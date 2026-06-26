@@ -15,8 +15,15 @@ hardware before it lands — no method ships on `py_compile` alone.
 - **M3 ✅ pushed** — 3-tier capacity (gpu/offload/refuse), cache-aware disk, named limits; offload codepath validated.
 - **M4 ✅ pushed** — GGUF backend (llama.cpp), auto-provisions binary + repo; validated qwen2.5-1.5b → Q4_K_M (0.92 GB, valid GGUF, f16 cleaned).
 - **M5 ✅ pushed** — `verify` command (smoke-load), README refresh, CI workflow; 19 tests.
-- **M6 🔶 next** — regenerate the real spine via the tool (gemma-2-2b, controlled wikitext-103) → push to HF.
-- **M7** — release polish (version, PyPI metadata, tag).
+- **M6 ⏸ deferred (disk-gated)** — gemma-2-2b is accessible (token OK, ~4.9 GB) but the dev machine has ~15 GB free on a 99%-full drive; downloading + quantizing would leave the system critically low. One command away on a machine with headroom (or Docker/cloud): `quantfit quantize --model google/gemma-2-2b-it --method awq --out ./out --push Crusadersk/gemma-2-2b-awq-4bit`. The HF push also deserves the user present (outward-facing, under their identity).
+- **M7 ✅ pushed** — v0.2.0: version bump, LICENSE (Apache-2.0), CHANGELOG, tag.
+
+## Outcome
+quantfit v0.2.0 is a complete, validated, GPU-aware quantization CLI: 6 compressed-tensors
+methods × 9 schemes + GGUF, 3-tier capacity with offload, `check`/`list`/`quantize`/`verify`,
+19 unit tests + real end-to-end validation on qwen2.5-1.5b (AWQ/FP8/GPTQ/GGUF + offload +
+load-smoke-test). Deferred: large-model offload and gemma regeneration are disk-gated on the
+dev machine (Docker/cloud), and PyPI publish + HF pushes are left for the user (outward-facing).
 
 ## v0.2 — the great tool
 
