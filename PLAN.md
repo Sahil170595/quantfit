@@ -14,7 +14,9 @@ hardware before it lands — no method ships on `py_compile` alone.
 - **M2 ✅ pushed** — method×scheme matrix; AWQ + FP8 + GPTQ validated on qwen2.5-1.5b.
 - **M3 ✅ pushed** — 3-tier capacity (gpu/offload/refuse), cache-aware disk, named limits; offload codepath validated.
 - **M4 ✅ pushed** — GGUF backend (llama.cpp), auto-provisions binary + repo; validated qwen2.5-1.5b → Q4_K_M (0.92 GB, valid GGUF, f16 cleaned).
-- **M5 🔶 next** — CLI polish (`verify` smoke-load), README refresh, CI.
+- **M5 ✅ pushed** — `verify` command (smoke-load), README refresh, CI workflow; 19 tests.
+- **M6 🔶 next** — regenerate the real spine via the tool (gemma-2-2b, controlled wikitext-103) → push to HF.
+- **M7** — release polish (version, PyPI metadata, tag).
 
 ## v0.2 — the great tool
 

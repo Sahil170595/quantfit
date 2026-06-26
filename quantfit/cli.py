@@ -28,6 +28,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("list", help="list supported methods + schemes")
 
+    pv = sub.add_parser("verify", help="smoke-load a quantized artifact + generate")
+    pv.add_argument("--model", required=True, help="path to a quantized output dir or .gguf")
+
     pq = sub.add_parser("quantize", help="quantize a model")
     pq.add_argument("--model", required=True, help="HF model id (the FP16 base)")
     pq.add_argument("--method", required=True, choices=tuple(METHODS))
@@ -56,6 +59,13 @@ def main(argv: list[str] | None = None) -> int:
 
         print(catalog())
         return 0
+
+    if args.cmd == "verify":
+        from quantfit.verify import verify
+
+        ok, msg = verify(args.model)
+        print(("PASS: " if ok else "FAIL: ") + msg)
+        return 0 if ok else 2
 
     if args.cmd == "quantize":
         from quantfit.quantize import CannotQuantize, push, quantize
