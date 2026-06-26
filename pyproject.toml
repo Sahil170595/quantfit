@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantfit"
-version = "0.2.0"
+version = "0.2.1"
 description = "Quantize an LLM if it fits your GPU — a GPU-aware 4-bit AWQ/GPTQ quantization CLI."
 readme = "README.md"
 requires-python = ">=3.10"

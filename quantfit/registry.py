@@ -47,10 +47,6 @@ METHODS: dict[str, Method] = {
         "gptq", BACKEND_CT, "W4A16", True,
         "Hessian/OBQ weight quant (4-bit, symmetric)",
     ),
-    "autoround": Method(
-        "autoround", BACKEND_CT, "W4A16", True,
-        "Intel AutoRound sign-gradient weight quant; often beats GPTQ/AWQ",
-    ),
     "smoothquant": Method(
         "smoothquant", BACKEND_CT, "W8A8", True,
         "SmoothQuant activation smoothing + W8A8 (8-bit weight+activation)",

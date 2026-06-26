@@ -19,7 +19,6 @@ _SMOOTHING_STRENGTH = 0.8  # SmoothQuant migration strength (standard default)
 def build_recipe(method: str, scheme: str):
     """Construct the llm-compressor recipe (modifier or modifier list) for a method."""
     from llmcompressor.modifiers.awq import AWQModifier
-    from llmcompressor.modifiers.autoround import AutoRoundModifier
     from llmcompressor.modifiers.quantization import GPTQModifier, QuantizationModifier
     from llmcompressor.modifiers.smoothquant import SmoothQuantModifier
 
@@ -28,8 +27,6 @@ def build_recipe(method: str, scheme: str):
         return AWQModifier(scheme=scheme, **common)
     if method == "gptq":
         return GPTQModifier(scheme=scheme, **common)
-    if method == "autoround":
-        return AutoRoundModifier(scheme=scheme, **common)
     if method == "smoothquant":
         return [
             SmoothQuantModifier(smoothing_strength=_SMOOTHING_STRENGTH),
@@ -41,17 +38,32 @@ def build_recipe(method: str, scheme: str):
 
 
 def calib_dataset(spec: QuantSpec, tokenizer, token: str | None = None):
-    """Load + tokenize calibration text under the frozen spec (deterministic)."""
-    from datasets import load_dataset
+    """Packed fixed-length calibration: concatenate text, chunk into seq-len blocks.
+
+    Uniform-length sequences are required by AutoRound (it stacks samples and
+    rejects ragged lengths) and are the standard GPTQ/AWQ calibration form, so one
+    packed dataset serves every calibrated method. Deterministic under the spec.
+    """
+    from datasets import Dataset, load_dataset
 
     ds = load_dataset(
         spec.calib_dataset, spec.calib_config, split=spec.calib_split, token=token
     )
     ds = ds.filter(lambda ex: ex["text"] is not None and ex["text"].strip() != "")
-    ds = ds.shuffle(seed=spec.seed).select(range(spec.calib_samples))
-    return ds.map(
-        lambda ex: tokenizer(ex["text"], truncation=True, max_length=spec.calib_seqlen),
-        remove_columns=ds.column_names,
+    ds = ds.shuffle(seed=spec.seed)
+
+    needed = spec.calib_samples * spec.calib_seqlen
+    buf: list[int] = []
+    for ex in ds:
+        buf.extend(tokenizer(ex["text"]).input_ids)
+        if len(buf) >= needed:
+            break
+    blocks = [
+        buf[i : i + spec.calib_seqlen]
+        for i in range(0, needed, spec.calib_seqlen)
+    ]
+    return Dataset.from_dict(
+        {"input_ids": blocks, "attention_mask": [[1] * len(b) for b in blocks]}
     )
 
 

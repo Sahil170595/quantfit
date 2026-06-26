@@ -18,12 +18,19 @@ hardware before it lands — no method ships on `py_compile` alone.
 - **M6 ⏸ deferred (disk-gated)** — gemma-2-2b is accessible (token OK, ~4.9 GB) but the dev machine has ~15 GB free on a 99%-full drive; downloading + quantizing would leave the system critically low. One command away on a machine with headroom (or Docker/cloud): `quantfit quantize --model google/gemma-2-2b-it --method awq --out ./out --push Crusadersk/gemma-2-2b-awq-4bit`. The HF push also deserves the user present (outward-facing, under their identity).
 - **M7 ✅ pushed** — v0.2.0: version bump, LICENSE (Apache-2.0), CHANGELOG, tag.
 
+- **D7** — `autoround` deferred: failed validation twice (ragged AND packed calibration) with a
+  tensor-shape mismatch inside llm-compressor's AutoRound loop. Removed from the advertised methods
+  rather than ship one that errors ("ensure it works"). Recipe/import excised; re-add behind a fix.
+  Calibration was switched to packed fixed-length sequences (standard form) and awq re-validated;
+  gptq/smoothquant share the identical calibration function.
+
 ## Outcome
-quantfit v0.2.0 is a complete, validated, GPU-aware quantization CLI: 6 compressed-tensors
-methods × 9 schemes + GGUF, 3-tier capacity with offload, `check`/`list`/`quantize`/`verify`,
-19 unit tests + real end-to-end validation on qwen2.5-1.5b (AWQ/FP8/GPTQ/GGUF + offload +
-load-smoke-test). Deferred: large-model offload and gemma regeneration are disk-gated on the
-dev machine (Docker/cloud), and PyPI publish + HF pushes are left for the user (outward-facing).
+quantfit v0.2.1 is a complete, validated, GPU-aware quantization CLI: **5 compressed-tensors
+methods (awq/gptq/smoothquant/fp8/rtn) × 9 schemes + GGUF**, 3-tier capacity with offload,
+`check`/`list`/`quantize`/`verify`, 19 unit tests + real end-to-end validation on qwen2.5-1.5b
+(AWQ/FP8/GPTQ/SmoothQuant/GGUF + CPU-offload + transformers load-smoke-test). Deferred (honest):
+`autoround` (llm-compressor bug), large-model offload + gemma regeneration (disk-gated on the dev
+machine → Docker/cloud), Tier-2 sub-3-bit, and PyPI/HF publishing (outward-facing, left to the user).
 
 ## v0.2 — the great tool
 

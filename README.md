@@ -34,7 +34,6 @@ footprint, then decides:
 |---|---|---|
 | `awq` | activation-aware weight quant (best 4-bit quality) | W4A16_ASYM |
 | `gptq` | Hessian/OBQ weight quant | W4A16 |
-| `autoround` | Intel AutoRound (often beats GPTQ/AWQ) | W4A16 |
 | `smoothquant` | activation smoothing + W8A8 | W8A8 |
 | `fp8` | FP8 E4M3 dynamic, no calibration | FP8_DYNAMIC |
 | `rtn` | round-to-nearest baseline, no calibration | W4A16 |
