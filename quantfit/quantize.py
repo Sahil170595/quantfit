@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from quantfit.gpufit import check_fit
+from quantfit.fit import MODE_REFUSE, plan
 from quantfit.registry import BACKEND_CT, resolve
 from quantfit.spec import DEFAULT_SPEC, QuantSpec
 
@@ -25,11 +25,14 @@ def quantize(
     """Quantize `model_id` with `method` (+ optional `scheme`) into `out_dir`."""
     m, resolved_scheme = resolve(method, scheme)
 
-    # Offload mode fits any size by holding the model on CPU, so skip the VRAM gate.
-    if run_check and not offload:
-        report = check_fit(model_id, token=token)
-        if not report.fits:
-            raise CannotQuantize(report.reason() + "  (try --offload to quantize on CPU)")
+    # 3-tier capacity decision: in-GPU / CPU-offload / refuse. Auto-offload when
+    # VRAM is short but RAM+disk suffice, so big models quantize instead of failing.
+    if run_check:
+        cap = plan(model_id, out_dir, token=token)
+        if cap.mode == MODE_REFUSE:
+            raise CannotQuantize(cap.reason())
+        if cap.offload:
+            offload = True
 
     if m.backend == BACKEND_CT:
         from quantfit.backends.compressed_tensors import quantize_ct

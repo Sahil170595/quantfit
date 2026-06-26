@@ -45,11 +45,11 @@ def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
 
     if args.cmd == "check":
-        from quantfit.gpufit import check_fit
+        from quantfit.fit import plan
 
-        report = check_fit(args.model)
-        print(report.reason())
-        return 0 if report.fits else 2
+        cap = plan(args.model)
+        print(cap.reason())
+        return 0 if cap.fits else 2
 
     if args.cmd == "list":
         from quantfit.registry import catalog

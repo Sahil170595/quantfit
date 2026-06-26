@@ -10,6 +10,9 @@ hardware before it lands — no method ships on `py_compile` alone.
 
 ## Status
 - **v0.1 (done):** `check` GPU pre-flight, AWQ/GPTQ via llm-compressor, HF push, Docker, tests.
+- **M1 ✅ pushed** — base engine validated (qwen2.5-1.5b AWQ → real artifact; load-smoke-test PASS).
+- **M2 ✅ pushed** — method×scheme matrix; AWQ + FP8 + GPTQ validated on qwen2.5-1.5b.
+- **M3 🔶 in progress** — 3-tier capacity (gpu/offload/refuse) with cache-aware disk; routing validated on real metadata + 15 unit tests; offload codepath under validation.
 
 ## v0.2 — the great tool
 
@@ -56,3 +59,5 @@ serializes (one GPU).
 - **D2** — Both AWQ and GPTQ route through llm-compressor (one library, shared calibration, compressed-tensors output) → algorithm-only comparison, and dodges gptqmodel's Windows cp1252 logger crash.
 - **D3** — Calibration set is pre-tokenized in-tool (not llm-compressor's text_column auto-path, which fed float input_ids into the embedding). Deterministic under the frozen spec.
 - **D4** — Name `quantfit` (PyPI-available); GPU-fit is the headline so the name carries the value prop.
+- **D5** — Disk is a first-class capacity tier (needed in both gpu and offload modes), cache-aware (don't count a download you already have); refusals name the actual limiting resource (disk vs machine).
+- **D6** — The dev machine's C: is ~99% full (~14 GB free), so real large-model offload can't be demonstrated locally for lack of download space. The 3-tier routing is unit-tested + validated on real model metadata; the offload codepath is validated on a cached small model. Full large-model offload validation is a Docker/cloud task — a machine constraint, not a tool defect.
