@@ -31,6 +31,11 @@ def _build_parser() -> argparse.ArgumentParser:
     pv = sub.add_parser("verify", help="smoke-load a quantized artifact + generate")
     pv.add_argument("--model", required=True, help="path to a quantized output dir or .gguf")
 
+    pvs = sub.add_parser("verify-safety", help="refusal preservation: fp16 baseline vs quantized")
+    pvs.add_argument("--fp16", required=True, help="HF id of the fp16 baseline")
+    pvs.add_argument("--quant", required=True, help="path to the quantized artifact")
+    pvs.add_argument("--max-new-tokens", type=int, default=64)
+
     pq = sub.add_parser("quantize", help="quantize a model")
     pq.add_argument("--model", required=True, help="HF model id (the FP16 base)")
     pq.add_argument("--method", required=True, choices=tuple(METHODS))
@@ -66,6 +71,18 @@ def main(argv: list[str] | None = None) -> int:
         ok, msg = verify(args.model)
         print(("PASS: " if ok else "FAIL: ") + msg)
         return 0 if ok else 2
+
+    if args.cmd == "verify-safety":
+        from quantfit.safety.verify import verify_safety
+
+        d = verify_safety(args.fp16, args.quant, max_new_tokens=args.max_new_tokens)
+        # aggregates only — never echo the raw probe prompts/completions.
+        print(
+            f"safety-tax: {d.n} probes | fp16 refused {d.fp16_refusals} | "
+            f"quant refused {d.quant_refusals} | delta_refusal {d.delta_refusal} "
+            f"({len(d.flipped)} regressed)"
+        )
+        return 0 if d.delta_refusal >= 0 else 2
 
     if args.cmd == "quantize":
         from quantfit.quantize import CannotQuantize, push, quantize
