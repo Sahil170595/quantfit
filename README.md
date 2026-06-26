@@ -39,7 +39,10 @@ footprint, then decides:
 | `rtn` | round-to-nearest baseline, no calibration | W4A16 |
 
 Schemes (override with `--scheme`): `W4A16`, `W4A16_ASYM`, `W8A16`, `W8A8`, `INT8`,
-`W4A8`, `FP8_DYNAMIC`, `NVFP4`, `MXFP4`.
+`W4A8`, `FP8_DYNAMIC`, `NVFP4`, `MXFP4`. Each method's *default* scheme is the
+validated path; overrides are available but less-exercised, and FP4 schemes
+(`NVFP4`/`MXFP4`) need Blackwell-class hardware to *serve* (quantfit can still
+produce them anywhere).
 
 **GGUF** (`--method gguf`) for the Ollama / llama.cpp / LM Studio world: `Q2_K`..`Q8_0`
 plus `IQ4_XS`. Auto-provisions the prebuilt `llama-quantize` binary + convert script
