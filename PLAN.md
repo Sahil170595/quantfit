@@ -12,7 +12,9 @@ hardware before it lands — no method ships on `py_compile` alone.
 - **v0.1 (done):** `check` GPU pre-flight, AWQ/GPTQ via llm-compressor, HF push, Docker, tests.
 - **M1 ✅ pushed** — base engine validated (qwen2.5-1.5b AWQ → real artifact; load-smoke-test PASS).
 - **M2 ✅ pushed** — method×scheme matrix; AWQ + FP8 + GPTQ validated on qwen2.5-1.5b.
-- **M3 🔶 in progress** — 3-tier capacity (gpu/offload/refuse) with cache-aware disk; routing validated on real metadata + 15 unit tests; offload codepath under validation.
+- **M3 ✅ pushed** — 3-tier capacity (gpu/offload/refuse), cache-aware disk, named limits; offload codepath validated.
+- **M4 ✅ pushed** — GGUF backend (llama.cpp), auto-provisions binary + repo; validated qwen2.5-1.5b → Q4_K_M (0.92 GB, valid GGUF, f16 cleaned).
+- **M5 🔶 next** — CLI polish (`verify` smoke-load), README refresh, CI.
 
 ## v0.2 — the great tool
 

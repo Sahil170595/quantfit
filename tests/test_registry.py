@@ -33,6 +33,18 @@ def test_smoothquant_requires_activation_scheme():
     assert s == "W8A8"
 
 
+def test_gguf_resolves_to_qtype():
+    m, s = resolve("gguf", None)
+    assert m.backend == "gguf" and s == "Q4_K_M"
+    _, s = resolve("gguf", "Q6_K")
+    assert s == "Q6_K"
+
+
+def test_gguf_rejects_compressed_tensors_scheme():
+    with pytest.raises(UnsupportedCombo):
+        resolve("gguf", "W4A16")
+
+
 def test_catalog_lists_every_method():
     c = catalog()
     for name in METHODS:

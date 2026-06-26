@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from quantfit.fit import MODE_REFUSE, plan
-from quantfit.registry import BACKEND_CT, resolve
+from quantfit.registry import BACKEND_CT, BACKEND_GGUF, resolve
 from quantfit.spec import DEFAULT_SPEC, QuantSpec
 
 
@@ -25,9 +25,9 @@ def quantize(
     """Quantize `model_id` with `method` (+ optional `scheme`) into `out_dir`."""
     m, resolved_scheme = resolve(method, scheme)
 
-    # 3-tier capacity decision: in-GPU / CPU-offload / refuse. Auto-offload when
-    # VRAM is short but RAM+disk suffice, so big models quantize instead of failing.
-    if run_check:
+    # The 3-tier capacity plan applies to GPU quantization (compressed-tensors).
+    # GGUF quantization is CPU-only, so it skips the VRAM/offload plan.
+    if run_check and m.backend == BACKEND_CT:
         cap = plan(model_id, out_dir, token=token)
         if cap.mode == MODE_REFUSE:
             raise CannotQuantize(cap.reason())
@@ -41,6 +41,10 @@ def quantize(
             model_id, m.name, resolved_scheme, out_dir, spec,
             m.needs_calibration, token=token, offload=offload,
         )
+    elif m.backend == BACKEND_GGUF:
+        from quantfit.backends.gguf import quantize_gguf
+
+        out = quantize_gguf(model_id, resolved_scheme, out_dir, token=token)
     else:
         raise NotImplementedError(f"backend {m.backend!r} is not wired yet")
 
@@ -49,7 +53,21 @@ def quantize(
 
 
 def _write_card(out: Path, model_id: str, method: str, scheme: str, spec: QuantSpec) -> None:
-    card = f"""---
+    if method == "gguf":
+        card = f"""---
+base_model: {model_id}
+tags: [quantized, gguf, {scheme.lower()}, llama.cpp, quantfit]
+---
+
+# {out.name}
+
+GGUF {scheme} quantization of `{model_id}`, produced with
+[quantfit](https://github.com/Sahil170595/quantfit).
+
+Loads in llama.cpp / Ollama / LM Studio. k-quant, no calibration (no imatrix).
+"""
+    else:
+        card = f"""---
 base_model: {model_id}
 tags: [quantized, {method}, {scheme.lower()}, compressed-tensors, quantfit]
 ---

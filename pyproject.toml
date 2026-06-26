@@ -29,6 +29,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+gguf = ["gguf>=0.10"]  # for the GGUF backend's convert step
 
 [project.urls]
 Homepage = "https://github.com/Sahil170595/quantfit"

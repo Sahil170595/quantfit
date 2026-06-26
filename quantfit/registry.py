@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from quantfit.backends.gguf import GGUF_TYPES
+
 # compressed-tensors scheme presets quantfit exposes (a validated subset of what
 # llm-compressor installs). Weight-only and weight+activation, down to FP4.
 SCHEMES = (
@@ -61,6 +63,10 @@ METHODS: dict[str, Method] = {
         "rtn", BACKEND_CT, "W4A16", False,
         "Round-to-nearest; no calibration; the honest baseline",
     ),
+    "gguf": Method(
+        "gguf", BACKEND_GGUF, "Q4_K_M", False,
+        "llama.cpp GGUF k-quants for Ollama/llama.cpp/LM Studio (Q2_K..Q8_0)",
+    ),
 }
 
 # Methods that constrain their scheme to weight+activation presets.
@@ -82,6 +88,16 @@ def resolve(method: str, scheme: str | None) -> tuple[Method, str]:
             f"unknown method {method!r}; choose from {sorted(METHODS)}"
         )
     m = METHODS[method]
+
+    # GGUF has its own quant-type vocabulary, not the compressed-tensors schemes.
+    if m.backend == BACKEND_GGUF:
+        chosen = scheme or m.default_scheme
+        if chosen not in GGUF_TYPES:
+            raise UnsupportedCombo(
+                f"unknown gguf type {chosen!r}; choose from {list(GGUF_TYPES)}"
+            )
+        return m, chosen
+
     chosen = scheme or m.default_scheme
     if chosen not in SCHEMES:
         raise UnsupportedCombo(f"unknown scheme {chosen!r}; choose from {list(SCHEMES)}")
@@ -103,4 +119,5 @@ def catalog() -> str:
         calib = "calibrated" if m.needs_calibration else "no-calib"
         lines.append(f"  {m.name:<12} [{m.backend}] default={m.default_scheme:<12} ({calib})  {m.summary}")
     lines.append("\nschemes (override with --scheme): " + ", ".join(SCHEMES))
+    lines.append("gguf types (override with --scheme): " + ", ".join(GGUF_TYPES))
     return "\n".join(lines)
