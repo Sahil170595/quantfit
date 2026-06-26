@@ -13,7 +13,7 @@ from dataclasses import dataclass
 class QuantSpec:
     bits: int = 4
     group_size: int = 128
-    calib_dataset: str = "wikitext"            # HF dataset id
+    calib_dataset: str = "Salesforce/wikitext"  # HF dataset id (namespaced; bare "wikitext" fails the strict URI parser)
     calib_config: str = "wikitext-103-raw-v1"  # config/subset
     calib_split: str = "train"
     calib_samples: int = 128

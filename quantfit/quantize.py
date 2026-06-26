@@ -57,22 +57,43 @@ def quantize(
     out.mkdir(parents=True, exist_ok=True)
 
     from llmcompressor import oneshot
+    from transformers import AutoTokenizer
+
+    tokenizer = AutoTokenizer.from_pretrained(model_id, token=token)
+    calib = _calib_dataset(spec, tokenizer, token=token)
 
     oneshot(
         model=model_id,
-        dataset=spec.calib_dataset,
-        dataset_config_name=spec.calib_config,
-        splits=spec.calib_split,
+        tokenizer=tokenizer,
+        dataset=calib,
         num_calibration_samples=spec.calib_samples,
         max_seq_length=spec.calib_seqlen,
-        text_column="text",
-        pad_to_max_length=False,
-        shuffle_calibration_samples=True,
         recipe=_recipe(method),
         output_dir=str(out),
     )
     _write_card(out, model_id, method, spec)
     return out
+
+
+def _calib_dataset(spec: QuantSpec, tokenizer, token: str | None = None):
+    """Load + tokenize calibration text under the frozen spec.
+
+    Pre-tokenizing (rather than llm-compressor's text_column auto-path) is both
+    more reliable — the auto-path fed float input_ids into the embedding — and
+    gives explicit, reproducible control over what gets calibrated.
+    """
+    from datasets import load_dataset
+
+    ds = load_dataset(
+        spec.calib_dataset, spec.calib_config, split=spec.calib_split, token=token
+    )
+    ds = ds.filter(lambda ex: ex["text"] is not None and ex["text"].strip() != "")
+    ds = ds.shuffle(seed=spec.seed).select(range(spec.calib_samples))
+
+    def _tok(ex):
+        return tokenizer(ex["text"], truncation=True, max_length=spec.calib_seqlen)
+
+    return ds.map(_tok, remove_columns=ds.column_names)
 
 
 def _write_card(out: Path, model_id: str, method: str, spec: QuantSpec) -> None:
