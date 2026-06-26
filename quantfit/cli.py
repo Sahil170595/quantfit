@@ -1,8 +1,10 @@
-"""quantfit CLI — `check` and `quantize`."""
+"""quantfit CLI — `check`, `list`, `quantize`."""
 from __future__ import annotations
 
 import argparse
 import sys
+
+from quantfit.registry import METHODS
 
 
 def _force_utf8_stdio() -> None:
@@ -24,12 +26,16 @@ def _build_parser() -> argparse.ArgumentParser:
     pc = sub.add_parser("check", help="will this model fit your GPU?")
     pc.add_argument("--model", required=True, help="HF model id")
 
-    pq = sub.add_parser("quantize", help="quantize a model (AWQ/GPTQ)")
+    sub.add_parser("list", help="list supported methods + schemes")
+
+    pq = sub.add_parser("quantize", help="quantize a model")
     pq.add_argument("--model", required=True, help="HF model id (the FP16 base)")
-    pq.add_argument("--method", required=True, choices=("awq", "gptq"))
+    pq.add_argument("--method", required=True, choices=tuple(METHODS))
+    pq.add_argument("--scheme", default=None, help="override the method's default scheme")
     pq.add_argument("--out", required=True, help="output directory")
     pq.add_argument("--push", default=None, help="HF repo id to upload the result to")
     pq.add_argument("--private", action="store_true", help="push as a private repo")
+    pq.add_argument("--offload", action="store_true", help="quantize on CPU (fits any size, slower)")
     pq.add_argument("--no-check", action="store_true", help="skip the GPU pre-flight")
     return p
 
@@ -45,12 +51,22 @@ def main(argv: list[str] | None = None) -> int:
         print(report.reason())
         return 0 if report.fits else 2
 
+    if args.cmd == "list":
+        from quantfit.registry import catalog
+
+        print(catalog())
+        return 0
+
     if args.cmd == "quantize":
         from quantfit.quantize import CannotQuantize, push, quantize
+        from quantfit.registry import UnsupportedCombo
 
         try:
-            out = quantize(args.model, args.method, args.out, run_check=not args.no_check)
-        except CannotQuantize as exc:
+            out = quantize(
+                args.model, args.method, args.out,
+                scheme=args.scheme, run_check=not args.no_check, offload=args.offload,
+            )
+        except (CannotQuantize, UnsupportedCombo) as exc:
             print(exc)
             return 2
         print(f"quantized -> {out}")
