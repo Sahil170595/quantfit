@@ -39,3 +39,7 @@ quantfit = "quantfit.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["quantfit*"]
+
+[tool.pytest.ini_options]
+# Make `pytest tests/` import the package without an editable install (keeps CI light).
+pythonpath = ["."]
