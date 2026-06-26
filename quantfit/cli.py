@@ -75,14 +75,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "verify-safety":
         from quantfit.safety.verify import verify_safety
 
-        d = verify_safety(args.fp16, args.quant, max_new_tokens=args.max_new_tokens)
-        # aggregates only — never echo the raw probe prompts/completions.
-        print(
-            f"safety-tax: {d.n} probes | fp16 refused {d.fp16_refusals} | "
-            f"quant refused {d.quant_refusals} | delta_refusal {d.delta_refusal} "
-            f"({len(d.flipped)} regressed)"
-        )
-        return 0 if d.delta_refusal >= 0 else 2
+        tax = verify_safety(args.fp16, args.quant, max_new_tokens=args.max_new_tokens)
+        print(tax.summary())  # aggregates only — never echoes raw probe prompts/completions
+        return 0 if tax.clean else 2
 
     if args.cmd == "quantize":
         from quantfit.quantize import CannotQuantize, push, quantize
