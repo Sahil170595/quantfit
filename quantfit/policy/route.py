@@ -1,6 +1,6 @@
 """The router — pick an `EngineConfig` for (model, target, budget).
 
-v0.3 is a TRANSPARENT HEURISTIC, not a learned/optimized policy: a short ordered
+This router is a TRANSPARENT HEURISTIC, not a learned/optimized policy: a short ordered
 list of (hardware, preference) -> (method, scheme) rules, each carrying the
 human-readable WHY it fired. The router only ever returns a config that an engine
 reported feasible for the target — it never fabricates one. If the preferred
@@ -13,8 +13,8 @@ from __future__ import annotations
 
 from quantfit.engines.base import Budget, Engine, EngineConfig, Plan, Target
 
-# Every rationale carries this tag so callers see the decision is a v0.3 heuristic.
-HEURISTIC_TAG = "v0.3 transparent heuristic"
+# Every rationale carries this tag so callers see the decision is a heuristic.
+HEURISTIC_TAG = "heuristic baseline"
 
 # Routing-rule targets: the (method, scheme) each rule selects. These must match
 # what the engines' feasible() reports; the router resolves against that set only.

@@ -19,13 +19,24 @@ def _force_utf8_stdio() -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="quantfit", description="Quantize an LLM if it fits your GPU.")
+    p = argparse.ArgumentParser(
+        prog="quantfit",
+        description="Quantize an LLM, check it fits your GPU, and verify it still refuses what it should.",
+    )
     sub = p.add_subparsers(dest="cmd", required=True)
 
     pc = sub.add_parser("check", help="will this model fit your GPU?")
     pc.add_argument("--model", required=True, help="HF model id")
 
     sub.add_parser("list", help="list supported methods + schemes")
+
+    pp = sub.add_parser("plan", help="show the config quantfit would pick for your GPU (no quantize)")
+    pp.add_argument("--model", required=True, help="HF model id")
+    pp.add_argument("--prefer", default="quality", choices=("quality", "speed", "size"))
+
+    ppr = sub.add_parser("probe", help="measure how much a model degrades at each bit-width (RTN-KL)")
+    ppr.add_argument("--model", required=True, help="HF model id")
+    ppr.add_argument("--bits", type=int, nargs="+", default=[4, 8], help="bit-widths to probe")
 
     pv = sub.add_parser("verify", help="smoke-load a quantized artifact + generate")
     pv.add_argument("--model", required=True, help="path to a quantized output dir or .gguf")
@@ -62,6 +73,29 @@ def main(argv: list[str] | None = None) -> int:
         from quantfit.registry import catalog
 
         print(catalog())
+        return 0
+
+    if args.cmd == "plan":
+        from quantfit.engines.base import Budget
+        from quantfit.engines.compressed_tensors import CompressedTensorsEngine
+        from quantfit.engines.gguf import GgufEngine
+        from quantfit.policy.route import route
+        from quantfit.policy.target import detect_target
+
+        target = detect_target()
+        routed = route(args.model, target, Budget(prefer=args.prefer), [CompressedTensorsEngine(), GgufEngine()])
+        print(f"target: {target.device}/{target.gpu_arch or '-'} serve={target.serve}")
+        print(f"pick:   {routed.config.method} {routed.config.scheme}  [{routed.config.engine}]")
+        print(f"why:    {routed.rationale}")
+        return 0
+
+    if args.cmd == "probe":
+        from quantfit.policy.probe import probe_sensitivity
+
+        print("sensitivity — RTN-KL(fp16 || quant); higher = more degradation:")
+        for bits in args.bits:
+            r = probe_sensitivity(args.model, bits=bits)
+            print(f"  {bits}-bit: KL {r.mean_kl:.3f}  (n={r.n_samples})")
         return 0
 
     if args.cmd == "verify":
