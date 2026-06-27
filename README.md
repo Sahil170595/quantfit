@@ -1,34 +1,52 @@
 # quantfit
 
-**Quantize an LLM if it fits your GPU.** A small, GPU-aware quantization CLI that
-covers the SOTA method matrix and tells you up front whether a model will fit —
-*before* downloading 30 GB of weights.
+**Quantize an LLM — and check it still refuses what it should.**
+
+Quantization makes a model cheaper to serve. It can also quietly strip safety
+behavior: a 4-bit model that answers prompts the fp16 model refused is a regression
+you will not see in a perplexity number. `quantfit` quantizes across the SOTA method
+matrix, is honest about whether a model fits your GPU, and — uniquely — measures the
+**safety tax** of the quantization it just performed.
 
 ```bash
 pip install quantfit
 
-quantfit check  --model Qwen/Qwen2.5-7B-Instruct          # will it fit? (no download)
-quantfit list                                             # every method + scheme
-quantfit quantize --model Qwen/Qwen2.5-1.5B-Instruct --method awq --out ./out
-quantfit verify --model ./out                             # load it + generate
+quantfit check        --model Qwen/Qwen2.5-7B-Instruct                 # will it fit? (no download)
+quantfit quantize     --model Qwen/Qwen2.5-1.5B-Instruct --method awq --out ./out
+quantfit verify-safety --fp16 Qwen/Qwen2.5-1.5B-Instruct --quant ./out  # did quantization break refusals?
 ```
 
-## Why
+## The safety check — what nothing else does
 
-Most quantization runs die one of two ways: an OOM crash 20 minutes into a job, or
-a pile of hand-made checkpoints with drifting calibration. quantfit fixes both — a
-capacity pre-flight that refuses (or offloads) honestly, and one frozen calibration
-spec shared across methods so results are comparable.
+`verify-safety` generates from both the fp16 baseline and the quantized model over a
+curated probe set, judges each response refusal/compliance with a local classifier,
+and reports the tax as a **vector**, the way it actually matters:
 
-## What it does
+```
+safety-tax over 40 probes (REGRESSION):
+  refusal-robustness (expected-unsafe n=12): fp16 refused 12 -> quant 12 | 0 harmful-compliance regressions
+  over-refusal       (expected-safe   n=28): fp16 refused 18 -> quant 18 | 2 new false refusals
+  by zone: borderline[10->10/16] clear_safe[8->8/12] clear_unsafe[12->12/12]
+```
 
-**GPU-aware, 3-tier capacity.** Reads HF file metadata (no download) to estimate the
-footprint, then decides:
-- fits VRAM → quantize in-GPU (fast)
-- too big for VRAM but fits RAM+disk → **CPU offload** (slower; a 27B can quantize on a 12 GB GPU)
-- won't fit even offloaded → refuse, naming the actual limit (disk / machine)
+Two axes, not one number:
+- **refusal-robustness** — on prompts that *should* be refused, did the quant start
+  complying? (the dangerous direction)
+- **over-refusal** — on prompts that *should* be answered, did the quant start
+  refusing? (the usability direction)
 
-**SOTA method × scheme matrix** (one `llm-compressor` backend, vLLM-loadable):
+A scalar refusal-delta can read 0 while both axes move in opposite directions; the
+vector + per-zone breakdown catches it. Local judge, curated public probes, no
+external API and no raw harmful corpora — so the check is distributable.
+
+## GPU-aware quantization
+
+**3-tier capacity.** `check` reads HF metadata (no download) to estimate the footprint:
+fits VRAM → quantize in-GPU; too big for VRAM but fits RAM+disk → **CPU offload** (a
+27B can quantize on a 12 GB GPU); won't fit even offloaded → refuse, naming the real
+limit. No OOM 20 minutes into a job.
+
+**Method × scheme matrix** (one llm-compressor backend, vLLM-loadable):
 
 | method | what | default scheme |
 |---|---|---|
@@ -36,50 +54,33 @@ footprint, then decides:
 | `gptq` | Hessian/OBQ weight quant | W4A16 |
 | `smoothquant` | activation smoothing + W8A8 | W8A8 |
 | `fp8` | FP8 E4M3 dynamic, no calibration | FP8_DYNAMIC |
-| `rtn` | round-to-nearest baseline, no calibration | W4A16 |
+| `rtn` | round-to-nearest baseline | W4A16 |
 
-Schemes (override with `--scheme`): `W4A16`, `W4A16_ASYM`, `W8A16`, `W8A8`, `INT8`,
-`W4A8`, `FP8_DYNAMIC`, `NVFP4`, `MXFP4`. Each method's *default* scheme is the
-validated path; overrides are available but less-exercised, and FP4 schemes
-(`NVFP4`/`MXFP4`) need Blackwell-class hardware to *serve* (quantfit can still
-produce them anywhere).
+Schemes (`--scheme`): `W4A16`, `W4A16_ASYM`, `W8A16`, `W8A8`, `INT8`, `W4A8`,
+`FP8_DYNAMIC`, `NVFP4`, `MXFP4`. Defaults are the validated paths; FP4 schemes need
+Blackwell to *serve* (quantfit can still produce them anywhere).
 
-**GGUF** (`--method gguf`) for the Ollama / llama.cpp / LM Studio world: `Q2_K`..`Q8_0`
-plus `IQ4_XS`. Auto-provisions the prebuilt `llama-quantize` binary + convert script
-(override with `QUANTFIT_LLAMACPP=/path/to/llama.cpp`).
+**GGUF** (`--method gguf`) for Ollama / llama.cpp: `Q2_K`..`Q8_0` + IQ-quants.
+Auto-provisions the prebuilt `llama-quantize` binary + convert script (override with
+`QUANTFIT_LLAMACPP`).
 
-**One frozen calibration spec.** AWQ/GPTQ/AutoRound/SmoothQuant all calibrate on the
-*same* data (wikitext-103, 128 samples, seq-len 2048, seed 42, group-size 128) — so
-the methods are comparable, not confounded. fp8/rtn/gguf skip calibration.
+One frozen packed calibration (wikitext-103, 128 samples, seq-len 2048, seed 42,
+group-size 128) is shared across the calibrated methods, so they are comparable.
 
-## Examples
+## What it is — and isn't
 
-```bash
-# 4-bit AWQ, push to the Hub
-quantfit quantize --model meta-llama/Llama-3.2-3B-Instruct --method awq \
-                  --out ./out --push you/llama3.2-3b-awq-4bit
-
-# FP8 (no calibration), or a frontier FP4 scheme
-quantfit quantize --model Qwen/Qwen2.5-1.5B-Instruct --method fp8 --out ./out
-quantfit quantize --model Qwen/Qwen2.5-1.5B-Instruct --method rtn --scheme NVFP4 --out ./out
-
-# Big model on a small GPU (auto-offloads; force with --offload)
-quantfit quantize --model Qwen/Qwen2.5-32B-Instruct --method gptq --out ./out
-
-# GGUF for Ollama
-quantfit quantize --model Qwen/Qwen2.5-1.5B-Instruct --method gguf --scheme Q4_K_M --out ./out
-```
+- It **quantizes** (wrapping llm-compressor + llama.cpp) and **checks safety
+  preservation**. Both are real and validated end-to-end.
+- It does **not** auto-select the config for you yet — you pick `--method`. Automatic
+  config selection is a real capability, but it is published research
+  ([AMQ](https://arxiv.org/abs/2509.12019),
+  [KL-Lens](https://arxiv.org/abs/2604.13440)); a routing layer that *implements* it is
+  planned, not claimed here.
 
 ## Docker
 
-`Dockerfile` builds an isolated CUDA image so quantfit never touches your global Python.
-For GGUF in Docker, the official `ghcr.io/ggml-org/llama.cpp:full` image carries the
-convert + quantize tooling.
-
-## Scope
-
-quantfit only quantizes. Evaluation, safety/quality measurement, and benchmarking live
-elsewhere — this tool produces the artifact, nothing more.
+`Dockerfile` builds an isolated CUDA image. For GGUF in Docker, the official
+`ghcr.io/ggml-org/llama.cpp:full` image carries the convert + quantize tooling.
 
 ## License
 
