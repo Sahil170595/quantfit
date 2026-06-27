@@ -1,4 +1,5 @@
 """quantfit CLI — `check`, `list`, `quantize`."""
+
 from __future__ import annotations
 
 import argparse
@@ -18,9 +19,7 @@ def _force_utf8_stdio() -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(
-        prog="quantfit", description="Quantize an LLM if it fits your GPU."
-    )
+    p = argparse.ArgumentParser(prog="quantfit", description="Quantize an LLM if it fits your GPU.")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     pc = sub.add_parser("check", help="will this model fit your GPU?")
@@ -85,8 +84,12 @@ def main(argv: list[str] | None = None) -> int:
 
         try:
             out = quantize(
-                args.model, args.method, args.out,
-                scheme=args.scheme, run_check=not args.no_check, offload=args.offload,
+                args.model,
+                args.method,
+                args.out,
+                scheme=args.scheme,
+                run_check=not args.no_check,
+                offload=args.offload,
             )
         except (CannotQuantize, UnsupportedCombo) as exc:
             print(exc)

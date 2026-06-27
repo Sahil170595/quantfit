@@ -1,4 +1,5 @@
 """GPU pre-flight logic — the load-bearing decision, tested without a GPU."""
+
 import quantfit.gpufit as g
 from quantfit.gpufit import FitReport, check_fit
 

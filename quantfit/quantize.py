@@ -1,4 +1,5 @@
 """Dispatcher: validate the request, GPU pre-flight, route to a backend, card it."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -38,8 +39,14 @@ def quantize(
         from quantfit.backends.compressed_tensors import quantize_ct
 
         out = quantize_ct(
-            model_id, m.name, resolved_scheme, out_dir, spec,
-            m.needs_calibration, token=token, offload=offload,
+            model_id,
+            m.name,
+            resolved_scheme,
+            out_dir,
+            spec,
+            m.needs_calibration,
+            token=token,
+            offload=offload,
         )
     elif m.backend == BACKEND_GGUF:
         from quantfit.backends.gguf import quantize_gguf

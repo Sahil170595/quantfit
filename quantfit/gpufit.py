@@ -7,6 +7,7 @@ metadata, no download) times a calibration-overhead factor, plus fixed headroom,
 compared against free VRAM. Errs toward refusal — a clear "can't quantize" beats
 an OOM crash 20 minutes in.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass

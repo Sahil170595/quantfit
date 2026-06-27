@@ -1,4 +1,4 @@
-name: tests
+name: CI
 
 on:
   push:
@@ -11,8 +11,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Match the declared support (requires-python >=3.10 + classifiers 3.10-3.13).
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        # Match the declared support (requires-python >=3.10 + classifiers 3.10-3.14).
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
 
@@ -24,3 +24,21 @@ jobs:
       # The unit tests mock the heavy backends; they only need these at import time.
       - run: pip install pytest huggingface_hub psutil
       - run: pytest tests/ -q
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install ruff
+
+      - name: Ruff check
+        run: ruff check quantfit tests
+
+      - name: Ruff format
+        run: ruff format --check quantfit tests

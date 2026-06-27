@@ -5,6 +5,7 @@ compressed-tensors (vLLM-loadable). For the calibrated algorithms the only
 cross-method difference is the algorithm itself — same calibration, same format
 — so the methods are comparable, not confounded.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -46,9 +47,7 @@ def calib_dataset(spec: QuantSpec, tokenizer, token: str | None = None):
     """
     from datasets import Dataset, load_dataset
 
-    ds = load_dataset(
-        spec.calib_dataset, spec.calib_config, split=spec.calib_split, token=token
-    )
+    ds = load_dataset(spec.calib_dataset, spec.calib_config, split=spec.calib_split, token=token)
     ds = ds.filter(lambda ex: ex["text"] is not None and ex["text"].strip() != "")
     ds = ds.shuffle(seed=spec.seed)
 
@@ -58,13 +57,8 @@ def calib_dataset(spec: QuantSpec, tokenizer, token: str | None = None):
         buf.extend(tokenizer(ex["text"]).input_ids)
         if len(buf) >= needed:
             break
-    blocks = [
-        buf[i : i + spec.calib_seqlen]
-        for i in range(0, needed, spec.calib_seqlen)
-    ]
-    return Dataset.from_dict(
-        {"input_ids": blocks, "attention_mask": [[1] * len(b) for b in blocks]}
-    )
+    blocks = [buf[i : i + spec.calib_seqlen] for i in range(0, needed, spec.calib_seqlen)]
+    return Dataset.from_dict({"input_ids": blocks, "attention_mask": [[1] * len(b) for b in blocks]})
 
 
 def quantize_ct(

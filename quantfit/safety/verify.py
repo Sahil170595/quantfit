@@ -32,6 +32,7 @@ VERIFIED against the live HF cards (2026-06-26):
 ASSUMED (not pinned by the cards): the judge scores the completion text alone (no
 prompt concatenation); generation uses each model's own chat template when present.
 """
+
 from __future__ import annotations
 
 import gc
@@ -44,9 +45,9 @@ PROBE_SPLIT = "train"
 PROBE_PROMPT_COLUMN = "prompt"
 PROBE_ZONE_COLUMN = "zone"
 PROBE_EXPECTED_COLUMN = "expected"
-EXPECTED_UNSAFE = "unsafe"          # ground truth: a correct model refuses
-EXPECTED_SAFE = "safe"              # ground truth: a correct model complies
-REFUSAL_LABEL_ID = 1               # verified default: id2label {0:"compliance", 1:"refusal"}
+EXPECTED_UNSAFE = "unsafe"  # ground truth: a correct model refuses
+EXPECTED_SAFE = "safe"  # ground truth: a correct model complies
+REFUSAL_LABEL_ID = 1  # verified default: id2label {0:"compliance", 1:"refusal"}
 
 # --- Tunables --------------------------------------------------------------------
 DEFAULT_MAX_NEW_TOKENS = 64
@@ -71,12 +72,12 @@ class SafetyTax:
     unsafe_n: int
     unsafe_fp16_refused: int
     unsafe_quant_refused: int
-    harmful_compliance_regressions: int   # expected-unsafe: fp16 refused, quant complied (dangerous)
+    harmful_compliance_regressions: int  # expected-unsafe: fp16 refused, quant complied (dangerous)
     # over-refusal axis: expected-safe probes (complying is correct).
     safe_n: int
     safe_fp16_refused: int
     safe_quant_refused: int
-    overrefusal_regressions: int          # expected-safe: fp16 complied, quant refused (usability tax)
+    overrefusal_regressions: int  # expected-safe: fp16 complied, quant refused (usability tax)
     # per-zone refusal counts for transparency.
     by_zone: dict
 
@@ -88,8 +89,7 @@ class SafetyTax:
     def summary(self) -> str:
         """Aggregates only — never the raw probe prompts/completions."""
         zones = " ".join(
-            f"{z}[{d['fp16_refused']}->{d['quant_refused']}/{d['n']}]"
-            for z, d in sorted(self.by_zone.items())
+            f"{z}[{d['fp16_refused']}->{d['quant_refused']}/{d['n']}]" for z, d in sorted(self.by_zone.items())
         )
         return (
             f"safety-tax over {self.n} probes "
@@ -121,7 +121,7 @@ def verify_safety(
     # Judge both sides in a single judge load.
     flags = _classify_refusals(fp16_completions + quant_completions, token)
     fp16_ref = flags[: len(probes)]
-    quant_ref = flags[len(probes):]
+    quant_ref = flags[len(probes) :]
 
     return _tabulate(probes, fp16_ref, quant_ref)
 

@@ -9,6 +9,7 @@ Three resources gate a quantization job:
 Refuse only when none of the above can be satisfied, and always name the actual
 limiting resource.
 """
+
 from __future__ import annotations
 
 import shutil
@@ -60,12 +61,11 @@ class CapacityPlan:
         return self.mode == MODE_OFFLOAD
 
     def reason(self) -> str:
-        g = lambda b: f"{b / _GIB:.1f}"
+        def g(b: int) -> str:
+            return f"{b / _GIB:.1f}"
+
         if self.mode == MODE_GPU:
-            return (
-                f"OK (in-GPU): {self.model_id} ~{g(self.fp16_bytes)} GB, "
-                f"{g(self.gpu_free)} GB VRAM free."
-            )
+            return f"OK (in-GPU): {self.model_id} ~{g(self.fp16_bytes)} GB, {g(self.gpu_free)} GB VRAM free."
         if self.mode == MODE_OFFLOAD:
             return (
                 f"OK (offload): {self.model_id} ~{g(self.fp16_bytes)} GB won't fit "

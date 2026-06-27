@@ -1,4 +1,5 @@
 """verify() structural check for GGUF artifacts (no model load)."""
+
 from quantfit.verify import _GGUF_MAGIC, verify
 
 

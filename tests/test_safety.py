@@ -1,4 +1,5 @@
 """Safety-tax tabulation + label resolution (pure logic, no model load)."""
+
 from quantfit.safety.verify import (
     REFUSAL_LABEL_ID,
     Probe,

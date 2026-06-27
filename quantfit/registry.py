@@ -4,6 +4,7 @@ Single source of truth for `quantfit list`, CLI validation, and which backend
 handles a request. Recipe construction itself lives in the backend; this module
 only describes *what* is offered and *whether* a (method, scheme) combo is valid.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -13,20 +14,20 @@ from quantfit.backends.gguf import GGUF_TYPES
 # compressed-tensors scheme presets quantfit exposes (a validated subset of what
 # llm-compressor installs). Weight-only and weight+activation, down to FP4.
 SCHEMES = (
-    "W4A16",        # 4-bit weight, symmetric
-    "W4A16_ASYM",   # 4-bit weight, asymmetric (AWQ default)
-    "W8A16",        # 8-bit weight-only
-    "W8A8",         # 8-bit weight + 8-bit activation
-    "INT8",         # 8-bit integer weight+activation
-    "W4A8",         # 4-bit weight, 8-bit activation
+    "W4A16",  # 4-bit weight, symmetric
+    "W4A16_ASYM",  # 4-bit weight, asymmetric (AWQ default)
+    "W8A16",  # 8-bit weight-only
+    "W8A8",  # 8-bit weight + 8-bit activation
+    "INT8",  # 8-bit integer weight+activation
+    "W4A8",  # 4-bit weight, 8-bit activation
     "FP8_DYNAMIC",  # FP8 E4M3, dynamic activations (no calibration)
-    "NVFP4",        # NVIDIA FP4 (Blackwell-native)
-    "MXFP4",        # OCP microscaling FP4
+    "NVFP4",  # NVIDIA FP4 (Blackwell-native)
+    "MXFP4",  # OCP microscaling FP4
 )
 
 # Backends.
 BACKEND_CT = "compressed-tensors"  # llm-compressor -> vLLM
-BACKEND_GGUF = "gguf"              # llama.cpp -> Ollama / llama.cpp
+BACKEND_GGUF = "gguf"  # llama.cpp -> Ollama / llama.cpp
 
 
 @dataclass(frozen=True)
@@ -40,27 +41,45 @@ class Method:
 
 METHODS: dict[str, Method] = {
     "awq": Method(
-        "awq", BACKEND_CT, "W4A16_ASYM", True,
+        "awq",
+        BACKEND_CT,
+        "W4A16_ASYM",
+        True,
         "Activation-aware weight quant (4-bit); best 4-bit quality for instruct models",
     ),
     "gptq": Method(
-        "gptq", BACKEND_CT, "W4A16", True,
+        "gptq",
+        BACKEND_CT,
+        "W4A16",
+        True,
         "Hessian/OBQ weight quant (4-bit, symmetric)",
     ),
     "smoothquant": Method(
-        "smoothquant", BACKEND_CT, "W8A8", True,
+        "smoothquant",
+        BACKEND_CT,
+        "W8A8",
+        True,
         "SmoothQuant activation smoothing + W8A8 (8-bit weight+activation)",
     ),
     "fp8": Method(
-        "fp8", BACKEND_CT, "FP8_DYNAMIC", False,
+        "fp8",
+        BACKEND_CT,
+        "FP8_DYNAMIC",
+        False,
         "FP8 E4M3 dynamic; ~FP16 quality, 50% memory, no calibration (H100/Ada)",
     ),
     "rtn": Method(
-        "rtn", BACKEND_CT, "W4A16", False,
+        "rtn",
+        BACKEND_CT,
+        "W4A16",
+        False,
         "Round-to-nearest; no calibration; the honest baseline",
     ),
     "gguf": Method(
-        "gguf", BACKEND_GGUF, "Q4_K_M", False,
+        "gguf",
+        BACKEND_GGUF,
+        "Q4_K_M",
+        False,
         "llama.cpp GGUF k-quants for Ollama/llama.cpp/LM Studio (Q2_K..Q8_0)",
     ),
 }
@@ -80,31 +99,23 @@ class UnsupportedCombo(ValueError):
 def resolve(method: str, scheme: str | None) -> tuple[Method, str]:
     """Validate a method (+ optional scheme override) and return (Method, scheme)."""
     if method not in METHODS:
-        raise UnsupportedCombo(
-            f"unknown method {method!r}; choose from {sorted(METHODS)}"
-        )
+        raise UnsupportedCombo(f"unknown method {method!r}; choose from {sorted(METHODS)}")
     m = METHODS[method]
 
     # GGUF has its own quant-type vocabulary, not the compressed-tensors schemes.
     if m.backend == BACKEND_GGUF:
         chosen = scheme or m.default_scheme
         if chosen not in GGUF_TYPES:
-            raise UnsupportedCombo(
-                f"unknown gguf type {chosen!r}; choose from {list(GGUF_TYPES)}"
-            )
+            raise UnsupportedCombo(f"unknown gguf type {chosen!r}; choose from {list(GGUF_TYPES)}")
         return m, chosen
 
     chosen = scheme or m.default_scheme
     if chosen not in SCHEMES:
         raise UnsupportedCombo(f"unknown scheme {chosen!r}; choose from {list(SCHEMES)}")
     if method in _ACT_QUANT_METHODS and chosen not in _ACT_SCHEMES:
-        raise UnsupportedCombo(
-            f"{method} requires a weight+activation scheme {sorted(_ACT_SCHEMES)}, got {chosen}"
-        )
+        raise UnsupportedCombo(f"{method} requires a weight+activation scheme {sorted(_ACT_SCHEMES)}, got {chosen}")
     if method in _WEIGHT_ONLY_METHODS and chosen in _FLOAT_SCHEMES:
-        raise UnsupportedCombo(
-            f"{method} is a weight-only algorithm; use --method fp8 for {chosen}"
-        )
+        raise UnsupportedCombo(f"{method} is a weight-only algorithm; use --method fp8 for {chosen}")
     return m, chosen
 
 

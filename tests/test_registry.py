@@ -1,4 +1,5 @@
 """Method/scheme catalog validation."""
+
 import pytest
 
 from quantfit.registry import METHODS, UnsupportedCombo, catalog, resolve

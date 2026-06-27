@@ -1,4 +1,5 @@
 """Capacity logic — gpu / offload / refuse with cache-aware disk, no hardware."""
+
 import quantfit.fit as f
 from quantfit.fit import LIMIT_DISK, LIMIT_MACHINE, MODE_GPU, MODE_OFFLOAD, MODE_REFUSE, plan
 

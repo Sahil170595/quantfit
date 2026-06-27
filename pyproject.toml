@@ -19,6 +19,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
@@ -33,7 +34,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "ruff>=0.3"]
 gguf = ["gguf>=0.10"]  # for the GGUF backend's convert step
 
 [project.urls]
@@ -49,3 +50,7 @@ include = ["quantfit*"]
 [tool.pytest.ini_options]
 # Make `pytest tests/` import the package without an editable install (keeps CI light).
 pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120

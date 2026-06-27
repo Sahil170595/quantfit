@@ -7,6 +7,7 @@ use (or located via QUANTFIT_LLAMACPP pointing at a llama.cpp checkout):
   - the repo's `convert_hf_to_gguf.py` (HF safetensors -> GGUF f16); it imports a
     sibling `conversion` package, so a shallow clone of the repo is required.
 """
+
 from __future__ import annotations
 
 import os
@@ -19,7 +20,15 @@ from pathlib import Path
 
 LLAMACPP_TAG = "b9817"  # pinned release; binary + convert script must match
 GGUF_TYPES = (
-    "Q2_K", "Q3_K_S", "Q3_K_M", "Q4_K_S", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0", "IQ4_XS",
+    "Q2_K",
+    "Q3_K_S",
+    "Q3_K_M",
+    "Q4_K_S",
+    "Q4_K_M",
+    "Q5_K_M",
+    "Q6_K",
+    "Q8_0",
+    "IQ4_XS",
 )
 
 _REPO = "https://github.com/ggml-org/llama.cpp"
@@ -114,7 +123,8 @@ def quantize_gguf(model_id: str, qtype: str, out_dir: str, token: str | None = N
 
     subprocess.run(
         [sys.executable, str(convert), model_dir, "--outtype", "f16", "--outfile", str(f16)],
-        check=True, env=env,
+        check=True,
+        env=env,
     )
     subprocess.run([str(quant_bin), str(f16), str(final), qtype], check=True, env=env)
     f16.unlink(missing_ok=True)  # drop the large f16 intermediate

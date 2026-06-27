@@ -4,6 +4,7 @@ compressed-tensors outputs load via transformers and generate a few tokens.
 GGUF files are checked structurally (magic) — full GGUF inference needs a
 llama.cpp runtime, out of scope for a quick verify.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -42,5 +43,5 @@ def _verify_transformers(path: str, max_new_tokens: int) -> tuple[bool, str]:
     tokenizer = AutoTokenizer.from_pretrained(path)
     ids = tokenizer(_PROMPT, return_tensors="pt").to(device)
     out = model.generate(**ids, max_new_tokens=max_new_tokens, do_sample=False)
-    gen = tokenizer.decode(out[0][ids.input_ids.shape[1]:], skip_special_tokens=True)
+    gen = tokenizer.decode(out[0][ids.input_ids.shape[1] :], skip_special_tokens=True)
     return len(gen.strip()) > 0, f"{_PROMPT!r} -> {gen!r}"
