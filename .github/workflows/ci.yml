@@ -8,11 +8,19 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Match the declared support (requires-python >=3.10 + classifiers 3.10-3.13).
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
+
       # The unit tests mock the heavy backends; they only need these at import time.
       - run: pip install pytest huggingface_hub psutil
       - run: pytest tests/ -q
