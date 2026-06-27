@@ -1,19 +1,24 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantfit"
 version = "0.1.0"
-description = "Quantize an LLM if it fits your GPU — a GPU-aware 4-bit AWQ/GPTQ quantization CLI."
+description = "Quantize an LLM and check it still refuses what it should — a GPU-aware quantization CLI with a built-in safety-tax check."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
 authors = [{ name = "Sahil Kadadekar" }]
-keywords = ["llm", "quantization", "awq", "gptq", "vllm", "gpu", "4-bit"]
+keywords = ["llm", "quantization", "awq", "gptq", "gguf", "fp8", "gpu", "safety"]
 classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
   "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
@@ -33,6 +38,7 @@ gguf = ["gguf>=0.10"]  # for the GGUF backend's convert step
 
 [project.urls]
 Homepage = "https://github.com/Sahil170595/quantfit"
+Repository = "https://github.com/Sahil170595/quantfit"
 
 [project.scripts]
 quantfit = "quantfit.cli:main"
