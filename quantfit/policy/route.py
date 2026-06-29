@@ -27,7 +27,7 @@ METHOD_AWQ, SCHEME_AWQ = "awq", "W4A16_ASYM"
 DEVICE_CPU, DEVICE_CUDA = "cpu", "cuda"
 SERVE_LLAMACPP = "llama.cpp"
 PREFER_SPEED, PREFER_SIZE = "speed", "size"
-FP8_ARCHS = ("hopper", "blackwell")  # archs with first-class FP8 tensor cores
+FP8_ARCHS = ("ada", "hopper", "blackwell")  # archs with first-class FP8 tensor cores
 
 
 def _gather_feasible(target: Target, engines: list[Engine]) -> list[EngineConfig]:

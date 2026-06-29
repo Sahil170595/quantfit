@@ -1,4 +1,4 @@
-"""quantfit CLI — `check`, `list`, `quantize`."""
+"""quantfit CLI — check / list / plan / probe / quantize / verify / verify-safety."""
 
 from __future__ import annotations
 
@@ -25,47 +25,48 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    pc = sub.add_parser("check", help="will this model fit your GPU?")
+    # Shared --token for the commands that hit the Hub (gated / private models).
+    tok = argparse.ArgumentParser(add_help=False)
+    tok.add_argument("--token", default=None, help="HF token for gated/private models (else uses the HF_TOKEN env)")
+
+    pc = sub.add_parser("check", parents=[tok], help="will this model fit your GPU?")
     pc.add_argument("--model", required=True, help="HF model id")
 
     sub.add_parser("list", help="list supported methods + schemes")
 
-    pp = sub.add_parser("plan", help="show the config quantfit would pick for your GPU (no quantize)")
+    pp = sub.add_parser("plan", parents=[tok], help="show the config quantfit would pick for your GPU (no quantize)")
     pp.add_argument("--model", required=True, help="HF model id")
     pp.add_argument("--prefer", default="quality", choices=("quality", "speed", "size"))
 
-    ppr = sub.add_parser("probe", help="measure how much a model degrades at each bit-width (RTN-KL)")
+    ppr = sub.add_parser("probe", parents=[tok], help="measure how much a model degrades at each bit-width (RTN-KL)")
     ppr.add_argument("--model", required=True, help="HF model id")
     ppr.add_argument("--bits", type=int, nargs="+", default=[4, 8], help="bit-widths to probe")
 
     pv = sub.add_parser("verify", help="smoke-load a quantized artifact + generate")
     pv.add_argument("--model", required=True, help="path to a quantized output dir or .gguf")
 
-    pvs = sub.add_parser("verify-safety", help="refusal preservation: fp16 baseline vs quantized")
+    pvs = sub.add_parser("verify-safety", parents=[tok], help="refusal preservation: fp16 baseline vs quantized")
     pvs.add_argument("--fp16", required=True, help="HF id of the fp16 baseline")
     pvs.add_argument("--quant", required=True, help="path to the quantized artifact")
     pvs.add_argument("--max-new-tokens", type=int, default=64)
 
-    pq = sub.add_parser("quantize", help="quantize a model")
+    pq = sub.add_parser("quantize", parents=[tok], help="quantize a model")
     pq.add_argument("--model", required=True, help="HF model id (the FP16 base)")
     pq.add_argument("--method", required=True, choices=tuple(METHODS))
     pq.add_argument("--scheme", default=None, help="override the method's default scheme")
     pq.add_argument("--out", required=True, help="output directory")
     pq.add_argument("--push", default=None, help="HF repo id to upload the result to")
     pq.add_argument("--private", action="store_true", help="push as a private repo")
-    pq.add_argument("--offload", action="store_true", help="quantize on CPU (fits any size, slower)")
+    pq.add_argument("--offload", action="store_true", help="quantize on CPU (for models too big for VRAM; slower)")
     pq.add_argument("--no-check", action="store_true", help="skip the GPU pre-flight")
     return p
 
 
-def main(argv: list[str] | None = None) -> int:
-    _force_utf8_stdio()
-    args = _build_parser().parse_args(argv)
-
+def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "check":
         from quantfit.fit import plan
 
-        cap = plan(args.model)
+        cap = plan(args.model, token=args.token)
         print(cap.reason())
         return 0 if cap.fits else 2
 
@@ -92,10 +93,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "probe":
         from quantfit.policy.probe import probe_sensitivity
 
-        print("sensitivity — RTN-KL(fp16 || quant); higher = more degradation:")
+        print("sensitivity — mean per-token RTN-KL(fp16 || quant); higher = more degradation:")
         for bits in args.bits:
-            r = probe_sensitivity(args.model, bits=bits)
+            r = probe_sensitivity(args.model, bits=bits, token=args.token)
             print(f"  {bits}-bit: KL {r.mean_kl:.3f}  (n={r.n_samples})")
+        print("note: RTN is the worst case — LOW KL = safe bit-width; HIGH KL can over-escalate")
+        print("      (calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict.")
         return 0
 
     if args.cmd == "verify":
@@ -108,7 +111,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "verify-safety":
         from quantfit.safety.verify import verify_safety
 
-        tax = verify_safety(args.fp16, args.quant, max_new_tokens=args.max_new_tokens)
+        tax = verify_safety(args.fp16, args.quant, token=args.token, max_new_tokens=args.max_new_tokens)
         print(tax.summary())  # aggregates only — never echoes raw probe prompts/completions
         return 0 if tax.clean else 2
 
@@ -122,6 +125,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.method,
                 args.out,
                 scheme=args.scheme,
+                token=args.token,
                 run_check=not args.no_check,
                 offload=args.offload,
             )
@@ -130,10 +134,22 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         print(f"quantized -> {out}")
         if args.push:
-            print(f"pushed -> {push(str(out), args.push, private=args.private)}")
+            print(f"pushed -> {push(str(out), args.push, token=args.token, private=args.private)}")
         return 0
 
     return 1  # unreachable: subparser is required
+
+
+def main(argv: list[str] | None = None) -> int:
+    _force_utf8_stdio()
+    args = _build_parser().parse_args(argv)
+    try:
+        return _dispatch(args)
+    except (RuntimeError, OSError) as exc:
+        # Operational failures (no GPU, gated/missing model, network, disk) -> a clean
+        # message + exit 2, not a traceback. Programming errors still surface raw.
+        print(f"error: {exc}")
+        return 2
 
 
 if __name__ == "__main__":

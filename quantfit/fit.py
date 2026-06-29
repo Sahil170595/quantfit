@@ -12,6 +12,7 @@ limiting resource.
 
 from __future__ import annotations
 
+import logging
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,11 +26,15 @@ from quantfit.gpufit import (
     gpu_free_bytes,
 )
 
+logger = logging.getLogger(__name__)
+
 # Offload holds the model in CPU RAM and moves one layer at a time to the GPU.
 OFFLOAD_RAM_FACTOR = 1.15
 # Quantized output is smaller than fp16; reserve this fraction (covers 8-bit, the
 # largest common output; 4-bit is ~half this).
 OUTPUT_DISK_FACTOR = 0.6
+# GGUF writes a full-size f16 intermediate before quantizing it; budget ~1x fp16 for it.
+GGUF_F16_DISK_FACTOR = 1.0
 _GIB = 1024**3
 
 MODE_GPU = "gpu"
@@ -86,25 +91,46 @@ class CapacityPlan:
 
 def _existing_parent(path: str) -> str:
     p = Path(path).resolve()
-    while not p.exists():
+    while not p.exists() and p != p.parent:  # stop at the root; a missing drive never .exists()
         p = p.parent
     return str(p)
 
 
 def _cached_weight_bytes(model_id: str) -> int:
-    """Bytes of this model's safetensors already in the HF cache (0 if absent)."""
+    """Bytes of this model's cached weights (safetensors, else .bin); 0 if absent.
+
+    Mirrors estimate_fp16_bytes' suffix preference so cache detection and footprint
+    estimation count the same files — a .bin-only repo would otherwise read as cached=0
+    and inflate the estimated download.
+    """
     from huggingface_hub.constants import HF_HUB_CACHE
 
     snap = Path(HF_HUB_CACHE) / ("models--" + model_id.replace("/", "--")) / "snapshots"
     if not snap.exists():
         return 0
-    total = 0
-    for f in snap.rglob("*.safetensors"):
-        try:
-            total += f.stat().st_size
-        except OSError:
-            pass
-    return total
+    for suffix in (".safetensors", ".bin"):
+        total = 0
+        for f in snap.rglob("*" + suffix):
+            try:
+                total += f.stat().st_size
+            except OSError as exc:
+                logger.warning("skipping unreadable cache file %s: %s", f, exc)
+        if total:
+            return total
+    return 0
+
+
+def gguf_disk_need(model_id: str, out_dir: str = ".", token: str | None = None) -> tuple[int, int]:
+    """(free, need) disk bytes for a GGUF job: download + f16 intermediate + quantized output.
+
+    GGUF is CPU-only (no VRAM gate) but writes a full-size f16 GGUF before quantizing it,
+    so it needs more disk than a compressed-tensors job — give it its own pre-flight.
+    """
+    fp16 = estimate_fp16_bytes(model_id, token=token)
+    free = shutil.disk_usage(_existing_parent(out_dir)).free
+    download_need = max(0, fp16 - _cached_weight_bytes(model_id))
+    need = download_need + int(fp16 * GGUF_F16_DISK_FACTOR) + int(fp16 * OUTPUT_DISK_FACTOR)
+    return free, need
 
 
 def plan(model_id: str, out_dir: str = ".", token: str | None = None) -> CapacityPlan:

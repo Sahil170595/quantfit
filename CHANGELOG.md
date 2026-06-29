@@ -1,8 +1,24 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.2.0 (unreleased)
 
-First release candidate — a GPU-aware quantization CLI.
+Routing diagnostics + a pre-release blind-audit hardening pass.
+
+- **`quantfit plan <model>`** — transparent heuristic router: shows the (method, scheme)
+  it would pick for your GPU and *why*, instant, no quantize. Wraps a new engine
+  abstraction (`engines/`) over compressed-tensors + GGUF.
+- **`quantfit probe <model> [--bits ...]`** — forward-only RTN-KL sensitivity per
+  bit-width. Low KL = safe bit-width; it over-escalates as a method selector, so it
+  ships as a diagnostic, not an auto-router.
+- **Audit hardening:** GGUF binary download is SHA256-verified before extract/execute and
+  downloaded/cloned atomically; offload claims scoped to what's validated; Dockerfile
+  build tooling fixed (PEP 639 setuptools); calibration packing guards short datasets;
+  per-token KL normalization in the probe; clean refusal (not a traceback) on CPU-only
+  hosts; a `--token` flag across commands; the router gains unit tests.
+
+## 0.1.0
+
+First release — a GPU-aware quantization CLI.
 
 - **Quantization** via one llm-compressor backend: `awq` / `gptq` / `smoothquant` /
   `fp8` / `rtn` × W4A16 / W8A16 / W8A8 / W4A8 / FP8 / NVFP4 / MXFP4, plus a GGUF
