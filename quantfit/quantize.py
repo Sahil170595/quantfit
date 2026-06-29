@@ -27,13 +27,25 @@ def quantize(
     m, resolved_scheme = resolve(method, scheme)
 
     # The 3-tier capacity plan applies to GPU quantization (compressed-tensors).
-    # GGUF quantization is CPU-only, so it skips the VRAM/offload plan.
+    # GGUF quantization is CPU-only, so it gets a disk-only pre-flight instead.
     if run_check and m.backend == BACKEND_CT:
-        cap = plan(model_id, out_dir, token=token)
+        try:
+            cap = plan(model_id, out_dir, token=token)
+        except RuntimeError as exc:  # e.g. no CUDA GPU visible -> a clean refusal, not a traceback
+            raise CannotQuantize(str(exc)) from exc
         if cap.mode == MODE_REFUSE:
             raise CannotQuantize(cap.reason())
         if cap.offload:
             offload = True
+    elif run_check and m.backend == BACKEND_GGUF:
+        from quantfit.fit import gguf_disk_need
+
+        free, need = gguf_disk_need(model_id, out_dir, token=token)
+        if free < need:
+            raise CannotQuantize(
+                f"CAN'T QUANTIZE (gguf): {model_id} needs ~{need / 1024**3:.1f} GB free disk "
+                f"(download + f16 intermediate + output) but only {free / 1024**3:.1f} GB is free."
+            )
 
     if m.backend == BACKEND_CT:
         from quantfit.backends.compressed_tensors import quantize_ct

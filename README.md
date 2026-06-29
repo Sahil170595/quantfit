@@ -12,7 +12,9 @@ matrix, is honest about whether a model fits your GPU, and — uniquely — meas
 pip install quantfit
 
 quantfit check        --model Qwen/Qwen2.5-7B-Instruct                 # will it fit? (no download)
+quantfit plan         --model Qwen/Qwen2.5-7B-Instruct                 # what config would it pick? + why
 quantfit quantize     --model Qwen/Qwen2.5-1.5B-Instruct --method awq --out ./out
+quantfit probe        --model Qwen/Qwen2.5-1.5B-Instruct --bits 4 8    # per-bit-width quant sensitivity
 quantfit verify-safety --fp16 Qwen/Qwen2.5-1.5B-Instruct --quant ./out  # did quantization break refusals?
 ```
 
@@ -42,9 +44,10 @@ external API and no raw harmful corpora — so the check is distributable.
 ## GPU-aware quantization
 
 **3-tier capacity.** `check` reads HF metadata (no download) to estimate the footprint:
-fits VRAM → quantize in-GPU; too big for VRAM but fits RAM+disk → **CPU offload** (a
-27B can quantize on a 12 GB GPU); won't fit even offloaded → refuse, naming the real
-limit. No OOM 20 minutes into a job.
+fits VRAM → quantize in-GPU; too big for VRAM but fits RAM+disk → **CPU offload**
+(slower; the in-GPU path is validated, large-model offload is the design target — see
+*What it is — and isn't*); won't fit even offloaded → refuse, naming the real limit.
+No OOM 20 minutes into a job.
 
 **Method × scheme matrix** (one llm-compressor backend, vLLM-loadable):
 
@@ -70,12 +73,16 @@ group-size 128) is shared across the calibrated methods, so they are comparable.
 ## What it is — and isn't
 
 - It **quantizes** (wrapping llm-compressor + llama.cpp) and **checks safety
-  preservation**. Both are real and validated end-to-end.
-- It does **not** auto-select the config for you yet — you pick `--method`. Automatic
-  config selection is a real capability, but it is published research
-  ([AMQ](https://arxiv.org/abs/2509.12019),
-  [KL-Lens](https://arxiv.org/abs/2604.13440)); a routing layer that *implements* it is
-  planned, not claimed here.
+  preservation**. Both run end-to-end and are validated on small models (Qwen-1.5B,
+  Llama-1B); large-model CPU-offload is the intended design, not yet validated at scale.
+- It ships **transparent config help**, not auto-quantization: `quantfit plan <model>`
+  shows the config a heuristic would pick and *why* (instant, no quantize); `quantfit
+  probe <model>` measures per-bit-width quantization sensitivity (forward-only RTN-KL,
+  a conservative upper bound — see the caveat in `policy/probe.py`).
+- It does **not** *auto-pick the method and quantize* for you — you pass `--method`. A
+  learned/optimized routing policy ([AMQ](https://arxiv.org/abs/2509.12019),
+  [KL-Lens](https://arxiv.org/abs/2604.13440)) is published research and the planned
+  next step, not claimed here.
 
 ## Docker
 

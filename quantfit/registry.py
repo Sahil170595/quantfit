@@ -11,8 +11,10 @@ from dataclasses import dataclass
 
 from quantfit.backends.gguf import GGUF_TYPES
 
-# compressed-tensors scheme presets quantfit exposes (a validated subset of what
-# llm-compressor installs). Weight-only and weight+activation, down to FP4.
+# compressed-tensors scheme presets quantfit exposes. Weight-only and
+# weight+activation, down to FP4. The per-method DEFAULT schemes are validated
+# end-to-end; the other presets are accepted and emitted, not each individually
+# load-tested — override with --scheme at your own risk.
 SCHEMES = (
     "W4A16",  # 4-bit weight, symmetric
     "W4A16_ASYM",  # 4-bit weight, asymmetric (AWQ default)
@@ -89,7 +91,7 @@ _ACT_QUANT_METHODS = {"smoothquant"}
 _ACT_SCHEMES = {"W8A8", "INT8", "W4A8"}
 # FP8/FP4 presets pair with the dedicated fp8/scheme path, not weight-only algos.
 _FLOAT_SCHEMES = {"FP8_DYNAMIC", "NVFP4", "MXFP4"}
-_WEIGHT_ONLY_METHODS = {"awq", "gptq", "autoround", "rtn"}
+_WEIGHT_ONLY_METHODS = {"awq", "gptq", "rtn"}
 
 
 class UnsupportedCombo(ValueError):

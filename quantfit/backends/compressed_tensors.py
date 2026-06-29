@@ -1,6 +1,6 @@
 """compressed-tensors backend (llm-compressor): the method × scheme matrix.
 
-awq / gptq / autoround / smoothquant calibrate; fp8 / rtn do not. All emit
+awq / gptq / smoothquant calibrate; fp8 / rtn do not. All emit
 compressed-tensors (vLLM-loadable). For the calibrated algorithms the only
 cross-method difference is the algorithm itself — same calibration, same format
 — so the methods are comparable, not confounded.
@@ -57,7 +57,15 @@ def calib_dataset(spec: QuantSpec, tokenizer, token: str | None = None):
         buf.extend(tokenizer(ex["text"]).input_ids)
         if len(buf) >= needed:
             break
-    blocks = [buf[i : i + spec.calib_seqlen] for i in range(0, needed, spec.calib_seqlen)]
+    # Only chunk over tokens actually collected; a short dataset must error, not
+    # silently emit empty blocks (range(0, needed, ...) would slice past len(buf)).
+    usable = (len(buf) // spec.calib_seqlen) * spec.calib_seqlen
+    blocks = [buf[i : i + spec.calib_seqlen] for i in range(0, min(needed, usable), spec.calib_seqlen)]
+    if len(blocks) < spec.calib_samples:
+        raise ValueError(
+            f"calibration set yielded {len(blocks)} of {spec.calib_samples} requested sequences "
+            f"({len(buf)} tokens, need {needed}); use a larger calib set or fewer/shorter samples"
+        )
     return Dataset.from_dict({"input_ids": blocks, "attention_mask": [[1] * len(b) for b in blocks]})
 
 
@@ -73,21 +81,26 @@ def quantize_ct(
 ) -> Path:
     """Run llm-compressor oneshot for `method`/`scheme` into `out_dir`."""
     from llmcompressor import oneshot
-    from transformers import AutoTokenizer
+    from transformers import AutoModelForCausalLM, AutoTokenizer
 
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     tokenizer = AutoTokenizer.from_pretrained(model_id, token=token)
 
+    # Default: hand oneshot the model id and let it load onto the GPU. For offload, load
+    # with accelerate's device_map so WEIGHTS spill to CPU RAM (the sequential pipeline
+    # then quantizes layer-by-layer). Validated on models that fit VRAM; large-model
+    # (exceeds-VRAM) offload is the design target, NOT yet validated end-to-end.
+    model: object = model_id
+    if offload:
+        model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", torch_dtype="auto", token=token)
+
     kwargs: dict = dict(
-        model=model_id,
+        model=model,
         tokenizer=tokenizer,
         recipe=build_recipe(method, scheme),
         output_dir=str(out),
     )
-    if offload:
-        # Quantize layer-by-layer with the model held on CPU -> fits any size.
-        kwargs["sequential_offload_device"] = "cpu"
     if needs_calibration:
         kwargs.update(
             dataset=calib_dataset(spec, tokenizer, token=token),

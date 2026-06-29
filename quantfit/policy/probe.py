@@ -8,9 +8,11 @@ more degradation.
 
 This is the cheap forward-only proxy from the KL-Lens line of work
 (https://arxiv.org/abs/2604.13440) — we *implement* it as a routing input, not as a
-novel method. The real AWQ/GPTQ paths refine on top of RTN, so RTN-KL is a
-conservative upper bound on the error: if a model survives RTN at N bits, a
-calibrated method will do at least as well.
+novel method. RTN is the worst case (calibrated AWQ/GPTQ refine on top of it), so a
+LOW RTN-KL is a strong "this bit-width is safe" signal. The converse does NOT hold:
+HIGH RTN-KL over-escalates — models that are fine under calibrated 4-bit can still show
+large RTN-4bit KL. Read mean_kl as a per-bit-width sensitivity measurement, not a
+method-selection verdict.
 """
 
 from __future__ import annotations
@@ -73,8 +75,12 @@ def probe_sensitivity(
         for inputs, ref_cpu in zip(batch, fp16_logprobs):
             q_lp = F.log_softmax(model(**inputs).logits.float(), dim=-1)
             ref = ref_cpu.to(q_lp.device)
-            # KL(fp16 || quant) = sum exp(ref) * (ref - q_lp); batchmean over tokens.
-            kls.append(float(F.kl_div(q_lp, ref, log_target=True, reduction="batchmean")))
+            # mean per-token KL(fp16 || quant): flatten (1,T,V)->(T,V) so batchmean
+            # divides by token count, not the batch dim (=1) — makes variable-length
+            # rows comparable instead of summing KL over all T positions.
+            q_flat = q_lp.reshape(-1, q_lp.size(-1))
+            ref_flat = ref.reshape(-1, ref.size(-1))
+            kls.append(float(F.kl_div(q_flat, ref_flat, log_target=True, reduction="batchmean")))
 
     del model, tokenizer
     _free_gpu(device)
