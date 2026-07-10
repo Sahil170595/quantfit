@@ -9,7 +9,7 @@ from quantfit.registry import METHODS
 
 
 def _force_utf8_stdio() -> None:
-    # llm-compressor / gptqmodel loggers emit unicode; a Windows cp1252 console
+    # llm-compressor loggers emit unicode; a Windows cp1252 console
     # otherwise crashes mid-run with UnicodeEncodeError.
     for stream in (sys.stdout, sys.stderr):
         try:
@@ -45,7 +45,12 @@ def _build_parser() -> argparse.ArgumentParser:
     pv = sub.add_parser("verify", help="smoke-load a quantized artifact + generate")
     pv.add_argument("--model", required=True, help="path to a quantized output dir or .gguf")
 
-    pvs = sub.add_parser("verify-safety", parents=[tok], help="refusal preservation: fp16 baseline vs quantized")
+    pvs = sub.add_parser(
+        "verify-safety",
+        parents=[tok],
+        help="refusal preservation: fp16 baseline vs quantized "
+        "(exit 0 = no regression detected, 3 = regression, 4 = axis unmeasurable, 2 = operational error)",
+    )
     pvs.add_argument("--fp16", required=True, help="HF id of the fp16 baseline")
     pvs.add_argument("--quant", required=True, help="path to the quantized artifact")
     pvs.add_argument("--max-new-tokens", type=int, default=64)
@@ -57,7 +62,6 @@ def _build_parser() -> argparse.ArgumentParser:
     pq.add_argument("--out", required=True, help="output directory")
     pq.add_argument("--push", default=None, help="HF repo id to upload the result to")
     pq.add_argument("--private", action="store_true", help="push as a private repo")
-    pq.add_argument("--offload", action="store_true", help="quantize on CPU (for models too big for VRAM; slower)")
     pq.add_argument("--no-check", action="store_true", help="skip the GPU pre-flight")
     return p
 
@@ -111,9 +115,15 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "verify-safety":
         from quantfit.safety.verify import verify_safety
 
-        tax = verify_safety(args.fp16, args.quant, token=args.token, max_new_tokens=args.max_new_tokens)
-        print(tax.summary())  # aggregates only — never echoes raw probe prompts/completions
-        return 0 if tax.clean else 2
+        drift = verify_safety(args.fp16, args.quant, token=args.token, max_new_tokens=args.max_new_tokens)
+        print(drift.summary())  # aggregates only — never echoes raw probe prompts/completions
+        # Exit codes are the CI contract; they must not collide with 2 (operational
+        # failure, from main's handler) or an unmeasured run would read as a verdict.
+        if drift.regression_detected:
+            return 3
+        if drift.unmeasurable_axes:
+            return 4  # zero at-risk pairs on an axis: nothing was measured, not a pass
+        return 0
 
     if args.cmd == "quantize":
         from quantfit.quantize import CannotQuantize, push, quantize
@@ -127,7 +137,6 @@ def _dispatch(args: argparse.Namespace) -> int:
                 scheme=args.scheme,
                 token=args.token,
                 run_check=not args.no_check,
-                offload=args.offload,
             )
         except (CannotQuantize, UnsupportedCombo) as exc:
             print(exc)
@@ -146,8 +155,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return _dispatch(args)
     except (RuntimeError, OSError) as exc:
-        # Operational failures (no GPU, gated/missing model, network, disk) -> a clean
-        # message + exit 2, not a traceback. Programming errors still surface raw.
+        # Operational failures (no GPU, gated/missing model, network, disk, short
+        # calibration/probe datasets — quantfit raises its own as RuntimeError) ->
+        # a clean message + exit 2, not a traceback. Programming errors, including
+        # ValueError from anywhere in the torch/transformers stack, surface raw.
         print(f"error: {exc}")
         return 2
 

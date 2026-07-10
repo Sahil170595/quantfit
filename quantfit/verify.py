@@ -43,7 +43,7 @@ def _verify_transformers(path: str, max_new_tokens: int) -> tuple[bool, str]:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = None
     try:
-        model = AutoModelForCausalLM.from_pretrained(path, device_map=device, torch_dtype="auto")
+        model = AutoModelForCausalLM.from_pretrained(path, device_map=device, dtype="auto")
         tokenizer = AutoTokenizer.from_pretrained(path)
         ids = tokenizer(_PROMPT, return_tensors="pt").to(device)
         out = model.generate(**ids, max_new_tokens=max_new_tokens, do_sample=False)

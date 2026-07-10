@@ -23,7 +23,16 @@ def test_gpu_mode_when_fits_vram(monkeypatch):
 def test_offload_when_too_big_for_vram_but_ram_ok(monkeypatch):
     _patch(monkeypatch, 14 * _GIB, 11 * _GIB, 32 * _GIB, 100 * _GIB)  # ~7B, ample disk
     p = plan("m")
-    assert p.mode == MODE_OFFLOAD and p.offload and p.fits
+    assert p.mode == MODE_OFFLOAD and p.fits
+
+
+def test_refuse_when_ram_too_small_even_if_vram_fits(monkeypatch):
+    # Weights load CPU-first (sequential onloading), so RAM gates even models that
+    # fit VRAM: 40GB model, 80GB VRAM, 8GB RAM must refuse — not OOM mid-load.
+    _patch(monkeypatch, 40 * _GIB, 80 * _GIB, 8 * _GIB, 500 * _GIB)
+    p = plan("m")
+    assert p.mode == MODE_REFUSE and p.limit == LIMIT_MACHINE
+    assert "RAM" in p.reason()
 
 
 def test_refuse_machine_when_too_big_even_for_ram(monkeypatch):

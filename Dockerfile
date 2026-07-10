@@ -10,7 +10,7 @@ WORKDIR /app
 COPY . /app
 
 # torch from the CUDA wheel index first, then the package (build-isolation off so
-# llm-compressor / gptqmodel see the installed torch).
+# llm-compressor sees the installed torch).
 # ubuntu22.04 ships setuptools 59; PEP 639 `license = "Apache-2.0"` needs >=77.
 RUN pip3 install --no-cache-dir --upgrade pip "setuptools>=77" wheel && \
     pip3 install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cu124 && \

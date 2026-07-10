@@ -62,7 +62,8 @@ def calib_dataset(spec: QuantSpec, tokenizer, token: str | None = None):
     usable = (len(buf) // spec.calib_seqlen) * spec.calib_seqlen
     blocks = [buf[i : i + spec.calib_seqlen] for i in range(0, min(needed, usable), spec.calib_seqlen)]
     if len(blocks) < spec.calib_samples:
-        raise ValueError(
+        # RuntimeError: operational (dataset too short), so the CLI exits cleanly.
+        raise RuntimeError(
             f"calibration set yielded {len(blocks)} of {spec.calib_samples} requested sequences "
             f"({len(buf)} tokens, need {needed}); use a larger calib set or fewer/shorter samples"
         )
@@ -77,7 +78,6 @@ def quantize_ct(
     spec: QuantSpec,
     needs_calibration: bool,
     token: str | None = None,
-    offload: bool = False,
 ) -> Path:
     """Run llm-compressor oneshot for `method`/`scheme` into `out_dir`."""
     from llmcompressor import oneshot
@@ -87,13 +87,13 @@ def quantize_ct(
     out.mkdir(parents=True, exist_ok=True)
     tokenizer = AutoTokenizer.from_pretrained(model_id, token=token)
 
-    # Default: hand oneshot the model id and let it load onto the GPU. For offload, load
-    # with accelerate's device_map so WEIGHTS spill to CPU RAM (the sequential pipeline
-    # then quantizes layer-by-layer). Validated on models that fit VRAM; large-model
-    # (exceeds-VRAM) offload is the design target, NOT yet validated end-to-end.
-    model: object = model_id
-    if offload:
-        model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", torch_dtype="auto", token=token)
+    # Load on CPU (no device_map) — llm-compressor's recommended pattern. Its default
+    # sequential-onloading pipeline moves one layer at a time to the GPU during
+    # calibration, so the same path serves models that fit VRAM and models that don't.
+    # accelerate's device_map="auto" is NOT used: it fights the sequential pipeline.
+    # In-GPU-sized models are validated end-to-end; exceeds-VRAM models remain the
+    # design target, not yet validated at scale (see ROADMAP 0.4b).
+    model = AutoModelForCausalLM.from_pretrained(model_id, dtype="auto", token=token)
 
     kwargs: dict = dict(
         model=model,

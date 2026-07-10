@@ -6,7 +6,7 @@ Quantization makes a model cheaper to serve. It can also quietly strip safety
 behavior: a 4-bit model that answers prompts the fp16 model refused is a regression
 you will not see in a perplexity number. `quantfit` quantizes across the SOTA method
 matrix, is honest about whether a model fits your GPU, and — uniquely — measures the
-**safety tax** of the quantization it just performed.
+**safety drift** of the quantization it just performed.
 
 ```bash
 pip install quantfit
@@ -22,32 +22,43 @@ quantfit verify-safety --fp16 Qwen/Qwen2.5-1.5B-Instruct --quant ./out  # did qu
 
 `verify-safety` generates from both the fp16 baseline and the quantized model over a
 curated probe set, judges each response refusal/compliance with a local classifier,
-and reports the tax as a **vector**, the way it actually matters:
+and reports the drift as a **vector**, the way it actually matters:
 
 ```
-safety-tax over 40 probes (REGRESSION):
-  refusal-robustness (expected-unsafe n=12): fp16 refused 12 -> quant 12 | 0 harmful-compliance regressions
-  over-refusal       (expected-safe   n=28): fp16 refused 18 -> quant 18 | 2 new false refusals
-  by zone: borderline[10->10/16] clear_safe[8->8/12] clear_unsafe[12->12/12]
+safety drift over 40 probes — REGRESSION DETECTED (over-refusal axis)
+  refusal-robustness (expected-unsafe n=12): fp16 refused 12 -> quant 12
+    harmful-compliance flips: 0/12 at-risk pairs flipped (95% CI upper 24.3%; ~13pp detectable at 80% power)
+  over-refusal       (expected-safe   n=28): fp16 refused 18 -> quant 18
+    new false refusals: 2/10 at-risk pairs flipped (20.0%, 95% CI 5.7-51.0%)
+  by zone (fp16->quant refusals / n): borderline[10->10/16] clear_safe[8->8/12] clear_unsafe[12->12/12]
+  note: 40 curated probes; a no-detection result bounds the drift, it does not certify safety.
 ```
 
 Two axes, not one number:
-- **refusal-robustness** — on prompts that *should* be refused, did the quant start
-  complying? (the dangerous direction)
-- **over-refusal** — on prompts that *should* be answered, did the quant start
+- **refusal-robustness drift** — on prompts that *should* be refused, did the quant
+  start complying? (the dangerous direction)
+- **over-refusal drift** — on prompts that *should* be answered, did the quant start
   refusing? (the usability direction)
 
 A scalar refusal-delta can read 0 while both axes move in opposite directions; the
 vector + per-zone breakdown catches it. Local judge, curated public probes, no
 external API and no raw harmful corpora — so the check is distributable.
 
+Verdicts are **bounded, never absolute**: each axis is a binomial over its *at-risk
+pairs* (probes the fp16 baseline got right), reported with a Wilson 95% CI and — on
+zero flips — the minimum detectable effect at 80% power. At the shipped probe set's
+n, a pass bounds the dangerous flip rate below ~24pp; it does not certify safety.
+(Why "drift" and not "tax": in the alignment literature a safety/alignment *tax*
+is capability paid FOR safety — nearly the inverse of what this measures.)
+
 ## GPU-aware quantization
 
 **3-tier capacity.** `check` reads HF metadata (no download) to estimate the footprint:
-fits VRAM → quantize in-GPU; too big for VRAM but fits RAM+disk → **CPU offload**
-(slower; the in-GPU path is validated, large-model offload is the design target — see
-*What it is — and isn't*); won't fit even offloaded → refuse, naming the real limit.
-No OOM 20 minutes into a job.
+fits VRAM → fast; too big for VRAM but fits RAM+disk → same mechanism, slower (weights
+load into CPU RAM and llm-compressor's default **sequential onloading** streams one
+layer at a time to the GPU — no accelerate `device_map`; validated at in-GPU sizes,
+the exceeds-VRAM case is the design target — see *What it is — and isn't*); won't fit
+even in RAM → refuse, naming the real limit. No OOM 20 minutes into a job.
 
 **Method × scheme matrix** (one llm-compressor backend, vLLM-loadable):
 
@@ -74,15 +85,17 @@ group-size 128) is shared across the calibrated methods, so they are comparable.
 
 - It **quantizes** (wrapping llm-compressor + llama.cpp) and **checks safety
   preservation**. Both run end-to-end and are validated on small models (Qwen-1.5B,
-  Llama-1B); large-model CPU-offload is the intended design, not yet validated at scale.
+  Llama-1B); exceeds-VRAM quantization (llm-compressor's sequential onloading) is the
+  intended design, not yet validated at scale.
 - It ships **transparent config help**, not auto-quantization: `quantfit plan <model>`
   shows the config a heuristic would pick and *why* (instant, no quantize); `quantfit
   probe <model>` measures per-bit-width quantization sensitivity (forward-only RTN-KL,
   a conservative upper bound — see the caveat in `policy/probe.py`).
-- It does **not** *auto-pick the method and quantize* for you — you pass `--method`. A
-  learned/optimized routing policy ([AMQ](https://arxiv.org/abs/2509.12019),
-  [KL-Lens](https://arxiv.org/abs/2604.13440)) is published research and the planned
-  next step, not claimed here.
+- It does **not** *auto-pick the method and quantize* for you — you pass `--method`.
+  Learned routing ([AMQ](https://arxiv.org/abs/2509.12019),
+  [KL-Lens](https://arxiv.org/abs/2604.13440)) exists as published research, but it is
+  explicitly out of scope here (see `ROADMAP.md`): quantfit's bet is honest
+  measurement, and `plan`/`probe` stay transparent diagnostics.
 
 ## Docker
 

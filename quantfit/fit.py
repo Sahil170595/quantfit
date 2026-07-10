@@ -1,13 +1,15 @@
 """Capacity decision: in-GPU / CPU-offload / refuse.
 
 Three resources gate a quantization job:
-  - disk : weights must be downloaded (unless cached) + the output written. Needed
-           in BOTH gpu and offload modes, so it's a precondition.
-  - VRAM : enough -> quantize in-GPU (fast).
-  - RAM  : not enough VRAM but enough RAM -> hold the model on CPU and stream
-           layers to the GPU (offload; slower; fits any size).
-Refuse only when none of the above can be satisfied, and always name the actual
-limiting resource.
+  - disk : weights must be downloaded (unless cached) + the output written.
+           Needed in every mode, so it's a precondition.
+  - RAM  : weights ALWAYS load into CPU RAM first (llm-compressor's sequential
+           onloading then streams layers to the GPU), so RAM is a precondition
+           in every mode too — including models that fit VRAM.
+  - VRAM : enough -> calibration runs fully GPU-resident (fast); not enough ->
+           offload mode (layers stream from RAM; slower; fits any size).
+Refuse only when a precondition fails, and always name the actual limiting
+resource.
 """
 
 from __future__ import annotations
@@ -61,10 +63,6 @@ class CapacityPlan:
     def fits(self) -> bool:
         return self.mode != MODE_REFUSE
 
-    @property
-    def offload(self) -> bool:
-        return self.mode == MODE_OFFLOAD
-
     def reason(self) -> str:
         def g(b: int) -> str:
             return f"{b / _GIB:.1f}"
@@ -82,10 +80,11 @@ class CapacityPlan:
                 f"CAN'T QUANTIZE: {self.model_id} needs ~{g(self.disk_need)} GB free "
                 f"disk (download + output) but only {g(self.disk_free)} GB is free."
             )
+        ram_need = int(self.fp16_bytes * OFFLOAD_RAM_FACTOR) + HEADROOM_BYTES
         return (
-            f"CAN'T QUANTIZE: {self.model_id} ~{g(self.fp16_bytes)} GB needs more than "
-            f"{g(self.gpu_free)} GB VRAM and {g(self.ram_available)} GB RAM. "
-            f"Use a bigger machine."
+            f"CAN'T QUANTIZE: {self.model_id} ~{g(self.fp16_bytes)} GB must load into "
+            f"CPU RAM first (~{g(ram_need)} GB with overhead) but only "
+            f"{g(self.ram_available)} GB is available. Use a machine with more RAM."
         )
 
 
@@ -147,10 +146,13 @@ def plan(model_id: str, out_dir: str = ".", token: str | None = None) -> Capacit
 
     if disk < disk_need:
         mode, limit = MODE_REFUSE, LIMIT_DISK
+    elif ram < ram_need:
+        # RAM gates EVERY mode: the CPU-first load materializes the full weights in
+        # host RAM even for models that fit VRAM (sequential onloading streams from
+        # there), so a big-VRAM/small-RAM machine must refuse, not OOM mid-load.
+        mode, limit = MODE_REFUSE, LIMIT_MACHINE
     elif gpu_need <= gpu:
         mode, limit = MODE_GPU, LIMIT_NONE
-    elif ram_need <= ram:
-        mode, limit = MODE_OFFLOAD, LIMIT_NONE
     else:
-        mode, limit = MODE_REFUSE, LIMIT_MACHINE
+        mode, limit = MODE_OFFLOAD, LIMIT_NONE
     return CapacityPlan(model_id, fp16, gpu, ram, disk, disk_need, mode, limit)

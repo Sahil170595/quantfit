@@ -13,6 +13,12 @@ LOW RTN-KL is a strong "this bit-width is safe" signal. The converse does NOT ho
 HIGH RTN-KL over-escalates — models that are fine under calibrated 4-bit can still show
 large RTN-4bit KL. Read mean_kl as a per-bit-width sensitivity measurement, not a
 method-selection verdict.
+
+Scope: KL is a QUALITY-drift signal, not a safety predictor. Quality preservation
+does not imply refusal preservation ("Quality Is Not a Safety Proxy Under
+Quantization", https://arxiv.org/abs/2606.10154) — a low-KL bit-width can still
+flip refusal behavior. Use `verify-safety` for the safety axis; this probe never
+substitutes for it.
 """
 
 from __future__ import annotations
@@ -54,12 +60,13 @@ def probe_sensitivity(
     device = _CUDA if torch.cuda.is_available() else _CPU
     dtype = torch.float16 if device == _CUDA else torch.float32
     tokenizer = AutoTokenizer.from_pretrained(model_id, token=token)
-    model = AutoModelForCausalLM.from_pretrained(model_id, device_map=device, torch_dtype=dtype, token=token)
+    model = AutoModelForCausalLM.from_pretrained(model_id, device_map=device, dtype=dtype, token=token)
     model.eval()
 
     batch = _probe_batch(tokenizer, n_samples, seqlen, device, token)
     if not batch:
-        raise ValueError("probe batch is empty; calibration dataset returned no usable rows")
+        # RuntimeError: operational (unusable dataset), so the CLI exits cleanly.
+        raise RuntimeError("probe batch is empty; calibration dataset returned no usable rows")
 
     # fp16 reference log-probs, kept on CPU so the GPU isn't holding 8 x (T x vocab).
     fp16_logprobs = []
