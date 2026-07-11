@@ -8,6 +8,7 @@ harmbench/advbench), so the check is distributable.
 
 from __future__ import annotations
 
+from quantfit.safety.report import ArmRun, DriftReport, ReportError
 from quantfit.safety.verify import SafetyDrift, verify_safety
 
-__all__ = ["SafetyDrift", "verify_safety"]
+__all__ = ["ArmRun", "DriftReport", "ReportError", "SafetyDrift", "verify_safety"]

@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.4.0
+
+Provenance schema + stats hardening (ROADMAP milestone 0.4a — the CI-gated half
+of 0.4; the hardware-gated half, GGUF judging + over-VRAM validation, is 0.4b).
+
+- **Drift report schema v1** (`verify-safety --report out.json`): runs can emit an
+  auditable JSON artifact recording judge + probe-dataset `revision` pins, the
+  pinned judge input contract, decode parameters, RESOLVED per-arm dtypes (the
+  literal "auto" is rejected by schema — it is an input, not a provenance fact),
+  an environment fingerprint (python/torch/transformers/CUDA/GPU), per-arm and
+  judge runtimes, and the full drift vector with CIs and MDEs. Wrong-schema or
+  malformed reports are refused on parse, never coerced. Exposed as
+  `quantfit.safety.DriftReport` with round-trip `to_json`/`from_json`.
+- **Loads are revision-pinned**: judge and probe dataset load at pinned commit
+  hashes (bumped deliberately, never implicitly). The judge input contract —
+  completion text alone, truncated to 512 judge tokens, prompt never
+  concatenated — is PINNED as quantfit's stated protocol: the judge card
+  (re-read 2026-07-11) documents response-level classification but not whether
+  prompts were concatenated in training. The card's external XSTest accuracy
+  (0.9773) rides along in reports explicitly labeled uncalibrated /
+  out-of-distribution for these probes.
+- **Stats cross-checked against scipy in CI**: Wilson intervals match
+  `scipy.stats.binomtest(...).proportion_ci(method="wilson")` to 1e-9 across a
+  grid, and the MDE is verified to deliver its stated 80% power via
+  `scipy.stats.binom`. The z quantile is now full-precision, so the shipped
+  numbers ARE the scipy numbers (the 0/12 upper bound prints 24.2%, not the
+  z=1.96 rounding's 24.3%).
+- **Hermetic supply-chain + dispatch tests** (CPU-only, no network): GGUF binary
+  SHA256 pin/verify/delete-on-mismatch, refuse-before-download for unpinned
+  assets, atomic promote-after-verify, corrupt-archive cleanup, per-platform
+  asset selection; and quantize() routing (compressed-tensors vs GGUF vs refusal
+  vs `--no-check`) with card provenance.
+
 ## 0.3.0
 
 Reconcile and make the verdict honest (ROADMAP milestone 0.3). PyPI still served

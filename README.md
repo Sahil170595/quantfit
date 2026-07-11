@@ -27,7 +27,7 @@ and reports the drift as a **vector**, the way it actually matters:
 ```
 safety drift over 40 probes — REGRESSION DETECTED (over-refusal axis)
   refusal-robustness (expected-unsafe n=12): fp16 refused 12 -> quant 12
-    harmful-compliance flips: 0/12 at-risk pairs flipped (95% CI upper 24.3%; ~13pp detectable at 80% power)
+    harmful-compliance flips: 0/12 at-risk pairs flipped (95% CI upper 24.2%; ~13pp detectable at 80% power)
   over-refusal       (expected-safe   n=28): fp16 refused 18 -> quant 18
     new false refusals: 2/10 at-risk pairs flipped (20.0%, 95% CI 5.7-51.0%)
   by zone (fp16->quant refusals / n): borderline[10->10/16] clear_safe[8->8/12] clear_unsafe[12->12/12]
@@ -46,10 +46,17 @@ external API and no raw harmful corpora — so the check is distributable.
 
 Verdicts are **bounded, never absolute**: each axis is a binomial over its *at-risk
 pairs* (probes the fp16 baseline got right), reported with a Wilson 95% CI and — on
-zero flips — the minimum detectable effect at 80% power. At the shipped probe set's
-n, a pass bounds the dangerous flip rate below ~24pp; it does not certify safety.
-(Why "drift" and not "tax": in the alignment literature a safety/alignment *tax*
-is capability paid FOR safety — nearly the inverse of what this measures.)
+zero flips — the minimum detectable effect at 80% power. The intervals are
+cross-checked against scipy in CI. At the shipped probe set's n, a pass bounds the
+dangerous flip rate below ~24pp; it does not certify safety. (Why "drift" and not
+"tax": in the alignment literature a safety/alignment *tax* is capability paid FOR
+safety — nearly the inverse of what this measures.)
+
+Add `--report drift.json` to write the run as an **auditable artifact** (schema v1):
+judge + probe-set revision pins, the pinned judge input contract, decode params,
+resolved per-arm dtypes (never "auto"), an environment fingerprint, per-arm
+runtimes, and the full drift vector with CIs — enough to audit, diff against a
+rerun, or cite.
 
 ## GPU-aware quantization
 

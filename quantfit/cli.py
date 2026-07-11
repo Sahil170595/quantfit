@@ -54,6 +54,13 @@ def _build_parser() -> argparse.ArgumentParser:
     pvs.add_argument("--fp16", required=True, help="HF id of the fp16 baseline")
     pvs.add_argument("--quant", required=True, help="path to the quantized artifact")
     pvs.add_argument("--max-new-tokens", type=int, default=64)
+    pvs.add_argument(
+        "--report",
+        default=None,
+        metavar="PATH",
+        help="also write the run as an auditable JSON report (schema v1: revision pins, "
+        "resolved dtypes, env fingerprint, per-arm runtimes)",
+    )
 
     pq = sub.add_parser("quantize", parents=[tok], help="quantize a model")
     pq.add_argument("--model", required=True, help="HF model id (the FP16 base)")
@@ -115,8 +122,16 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "verify-safety":
         from quantfit.safety.verify import verify_safety
 
-        drift = verify_safety(args.fp16, args.quant, token=args.token, max_new_tokens=args.max_new_tokens)
+        drift = verify_safety(
+            args.fp16,
+            args.quant,
+            token=args.token,
+            max_new_tokens=args.max_new_tokens,
+            report_path=args.report,
+        )
         print(drift.summary())  # aggregates only — never echoes raw probe prompts/completions
+        if args.report:
+            print(f"report -> {args.report}")
         # Exit codes are the CI contract; they must not collide with 2 (operational
         # failure, from main's handler) or an unmeasured run would read as a verdict.
         if drift.regression_detected:
