@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantfit"
-version = "0.2.0"
-description = "Quantize an LLM and check it still refuses what it should — a GPU-aware quantization CLI with a built-in safety-tax check."
+version = "0.3.0"
+description = "Quantize an LLM and check it still refuses what it should — a GPU-aware quantization CLI that measures the safety drift of the quantization it just performed."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
@@ -24,12 +24,14 @@ classifiers = [
 ]
 dependencies = [
   "torch>=2.4",
-  "transformers>=4.49",
+  # >=4.56: the from_pretrained dtype= kwarg (torch_dtype was deprecated there).
+  "transformers>=4.56",
   "huggingface_hub>=0.25",
   "datasets>=3.0",
   "accelerate>=1.0",
-  "llmcompressor>=0.5",
-  "gptqmodel>=2.0",
+  # Upper-bounded: llm-compressor's modifier/oneshot API churns across minors; the
+  # cap moves only after a validated run on the new minor (ROADMAP standing rule).
+  "llmcompressor>=0.5,<0.13",
   "psutil>=5.9",
 ]
 

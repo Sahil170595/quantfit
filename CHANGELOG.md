@@ -1,6 +1,49 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## 0.3.0
+
+Reconcile and make the verdict honest (ROADMAP milestone 0.3). PyPI still served
+0.1.0 (uploaded 2026-06-27) while the repo sat at an unpublished 0.2.0 with
+`__init__.__version__` stuck at 0.1.0 — 0.3.0 supersedes both.
+
+- **Bounded verdict statistics** for `verify-safety`: the single-flip CLEAN/REGRESSION
+  binary is gone. Each axis is now a binomial over its *at-risk pairs* (probes the
+  fp16 baseline got right), reported with a Wilson 95% CI; a zero-flip axis prints its
+  CI upper bound and the minimum detectable effect at 80% power
+  ("NO REGRESSION DETECTED (dangerous-axis MDE ~13pp at n=12)"). New helpers
+  `wilson_interval` / `detectable_flip_rate`, unit-tested against known values.
+- **Rename: safety tax -> safety drift vector** (`SafetyTax` -> `SafetyDrift`,
+  README, package description). "Safety tax" collides with the literature's
+  alignment-tax usage (capability paid FOR safety) — near-inverse of what this
+  measures. Breaking, while real users are ~zero. A repo-wide test now enforces the
+  purge on shipped surfaces.
+- **Determinism canary documented**: an fp16-vs-fp16 rerun is zero-flip by
+  construction under greedy decoding — it validates determinism only and is never a
+  judge noise floor.
+- **Deprecated offload path deleted**: the accelerate `device_map="auto"` branch (and
+  the `--offload` flag) are gone. Models load on CPU and llm-compressor's default
+  sequential onloading streams layers to the GPU — one code path for every size.
+  Because the load is now CPU-first, **RAM gates every mode** in the capacity plan:
+  a big-VRAM/small-RAM machine refuses up front instead of OOM-ing mid-load.
+  Exceeds-VRAM validation stays a 0.4b gate; the README says so.
+- **CI-contract exit codes for `verify-safety`**: 0 = measured, no regression
+  detected; 3 = regression detected; 4 = an axis had zero at-risk pairs (an
+  unmeasured run is not a pass); 2 = operational failure. Previously a regression
+  and a crashed run both exited 2.
+- **Probe scope corrected**: RTN-KL is a quality-drift signal, not a safety predictor
+  (arXiv 2606.10154); `verify-safety` owns the safety axis.
+- `from_pretrained` calls use `dtype=` (the `torch_dtype` kwarg is deprecated);
+  transformers floor raised to >=4.56 accordingly.
+- Dropped the never-imported `gptqmodel` dependency; upper-bounded `llmcompressor`
+  (<0.13) pending validated runs on newer minors. quantfit's own operational errors
+  (short calibration set, empty probe batch, unroutable host) now raise
+  `RuntimeError`, so the CLI exits 2 with a clean message while programming errors
+  — including third-party `ValueError`s — still surface as tracebacks.
+- `__init__.__version__` / pyproject parity is now enforced by a test; CI gained an
+  install-smoke job (build the wheel, install it into a clean env on Ubuntu +
+  Windows, run the CLI).
+
+## 0.2.0 (never published — superseded by 0.3.0)
 
 Routing diagnostics + a pre-release blind-audit hardening pass.
 

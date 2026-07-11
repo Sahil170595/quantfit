@@ -70,7 +70,9 @@ def test_cpu_routes_gguf():
 
 
 def test_no_feasible_config_raises():
-    with pytest.raises(ValueError):
+    # RuntimeError: operational (no engine can serve this host) -> the CLI catches
+    # it and exits cleanly instead of dumping a traceback.
+    with pytest.raises(RuntimeError):
         _route(_gpu(), Budget(), [])
 
 

@@ -85,7 +85,8 @@ def route(model_id: str, target: Target, budget: Budget, engines: list[Engine]) 
     """Route (model, target, budget) to a feasible `EngineConfig` with a legible rationale."""
     feasible = _gather_feasible(target, engines)
     if not feasible:
-        raise ValueError(
+        # RuntimeError: operational (this host can't serve any config) -> clean CLI exit.
+        raise RuntimeError(
             f"no engine reports a feasible config for {model_id} on target "
             f"{target.device}/{target.gpu_arch or 'no-gpu'}; cannot route."
         )
@@ -97,7 +98,7 @@ def route(model_id: str, target: Target, budget: Budget, engines: list[Engine]) 
 
     # Guards fired but none of their configs were feasible (or no guard fired at all).
     offered = [(c.method, c.scheme) for c in feasible]
-    raise ValueError(
+    raise RuntimeError(
         f"no routing rule matched a feasible config for {model_id} on "
         f"{target.device}/{target.gpu_arch or 'no-gpu'} (prefer={budget.prefer}); "
         f"feasible set was {offered}."

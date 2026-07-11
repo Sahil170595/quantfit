@@ -21,7 +21,6 @@ def quantize(
     spec: QuantSpec = DEFAULT_SPEC,
     token: str | None = None,
     run_check: bool = True,
-    offload: bool = False,
 ) -> Path:
     """Quantize `model_id` with `method` (+ optional `scheme`) into `out_dir`."""
     m, resolved_scheme = resolve(method, scheme)
@@ -35,8 +34,6 @@ def quantize(
             raise CannotQuantize(str(exc)) from exc
         if cap.mode == MODE_REFUSE:
             raise CannotQuantize(cap.reason())
-        if cap.offload:
-            offload = True
     elif run_check and m.backend == BACKEND_GGUF:
         from quantfit.fit import gguf_disk_need
 
@@ -58,7 +55,6 @@ def quantize(
             spec,
             m.needs_calibration,
             token=token,
-            offload=offload,
         )
     elif m.backend == BACKEND_GGUF:
         from quantfit.backends.gguf import quantize_gguf

@@ -38,7 +38,6 @@ class EngineConfig:
     engine: str  # Engine.name that produced/handles this
     method: str  # awq | gptq | smoothquant | fp8 | rtn | gguf
     scheme: str  # W4A16 / W4A16_ASYM / FP8_DYNAMIC / Q4_K_M / ...
-    offload: bool = False
 
 
 @dataclass(frozen=True)

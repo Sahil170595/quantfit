@@ -50,5 +50,4 @@ class CompressedTensorsEngine:
             spec,
             needs_calibration,
             token=token,
-            offload=config.offload,
         )

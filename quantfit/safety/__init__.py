@@ -8,6 +8,6 @@ harmbench/advbench), so the check is distributable.
 
 from __future__ import annotations
 
-from quantfit.safety.verify import SafetyTax, verify_safety
+from quantfit.safety.verify import SafetyDrift, verify_safety
 
-__all__ = ["SafetyTax", "verify_safety"]
+__all__ = ["SafetyDrift", "verify_safety"]

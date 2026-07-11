@@ -28,6 +28,39 @@ jobs:
       - run: pip install -e . --no-deps
       - run: pytest tests/ -q
 
+  # The 0.3 release gate: a clean-venv install of the built wheel (real dependency
+  # resolution, no mocks) must work on Linux AND Windows, and the CLI must run.
+  install-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip  # the torch wheel dominates install time; cache it across runs
+
+      - name: Build wheel
+        run: |
+          pip install build
+          python -m build --wheel
+
+      - name: Install wheel with full dependencies
+        shell: bash
+        run: pip install dist/*.whl
+
+      - name: CLI smoke
+        shell: bash
+        run: |
+          quantfit --help
+          quantfit list
+          python -c "import quantfit; print('quantfit', quantfit.__version__)"
+
   lint:
     runs-on: ubuntu-latest
     steps:
