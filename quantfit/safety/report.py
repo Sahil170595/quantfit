@@ -34,6 +34,15 @@ class ReportError(RuntimeError):
     """Malformed or wrong-schema report (operational: clean CLI exit, no traceback)."""
 
 
+def _require(condition: bool, message: str) -> None:
+    if not condition:
+        raise ReportError(message)
+
+
+def _is_number(value) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
 @dataclass(frozen=True)
 class ArmRun:
     """Provenance for one generation arm (baseline or quantized)."""
@@ -44,8 +53,14 @@ class ArmRun:
     runtime_s: float  # wall-clock generation time for this arm
 
     def __post_init__(self) -> None:
-        if self.resolved_dtype.strip().lower() == _FORBIDDEN_DTYPE:
-            raise ReportError("resolved_dtype must be the loaded torch dtype, not the 'auto' input")
+        _require(isinstance(self.model, str) and bool(self.model), "arm model must be a non-empty string")
+        _require(self.revision is None or isinstance(self.revision, str), "arm revision must be a string or null")
+        _require(isinstance(self.resolved_dtype, str), "arm resolved_dtype must be a string")
+        _require(
+            self.resolved_dtype.strip().lower() != _FORBIDDEN_DTYPE,
+            "resolved_dtype must be the loaded torch dtype, not the 'auto' input",
+        )
+        _require(_is_number(self.runtime_s), "arm runtime_s must be a number")
 
 
 @dataclass(frozen=True)
@@ -63,6 +78,19 @@ class DriftReport:
     quantized: ArmRun
     judge_runtime_s: float
     drift: dict  # the SafetyDrift vector: counts, at-risk, CIs, MDE, verdict
+
+    def __post_init__(self) -> None:
+        # Structural validation — "validated" must mean more than "the keys exist".
+        # A tampered report ("judge": "x", "drift": [], runtime as a string) must be
+        # refused here, not crash whatever audit tooling reads the parsed object.
+        _require(self.schema_version == SCHEMA_VERSION, f"schema_version must be {SCHEMA_VERSION}")
+        for name in ("quantfit_version", "created_utc"):
+            _require(isinstance(getattr(self, name), str), f"{name} must be a string")
+        for name in ("judge", "probe_dataset", "decode", "env", "drift"):
+            _require(isinstance(getattr(self, name), dict), f"{name} must be a JSON object")
+        _require(isinstance(self.baseline, ArmRun), "baseline must be an ArmRun object")
+        _require(isinstance(self.quantized, ArmRun), "quantized must be an ArmRun object")
+        _require(_is_number(self.judge_runtime_s), "judge_runtime_s must be a number")
 
     def to_json(self, path: str) -> Path:
         """Write the report; returns the path."""
@@ -87,8 +115,10 @@ class DriftReport:
             baseline = ArmRun(**payload.pop("baseline"))
             quantized = ArmRun(**payload.pop("quantized"))
             return cls(baseline=baseline, quantized=quantized, **payload)
-        except TypeError as exc:  # missing/extra keys surface here
+        except TypeError as exc:  # missing/extra keys and non-object arms surface here
             raise ReportError(f"report {path} does not match schema v{SCHEMA_VERSION}: {exc}") from exc
+        except ReportError as exc:  # field-level type violations from __post_init__
+            raise ReportError(f"report {path}: {exc}") from exc
 
 
 def environment_fingerprint() -> dict:

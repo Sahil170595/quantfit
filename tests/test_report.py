@@ -62,6 +62,36 @@ def test_auto_dtype_refused():
         ArmRun(model="m", revision=None, resolved_dtype="auto", runtime_s=1.0)
 
 
+@pytest.mark.parametrize(
+    ("field", "bad"),
+    [
+        ("judge", "tampered"),  # object replaced by a string
+        ("drift", []),  # object replaced by a list
+        ("created_utc", 123),  # string replaced by a number
+        ("judge_runtime_s", "fast"),  # number replaced by a string
+        ("baseline", "tampered"),  # arm replaced by a string
+    ],
+)
+def test_nested_type_confusion_refused(tmp_path, field, bad):
+    # Key names alone are not validation: a tampered report whose values have the
+    # wrong types must be refused on parse, not crash downstream audit tooling.
+    p = _report().to_json(str(tmp_path / "r.json"))
+    payload = json.loads(p.read_text(encoding="utf-8"))
+    payload[field] = bad
+    p.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ReportError):
+        DriftReport.from_json(str(p))
+
+
+def test_armrun_field_type_confusion_refused(tmp_path):
+    p = _report().to_json(str(tmp_path / "r.json"))
+    payload = json.loads(p.read_text(encoding="utf-8"))
+    payload["baseline"]["runtime_s"] = "fast"
+    p.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ReportError, match="runtime_s"):
+        DriftReport.from_json(str(p))
+
+
 def test_drift_to_dict_carries_stats():
     from quantfit.safety.verify import Probe, _tabulate
 
@@ -77,6 +107,7 @@ def test_drift_to_dict_carries_stats():
 
 def test_environment_fingerprint_is_resolved():
     pytest.importorskip("torch", reason="fingerprint resolves the live torch env")
+    pytest.importorskip("transformers", reason="fingerprint records the transformers version too")
     from quantfit.safety.report import environment_fingerprint
 
     env = environment_fingerprint()

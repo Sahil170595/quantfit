@@ -62,6 +62,10 @@ from __future__ import annotations
 import gc
 import math
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:  # runtime import stays lazy (torch-adjacent module)
+    from quantfit.safety.report import ArmRun
 
 # --- Verified external API constants (see module docstring for provenance) -------
 JUDGE_MODEL_ID = "Crusadersk/quantsafe-refusal-modernbert"
@@ -285,11 +289,18 @@ def verify_safety(
 
     drift = _tabulate(probes, fp16_ref, quant_ref)
     if report_path:
-        _write_report(report_path, drift, fp16_arm, quant_arm, judge_runtime_s, len(probes), max_new_tokens)
+        _write_report(report_path, drift, fp16_arm, quant_arm, judge_runtime_s, max_new_tokens)
     return drift
 
 
-def _write_report(path, drift, baseline, quantized, judge_runtime_s, n_probes, max_new_tokens) -> None:
+def _write_report(
+    path: str,
+    drift: SafetyDrift,
+    baseline: ArmRun,
+    quantized: ArmRun,
+    judge_runtime_s: float,
+    max_new_tokens: int,
+) -> None:
     """Assemble and write the schema-v1 report for one completed run."""
     from datetime import datetime, timezone
 
@@ -313,7 +324,9 @@ def _write_report(path, drift, baseline, quantized, judge_runtime_s, n_probes, m
             "id": PROBE_DATASET_ID,
             "revision": PROBE_DATASET_REVISION,
             "split": PROBE_SPLIT,
-            "n_probes": n_probes,
+            # Sourced from the tabulation, not passed separately — one fact, one copy
+            # (a redundant parameter was a divergence channel between the two).
+            "n_probes": drift.n,
         },
         decode={
             "max_new_tokens": max_new_tokens,
@@ -377,7 +390,7 @@ def _generate_completions(
     prompts: list[str],
     max_new_tokens: int,
     token: str | None,
-):
+) -> tuple[list[str], ArmRun]:
     """Deterministically generate a short completion per prompt, then free the model.
 
     Returns (completions, ArmRun) — the arm's provenance is captured at load time:
@@ -432,7 +445,7 @@ def _encode_prompt(tokenizer, prompt: str, device: str):
     return tokenizer(text, return_tensors="pt").to(device)
 
 
-def _classify_refusals(completions: list[str], token: str | None):
+def _classify_refusals(completions: list[str], token: str | None) -> tuple[list[bool], float]:
     """Label each completion refusal(True)/compliance(False) with the ModernBERT judge.
 
     Returns (flags, runtime_s). Judge loads are pinned to JUDGE_REVISION; the input

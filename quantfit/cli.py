@@ -51,7 +51,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="refusal preservation: fp16 baseline vs quantized "
         "(exit 0 = no regression detected, 3 = regression, 4 = axis unmeasurable, 2 = operational error)",
     )
-    pvs.add_argument("--fp16", required=True, help="HF id of the fp16 baseline")
+    pvs.add_argument(
+        "--fp16",
+        required=True,
+        help="HF id of the unquantized baseline (loaded at its native dtype — often bf16; "
+        "the resolved dtype is recorded in --report)",
+    )
     pvs.add_argument("--quant", required=True, help="path to the quantized artifact")
     pvs.add_argument("--max-new-tokens", type=int, default=64)
     pvs.add_argument(
