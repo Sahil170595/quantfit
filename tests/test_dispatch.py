@@ -25,7 +25,7 @@ def test_ct_method_routes_to_compressed_tensors(tmp_path, monkeypatch):
         out.mkdir(exist_ok=True)
         return out
 
-    monkeypatch.setattr(q, "plan", lambda *a, **k: _cap(MODE_GPU))
+    monkeypatch.setattr(q, "capacity_plan", lambda *a, **k: _cap(MODE_GPU))
     monkeypatch.setattr(ct_backend, "quantize_ct", fake_ct)
     out = q.quantize("m", "awq", str(tmp_path / "out"))
     assert calls["model"] == "m" and calls["method"] == "awq"
@@ -35,7 +35,7 @@ def test_ct_method_routes_to_compressed_tensors(tmp_path, monkeypatch):
 
 
 def test_refusal_raises_cannot_quantize(monkeypatch):
-    monkeypatch.setattr(q, "plan", lambda *a, **k: _cap(MODE_REFUSE, LIMIT_MACHINE))
+    monkeypatch.setattr(q, "capacity_plan", lambda *a, **k: _cap(MODE_REFUSE, LIMIT_MACHINE))
     with pytest.raises(q.CannotQuantize, match="CAN'T QUANTIZE"):
         q.quantize("m", "awq", "out")
 
@@ -44,7 +44,7 @@ def test_no_gpu_plan_error_becomes_refusal(monkeypatch):
     def _boom(*a, **k):
         raise RuntimeError("no CUDA device visible")
 
-    monkeypatch.setattr(q, "plan", _boom)
+    monkeypatch.setattr(q, "capacity_plan", _boom)
     with pytest.raises(q.CannotQuantize, match="no CUDA"):
         q.quantize("m", "awq", "out")
 
@@ -79,8 +79,8 @@ def test_unknown_method_is_unsupported():
 
 def test_no_check_skips_preflight(tmp_path, monkeypatch):
     def _fail(*a, **k):
-        raise AssertionError("plan() must not run with run_check=False")
+        raise AssertionError("capacity_plan() must not run with run_check=False")
 
-    monkeypatch.setattr(q, "plan", _fail)
+    monkeypatch.setattr(q, "capacity_plan", _fail)
     monkeypatch.setattr(ct_backend, "quantize_ct", lambda *a, **k: tmp_path)
     q.quantize("m", "rtn", str(tmp_path), run_check=False)

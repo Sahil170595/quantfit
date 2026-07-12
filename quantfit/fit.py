@@ -132,8 +132,12 @@ def gguf_disk_need(model_id: str, out_dir: str = ".", token: str | None = None) 
     return free, need
 
 
-def plan(model_id: str, out_dir: str = ".", token: str | None = None) -> CapacityPlan:
-    """Decide gpu / offload / refuse for quantizing `model_id`."""
+def capacity_plan(model_id: str, out_dir: str = ".", token: str | None = None) -> CapacityPlan:
+    """Decide gpu / offload / refuse for quantizing `model_id`.
+
+    Named capacity_plan (not plan) so it can't be confused with the ROUTING
+    plan — the `quantfit plan` subcommand's (method, scheme) pick in policy/route.
+    """
     fp16 = estimate_fp16_bytes(model_id, token=token)
     gpu = gpu_free_bytes()
     ram = int(psutil.virtual_memory().available)

@@ -1,6 +1,9 @@
 # quantfit roadmap
 
-## Current state (v0.2.0, verified 2026-07-05)
+## State at roadmap time (v0.2.0, verified 2026-07-05)
+
+*(Snapshot when this roadmap was decided; 0.3 and 0.4a have since shipped exactly the
+fixes this section calls for — see CHANGELOG.md for what landed.)*
 
 quantfit is a GPU-aware LLM quantization CLI: `check`, `plan`, `quantize` (awq/gptq/smoothquant/fp8/rtn via llm-compressor; gguf via llama.cpp), `probe`, `verify`, and `verify-safety` — the differentiator: a paired fp16-vs-quantized refusal diff over a curated 40-probe set with a local judge, reported as a vector (refusal-robustness loss vs over-refusal), per zone. Facts re-verified at roadmap time, because two of them were stale in our own notes: **PyPI already serves quantfit 0.1.0** (uploaded 2026-06-27) with a version skew against the repo (`__init__.py` 0.1.0 vs pyproject 0.2.0); the dev box has **71.0 GB free disk**, not 14 GB, so disk-gated deferrals are unblocked. Known weaknesses, verified in code: the verdict is a single-flip binary (verify.py:85-96) over only 12 dangerous-direction probes — a "CLEAN" run bounds harmful flips only below ~24pp — and the term "safety tax" collides with established alignment-tax usage.
 

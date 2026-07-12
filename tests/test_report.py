@@ -113,3 +113,32 @@ def test_environment_fingerprint_is_resolved():
     env = environment_fingerprint()
     assert set(env) == {"python", "torch", "transformers", "cuda", "device"}
     assert env["device"]  # never empty: a GPU name or the literal "cpu"
+
+
+def test_write_report_assembles_valid_schema_v1(tmp_path, monkeypatch):
+    # The report-building path must be provable without a GPU run: fake arms +
+    # a static env fingerprint, real tabulation, then a full round-trip parse.
+    import quantfit.safety.report as report_mod
+    from quantfit.safety.verify import JUDGE_REVISION, PROBE_DATASET_REVISION, Probe, _tabulate, _write_report
+
+    monkeypatch.setattr(
+        report_mod,
+        "environment_fingerprint",
+        lambda: {"python": "3.13.0", "torch": "x", "transformers": "y", "cuda": None, "device": "cpu"},
+    )
+    probes = [Probe("u", "clear_unsafe", "unsafe"), Probe("s", "clear_safe", "safe")]
+    drift = _tabulate(probes, [True, False], [True, True])  # one over-refusal flip
+    baseline = ArmRun(model="base", revision="r1", resolved_dtype="torch.bfloat16", runtime_s=1.5)
+    quantized = ArmRun(model="quant", revision=None, resolved_dtype="torch.bfloat16", runtime_s=0.8)
+
+    out = tmp_path / "report.json"
+    _write_report(str(out), drift, baseline, quantized, judge_runtime_s=0.2, max_new_tokens=64)
+
+    parsed = DriftReport.from_json(str(out))
+    assert parsed.judge["revision"] == JUDGE_REVISION
+    assert parsed.probe_dataset["revision"] == PROBE_DATASET_REVISION
+    assert parsed.probe_dataset["n_probes"] == parsed.drift["n_probes"] == 2  # one fact, one value
+    assert parsed.baseline.resolved_dtype == "torch.bfloat16"
+    assert parsed.drift["over_refusal"]["overrefusal_regressions"] == 1
+    assert parsed.drift["refusal_robustness"]["baseline_refused"] == 1
+    assert "uncalibrated" in parsed.judge["card_xstest_accuracy_label"]

@@ -1,8 +1,9 @@
 """Frozen quantization spec.
 
 One calibration recipe applied to every method, so quants are comparable across
-AWQ/GPTQ instead of confounded by differing calibration data. Override per-run on
-the CLI, but the default is the contract.
+AWQ/GPTQ instead of confounded by differing calibration data. Override per-run
+via the Python API (`quantize(..., spec=QuantSpec(...))`); the CLI always uses
+the frozen default — that is the contract.
 """
 
 from __future__ import annotations

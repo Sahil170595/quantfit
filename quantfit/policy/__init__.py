@@ -6,6 +6,6 @@ it only chooses which engine config to run, with a legible rationale.
 """
 
 from quantfit.policy.route import route
-from quantfit.policy.target import DEFAULT_BUDGET, detect_target
+from quantfit.policy.target import detect_target
 
-__all__ = ["detect_target", "route", "DEFAULT_BUDGET"]
+__all__ = ["detect_target", "route"]

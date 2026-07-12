@@ -7,7 +7,7 @@ weights, no network: a cheap pre-flight the policy can call on every request.
 
 from __future__ import annotations
 
-from quantfit.engines.base import Budget, Target
+from quantfit.engines.base import Target
 
 # Compute-capability (sm_XX = major*10 + minor) -> GPU arch family. Named so the
 # arch mapping is auditable rather than a wall of magic integers.
@@ -19,9 +19,6 @@ SM_BLACKWELL_MIN = 100  # B100/B200 and newer (sm_100+)
 # Serving backends keyed off device class.
 SERVE_CUDA = "vllm"
 SERVE_CPU = "llama.cpp"
-
-# Default preference, exposed so callers have a ready Budget without importing base.
-DEFAULT_BUDGET = Budget()
 
 
 def _arch_for_sm(sm: int) -> str | None:

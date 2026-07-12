@@ -25,15 +25,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from quantfit.spec import DEFAULT_SPEC
+from quantfit.torchrt import CUDA, free_gpu, pick_device
+
 DEFAULT_PROBE_SAMPLES = 8
 DEFAULT_PROBE_SEQLEN = 512
-DEFAULT_GROUP_SIZE = 128
-DEFAULT_SEED = 42
-_CALIB_DATASET = "Salesforce/wikitext"
-_CALIB_CONFIG = "wikitext-103-raw-v1"
+# Calibration facts come from the frozen spec — the probe must measure sensitivity
+# on the same distribution the quantize path calibrates on, never a stale copy.
+DEFAULT_GROUP_SIZE = DEFAULT_SPEC.group_size
 _MIN_PROBE_TOKENS = 8  # skip near-empty rows
-_CUDA = "cuda"
-_CPU = "cpu"
 
 
 @dataclass(frozen=True)
@@ -57,8 +57,8 @@ def probe_sensitivity(
     import torch.nn.functional as F
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
-    device = _CUDA if torch.cuda.is_available() else _CPU
-    dtype = torch.float16 if device == _CUDA else torch.float32
+    device = pick_device()
+    dtype = torch.float16 if device == CUDA else torch.float32
     tokenizer = AutoTokenizer.from_pretrained(model_id, token=token)
     model = AutoModelForCausalLM.from_pretrained(model_id, device_map=device, dtype=dtype, token=token)
     model.eval()
@@ -90,7 +90,7 @@ def probe_sensitivity(
             kls.append(float(F.kl_div(q_flat, ref_flat, log_target=True, reduction="batchmean")))
 
     del model, tokenizer
-    _free_gpu(device)
+    free_gpu(device)
     return ProbeResult(bits=bits, group_size=group_size, mean_kl=sum(kls) / len(kls), n_samples=len(batch))
 
 
@@ -98,9 +98,9 @@ def _probe_batch(tokenizer, n_samples: int, seqlen: int, device: str, token: str
     """A few tokenized calibration rows for the forward pass."""
     from datasets import load_dataset
 
-    ds = load_dataset(_CALIB_DATASET, _CALIB_CONFIG, split="train", token=token)
+    ds = load_dataset(DEFAULT_SPEC.calib_dataset, DEFAULT_SPEC.calib_config, split="train", token=token)
     ds = ds.filter(lambda ex: ex["text"] is not None and ex["text"].strip() != "")
-    ds = ds.shuffle(seed=DEFAULT_SEED).select(range(min(n_samples * 4, len(ds))))
+    ds = ds.shuffle(seed=DEFAULT_SPEC.seed).select(range(min(n_samples * 4, len(ds))))
 
     batch = []
     for row in ds:
@@ -135,13 +135,3 @@ def _rtn(weight, bits: int, group_size: int):
     scale = (w.abs().amax(dim=-1, keepdim=True) / qmax).clamp(min=1e-8)
     q = torch.clamp(torch.round(w / scale), qmin, qmax)
     return (q * scale).reshape(out_f, in_f).to(weight.dtype)
-
-
-def _free_gpu(device: str) -> None:
-    import gc
-
-    import torch
-
-    gc.collect()
-    if device == _CUDA:
-        torch.cuda.empty_cache()

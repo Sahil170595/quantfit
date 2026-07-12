@@ -82,3 +82,20 @@ def test_binary_asset_per_platform(monkeypatch):
     monkeypatch.setattr(g.platform, "system", lambda: "Darwin")
     with pytest.raises(RuntimeError, match="no prebuilt"):
         g._binary_asset()
+
+
+def test_cached_archive_is_reverified_before_extract(tmp_path, monkeypatch):
+    # "existence != integrity": a tampered archive already sitting in the cache
+    # must be re-hashed against the pin, refused, and deleted — never extracted,
+    # and no download attempted in its place during the same call.
+    monkeypatch.setattr(g, "_cache_dir", lambda: tmp_path)
+    monkeypatch.setattr(g, "_binary_asset", lambda: "asset.zip")
+    monkeypatch.setitem(g._BINARY_SHA256, "asset.zip", "0" * 64)
+    monkeypatch.setattr(
+        g.urllib.request, "urlretrieve", lambda *a, **k: (_ for _ in ()).throw(AssertionError("no download"))
+    )
+    cached = tmp_path / "asset.zip"
+    cached.write_bytes(b"tampered cache")
+    with pytest.raises(RuntimeError, match="SHA256 mismatch"):
+        g.llama_quantize_bin()
+    assert not cached.exists()

@@ -1,16 +1,12 @@
-"""GPU capacity pre-flight.
+"""Footprint estimation for the capacity pre-flight.
 
-The whole point of the tool: decide whether a model can be quantized in-GPU on
-*this* machine BEFORE downloading weights or starting a multi-minute job. The
-estimate is the FP16 footprint of the released weights (read from the Hub file
-metadata, no download) times a calibration-overhead factor, plus fixed headroom,
-compared against free VRAM. Errs toward refusal — a clear "can't quantize" beats
-an OOM crash 20 minutes in.
+Estimates a model's FP16 footprint from Hub file metadata (no weight download)
+and reads free VRAM. The actual gpu/offload/refuse decision lives in
+`quantfit.fit.capacity_plan`, which consumes these numbers plus RAM and disk.
+Errs toward refusal — a clear "can't quantize" beats an OOM crash 20 minutes in.
 """
 
 from __future__ import annotations
-
-from dataclasses import dataclass
 
 from huggingface_hub import HfApi
 
@@ -19,43 +15,9 @@ from huggingface_hub import HfApi
 # CUDA context, calibration-batch activations, and allocator fragmentation.
 CALIB_OVERHEAD_FACTOR = 1.25
 HEADROOM_BYTES = 2 * 1024**3
-_GIB = 1024**3
 # Prefer safetensors; fall back to .bin only if no safetensors shards exist
 # (summing both would double-count repos that ship both formats).
 _WEIGHT_SUFFIXES = (".safetensors", ".bin")
-
-
-@dataclass(frozen=True)
-class FitReport:
-    model_id: str
-    fp16_bytes: int
-    required_bytes: int
-    free_bytes: int
-    fits: bool
-
-    @property
-    def fp16_gib(self) -> float:
-        return self.fp16_bytes / _GIB
-
-    @property
-    def required_gib(self) -> float:
-        return self.required_bytes / _GIB
-
-    @property
-    def free_gib(self) -> float:
-        return self.free_bytes / _GIB
-
-    def reason(self) -> str:
-        if self.fits:
-            return (
-                f"OK: {self.model_id} is ~{self.fp16_gib:.1f} GB FP16, needs "
-                f"~{self.required_gib:.1f} GB to quantize, {self.free_gib:.1f} GB free."
-            )
-        return (
-            f"CAN'T QUANTIZE: {self.model_id} needs ~{self.required_gib:.1f} GB "
-            f"in-GPU but only {self.free_gib:.1f} GB is free. Use a bigger GPU "
-            f"or a smaller model."
-        )
 
 
 def estimate_fp16_bytes(model_id: str, token: str | None = None) -> int:
@@ -69,7 +31,8 @@ def estimate_fp16_bytes(model_id: str, token: str | None = None) -> int:
     for suffix in _WEIGHT_SUFFIXES:
         if by_suffix.get(suffix):
             return by_suffix[suffix]
-    raise ValueError(
+    # RuntimeError: operational (gated/unavailable/weightless repo) -> clean CLI exit 2.
+    raise RuntimeError(
         f"{model_id}: no weight-file sizes found via Hub metadata; cannot "
         "estimate footprint (model may be gated without access, or unavailable)."
     )
@@ -83,16 +46,3 @@ def gpu_free_bytes() -> int:
         raise RuntimeError("no CUDA GPU visible; quantfit needs a GPU to quantize.")
     free, _total = torch.cuda.mem_get_info()
     return int(free)
-
-
-def check_fit(
-    model_id: str,
-    token: str | None = None,
-    overhead: float = CALIB_OVERHEAD_FACTOR,
-    headroom_bytes: int = HEADROOM_BYTES,
-) -> FitReport:
-    """Estimate footprint vs. free VRAM and return a fit verdict."""
-    fp16 = estimate_fp16_bytes(model_id, token=token)
-    required = int(fp16 * overhead) + headroom_bytes
-    free = gpu_free_bytes()
-    return FitReport(model_id, fp16, required, free, fits=required <= free)

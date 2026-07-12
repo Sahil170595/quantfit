@@ -29,7 +29,11 @@ def _build_parser() -> argparse.ArgumentParser:
     tok = argparse.ArgumentParser(add_help=False)
     tok.add_argument("--token", default=None, help="HF token for gated/private models (else uses the HF_TOKEN env)")
 
-    pc = sub.add_parser("check", parents=[tok], help="will this model fit your GPU?")
+    pc = sub.add_parser(
+        "check",
+        parents=[tok],
+        help="will this model fit your GPU? (exit 0 = fits, 3 = won't fit, 2 = operational error)",
+    )
     pc.add_argument("--model", required=True, help="HF model id")
 
     sub.add_parser("list", help="list supported methods + schemes")
@@ -42,23 +46,34 @@ def _build_parser() -> argparse.ArgumentParser:
     ppr.add_argument("--model", required=True, help="HF model id")
     ppr.add_argument("--bits", type=int, nargs="+", default=[4, 8], help="bit-widths to probe")
 
-    pv = sub.add_parser("verify", help="smoke-load a quantized artifact + generate")
+    pv = sub.add_parser(
+        "verify",
+        help="smoke-load a quantized artifact + generate (GGUF: structural magic check only) "
+        "(exit 0 = pass, 3 = fail, 2 = operational error)",
+    )
     pv.add_argument("--model", required=True, help="path to a quantized output dir or .gguf")
 
     pvs = sub.add_parser(
         "verify-safety",
         parents=[tok],
-        help="refusal preservation: fp16 baseline vs quantized "
+        help="refusal preservation: unquantized baseline vs quantized "
         "(exit 0 = no regression detected, 3 = regression, 4 = axis unmeasurable, 2 = operational error)",
     )
     pvs.add_argument(
-        "--fp16",
+        "--baseline",
+        "--fp16",  # legacy alias from 0.1-0.3; the baseline loads at its NATIVE dtype (often bf16)
+        dest="baseline",
         required=True,
         help="HF id of the unquantized baseline (loaded at its native dtype — often bf16; "
         "the resolved dtype is recorded in --report)",
     )
     pvs.add_argument("--quant", required=True, help="path to the quantized artifact")
-    pvs.add_argument("--max-new-tokens", type=int, default=64)
+    pvs.add_argument(
+        "--max-new-tokens",
+        type=int,
+        default=64,
+        help="completion length generated per probe and judged for refusal (default 64)",
+    )
     pvs.add_argument(
         "--report",
         default=None,
@@ -68,7 +83,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
 
     pq = sub.add_parser("quantize", parents=[tok], help="quantize a model")
-    pq.add_argument("--model", required=True, help="HF model id (the FP16 base)")
+    pq.add_argument("--model", required=True, help="HF model id (the full-precision base)")
     pq.add_argument("--method", required=True, choices=tuple(METHODS))
     pq.add_argument("--scheme", default=None, help="override the method's default scheme")
     pq.add_argument("--out", required=True, help="output directory")
@@ -80,11 +95,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "check":
-        from quantfit.fit import plan
+        from quantfit.fit import capacity_plan
 
-        cap = plan(args.model, token=args.token)
+        cap = capacity_plan(args.model, token=args.token)
         print(cap.reason())
-        return 0 if cap.fits else 2
+        return 0 if cap.fits else 3  # 3 = the doesn't-fit verdict; 2 stays operational-error
 
     if args.cmd == "list":
         from quantfit.registry import catalog
@@ -122,13 +137,13 @@ def _dispatch(args: argparse.Namespace) -> int:
 
         ok, msg = verify(args.model)
         print(("PASS: " if ok else "FAIL: ") + msg)
-        return 0 if ok else 2
+        return 0 if ok else 3  # 3 = the smoke-test verdict; 2 stays operational-error
 
     if args.cmd == "verify-safety":
         from quantfit.safety.verify import verify_safety
 
         drift = verify_safety(
-            args.fp16,
+            args.baseline,
             args.quant,
             token=args.token,
             max_new_tokens=args.max_new_tokens,
