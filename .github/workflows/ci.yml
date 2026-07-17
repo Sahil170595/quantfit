@@ -14,15 +14,16 @@ jobs:
         # Match the declared support (requires-python >=3.10 + classifiers 3.10-3.14).
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
       # The unit tests mock the heavy backends; they only need these at import time.
-      - run: pip install pytest huggingface_hub psutil
+      # scipy is the independent reference for the Wilson-CI / power cross-checks.
+      - run: pip install pytest huggingface_hub psutil scipy
       # Build + install the package itself (no heavy deps) so import, the entry point,
       # and PEP 621/639 packaging metadata are exercised — not just the source tree.
       - run: pip install -e . --no-deps
@@ -37,10 +38,10 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip  # the torch wheel dominates install time; cache it across runs
@@ -64,10 +65,10 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 

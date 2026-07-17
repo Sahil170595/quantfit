@@ -1,35 +1,70 @@
-"""GPU pre-flight logic — the load-bearing decision, tested without a GPU."""
+"""Footprint estimation from Hub metadata — weight-file selection, no network."""
+
+import pytest
 
 import quantfit.gpufit as g
-from quantfit.gpufit import FitReport, check_fit
 
 _GIB = 1024**3
 
 
-def test_fits_when_required_under_free(monkeypatch):
-    monkeypatch.setattr(g, "estimate_fp16_bytes", lambda *a, **k: 3 * _GIB)  # ~1.5B
-    monkeypatch.setattr(g, "gpu_free_bytes", lambda: 11 * _GIB)
-    r = check_fit("dummy")
-    assert r.fits
-    assert "OK" in r.reason()
+class _Sibling:
+    def __init__(self, rfilename, size):
+        self.rfilename = rfilename
+        self.size = size
 
 
-def test_refuses_when_required_over_free(monkeypatch):
-    monkeypatch.setattr(g, "estimate_fp16_bytes", lambda *a, **k: 14 * _GIB)  # ~7B
-    monkeypatch.setattr(g, "gpu_free_bytes", lambda: 11 * _GIB)
-    r = check_fit("dummy")
-    assert not r.fits
-    assert "CAN'T QUANTIZE" in r.reason()
+def _stub_hub(monkeypatch, siblings):
+    class _Info:
+        pass
+
+    info = _Info()
+    info.siblings = siblings
+
+    class _Api:
+        def model_info(self, model_id, files_metadata=True, token=None):
+            return info
+
+    monkeypatch.setattr(g, "HfApi", _Api)
 
 
-def test_required_includes_overhead_and_headroom(monkeypatch):
-    monkeypatch.setattr(g, "estimate_fp16_bytes", lambda *a, **k: 4 * _GIB)
-    monkeypatch.setattr(g, "gpu_free_bytes", lambda: 99 * _GIB)
-    r = check_fit("dummy")
-    assert r.required_bytes == int(4 * _GIB * g.CALIB_OVERHEAD_FACTOR) + g.HEADROOM_BYTES
+def test_sums_safetensors_shards(monkeypatch):
+    _stub_hub(
+        monkeypatch,
+        [
+            _Sibling("model-00001-of-00002.safetensors", 2 * _GIB),
+            _Sibling("model-00002-of-00002.safetensors", 1 * _GIB),
+            _Sibling("tokenizer.json", 4096),  # non-weight files never counted
+        ],
+    )
+    assert g.estimate_fp16_bytes("m") == 3 * _GIB
 
 
-def test_report_gib_conversion():
-    r = FitReport("m", fp16_bytes=2 * _GIB, required_bytes=4 * _GIB, free_bytes=8 * _GIB, fits=True)
-    assert abs(r.fp16_gib - 2.0) < 1e-6
-    assert abs(r.required_gib - 4.0) < 1e-6
+def test_falls_back_to_bin_when_no_safetensors(monkeypatch):
+    _stub_hub(monkeypatch, [_Sibling("pytorch_model.bin", 5 * _GIB)])
+    assert g.estimate_fp16_bytes("m") == 5 * _GIB
+
+
+def test_never_sums_both_formats(monkeypatch):
+    # Repos shipping both formats must not double-count: safetensors wins.
+    _stub_hub(
+        monkeypatch,
+        [_Sibling("model.safetensors", 3 * _GIB), _Sibling("pytorch_model.bin", 3 * _GIB)],
+    )
+    assert g.estimate_fp16_bytes("m") == 3 * _GIB
+
+
+def test_unsized_files_are_skipped(monkeypatch):
+    # Hub metadata can return size=None; those entries carry no information.
+    _stub_hub(
+        monkeypatch,
+        [_Sibling("model-00001.safetensors", None), _Sibling("model-00002.safetensors", 2 * _GIB)],
+    )
+    assert g.estimate_fp16_bytes("m") == 2 * _GIB
+
+
+def test_no_weight_files_is_clean_operational_error(monkeypatch):
+    # A GGUF-only or gated repo must exit 2 via the CLI's RuntimeError handler,
+    # never a raw traceback (the documented error taxonomy).
+    _stub_hub(monkeypatch, [_Sibling("model.Q4_K_M.gguf", 1 * _GIB)])
+    with pytest.raises(RuntimeError, match="no weight-file sizes"):
+        g.estimate_fp16_bytes("m")

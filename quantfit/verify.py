@@ -35,12 +35,11 @@ def _verify_gguf(path: Path) -> tuple[bool, str]:
 
 
 def _verify_transformers(path: str, max_new_tokens: int) -> tuple[bool, str]:
-    import gc
-
-    import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    from quantfit.torchrt import free_gpu, pick_device
+
+    device = pick_device()
     model = None
     try:
         model = AutoModelForCausalLM.from_pretrained(path, device_map=device, dtype="auto")
@@ -53,6 +52,4 @@ def _verify_transformers(path: str, max_new_tokens: int) -> tuple[bool, str]:
         return False, f"failed to load/generate from {path}: {exc}"
     finally:
         del model  # free the one resident model before returning (happy or unhappy path)
-        gc.collect()
-        if device == "cuda":
-            torch.cuda.empty_cache()
+        free_gpu(device)

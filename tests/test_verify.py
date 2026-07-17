@@ -13,3 +13,10 @@ def test_verify_gguf_magic_bad(tmp_path):
     (tmp_path / "model.Q4_K_M.gguf").write_bytes(b"XXXX" + b"\x00" * 16)
     ok, _ = verify(str(tmp_path))
     assert not ok
+
+
+def test_verify_accepts_direct_gguf_file_path(tmp_path):
+    f = tmp_path / "m.Q4_K_M.gguf"
+    f.write_bytes(_GGUF_MAGIC + b"\x00" * 16)
+    ok, msg = verify(str(f))  # the CLI documents "dir or .gguf" — cover the file form
+    assert ok and "GGUF magic" in msg

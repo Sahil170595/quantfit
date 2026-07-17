@@ -1,5 +1,66 @@
 # Changelog
 
+## 0.4.0
+
+Provenance schema + stats hardening (ROADMAP milestone 0.4a — the CI-gated half
+of 0.4; the hardware-gated half, GGUF judging + over-VRAM validation, is 0.4b).
+
+- **Drift report schema v1** (`verify-safety --report out.json`): runs can emit an
+  auditable JSON artifact recording judge + probe-dataset `revision` pins, the
+  pinned judge input contract, decode parameters, RESOLVED per-arm dtypes (the
+  literal "auto" is rejected by schema — it is an input, not a provenance fact),
+  an environment fingerprint (python/torch/transformers/CUDA/GPU), per-arm and
+  judge runtimes, and the full drift vector with CIs and MDEs. Wrong-schema or
+  malformed reports are refused on parse, never coerced. Exposed as
+  `quantfit.safety.DriftReport` with round-trip `to_json`/`from_json`.
+- **Loads are revision-pinned**: judge and probe dataset load at pinned commit
+  hashes (bumped deliberately, never implicitly). The judge input contract —
+  completion text alone, truncated to 512 judge tokens, prompt never
+  concatenated — is PINNED as quantfit's stated protocol: the judge card
+  (re-read 2026-07-11) documents response-level classification but not whether
+  prompts were concatenated in training. The card's external XSTest accuracy
+  (0.9773) rides along in reports explicitly labeled uncalibrated /
+  out-of-distribution for these probes.
+- **Stats cross-checked against scipy in CI**: Wilson intervals match
+  `scipy.stats.binomtest(...).proportion_ci(method="wilson")` to 1e-9 across a
+  grid, and the MDE is verified to deliver its stated 80% power via
+  `scipy.stats.binom`. The z quantile is now full-precision, so the shipped
+  numbers ARE the scipy numbers (the 0/12 upper bound prints 24.2%, not the
+  z=1.96 rounding's 24.3%).
+- **Hermetic supply-chain + dispatch tests** (CPU-only, no network): GGUF binary
+  SHA256 pin/verify/delete-on-mismatch, refuse-before-download for unpinned
+  assets, atomic promote-after-verify, corrupt-archive cleanup, per-platform
+  asset selection; and quantize() routing (compressed-tensors vs GGUF vs refusal
+  vs `--no-check`) with card provenance.
+- **Vocabulary: "fp16" -> "baseline"** everywhere the unquantized arm is meant —
+  the live report proved the arm loads at its NATIVE dtype (bf16 for Qwen2.5).
+  Schema v1 keys are `baseline_refused`/`quant_refused` and flip counts use the
+  dataclass names (`harmful_compliance_regressions`/`overrefusal_regressions`);
+  `SafetyDrift` fields renamed to match; the CLI flag is now `--baseline`
+  (`--fp16` kept as a legacy alias); `verify_safety`'s first param is
+  `baseline_model_id`.
+- **Exit-code coherence for `check` and `verify`**: verdicts moved off the
+  operational-error code — `check` won't-fit and `verify` FAIL now exit 3
+  (0 = pass, 2 = operational error), matching verify-safety's contract; all
+  three help strings document their codes.
+- **Public API reflects what quantfit is**: the package root lazily (PEP 562)
+  re-exports `verify_safety`/`SafetyDrift`/`DriftReport`, `quantize`, and
+  `capacity_plan`/`CapacityPlan`; `import quantfit` no longer drags
+  huggingface_hub. The 0.1-era `check_fit`/`FitReport` (VRAM-only, a different
+  verdict than the shipped 3-tier plan) are removed; `fit.plan` is renamed
+  `capacity_plan` (the word "plan" now means only the routing pick);
+  `wilson_interval`/`detectable_flip_rate` are exported from `quantfit.safety`;
+  the never-used `DEFAULT_BUDGET` is gone.
+- **One fact, one place**: GPU device-pick + memory hygiene unified in
+  `quantfit.torchrt` (was triplicated); the probe sources its calibration
+  corpus/config/seed/group-size from the frozen `QuantSpec` instead of shadow
+  constants; the `Engine` protocol slims to `feasible()` — execution has exactly
+  one path (`quantize` -> backends), never a parallel one via engines.
+- Error-taxonomy stragglers fixed: a weightless/gated repo in `check` now exits
+  2 cleanly (was a raw ValueError traceback); docs corrected where they
+  overstated the code (spec "override on the CLI", README tier-1 RAM
+  precondition, GGUF IQ family -> `IQ4_XS`, `verify`'s GGUF magic-only scope).
+
 ## 0.3.0
 
 Reconcile and make the verdict honest (ROADMAP milestone 0.3). PyPI still served

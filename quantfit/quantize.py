@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from quantfit.fit import MODE_REFUSE, plan
+from quantfit.fit import MODE_REFUSE, capacity_plan
 from quantfit.registry import BACKEND_CT, BACKEND_GGUF, resolve
 from quantfit.spec import DEFAULT_SPEC, QuantSpec
 
@@ -29,7 +29,7 @@ def quantize(
     # GGUF quantization is CPU-only, so it gets a disk-only pre-flight instead.
     if run_check and m.backend == BACKEND_CT:
         try:
-            cap = plan(model_id, out_dir, token=token)
+            cap = capacity_plan(model_id, out_dir, token=token)
         except RuntimeError as exc:  # e.g. no CUDA GPU visible -> a clean refusal, not a traceback
             raise CannotQuantize(str(exc)) from exc
         if cap.mode == MODE_REFUSE:

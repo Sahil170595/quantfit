@@ -1,17 +1,16 @@
 """Engine abstraction + the types the policy routes over.
 
-quantfit is a router on top of the ecosystem: the policy picks an `EngineConfig`,
-an `Engine` executes it. Adding a quantization method = adding an `Engine`, never
-touching the policy. This module is the contract; everything implements it exactly.
+quantfit is a router on top of the ecosystem: engines declare what configs are
+FEASIBLE for a target; the policy picks one. Execution deliberately does NOT go
+through this contract — `quantfit.quantize` dispatches straight to the backends,
+so there is exactly one execution path to validate. Adding a quantization method
+= adding an Engine's feasibility + a backend, never touching the policy.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Protocol, runtime_checkable
-
-from quantfit.spec import QuantSpec
 
 
 @dataclass(frozen=True)
@@ -50,21 +49,10 @@ class Plan:
 
 @runtime_checkable
 class Engine(Protocol):
-    """A quantization backend. Implementations WRAP existing tooling."""
+    """A quantization capability, declared to the router. Execution lives in backends."""
 
     name: str
 
     def feasible(self, target: Target) -> list[EngineConfig]:
         """The configs this engine can produce for `target` (hardware-gated)."""
-        ...
-
-    def quantize(
-        self,
-        model_id: str,
-        config: EngineConfig,
-        out_dir: str,
-        spec: QuantSpec,
-        token: str | None = None,
-    ) -> Path:
-        """Run the quantization and return the output directory."""
         ...
