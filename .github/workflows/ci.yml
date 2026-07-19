@@ -22,8 +22,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       # The unit tests mock the heavy backends; they only need these at import time.
-      # scipy is the independent reference for the Wilson-CI / power cross-checks.
-      - run: pip install pytest huggingface_hub psutil scipy
+      # scipy is the independent reference for the Wilson-CI / power cross-checks;
+      # gguf crafts + reads the tiny GGUF files in the verify-safety arm tests.
+      - run: pip install pytest huggingface_hub psutil scipy gguf
       # Build + install the package itself (no heavy deps) so import, the entry point,
       # and PEP 621/639 packaging metadata are exercised — not just the source tree.
       - run: pip install -e . --no-deps

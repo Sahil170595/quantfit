@@ -1,16 +1,24 @@
-"""Drift report schema v1: a verify-safety run as an auditable artifact.
+"""Drift report schema v2: a verify-safety run as an auditable artifact.
 
 A printed summary is evidence only for whoever watched the terminal. The report
 is the durable form: every input that determines the numbers is recorded —
-judge + probe-dataset revision pins, decode parameters, the RESOLVED dtype of
-each arm (never "auto"), an environment fingerprint, and per-arm runtimes — so a
-report can be audited, diffed against a rerun, and cited.
+judge + probe-dataset revision pins, decode parameters, the RESOLVED precision
+of each arm (never "auto"), per-arm engine provenance, an environment
+fingerprint, and per-arm runtimes — so a report can be audited, diffed against
+a rerun, and cited.
 
 Schema rules (enforced on construction and on parse):
   - `schema_version` must match; a report from a different schema is refused,
-    never silently coerced.
-  - dtypes are the resolved torch dtypes (e.g. "torch.float16"); the literal
-    string "auto" is rejected — "auto" is an input, not a provenance fact.
+    never silently coerced. (v1, shipped only in 0.4.0, lacked per-arm engine
+    provenance; no v1 reports were ever published as reference artifacts.)
+  - `resolved_dtype` is the precision actually loaded: a torch dtype for
+    transformers arms ("torch.bfloat16"), a GGUF file type for llama.cpp arms
+    ("F16", "Q4_K_M"). The literal string "auto" is rejected — "auto" is an
+    input, not a provenance fact.
+  - `engine` names what generated the arm's completions: transformers version,
+    or the llama.cpp binary (SHA256 of the executable actually run + pinned
+    tag + thread count) — the same-binary mandate for GGUF pairs is auditable
+    from the two arms' `binary_sha256` being equal.
   - judge/dataset revisions are the pinned commit hashes the run actually used.
 
 The judge's card-reported external accuracy rides along labeled exactly as what
@@ -25,7 +33,7 @@ import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 _FORBIDDEN_DTYPE = "auto"
 
@@ -47,10 +55,12 @@ def _is_number(value) -> bool:
 class ArmRun:
     """Provenance for one generation arm (baseline or quantized)."""
 
-    model: str  # id or local path, as given
+    model: str  # id, local path, or hf:<org>/<repo>/<file>.gguf ref, as given
     revision: str | None  # HF commit hash when resolvable; None for local paths
-    resolved_dtype: str  # e.g. "torch.float16" — the dtype actually loaded, never "auto"
+    resolved_dtype: str  # precision actually loaded: torch dtype or GGUF file type, never "auto"
     runtime_s: float  # wall-clock generation time for this arm
+    engine: dict  # what generated the completions: transformers version, or llama.cpp binary pin + threads
+    artifact_sha256: str | None  # SHA256 of a single-file artifact (GGUF); None for HF snapshot dirs
 
     def __post_init__(self) -> None:
         _require(isinstance(self.model, str) and bool(self.model), "arm model must be a non-empty string")
@@ -58,9 +68,18 @@ class ArmRun:
         _require(isinstance(self.resolved_dtype, str), "arm resolved_dtype must be a string")
         _require(
             self.resolved_dtype.strip().lower() != _FORBIDDEN_DTYPE,
-            "resolved_dtype must be the loaded torch dtype, not the 'auto' input",
+            "resolved_dtype must be the loaded precision, not the 'auto' input",
         )
         _require(_is_number(self.runtime_s), "arm runtime_s must be a number")
+        _require(isinstance(self.engine, dict), "arm engine must be a JSON object")
+        _require(
+            isinstance(self.engine.get("name"), str) and bool(self.engine.get("name")),
+            "arm engine must name what generated the completions (engine.name)",
+        )
+        _require(
+            self.artifact_sha256 is None or isinstance(self.artifact_sha256, str),
+            "arm artifact_sha256 must be a string or null",
+        )
 
 
 @dataclass(frozen=True)
