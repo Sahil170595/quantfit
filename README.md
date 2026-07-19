@@ -53,11 +53,31 @@ dangerous flip rate below ~24pp; it does not certify safety. (Why "drift" and no
 "tax": in the alignment literature a safety/alignment *tax* is capability paid FOR
 safety — nearly the inverse of what this measures.)
 
-Add `--report drift.json` to write the run as an **auditable artifact** (schema v1):
+**GGUF pairs — the format third-party quants actually ship in.** Point both arms
+at GGUF files (local `*.gguf` or `hf:<org>/<repo>/<file>.gguf`) and the diff runs
+under the **identical pinned llama.cpp binary** on CPU — F16 baseline vs Qn quant,
+same binary, same device, only the weights differ, so the diff isolates the
+quantization. The F16 arm runs in RAM, which removes the baseline VRAM cap:
+7-8B pairs work on a 12 GB GPU box.
+
+```bash
+quantfit verify-safety \
+  --baseline hf:bartowski/Qwen2.5-7B-Instruct-GGUF/Qwen2.5-7B-Instruct-f16.gguf \
+  --quant    hf:bartowski/Qwen2.5-7B-Instruct-GGUF/Qwen2.5-7B-Instruct-Q4_K_M.gguf
+```
+
+The baseline must be unquantized (F16/BF16/F32 — read from the file's own
+metadata, never the filename) and both files must share an architecture; a
+transformers-baseline vs GGUF-quant mix is refused — that measures engine +
+quantization at once (a deployment delta), never pooled with a quantization diff.
+
+Add `--report drift.json` to write the run as an **auditable artifact** (schema v2):
 judge + probe-set revision pins, the pinned judge input contract, decode params,
-resolved per-arm dtypes (never "auto"), an environment fingerprint, per-arm
-runtimes, and the full drift vector with CIs — enough to audit, diff against a
-rerun, or cite.
+resolved per-arm precisions (never "auto"), per-arm **engine provenance** —
+transformers version, or the SHA256 of the llama.cpp binary actually run, so the
+same-binary mandate is auditable from the report alone — artifact hashes, an
+environment fingerprint, per-arm runtimes, and the full drift vector with CIs —
+enough to audit, diff against a rerun, or cite.
 
 ## GPU-aware quantization
 

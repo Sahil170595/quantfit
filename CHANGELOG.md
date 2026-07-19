@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.4.1
+
+GGUF judging + over-VRAM validation (ROADMAP milestone 0.4b — the
+hardware-gated half of 0.4).
+
+- **verify-safety runs on GGUF pairs** — the format third-party quants actually
+  ship in. Both arms run under the IDENTICAL pinned llama.cpp `llama-server`
+  binary (same SHA256-verified b9817 release archive as `llama-quantize`) on
+  CPU: F16-GGUF baseline vs Qn-GGUF quant, so the diff isolates the
+  quantization and the baseline arm is no longer VRAM-capped — 7-8B pairs fit
+  in RAM. Refs are local `*.gguf` paths or `hf:<org>/<repo>/<file>.gguf`.
+  Greedy decoding via one server per arm, sequential requests, no prompt-cache
+  reuse; the model's own chat template (GGUF metadata) is applied via
+  `--jinja` when present, raw prompt otherwise — the same policy as the
+  transformers arms. The judge is unchanged.
+- **Pairing mandates, enforced not documented**: the baseline must be an
+  unquantized GGUF (F16/BF16/F32) — resolved from the file's own
+  `general.file_type` metadata, never trusted from the filename; both files
+  must declare the same architecture; and a transformers-baseline vs
+  llama.cpp-quant mix is refused outright — that diff measures engine +
+  quantization at once (a deployment delta) and is never pooled with a
+  quantization diff.
+- **Drift report schema v2** (breaking, replaces v1; no v1 reference reports
+  were ever published): each arm now records `engine` provenance —
+  transformers version, or the llama.cpp binary's SHA256 (of the executable
+  actually run), source, thread count, and device — plus `artifact_sha256`
+  for single-file GGUF artifacts. The same-binary mandate is auditable from
+  the report alone: the two arms' `binary_sha256` must be equal.
+  `resolved_dtype` widens to "precision actually loaded": a torch dtype for
+  transformers arms, a GGUF file type ("F16", "Q4_K_M") for llama.cpp arms.
+  v1 reports are refused on parse with a clear message.
+
 ## 0.4.0
 
 Provenance schema + stats hardening (ROADMAP milestone 0.4a — the CI-gated half
