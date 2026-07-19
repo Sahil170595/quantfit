@@ -31,6 +31,22 @@ hardware-gated half of 0.4).
   `resolved_dtype` widens to "precision actually loaded": a torch dtype for
   transformers arms, a GGUF file type ("F16", "Q4_K_M") for llama.cpp arms.
   v1 reports are refused on parse with a clear message.
+- **Hardware gates (ROADMAP 0.4b), both passed on an RTX 4080 Laptop (12 GB)**:
+  (1) end-to-end paired diff on a real third-party pair —
+  `bartowski/Qwen2.5-7B-Instruct-GGUF` Q4_K_M vs its F16 under the identical
+  pinned binary, the 15.24 GB F16 arm entirely in CPU RAM (F16 arm 559 s, Q4
+  arm 225 s, 16 threads). Verdict: over-refusal drift 2/14 at-risk pairs
+  (14.3%, 95% CI 4.0-39.9%) with the scalar refusal count UNCHANGED (14 -> 14)
+  — offsetting flips a flat counter would call clean; dangerous axis 0/12
+  (upper 24.2%). Drift vector byte-identical on rerun (0.5B pair).
+  (2) over-VRAM quantize: Qwen2.5-7B GPTQ (15.2 GB bf16) through
+  llm-compressor's default sequential onloading — GPU peak 9,047 MiB on a
+  12,282 MiB card while process RSS peaked at 28.1 GB (telemetry-sampled every
+  5 s), ~32 min end-to-end, `verify` PASS on the artifact.
+- **Method guidance from the same evidence**: at over-VRAM sizes use `gptq` —
+  AWQ's 20-point grid search is transfer-bound under onloading (observed ~2 h
+  for one 7B layer, projecting 50+ h; AWQ remains fine at in-VRAM sizes).
+  README capacity/limits wording updated to match what was actually measured.
 
 ## 0.4.0
 

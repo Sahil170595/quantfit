@@ -85,9 +85,14 @@ enough to audit, diff against a rerun, or cite.
 fits VRAM (and RAM — weights always stage in CPU RAM first) → fast; too big for VRAM
 but fits RAM+disk → same mechanism, slower (weights
 load into CPU RAM and llm-compressor's default **sequential onloading** streams one
-layer at a time to the GPU — no accelerate `device_map`; validated at in-GPU sizes,
-the exceeds-VRAM case is the design target — see *What it is — and isn't*); won't fit
+layer at a time to the GPU — no accelerate `device_map`; validated over-VRAM:
+Qwen2.5-7B GPTQ, 15.2 GB bf16 on a 12 GB card, GPU peak 9.0 GB with 28 GB
+process RSS observed, ~32 min); won't fit
 even in RAM → refuse, naming the real limit. No OOM 20 minutes into a job.
+
+Method caveat at over-VRAM sizes: **use `gptq`** — AWQ's 20-point grid search is
+transfer-bound under onloading (observed ~2 h for a single 7B layer, projecting
+50+ hours; the same AWQ completes fine at in-VRAM sizes).
 
 **Method × scheme matrix** (one llm-compressor backend, vLLM-loadable):
 
@@ -113,9 +118,10 @@ group-size 128) is shared across the calibrated methods, so they are comparable.
 ## What it is — and isn't
 
 - It **quantizes** (wrapping llm-compressor + llama.cpp) and **checks safety
-  preservation**. Both run end-to-end and are validated on small models (Qwen-1.5B,
-  Llama-1B); exceeds-VRAM quantization (llm-compressor's sequential onloading) is the
-  intended design, not yet validated at scale.
+  preservation**. Both run end-to-end, validated on small models (Qwen-1.5B,
+  Llama-1B) and over-VRAM (Qwen2.5-7B GPTQ on a 12 GB card via sequential
+  onloading, telemetry-confirmed CPU spill; the safety check covers 7B GGUF
+  pairs with the F16 baseline in CPU RAM).
 - It ships **transparent config help**, not auto-quantization: `quantfit plan --model <id>`
   shows the config a heuristic would pick and *why* (instant, no quantize); `quantfit
   probe --model <id>` measures per-bit-width quantization sensitivity (forward-only RTN-KL,
