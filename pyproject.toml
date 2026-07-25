@@ -36,8 +36,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# scipy: stats cross-check tests; gguf: crafts/reads tiny GGUFs in the arm tests
-dev = ["pytest>=8.0", "ruff>=0.3", "scipy>=1.11", "gguf>=0.10,<1.0"]
+# scipy: stats cross-check tests; gguf: crafts/reads tiny GGUFs in the arm tests.
+# ruff bounded: new minors add default rules (0.16 did, mid-cycle) — cap moves
+# only after a validated run on the new minor, same rule as llmcompressor.
+dev = ["pytest>=8.0", "ruff>=0.16,<0.17", "scipy>=1.11", "gguf>=0.10,<1.0"]
 # GGUF metadata reading (verify-safety GGUF arms resolve file_type/architecture
 # from the file itself) + the backend's convert step. Pre-1.0 and tracks llama.cpp;
 # the enums quantfit reads are append-only in practice, so <1.0 is the honest cap.

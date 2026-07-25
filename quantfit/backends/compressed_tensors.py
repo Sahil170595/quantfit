@@ -23,7 +23,7 @@ def build_recipe(method: str, scheme: str):
     from llmcompressor.modifiers.quantization import GPTQModifier, QuantizationModifier
     from llmcompressor.modifiers.smoothquant import SmoothQuantModifier
 
-    common = dict(targets=_TARGETS, ignore=_IGNORE)
+    common = {"targets": _TARGETS, "ignore": _IGNORE}
     if method == "awq":
         return AWQModifier(scheme=scheme, **common)
     if method == "gptq":
@@ -95,12 +95,12 @@ def quantize_ct(
     # design target, not yet validated at scale (see ROADMAP 0.4b).
     model = AutoModelForCausalLM.from_pretrained(model_id, dtype="auto", token=token)
 
-    kwargs: dict = dict(
-        model=model,
-        tokenizer=tokenizer,
-        recipe=build_recipe(method, scheme),
-        output_dir=str(out),
-    )
+    kwargs: dict = {
+        "model": model,
+        "tokenizer": tokenizer,
+        "recipe": build_recipe(method, scheme),
+        "output_dir": str(out),
+    }
     if needs_calibration:
         kwargs.update(
             dataset=calib_dataset(spec, tokenizer, token=token),

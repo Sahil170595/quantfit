@@ -143,8 +143,10 @@ def _provenance(report: DriftReport) -> list[str]:
     lines = [
         "### Provenance",
         "",
-        f"- **quantfit** `{report.quantfit_version}` — report schema v{report.schema_version}, "
-        f"run `{report.created_utc}`",
+        (
+            f"- **quantfit** `{report.quantfit_version}` — report schema v{report.schema_version}, "
+            f"run `{report.created_utc}`"
+        ),
         f"- **Judge** `{judge['id']}` @ `{judge['revision']}`",
         f"  - input contract: {judge['input_contract']}",
         f"  - card accuracy {judge['card_xstest_accuracy']} — {judge['card_xstest_accuracy_label']}",

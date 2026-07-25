@@ -7,7 +7,7 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
-from quantfit.policy.probe import _rtn  # noqa: E402  (after importorskip)
+from quantfit.policy.probe import _rtn
 
 
 def test_more_bits_means_less_error():

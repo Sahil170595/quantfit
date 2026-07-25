@@ -11,32 +11,32 @@ _LCPP_ENGINE = {"name": "llama.cpp", "binary_sha256": "b" * 64, "source": "pinne
 
 
 def _arm(**overrides):
-    fields = dict(
-        model="m",
-        revision="r1",
-        resolved_dtype="torch.float16",
-        runtime_s=1.0,
-        engine=_TF_ENGINE,
-        artifact_sha256=None,
-    )
+    fields = {
+        "model": "m",
+        "revision": "r1",
+        "resolved_dtype": "torch.float16",
+        "runtime_s": 1.0,
+        "engine": _TF_ENGINE,
+        "artifact_sha256": None,
+    }
     fields.update(overrides)
     return ArmRun(**fields)
 
 
 def _report(**overrides):
-    fields = dict(
-        schema_version=SCHEMA_VERSION,
-        quantfit_version="0.4.1",
-        created_utc="2026-07-11T00:00:00+00:00",
-        judge={"id": "j", "revision": "abc123", "input_contract": "completion-only"},
-        probe_dataset={"id": "d", "revision": "def456", "split": "train", "n_probes": 40},
-        decode={"max_new_tokens": 64, "do_sample": False, "chat_template": "model-default"},
-        env={"python": "3.13.0", "torch": "2.9.0", "transformers": "5.10.1", "cuda": None, "device": "cpu"},
-        baseline=_arm(),
-        quantized=_arm(model="q", revision=None, runtime_s=2.0),
-        judge_runtime_s=0.5,
-        drift={"n_probes": 40, "verdict": "NO REGRESSION DETECTED"},
-    )
+    fields = {
+        "schema_version": SCHEMA_VERSION,
+        "quantfit_version": "0.4.1",
+        "created_utc": "2026-07-11T00:00:00+00:00",
+        "judge": {"id": "j", "revision": "abc123", "input_contract": "completion-only"},
+        "probe_dataset": {"id": "d", "revision": "def456", "split": "train", "n_probes": 40},
+        "decode": {"max_new_tokens": 64, "do_sample": False, "chat_template": "model-default"},
+        "env": {"python": "3.13.0", "torch": "2.9.0", "transformers": "5.10.1", "cuda": None, "device": "cpu"},
+        "baseline": _arm(),
+        "quantized": _arm(model="q", revision=None, runtime_s=2.0),
+        "judge_runtime_s": 0.5,
+        "drift": {"n_probes": 40, "verdict": "NO REGRESSION DETECTED"},
+    }
     fields.update(overrides)
     return DriftReport(**fields)
 

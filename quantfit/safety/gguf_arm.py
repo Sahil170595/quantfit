@@ -153,7 +153,9 @@ def _read_meta(path: Path) -> dict:
         raise RuntimeError(f"{path} has no general.architecture in its GGUF metadata")
     file_type = contents("general.file_type")
     if not isinstance(file_type, int):
-        raise RuntimeError(f"{path} has no general.file_type in its GGUF metadata")
+        # Operational (clean exit 2), not a programming error: the file on disk is
+        # malformed, and quantfit's operational class is RuntimeError, never TypeError.
+        raise RuntimeError(f"{path} has no general.file_type in its GGUF metadata")  # noqa: TRY004
     name = contents("general.name")
     return {
         "architecture": architecture,
@@ -186,7 +188,7 @@ def generate_completions(arm: ResolvedGguf, prompts: list[str], max_new_tokens: 
     threads = _threads()
     port = _free_port()
     log_fd, log_name = tempfile.mkstemp(prefix="quantfit-llama-server-", suffix=".log")
-    proc = subprocess.Popen(  # noqa: S603 - SHA256-verified binary, fixed args
+    proc = subprocess.Popen(
         [
             str(server),
             "-m",

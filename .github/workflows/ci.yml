@@ -73,7 +73,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - run: pip install ruff
+      # Bounded like every churning dep (ROADMAP standing rule): 0.16.0 shipped new
+      # default rules mid-cycle and broke a green branch. The cap moves only after
+      # a validated local run on the new minor.
+      - run: pip install "ruff>=0.16,<0.17"
 
       - name: Ruff check
         run: ruff check quantfit tests

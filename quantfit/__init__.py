@@ -19,7 +19,7 @@ _LAZY = {
     "model_card_fragment": ("quantfit.modelcard", "model_card_fragment"),
 }
 
-__all__ = ["DEFAULT_SPEC", "QuantSpec", "__version__", *sorted(_LAZY)]
+__all__ = ["DEFAULT_SPEC", "QuantSpec", "__version__", *sorted(_LAZY)]  # noqa: PLE0604 — _LAZY keys are str literals
 
 
 def __getattr__(name: str):

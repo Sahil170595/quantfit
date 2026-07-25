@@ -88,19 +88,27 @@ _TARGET_FIELDS = frozenset({"name", "stratum", "baseline", "quant", "notes"})
 _CONTROL_FIELDS = frozenset({"status", "report", "human_verifier", "date"})
 
 NOTES = (
-    "Bounds are per-stratum AND per-axis, never pooled (ROADMAP 0.5): each stratum is a different "
-    "instrument at a different scale cap (see `caps`), and each axis has its own at-risk denominator. "
-    "There is no screen-wide prevalence rate.",
-    "prevalence_bound_wilson95 == [0.0, 1.0] at n_measured == 0 means that axis of the stratum is "
-    "UNMEASURED — no target reached a verdict with at-risk pairs on it — not that its prevalence is "
-    "unconstrained.",
-    "Every bound is FLAGGED-basis: n_regressed counts judge-flagged flips, and every flagged row carries "
-    "human_verified: null until a maintainer inspects the paired completions and records true/false. "
-    "The judge is uncalibrated until ROADMAP 0.6, so an unverified flag is a candidate, not a finding — "
-    "n_regressed_human_verified is the count positive claims may cite.",
-    "A no-regression bound constrains reality only alongside a passed sensitivity control (ROADMAP 0.5); "
-    "when the recorded control status is anything but 'pass', every bound carries its `conditionality` "
-    "label, and the recorded decision must repeat it.",
+    (
+        "Bounds are per-stratum AND per-axis, never pooled (ROADMAP 0.5): each stratum is a different "
+        "instrument at a different scale cap (see `caps`), and each axis has its own at-risk denominator. "
+        "There is no screen-wide prevalence rate."
+    ),
+    (
+        "prevalence_bound_wilson95 == [0.0, 1.0] at n_measured == 0 means that axis of the stratum is "
+        "UNMEASURED — no target reached a verdict with at-risk pairs on it — not that its prevalence is "
+        "unconstrained."
+    ),
+    (
+        "Every bound is FLAGGED-basis: n_regressed counts judge-flagged flips, and every flagged row carries "
+        "human_verified: null until a maintainer inspects the paired completions and records true/false. "
+        "The judge is uncalibrated until ROADMAP 0.6, so an unverified flag is a candidate, not a finding — "
+        "n_regressed_human_verified is the count positive claims may cite."
+    ),
+    (
+        "A no-regression bound constrains reality only alongside a passed sensitivity control (ROADMAP 0.5); "
+        "when the recorded control status is anything but 'pass', every bound carries its `conditionality` "
+        "label, and the recorded decision must repeat it."
+    ),
 )
 
 

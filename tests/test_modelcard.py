@@ -30,38 +30,38 @@ def _drift(dangerous=(0, 12), overrefusal=(2, 10), **overrides):
         for name, (_, at_risk) in (("refusal-robustness", dangerous), ("over-refusal", overrefusal))
         if at_risk == 0
     ]
-    fields = dict(
-        n_probes=40,
-        verdict=_VERDICT,
-        regression_detected=bool(dangerous[0] or overrefusal[0]),
-        unmeasurable_axes=unmeasurable,
-        refusal_robustness=_axis(*dangerous, "harmful_compliance_regressions"),
-        over_refusal=_axis(*overrefusal, "overrefusal_regressions"),
-        by_zone={},
-    )
+    fields = {
+        "n_probes": 40,
+        "verdict": _VERDICT,
+        "regression_detected": bool(dangerous[0] or overrefusal[0]),
+        "unmeasurable_axes": unmeasurable,
+        "refusal_robustness": _axis(*dangerous, "harmful_compliance_regressions"),
+        "over_refusal": _axis(*overrefusal, "overrefusal_regressions"),
+        "by_zone": {},
+    }
     fields.update(overrides)
     return fields
 
 
 def _arm(**overrides):
-    fields = dict(
-        model="m",
-        revision="r1",
-        resolved_dtype="torch.float16",
-        runtime_s=1.0,
-        engine=_TF_ENGINE,
-        artifact_sha256=None,
-    )
+    fields = {
+        "model": "m",
+        "revision": "r1",
+        "resolved_dtype": "torch.float16",
+        "runtime_s": 1.0,
+        "engine": _TF_ENGINE,
+        "artifact_sha256": None,
+    }
     fields.update(overrides)
     return ArmRun(**fields)
 
 
 def _report(**overrides):
-    fields = dict(
-        schema_version=SCHEMA_VERSION,
-        quantfit_version="0.5.0",
-        created_utc="2026-07-24T00:00:00+00:00",
-        judge={
+    fields = {
+        "schema_version": SCHEMA_VERSION,
+        "quantfit_version": "0.5.0",
+        "created_utc": "2026-07-24T00:00:00+00:00",
+        "judge": {
             "id": "Crusadersk/quantsafe-refusal-modernbert",
             "revision": "b34061f964619a5b6e0ff24be45a428124fa36bc",
             "input_contract": "completion-only; truncated to 512 judge tokens; prompt never concatenated",
@@ -70,36 +70,36 @@ def _report(**overrides):
                 "card-reported, external XSTest/GPT-4 responses — uncalibrated, out-of-distribution for these probes"
             ),
         },
-        probe_dataset={
+        "probe_dataset": {
             "id": "Crusadersk/quantsafe-judge-benchmark",
             "revision": "c26cc2e",
             "split": "train",
             "n_probes": 40,
         },
-        decode={"max_new_tokens": 64, "do_sample": False, "chat_template": "model-default"},
-        env={"python": "3.13.1", "torch": "2.9.0", "transformers": "5.10.1", "cuda": None, "device": "cpu"},
-        baseline=_arm(model="org/base"),
-        quantized=_arm(model="org/base-awq", revision=None, runtime_s=2.0),
-        judge_runtime_s=0.5,
-        drift=_drift(),
-    )
+        "decode": {"max_new_tokens": 64, "do_sample": False, "chat_template": "model-default"},
+        "env": {"python": "3.13.1", "torch": "2.9.0", "transformers": "5.10.1", "cuda": None, "device": "cpu"},
+        "baseline": _arm(model="org/base"),
+        "quantized": _arm(model="org/base-awq", revision=None, runtime_s=2.0),
+        "judge_runtime_s": 0.5,
+        "drift": _drift(),
+    }
     fields.update(overrides)
     return DriftReport(**fields)
 
 
 def _gguf_report(**overrides):
-    fields = dict(
-        baseline=_arm(
+    fields = {
+        "baseline": _arm(
             model="hf:org/repo/m-f16.gguf", resolved_dtype="F16", engine=_LCPP_ENGINE, artifact_sha256="a" * 64
         ),
-        quantized=_arm(
+        "quantized": _arm(
             model="hf:org/repo/m-q4.gguf",
             revision=None,
             resolved_dtype="Q4_K_M",
             engine=_LCPP_ENGINE,
             artifact_sha256="c" * 64,
         ),
-    )
+    }
     fields.update(overrides)
     return _report(**fields)
 
