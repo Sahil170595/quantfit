@@ -79,6 +79,16 @@ same-binary mandate is auditable from the report alone — artifact hashes, an
 environment fingerprint, per-arm runtimes, and the full drift vector with CIs —
 enough to audit, diff against a rerun, or cite.
 
+**Scale it and publish it.** The protocol is versioned as **QSR v0**
+(`spec/qsr-v0.md`); `quantfit screen --targets targets.json --out reports/` runs
+the paired diff over a whole manifest of quants and aggregates per-stratum,
+per-axis Wilson prevalence bounds (flagged flips stay candidates until
+human-verified, and every bound is labeled "conditional on undemonstrated
+detection sensitivity" until the recorded sensitivity control passes); and
+`quantfit emit model-card --report drift.json` renders any report as a
+paste-ready model-card section with the drift table, provenance, and the exact
+serve command.
+
 ## GPU-aware quantization
 
 **3-tier capacity.** `check` reads HF metadata (no download) to estimate the footprint:

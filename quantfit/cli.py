@@ -1,4 +1,4 @@
-"""quantfit CLI — check / list / plan / probe / quantize / verify / verify-safety."""
+"""quantfit CLI — check / list / plan / probe / quantize / verify / verify-safety / screen / emit."""
 
 from __future__ import annotations
 
@@ -88,6 +88,30 @@ def _build_parser() -> argparse.ArgumentParser:
         "resolved precisions, per-arm engine provenance, env fingerprint, per-arm runtimes)",
     )
 
+    ps = sub.add_parser(
+        "screen",
+        parents=[tok],
+        help="run verify-safety over a target manifest and aggregate per-stratum, per-axis prevalence bounds "
+        "(exit 0 = no regression flagged, 3 = regression flagged, 4 = an axis went unmeasured, 2 = operational error)",
+    )
+    ps.add_argument("--targets", required=True, metavar="PATH", help="target manifest JSON (schema v1)")
+    ps.add_argument(
+        "--out", required=True, metavar="DIR", help="output dir: one drift report per target + screen-summary.json"
+    )
+    ps.add_argument(
+        "--max-new-tokens",
+        type=int,
+        default=64,
+        help="completion length generated per probe and judged for refusal (default 64)",
+    )
+
+    pe = sub.add_parser(
+        "emit",
+        help="render an artifact from a drift report (exit 0 = emitted, 2 = unreadable/wrong-schema report)",
+    )
+    pe.add_argument("what", choices=("model-card",), help="what to emit")
+    pe.add_argument("--report", required=True, metavar="PATH", help="a schema-v2 drift report written by --report")
+
     pq = sub.add_parser("quantize", parents=[tok], help="quantize a model")
     pq.add_argument("--model", required=True, help="HF model id (the full-precision base)")
     pq.add_argument("--method", required=True, choices=tuple(METHODS))
@@ -164,6 +188,36 @@ def _dispatch(args: argparse.Namespace) -> int:
             return 3
         if drift.unmeasurable_axes:
             return 4  # zero at-risk pairs on an axis: nothing was measured, not a pass
+        return 0
+
+    if args.cmd == "screen":
+        from quantfit.screen import STATUS_REGRESSION, STATUS_UNMEASURABLE, run_screen
+
+        summary = run_screen(args.targets, args.out, token=args.token, max_new_tokens=args.max_new_tokens)
+        for stratum, agg in sorted(summary["by_stratum"].items()):
+            print(f"{stratum}: {agg['n_completed']}/{agg['n_targets']} completed, {agg['n_operational_errors']} errors")
+            for axis in ("refusal_robustness", "over_refusal"):
+                a = agg[axis]
+                lo, hi = a["prevalence_bound_wilson95"]
+                label = f" [{a['conditionality']}]" if a["conditionality"] else ""
+                print(
+                    f"  {axis}: {a['n_regressed']}/{a['n_measured']} flagged "
+                    f"(95% CI {lo * 100:.1f}-{hi * 100:.1f}%){label}"
+                )
+        print(f"summary -> {args.out}/screen-summary.json")
+        statuses = {row["status"] for row in summary["rows"]}
+        axes = [a for agg in summary["by_stratum"].values() for a in (agg["refusal_robustness"], agg["over_refusal"])]
+        # Same contract as verify-safety: a flagged regression outranks unmeasured.
+        if STATUS_REGRESSION in statuses:
+            return 3
+        if STATUS_UNMEASURABLE in statuses or any(a["n_measured"] == 0 for a in axes):
+            return 4  # an axis nothing was measured on is not a clean screen
+        return 0
+
+    if args.cmd == "emit":
+        from quantfit.modelcard import model_card_fragment
+
+        print(model_card_fragment(args.report), end="")  # fragment carries its own trailing newline
         return 0
 
     if args.cmd == "quantize":

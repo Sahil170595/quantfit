@@ -20,6 +20,8 @@ def test_parser_accepts_every_command():
         ["probe", "--model", "m", "--bits", "4", "8"],
         ["verify", "--model", "p"],
         ["verify-safety", "--fp16", "a", "--quant", "b"],
+        ["screen", "--targets", "t.json", "--out", "d"],
+        ["emit", "model-card", "--report", "r.json"],
         ["quantize", "--model", "m", "--method", "awq", "--out", "o"],
     ]
     for argv in cases:
@@ -109,3 +111,66 @@ def test_verify_exit_code_for_failed_smoke(monkeypatch):
 
     monkeypatch.setattr(v, "verify", lambda *a, **k: (False, "did not generate"))
     assert main(["verify", "--model", "x"]) == 3
+
+
+def _screen_summary(status, n_measured=1, n_regressed=0):
+    axis = {
+        "n_measured": n_measured,
+        "n_regressed": n_regressed,
+        "n_regressed_human_verified": 0,
+        "prevalence_bound_wilson95": [0.0, 1.0],
+        "conditionality": None,
+    }
+    return {
+        "rows": [{"status": status}],
+        "by_stratum": {
+            "gguf": {
+                "n_targets": 1,
+                "n_completed": 1,
+                "n_operational_errors": 0,
+                "refusal_robustness": dict(axis),
+                "over_refusal": dict(axis),
+            }
+        },
+    }
+
+
+def test_screen_exit_codes_mirror_the_verify_safety_contract(monkeypatch):
+    # 0 = clean, 3 = a regression row, 4 = unmeasured axis or row, 2 = ScreenError.
+    import quantfit.screen as sc
+
+    cases = [
+        (_screen_summary("no_regression"), 0),
+        (_screen_summary("regression", n_regressed=1), 3),
+        (_screen_summary("unmeasurable"), 4),
+        (_screen_summary("no_regression", n_measured=0), 4),  # axis nothing was measured on
+    ]
+    for summary, expected in cases:
+        monkeypatch.setattr(sc, "run_screen", lambda *a, _s=summary, **k: _s)
+        assert main(["screen", "--targets", "t.json", "--out", "d"]) == expected
+
+    def _operational(*a, **k):
+        raise sc.ScreenError("target manifest t.json has schema_version None")
+
+    monkeypatch.setattr(sc, "run_screen", _operational)
+    assert main(["screen", "--targets", "t.json", "--out", "d"]) == 2
+
+
+def test_emit_model_card_prints_the_fragment(monkeypatch, capsys):
+    import quantfit.modelcard as mc
+
+    monkeypatch.setattr(mc, "model_card_fragment", lambda path: "## fragment\n")
+    assert main(["emit", "model-card", "--report", "r.json"]) == 0
+    assert capsys.readouterr().out == "## fragment\n"
+
+
+def test_emit_refuses_wrong_schema_report_with_exit_2(monkeypatch):
+    # §5.7's wrong-schema leg of the exit-2 contract, exercised through the CLI.
+    import quantfit.modelcard as mc
+    from quantfit.safety.report import ReportError
+
+    def _refuse(path):
+        raise ReportError(f"report {path} has schema_version 1; this quantfit reads 2")
+
+    monkeypatch.setattr(mc, "model_card_fragment", _refuse)
+    assert main(["emit", "model-card", "--report", "old.json"]) == 2
