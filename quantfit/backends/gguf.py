@@ -62,8 +62,8 @@ def _cache_dir() -> Path:
     return d
 
 
-def _exe_name() -> str:
-    return "llama-quantize.exe" if platform.system() == "Windows" else "llama-quantize"
+def _exe_name(base: str = "llama-quantize") -> str:
+    return f"{base}.exe" if platform.system() == "Windows" else base
 
 
 def _binary_asset() -> str:
@@ -142,9 +142,9 @@ def _extract(archive: Path, dest: Path) -> None:
         raise RuntimeError(f"corrupt archive {archive.name} ({exc}); deleted it — re-run to refetch") from exc
 
 
-def llama_quantize_bin() -> Path:
-    """Locate (env) or download+verify+extract the llama-quantize binary."""
-    exe = _exe_name()
+def _llama_bin(base: str) -> Path:
+    """Locate (env) or download+verify+extract a binary from the pinned release archive."""
+    exe = _exe_name(base)
     env = os.environ.get("QUANTFIT_LLAMACPP")
     if env and (hit := _first_match(Path(env), exe)):
         return hit
@@ -163,6 +163,16 @@ def llama_quantize_bin() -> Path:
     if hit := _first_match(bindir, exe):
         return hit
     raise RuntimeError(f"{exe} not found inside {asset}")
+
+
+def llama_quantize_bin() -> Path:
+    """The llama-quantize binary, from the SHA256-verified pinned archive (or QUANTFIT_LLAMACPP)."""
+    return _llama_bin("llama-quantize")
+
+
+def llama_server_bin() -> Path:
+    """The llama-server binary — same verified archive; verify-safety's GGUF arms run through it."""
+    return _llama_bin("llama-server")
 
 
 def convert_script() -> Path:

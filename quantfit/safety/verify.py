@@ -35,6 +35,12 @@ the unquantized baseline (loaded at its native dtype — recorded per-arm in the
 report) and the quantized artifact, classify each completion refusal/compliance
 with a compact ModernBERT judge, and pair them per-prompt.
 
+GGUF pairs (quantfit.safety.gguf_arm): both arms run under the IDENTICAL pinned
+llama.cpp binary on CPU — F16-GGUF baseline vs Qn-GGUF — so the diff isolates
+the quantization and the baseline is not VRAM-capped (7-8B pairs fit in RAM).
+Mixing a transformers arm with a GGUF arm is refused: that is a deployment
+delta, not a quantization diff. The judge is unchanged either way.
+
 Curated public corpus only (`Crusadersk/quantsafe-judge-benchmark`) so this stays
 distributable and umbrella-free — never raw harmbench/advbench. At most one model
 is GPU-resident at a time.
@@ -272,15 +278,44 @@ def verify_safety(
 ) -> SafetyDrift:
     """Compare refusal behavior of the unquantized baseline vs a quantized artifact.
 
-    With `report_path`, also writes the run as a schema-v1 `DriftReport` (JSON):
-    revision pins, resolved dtypes, env fingerprint, per-arm runtimes.
+    Arms are either both transformers (HF ids / local dirs) or both GGUF
+    (*.gguf paths or hf:<org>/<repo>/<file>.gguf) — GGUF pairs run under the
+    identical pinned llama.cpp binary on CPU, which is what lets an F16
+    baseline exceed VRAM. Mixing the two is refused: that diff would measure
+    engine + quantization at once (a deployment delta), never pooled with a
+    quantization diff.
+
+    With `report_path`, also writes the run as a schema-v2 `DriftReport` (JSON):
+    revision pins, resolved precisions, per-arm engine provenance, env
+    fingerprint, per-arm runtimes.
     """
+    from quantfit.safety.gguf_arm import is_gguf_ref
+
+    baseline_gguf = is_gguf_ref(baseline_model_id)
+    quant_gguf = is_gguf_ref(quant_path)
+    if baseline_gguf != quant_gguf:
+        raise RuntimeError(
+            "mixed arms: one ref is GGUF, the other is a transformers model. A transformers-baseline "
+            "vs llama.cpp-quant diff measures engine + quantization at once (a deployment delta), so it "
+            "is never pooled with a quantization diff. Pair the quant with an unquantized GGUF under the "
+            "same binary instead, e.g. --baseline hf:<org>/<repo>/<model>-f16.gguf"
+        )
+
     probes = _load_probes(token)
     prompts = [p.prompt for p in probes]
 
-    # One causal LM resident at a time; freed before the next loads.
-    baseline_completions, baseline_arm = _generate_completions(baseline_model_id, prompts, max_new_tokens, token)
-    quant_completions, quant_arm = _generate_completions(quant_path, prompts, max_new_tokens, token)
+    if baseline_gguf:
+        from quantfit.safety import gguf_arm
+
+        # Both files resolved + mandates enforced (unquantized baseline, same
+        # architecture) BEFORE any server starts or generation time is spent.
+        baseline_res, quant_res = gguf_arm.resolve_pair(baseline_model_id, quant_path, token)
+        baseline_completions, baseline_arm = gguf_arm.generate_completions(baseline_res, prompts, max_new_tokens)
+        quant_completions, quant_arm = gguf_arm.generate_completions(quant_res, prompts, max_new_tokens)
+    else:
+        # One causal LM resident at a time; freed before the next loads.
+        baseline_completions, baseline_arm = _generate_completions(baseline_model_id, prompts, max_new_tokens, token)
+        quant_completions, quant_arm = _generate_completions(quant_path, prompts, max_new_tokens, token)
 
     # Judge both sides in a single judge load.
     flags, judge_runtime_s = _classify_refusals(baseline_completions + quant_completions, token)
@@ -301,7 +336,7 @@ def _write_report(
     judge_runtime_s: float,
     max_new_tokens: int,
 ) -> None:
-    """Assemble and write the schema-v1 report for one completed run."""
+    """Assemble and write the schema-v2 report for one completed run."""
     from datetime import datetime, timezone
 
     import quantfit
@@ -400,6 +435,7 @@ def _generate_completions(
     import time
 
     import torch
+    import transformers
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     from quantfit.safety.report import ArmRun
@@ -428,6 +464,8 @@ def _generate_completions(
         revision=revision,
         resolved_dtype=resolved_dtype,
         runtime_s=round(time.perf_counter() - started, 2),
+        engine={"name": "transformers", "version": transformers.__version__, "device": device},
+        artifact_sha256=None,  # an HF snapshot is a directory; the revision pin is its identity
     )
     return completions, arm
 

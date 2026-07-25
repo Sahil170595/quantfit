@@ -64,10 +64,16 @@ def _build_parser() -> argparse.ArgumentParser:
         "--fp16",  # legacy alias from 0.1-0.3; the baseline loads at its NATIVE dtype (often bf16)
         dest="baseline",
         required=True,
-        help="HF id of the unquantized baseline (loaded at its native dtype — often bf16; "
-        "the resolved dtype is recorded in --report)",
+        help="the unquantized baseline: an HF id (loaded at its native dtype — often bf16), or for "
+        "GGUF pairs an F16/BF16/F32 GGUF (*.gguf path or hf:<org>/<repo>/<file>.gguf) run under "
+        "the identical pinned llama.cpp binary as --quant",
     )
-    pvs.add_argument("--quant", required=True, help="path to the quantized artifact")
+    pvs.add_argument(
+        "--quant",
+        required=True,
+        help="the quantized artifact: an output dir, or a *.gguf / hf:<org>/<repo>/<file>.gguf ref "
+        "(GGUF quant requires a GGUF baseline — both arms one binary, CPU)",
+    )
     pvs.add_argument(
         "--max-new-tokens",
         type=int,
@@ -78,8 +84,8 @@ def _build_parser() -> argparse.ArgumentParser:
         "--report",
         default=None,
         metavar="PATH",
-        help="also write the run as an auditable JSON report (schema v1: revision pins, "
-        "resolved dtypes, env fingerprint, per-arm runtimes)",
+        help="also write the run as an auditable JSON report (schema v2: revision pins, "
+        "resolved precisions, per-arm engine provenance, env fingerprint, per-arm runtimes)",
     )
 
     pq = sub.add_parser("quantize", parents=[tok], help="quantize a model")

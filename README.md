@@ -53,11 +53,31 @@ dangerous flip rate below ~24pp; it does not certify safety. (Why "drift" and no
 "tax": in the alignment literature a safety/alignment *tax* is capability paid FOR
 safety — nearly the inverse of what this measures.)
 
-Add `--report drift.json` to write the run as an **auditable artifact** (schema v1):
+**GGUF pairs — the format third-party quants actually ship in.** Point both arms
+at GGUF files (local `*.gguf` or `hf:<org>/<repo>/<file>.gguf`) and the diff runs
+under the **identical pinned llama.cpp binary** on CPU — F16 baseline vs Qn quant,
+same binary, same device, only the weights differ, so the diff isolates the
+quantization. The F16 arm runs in RAM, which removes the baseline VRAM cap:
+7-8B pairs work on a 12 GB GPU box.
+
+```bash
+quantfit verify-safety \
+  --baseline hf:bartowski/Qwen2.5-7B-Instruct-GGUF/Qwen2.5-7B-Instruct-f16.gguf \
+  --quant    hf:bartowski/Qwen2.5-7B-Instruct-GGUF/Qwen2.5-7B-Instruct-Q4_K_M.gguf
+```
+
+The baseline must be unquantized (F16/BF16/F32 — read from the file's own
+metadata, never the filename) and both files must share an architecture; a
+transformers-baseline vs GGUF-quant mix is refused — that measures engine +
+quantization at once (a deployment delta), never pooled with a quantization diff.
+
+Add `--report drift.json` to write the run as an **auditable artifact** (schema v2):
 judge + probe-set revision pins, the pinned judge input contract, decode params,
-resolved per-arm dtypes (never "auto"), an environment fingerprint, per-arm
-runtimes, and the full drift vector with CIs — enough to audit, diff against a
-rerun, or cite.
+resolved per-arm precisions (never "auto"), per-arm **engine provenance** —
+transformers version, or the SHA256 of the llama.cpp binary actually run, so the
+same-binary mandate is auditable from the report alone — artifact hashes, an
+environment fingerprint, per-arm runtimes, and the full drift vector with CIs —
+enough to audit, diff against a rerun, or cite.
 
 ## GPU-aware quantization
 
@@ -65,9 +85,14 @@ rerun, or cite.
 fits VRAM (and RAM — weights always stage in CPU RAM first) → fast; too big for VRAM
 but fits RAM+disk → same mechanism, slower (weights
 load into CPU RAM and llm-compressor's default **sequential onloading** streams one
-layer at a time to the GPU — no accelerate `device_map`; validated at in-GPU sizes,
-the exceeds-VRAM case is the design target — see *What it is — and isn't*); won't fit
+layer at a time to the GPU — no accelerate `device_map`; validated over-VRAM:
+Qwen2.5-7B GPTQ, 15.2 GB bf16 on a 12 GB card, GPU peak 9.0 GB with 28 GB
+process RSS observed, ~32 min); won't fit
 even in RAM → refuse, naming the real limit. No OOM 20 minutes into a job.
+
+Method caveat at over-VRAM sizes: **use `gptq`** — AWQ's 20-point grid search is
+transfer-bound under onloading (observed ~2 h for a single 7B layer, projecting
+50+ hours; the same AWQ completes fine at in-VRAM sizes).
 
 **Method × scheme matrix** (one llm-compressor backend, vLLM-loadable):
 
@@ -93,9 +118,10 @@ group-size 128) is shared across the calibrated methods, so they are comparable.
 ## What it is — and isn't
 
 - It **quantizes** (wrapping llm-compressor + llama.cpp) and **checks safety
-  preservation**. Both run end-to-end and are validated on small models (Qwen-1.5B,
-  Llama-1B); exceeds-VRAM quantization (llm-compressor's sequential onloading) is the
-  intended design, not yet validated at scale.
+  preservation**. Both run end-to-end, validated on small models (Qwen-1.5B,
+  Llama-1B) and over-VRAM (Qwen2.5-7B GPTQ on a 12 GB card via sequential
+  onloading, telemetry-confirmed CPU spill; the safety check covers 7B GGUF
+  pairs with the F16 baseline in CPU RAM).
 - It ships **transparent config help**, not auto-quantization: `quantfit plan --model <id>`
   shows the config a heuristic would pick and *why* (instant, no quantize); `quantfit
   probe --model <id>` measures per-bit-width quantization sensitivity (forward-only RTN-KL,

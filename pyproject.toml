@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantfit"
-version = "0.4.0"
+version = "0.4.1"
 description = "Quantize an LLM and check it still refuses what it should — a GPU-aware quantization CLI that measures the safety drift of the quantization it just performed."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -36,8 +36,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff>=0.3", "scipy>=1.11"]  # scipy: stats cross-check tests only
-gguf = ["gguf>=0.10"]  # for the GGUF backend's convert step
+# scipy: stats cross-check tests; gguf: crafts/reads tiny GGUFs in the arm tests
+dev = ["pytest>=8.0", "ruff>=0.3", "scipy>=1.11", "gguf>=0.10,<1.0"]
+# GGUF metadata reading (verify-safety GGUF arms resolve file_type/architecture
+# from the file itself) + the backend's convert step. Pre-1.0 and tracks llama.cpp;
+# the enums quantfit reads are append-only in practice, so <1.0 is the honest cap.
+gguf = ["gguf>=0.10,<1.0"]
 
 [project.urls]
 Homepage = "https://github.com/Sahil170595/quantfit"
