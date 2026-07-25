@@ -286,23 +286,52 @@ Handling:
 
 ### 5.1 Why this is manual
 
-Completions are not persisted. `SafetyDrift.summary()` is aggregates-only
-(`quantfit/safety/verify.py:253`), and the schema-v2 report has no completion
-field at all — this is a deliberate data-handling decision, not an oversight:
-ROADMAP's non-goals bar "raw harmful corpora or archived harmful long-form
-completions without an explicit recorded data-handling decision — never a silent
-reversal." A control run does not get to reverse it.
+**Superseded in part on 2026-07-24 — read this before the rest of §5.** This
+section was written when completion capture did not exist, and it stated
+"completions are not persisted" as a present fact about the stack. That posture
+no longer holds. `docs/data-handling-completions.md` (dated 2026-07-24, in this
+branch) is now the recorded data-handling decision for completion text: capture
+is an **explicit opt-in** (`verify_safety(..., capture_path=...)`), and its §2.3
+permits it on pre-GO runs **including this sensitivity control**, on the reading
+that a capture is the existing human-verification rule being done with better
+evidence. That document governs any capture this control produces — its
+never-commit / never-attach / never-redistribute / never-upload clause and its
+delete-once-the-adjudication-is-recorded clause apply here with no carve-out. The
+default is still no capture, and everything below describes the no-capture path.
+
+What has *not* changed is the report. `SafetyDrift.summary()` is aggregates-only
+(`quantfit/safety/verify.py`, `SafetyDrift.summary()`), the schema-v2 report has
+no completion field, and ROADMAP's non-goals still bar "raw harmful corpora or
+archived harmful long-form completions without an explicit recorded data-handling
+decision — never a silent reversal." Capture is not that silent reversal; it is
+the explicit recorded decision that clause demands, which is why the supersession
+is recorded here rather than left to be discovered.
 
 The report also does not say *which* probe flipped. `to_dict()` emits per-axis
-counts and per-zone baseline→quant refusal totals, not per-probe outcomes. So
-the human does not read flips out of an artifact; the human **reproduces the run
-and reads the pairs directly**.
+counts and per-zone baseline→quant refusal totals, not per-probe outcomes. So on
+a run made without a capture, the human does not read flips out of an artifact;
+the human **reproduces the run and reads the pairs directly**, which is what §5.2
+specifies.
 
 ### 5.2 Procedure
 
+**When the adjudication is done from a capture file** (§5.1), **Step 5 is
+unnecessary and should be skipped.** Step 5 exists only to establish that a
+hand-rerun produced the same bytes the judge scored; a capture *is* those bytes,
+written by the same `verify_safety` call that judged them, so there is nothing to
+reproduce and no provenance equality to check. The identity is machine-checkable
+rather than asserted: the unblinding key already records a per-entry
+`completion_sha256` alongside the judge's own label
+(`quantfit/safety/calibrate.py`, `build_labeling_sheet`), and that becomes this
+control's adjudication path once the `calibrate` rework lands. Steps 1-4 fall
+away with Step 5, since they exist only to
+recreate the run. Steps 6 and 7 are unchanged and remain the deliverable. The
+procedure below is the no-capture path, which is still the default.
+
 **Step 1 — get the probe set.** It is public and revision-pinned:
 `Crusadersk/quantsafe-judge-benchmark`, split `train`, 40 rows, revision
-`c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58` (`quantfit/safety/verify.py:82`).
+`c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58` (`quantfit/safety/verify.py`,
+`PROBE_DATASET_REVISION`).
 Columns: `id`, `zone`, `prompt`, `response`, `expected`. quantfit uses `prompt`
 as the probe text; `zone` is one of `clear_safe` / `clear_unsafe` / `borderline`
 and `expected` is `safe` / `unsafe`.
@@ -349,6 +378,8 @@ Keep the completions **local**. They do not go into the repo, the report, an
 issue, or a commit message.
 
 **Step 5 — verify the reproduction from provenance, before adjudicating.**
+*(Skip this step entirely when adjudicating from a capture — see the note at the
+top of this section.)*
 Decoding is greedy and prompt caching is off, so the same binary at the same
 thread count over the same files should reproduce the judged run's text. The
 reproduction is verified **from provenance equality alone** — every one of these
@@ -636,9 +667,24 @@ future reader will act on.
   in-process — `('Q2_K', 'Q3_K_S', 'Q3_K_M', 'Q4_K_S', 'Q4_K_M', 'Q5_K_M',
   'Q6_K', 'Q8_0', 'IQ4_XS')`. `registry.SCHEMES` printed the same way, confirming
   W4 as the compressed-tensors floor.
+- **The §5.1 supersession**: `docs/data-handling-completions.md` was read
+  2026-07-24 from this branch. Its §1 clause 2 states capture is "opt-in, and off
+  by default"; its §2.3 states that capture "**may** be enabled during pre-GO
+  runs — the 0.5 screen, the sensitivity control — at the operator's discretion
+  … it is the existing human-verification rule being done with better evidence."
+  That is the basis for §5.1's amendment and §5.2's capture note; the retention
+  and never-redistribute clauses quoted there are that document's §1 and §3.
+  `completion_sha256` in `quantfit/safety/calibrate.py`'s `build_labeling_sheet`
+  was read in the same branch and is the mechanism §5.2 names.
 - **Everything about quantfit's own behavior** is cited to file and line against
-  the working tree at the time of writing (`verify.py`, `gguf_arm.py`,
-  `report.py`, `registry.py`, `cli.py`); re-check the line numbers if those files
-  move. `screen.py` (§8) is cited **by symbol only** — `load_manifest`,
-  `run_screen`, `SUMMARY_FILENAME` — because it is under active revision and line
-  numbers there would be stale on arrival.
+  the working tree at the time of writing (`gguf_arm.py`, `report.py`,
+  `registry.py`, `cli.py`); re-check the line numbers if those files move.
+  `screen.py` (§8) is cited **by symbol only** — `load_manifest`, `run_screen`,
+  `SUMMARY_FILENAME` — because it is under active revision and line numbers there
+  would be stale on arrival. **`verify.py` now follows the same convention for
+  its two content citations, because they had already gone stale:** on 2026-07-24
+  `SafetyDrift.summary()` was at line 272, not the `:253` §5.1 cited (line 253 is
+  now inside `to_dict()`'s dict literal), and `PROBE_DATASET_REVISION` was at
+  line 89, not the `:82` §5.2 Step 1 cited. Both are now cited by symbol.
+  `verify.py:28-31` in §1 (the determinism canary) was re-checked on the same
+  date and is still correct, so it is left as a line citation.

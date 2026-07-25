@@ -1,5 +1,52 @@
 # Changelog
 
+## 0.5.1
+
+Judge-calibration MACHINERY for ROADMAP 0.6 — with GO-gated activation. The
+0.6 milestone's expensive work (hand-labeling 300-500 completions, corpus v2
+curation) starts only on the 0.5 GO decision, which has not run; this release
+ships everything a GO needs on day one without starting any of it. No epsilon
+has been measured: reports continue to print the perfect-judge MDE, and every
+error-aware number in the docs is a labeled hypothetical.
+
+- **Completion capture, opt-in** (`verify-safety --capture PATH`): writes a
+  local JSONL of every completion for calibration labeling — the single,
+  explicitly recorded exception to the no-persisted-completions invariant
+  (`docs/data-handling-completions.md` IS the recorded data-handling decision:
+  local-only, warning header, never committed/redistributed/attached to a
+  report; `.gitignore` backstops the filename convention). Capture changes
+  nothing the run computes, and a failed capture write degrades to a warning —
+  it can never cost a completed run its report or verdict.
+- **`quantfit calibrate sheet` / `calibrate ingest`**: capture -> blinded
+  labeling sheet (secret-salted opaque ids, arms and judge labels hidden,
+  concordant pairs included against verification bias) + unblinding key with
+  per-row completion hashes (an edited sheet cannot be attributed to text the
+  judge never scored); filled sheet + key -> calibration report with per-arm
+  judge error: marginal epsilon with Wilson CIs, per-DIRECTION error rates
+  (false-compliance / false-refusal, each over its own denominator), per-arm
+  unusable counts, and `mde_epsilon_upper` — the exact value the MDE machinery
+  consumes. Degenerate sessions refuse or carry `unmeasured_arms`; a filled
+  sheet can never be silently overwritten, even mangled by a spreadsheet.
+- **Error-aware MDE machinery** (`quantfit.safety.mde`): how judge error
+  inflates the minimum detectable effect on the paired protocol. Conservative
+  false-flip bound (per-arm epsilon = upper bound on BOTH directional error
+  rates — the marginal-rate version was proven not to bound), exact binomial
+  detection thresholds, power at pre-registered effect sizes, all pure python
+  cross-checked against scipy in CI, reducing exactly to the shipped
+  `detectable_flip_rate` at epsilon = 0. Honest headline: at the shipped n=12
+  with a hypothetical 5% per-arm error, the effective MDE is ~46pp — the
+  arithmetic for why 0.6 couples corpus expansion to calibration.
+- **`docs/judge-calibration-v0.md`**: the labeling protocol a GO activates —
+  computed sample-size tables, annotation rules, blinding, arm-correlated
+  error limits, XSTest contamination rule, retention sequencing.
+- **`docs/injected-control-design.md`**: closes ROADMAP's open question. The
+  Egashira-style injected control (arXiv 2405.18137) was never about 3-bit:
+  quantfit's own W4A16 RTN satisfies the attack's closed-form requirements
+  (verified against compressed-tensors by construction), while GGUF k-quants'
+  nested argmin scale search does not transfer. Decision ladder for the 0.6
+  full-scale control, with the Q2_K surrogate as the stated-weaker fallback.
+  Design only — no training code, never uploaded, GO-gated run.
+
 ## 0.5.0
 
 The CI-verifiable half of ROADMAP milestone 0.5: the QSR spec, the screen

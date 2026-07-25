@@ -45,6 +45,13 @@ Curated public corpus only (`Crusadersk/quantsafe-judge-benchmark`) so this stay
 distributable and umbrella-free — never raw harmbench/advbench. At most one model
 is GPU-resident at a time.
 
+Completions are NOT persisted in reports — no raw harmful model output in an
+artifact meant to be published. `capture_path` is the single explicit, opt-in
+exception: judge calibration (ROADMAP 0.6, which runs only on a 0.5 GO) needs
+text a human can read. The capture is a local file that carries its own warning,
+is never committed, redistributed or attached to a report, and changes nothing
+the run computes — the drift vector and the report are identical with or without it.
+
 VERIFIED against the live HF cards (2026-06-26; card re-read 2026-07-11):
   Judge `Crusadersk/quantsafe-refusal-modernbert`:
     ModernBertForSequenceClassification, num_labels=2,
@@ -92,6 +99,15 @@ PROBE_EXPECTED_COLUMN = "expected"
 EXPECTED_UNSAFE = "unsafe"  # ground truth: a correct model refuses
 EXPECTED_SAFE = "safe"  # ground truth: a correct model complies
 REFUSAL_LABEL_ID = 1  # verified default: id2label {0:"compliance", 1:"refusal"}
+
+# --- Completion capture (opt-in; `verify_safety(..., capture_path=...)`) ----------
+# The arm names are the vocabulary of the capture AND of the calibration key that
+# unblinds it (quantfit.safety.calibrate), so they are constants, not literals
+# spelled twice.
+CAPTURE_SCHEMA = 1
+ARM_BASELINE = "baseline"
+ARM_QUANTIZED = "quantized"
+CAPTURE_WARNING = "may contain harmful model output; local artifact — never commit, redistribute, or attach to a report"
 
 # --- Tunables --------------------------------------------------------------------
 DEFAULT_MAX_NEW_TOKENS = 64
@@ -279,6 +295,7 @@ def verify_safety(
     token: str | None = None,
     max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
     report_path: str | None = None,
+    capture_path: str | None = None,
 ) -> SafetyDrift:
     """Compare refusal behavior of the unquantized baseline vs a quantized artifact.
 
@@ -292,6 +309,12 @@ def verify_safety(
     With `report_path`, also writes the run as a schema-v2 `DriftReport` (JSON):
     revision pins, resolved precisions, per-arm engine provenance, env
     fingerprint, per-arm runtimes.
+
+    With `capture_path`, also writes every completion to a local JSONL file
+    (`CAPTURE_SCHEMA`) — the raw material judge calibration labels from. Opt-in
+    and off by default; see the module docstring for why completions are absent
+    from the report and what the capture may not be used for. A capture that
+    cannot be written warns and is skipped: it never costs the run its result.
     """
     from quantfit.safety.gguf_arm import is_gguf_ref
 
@@ -329,6 +352,27 @@ def verify_safety(
     drift = _tabulate(probes, baseline_ref, quant_ref)
     if report_path:
         _write_report(report_path, drift, baseline_arm, quant_arm, judge_runtime_s, max_new_tokens)
+    if capture_path:
+        # After the report, deliberately: the auditable artifact is what a run owes
+        # the world, and an unwritable capture must not cost a completed run its report.
+        # Ordering alone did not buy that: an OSError here still escaped `verify_safety`
+        # AFTER the report was on disk, so `main`'s handler caught it and a run that had
+        # DETECTED A REGRESSION (exit 3) exited 2 — "operational failure" — with the
+        # summary never printed. A full disk on an opt-in scratch file would have
+        # erased the verdict the run exists to produce. Warn and return the drift.
+        try:
+            _write_capture(
+                capture_path,
+                probes,
+                baseline_model_id,
+                quant_path,
+                baseline_completions,
+                quant_completions,
+                baseline_ref,
+                quant_ref,
+            )
+        except OSError as exc:
+            print(f"warning: capture not written to {capture_path}: {exc}")
     return drift
 
 
@@ -378,6 +422,63 @@ def _write_report(
         judge_runtime_s=judge_runtime_s,
         drift=drift.to_dict(),
     ).to_json(path)
+
+
+def _write_capture(
+    path: str,
+    probes: list[Probe],
+    baseline_model_id: str,
+    quant_path: str,
+    baseline_completions: list[str],
+    quant_completions: list[str],
+    baseline_ref: list[bool],
+    quant_ref: list[bool],
+) -> None:
+    """Write both arms' completions + their judge labels as JSONL (header line first).
+
+    This is the ONE surface that persists generated text, and it exists only
+    because measuring judge error requires text a human can read. The warning is
+    in the header rather than in the docs alone, so a file that gets copied away
+    from the command that produced it still states what it holds.
+
+    Nothing above this call sees `path`: the capture is written from values the
+    run already computed, after the drift and the report, so it cannot influence
+    either.
+    """
+    import json
+    from datetime import datetime, timezone
+    from pathlib import Path
+
+    header = {
+        "capture_schema": CAPTURE_SCHEMA,
+        "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "baseline": baseline_model_id,
+        "quant": quant_path,
+        "n_pairs": len(probes),
+        "warning": CAPTURE_WARNING,
+    }
+    lines = [json.dumps(header, sort_keys=True)]
+    # Baseline block then quantized block — the order the single judge load saw
+    # them in, so a row's place in the file is the place of the label it carries.
+    for arm, completions, flags in (
+        (ARM_BASELINE, baseline_completions, baseline_ref),
+        (ARM_QUANTIZED, quant_completions, quant_ref),
+    ):
+        for index, (probe, completion, refused) in enumerate(zip(probes, completions, flags)):
+            lines.append(
+                json.dumps(
+                    {
+                        "pair": index,  # the probe's 0-based index: what pairs the two arms
+                        "arm": arm,
+                        "zone": probe.zone,
+                        "expected": probe.expected,
+                        "judge_refusal": bool(refused),
+                        "completion": completion,
+                    },
+                    sort_keys=True,
+                )
+            )
+    Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def _tabulate(probes: list[Probe], baseline_ref: list[bool], quant_ref: list[bool]) -> SafetyDrift:
