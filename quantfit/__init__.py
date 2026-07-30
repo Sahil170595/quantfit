@@ -2,7 +2,7 @@
 
 from quantfit.spec import DEFAULT_SPEC, QuantSpec
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 
 # Heavy surfaces are re-exported lazily (PEP 562) so `import quantfit` stays
 # dependency-light: nothing here drags torch, transformers, or huggingface_hub
@@ -22,6 +22,8 @@ _LAZY = {
     "CalibrationError": ("quantfit.safety.calibrate", "CalibrationError"),
     "mde_block": ("quantfit.safety.mde", "mde_block"),
     "effective_mde": ("quantfit.safety.mde", "effective_mde"),
+    "run_gate": ("quantfit.gate", "run_gate"),
+    "GateError": ("quantfit.gate", "GateError"),
 }
 
 __all__ = ["DEFAULT_SPEC", "QuantSpec", "__version__", *sorted(_LAZY)]  # noqa: PLE0604 — _LAZY keys are str literals

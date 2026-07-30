@@ -25,6 +25,8 @@ def test_parser_accepts_every_command():
         ["emit", "model-card", "--report", "r.json"],
         ["calibrate", "sheet", "--capture", "c.capture.jsonl", "--sheet", "s.labels.csv", "--key", "k.labelkey.json"],
         ["calibrate", "ingest", "--sheet", "s.labels.csv", "--key", "k.labelkey.json", "--out", "cal.json"],
+        ["gate", "--baseline", "a", "--quant", "b", "--tier", "smoke"],
+        ["gate", "--baseline", "a", "--quant", "b", "--threshold", "30"],
         ["quantize", "--model", "m", "--method", "awq", "--out", "o"],
     ]
     for argv in cases:
@@ -193,6 +195,45 @@ def test_verify_safety_passes_capture_through(monkeypatch):
     monkeypatch.setattr(sv, "verify_safety", fake)
     assert main(["verify-safety", "--baseline", "a", "--quant", "b", "--capture", "x.capture.jsonl"]) == 0
     assert seen["capture_path"] == "x.capture.jsonl"
+
+
+def test_gate_threshold_is_percentage_points_at_the_cli_boundary(monkeypatch, capsys):
+    # The operator declares 30pp; run_gate takes a RATE. A silent 100x here would
+    # gate every quant at 3000pp (i.e. never fail), so the unit split is tested.
+    import quantfit.gate as g
+
+    seen = {}
+
+    def fake(baseline, quant, **kwargs):
+        seen.update(kwargs)
+        seen["baseline"] = baseline
+        return {"headline": "PASS (fake)", "exit_code": 0}
+
+    monkeypatch.setattr(g, "run_gate", fake)
+    assert main(["gate", "--baseline", "a", "--quant", "b", "--threshold", "30"]) == 0
+    assert seen["threshold"] == pytest.approx(0.30)
+    assert seen["tier"] is None
+    assert "PASS (fake)" in capsys.readouterr().out
+
+    seen.clear()
+    assert main(["gate", "--baseline", "a", "--quant", "b", "--tier", "smoke"]) == 0
+    assert seen["threshold"] is None and seen["tier"] == "smoke"
+
+
+def test_gate_exit_codes_are_relayed_verbatim(monkeypatch):
+    # The gate owns its verdict; the CLI must not reinterpret it — especially 4
+    # ("nothing measured") and 5 ("threshold unresolvable"), which are not passes.
+    import quantfit.gate as g
+
+    for code in (0, 3, 4, 5):
+        monkeypatch.setattr(g, "run_gate", lambda *a, _c=code, **k: {"headline": "h", "exit_code": _c})
+        assert main(["gate", "--baseline", "a", "--quant", "b", "--tier", "smoke"]) == code
+
+    def _operational(*a, **k):
+        raise g.GateError("threshold must be a flip RATE in (0, 1]")
+
+    monkeypatch.setattr(g, "run_gate", _operational)
+    assert main(["gate", "--baseline", "a", "--quant", "b", "--tier", "smoke"]) == 2
 
 
 def test_calibrate_subcommands_dispatch_and_refuse_operationally(monkeypatch, capsys):

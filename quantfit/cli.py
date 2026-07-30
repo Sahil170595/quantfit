@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 
+from quantfit.gate import TIERS as GATE_TIERS  # tier NAMES only — no torch, no heavy import
 from quantfit.registry import METHODS
 
 
@@ -136,6 +137,41 @@ def _build_parser() -> argparse.ArgumentParser:
     pci.add_argument("--key", required=True, metavar="PATH", help="the key written next to it")
     pci.add_argument("--out", required=True, metavar="PATH", help="calibration report JSON to write (counts only)")
 
+    pg = sub.add_parser(
+        "gate",
+        parents=[tok],
+        help="pre-release gate: does this quant hold a declared refusal-robustness threshold? "
+        "(exit 0 = pass, 3 = fail, 4 = gated axis unmeasurable, 5 = threshold finer than the "
+        "instrument's resolution, 2 = operational error)",
+    )
+    pg.add_argument("--baseline", "--fp16", dest="baseline", required=True, help="the unquantized baseline arm")
+    pg.add_argument("--quant", required=True, help="the quantized artifact to gate")
+    gthr = pg.add_mutually_exclusive_group(required=True)
+    gthr.add_argument(
+        "--threshold",
+        type=float,
+        metavar="PP",
+        help="declared dangerous-axis flip-rate threshold in PERCENTAGE POINTS (e.g. 30 = 30pp)",
+    )
+    gthr.add_argument("--tier", choices=tuple(GATE_TIERS), help="a named tier instead of a raw threshold")
+    pg.add_argument(
+        "--eps-upper",
+        type=float,
+        default=None,
+        metavar="RATE",
+        help="per-arm upper bound on BOTH directional judge-error rates (a calibration report's "
+        "mde_epsilon_upper). Without it the gate prints a perfect-judge FLOOR, not a resolution",
+    )
+    pg.add_argument(
+        "--eps-source",
+        default=None,
+        metavar="STR",
+        help="where --eps-upper came from (required with it: an unsourced epsilon is not evidence)",
+    )
+    pg.add_argument("--max-new-tokens", type=int, default=64, help="completion length per probe (default 64)")
+    pg.add_argument("--report", default=None, metavar="PATH", help="also write the schema-v2 drift report")
+    pg.add_argument("--out", default=None, metavar="PATH", help="write the gate decision artifact JSON")
+
     pq = sub.add_parser("quantize", parents=[tok], help="quantize a model")
     pq.add_argument("--model", required=True, help="HF model id (the full-precision base)")
     pq.add_argument("--method", required=True, choices=tuple(METHODS))
@@ -244,6 +280,30 @@ def _dispatch(args: argparse.Namespace) -> int:
 
         print(model_card_fragment(args.report), end="")  # fragment carries its own trailing newline
         return 0
+
+    if args.cmd == "gate":
+        from quantfit.gate import run_gate
+
+        # --threshold is percentage points at the CLI boundary; run_gate takes a rate.
+        # The conversion lives here so the machinery has one unit and the operator has
+        # the one they think in (a silent 100x is the failure mode this splits apart).
+        threshold = args.threshold / 100 if args.threshold is not None else None
+        decision = run_gate(
+            args.baseline,
+            args.quant,
+            threshold=threshold,
+            tier=args.tier,
+            eps_upper=args.eps_upper,
+            eps_source=args.eps_source,
+            token=args.token,
+            max_new_tokens=args.max_new_tokens,
+            report_path=args.report,
+            out_path=args.out,
+        )
+        print(decision["headline"])
+        if args.out:
+            print(f"gate decision -> {args.out}")
+        return decision["exit_code"]
 
     if args.cmd == "calibrate":
         if args.calibrate_cmd == "sheet":

@@ -1,5 +1,76 @@
 # Changelog
 
+> Note on versions: tool versions do not track ROADMAP milestone numbers. 0.5.1
+> shipped 0.6's machinery, 0.5.2 ships 0.7's; a milestone number in a version
+> would claim milestone completion, and those completions are gated on runs and
+> decisions that have not happened. 1.0 is the frozen standard (ROADMAP 1.0).
+
+## 0.5.2
+
+ROADMAP 0.7 machinery: the pre-release gate, its CI integration, and the
+protocols they need — built to the milestone's stated goal, *"the pre-release
+check a quantizer runs on their own GPU, which refuses to promise resolution it
+does not have."*
+
+- **`quantfit gate --baseline B --quant Q --tier smoke|full` (or `--threshold PP`)**:
+  runs the paired diff and answers PASS/FAIL on the refusal-robustness axis —
+  but only after proving it can resolve the resolution you declared. Resolution
+  is checked twice: **before any model loads**, against the best-case at-risk
+  pairs the pinned probe set can supply, and again against the realized at-risk
+  n after the run. Either refusal exits **5** and names the threshold, the
+  printed MDE, the n, and where epsilon came from. A gate that cannot fail is
+  refused too (a declared threshold coarser than 30pp is an operational error).
+  Note what the threshold does and does not do: it governs the *resolution* leg
+  only. The verdict is an exact binomial test at the printed bound, not a
+  comparison of the observed rate against your number — with any real judge
+  error a single flip stops being a rejection — and the gate prints both the
+  flip count and the detection threshold so the arithmetic is auditable.
+- **Exit codes as a CI contract** (now spec §5.8): 0 pass, 3 fail (H0 rejected
+  on the gated axis), 4 the gated axis had zero at-risk pairs, 5 unresolvable,
+  2 operational. **4 and 5 are not passes** and must fail a build. Two stated
+  divergences from `verify-safety`: the gate's 4 is narrowed to the gated axis,
+  and its 3 is threshold-relative on one axis — so when the underlying run
+  detects an over-refusal regression the gate can still exit 0, and it therefore
+  carries the protocol's own verdict verbatim, flags the ungated axis, and names
+  it in the headline.
+- **The floor disclosure.** No in-distribution judge error has been measured
+  (ROADMAP 0.6 is GO-gated), so without an operator-supplied `--eps-upper` the
+  gate prints a **perfect-judge floor** — a lower bound on the true resolution,
+  never the resolution — and says so on every surface. The floor cuts both ways
+  and the gate discloses both: it is optimistic about resolution, and at
+  epsilon = 0 the detection threshold is the smallest possible, so a floor-mode
+  FAIL runs at an uncontrolled alpha and is a candidate for human verification.
+  `--eps-upper` requires `--eps-source`; an unsourced epsilon is not evidence,
+  and an epsilon of exactly 0 is refused (no Wilson upper bound is ever 0).
+- **Fingerprint-keyed baseline caching** (`quantfit.safety.cache`): a wrong hit
+  fabricates half a paired diff, so the fingerprint covers every input that can
+  change a completion — model, digest-shaped revision, resolved precision,
+  engine identity (transformers version, or llama.cpp binary hash + threads +
+  device), decode params, probe pins, and the execution environment. A floating
+  ref like `main` confers no content identity and is refused rather than cached.
+  Entries re-derive their own fingerprint on load, so a hand-edited entry is
+  never served. Cache entries hold completion text and are governed by
+  `docs/data-handling-completions.md`; `.gitignore` backstops
+  `*.baseline-cache.json`. Budgets assume zero hits — a hit is a speedup, never
+  a planning assumption.
+- **Reference CI integration**: a composite action (`.github/actions/quantfit-gate`)
+  a third-party quantizer copies, a weekly CPU canary
+  (`.github/workflows/canary.yml`) that asserts the determinism canary's
+  zero-flips-by-construction property without downloading a large model, and
+  `docs/ci-integration.md` — the exit-code table, what the gate does not
+  promise, secret handling, and artifact rules.
+- **`docs/cross-hardware-tolerance-v0.md`**: the tolerance protocol 0.8's
+  reproduction gate will consume — what a tolerance covers (GPU model, driver,
+  kernel nondeterminism, host threads, and the judge's own forward pass) versus
+  what it cannot, which of those the shipped report can witness from its own
+  fields, and the recorded deviation where ROADMAP's "dtype pinned fp16 on all
+  arms" cannot hold on the GGUF stratum by construction.
+
+**Not in this release:** the cross-hardware T4 run, the injected-catastrophe
+canary, a rendered HF model-card page, and any measured judge error — so ROADMAP
+0.7's gate criteria are not claimed as met. The baseline cache is library
+surface: `quantfit gate` does not yet call it.
+
 ## 0.5.1
 
 Judge-calibration MACHINERY for ROADMAP 0.6 — with GO-gated activation. The

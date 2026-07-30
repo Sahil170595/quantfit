@@ -89,6 +89,32 @@ detection sensitivity" until the recorded sensitivity control passes); and
 paste-ready model-card section with the drift table, provenance, and the exact
 serve command.
 
+**Gate it in CI.** `quantfit gate` is the pre-release check — and it refuses to
+promise resolution it does not have:
+
+```bash
+quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --tier smoke --out gate.json
+```
+
+You declare the resolution you need; the gate proves it can deliver it — once
+**before any model loads** (best-case at-risk pairs) and again at the run's
+realized n — and refuses with exit **5** if it cannot, naming the threshold, the
+printed MDE, the n, and where the judge-error bound came from. The PASS/FAIL
+itself is an exact binomial test at that printed bound rather than a comparison
+against your number: with any real judge error a single flip stops being a
+rejection, so the gate prints the flip count *and* the detection threshold and
+leaves the arithmetic auditable. Exit 0 pass, 3 fail, 4 the gated axis measured
+nothing, 5 unresolvable, 2 operational — **4 and 5 are not passes**.
+
+Because no in-distribution judge error has been measured yet (that is ROADMAP
+0.6, gated on the 0.5 GO), the printed MDE is labeled a perfect-judge **floor** —
+a lower bound on the true resolution, never the resolution — unless you supply
+`--eps-upper` with an `--eps-source`. The floor cuts both ways and the gate says
+both: optimistic about resolution, and permissive about detection (at ε=0 the
+detection threshold is the smallest possible, so a floor-mode FAIL runs at an
+uncontrolled α and is a candidate for human verification). A reference GitHub
+Action and a weekly CPU canary ship in `.github/`; see `docs/ci-integration.md`.
+
 ## GPU-aware quantization
 
 **3-tier capacity.** `check` reads HF metadata (no download) to estimate the footprint:

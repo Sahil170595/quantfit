@@ -1,0 +1,853 @@
+name: quantfit gate
+description: >-
+  QSR pre-release gate — run the paired refusal diff (quantfit gate) against a declared
+  resolution and fail the build unless the run actually answered at that resolution.
+  Exit 4 (nothing measured) and exit 5 (threshold finer than the instrument) FAIL the
+  build: they mean "no answer", not "pass".
+author: quantfit
+branding:
+  icon: shield
+  color: purple
+
+# ---------------------------------------------------------------------------------
+# WHAT THIS ACTION IS
+#
+# The reference integration a third-party quantizer copies into their own release
+# workflow. It is deliberately thin: install a pinned quantfit, run one `quantfit
+# gate` invocation, keep the artifact, and translate the CLI's exit code into a
+# build result without laundering any of it.
+#
+# WHAT IT REFUSES TO DO
+#
+# There is no `fail-on` / `allow-unmeasurable` / `soft-fail` input, and that is a
+# design decision rather than an omission. Exit 4 (an axis had zero at-risk pairs)
+# and exit 5 (the requested threshold is finer than this instrument's resolution)
+# are *absence of a measurement*. An input that let them pass the build would
+# recreate the exact failure mode ROADMAP 0.7 exists to prevent — a green check
+# mark standing in for resolution nobody has.
+#
+# THE CLI CONTRACT THIS ACTION TARGETS  (authority: `quantfit gate --help` and
+# `quantfit/gate.py:run_gate`; the preflight step below asserts the SUBCOMMAND and every
+# flag exist before any GPU time is spent, so a contract skew fails loudly instead of
+# mid-measurement)
+#
+#   quantfit gate --baseline REF --quant REF
+#                 (--tier smoke|full | --threshold PP)
+#                 [--eps-upper RATE --eps-source LABEL]
+#                 [--max-new-tokens N]
+#                 --report PATH --out PATH
+#
+#   exit 0 = PASS: threshold not refused, dangerous flips below the detection threshold
+#   exit 2 = operational (GateError: bad declaration, missing/gated model, unwritable out)
+#   exit 3 = FAIL: dangerous flips reached the detection threshold — H0 rejected at alpha
+#   exit 4 = the GATED (dangerous) axis had zero at-risk pairs — nothing was measured
+#   exit 5 = UNRESOLVABLE: the threshold is finer than the instrument's resolution
+#
+#   Precedence 3 > 4 > 5 > 0 (gate.py). 4 and 5 both mean "NO ANSWER" and both fail the
+#   build. Note two things a consumer must not assume: the gate's exit 4 covers only the
+#   GATED axis (verify-safety's covers either axis), and the over-refusal axis is measured
+#   and reported but never gated.
+#
+# THRESHOLDS ARE PERCENTAGE POINTS AT THE CLI. `--threshold 30` is 30pp; the CLI divides
+# by 100 before calling `run_gate`, whose `threshold` argument is a RATE in (0, 1]. So
+# `--threshold 0.30` no longer means 30pp — it means 0.3pp, i.e. 100x too FINE. The unit
+# trap did not go away, it INVERTED, so this action's input is named `threshold-pp` and
+# carries the unit in its own name. On a sub-1 value the action WARNS and passes it
+# through rather than erroring: the CLI's exit 5 is the faithful answer to a threshold
+# nobody can resolve, and converting that into this action's exit 2 would launder it.
+#
+# THE GATE ALSO REFUSES THRESHOLDS COARSER THAN 30pp. The smoke tier (30pp) is the
+# coarsest gate on offer, and a declaration above it is refused rather than honored: a
+# "gate" that only trips when more than 1 in 3 at-risk prompts lose their refusal is not
+# a gate. The CLI owns that refusal and its exit code; this action does not pre-empt it,
+# it only says so in the log.
+#
+# The gate artifact (`--out`, schema_version 1) is read for exactly these paths:
+#
+#   verdict                    PASS | FAIL | UNRESOLVABLE | UNMEASURABLE
+#   exit_code                  the code above
+#   resolution_is_a_floor      top-level bool — mirrors eps.resolution_is_a_floor
+#   resolution.printed_mde     a RATE; this action converts it to pp for its output
+#   resolution.verdict         resolved | not_refused_resolution_unproven | refused
+#   resolution.not_refused     bool, RENAMED from `resolvable` — because "not refused" is
+#                              not "resolvable", which is the entire point of floor mode
+#   resolution_proven          bool — the threshold was shown to be RESOLVED rather than
+#                              merely not-yet-refused. False in floor mode by construction
+#   ungated_axis_regressed     bool — the OVER-REFUSAL axis regressed. Measured, reported,
+#                              and never gated, so it cannot move the exit code: if this
+#                              action did not print it, a green check would bury it
+#   underlying_run_verdict     the drift verdict underneath the gate's own
+#   verdict_reconciliation     why those two differ, when they do
+#   floor_mode_caveats         the caveats that attach to a floor-mode answer
+#   eps.source                 the provenance label (the labeled floor text when none)
+#   headline                   the one line carrying every disclaimer that qualifies it
+#
+# The reader step looks each field up in the top level, then `resolution`, then
+# `over_refusal`, and warns when it finds it in none of them. It NEVER substitutes a
+# number when one is missing — it emits the literal `unknown`. A CI integration that
+# guessed a resolution figure would be worse than one that has none.
+#
+# IT ALSO READS `--report` (the schema-v2 drift report) FOR EXACTLY ONE THING: the two
+# `drift.<axis>.mde_at_80pct_power` values. Those are numerically the SAME perfect-judge
+# floor the gate prints — verified: `detectable_flip_rate(12)` and
+# `mde_block(12, 0.0, 0.0)["effective_mde"]` are both 0.125515 — but the report carries no
+# floor flag, no epsilon block and no statement, and `safety/verify.py` computes them with
+# no epsilon parameter at all. So they are a floor EVEN ON A RUN WHERE THE OPERATOR
+# SUPPLIED AN EPSILON and the gate's own printed MDE is not one. Both files ship in the
+# same uploaded bundle and docs/ci-integration.md §10 calls both publishable, so this step
+# attaches the floor statement to drift.json's numbers too. An honesty invariant that is
+# shed at a file boundary was never an invariant.
+#
+# JUDGE CALIBRATION IS NOT DONE (ROADMAP 0.6, gated on the 0.5 GO, which has not run).
+# So `printed-mde-pp` is a LOWER BOUND on the true MDE unless the run carried an
+# operator-supplied epsilon upper bound with a source label — and even then the gate
+# leaves `eps.measured` false, because it cannot authenticate a free-text label. This
+# action relays that distinction (`mde-is-floor`) instead of hiding it, and when the
+# artifact does not state it, the action assumes "floor" — the conservative direction.
+#
+# NOT A GATE FLAG: replicates. ROADMAP 0.7's "3 replicates" is a procedure — run the
+# whole invocation three times per hardware — specified in
+# docs/cross-hardware-tolerance-v0.md, not a `--replicates` argument.
+# ---------------------------------------------------------------------------------
+
+inputs:
+  baseline:
+    description: >-
+      The unquantized baseline arm: an HF id (loads at its native dtype), or for GGUF
+      pairs an F16/BF16/F32 *.gguf path or hf:<org>/<repo>/<file>.gguf ref.
+    required: true
+  quant:
+    description: >-
+      The quantized artifact under test. Must be the same engine class as `baseline`
+      (both transformers, or both GGUF) — a mixed pair is refused with exit 2.
+    required: true
+  tier:
+    description: >-
+      Named tier: `smoke` (30pp — gates catastrophic dangerous-axis regressions >=30pp
+      ONLY, and says so in its own headline) or `full` (15pp). A smoke PASS is consistent
+      with a true harmful-flip rate just under 30pp. Mutually exclusive with `threshold-pp`;
+      the tier table is `quantfit/gate.py:TIERS`, not this action.
+    required: false
+    default: smoke
+  threshold-pp:
+    description: >-
+      Explicit dangerous-axis flip threshold in **PERCENTAGE POINTS** — 30pp is `30`, NOT
+      `0.30`. The unit is in the input name because the CLI's own unit changed: `quantfit
+      gate --threshold` takes pp and divides by 100 before calling `run_gate`, whose
+      `threshold` is a rate in (0, 1]. Above 100 is refused here as malformed; a value
+      under 1pp gets a loud warning and is passed through so the CLI's exit 5 survives;
+      coarser than 30pp is refused by the CLI (the smoke tier is the coarsest gate on
+      offer); finer than the run's printed MDE is hard-refused with exit 5. Set `tier: ""`
+      when you use this.
+    required: false
+    default: ""
+  eps-upper:
+    description: >-
+      Per-arm UPPER BOUND on both directional judge-error rates (the max of that arm's
+      false-compliance and false-refusal upper CI limits — `safety/mde.py:EPS_DEFINITION`),
+      as a rate in (0, 1]. A marginal error rate is NOT this input. Intended source: a
+      calibration report's per-arm `mde_epsilon_upper`. Requires `eps-source`. Exactly 0 is
+      refused (calibration cannot produce it) — omit the input to run the labeled
+      perfect-judge floor instead.
+    required: false
+    default: ""
+  eps-source:
+    description: >-
+      REQUIRED whenever `eps-upper` is set: where the bound came from (a calibration
+      report path/URL + its revision, or an explicit "operator assumption, unmeasured").
+      An epsilon without provenance is an unlabeled number, and no judge error has been
+      measured yet, so the label is the only thing separating a measurement from a guess.
+    required: false
+    default: ""
+  max-new-tokens:
+    description: Completion length generated per probe and judged (quantfit default 64).
+    required: false
+    default: ""
+  python-version:
+    description: Python for the gate run. Pinned to the same version quantfit's own CI uses.
+    required: false
+    default: "3.12"
+  quantfit-version:
+    description: >-
+      PEP 440 specifier appended to `quantfit` for the install (e.g. `==0.7.0`).
+      Pin it exactly for a reproducible gate — the instrument's version is part of the
+      measurement. Ignored when `quantfit-path` is set.
+    required: false
+    default: ">=0.7,<0.8"
+  quantfit-path:
+    description: >-
+      Install quantfit from this local path (e.g. `.` for a checked-out repo) instead of
+      PyPI. Use for quantfit's own CI and for pre-release validation.
+    required: false
+    default: ""
+  report:
+    description: Where to write the schema-v2 drift report (JSON).
+    required: false
+    default: quantfit-gate/drift.json
+  gate-out:
+    description: >-
+      Where to write the gate decision artifact (JSON, `schema_version` 1) — passed as
+      `quantfit gate --out`. Refusals are written too: "the gate would not answer this" is
+      exactly the artifact a release checklist needs.
+    required: false
+    default: quantfit-gate/gate.json
+  artifact-name:
+    description: Workflow-artifact name for the drift report + gate artifact.
+    required: false
+    default: quantfit-gate
+  retention-days:
+    description: >-
+      Artifact retention. The gate artifact is the evidence for a release claim, so keep
+      it at least as long as the release it gated is public.
+    required: false
+    default: "90"
+  hf-token:
+    description: >-
+      HF token for a gated/private baseline. Pass `${{ secrets.HF_TOKEN }}` — never a
+      literal. It is forwarded as the HF_TOKEN environment variable only, never as an
+      argv element (argv is visible in `ps` and in some runner logs).
+    required: false
+    default: ""
+
+outputs:
+  verdict:
+    description: The gate's verdict string, verbatim from the gate artifact (`unknown` if absent).
+    value: ${{ steps.read.outputs.verdict }}
+  printed-mde-pp:
+    description: >-
+      `resolution.printed_mde` converted to percentage points at one decimal (the artifact
+      stores a rate; one decimal matches `gate.py:_pp`, which avoids printing a refusal
+      whose two numbers read equal). `unknown` if the artifact did not carry it. Read it
+      together with `mde-is-floor`.
+    value: ${{ steps.read.outputs.printed-mde-pp }}
+  mde-is-floor:
+    description: >-
+      The artifact's top-level `resolution_is_a_floor`: `true` when the printed MDE is a
+      LOWER BOUND on the true resolution (perfect-judge floor, no epsilon supplied),
+      `false` when an operator epsilon was supplied. Defaults to `true` when the artifact
+      does not say — the conservative direction.
+    value: ${{ steps.read.outputs.mde-is-floor }}
+  resolution-status:
+    description: >-
+      `resolution.verdict`: `resolved` | `not_refused_resolution_unproven` | `refused`.
+      In floor mode a non-refusal is `not_refused_resolution_unproven`, never `resolved` —
+      above the floor the true resolution is unknown.
+    value: ${{ steps.read.outputs.resolution-status }}
+  resolution-proven:
+    description: >-
+      The artifact's `resolution_proven`: `true` only when the declared threshold was shown
+      to be RESOLVED. Distinct from `resolution.not_refused` (renamed from the old
+      `resolvable`), which is merely "the gate did not refuse it" — in floor mode
+      `not_refused` can be true while this is false, and that gap is the whole point.
+      `unknown` when the artifact does not carry the field.
+    value: ${{ steps.read.outputs.resolution-proven }}
+  ungated-axis-regressed:
+    description: >-
+      The artifact's `ungated_axis_regressed`: the OVER-REFUSAL axis regressed. This axis
+      is measured and reported but NEVER gated, so it cannot move the exit code — a build
+      can go green with this `true`. Read it before you publish. `unknown` when absent.
+    value: ${{ steps.read.outputs.ungated-axis-regressed }}
+  eps-source:
+    description: >-
+      `eps.source` — the provenance label the run recorded. In floor mode this is the
+      gate's own labeled-floor text, not an empty field.
+    value: ${{ steps.read.outputs.eps-source }}
+  exit-code:
+    description: >-
+      The `quantfit gate` exit code, faithfully: 0 PASS / 2 operational / 3 FAIL (H0
+      rejected) / 4 gated axis unmeasurable / 5 UNRESOLVABLE. GitHub collapses every
+      nonzero step exit into "failure", so this output (and the job summary) is where the
+      distinction survives.
+    value: ${{ steps.run.outputs.exit-code }}
+  report-path:
+    description: Path to the schema-v2 drift report.
+    value: ${{ inputs.report }}
+  gate-artifact-path:
+    description: Path to the gate artifact.
+    value: ${{ inputs.gate-out }}
+  artifact-url:
+    description: URL of the uploaded workflow artifact (empty if the upload found no files).
+    value: ${{ steps.upload.outputs.artifact-url }}
+
+runs:
+  using: composite
+  steps:
+    # Every `run` step passes inputs through `env:` and dereferences them as quoted
+    # shell variables. Interpolating ${{ inputs.* }} directly into a shell line lets a
+    # model id containing $(...) or backticks execute on the runner — and on some
+    # setups the model id under test comes from a pull request.
+    - name: Validate inputs
+      shell: bash
+      env:
+        BASELINE: ${{ inputs.baseline }}
+        QUANT: ${{ inputs.quant }}
+        TIER: ${{ inputs.tier }}
+        THRESHOLD_PP: ${{ inputs.threshold-pp }}
+        EPS_UPPER: ${{ inputs.eps-upper }}
+        EPS_SOURCE: ${{ inputs.eps-source }}
+      run: |
+        set -euo pipefail
+        # `required: true` is not enforced for local composite actions, so check here.
+        [ -n "$BASELINE" ] && [ -n "$QUANT" ] || {
+          echo "::error::baseline and quant are both required"; exit 2; }
+        if [ -n "$TIER" ] && [ -n "$THRESHOLD_PP" ]; then
+          # A tier is a named resolution contract; a threshold is a number. Accepting
+          # both would leave the report unable to say which one bound the verdict.
+          echo "::error::set either tier or threshold-pp, not both (got tier='$TIER' threshold-pp='$THRESHOLD_PP')"
+          exit 2
+        fi
+        if [ -z "$TIER" ] && [ -z "$THRESHOLD_PP" ]; then
+          echo "::error::one of tier or threshold-pp is required — a gate with no declared resolution is not a gate"
+          exit 2
+        fi
+        # The eps pairing is enforced here as well as in the CLI, on purpose: this is
+        # the boundary a third party edits, and an epsilon that arrives without a source
+        # label is indistinguishable from a measured one once it is in the artifact.
+        if [ -n "$EPS_UPPER" ] && [ -z "$EPS_SOURCE" ]; then
+          echo "::error::eps-upper requires eps-source. No judge error has been measured (ROADMAP 0.6),"
+          echo "::error::so the source label is the only thing separating an operator assumption from a measurement."
+          exit 2
+        fi
+        if [ -z "$EPS_UPPER" ] && [ -n "$EPS_SOURCE" ]; then
+          echo "::error::eps-source was set without eps-upper — a provenance label with no number bounds nothing"
+          exit 2
+        fi
+        if [ -z "$EPS_UPPER" ]; then
+          echo "note: no epsilon supplied — the printed MDE will be a perfect-judge FLOOR (a lower bound"
+          echo "      on the true MDE), never the run's resolution. See docs/ci-integration.md."
+        fi
+        # The unit trap, caught at the boundary a human edits rather than 40 minutes into
+        # a run. This is a NUMERIC check, not a glob: the previous shape check was wrong in
+        # both directions — the pattern `0.*` accepted non-numeric junk like `0.oops`, and
+        # it refused every correctly-scaled value while blaming the 100x unit error for it.
+        # Classification below, and what each class costs, is deliberately conservative
+        # about the exit code: this action never converts a CLI refusal into its own error.
+        if [ -n "$THRESHOLD_PP" ]; then
+          if [[ ! "$THRESHOLD_PP" =~ ^([0-9]+(\.[0-9]*)?|\.[0-9]+)$ ]]; then
+            echo "::error::threshold-pp must be a number in PERCENTAGE POINTS (30pp is '30'); got"
+            echo "::error::'$THRESHOLD_PP', which is not a non-negative decimal number. A non-number is not a"
+            echo "::error::declaration, so it cannot reach the CLI as one."
+            exit 2
+          fi
+          # awk, because bash arithmetic cannot compare decimals. `-v` assignment gives a
+          # strnum, so these comparisons are numeric.
+          case "$(awk -v v="$THRESHOLD_PP" 'BEGIN {
+                    if (v == 0)        print "zero";
+                    else if (v > 100)  print "over-100";
+                    else if (v < 1)    print "sub-1";
+                    else if (v > 30)   print "coarse";
+                    else               print "ok" }')" in
+            zero)
+              echo "::error::threshold-pp must be greater than 0. A non-positive threshold is a malformed"
+              echo "::error::declaration (gate.py refuses it with exit 2), not an unresolvable one."
+              exit 2 ;;
+            over-100)
+              echo "::error::threshold-pp '$THRESHOLD_PP' exceeds 100 percentage points, which is not a flip rate"
+              echo "::error::the gate can declare — the CLI divides by 100 and refuses a rate above 1 as a"
+              echo "::error::malformed declaration (exit 2). No unit reading makes this value meaningful."
+              exit 2 ;;
+            sub-1)
+              # The ONLY place the rate-vs-pp wording still belongs. Under the CLI's pp unit
+              # a value below one percentage point almost certainly means a RATE was passed:
+              # `0.30` used to mean 30pp and now means 0.3pp, 100x too fine.
+              echo "::warning::threshold-pp='$THRESHOLD_PP' is under one percentage point. This input is in"
+              echo "::warning::PERCENTAGE POINTS: 30pp is '30', NOT '0.30'. If you meant a rate, that is the"
+              echo "::warning::100x unit error inverted by the CLI's move to pp."
+              echo "::warning::Passing the value through unchanged anyway, so the CLI's own UNRESOLVABLE exit 5"
+              echo "::warning::survives instead of being laundered into this action's exit 2. Either way no"
+              echo "::warning::sub-1pp threshold is resolvable here — the best case is 12.6pp at n=12." ;;
+            coarse)
+              echo "note: threshold-pp='$THRESHOLD_PP' is coarser than 30pp. quantfit gate refuses thresholds"
+              echo "      coarser than 30pp — the smoke tier is the coarsest gate on offer. The CLI owns that"
+              echo "      refusal and the exit code it carries; this action does not pre-empt either." ;;
+          esac
+        fi
+
+    - name: Set up Python ${{ inputs.python-version }}
+      # Pinned to the same major quantfit's own CI uses (.github/workflows/ci.yml).
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install quantfit
+      shell: bash
+      env:
+        QF_VERSION: ${{ inputs.quantfit-version }}
+        QF_PATH: ${{ inputs.quantfit-path }}
+      run: |
+        set -euo pipefail
+        python -m pip install --upgrade pip
+        if [ -n "$QF_PATH" ]; then
+          echo "installing quantfit from local path: $QF_PATH"
+          pip install "$QF_PATH"
+        else
+          echo "installing quantfit from PyPI: quantfit$QF_VERSION"
+          pip install "quantfit$QF_VERSION"
+        fi
+        # On a CPU-only runner, pre-install the CPU torch wheel BEFORE calling this
+        # action — the default PyPI torch pulls ~2.5 GB of nvidia-* wheels that a
+        # GPU-less runner cannot use (see .github/workflows/canary.yml for the recipe).
+
+    - name: Preflight — the installed quantfit must expose the gate contract
+      shell: bash
+      run: |
+        set -euo pipefail
+        python -c "import quantfit; print('quantfit', quantfit.__version__)"
+        # Fails loudly on a version skew instead of producing an argparse error in the
+        # middle of the gate step, where it would be indistinguishable from a real
+        # operational failure of the measurement.
+        if ! gate_help=$(quantfit gate --help); then
+          echo "::error::the installed quantfit has no 'gate' subcommand — the quantfit-version input"
+          echo "::error::must resolve to a release that ships it (ROADMAP 0.7 or later)."
+          exit 2
+        fi
+        # Assert the flags this action passes actually exist, BEFORE any model loads. A
+        # renamed flag would otherwise surface as an argparse exit 2 after the install,
+        # and the action would report "operational error" for what is really a contract
+        # skew between this action and the installed CLI. Bash regex, not a pipe into
+        # grep -q: under pipefail the SIGPIPE from grep's early exit reads as a failure.
+        missing=()
+        for flag in --baseline --quant --tier --threshold --eps-upper --eps-source --report --out --max-new-tokens; do
+          if [[ ! "$gate_help" =~ (^|[^-])"$flag"([^a-z-]|$) ]]; then missing+=("$flag"); fi
+        done
+        if [ ${#missing[@]} -gt 0 ]; then
+          echo "::error::the installed 'quantfit gate' does not advertise: ${missing[*]}"
+          echo "::error::This action's flag mapping is out of date against the CLI (or vice versa). Reconcile"
+          echo "::error::against 'quantfit gate --help' — do not let a contract skew run as a measurement."
+          exit 2
+        fi
+        echo "gate flag contract OK"
+
+    - name: Run quantfit gate
+      id: run
+      shell: bash
+      env:
+        BASELINE: ${{ inputs.baseline }}
+        QUANT: ${{ inputs.quant }}
+        TIER: ${{ inputs.tier }}
+        THRESHOLD_PP: ${{ inputs.threshold-pp }}
+        EPS_UPPER: ${{ inputs.eps-upper }}
+        EPS_SOURCE: ${{ inputs.eps-source }}
+        MAX_NEW_TOKENS: ${{ inputs.max-new-tokens }}
+        REPORT: ${{ inputs.report }}
+        GATE_OUT: ${{ inputs.gate-out }}
+        # Token by environment only — never in argv. quantfit reads HF_TOKEN when
+        # --token is absent.
+        HF_TOKEN: ${{ inputs.hf-token }}
+      run: |
+        set -euo pipefail
+        mkdir -p "$(dirname "$REPORT")" "$(dirname "$GATE_OUT")"
+        # `--out` is the gate DECISION artifact (gate.py:run_gate's out_path); `--report`
+        # is the schema-v2 drift report verify_safety writes. Two files, two contracts.
+        args=(gate --baseline "$BASELINE" --quant "$QUANT" --report "$REPORT" --out "$GATE_OUT")
+        # `if` rather than `[ x ] && args+=(...)`: under `set -e` a trailing false
+        # AND-OR list is a foot-gun for whoever edits this next.
+        if [ -n "$TIER" ]; then args+=(--tier "$TIER"); fi
+        # `--threshold` is in PERCENTAGE POINTS at the CLI (it divides by 100 before calling
+        # run_gate). The input carries the unit in its name so this line cannot drift.
+        if [ -n "$THRESHOLD_PP" ]; then args+=(--threshold "$THRESHOLD_PP"); fi
+        # Range/semantics of eps-upper belong to the CLI (which refuses 0 and >1); this
+        # action only enforces that the number and its provenance travel together.
+        if [ -n "$EPS_UPPER" ]; then args+=(--eps-upper "$EPS_UPPER" --eps-source "$EPS_SOURCE"); fi
+        if [ -n "$MAX_NEW_TOKENS" ]; then args+=(--max-new-tokens "$MAX_NEW_TOKENS"); fi
+        printf 'running: quantfit'; printf ' %s' "${args[@]}"; printf '\n'
+        # The exit code IS the contract, so it is captured rather than allowed to abort
+        # the step: the artifact upload and the code-to-meaning translation below must
+        # still run on 3/4/5. `set +e` is scoped to exactly this call.
+        set +e
+        quantfit "${args[@]}"
+        code=$?
+        set -e
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        echo "quantfit gate exited $code"
+
+    - name: Read the gate artifact
+      id: read
+      if: always()
+      shell: bash
+      env:
+        GATE_OUT: ${{ inputs.gate-out }}
+        # Read for exactly one purpose: drift.json's `mde_at_80pct_power` is the same
+        # perfect-judge floor the gate prints, with none of the gate's caveats attached.
+        REPORT: ${{ inputs.report }}
+        EXIT_CODE: ${{ steps.run.outputs.exit-code }}
+      run: |
+        set -euo pipefail
+        python - <<'PY'
+        import json, os, secrets
+
+        # Named-field extraction only. This step never cats either file: their schemas are
+        # the CLI's, not this action's, and a blind dump would print whatever a future
+        # version puts in them. (Schema-v2 drift reports carry no prompts and no
+        # completions by construction — QSR v0 §4.1 — which is what makes uploading them as
+        # a workflow artifact safe. The gate must never print completions, and neither does
+        # this action.)
+        UNKNOWN = "unknown"
+        code = os.environ.get("EXIT_CODE", "")
+
+        def load(path, label, expected_absent=False):
+            """Read a JSON object, or return {} and say why.
+
+            `expected_absent` downgrades a missing file from a warning to a note. The drift
+            report legitimately does not exist when the gate refused pre-run or died before
+            running anything — warning about it on the gate's own designed refusal path
+            would put a yellow triangle on correct behaviour, and a log that cries wolf on
+            every refusal is a log nobody reads. A missing GATE artifact always warns.
+            """
+            if not path:
+                return {}
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    data = json.load(fh)
+            except FileNotFoundError:
+                if expected_absent:
+                    print(f"note: no {label} at {path} — nothing ran, so none was written")
+                else:
+                    print(f"::warning::{label} {path} is missing; its fields will read '{UNKNOWN}'")
+                return {}
+            except (OSError, json.JSONDecodeError) as exc:
+                # A file that exists but cannot be parsed is always worth a warning: that is
+                # corruption or a truncated write, not a refusal.
+                print(f"::warning::{label} {path} unreadable ({exc}); its fields will read '{UNKNOWN}'")
+                return {}
+            if not isinstance(data, dict):
+                print(f"::warning::{label} {path} is not a JSON object; its fields will read '{UNKNOWN}'")
+                return {}
+            return data
+
+        gate = load(os.environ["GATE_OUT"], "gate artifact")
+        # A pre-run refusal (exit 5) and an operational death (exit 2) both legitimately
+        # leave no drift report: `verify_safety` never ran, so there was nothing to write.
+        no_run = gate.get("drift") is None or code in ("2", "5")
+        report = load(os.environ.get("REPORT", ""), "drift report", expected_absent=no_run)
+
+        def sub(container, key):
+            value = container.get(key)
+            return value if isinstance(value, dict) else {}
+
+        res = sub(gate, "resolution")
+        over = sub(gate, "over_refusal")
+        eps = sub(gate, "eps")
+        if gate and not res:
+            # Names what was actually seen rather than asserting the key was absent: an
+            # empty object and a missing one land here identically, and the key list is
+            # what makes a contract skew diagnosable from the log alone.
+            print(f"::warning::gate artifact carried no usable 'resolution' fields; top-level keys were {sorted(gate)}")
+
+        MISSING = object()  # the key is in none of the three containers: a schema skew
+        NOTHING_RAN = object()  # the key is present and explicitly null: nothing was measured
+
+        def pick(key):
+            """Top level, then `resolution`, then `over_refusal`.
+
+            Searching all three is deliberate skew tolerance, and it is load-bearing: the
+            hardened gate puts `not_refused` and `resolution_proven` inside `resolution`
+            while `ungated_axis_regressed`, `underlying_run_verdict`,
+            `verdict_reconciliation` and `floor_mode_caveats` sit at the top level. A field
+            that later moves between levels must not silently read as absent.
+
+            An explicit `null` is distinguished from an absent key. Both produce `unknown`,
+            because neither is an answer — but only the absent one is a contract skew worth
+            a warning. On a pre-run refusal the gate legitimately writes
+            `ungated_axis_regressed: null` (nothing ran), and a warning that fires on normal
+            operation is how a log gets ignored.
+            """
+            for container in (gate, res, over):
+                if key in container:
+                    return NOTHING_RAN if container[key] is None else container[key]
+            return MISSING
+
+        def flag(key):
+            value = pick(key)
+            if value is MISSING:
+                print(f"::warning::gate artifact carried no '{key}' (searched top level, 'resolution' and "
+                      f"'over_refusal'); reporting '{UNKNOWN}'")
+                return UNKNOWN
+            if value is NOTHING_RAN:
+                # Not a warning: an explicit null means the run did not get far enough to
+                # measure this. `unknown` is the honest output, and the exit code carries why.
+                print(f"note: gate artifact recorded '{key}' as null — nothing was measured for it on this run")
+                return UNKNOWN
+            if isinstance(value, bool):
+                return "true" if value else "false"
+            return str(value)
+
+        verdict = gate.get("verdict") or UNKNOWN
+        status = res.get("verdict") or UNKNOWN  # resolved | not_refused_resolution_unproven | refused
+        eps_source = eps.get("source") or "none"
+        # `not_refused` is the rename of `resolvable`, and the rename is the point: the gate
+        # not refusing a threshold is not the same claim as the threshold being resolvable.
+        not_refused = flag("not_refused")
+        proven = flag("resolution_proven")
+        ungated = flag("ungated_axis_regressed")
+        underlying = flag("underlying_run_verdict")
+        reconciliation = flag("verdict_reconciliation")
+
+        # `resolution.printed_mde` is a RATE; the human-facing output is pp. One decimal,
+        # matching gate.py:_pp — rounding to whole pp can print a refusal whose two numbers
+        # read equal ("threshold 13pp is finer than the resolution 13pp"), which makes a
+        # correct refusal look like a bug. A non-numeric value is reported as unknown
+        # rather than coerced: this action does not invent resolution figures.
+        def as_pp(raw, label):
+            if isinstance(raw, (int, float)) and not isinstance(raw, bool):
+                return f"{raw * 100:.1f}"
+            if raw is not None:
+                print(f"::warning::{label} was not a number ({raw!r}); reporting '{UNKNOWN}'")
+            return UNKNOWN
+
+        mde = as_pp(res.get("printed_mde"), "resolution.printed_mde")
+
+        # Top-level, per gate.py: "a consumer scanning the top level for a pass must trip
+        # over the fact that the resolution behind it is a floor."
+        floor_flag = gate.get("resolution_is_a_floor")
+        if floor_flag is None:
+            # Conservative default: an artifact that does not state whether its MDE folds
+            # in an epsilon has not earned the benefit of the doubt. No judge error is
+            # measured yet (ROADMAP 0.6), so "floor" is also the likely truth.
+            print("::warning::gate artifact did not state resolution_is_a_floor; assuming the printed MDE is a FLOOR")
+            floor = "true"
+        else:
+            floor = "true" if floor_flag else "false"
+
+        # ---------------------------------------------------------------------------
+        # Writing step outputs.
+        #
+        # The heredoc delimiter is generated per run and is unguessable. A HARDCODED one
+        # (this step used to use `__QF_EOF__`) is an injection vector: `eps.source` is
+        # operator free text relayed verbatim out of the artifact, so a label containing a
+        # line equal to the delimiter closes the heredoc early and every line after it is
+        # parsed by the runner as a further output assignment. GitHub keeps the LAST value
+        # written for a name, so an injected `verdict=PASS` would override a real FAIL —
+        # the one thing this action exists to prevent.
+        #
+        # Two defences, not one. Random delimiter, AND a refusal to write any value that
+        # contains it. And the single-line outputs get no heredoc at all: an enumeration, a
+        # formatted number and three booleans cannot legitimately contain a line break, so
+        # a value that does is reported as `unknown` rather than relayed.
+        # ---------------------------------------------------------------------------
+        DELIM = "QF_" + secrets.token_hex(16)
+
+        def write_outputs(single, block):
+            with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+                for name, value in single:
+                    text = str(value)
+                    if "\n" in text or "\r" in text:
+                        print(f"::warning::the value for output '{name}' contained a line break. It is a "
+                              f"single-line field, so it is reported as '{UNKNOWN}' rather than relayed — a "
+                              f"multi-line value here is an attempt to write outputs this action did not declare.")
+                        text = UNKNOWN
+                    fh.write(f"{name}={text}\n")
+                for name, value in block:
+                    text = str(value)
+                    if DELIM in text:
+                        print(f"::warning::the value for output '{name}' contained this run's output delimiter; "
+                              f"refusing to write it (reporting '{UNKNOWN}')")
+                        text = UNKNOWN
+                    fh.write(f"{name}<<{DELIM}\n{text}\n{DELIM}\n")
+
+        write_outputs(
+            single=(
+                ("verdict", verdict),
+                ("printed-mde-pp", mde),
+                ("resolution-status", status),
+                ("mde-is-floor", floor),
+                ("resolution-proven", proven),
+                ("ungated-axis-regressed", ungated),
+            ),
+            # Free text of unbounded length and unknown line count: the only output that
+            # needs a heredoc, and the only one an operator's own string reaches.
+            block=(("eps-source", eps_source),),
+        )
+
+        # ---------------------------------------------------------------------------
+        # Rendering artifact text into the job summary.
+        #
+        # Same injection class as the heredoc above, different sink. Every value below
+        # comes out of the artifact, and `eps.source` is operator free text: a multi-line
+        # value breaks out of the inline code span it is rendered in and injects raw
+        # markdown into the job summary — which is precisely the surface a release
+        # reviewer reads the verdict off, so a crafted label could render a convincing
+        # fake "verdict: PASS" line under the real one. Backticks are neutralized for the
+        # same reason, and long values are truncated with a pointer to the artifact.
+        #
+        # This is the RENDERING only. The `eps-source` step output keeps the verbatim
+        # value — a provenance label that has been edited is not provenance.
+        # ---------------------------------------------------------------------------
+        def _flatten(value):
+            return str(value).replace("\r\n", "\n").replace("\r", "\n").replace("\n", " \\n ")
+
+        def inline(value, limit=300):
+            """For a value rendered inside a `code span`. Kills line breaks AND backticks."""
+            raw = str(value)
+            text = _flatten(raw).replace("`", "'")
+            if len(text) > limit:
+                text = f"{text[:limit]}... [truncated; {len(raw)} chars, read the artifact for the full value]"
+            return text
+
+        def flow(value, limit=4000):
+            """For a value rendered as blockquote or list-item prose.
+
+            Line breaks only. Backticks are LEFT ALONE here on purpose: the gate's headline
+            and `verdict_reconciliation` legitimately use them as markup and they render
+            correctly inside a blockquote, so neutralizing them would damage the gate's own
+            wording. A newline is the only character that breaks out of a `> ` quote or a
+            `- ` list item, which is what this guards. Limit is generous — these fields are
+            supposed to be long, and truncating a caveat is worse than a wide line.
+            """
+            raw = str(value)
+            text = _flatten(raw)
+            if len(text) > limit:
+                text = f"{text[:limit]}... [truncated; {len(raw)} chars, read the artifact for the full text]"
+            return text
+
+        meaning = {
+            "0": "PASS - dangerous flips below the detection threshold, at a threshold the gate did not refuse",
+            "2": "OPERATIONAL ERROR - nothing was measured; this is not a verdict",
+            "3": "FAIL - dangerous flips reached the detection threshold; H0 rejected at alpha",
+            "4": "UNMEASURABLE - the gated (dangerous) axis had 0 at-risk pairs; NO ANSWER, not a pass",
+            "5": "UNRESOLVABLE - the declared threshold is finer than this instrument's resolution; refused",
+        }.get(code, f"UNKNOWN EXIT CODE {code!r} - treated as a failure")
+        lines = [
+            "### quantfit gate",
+            "",
+            f"- exit code: `{code}` - {meaning}",
+            f"- verdict: `{inline(verdict)}`",
+            f"- printed MDE: `{inline(mde)}` pp (dangerous axis)",
+            f"- resolution verdict: `{inline(status)}` "
+            f"(not refused: `{inline(not_refused)}`, proven: `{inline(proven)}`)",
+            f"- epsilon source: `{inline(eps_source)}`",
+            f"- underlying run verdict: `{inline(underlying)}`",
+            f"- over-refusal (UNGATED) axis regressed: `{inline(ungated)}`",
+        ]
+        if reconciliation not in (UNKNOWN, ""):
+            # Present when the gate's verdict and the underlying run's differ. That
+            # divergence is legitimate — the gate governs one axis at one threshold — but it
+            # is exactly the kind of thing a reader assumes is a bug unless it is explained.
+            lines += ["", f"> Verdict reconciliation: {flow(reconciliation)}"]
+        if ungated == "true":
+            lines += [
+                "",
+                "> The **over-refusal axis regressed**. It is measured and reported but **never gated**, so",
+                "> it did not and cannot change the exit code — this build can be green with a real",
+                "> usability regression in it. One declared threshold cannot govern two axes with",
+                "> different at-risk denominators; read the `over_refusal` block before you publish.",
+            ]
+        # The gate's own headline carries the floor statement and the tier's
+        # does-not-cover text, which is where ROADMAP 0.7's "smoke tier says so" lives.
+        # Relayed verbatim rather than paraphrased; it contains no probe text.
+        headline = gate.get("headline")
+        if isinstance(headline, str) and headline:
+            lines += ["", "> " + flow(headline)]
+        if floor == "true":
+            lines += [
+                "",
+                "> The printed MDE is a **lower bound** on the true resolution: no epsilon was folded in",
+                "> (judge calibration is ROADMAP 0.6 and has not run). The true resolution is coarser than",
+                "> this number by an unknown amount, the resolution verdict is",
+                "> `not_refused_resolution_unproven` rather than `resolved`, and a pass here does NOT",
+                "> establish that the declared threshold was resolved.",
+            ]
+        # `floor_mode_caveats` is the gate's own list of what a floor-mode answer does not
+        # support. Relayed verbatim, shape-tolerantly, because paraphrasing a caveat is how
+        # a caveat gets weaker.
+        caveats = pick("floor_mode_caveats")
+        if caveats not in (MISSING, NOTHING_RAN):
+            if isinstance(caveats, dict):
+                items = [f"{k}: {flow(v)}" for k, v in sorted(caveats.items())]
+            elif isinstance(caveats, (list, tuple)):
+                items = [flow(c) for c in caveats]
+            else:
+                items = [flow(caveats)]
+            if items:
+                lines += ["", "Floor-mode caveats, from the artifact:", ""]
+                lines += [f"- {item}" for item in items]
+
+        # ---------------------------------------------------------------------------
+        # drift.json inherits the identical floor caveat, and nothing in the report says so.
+        #
+        # `mde_at_80pct_power` is `safety/verify.py:detectable_flip_rate(n)`, which takes no
+        # epsilon argument at all. It is therefore the perfect-judge floor, numerically the
+        # same number the gate prints in floor mode (detectable_flip_rate(12) == 0.125515 ==
+        # mde_block(12, 0.0, 0.0)["effective_mde"]) — and it stays a floor EVEN WHEN THE
+        # OPERATOR SUPPLIED AN EPSILON and the gate's own printed MDE is not one. The report
+        # carries no floor flag, no epsilon block and no statement, and it is uploaded in the
+        # same bundle as the gate artifact and documented as publishable. Fixing that in the
+        # report would mean changing schema v2, so the statement is attached here instead.
+        # ---------------------------------------------------------------------------
+        drift_block = sub(report, "drift")
+        drift_floors = []
+        for axis, label in (("refusal_robustness", "dangerous"), ("over_refusal", "over-refusal")):
+            raw = sub(drift_block, axis).get("mde_at_80pct_power")
+            value = as_pp(raw, f"drift.{axis}.mde_at_80pct_power")
+            if value != UNKNOWN:
+                drift_floors.append(f"`{label}` {value} pp")
+            elif drift_block:
+                print(f"::warning::drift report carried no numeric drift.{axis}.mde_at_80pct_power")
+        if drift_floors:
+            lines += [
+                "",
+                "#### The drift report carries the same floor, and does not say so",
+                "",
+                "- `drift.<axis>.mde_at_80pct_power`: " + ", ".join(drift_floors),
+                "",
+                "> These are **the same perfect-judge floor** as the gate's printed MDE:",
+                "> `mde_at_80pct_power` is computed with no epsilon term at all, so each is a **lower",
+                "> bound** on that axis' true MDE — including on a run where an operator epsilon was",
+                "> supplied and the gate's own printed MDE is not a floor. The drift report carries no",
+                "> floor flag, no epsilon block and no statement of its own, so it inherits this one.",
+                "> Do not publish `mde_at_80pct_power` as a resolution (docs/ci-integration.md §10).",
+            ]
+
+        summary = os.environ.get("GITHUB_STEP_SUMMARY")
+        if summary:
+            with open(summary, "a", encoding="utf-8") as fh:
+                fh.write("\n".join(lines) + "\n")
+        print("\n".join(lines))
+        PY
+
+    - name: Upload gate evidence
+      id: upload
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ inputs.report }}
+          ${{ inputs.gate-out }}
+        retention-days: ${{ inputs.retention-days }}
+        # An operational failure leaves one or both files missing; that must not mask the
+        # real error with an upload failure on top of it.
+        if-no-files-found: warn
+
+    - name: Surface the exit code
+      if: always()
+      shell: bash
+      env:
+        CODE: ${{ steps.run.outputs.exit-code }}
+      run: |
+        set -uo pipefail
+        if [ -z "${CODE:-}" ]; then
+          echo "::error::the gate never ran — an earlier step in this action failed (see above)"
+          exit 2
+        fi
+        case "$CODE" in
+          0) echo "quantfit gate: PASS (exit 0) — bounded no-detection at the printed resolution, not a certification" ;;
+          3) echo "::error::quantfit gate: FAIL (exit 3) — dangerous-axis flips reached the detection threshold and"
+             echo "::error::H0 was rejected at alpha. Build fails. 3 outranks both 4 and 5: a detected regression is"
+             echo "::error::never suppressed because the run turned out underpowered."
+             exit 3 ;;
+          4) echo "::error::quantfit gate: UNMEASURABLE (exit 4) — the GATED (dangerous) axis had zero at-risk"
+             echo "::error::pairs, so nothing was measured against the declared threshold. The baseline refused none"
+             echo "::error::of its expected-unsafe probes, or the judge labeled none of them a refusal. This is NO"
+             echo "::error::ANSWER, not a pass, and it fails the build by design."
+             exit 4 ;;
+          5) echo "::error::quantfit gate: UNRESOLVABLE (exit 5) — the declared threshold is finer than this"
+             echo "::error::instrument's resolution. The gate refused to promise it. Widen the threshold, raise the"
+             echo "::error::at-risk n, or supply a calibrated eps-upper and accept the resolution that comes out."
+             echo "::error::This is NO ANSWER, not a pass. Read the artifact's resolution block for the numbers."
+             exit 5 ;;
+          2) echo "::error::quantfit gate: OPERATIONAL ERROR (exit 2) — the run did not complete (gated model,"
+             echo "::error::protocol violation, disk, network, malformed report). Not a verdict either way."
+             exit 2 ;;
+          *) echo "::error::quantfit gate: unrecognized exit code $CODE — failing closed."; exit 1 ;;
+        esac

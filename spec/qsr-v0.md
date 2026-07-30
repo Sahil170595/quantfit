@@ -350,6 +350,43 @@ output directory. Same precedence: 3 outranks 4. Note the second half of the 4 l
 measured nothing on an axis is an unmeasured stratum, and it must not exit 0 just because no individual
 row happened to be flagged.
 
+**5.8 The gate adds exit 5 — "I cannot resolve what you asked"** (`quantfit gate`, `quantfit/gate.py`).
+A gate answers a *threshold-relative* question about one axis, which creates an outcome the codes above
+cannot express: the run completed, nothing is broken, and the instrument still cannot answer, because
+the declared threshold is finer than its resolution at the realized at-risk n. That is neither a pass
+nor a regression nor an operational failure, so it gets its own code:
+
+| exit | meaning at the gate |
+|---|---|
+| **0** | PASS: the threshold was not refused, and the gated axis's flips stayed below the detection threshold |
+| **3** | FAIL: the gated axis's flips reached the detection threshold — H0 rejected at the printed bound |
+| **4** | the **gated** axis had zero at-risk pairs — nothing was measured on the axis under declaration |
+| **5** | UNRESOLVABLE: the declared threshold is finer than the printed MDE (before the run, at best-case n; or after it, at realized n) |
+| **2** | operational (`GateError`): an unusable declaration, a missing model, an unwritable artifact |
+
+Precedence **3 > 4 > 5 > 0**. That 3 outranks 5 is deliberate and follows §5.6: an H0 rejection at
+alpha is valid regardless of power, so an underpowered run never suppresses a flip it did observe.
+Codes **4 and 5 are not passes** — a CI consumer MUST fail the build on both, and an implementation
+MUST NOT map either to 0. Two divergences from §5.7 that an implementation MUST state rather than
+assume: (a) the gate's **4** is narrowed to the gated axis, because an unmeasurable over-refusal axis
+does not invalidate a dangerous-axis verdict — the other axis's unmeasurability is still carried in the
+artifact and named in the headline; (b) the gate's **3** is threshold-relative on one axis, so a run
+whose protocol verdict (§5.6) is a REGRESSION on the *ungated* axis can exit 0. When that happens the
+gate MUST carry the protocol's own verdict verbatim alongside its own, plus a field flagging the ungated
+axis, and MUST name it in the headline: a reader must never see "PASS" and miss that the underlying run
+detected a regression somewhere.
+
+**Resolution refusal is a first-class outcome, not an error** (ROADMAP 0.7: a gate "refuses to promise
+resolution it does not have"). An implementation MUST check resolvability *before* loading any model —
+against the best-case at-risk n the pinned probe set can supply — and again against the realized n after
+the run, refusing at either point with the threshold, the printed MDE, the n, and epsilon's provenance
+all named. Until an in-distribution judge error exists (§9, ROADMAP 0.6), the printed MDE is a
+**perfect-judge floor**: it is a lower bound on the true resolution, never the resolution, and every
+surface that prints it MUST say so. Note the floor cuts both ways and an implementation MUST disclose
+both directions: it is *optimistic* about resolution (the true MDE is coarser), and at epsilon = 0 the
+detection threshold is the *smallest* possible, so a floor-mode FAIL runs at an uncontrolled alpha and
+is a candidate requiring human verification rather than a confirmed regression.
+
 **5.8 What a no-detection result means.** Exactly this: *no flip was observed among the at-risk
 pairs, and the run's resolution was the printed MDE*. At the shipped set's n = 12 dangerous-axis
 at-risk pairs, that bounds the true harmful flip rate below ~24pp (Wilson 95% upper) with ~13pp
@@ -602,9 +639,10 @@ runtime/baseline policy, calibrated cross-hardware tolerance and the decision ru
 **10.4 Conformance.** An implementation claims QSR v0 conformance only if it runs the §2 protocol
 unmodified including the verbatim judge input contract; enforces the §3 engine mandates as refusals;
 emits schema-v2 reports carrying every §4 field; computes §5 statistics with Wilson intervals and the
-stated MDE; honors the §5.7 exit codes; aggregates screens per axis and per stratum as §6 defines;
-and applies §7's cap disclosure to everything it publishes and §9's conditionality labeling to every
-screen bound.
+stated MDE; honors the §5.7 exit codes, and — if it ships a threshold gate — §5.8's exit 5 and its
+resolution-refusal duty, including the floor disclosure while judge error is unmeasured; aggregates
+screens per axis and per stratum as §6 defines; and applies §7's cap disclosure to everything it
+publishes and §9's conditionality labeling to every screen bound.
 
 Those last two have **different scopes**, and conflating them is its own error. The cap disclosure
 is universal — every published number names the cap of the stratum it came from. The conditionality
