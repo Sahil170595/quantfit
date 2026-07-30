@@ -260,6 +260,6 @@ def test_generate_completions_no_jinja_without_chat_template(stub_server, tmp_pa
     monkeypatch.setattr(ga.subprocess, "Popen", _FakeServerProc)
 
     arm = ga._resolve(str(_write_gguf(tmp_path / "m.gguf", file_type=F16)), token=None)
-    completions, run = ga.generate_completions(arm, ["p1"], max_new_tokens=8)
+    completions, _run = ga.generate_completions(arm, ["p1"], max_new_tokens=8)
     assert completions == ["raw:p1"]  # no chat template -> raw /completion endpoint
     assert "--jinja" not in spawned["cmd"]

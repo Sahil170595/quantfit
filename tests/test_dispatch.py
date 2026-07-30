@@ -4,8 +4,8 @@ import pytest
 
 import quantfit.backends.compressed_tensors as ct_backend
 import quantfit.backends.gguf as gguf_backend
-import quantfit.fit as fit
 import quantfit.quantize as q
+from quantfit import fit
 from quantfit.fit import LIMIT_MACHINE, MODE_GPU, MODE_REFUSE, CapacityPlan
 from quantfit.registry import UnsupportedCombo
 

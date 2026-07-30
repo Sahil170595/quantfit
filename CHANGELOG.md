@@ -1,5 +1,56 @@
 # Changelog
 
+## 0.5.0
+
+The CI-verifiable half of ROADMAP milestone 0.5: the QSR spec, the screen
+harness, the model-card emitter, the sensitivity-control procedure, and a
+verified target list. The hunt runs themselves, the control run, the
+replication package, outreach, and the GO/NO-GO clock are NOT in this release —
+they run against it.
+
+- **QSR spec v0** (`spec/qsr-v0.md`): the versioned protocol document — paired
+  diff, engine rules (same-binary GGUF mandate), provenance rules (schema v2
+  field-by-field), statistics (at-risk denominators, Wilson, MDE, exit-code CI
+  contract), screen aggregation, hardware caps, determinism canary,
+  sensitivity-control conditionality labeling, versioning rules. Every numeric
+  claim was verified by executing the shipped code; the tool is the spec's
+  reference implementation.
+- **`quantfit screen --targets targets.json --out DIR`**: runs verify-safety
+  sequentially over a target manifest and writes one drift report per target
+  plus `screen-summary.json`. Aggregation is per-stratum AND per-axis — each
+  axis has its own at-risk denominator, so a dangerous-axis flip on a target
+  whose over-refusal axis was unmeasurable still enters the dangerous-axis
+  bound (never silently dropped). Bounds are flagged-basis with
+  `n_regressed_human_verified` reported separately; the summary carries the
+  §7 caps as data; per-target operational failures (RuntimeError AND the
+  OSError family — gated repos) become rows, not screen deaths; target names
+  are collision-checked case-insensitively (Windows/macOS filesystems). Exit
+  codes mirror verify-safety: 0/3/4/2.
+- **Sensitivity-control conditionality is machine-carried**: the manifest
+  accepts a `sensitivity_control` block (status pass/fail/unmeasurable/
+  not_run; absent = not_run); any status but "pass" stamps ROADMAP 0.5's
+  literal label — "conditional on undemonstrated detection sensitivity" — into
+  every bound's `conditionality` field. The control's procedure and decision
+  rule (keyed on the report's `unmeasurable_axes`, never the exit code) live
+  in `docs/sensitivity-control-v0.md`.
+- **`quantfit emit model-card --report drift.json`**: renders a schema-v2
+  report as a paste-ready markdown model-card section — verdict verbatim, both
+  axes with CI/MDE (zero-flip rates withheld, as verify-safety prints them),
+  full provenance incl. the same-binary hash statement, the §7 cap line, and
+  the exact serve command (`vllm serve` for transformers arms, `llama-server`
+  for GGUF). Wrong-schema reports exit 2. Exposed as
+  `quantfit.model_card_fragment`.
+- **Screen target list** (`screens/targets-0.5.json` + curation audit trail):
+  15 targets — 12 GGUF pairs across 9 model families and 4 quantizer orgs,
+  3 transformers pairs — every filename/revision/size verified twice against
+  the HF API, with disclosed corrections (one candidate removed because its
+  "BF16 baseline" was an upcast of FP8-quantized weights; the maintainer's own
+  anchor quant disclosed as self-produced; a first-party autoawq artifact
+  disclosed as requiring the new `quantfit[awq]` extra).
+- **Verdict strings now name every unmeasurable axis**: a run whose
+  over-refusal axis had zero at-risk pairs no longer prints a plain clean
+  verdict alongside exit 4.
+
 ## 0.4.1
 
 GGUF judging + over-VRAM validation (ROADMAP milestone 0.4b — the

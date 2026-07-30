@@ -2,7 +2,7 @@
 
 from quantfit.spec import DEFAULT_SPEC, QuantSpec
 
-__version__ = "0.4.1"
+__version__ = "0.5.0"
 
 # Heavy surfaces are re-exported lazily (PEP 562) so `import quantfit` stays
 # dependency-light: nothing here drags torch, transformers, or huggingface_hub
@@ -14,9 +14,12 @@ _LAZY = {
     "quantize": ("quantfit.quantize", "quantize"),
     "capacity_plan": ("quantfit.fit", "capacity_plan"),
     "CapacityPlan": ("quantfit.fit", "CapacityPlan"),
+    "run_screen": ("quantfit.screen", "run_screen"),
+    "ScreenError": ("quantfit.screen", "ScreenError"),
+    "model_card_fragment": ("quantfit.modelcard", "model_card_fragment"),
 }
 
-__all__ = ["DEFAULT_SPEC", "QuantSpec", "__version__", *sorted(_LAZY)]
+__all__ = ["DEFAULT_SPEC", "QuantSpec", "__version__", *sorted(_LAZY)]  # noqa: PLE0604 — _LAZY keys are str literals
 
 
 def __getattr__(name: str):

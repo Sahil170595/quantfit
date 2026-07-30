@@ -1,0 +1,226 @@
+{
+  "purpose": "Curation record for screens/targets-0.5.json (the loadable manifest). Every row was verified twice against the HF API (curation agent, then an independent re-verification agent; both 2026-07-24), then corrected on the main thread. This file is the audit trail; the manifest is what `quantfit screen` consumes.",
+  "revision_semantics": "repo_revision records the repo's main commit AT CURATION TIME, verified sha-for-sha. quantfit's hf: loader resolves whatever main points at when the screen runs and records the RESOLVED commit in each report's arm revision — compare it to the pin here after the run. The pin is a verification record, not an enforced input (gguf_arm._fetch passes no revision=).",
+  "caps": {
+    "gguf": "unquantized baseline file <= 16.5 GB on disk (~8B-class) — the binding constraint is RAM for the F16 arm",
+    "compressed-tensors": "<= 3B params in-GPU on 12 GB VRAM; transformers-loadable quantized checkpoints (compressed-tensors format or AWQ)"
+  },
+  "total_download_gb": 129.49,
+  "disk_note": "129.49 GB total vs ~38 GB free at curation: prune by tier (C first) or clean the 0.4b artifacts before the hunt. Tiers: A = never prune (cheap/high-signal), B = mid, C = prune first.",
+  "targets": [
+    {
+      "name": "gguf-llama32-1b-bartowski",
+      "base_model": "meta-llama/Llama-3.2-1B-Instruct",
+      "family": "llama",
+      "repo_revision": "067b946cf014b7c697f3654f621d577a3e3afd1c",
+      "downloads_30d": 227693,
+      "baseline_gb": 2.4796,
+      "quant_gb": 0.8077,
+      "license": "llama3.2 (GGUF repo ungated; upstream meta-llama repo gated but not on the download path)"
+    },
+    {
+      "name": "gguf-llama32-3b-bartowski",
+      "base_model": "meta-llama/Llama-3.2-3B-Instruct",
+      "family": "llama",
+      "repo_revision": "5ab33fa94d1d04e903623ae72c95d1696f09f9e8",
+      "downloads_30d": 172650,
+      "baseline_gb": 6.4337,
+      "quant_gb": 2.0194,
+      "license": "llama3.2 (GGUF repo ungated)"
+    },
+    {
+      "name": "gguf-qwen3-8b-unsloth",
+      "base_model": "Qwen/Qwen3-8B",
+      "family": "qwen",
+      "repo_revision": "a6adef130ffb23ddaf1a62fec9dced968c9bc482",
+      "downloads_30d": 318290,
+      "baseline_gb": 16.388,
+      "quant_gb": 5.0278,
+      "license": "apache-2.0, ungated both sides",
+      "correction": "Original why claimed this row 'doubles as the ROADMAP 0.4b onload/CPU-spill run' — false (the GGUF path is CPU-only, there is no VRAM to spill from, and the 0.4b onload gate already passed via llm-compressor GPTQ). Kept on its real merits: highest-download both-arm repo, only 8B-class entry. Base is 8,190,735,360 params (8.19B): the nominal '8B' label is a class name; the binding cap is the 16.5 GB baseline file."
+    },
+    {
+      "name": "gguf-qwen25-15b-uncensored-mradermacher",
+      "base_model": "thirdeyeai/Qwen2.5-1.5B-Instruct-uncensored",
+      "family": "qwen (de-aligned fine-tune)",
+      "repo_revision": "ecee937554b3b66f89e7eb4fc432b8d8445208e7",
+      "downloads_30d": 12244,
+      "baseline_gb": 3.5604,
+      "quant_gb": 1.1173,
+      "license": "none stated on the quantizer card — provenance recorded as unstated; the upstream fine-tune carries the licensing question"
+    },
+    {
+      "name": "gguf-gemma2-2b-it-bartowski",
+      "base_model": "google/gemma-2-2b-it",
+      "family": "gemma",
+      "repo_revision": "855f67caed130e1befc571b52bd181be2e858883",
+      "downloads_30d": 178165,
+      "baseline_gb": 10.4634,
+      "quant_gb": 1.7086,
+      "license": "gemma (Gemma Terms of Use; GGUF repo ungated)",
+      "correction": "Original why called this '2nd-highest downloads on the list' — it is 3rd among GGUF rows and 4th overall (Qwen3-8B 318,290 > Llama-3.2-1B 227,693 > gemma-2-2b 178,165 > Llama-3.2-3B 172,650; the CT row Qwen AWQ at 835,675 tops all). Prune fallback: unsloth/gemma-3-4b-it-GGUF (BF16 7.77 + Q4_K_M 2.49 GB, 44,970 dl, verified)."
+    },
+    {
+      "name": "gguf-phi4-mini-unsloth",
+      "base_model": "microsoft/Phi-4-mini-instruct",
+      "family": "phi",
+      "repo_revision": "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+      "downloads_30d": 46781,
+      "baseline_gb": 7.6807,
+      "quant_gb": 2.4919,
+      "license": "MIT both sides, ungated"
+    },
+    {
+      "name": "gguf-ministral-8b-bartowski",
+      "base_model": "mistralai/Ministral-8B-Instruct-2410",
+      "family": "mistral",
+      "repo_revision": "b4e2ea74eb4eecb178aa88d482c3126b34ad0157",
+      "downloads_30d": 7880,
+      "baseline_gb": 16.0481,
+      "quant_gb": 4.9115,
+      "license": "other (Mistral Research License) — read before redistributing completions",
+      "correction": "Replaces the originally-curated unsloth/Ministral-3-3B-Instruct-2512 row (see excluded). Base verified text-only MistralForCausalLM with NO quantization_config; f16 16,048,097,824 B clears the 16.5 GB cap. Verified on the main thread 2026-07-24."
+    },
+    {
+      "name": "gguf-smollm3-3b-bartowski",
+      "base_model": "HuggingFaceTB/SmolLM3-3B",
+      "family": "smollm",
+      "repo_revision": "86b3536ed1ca0dcb4716745642db4e6804bf3d32",
+      "downloads_30d": 12762,
+      "baseline_gb": 6.1583,
+      "quant_gb": 1.9153,
+      "license": "apache-2.0, ungated; fully open training data and recipe",
+      "prune_fallback": "bartowski/SmolLM2-360M-Instruct-GGUF (f16 0.73 + Q4_K_M 0.27 GB, 7,848 dl, verified) keeps smollm coverage at ~1 GB"
+    },
+    {
+      "name": "gguf-olmo2-7b-bartowski",
+      "base_model": "allenai/OLMo-2-1124-7B-Instruct",
+      "family": "olmo",
+      "repo_revision": "01a56cca7da47f11851889af56ec36a9e75ceac8",
+      "downloads_30d": 14724,
+      "baseline_gb": 14.6019,
+      "quant_gb": 4.472,
+      "license": "apache-2.0, ungated; fully open weights + data + code"
+    },
+    {
+      "name": "gguf-lfm25-12b-unsloth",
+      "base_model": "LiquidAI/LFM2.5-1.2B-Instruct",
+      "family": "lfm2 (hybrid conv/attention)",
+      "repo_revision": "bf1ebe055f24ddd24f3622d933a63b42606773f3",
+      "downloads_30d": 25318,
+      "baseline_gb": 2.3433,
+      "quant_gb": 0.7309,
+      "license": "other (LiquidAI LFM Open License) — not automatically permissive"
+    },
+    {
+      "name": "gguf-r1-distill-qwen-15b-unsloth",
+      "base_model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+      "family": "qwen (deepseek-r1-distill)",
+      "repo_revision": "3cb4d15544a2a5e07439592b9a0965b6445fbd34",
+      "downloads_30d": 59058,
+      "baseline_gb": 3.5604,
+      "quant_gb": 1.1173,
+      "license": "apache-2.0 on the unsloth GGUF repo; MIT on the DeepSeek base (corrected — originally misrecorded as apache-2.0 on both); both ungated"
+    },
+    {
+      "name": "gguf-gemma3-270m-lmstudio",
+      "base_model": "google/gemma-3-270m-it",
+      "family": "gemma",
+      "repo_revision": "2a3f11cd1f383dc6fa7d34c34aef9e44d5bdedf2",
+      "downloads_30d": 510,
+      "baseline_gb": 0.5428,
+      "quant_gb": 0.2531,
+      "license": "gemma (Gemma Terms of Use; GGUF repo ungated)",
+      "note": "510 dl is the honest ceiling for lmstudio-community here: only 12 of its top-300 GGUF repos ship a real single-file unquantized arm, and every <=8B one is low-download. Kept as the 4th quantizer org and the binary smoke-test."
+    },
+    {
+      "name": "ct-qwen25-15b-anchor-crusadersk",
+      "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+      "family": "qwen",
+      "repo_revision": "8d8d7a100bb753cd1214c7158283215a7fa887f0",
+      "baseline_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+      "downloads_30d": 138,
+      "baseline_gb": 3.099,
+      "quant_gb": 1.1637,
+      "license": "apache-2.0 both sides",
+      "disclosure": "SELF-PRODUCED: this is the maintainer's own quant (Crusadersk), included as the known-finding reference case (prior: 2/10 over-refusal, CI 5.7-51.0%). It is not a third-party artifact; the compressed-tensors prevalence bound is quoted with and without it. Format verified compressed-tensors pack-quantized W4A16 g128 asymmetric despite the 'awq' repo name."
+    },
+    {
+      "name": "ct-qwen25-15b-official-awq",
+      "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+      "family": "qwen",
+      "repo_revision": "3ecffa0ceb27851800f45519bab9c457a04405e1",
+      "downloads_30d": 835675,
+      "baseline_gb": 3.099,
+      "quant_gb": 1.6146,
+      "license": "apache-2.0, first-party Qwen release",
+      "disclosure": "Real autoawq (quant_method=awq, gemm, 4-bit, g128, zero_point), NOT compressed-tensors format: it loads through transformers' AwqQuantizer, which requires gptqmodel (pip install 'quantfit[awq]'). The stratum is defined by the transformers pairing path; the bound's one-autoawq-member composition is disclosed wherever the bound is quoted. Incremental download 1.61 GB (baseline shared with the anchor)."
+    },
+    {
+      "name": "ct-granite31-2b-redhat-w4a16",
+      "base_model": "ibm-granite/granite-3.1-2b-instruct",
+      "family": "granite",
+      "repo_revision": "3cc0f9b3fb463b13808dcd9d3589a0726153fe7a",
+      "baseline_revision": "bbc2aed595bd38bd770263dc3ab831db9794441d",
+      "downloads_30d": 34159,
+      "baseline_gb": 5.0719,
+      "quant_gb": 1.7002,
+      "license": "apache-2.0 both sides, ungated",
+      "note": "Verified compressed-tensors pack-quantized W4A16 g64 symmetric (MSE observer). If the CT stratum shrinks to 2, drop this and state the bound covers one model family only."
+    }
+  ],
+  "excluded": [
+    {
+      "repo": "unsloth/Ministral-3-3B-Instruct-2512-GGUF",
+      "reason": "REMOVED AFTER VERIFICATION (was on the original list): the declared base mistralai/Ministral-3-3B-Instruct-2512 is itself FP8-quantized (quant_method=fp8; 78.6% of params stored F8_E4M3), so the 'BF16' GGUF is an upcast of quantized weights, not an unquantized baseline — the diff would measure FP8->Q4_K_M while labeled unquantized-vs-Q4_K_M, and the GGUF file_type guard (ftype 32 = BF16) cannot catch it. It is also a VLM (Mistral3ForConditionalGeneration, separate mmproj files), the same rule that excluded UI-TARS. Lesson recorded: curation must check the BASE model's quantization_config; the file's own metadata is necessary but not sufficient."
+    },
+    {
+      "repo": "mradermacher/UI-TARS-1.5-7B-GGUF",
+      "reason": "VLM arch (Qwen2.5-VL-derived GUI agent): text-only pairing unvalidated, corpus is text. Highest 30d downloads of any <=8B both-arm repo (562,394); revisit only if the VL text path is smoke-tested first. Same rule as Ministral-3-3B."
+    },
+    {
+      "repo": "TheBloke (entire org)",
+      "reason": "Top-300 scan: zero repos ship an unquantized F16/BF16/F32 GGUF next to a Q4_K_M (the two 'bf16' regex hits are base-model NAMES, not file types). Structurally ineligible for a same-repo paired diff."
+    },
+    {
+      "repo": "QuantFactory (entire org)",
+      "reason": "Top-300 scan: the single 'f16' hit is an output-tensor-dtype suffix on already-quantized files, not an unquantized baseline."
+    },
+    {
+      "repo": "bartowski/Meta-Llama-3.1-8B-Instruct-GGUF",
+      "reason": "Baseline over cap: only unquantized file is f32 at 32.13 GB. In-cap substitute if a llama-3.1-8B pair is wanted: unsloth/Llama-3.1-8B-Instruct-GGUF (BF16 16.07 GB + Q4_K_M 4.92 GB, 17,946 dl, verified)."
+    },
+    {
+      "repo": "bartowski/Mistral-7B-Instruct-v0.3-GGUF + lmstudio-community mirror",
+      "reason": "Baseline over cap in BOTH repos (f32-only, 28.99 GB byte-identical). NOTE (corrected claim): in-cap mistral-family alternatives DO exist — mradermacher/Mistral-7B-Instruct-v0.3-GGUF ships a true f16 at 14.50 GB (286 dl) and bartowski/Ministral-8B-Instruct-2410-GGUF ships f16 at 16.05 GB (7,880 dl; now on the list). The mistral slot is a curation choice, not a coverage gap."
+    },
+    {
+      "repo": "unsloth/granite-4.1-8b-GGUF",
+      "reason": "Baseline over cap by 1.09 GB (BF16 17.59 GB). Granite covered in the CT stratum; in-cap GGUF fallback: unsloth/granite-4.1-3b-GGUF (verified, 8.91 GB pair)."
+    },
+    {
+      "repo": "bartowski/Phi-3.5-mini-instruct-GGUF",
+      "reason": "Cost: f32-only baseline at 15.29 GB; Phi-4-mini covers the family for 7.5 GB less."
+    },
+    {
+      "repo": "nm-testing/SmolLM-1.7B-Instruct-quantized.w4a16",
+      "reason": "Mirror/bot noise: 1.45M 30d downloads from Neural Magic's CI org; ROADMAP 0.5 excludes mirror-noise counts from evidence. Artifact itself verified real if a 4th CT target is needed."
+    },
+    {
+      "repo": "RedHatAI/Llama-3.2-1B-Instruct-quantized.w8a8",
+      "reason": "Reserve, not disqualified: baseline is gated (manual accept) and W8A8 is a weaker perturbation than W4A16. Promote if a llama-family CT point is wanted."
+    },
+    {
+      "repo": "RedHatAI/Qwen2.5-VL-3B-Instruct-quantized.w8a8",
+      "reason": "VLM arch; vision tower in the quantization ignore-list — not a clean text-only diff."
+    },
+    {
+      "repo": "bartowski/Qwen2.5-7B-Instruct-GGUF",
+      "reason": "Near miss, dropped on budget + family balance (three qwen-lineage rows already). NOTE: this pair is the recorded 0.4b gate artifact (over-refusal 2/14, CHANGELOG 0.4.1) — re-running it would be a free reproducibility control; that is the real argument for re-adding it if disk allows."
+    },
+    {
+      "repo": "sharded-baseline GGUF repos (GLM/Kimi/DeepSeek-V3/grok-2/...)",
+      "reason": "All far over 8B AND multi-part unquantized arms; the hf: ref resolves exactly one file."
+    }
+  ]
+}

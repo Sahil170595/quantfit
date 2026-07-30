@@ -117,7 +117,7 @@ def _download_verified(url: str, asset: str, dest: Path) -> None:
     os.close(fd)
     tmp = Path(tmp_name)
     try:
-        urllib.request.urlretrieve(url, tmp)  # noqa: S310 - fixed github releases URL
+        urllib.request.urlretrieve(url, tmp)
         _verify_or_die(tmp, asset)
         os.replace(tmp, dest)  # dest appears only once fully downloaded AND verified
     finally:

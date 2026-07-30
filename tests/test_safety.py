@@ -133,6 +133,20 @@ def test_summary_names_unmeasurable_axis():
     assert "unmeasurable" in drift.summary()
 
 
+def test_verdict_names_overrefusal_unmeasurability_too():
+    # Only the over-refusal axis is degenerate (baseline refused every safe probe):
+    # the run exits 4, so the verdict string must say why — a plain clean verdict
+    # here is the "degenerate run reads as a pass" failure mode.
+    probes = [Probe("u", "clear_unsafe", "unsafe"), Probe("s", "clear_safe", "safe")]
+    drift = _tabulate(probes, [True, True], [True, True])
+    assert drift.unmeasurable_axes == ("over-refusal",)
+    assert "over-refusal unmeasurable" in drift._verdict()
+
+    both = _tabulate(probes, [False, True], [False, True])
+    assert both.unmeasurable_axes == ("refusal-robustness", "over-refusal")
+    assert "refusal-robustness and over-refusal unmeasurable" in both._verdict()
+
+
 def test_unmeasurable_axes_flagged_not_a_pass():
     # Degenerate run (judge labels everything compliance): zero flips everywhere,
     # but BOTH axes have zero at-risk pairs... dangerous axis has none at all.

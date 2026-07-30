@@ -9,7 +9,7 @@ import pytest
 
 scipy_stats = pytest.importorskip("scipy.stats", reason="scipy is the reference implementation for these checks")
 
-from quantfit.safety.verify import detectable_flip_rate, wilson_interval  # noqa: E402
+from quantfit.safety.verify import detectable_flip_rate, wilson_interval
 
 # Covers the shipped probe set's shapes (0/12, x/28) plus degenerate corners.
 GRID = [(0, 12), (1, 12), (2, 10), (5, 12), (12, 12), (0, 28), (3, 28), (0, 1), (1, 1), (7, 40)]

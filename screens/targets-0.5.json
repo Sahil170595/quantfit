@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "name": "0.5 existence-proof hunt (ROADMAP 0.5): third-party quants, GGUF + compressed-tensors strata",
+  "sensitivity_control": {
+    "status": "not_run"
+  },
+  "targets": [
+    {
+      "name": "gguf-gemma3-270m-lmstudio",
+      "stratum": "gguf",
+      "baseline": "hf:lmstudio-community/gemma-3-270m-it-GGUF/gemma-3-270m-it-F16.gguf",
+      "quant": "hf:lmstudio-community/gemma-3-270m-it-GGUF/gemma-3-270m-it-Q4_K_M.gguf",
+      "notes": "TIER A, run first: cheapest pair (0.80 GB), 4th quantizer org, smoke-test for the pinned binary. Gemma terms govern redistribution of derived outputs. Curation facts: screens/targets-0.5.curation.json"
+    },
+    {
+      "name": "gguf-llama32-1b-bartowski",
+      "stratum": "gguf",
+      "baseline": "hf:bartowski/Llama-3.2-1B-Instruct-GGUF/Llama-3.2-1B-Instruct-f16.gguf",
+      "quant": "hf:bartowski/Llama-3.2-1B-Instruct-GGUF/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+      "notes": "TIER A: cheapest mainstream llama pair (3.29 GB), 227,693 30d downloads. Llama 3.2 Community License; GGUF repo ungated."
+    },
+    {
+      "name": "gguf-qwen25-15b-uncensored-mradermacher",
+      "stratum": "gguf",
+      "baseline": "hf:mradermacher/Qwen2.5-1.5B-Instruct-uncensored-GGUF/Qwen2.5-1.5B-Instruct-uncensored.f16.gguf",
+      "quant": "hf:mradermacher/Qwen2.5-1.5B-Instruct-uncensored-GGUF/Qwen2.5-1.5B-Instruct-uncensored.Q4_K_M.gguf",
+      "notes": "TIER A: 3rd quantizer pipeline, and the most safety-informative base — an already-de-aligned fine-tune is where a quantization-conditional refusal shift is most likely measurable. 4.68 GB. No license on the quantizer card; provenance flagged in curation file."
+    },
+    {
+      "name": "gguf-r1-distill-qwen-15b-unsloth",
+      "stratum": "gguf",
+      "baseline": "hf:unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF/DeepSeek-R1-Distill-Qwen-1.5B-BF16.gguf",
+      "quant": "hf:unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF/DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+      "notes": "TIER A: direct tie to the R1-1776 8-bit re-censorship incident class (ROADMAP outreach). 4.68 GB. apache-2.0 on the GGUF repo; MIT on the DeepSeek base; both ungated."
+    },
+    {
+      "name": "gguf-lfm25-12b-unsloth",
+      "stratum": "gguf",
+      "baseline": "hf:unsloth/LFM2.5-1.2B-Instruct-GGUF/LFM2.5-1.2B-Instruct-BF16.gguf",
+      "quant": "hf:unsloth/LFM2.5-1.2B-Instruct-GGUF/LFM2.5-1.2B-Instruct-Q4_K_M.gguf",
+      "notes": "TIER A: architectural outlier (hybrid conv/attention) exercising different llama.cpp quantization kernels. 3.07 GB. LiquidAI LFM Open License ('other') — read before redistributing completions."
+    },
+    {
+      "name": "gguf-llama32-3b-bartowski",
+      "stratum": "gguf",
+      "baseline": "hf:bartowski/Llama-3.2-3B-Instruct-GGUF/Llama-3.2-3B-Instruct-f16.gguf",
+      "quant": "hf:bartowski/Llama-3.2-3B-Instruct-GGUF/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+      "notes": "TIER B: one of the most-deployed local-inference artifacts (172,650 30d downloads). 8.45 GB pair. Llama 3.2 Community License; GGUF repo ungated."
+    },
+    {
+      "name": "gguf-phi4-mini-unsloth",
+      "stratum": "gguf",
+      "baseline": "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf",
+      "quant": "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf",
+      "notes": "TIER B: phi family; conservative refusal tuning makes it a good place to look for quantization-induced refusal REMOVAL. 10.17 GB. MIT, ungated."
+    },
+    {
+      "name": "gguf-smollm3-3b-bartowski",
+      "stratum": "gguf",
+      "baseline": "hf:bartowski/HuggingFaceTB_SmolLM3-3B-GGUF/HuggingFaceTB_SmolLM3-3B-bf16.gguf",
+      "quant": "hf:bartowski/HuggingFaceTB_SmolLM3-3B-GGUF/HuggingFaceTB_SmolLM3-3B-Q4_K_M.gguf",
+      "notes": "TIER B: fully-open base (weights+data+recipe) — a flip here is the most reproducible finding in the set. 8.07 GB. apache-2.0, ungated."
+    },
+    {
+      "name": "gguf-ministral-8b-bartowski",
+      "stratum": "gguf",
+      "baseline": "hf:bartowski/Ministral-8B-Instruct-2410-GGUF/Ministral-8B-Instruct-2410-f16.gguf",
+      "quant": "hf:bartowski/Ministral-8B-Instruct-2410-GGUF/Ministral-8B-Instruct-2410-Q4_K_M.gguf",
+      "notes": "TIER C, prune candidate (20.96 GB pair, 7,880 30d downloads): the mistral-family slot — clean text-only MistralForCausalLM base, f16 16.05 GB just under the 16.5 GB cap. Mistral Research License ('other') — read before redistributing completions."
+    },
+    {
+      "name": "gguf-gemma2-2b-it-bartowski",
+      "stratum": "gguf",
+      "baseline": "hf:bartowski/gemma-2-2b-it-GGUF/gemma-2-2b-it-f32.gguf",
+      "quant": "hf:bartowski/gemma-2-2b-it-GGUF/gemma-2-2b-it-Q4_K_M.gguf",
+      "notes": "TIER C, prune candidate (12.17 GB; the only unquantized file is f32): deployment-dominant gemma artifact, 178,165 30d downloads (3rd among GGUF rows). Gemma Terms of Use govern redistribution of derived outputs."
+    },
+    {
+      "name": "gguf-olmo2-7b-bartowski",
+      "stratum": "gguf",
+      "baseline": "hf:bartowski/OLMo-2-1124-7B-Instruct-GGUF/OLMo-2-1124-7B-Instruct-f16.gguf",
+      "quant": "hf:bartowski/OLMo-2-1124-7B-Instruct-GGUF/OLMo-2-1124-7B-Instruct-Q4_K_M.gguf",
+      "notes": "TIER C, prune second (19.07 GB, 14,724 30d downloads): the only fully-open-everything 7B in the set (AI2). apache-2.0, ungated."
+    },
+    {
+      "name": "gguf-qwen3-8b-unsloth",
+      "stratum": "gguf",
+      "baseline": "hf:unsloth/Qwen3-8B-GGUF/Qwen3-8B-BF16.gguf",
+      "quant": "hf:unsloth/Qwen3-8B-GGUF/Qwen3-8B-Q4_K_M.gguf",
+      "notes": "TIER C, prune first (21.42 GB, the largest line item) BUT the highest-download both-arm repo on the list (318,290 30d) and the only 8B-class entry (8.19B params — at the cap's edge; the binding cap is the 16.5 GB baseline file, which the 16.39 GB BF16 clears). apache-2.0, ungated, fully redistributable."
+    },
+    {
+      "name": "ct-qwen25-15b-anchor-crusadersk",
+      "stratum": "compressed-tensors",
+      "baseline": "Qwen/Qwen2.5-1.5B-Instruct",
+      "quant": "Crusadersk/qwen2.5-1.5b-awq-4bit",
+      "notes": "REQUIRED ANCHOR with a DISCLOSURE: this is the maintainer's own self-produced quant (known prior finding: 2/10 over-refusal), NOT a third-party artifact. The compressed-tensors prevalence bound must be quoted both with and without this row. compressed-tensors format (despite 'awq' in the name), W4A16_ASYM g128. apache-2.0."
+    },
+    {
+      "name": "ct-qwen25-15b-official-awq",
+      "stratum": "compressed-tensors",
+      "baseline": "Qwen/Qwen2.5-1.5B-Instruct",
+      "quant": "Qwen/Qwen2.5-1.5B-Instruct-AWQ",
+      "notes": "Controlled comparison against the anchor: same baseline weights, DIFFERENT scheme (real autoawq gemm 4-bit g128, first-party, 835,675 30d downloads). Loads via transformers' AwqQuantizer, which requires gptqmodel — pip install 'quantfit[awq]'. Stratum covers transformers-loadable quants; the bound's autoawq membership is disclosed in the curation file. apache-2.0."
+    },
+    {
+      "name": "ct-granite31-2b-redhat-w4a16",
+      "stratum": "compressed-tensors",
+      "baseline": "ibm-granite/granite-3.1-2b-instruct",
+      "quant": "RedHatAI/granite-3.1-2b-instruct-quantized.w4a16",
+      "notes": "Breaks the CT stratum out of qwen-only: IBM Granite family, RedHatAI producer (the reference llm-compressor publisher). W4A16 g64 symmetric, 6.77 GB, 34,159 30d downloads. apache-2.0, ungated."
+    }
+  ]
+}
