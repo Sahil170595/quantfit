@@ -1177,7 +1177,7 @@ the evidence that produced it.
   "spec_version": "v0",
   "quantfit_version": "<from the reports>",
   "created_utc": "<ISO 8601, UTC, seconds>",
-  "outcome": "reproduced | reproduced_with_denominator_drift | breach | void",
+  "outcome": "reproduced | reproduced_t0_unverified | reproduced_with_denominator_drift | breach | void",
   "reference": {
     "report": "<path>", "report_sha256": "<hex>",
     "stratum": "gguf | compressed-tensors",
@@ -1249,6 +1249,7 @@ the evidence that produced it.
 | `reproduced_with_denominator_drift` | T0, T1, T2, T4, T5 pass; **T3 fails with `\|Δat_risk\| ≤ 1` on one axis** | the gate is **not** met; the near-miss is published with both printed MDEs side by side (§1.2's table) and the baseline-side divergence named as the cause |
 | `breach` | T0 passes on both sides and any of T2, T4, T5 fails, or T3 fails by more than 1 — **including a 0 → 1 flip divergence on an axis with no reference flips**, which fails T2 by design and has no softer outcome value (§1.3's fourth note, §5.3) | the tolerance is breached; publish the deltas and the affected axis, do **not** widen the rule to fit them |
 | `void` | T0 fails on either side, or T1 fails | nothing about hardware. Fix the leak (T0) or stop calling them the same measurement (T1) |
+| `reproduced_t0_unverified` **(minted at 0.8 by `quantfit/reproduce.py`)** | T1–T5 all pass, but **no T0 result was supplied for a side**. T0 is a within-hardware property of three replicates and is not computable from the two reports a comparison receives, so it must be handed in | the gate is **not** met. Publish it as what it is: the cross-hardware clauses held, the within-hardware precondition was never shown. Supply `t0_reference` / `t0_candidate` and re-run to reach `reproduced` |
 
 Three recording rules, stated so they are not decided under pressure later.
 
@@ -1261,16 +1262,53 @@ Three recording rules, stated so they are not decided under pressure later.
 - **`void` is not a soft failure.** It is the more informative outcome of the two
   failure modes, because it points at a fixable defect in the harness rather than at
   an unfixable fact about silicon.
-- **No exit code is claimed here.** **Verified against the tree:** `quantfit gate` is
-  wired into `cli.py` in this PR — the `gate` branch of `_dispatch` calls
-  `gate.run_gate(...)` and returns `decision["exit_code"]` — so the fifth code becomes
-  reachable from the shipped tool **with this change**, not at a later milestone.
-  `gate.py` defines `EXIT_PASS = 0`, `EXIT_OPERATIONAL = 2`, `EXIT_FAIL = 3`,
-  `EXIT_UNMEASURABLE = 4` and `EXIT_UNRESOLVABLE = 5` (a declared threshold finer than
-  the instrument's resolution), with 1 left to argparse. This document adds no command
-  and no code: the comparison is a recorded check over two JSON files. If 0.8 later adds
-  a report-diff subcommand, its breach code must not collide with any of those five, and
-  that choice belongs to `cli.py`'s owner, not to this file.
+- **The exit codes are QSR v0 §5.7's, reused. AMENDED at 0.8 — this bullet previously
+  read "No exit code is claimed here" and required a future report-diff subcommand's
+  breach code to "not collide with any of those five". That requirement is withdrawn,
+  deliberately and on the record, because it forbade the only correct answer.** The
+  standing facts are unchanged and still verified against the tree: `quantfit gate` is
+  wired into `cli.py` — the `gate` branch of `_dispatch` calls `gate.run_gate(...)` and
+  returns `decision["exit_code"]` — and `gate.py` defines `EXIT_PASS = 0`,
+  `EXIT_OPERATIONAL = 2`, `EXIT_FAIL = 3`, `EXIT_UNMEASURABLE = 4` and
+  `EXIT_UNRESOLVABLE = 5` (a declared threshold finer than the instrument's resolution),
+  with 1 left to argparse. What is new is that the comparison **is** code now
+  (`quantfit/reproduce.py`, which implements §1.3's T1–T5 and this section's outcome
+  vocabulary), so a code must be claimed. It claims no new ones:
+
+  | exit | what it means for a reproduction comparison |
+  |---|---|
+  | **0** | `reproduced` — T0 passed on **both** sides and T1–T5 all hold. The 0.8 gate clause is met for that report at that cap. Reserved for exactly that |
+  | **3** | the tolerance was evaluated and the gate was **not met** (`breach`, `reproduced_with_denominator_drift`) or **not established** (T1–T5 hold but no T0 evidence was supplied) |
+  | **4** | `void`, on every one of its triggers — T1 fails, T0 fails on a side, the gated axis had zero at-risk pairs, or the two inputs are one file twice. Nothing was compared; **not** a pass |
+  | **2** | operational only: a raised error (unreadable, malformed or wrong-schema input; an unwritable artifact). No **outcome** maps here — outcomes are return values |
+
+  **Why reuse rather than mint 6 and 7.** Minting would satisfy the withdrawn
+  non-collision rule and defeat its purpose. §5.7's codes are a *CI contract*, and the
+  contract is already consumed. **Verified against the tree:**
+  `.github/workflows/canary.yml`'s `verify-safety` step `case`s on `0|4`, on `3`, and on
+  `*` as "operational error", and its gate step asserts exit **5** specifically;
+  `tests/test_cli.py` asserts 0, 2 and 3 for the shipped commands. A sixth and seventh
+  code would not extend that contract, it would open a **second** one — and note the
+  shape of the existing consumer: an unrecognized code falls into a `*` arm written to
+  mean "operational error", so a new code would be *misreported* by the CI that already
+  exists, not merely unhandled by CI that does not. That is the "a degenerate run must
+  never read as clean" failure QSR v0 §5.5 exists to prevent, re-introduced through the
+  exit vocabulary. One bit is what CI needs (did the gate hold?) and 0/3/4 already carry
+  it, with §5.5's own meaning intact on 4. The finer
+  distinctions — which outcome, which `void` trigger, which predicate failed — belong in
+  the artifact, and a consumer that wants them reads `outcome`, `void_reasons` and
+  `failing_predicates`, not the code. 5 stays `gate.py`'s and is not reachable from a
+  reproduction comparison.
+
+  **Two consequences this document states rather than leaves to be discovered.** A T1
+  failure exits **4**, not 2: §1.3 already decides that case ("the record is `void`, never
+  `breach` and never `reproduced`") and it is a verdict — both reports parsed and the
+  comparison ran — not the tool refusing a configuration it was asked to run, which is
+  what §5.7's exit-2 "protocol violation" leg covers. And if an implementation mints an
+  outcome **name** this section's table does not list, it must record it as minted, must
+  map it into the four codes above, and must not map it to 0 unless T0 passed on both
+  sides: the vocabulary may grow toward *stricter*, never toward a softer name wearing
+  exit 0.
 
 ### 6.4 Publication rules for anything derived from this protocol
 

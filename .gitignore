@@ -25,6 +25,9 @@ venv/
 *.labels.csv
 *.labelkey.json
 *.baseline-cache.json
+# Inspect eval logs hold model completions the same way a capture does.
+logs/
+*.eval
 
 # Internal build/process notes — kept local, not user-facing
 PLAN.md

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantfit"
-version = "0.5.2"
+version = "0.5.3"
 description = "Quantize an LLM and check it still refuses what it should — a GPU-aware quantization CLI that measures the safety drift of the quantization it just performed."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -47,6 +47,9 @@ gguf = ["gguf>=0.10,<1.0"]
 # transformers' AwqQuantizer refuses to load autoawq checkpoints without gptqmodel;
 # needed only for screening first-party AWQ artifacts (e.g. Qwen/*-AWQ).
 awq = ["gptqmodel>=1.0"]
+# The Inspect-API runner (ROADMAP 0.8). Pure python, so CI installs it to run the
+# parity test — a parity claim whose only test permanently skips is not a claim.
+inspect = ["inspect-ai>=0.3"]
 
 [project.urls]
 Homepage = "https://github.com/Sahil170595/quantfit"
