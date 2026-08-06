@@ -19,5 +19,11 @@ venv/
 .ruff_cache/
 .mypy_cache/
 
+# Judge-calibration artifacts that carry completion text (docs/data-handling-completions.md:
+# local-only, never committed). Backstops the doc-mandated filename convention.
+*.capture.jsonl
+*.labels.csv
+*.labelkey.json
+
 # Internal build/process notes — kept local, not user-facing
 PLAN.md

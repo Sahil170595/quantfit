@@ -87,6 +87,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="also write the run as an auditable JSON report (schema v2: revision pins, "
         "resolved precisions, per-arm engine provenance, env fingerprint, per-arm runtimes)",
     )
+    pvs.add_argument(
+        "--capture",
+        default=None,
+        metavar="PATH",
+        help="ALSO write every completion to a local JSONL for judge calibration (may contain "
+        "harmful model output; never commit, redistribute, or attach to a report — see "
+        "docs/data-handling-completions.md; use the *.capture.jsonl suffix)",
+    )
 
     ps = sub.add_parser(
         "screen",
@@ -111,6 +119,22 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     pe.add_argument("what", choices=("model-card",), help="what to emit")
     pe.add_argument("--report", required=True, metavar="PATH", help="a schema-v2 drift report written by --report")
+
+    pca = sub.add_parser(
+        "calibrate",
+        help="judge-calibration machinery (ROADMAP 0.6; labeling itself starts only on the 0.5 GO): "
+        "build a blinded labeling sheet from a capture, or ingest filled labels into a calibration report "
+        "(exit 0 = done, 2 = operational error)",
+    )
+    csub = pca.add_subparsers(dest="calibrate_cmd", required=True)
+    pcs = csub.add_parser("sheet", help="capture JSONL -> blinded labeling sheet CSV + unblinding key JSON")
+    pcs.add_argument("--capture", required=True, metavar="PATH", help="a *.capture.jsonl written by --capture")
+    pcs.add_argument("--sheet", required=True, metavar="PATH", help="blinded sheet to write (*.labels.csv)")
+    pcs.add_argument("--key", required=True, metavar="PATH", help="unblinding key to write (*.labelkey.json)")
+    pci = csub.add_parser("ingest", help="filled sheet + key -> per-arm judge-error calibration report")
+    pci.add_argument("--sheet", required=True, metavar="PATH", help="the filled labeling sheet")
+    pci.add_argument("--key", required=True, metavar="PATH", help="the key written next to it")
+    pci.add_argument("--out", required=True, metavar="PATH", help="calibration report JSON to write (counts only)")
 
     pq = sub.add_parser("quantize", parents=[tok], help="quantize a model")
     pq.add_argument("--model", required=True, help="HF model id (the full-precision base)")
@@ -178,6 +202,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             token=args.token,
             max_new_tokens=args.max_new_tokens,
             report_path=args.report,
+            capture_path=args.capture,
         )
         print(drift.summary())  # aggregates only — never echoes raw probe prompts/completions
         if args.report:
@@ -218,6 +243,27 @@ def _dispatch(args: argparse.Namespace) -> int:
         from quantfit.modelcard import model_card_fragment
 
         print(model_card_fragment(args.report), end="")  # fragment carries its own trailing newline
+        return 0
+
+    if args.cmd == "calibrate":
+        if args.calibrate_cmd == "sheet":
+            from quantfit.safety.calibrate import build_labeling_sheet
+
+            sheet, key = build_labeling_sheet(args.capture, args.sheet, args.key)
+            print(f"blinded sheet -> {sheet}")
+            print(f"unblinding key -> {key} (labeler never sees this file)")
+            return 0
+        from quantfit.safety.calibrate import ingest_labels
+
+        report = ingest_labels(args.sheet, args.key, args.out)
+        for arm in ("baseline", "quantized"):
+            block = report[arm]
+            eps = block["epsilon"]
+            print(
+                f"{arm}: n={block['n']} judge_errors={block['judge_errors']} "
+                f"epsilon={'unmeasured' if eps is None else f'{eps:.4f}'}"
+            )
+        print(f"calibration report -> {args.out} (counts only, no completion text)")
         return 0
 
     if args.cmd == "quantize":

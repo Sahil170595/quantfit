@@ -20,8 +20,11 @@ def test_parser_accepts_every_command():
         ["probe", "--model", "m", "--bits", "4", "8"],
         ["verify", "--model", "p"],
         ["verify-safety", "--fp16", "a", "--quant", "b"],
+        ["verify-safety", "--baseline", "a", "--quant", "b", "--capture", "c.capture.jsonl"],
         ["screen", "--targets", "t.json", "--out", "d"],
         ["emit", "model-card", "--report", "r.json"],
+        ["calibrate", "sheet", "--capture", "c.capture.jsonl", "--sheet", "s.labels.csv", "--key", "k.labelkey.json"],
+        ["calibrate", "ingest", "--sheet", "s.labels.csv", "--key", "k.labelkey.json", "--out", "cal.json"],
         ["quantize", "--model", "m", "--method", "awq", "--out", "o"],
     ]
     for argv in cases:
@@ -174,3 +177,45 @@ def test_emit_refuses_wrong_schema_report_with_exit_2(monkeypatch):
 
     monkeypatch.setattr(mc, "model_card_fragment", _refuse)
     assert main(["emit", "model-card", "--report", "old.json"]) == 2
+
+
+def test_verify_safety_passes_capture_through(monkeypatch):
+    import quantfit.safety.verify as sv
+    from quantfit.safety.verify import Probe
+
+    seen = {}
+
+    def fake(baseline, quant, token=None, max_new_tokens=64, report_path=None, capture_path=None):
+        seen["capture_path"] = capture_path
+        probes = [Probe("u", "clear_unsafe", "unsafe"), Probe("s", "clear_safe", "safe")]
+        return _drift([True, False], [True, False], probes)
+
+    monkeypatch.setattr(sv, "verify_safety", fake)
+    assert main(["verify-safety", "--baseline", "a", "--quant", "b", "--capture", "x.capture.jsonl"]) == 0
+    assert seen["capture_path"] == "x.capture.jsonl"
+
+
+def test_calibrate_subcommands_dispatch_and_refuse_operationally(monkeypatch, capsys):
+    from pathlib import Path
+
+    import quantfit.safety.calibrate as cal
+
+    monkeypatch.setattr(cal, "build_labeling_sheet", lambda c, s, k: (Path(s), Path(k)))
+    assert main(["calibrate", "sheet", "--capture", "c", "--sheet", "s.labels.csv", "--key", "k.labelkey.json"]) == 0
+    out = capsys.readouterr().out
+    assert "blinded sheet" in out and "labeler never sees" in out
+
+    report = {
+        "baseline": {"n": 4, "judge_errors": 1, "epsilon": 0.25},
+        "quantized": {"n": 0, "judge_errors": 0, "epsilon": None},
+    }
+    monkeypatch.setattr(cal, "ingest_labels", lambda s, k, o: report)
+    assert main(["calibrate", "ingest", "--sheet", "s", "--key", "k", "--out", "o.json"]) == 0
+    out = capsys.readouterr().out
+    assert "epsilon=0.2500" in out and "epsilon=unmeasured" in out
+
+    def _refuse(*a, **k):
+        raise cal.CalibrationError("row 3 (id rdeadbeef) is unlabeled")
+
+    monkeypatch.setattr(cal, "ingest_labels", _refuse)
+    assert main(["calibrate", "ingest", "--sheet", "s", "--key", "k", "--out", "o.json"]) == 2
