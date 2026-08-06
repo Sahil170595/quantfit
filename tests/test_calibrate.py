@@ -368,14 +368,41 @@ def test_two_captures_never_mint_the_same_ids(tmp_path):
 
 
 def test_row_order_is_a_shuffle_not_the_capture_order(tmp_path):
+    # The blind rests on row order carrying no information about (pair, arm).
+    # Assert the MECHANISM, which is deterministic — rows are ordered by their
+    # opaque id — rather than any single draw's shape. The salt is now random
+    # (secrets.token_hex), so per-build order is a uniform permutation of the
+    # 2*_N_PAIRS rows: an assertion like "the first block holds both arms" is
+    # true only 1 - 2/C(10,5) = 99.2% of the time and reds CI ~0.8% of runs.
     sheet, key = _build(tmp_path)
     ids = json.loads(Path(key).read_text(encoding="utf-8"))["ids"]
-    order = [ids[row[0]] for row in _sheet_rows(sheet)[1:]]
+    rows = [row[0] for row in _sheet_rows(sheet)[1:]]
 
-    arms = [entry["arm"] for entry in order]
-    assert arms != [ARM_BASELINE] * _N_PAIRS + [ARM_QUANTIZED] * _N_PAIRS  # the capture's own order
-    assert [entry["pair"] for entry in order] != sorted(entry["pair"] for entry in order)
-    assert len(set(arms[:_N_PAIRS])) == 2  # both arms are interleaved from the first block on
+    # Ordered by the opaque id — the only ordering key, and one the labeler
+    # cannot invert without the key file they never receive.
+    assert rows == sorted(rows)
+    assert len(rows) == 2 * _N_PAIRS == len(ids)
+    # Every id appears exactly once, and each is an opaque fixed-shape token —
+    # `r` + 16 lowercase hex — so a row's position says nothing about its
+    # (pair, arm) beyond what the key file, which the labeler never gets, reveals.
+    assert set(rows) == set(ids)
+    assert all(re.fullmatch(r"r[0-9a-f]{16}", row_id) for row_id in rows)
+
+
+def test_the_shuffle_is_salted_so_two_sheets_do_not_share_an_order(tmp_path):
+    # The blind's strength IS the per-build salt: two sheets from one capture
+    # must not agree on order, or the ordering would be recoverable offline.
+    # P(two independent permutations of 10 rows coincide) = 1/10! = 2.8e-7,
+    # so this is deterministic in practice, unlike the per-draw shape it replaces.
+    capture = _capture(tmp_path)
+    orders = []
+    for stem in ("a", "b"):
+        sheet, key = _build(tmp_path, capture_path=capture, stem=stem)
+        ids = json.loads(Path(key).read_text(encoding="utf-8"))["ids"]
+        orders.append([(ids[row[0]]["pair"], ids[row[0]]["arm"]) for row in _sheet_rows(sheet)[1:]])
+
+    assert sorted(orders[0]) == sorted(orders[1])  # same content...
+    assert orders[0] != orders[1]  # ...different order, because the salt differs
 
 
 def test_both_arms_and_both_judge_labels_are_in_the_sheet(tmp_path):
