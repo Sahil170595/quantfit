@@ -854,9 +854,10 @@ named — Colab or Kaggle, with §4.5's resolving command output recorded rather
 relayed RAM figure (`cross-hardware-tolerance-v0.md:769-774`) **[V]**.
 
 **6. The tolerance is evaluated and recorded — outcome, not narrative.**
-Evidence: a `reproduction_record_version: 1` record with `outcome` ∈
-`reproduced | reproduced_with_denominator_drift | breach | void`
-(`cross-hardware-tolerance-v0.md:1174-1251`) **[V]**. The rule is pre-registered: a
+Evidence: a `schema_version: 1` reproduction record — the key
+`quantfit/reproduce.py:compare` actually emits — with `outcome` ∈
+`reproduced | reproduced_t0_unverified | reproduced_with_denominator_drift | breach | void`
+(`docs/cross-hardware-tolerance-v0.md` §6.3, and `reproduce.py:OUTCOMES`) **[V]**. The rule is pre-registered: a
 `|Δflips| = 2` result is a `breach` and a publishable finding about the instrument;
 widening `flip_count_slack` after seeing data "would convert a measurement into a
 ratification" **[V]**.

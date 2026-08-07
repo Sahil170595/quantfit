@@ -1218,17 +1218,21 @@ satisfies the 0.7 dtype clause, which it does not.
 
 ### 6.3 The pass/fail recording shape 0.8 will use
 
-**This is a document-defined record, not a shipped schema.** Nothing in `report.py`
-or `screen.py` reads or writes it, and no `schema_version` in this repo covers it —
-`reproduction_record_version` below is this document's own namespace, in the same
-spirit as QSR v0 §10.2's warning that a bare `schema_version: 1` means nothing until
-you know which file you are holding. It is deliberately shaped like `screen.py`'s
-`sensitivity_control` block: a status field a consumer reads instead of prose, plus
-the evidence that produced it.
+**AMENDED at 0.8: this record now ships.** It was written here as a document-defined
+shape before any code emitted it, and the paragraph that used to sit here said
+"nothing in this repo reads or writes it". `quantfit/reproduce.py:compare` now writes
+exactly this record, so that disclaimer was false on its own terms and is withdrawn.
+The version key is the one the module actually emits — `schema_version`, carrying
+`reproduce.REPRODUCTION_SCHEMA_VERSION` — rather than the bespoke record-version key
+this document coined before any code existed to write one. QSR v0 §10.2's warning still applies and is why the record
+also carries `spec_version`: a bare `schema_version: 1` means nothing until you know
+which artifact you are holding, and this repo now ships five of them. The shape
+deliberately mirrors `screen.py`'s `sensitivity_control` block: a status field a
+consumer reads instead of prose, plus the evidence that produced it.
 
 ```json
 {
-  "reproduction_record_version": 1,
+  "schema_version": 1,
   "spec_version": "v0",
   "quantfit_version": "<from the reports>",
   "created_utc": "<ISO 8601, UTC, seconds>",

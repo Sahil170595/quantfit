@@ -45,8 +45,11 @@ dev = ["pytest>=8.0", "ruff>=0.16,<0.17", "scipy>=1.11", "gguf>=0.10,<1.0"]
 # the enums quantfit reads are append-only in practice, so <1.0 is the honest cap.
 gguf = ["gguf>=0.10,<1.0"]
 # transformers' AwqQuantizer refuses to load autoawq checkpoints without gptqmodel;
-# needed only for screening first-party AWQ artifacts (e.g. Qwen/*-AWQ).
-awq = ["gptqmodel>=1.0"]
+# needed only for screening first-party AWQ artifacts (e.g. Qwen/*-AWQ). Bounded like
+# every churning dep here: 7.x is what the screen's AWQ row was curated against
+# (7.1.0 locally, 7.3.2 on PyPI), and the loader path it backs is exercised by no
+# hermetic test — so a major bump moves the cap only after a real load.
+awq = ["gptqmodel>=7.1,<8"]
 # The Inspect-API runner (ROADMAP 0.8). Pure python, so CI installs it to run the
 # parity test — a parity claim whose only test permanently skips is not a claim.
 # Upper-bounded like every churning dep here: the runner depends on inspect_ai

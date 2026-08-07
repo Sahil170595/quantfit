@@ -403,8 +403,8 @@ died trying.
 
 *Input.* A **target manifest, schema v1**: top-level `schema_version` (MUST equal 1), `name`,
 `targets`, and an optional `sensitivity_control` block (§9). **Unknown top-level keys are refused**,
-because a typo'd key must not read as an omitted field, and a screen that silently ignored
-`sensitivity_controls` would publish an unlabeled bound. Target names are unique **under casefolding**
+because a typo'd key must not read as an omitted field: a screen that silently ignored a misspelling
+of that block — an extra trailing letter is enough — would publish an unlabeled bound. Target names are unique **under casefolding**
 and MUST NOT casefold-collide with the summary filename's stem: a name is a report filename, and on a
 case-insensitive filesystem two targets differing only in case would overwrite one another's report,
 silently dropping a result from a screen that still counted it.
