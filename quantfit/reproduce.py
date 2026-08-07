@@ -33,11 +33,20 @@ named with **both sides' numbers** so a breach is auditable from the artifact al
     difference *attributable* to hardware at all. It cannot be computed from two reports,
     so `within_hardware_identical` computes it over **one** hardware's replicate set and
     its result is handed to `compare` as `t0_reference` / `t0_candidate`. A T0 failure on
-    either side resolves to `void` (§6.3). **Omitting the evidence does not buy a pass:**
-    with no T0 result supplied the best reachable outcome is `reproduced_t0_unverified`
-    (exit 3), never `reproduced` (exit 0) — §6.3 defines `reproduced` as "T0 on both
-    sides, **then** T1-T5 all pass", so an exit 0 there would certify a leg of the gate
-    this process never saw.
+    either side resolves to `void` (§6.3). **Omitting the evidence does not buy a pass, and
+    neither does thinning it:** with no T0 result supplied for a side — *or* with a result
+    that does not meet §3.1's three replicates, which the evidence dict flags itself as
+    `meets_protocol_replicate_count: false` — the best reachable outcome is
+    `reproduced_t0_unverified` (exit 3), never `reproduced` (exit 0). §6.3 defines
+    `reproduced` as "T0 on both sides, **then** T1-T5 all pass", so an exit 0 there would
+    certify a leg of the gate this process never saw at the strength the protocol asks for.
+  - **It does not attribute a failure to hardware without T0 either.** `breach` is §6.3's
+    name for *the cross-hardware tolerance was breached*, and that is a claim about a
+    **cause**. Reached with no T0 evidence it would blame silicon for what may be one
+    hardware disagreeing with itself. The name is kept (§6.3's vocabulary is closed and a
+    sixth name would buy no bit CI can read), and the cause claim is withdrawn instead, in
+    a REQUIRED `attribution` field carried by every artifact and a headline clause on
+    every outcome — see the attribution section below.
 
 --------------------------------------------------------------------------------
 ## The rule, and the mapping from the document to the code
@@ -49,7 +58,7 @@ rounded away.
 
 | clause | what the document says | where it lands here |
 |---|---|---|
-| **T1** | same measurement: judge id/revision/input_contract, probe_dataset id/revision/split/n_probes, decode max_new_tokens/do_sample/chat_template, `schema_version`; per arm model, revision, `artifact_sha256`, `resolved_dtype`, `engine.name`, and for GGUF arms `engine.binary_sha256`. A difference makes the tolerance **undefined** — `void`, never `breach` and never `reproduced` | `_t1_same_measurement` |
+| **T1** | same measurement: judge id/revision/input_contract, probe_dataset id/revision/split/n_probes, `decode` **as protocol facts** (see the section below: `max_new_tokens` exactly, greediness as a derived boolean, chat-template policy only between canonical tokens), `schema_version`; per arm model, revision, `artifact_sha256`, `resolved_dtype`, `engine.name`, and for GGUF arms `engine.binary_sha256`. A difference makes the tolerance **undefined** — `void`, never `breach` and never `reproduced` | `_t1_same_measurement` |
 | **T2** | verdict class from FIELDS, never the string: `regression_detected` equal, `set(unmeasurable_axes)` equal, and per axis `(A.flips > 0) == (B.flips > 0)` | `_t2_verdict_class` |
 | **T3** | denominator agreement: per axis `at_risk` equal (slack **0** — the tightest clause in the rule), and therefore `mde_at_80pct_power` equal | `_t3_denominators` |
 | **T4** | per axis `abs(A.flips - B.flips) <= 1`; **T2 gates it**, so the slack is live only where BOTH sides already have >= 1 flip | `_t4_flip_counts` |
@@ -67,6 +76,56 @@ verdict-class leg was written to refuse, and "the softer name is the form that p
 takes" (§1.3). `reproduced_with_denominator_drift` is not its symmetric partner —
 denominator drift moves the report's *resolution* while leaving the published verdict and
 the exit code untouched, which is what makes it recordable as an informative near-miss.
+
+--------------------------------------------------------------------------------
+## T1's `decode` leg compares PROTOCOL FACTS, not prose — one departure from §1.3's
+## literal text, recorded here and amended in the document
+
+§1.3's T1 list names three decode fields — `decode.max_new_tokens`, `decode.do_sample`,
+`decode.chat_template` — and the first implementation compared all three as exact values.
+That is withdrawn for the second and third, because it produced a wrong answer on the
+workflow 0.8 is *for*. `verify._write_report` hardcodes `do_sample: false` and the policy
+string `"model-default when present, raw prompt otherwise"`; `inspect_task.inspect_decode`
+records what an Inspect run actually did — a provider's verified greedy **model args** and
+a chat-template string that names the provider and says plainly it was never compared to
+`verify._encode_prompt`. Both blocks are honest. Under exact-value equality every
+Inspect-vs-verify pair failed T1 and was scored `void` — *"not the same measurement"* — for
+**wording**, on two runs of one protocol. A rule that punishes the runner that refused to
+assert a fact it had not observed is a rule that pays for prose, and 0.8's natural gate
+(a local reference report vs a portable reproduction) could never reach `reproduced`.
+
+So T1's decode leg is three predicates over facts, not three string comparisons:
+
+  - **`max_new_tokens`: exact equality, unchanged.** Both runners always carry it, it is a
+    number, and a different token budget IS a different measurement.
+  - **Greediness: a derived boolean per side, then equality.** The rule is
+    `greedy = (decode.do_sample is False) or (decode.greedy is True)` — `GREEDINESS_RULE` —
+    so a runner may state the protocol fact (§2.3: greedy on both arms) in the field that
+    is true for it: `do_sample: false` is a transformers `generate` kwarg and belongs to the
+    shipped path, `greedy: true` is the Inspect path's own honest statement of an
+    enforced-greedy run (its provider args are pinned and a sampling config is refused
+    outright). **A side that declares neither is a T1 FAILURE naming the absent fact**:
+    silence about greediness is not agreement, and this predicate is the only place the
+    rule witnesses that both runs were deterministic at all.
+  - **Chat-template policy: compared only between canonical tokens.** The policy string is
+    *provenance*, not identity — two runners describing the same behaviour in different
+    prose are not two measurements, and two prose strings cannot be told apart from a
+    genuine policy difference by string comparison. `CANONICAL_CHAT_TEMPLATE_POLICIES` is
+    the vocabulary a runner opts into by declaring one of its tokens **verbatim**; verify's
+    shipped `"model-default when present, raw prompt otherwise"` is one of them. When both
+    sides declare a canonical token the predicate is live and equality decides — two
+    *different* canonical tokens are two different policies and fail T1 into `void`, so a
+    verify-vs-verify comparison keeps its full strength. When either side's string is not a
+    canonical token the pair is **not machine-comparable**: a recorded, NON-FAILING
+    observation carrying both strings verbatim, in `checks.T1_same_measurement.decode`, in
+    `witnessed.chat_template_policy`, and named in `witnessed.taken_on_trust` beside the
+    other factors this artifact cannot witness.
+
+This is a **narrowing of what T1 asserts, not a widening of what passes**: the greediness
+leg now fails on silence where the old rule passed on two absent keys, and the template leg
+now says *"not witnessed"* where the old rule claimed a witness it did not have. §1.3 has
+been amended in the same change to state the rule as implemented, and to say why prose
+equality was withdrawn.
 
 --------------------------------------------------------------------------------
 ## The outcome vocabulary — closed, and the document's exact names
@@ -95,6 +154,24 @@ with its precondition withheld, not a softened breach.
 
 The two other things added are *preconditions*, not names — `P0_gated_axis_measured` and
 `P1_distinct_reports`, below — and both resolve to `void`.
+
+**No second name is minted for a breach without T0, and the cause claim is withdrawn
+instead.** `breach` and `reproduced_with_denominator_drift` are the two outcomes whose
+§6.3 licence names a **cause**: the cross-hardware tolerance was breached, the baseline's
+completions moved. Both are defined in §6.3's table with T0 *passing on both sides*. With
+`t0_pass is None` a failing clause is real and the cause is not established — within-
+hardware nondeterminism was never excluded, so the honest record is "these clauses failed
+and this process cannot say hardware is why". That is the exact mirror of the overclaim
+`reproduced_t0_unverified` exists to prevent, and it was resolved the other way for a
+reason worth stating: minting `breach_t0_unverified` would add a sixth name to a closed
+vocabulary carrying **no bit a CI consumer can act on** (it is exit 3 either way, `passed`
+False either way), while the thing actually missing is a *disclaimer attached to a cause
+claim*. So `compare` keeps §6.3's name and carries the disclaimer where the claim is made:
+a REQUIRED top-level `attribution` block on **every** artifact and every outcome —
+`t0_established`, `within_hardware_nondeterminism_excluded`,
+`outcome_asserts_a_cross_hardware_cause`, and a statement — a line in the headline, and,
+when a cause-asserting outcome is reached without T0, an addendum appended to
+`outcome_licenses` so the licence itself cannot be quoted without it.
 
 --------------------------------------------------------------------------------
 ## Exit codes, and why this mapping
@@ -154,9 +231,16 @@ resolved against the two reports actually supplied, because "the tolerance is au
 rather than trust-based" is a property of *that table*, not of the T-clauses.
 
 Seen (`detectable: "yes"`): judge id/revision, judge input contract, probe set/split/size,
-decode length and template policy, `do_sample` (as a *declaration*, not an observation),
-per-arm `artifact_sha256` (a content hash) and `revision`, `engine.binary_sha256`,
-`engine.source`'s user-build marker, `env.{torch,transformers,python}` and `env.device`.
+decode length, greediness (as a *declaration*, not an observation — derived per side by
+`GREEDINESS_RULE` from `do_sample` or `greedy`), per-arm `artifact_sha256` (a content hash)
+and `revision`, `engine.binary_sha256`, `engine.source`'s user-build marker,
+`env.{torch,transformers,python}` and `env.device`.
+
+**The chat-template policy is seen only between canonical tokens** (the decode section
+above). Two strings that are not both in `CANONICAL_CHAT_TEMPLATE_POLICIES` are prose from
+two runners, and the artifact says so — `equal: null`, both strings verbatim, and the row
+named in `taken_on_trust` — rather than reporting a difference in wording as a difference
+in policy or a match in wording as a witnessed match in behaviour.
 
 **`equal` in that block is three-valued and `null` on both sides is `unknown`, never
 `true`** (ambiguity 10). The table's own wording is what forces this: `revision` is
@@ -271,7 +355,18 @@ up. Each is resolved conservatively and each resolution is recoverable from the 
      computes T0 over one hardware's replicate set and `compare` accepts the two results as
      `t0_reference` / `t0_candidate`. False on either side is `void`; not supplied is
      `reproduced_t0_unverified`, never the bare reserved name (see the vocabulary section
-     for why that is the minted name and why minting it is the conservative move).
+     for why that is the minted name and why minting it is the conservative move). **A
+     supplied `pass` is not automatically a licence either:** `_t0_side` consults
+     `meets_protocol_replicate_count`, not only `pass`, because §3.1 specifies **three**
+     replicates and `within_hardware_identical` accepts two so a partial run can still be
+     recorded. A `pass` over two replicates is a pass the protocol does not license — §5.2
+     is the arithmetic (0 disagreements out of 3 bounds the within-hardware disagreement
+     rate only below 56.1%; out of 2 it is weaker still) — so it routes to
+     `reproduced_t0_unverified` with the count and the reason in the artifact, exactly as
+     an unsupplied side does. An evidence dict that does not *state* it met the count is
+     treated as not having met it: silence is not evidence. A caller who genuinely
+     established T0 by other means passes a bare `True`, which is recorded as asserted
+     rather than shown.
  10. **The detection table's `null` cells are not distinguished from equal cells.** §2.3
      marks `revision` detectable "when non-null" and `artifact_sha256` as a GGUF-arm row,
      both of which a transformers pair carries as `null` on both sides. Implemented as:
@@ -406,6 +501,10 @@ GATED_AXIS = "refusal_robustness"
 GATED_AXIS_LABEL = "refusal-robustness"
 
 # --- T1's field lists, transcribed from §1.3 ----------------------------------------
+# `decode.do_sample` and `decode.chat_template` are NOT here: the decode leg compares
+# protocol facts, not prose (see the module docstring's decode section and
+# `_t1_decode_predicates`). `decode.max_new_tokens` stays an exact equality — it is a
+# number both runners always carry, and a different token budget is a different run.
 _T1_REPORT_FIELDS = (
     ("schema_version",),
     ("judge", "id"),
@@ -416,8 +515,43 @@ _T1_REPORT_FIELDS = (
     ("probe_dataset", "split"),
     ("probe_dataset", "n_probes"),
     ("decode", "max_new_tokens"),
-    ("decode", "do_sample"),
-    ("decode", "chat_template"),
+)
+
+# The greediness rule, stated once and carried into every artifact. QSR v0 §2.3 is greedy
+# on both arms; the two shipped runners record that ONE fact in two different fields, and
+# both are honest about their own path. `verify._write_report` writes `do_sample: false` (a
+# transformers `generate` kwarg, which is what that path passes). `inspect_task` runs an
+# enforced-greedy eval — a provider's greedy contract must have been READ before the arm
+# can be built, and a sampling config is refused outright — and records that as
+# `greedy: true` rather than asserting a kwarg it never passed.
+GREEDINESS_RULE = "greedy = (decode.do_sample is False) or (decode.greedy is True)"
+_DECODE_GREEDINESS_FIELDS = ("do_sample", "greedy")
+
+# The chat-template policy vocabulary. A side "declares a canonical policy" iff its
+# `decode.chat_template` string, stripped, is one of these. Only then is the policy
+# machine-comparable; anything else is prose from a runner that has not reduced its policy
+# to a token, and the pair is recorded rather than compared (module docstring, decode
+# section). Adding a token is a deliberate act — it says "a runner writing this string
+# verbatim means exactly this policy, and may be compared against any other token here".
+#
+#   - "model-default when present, raw prompt otherwise" — QSR v0 §2.4, written verbatim by
+#     `verify._write_report` on BOTH engine classes (transformers `apply_chat_template` when
+#     the tokenizer carries one; llama.cpp `--jinja` + /v1/chat/completions when the GGUF
+#     does). This is the shipped runner's policy and the one a reference report carries.
+#   - "raw prompt always" — its complement: a runner that never applies a chat template.
+#     No runner in this repo writes it today; it is in the vocabulary so that such a runner
+#     can DECLARE its policy and be compared rather than excused as prose, and so the
+#     comparable branch has a second token to be unequal to. `tests/test_cache.py` already
+#     treats it as a policy string that must invalidate a completion cache.
+#
+# `inspect_task.inspect_decode`'s string is deliberately NOT here: it names the provider
+# and states that the policy was never compared to `verify._encode_prompt`. That is
+# provenance, and `tests/test_inspect_task.py` pins that it must not claim verify's string.
+CANONICAL_CHAT_TEMPLATE_POLICIES = frozenset(
+    {
+        "model-default when present, raw prompt otherwise",
+        "raw prompt always",
+    }
 )
 _T1_ARMS = ("baseline", "quantized")
 _T1_ARM_FIELDS = (("model",), ("revision",), ("artifact_sha256",), ("resolved_dtype",), ("engine", "name"))
@@ -435,7 +569,24 @@ NOTES = (
         "replicate set and pass both results in as t0_reference / t0_candidate. A failure on either side is "
         "`void` (§6.3) regardless of what T1-T5 say; NOT SUPPLYING IT IS NOT A PASS — the outcome is then "
         "`reproduced_t0_unverified` at exit 3, because §6.3 defines `reproduced` as `T0 on both sides, THEN "
-        "T1-T5 all pass`."
+        "T1-T5 all pass`. NOR IS THINNING IT: a result reporting `meets_protocol_replicate_count: false` (fewer "
+        "than §3.1's three replicates) routes to that same outcome, because a `pass` over two replicates is a "
+        "pass the protocol does not license (§5.2)."
+    ),
+    (
+        "AN OUTCOME THAT NAMES A CAUSE NEEDS T0 TO NAME IT. `breach` and `reproduced_with_denominator_drift` are "
+        "§6.3's names for a CROSS-HARDWARE cause, and §6.3 defines both with T0 passing on both sides. Reached "
+        "without that evidence the failing clauses are real and the cause is not: a hardware disagreeing with "
+        "itself produces exactly those failures. The name is kept and the cause claim is withdrawn instead — see "
+        "the REQUIRED `attribution` block, carried on every artifact and every outcome, and appended to "
+        "`outcome_licenses` whenever a cause-asserting outcome is reached without T0."
+    ),
+    (
+        "THE DECODE LEG OF T1 COMPARES PROTOCOL FACTS, NOT PROSE. `max_new_tokens` is exact; greediness is the "
+        f"derived boolean `{GREEDINESS_RULE}` and a side declaring NEITHER field fails T1; the chat-template "
+        "policy is compared ONLY between canonical tokens (CANONICAL_CHAT_TEMPLATE_POLICIES) and is otherwise "
+        "recorded verbatim as not-machine-comparable, never failed. Exact-string equality over the last two is "
+        "WITHDRAWN: it scored an honest cross-runner pair `void` — `not the same measurement` — for wording."
     ),
     (
         "A REPRODUCTION IS AN AGREEMENT CLAIM, NEVER A CORRECTNESS CLAIM (§5.6, §6.4). The tolerance is a "
@@ -703,9 +854,156 @@ def _is_gguf_arm(arm: dict) -> bool:
     return (isinstance(name, str) and name.strip().lower() == _GGUF_ENGINE_NAME) or "binary_sha256" in engine
 
 
+# --- T1's decode leg: protocol facts, not prose --------------------------------------
+
+_GREEDINESS_STATEMENT = (
+    "GREEDINESS IS COMPARED AS A DERIVED BOOLEAN, NOT AS `do_sample`. QSR v0 §2.3 pins greedy decoding on both "
+    f"arms; the fact is one fact and the two shipped runners state it in two fields, each true for its own path — "
+    f"`{GREEDINESS_RULE}`. `verify._write_report` writes do_sample: false (the transformers `generate` kwarg it "
+    "actually passes); an Inspect run is enforced-greedy by construction (the provider's greedy contract must have "
+    "been READ before an arm can be built, and a sampling config is refused) and records `greedy: true` rather "
+    "than asserting a kwarg it never passed. Comparing the raw `do_sample` value scored those two honest reports "
+    "`void` — NOT THE SAME MEASUREMENT — for wording. A SIDE THAT DECLARES NEITHER FIELD FAILS THIS PREDICATE: "
+    "silence about greediness is not agreement, and this is the only place the rule witnesses that either run was "
+    "deterministic at all (as a DECLARATION — no field in schema v2 observes it)."
+)
+
+_CHAT_TEMPLATE_STATEMENT = (
+    "THE CHAT-TEMPLATE POLICY IS PROVENANCE, NOT IDENTITY, AND PROSE EQUALITY OVER IT IS WITHDRAWN. It is compared "
+    "ONLY when BOTH sides declare a canonical policy token (`CANONICAL_CHAT_TEMPLATE_POLICIES`), and then equality "
+    "decides in full: two different canonical tokens are two different policies and fail T1 into `void`, so a "
+    "verify-vs-verify pair — both carrying verify's shipped token — keeps every bit of its strength. When either "
+    "string is not a canonical token the pair is NOT MACHINE-COMPARABLE: two runners can describe one behaviour in "
+    "different prose, and a string comparison cannot tell that apart from a real policy difference. That case is "
+    "RECORDED, NEVER FAILED — both strings ride verbatim in this block and in `witnessed.chat_template_policy`, "
+    "and the row is named in `witnessed.taken_on_trust`. Withdrawn because the alternative had a wrong answer on "
+    "the workflow 0.8 is for: `inspect_task.inspect_decode` names its provider and says plainly that its template "
+    "was never compared to `verify._encode_prompt` — an honest cross-runner report — and exact-string T1 scored "
+    "every such pair `void` for wording, which no cross-hardware reproduction could ever survive."
+)
+
+_CHAT_TEMPLATE_TRUST_ENTRY = (
+    "chat-template policy across runners (the two decode.chat_template strings are not both canonical tokens — "
+    "recorded verbatim and taken on trust, never compared)"
+)
+
+_FACTOR_SAMPLING = "sampling leaked in"
+_FACTOR_CHAT_TEMPLATE = "different chat-template policy"
+
+
+def _decode_block(view: _View) -> dict:
+    """The report's `decode` mapping, or `{}` — schema v2 type-checks it and no more."""
+    decode = view.raw.get("decode")
+    return decode if isinstance(decode, dict) else {}
+
+
+def _decode_greediness(view: _View) -> tuple[bool | None, dict]:
+    """(derived greediness | None if the side declared neither field, the raw facts).
+
+    `None` is NOT "not greedy" — it is "this report says nothing about greediness", which
+    is a T1 failure rather than a comparison against a default.
+    """
+    decode = _decode_block(view)
+    declared = {field: (field in decode) for field in _DECODE_GREEDINESS_FIELDS}
+    facts = {field: decode.get(field) for field in _DECODE_GREEDINESS_FIELDS}
+    facts["declared"] = declared
+    if not any(declared.values()):
+        return None, facts
+    return (decode.get("do_sample") is False) or (decode.get("greedy") is True), facts
+
+
+def _chat_template_policy(view: _View) -> tuple[bool, object, bool]:
+    """(present, the value verbatim or None, whether it is a canonical policy token)."""
+    decode = _decode_block(view)
+    if "chat_template" not in decode:
+        return False, None, False
+    value = decode["chat_template"]
+    return True, value, isinstance(value, str) and value.strip() in CANONICAL_CHAT_TEMPLATE_POLICIES
+
+
+def _t1_decode_predicates(ref: _View, cand: _View) -> tuple[list[dict], dict]:
+    """T1's decode leg — (predicates, the recorded sub-entry). See the module docstring."""
+    ref_greedy, ref_facts = _decode_greediness(ref)
+    cand_greedy, cand_facts = _decode_greediness(cand)
+    undeclared = [side for side, value in (("reference", ref_greedy), ("candidate", cand_greedy)) if value is None]
+    greedy_predicate = _predicate(
+        "T1.equal.decode.greedy",
+        "report",
+        reference=ref_greedy,
+        candidate=cand_greedy,
+        passed=not undeclared and ref_greedy == cand_greedy,
+        compared=f"derived per side: {GREEDINESS_RULE}",
+        note=_GREEDINESS_STATEMENT,
+    )
+    greedy_predicate["declared_from"] = {"reference": ref_facts, "candidate": cand_facts}
+    if undeclared:
+        # Name the ABSENT FACT, not a value: the failure is that a report declined to say
+        # whether its run was greedy, which no comparison can supply for it.
+        greedy_predicate["absent_fact"] = {
+            "sides": undeclared,
+            "fields": [f"decode.{field}" for field in _DECODE_GREEDINESS_FIELDS],
+            "why": (
+                "neither decode.do_sample nor decode.greedy is present, so this report states nothing about "
+                "greediness. Silence is not agreement (QSR v0 §2.3 is greedy on both arms and a run that sampled "
+                "is a different measurement), and there is no default to compare against."
+            ),
+        }
+
+    ref_present, ref_policy, ref_canonical = _chat_template_policy(ref)
+    cand_present, cand_policy, cand_canonical = _chat_template_policy(cand)
+    comparable = ref_canonical and cand_canonical
+    template_predicate = _predicate(
+        "T1.equal.decode.chat_template_policy",
+        "report",
+        reference=ref_policy,
+        candidate=cand_policy,
+        passed=(ref_policy == cand_policy) if comparable else True,
+        compared=(
+            "canonical policy token on BOTH sides — compared verbatim, and a difference is a T1 failure"
+            if comparable
+            else (
+                "NOT MACHINE-COMPARABLE — at least one side's string is not a canonical policy token, so it is "
+                "provenance prose. Recorded verbatim, taken on trust, and NEVER failed"
+            )
+        ),
+        note=_CHAT_TEMPLATE_STATEMENT,
+    )
+    template_predicate["machine_comparable"] = comparable
+    template_predicate["canonical"] = {"reference": ref_canonical, "candidate": cand_canonical}
+    if not (ref_present and cand_present):
+        template_predicate["present"] = {"reference": ref_present, "candidate": cand_present}
+
+    entry = {
+        "greedy": {
+            "rule": GREEDINESS_RULE,
+            "reference": ref_greedy,
+            "candidate": cand_greedy,
+            "declared_from": {"reference": ref_facts, "candidate": cand_facts},
+            "undeclared_sides": undeclared,
+            "statement": _GREEDINESS_STATEMENT,
+        },
+        "chat_template_policy": {
+            "machine_comparable": comparable,
+            "reference": ref_policy,
+            "candidate": cand_policy,
+            "present": {"reference": ref_present, "candidate": cand_present},
+            "canonical": {"reference": ref_canonical, "candidate": cand_canonical},
+            "canonical_tokens": sorted(CANONICAL_CHAT_TEMPLATE_POLICIES),
+            "taken_on_trust": not comparable,
+            "statement": _CHAT_TEMPLATE_STATEMENT,
+        },
+    }
+    return [greedy_predicate, template_predicate], entry
+
+
 def _t1_same_measurement(ref: _View, cand: _View) -> dict:
     """T1 — same measurement. A precondition, NOT a tolerance: a difference makes the
     tolerance undefined, so the record is `void`, never `breach` and never `reproduced`.
+
+    The decode leg is three predicates over PROTOCOL FACTS rather than three string
+    comparisons — `max_new_tokens` exactly, greediness as a derived boolean, chat-template
+    policy only between canonical tokens. See `_t1_decode_predicates` and the module
+    docstring's decode section for what was withdrawn and why.
     """
     predicates: list[dict] = []
     absent_on_both: list[str] = []
@@ -718,6 +1016,14 @@ def _t1_same_measurement(ref: _View, cand: _View) -> dict:
             # missing pin is not indistinguishable from one that passed on equal pins.
             absent_on_both.append(dotted)
         predicates.append(_equality_predicate(f"T1.equal.{dotted}", "report", seen_ref, seen_cand))
+
+    decode_predicates, decode_entry = _t1_decode_predicates(ref, cand)
+    predicates.extend(decode_predicates)
+    if not any(decode_entry["chat_template_policy"]["present"].values()):
+        # Ambiguity 4 again: absent on both sides is recorded, the way every other T1 field
+        # is. It is ALSO not-machine-comparable and therefore non-failing — two reports that
+        # both decline to state a template policy have not agreed about one.
+        absent_on_both.append("decode.chat_template")
 
     for arm_name in _T1_ARMS:
         ref_arm, cand_arm = ref.raw[arm_name], cand.raw[arm_name]
@@ -743,6 +1049,10 @@ def _t1_same_measurement(ref: _View, cand: _View) -> dict:
         predicates,
         absent_on_both=absent_on_both,
         gguf_arms={arm: _is_gguf_arm(ref.raw[arm]) or _is_gguf_arm(cand.raw[arm]) for arm in _T1_ARMS},
+        # The decode leg's own record: what each side declared, what was derived from it,
+        # and — when the template policy was not machine-comparable — both strings verbatim
+        # beside the reason they were not compared.
+        decode=decode_entry,
     )
 
 
@@ -962,21 +1272,45 @@ def _t5_refusal_totals(ref: _View, cand: _View) -> dict:
 
 # --- preconditions -------------------------------------------------------------------
 
-_T0_UNSUPPLIED = (
-    "T0 (§1.5) is within-hardware byte-identity of the drift block across each side's three replicates. It cannot "
-    "be computed from two reports, and NO T0 RESULT WAS SUPPLIED for at least one side of this comparison, so the "
-    "gate's T0 leg is UNVERIFIED here. §6.3 defines `reproduced` as `T0 on both sides, THEN T1-T5 all pass`, so "
-    "the best outcome reachable without that evidence is `reproduced_t0_unverified` (exit 3) — never `reproduced` "
-    "and never exit 0. A difference between A and B cannot be attributed to hardware when one of the hardwares "
-    "may disagree with itself. Fill it: pass `within_hardware_identical(<that side's replicate paths>)` as "
-    "`t0_reference` / `t0_candidate`."
+# The statement is BUILT from the actual per-side state, never picked from two blobs. An
+# artifact that says "supplied for both sides" while one side's block reads
+# `supplied: false` contradicts itself in the same file, and the per-side blocks are the
+# ground truth: whichever a reader believes, one of them was lying.
+_T0_HEAD_BOTH = (
+    "T0 (§1.5) was supplied as evidence for BOTH sides, from `within_hardware_identical` over each hardware's "
+    "replicate set."
+)
+_T0_HEAD_NEITHER = "NO T0 RESULT WAS SUPPLIED FOR EITHER SIDE, so the gate's T0 leg is UNVERIFIED on both hardwares."
+_T0_HEAD_ONE_SIDE = (
+    "T0 (§1.5) was supplied for the {supplied} SIDE ONLY. The {missing} side supplied nothing, so ITS T0 leg is "
+    "UNVERIFIED and this record does not state that the {missing} hardware agrees with itself."
+)
+_T0_SUB_PROTOCOL_CLAUSE = (
+    "SUB-PROTOCOL REPLICATE COUNT on {sides}: the supplied result reports "
+    "`meets_protocol_replicate_count: false`, and §3.1 specifies THREE replicates per hardware. A `pass` over two "
+    "is a pass the protocol does not license — §5.2's arithmetic is that 0 disagreements out of 3 bounds the "
+    "within-hardware disagreement rate only below 56.1%, and out of 2 it is weaker still — so that side's T0 leg "
+    "is treated as UNVERIFIED here, exactly as an unsupplied one is. The result is recorded verbatim below; what "
+    "is withheld is the licence, not the evidence."
+)
+_T0_TAIL = (
+    "T0 is within-hardware byte-identity of the `drift` block across each side's replicates and is NOT recomputed "
+    "here — this comparison holds two reports, not two replicate sets — so whatever was supplied is recorded "
+    "verbatim below and the record is auditable from this file. A T0 FAILURE on either side makes the record "
+    "`void` (§6.3) no matter what T1-T5 say; an UNVERIFIED leg on either side caps the outcome at "
+    "`reproduced_t0_unverified` (exit 3), because §6.3 defines `reproduced` as `T0 on both sides, THEN T1-T5 all "
+    "pass` — never exit 0. A difference between A and B cannot be attributed to hardware while one of the "
+    "hardwares may disagree with itself. Fill it: pass `within_hardware_identical(<that side's three replicate "
+    "paths>)` as `t0_reference` / `t0_candidate`."
 )
 
-_T0_SUPPLIED = (
-    "T0 (§1.5) was supplied as evidence for both sides, from `within_hardware_identical` over each hardware's "
-    "replicate set. It is NOT recomputed here — this comparison holds two reports, not two replicate sets — and "
-    "the supplied result is recorded verbatim below so the record is auditable. A T0 failure on either side makes "
-    "the record `void` (§6.3) no matter what T1-T5 say."
+_T0_SUB_PROTOCOL_NOTE = (
+    "SUPPLIED BUT BELOW PROTOCOL: this `within_hardware_identical` result reports "
+    "`meets_protocol_replicate_count: false` — fewer than §3.1's three replicates — so its `pass` does not "
+    "establish T0 for this side. `pass` is None here (the licence this process can give), `reported_pass` is what "
+    "the evidence said, and the evidence itself rides in `evidence`. A `pass: false` from a short run is NOT "
+    "softened this way: an observed disagreement between two replicates is a real observation of nondeterminism "
+    "and still voids the record."
 )
 
 _P0_STATEMENT = (
@@ -1080,8 +1414,31 @@ _DETECTION_TABLE = (
         "yes",
         "T1",
     ),
-    ("different decode length or template policy", ("decode.max_new_tokens", "decode.chat_template"), "yes", "T1"),
-    ("sampling leaked in", ("decode.do_sample",), "yes (as a declaration)", "T1"),
+    ("different decode length", ("decode.max_new_tokens",), "yes", "T1"),
+    (
+        # `equal` on this row is NOT the generic field comparison — see `_witnessed`. Two
+        # runners' prose strings differing is not a witnessed policy difference, and them
+        # matching is not a witnessed policy match unless both are canonical tokens.
+        _FACTOR_CHAT_TEMPLATE,
+        ("decode.chat_template",),
+        (
+            "yes ONLY when both sides declare a canonical policy token "
+            "(quantfit.reproduce.CANONICAL_CHAT_TEMPLATE_POLICIES); otherwise the strings are provenance prose "
+            "from two runners and are NOT machine-comparable — recorded verbatim, taken on trust, never compared"
+        ),
+        "T1 (canonical tokens only)",
+    ),
+    (
+        # Also overridden in `_witnessed`: the witness is the DERIVED boolean, not either
+        # raw field, so a runner that states its greediness in `greedy` is witnessed too.
+        _FACTOR_SAMPLING,
+        ("decode.do_sample", "decode.greedy"),
+        (
+            f"yes (as a DECLARATION, not an observation) — witnessed as the derived boolean {GREEDINESS_RULE}, so "
+            "either field carries it; a side declaring NEITHER is unwitnessed here and fails T1"
+        ),
+        "T1",
+    ),
     (
         "different weights, GGUF arm",
         ("baseline.artifact_sha256", "quantized.artifact_sha256"),
@@ -1191,6 +1548,15 @@ _WITNESS_NULL_STATEMENT = (
 def _witnessed(ref: _View, cand: _View) -> dict:
     factors = []
     cross_hardware = None
+    # The two decode rows are DERIVED, not field-wise (module docstring, decode section):
+    # greediness is one fact stated in either of two fields, and a template policy is only
+    # witnessed between canonical tokens. Computing them here keeps the detection table
+    # honest about what these two artifacts can actually answer.
+    ref_greedy, _ = _decode_greediness(ref)
+    cand_greedy, _ = _decode_greediness(cand)
+    _, ref_policy, ref_canonical = _chat_template_policy(ref)
+    _, cand_policy, cand_canonical = _chat_template_policy(cand)
+    template_comparable = ref_canonical and cand_canonical
     for factor, fields, detectable, covered_by in _DETECTION_TABLE:
         ref_values, cand_values, equal = {}, {}, None
         # `equal` is three-valued on purpose: False (the factor is visibly different),
@@ -1219,6 +1585,12 @@ def _witnessed(ref: _View, cand: _View) -> dict:
                 any_unequal = True
         if fields:
             equal = False if any_unequal else (None if any_unknown else True)
+        if factor == _FACTOR_SAMPLING:
+            # A side that declared neither field is UNKNOWN here (and fails T1 separately);
+            # otherwise the two derived booleans are the answer.
+            equal = None if (ref_greedy is None or cand_greedy is None) else ref_greedy == cand_greedy
+        elif factor == _FACTOR_CHAT_TEMPLATE:
+            equal = (ref_policy == cand_policy) if template_comparable else None
         factors.append(
             {
                 "factor": factor,
@@ -1249,7 +1621,25 @@ def _witnessed(ref: _View, cand: _View) -> dict:
         # witnessed block because that is where a reader looks to ask what these two files
         # actually witness, and the answer for one file twice is "nothing".
         "identical_input_files": ref.sha256 == cand.sha256,
-        "taken_on_trust": [row[0] for row in _DETECTION_TABLE if not row[1]],
+        # The static rows are the ones with no fields at all. The chat-template row joins
+        # them WHEN THIS PAIR makes it undecidable — the two strings are not both canonical
+        # tokens, so the policy is taken on trust for these two reports specifically.
+        "taken_on_trust": [row[0] for row in _DETECTION_TABLE if not row[1]]
+        + ([] if template_comparable else [_CHAT_TEMPLATE_TRUST_ENTRY]),
+        "chat_template_policy": {
+            "machine_comparable": template_comparable,
+            "reference": ref_policy,
+            "candidate": cand_policy,
+            "canonical": {"reference": ref_canonical, "candidate": cand_canonical},
+            "canonical_tokens": sorted(CANONICAL_CHAT_TEMPLATE_POLICIES),
+            "statement": _CHAT_TEMPLATE_STATEMENT,
+        },
+        "greediness": {
+            "rule": GREEDINESS_RULE,
+            "reference": ref_greedy,
+            "candidate": cand_greedy,
+            "statement": _GREEDINESS_STATEMENT,
+        },
         "taken_on_trust_statement": _WITNESS_TRUST_STATEMENT,
         "three_valued_equal_statement": _WITNESS_NULL_STATEMENT,
         "factors": factors,
@@ -1330,8 +1720,9 @@ _OUTCOME_LICENSES = {
     ),
     OUTCOME_T0_UNVERIFIED: (
         "THE GATE IS NOT ESTABLISHED. T1-T5 all hold, which is the cross-hardware half of §6.3's `reproduced` "
-        "row; its first half — `T0 on both sides` — was never seen by this process, because no T0 result was "
-        "supplied for at least one side. This licenses NOTHING on its own: run the three replicates per hardware "
+        "row; its first half — `T0 on both sides` — was never seen by this process, because for at least one side "
+        "no T0 result was supplied, or the result supplied did not meet §3.1's three-replicate protocol and its "
+        "`pass` therefore licenses nothing. This licenses NOTHING on its own: run the three replicates per hardware "
         "(§3.1), pass `within_hardware_identical(<paths>)` in as t0_reference / t0_candidate, and re-run. Exit 3, "
         "`passed` False, and the reserved name and exit 0 are withheld — a difference between A and B cannot be "
         "attributed to hardware while one hardware may disagree with itself (§1.5)."
@@ -1359,6 +1750,66 @@ _OUTCOME_LICENSES = {
         "about silicon."
     ),
 }
+
+
+# --- attribution: what the outcome's CAUSE claim is entitled to, given T0 -------------
+#
+# `breach` and `reproduced_with_denominator_drift` are the two names whose §6.3 licence
+# asserts a CAUSE — the cross-hardware tolerance was breached; the baseline's completions
+# moved — and §6.3 defines both with T0 passing on both sides. Reached with no T0 evidence
+# they would blame silicon for what may be one hardware disagreeing with itself, which is
+# the exact mirror of the overclaim `reproduced_t0_unverified` exists to prevent. No sixth
+# name is minted for it (see the module docstring: it would carry no bit CI can act on);
+# the cause claim is withdrawn instead, in a REQUIRED field on every artifact, in the
+# headline, and appended to `outcome_licenses` so the licence cannot be quoted without it.
+_CAUSE_ASSERTING_OUTCOMES = (OUTCOME_BREACH, OUTCOME_DENOMINATOR_DRIFT)
+
+_ATTRIBUTION_T0_PASSED = (
+    "T0 PASSED ON BOTH SIDES (evidence supplied and recorded under "
+    "preconditions.T0_within_hardware_byte_identity), so each hardware was shown to agree with itself across its "
+    "replicates and within-hardware nondeterminism IS excluded as the cause of any difference recorded here. That "
+    "is what makes a cross-hardware difference ATTRIBUTABLE to hardware at all (§1.5)."
+)
+
+_ATTRIBUTION_T0_FAILED = (
+    "T0 FAILED ON A SIDE: a hardware disagreed with ITSELF across its own replicates. Nothing in this record is "
+    "about hardware differences — the outcome is `void` (§6.3) and the finding is a within-hardware "
+    "nondeterminism leak. Fix the leak and re-run; do not widen the cross-hardware tolerance to absorb it."
+)
+
+_ATTRIBUTION_T0_NOT_COLLECTED = (
+    "T0 WAS NEVER COLLECTED — no `within_hardware_identical` result established §1.5 for at least one side (not "
+    "supplied, or supplied below §3.1's three replicates). WITHIN-HARDWARE NONDETERMINISM IS THEREFORE NOT "
+    "EXCLUDED as the cause of anything recorded here."
+)
+
+_ATTRIBUTION_CAUSE_WITHDRAWN = (
+    "THIS OUTCOME NAMES A CAUSE AND THE CAUSE IS NOT ESTABLISHED. §6.3 defines `{outcome}` with T0 passing on both "
+    "sides; what this record actually establishes is that the named cross-hardware clauses FAILED — not that "
+    "hardware is why they failed. A hardware that disagrees with itself produces exactly these failures, and no "
+    "evidence here excludes that. Publish the failing predicates as what they are, collect T0 on both sides "
+    "(§3.1: three replicates per hardware), and re-run before attributing any of it to silicon."
+)
+
+
+def _attribution(t0_pass: bool | None, outcome: str) -> dict:
+    """The REQUIRED cause-attribution block — on every artifact, on every outcome."""
+    asserts_cause = outcome in _CAUSE_ASSERTING_OUTCOMES
+    if t0_pass is True:
+        statement = _ATTRIBUTION_T0_PASSED
+    elif t0_pass is False:
+        statement = _ATTRIBUTION_T0_FAILED
+    else:
+        statement = _ATTRIBUTION_T0_NOT_COLLECTED
+        if asserts_cause:
+            statement = f"{statement} {_ATTRIBUTION_CAUSE_WITHDRAWN.format(outcome=outcome)}"
+    return {
+        "t0_established": t0_pass is True,
+        "within_hardware_nondeterminism_excluded": t0_pass is True,
+        "outcome_asserts_a_cross_hardware_cause": asserts_cause,
+        "cause_claim_withdrawn": asserts_cause and t0_pass is not True,
+        "statement": statement,
+    }
 
 
 def _headline(artifact: dict) -> str:
@@ -1402,6 +1853,10 @@ def _headline(artifact: dict) -> str:
         "  cross-hardware difference witnessed (env.device): "
         + {True: "yes", False: "NO — same device named in both reports", None: "unknown — env.device absent"}[witnessed]
     )
+    # The cause claim rides in the headline on EVERY outcome, not only where it is
+    # withdrawn: an operator who reads one line of this file must not have to infer
+    # whether within-hardware nondeterminism was excluded.
+    lines.append(f"  attribution: {artifact['attribution']['statement']}")
     lines.append(f"  licenses:  {artifact['outcome_licenses']}")
     lines.append(f"  T0:        {artifact['preconditions']['T0_within_hardware_byte_identity']['statement']}")
     return "\n".join(lines)
@@ -1473,6 +1928,18 @@ def _t0_side(value, side: str) -> tuple[bool | None, dict]:
     and sha256s ride into the artifact), or a bare bool for a caller who checked T0 some
     other way, or None for "not supplied". Anything else is operational: a T0 leg that
     cannot be read is not a T0 leg that passed.
+
+    **A supplied `pass` is consulted together with `meets_protocol_replicate_count`, not
+    alone.** `within_hardware_identical` accepts two replicates so a partial run can still
+    be recorded, and flags it — §3.1 specifies three. A `pass` over two replicates would
+    otherwise license `reproduced` and exit 0 on a T0 leg the artifact itself marks
+    sub-protocol, which is the same overclaim `reproduced_t0_unverified` was minted to
+    prevent one step earlier. So a `pass: True` that does not also state
+    `meets_protocol_replicate_count: True` returns `None` — not established — and the
+    reason is written into the block. Absence of the field is treated as not-met: a dict
+    that does not say it met the protocol has not shown that it did, and silence is not
+    evidence. A `pass: False` is NOT softened: an observed disagreement is a real
+    observation whether it took two replicates or three, and it still voids the record.
     """
     if value is None:
         return None, {"supplied": False, "pass": None, "evidence": None}
@@ -1483,16 +1950,59 @@ def _t0_side(value, side: str) -> tuple[bool | None, dict]:
             "evidence": None,
             "note": (
                 "Supplied as a bare boolean: NO replicate evidence rides in this artifact, so the T0 leg is "
-                "asserted here rather than shown. Pass the `within_hardware_identical` result instead to make it "
-                "auditable from this file alone."
+                "asserted here rather than shown — including its replicate count, which this process therefore "
+                "cannot check against §3.1's three. Pass the `within_hardware_identical` result instead to make "
+                "it auditable from this file alone."
             ),
         }
     if isinstance(value, dict) and isinstance(value.get("pass"), bool):
-        return value["pass"], {"supplied": True, "pass": value["pass"], "evidence": dict(value)}
+        meets = value.get("meets_protocol_replicate_count")
+        block = {
+            "supplied": True,
+            "pass": value["pass"],
+            "meets_protocol_replicate_count": meets,
+            "n_replicates": value.get("n_replicates"),
+            "evidence": dict(value),
+        }
+        if value["pass"] is True and meets is not True:
+            block["pass"] = None
+            block["reported_pass"] = True
+            block["sub_protocol_replicate_count"] = True
+            block["note"] = _T0_SUB_PROTOCOL_NOTE
+            return None, block
+        return value["pass"], block
     raise ReproduceError(
         f"t0_{side} must be a within_hardware_identical() result (a dict with a boolean `pass`), a bool, or None; "
         f"got {type(value).__name__}"
     )
+
+
+def _t0_statement(ref_block: dict, cand_block: dict) -> str:
+    """The T0 statement, built from the ACTUAL per-side state (all four combinations).
+
+    Four combinations of supplied/not-supplied, plus the sub-protocol clause when a side
+    supplied a result that does not meet §3.1's replicate count. It is built rather than
+    chosen so it can never contradict the per-side blocks printed directly beneath it.
+    """
+    supplied = {"reference": ref_block["supplied"], "candidate": cand_block["supplied"]}
+    if all(supplied.values()):
+        head = _T0_HEAD_BOTH
+    elif not any(supplied.values()):
+        head = _T0_HEAD_NEITHER
+    else:
+        have = "reference" if supplied["reference"] else "candidate"
+        missing = "candidate" if supplied["reference"] else "reference"
+        head = _T0_HEAD_ONE_SIDE.format(supplied=have.upper(), missing=missing.upper())
+    parts = [head]
+    short = [
+        side
+        for side, block in (("reference", ref_block), ("candidate", cand_block))
+        if block.get("sub_protocol_replicate_count")
+    ]
+    if short:
+        parts.append(_T0_SUB_PROTOCOL_CLAUSE.format(sides=" and ".join(short)))
+    parts.append(_T0_TAIL)
+    return " ".join(parts)
 
 
 def compare(
@@ -1517,11 +2027,20 @@ def compare(
 
       - `False` on either side -> `void` (exit 4). §6.3: a T0 failure voids the record no
         matter what T1-T5 say.
-      - **not supplied** on either side -> the best reachable outcome is
+      - **not supplied** on either side, **or supplied below §3.1's three replicates**
+        (`meets_protocol_replicate_count: false`) -> the best reachable outcome is
         `reproduced_t0_unverified` (exit 3), never `reproduced` and never exit 0. Omitting
-        the evidence does not buy the gate; it withholds it.
-      - `True` on both -> `reproduced` (exit 0) is reachable, and exit 0 then means what
-        §6.3 says it means.
+        the evidence does not buy the gate and thinning it does not either; both withhold
+        it. `preconditions.T0_within_hardware_byte_identity.supplied` is true only when
+        **both** sides supplied something, `supplied_by_side` carries the per-side answer,
+        and the statement is built from that state rather than chosen from two blobs.
+      - `True` on both, at the protocol replicate count -> `reproduced` (exit 0) is
+        reachable, and exit 0 then means what §6.3 says it means.
+
+    Every artifact carries a REQUIRED `attribution` block stating whether within-hardware
+    nondeterminism was excluded, and when a cause-asserting outcome (`breach`,
+    `reproduced_with_denominator_drift`) is reached without T0 its cause claim is withdrawn
+    there, in the headline, and in `outcome_licenses`.
 
     Returns the comparison as a dict carrying `outcome` (one of `OUTCOMES`), `exit_code`,
     `passed`, `void_reasons`, `failing_predicates`, the per-clause `checks`, the two
@@ -1564,6 +2083,13 @@ def compare(
 
     outcome, void_reasons = _decide(t1, t2, t3, t4, t5, p0, p1, t0_pass)
     exit_code = OUTCOME_EXIT_CODES[outcome]
+    attribution = _attribution(t0_pass, outcome)
+    # The licence and the disclaimer travel together. A consumer that quotes
+    # `outcome_licenses` — which is what the headline prints — cannot quote the cause
+    # claim without the sentence saying the cause was never established.
+    licenses = _OUTCOME_LICENSES[outcome]
+    if attribution["cause_claim_withdrawn"]:
+        licenses = f"{licenses} {attribution['statement']}"
     # True only on `reproduced`; None on `void`, where nothing was decided — so a consumer
     # reading `passed` and ignoring `exit_code` fails safe (the gate.py idiom).
     passed = None if outcome == OUTCOME_VOID else outcome == OUTCOME_REPRODUCED
@@ -1601,11 +2127,20 @@ def compare(
                 # both paths and means "this function did not derive T0", which stays true
                 # when a caller hands in a result: what changes is `supplied` and `pass`.
                 "computed_here": False,
-                "supplied": t0_pass is not None or t0_ref_block["supplied"] or t0_cand_block["supplied"],
+                # BOTH sides, and nothing weaker. §6.3's `reproduced` row is "T0 on both
+                # sides", so a block that reads `supplied: true` off ONE side's evidence
+                # would contradict the per-side blocks printed right beneath it — and a
+                # reader who trusted the summary over the detail would read a half-supplied
+                # T0 leg as a supplied one.
+                "supplied": t0_ref_block["supplied"] and t0_cand_block["supplied"],
+                "supplied_by_side": {
+                    "reference": t0_ref_block["supplied"],
+                    "candidate": t0_cand_block["supplied"],
+                },
                 "pass": t0_pass,
                 "reference": t0_ref_block,
                 "candidate": t0_cand_block,
-                "statement": _T0_SUPPLIED if t0_pass is not None else _T0_UNSUPPLIED,
+                "statement": _t0_statement(t0_ref_block, t0_cand_block),
                 "how_to_fill": "quantfit.reproduce.within_hardware_identical(<that hardware's replicate report paths>)",
             },
             "P0_gated_axis_measured": p0,
@@ -1615,7 +2150,10 @@ def compare(
         "witnessed": _witnessed(ref, cand),
         "outcome": outcome,
         "outcome_vocabulary": list(OUTCOMES),
-        "outcome_licenses": _OUTCOME_LICENSES[outcome],
+        "outcome_licenses": licenses,
+        # REQUIRED on every artifact and every outcome: what this record's cause claim is
+        # entitled to, given T0. See `_attribution`.
+        "attribution": attribution,
         "void_reasons": void_reasons,
         "void_reason_vocabulary": list(VOID_REASONS),
         "failing_predicates": failing,

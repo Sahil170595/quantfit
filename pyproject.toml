@@ -49,7 +49,11 @@ gguf = ["gguf>=0.10,<1.0"]
 awq = ["gptqmodel>=1.0"]
 # The Inspect-API runner (ROADMAP 0.8). Pure python, so CI installs it to run the
 # parity test — a parity claim whose only test permanently skips is not a claim.
-inspect = ["inspect-ai>=0.3"]
+# Upper-bounded like every churning dep here: the runner depends on inspect_ai
+# internals (SampleScore/Score/Value, inspect_ai.score, and the epoch-reduction
+# behaviour of Score.value) and is VERIFIED against 0.3.252. The cap moves only
+# after a validated run on the new minor — the standing ROADMAP rule.
+inspect = ["inspect-ai>=0.3.252,<0.4"]
 
 [project.urls]
 Homepage = "https://github.com/Sahil170595/quantfit"

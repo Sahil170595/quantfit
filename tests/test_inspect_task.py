@@ -51,13 +51,14 @@ import json
 import subprocess
 import sys
 import types
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import pytest
 
 from quantfit.inspect_task import (
     ARMS_GENERATED_BY,
     ARMS_KEY,
+    ARMS_MODEL_ARGS,
     ARMS_ROLE_BOUND,
     ARMS_VETTED,
     BASELINE_ROLE,
@@ -66,8 +67,12 @@ from quantfit.inspect_task import (
     EPOCH_KEY,
     EVAL_PASSTHROUGH,
     EVAL_REFUSALS,
+    GENERATE_CONFIG_ALLOWED,
+    GENERATE_CONFIG_REFUSALS,
     GREEDY_PROVIDER_ARGS,
     JUDGE_RUNTIME_KEY,
+    MODEL_ARG_ALLOWLIST,
+    MODEL_ARG_REFUSALS,
     NOT_CLAIMED,
     PAIR_INDEX_KEY,
     PINNED_TEMPERATURE,
@@ -76,8 +81,10 @@ from quantfit.inspect_task import (
     PROBE_ZONE_KEY,
     QUANTIZED_ROLE,
     SAMPLING_FIELDS,
+    VERIFIED_INSPECT_AI_VERSION,
     InspectTaskError,
     PairOutcome,
+    _import_refusal,
     check_arms,
     check_epochs,
     check_eval_args,
@@ -89,8 +96,10 @@ from quantfit.inspect_task import (
     drift_from_outcomes,
     inspect_decode,
     judge_runtime_from_outcomes,
+    model_args_provenance,
     outcomes_from_scores,
     provider_of,
+    run_model_args,
     write_drift_report,
 )
 from quantfit.safety.verify import (
@@ -231,14 +240,16 @@ def _outcomes(scenario=MAIN, arms=ARMS):
     ]
 
 
-def _arms_record(vetted=ARMS, generated_by=None, role_bound=None):
+def _arms_record(vetted=ARMS, generated_by=None, role_bound=None, model_args=None):
     """The provenance block the solver writes and the aggregation checks."""
     used = generated_by if generated_by is not None else vetted
     bound = role_bound if role_bound is not None else used
+    args = model_args if model_args is not None else ({}, {})
     return {
         ARMS_VETTED: {ARM_BASELINE: vetted[0], ARM_QUANTIZED: vetted[1]},
         ARMS_GENERATED_BY: {ARM_BASELINE: used[0], ARM_QUANTIZED: used[1]},
         ARMS_ROLE_BOUND: {ARM_BASELINE: bound[0], ARM_QUANTIZED: bound[1]},
+        ARMS_MODEL_ARGS: {ARM_BASELINE: dict(args[0]), ARM_QUANTIZED: dict(args[1])},
     }
 
 
@@ -408,6 +419,42 @@ def test_missing_inspect_ai_is_an_operational_error_naming_the_install():
         qsr_paired_diff("hf/org/base", "hf/org/quant")
 
 
+def test_an_absent_package_is_diagnosed_as_absent(monkeypatch):
+    # The absent branch, on an install that HAS the extra: find_spec is the question
+    # ("is the package there at all"), so stubbing it is stubbing the question.
+    import importlib.util
+
+    monkeypatch.setattr(importlib.util, "find_spec", lambda name: None)
+    refusal = _import_refusal(ModuleNotFoundError("No module named 'inspect_ai'", name="inspect_ai"))
+    assert "quantfit[inspect]" in str(refusal)
+    assert "is not installed" in str(refusal)
+
+
+def test_an_import_that_is_not_an_absence_is_not_reported_as_one():
+    """A symbol that moved in a newer inspect_ai is an INCOMPATIBILITY, not an absence.
+
+    Catching every ImportError and printing "inspect_ai is not installed" sends an
+    operator to reinstall a package they already have — a wrong diagnosis, and one that
+    cannot be acted on. The two cases are distinguished by `find_spec`, and the second
+    names the version installed, the symbol, and the version this module was verified
+    against, so the fix (a pin, or a reviewed port) is the one the message points at.
+    """
+    pytest.importorskip("inspect_ai", reason="the installed-but-incompatible case needs the package present")
+    from quantfit.inspect_task import _installed_inspect_ai_version
+
+    refusal = _import_refusal(ImportError("cannot import name 'Task' from 'inspect_ai'", name="inspect_ai"))
+    text = str(refusal)
+    assert isinstance(refusal, InspectTaskError)
+    assert "is not installed" not in text
+    assert "IS installed" in text and "INCOMPATIBILITY" in text
+    assert "Task" in text  # the symbol, so the operator knows what moved
+    assert VERIFIED_INSPECT_AI_VERSION in text  # what this module was checked against
+    assert _installed_inspect_ai_version() in text  # what they actually have
+    assert _installed_inspect_ai_version() not in ("unknown", "")
+    # And it points at the pin rather than at a reinstall.
+    assert "reinstalling will not fix it" in text
+
+
 # --- what is NOT claimed ----------------------------------------------------------
 
 
@@ -422,6 +469,7 @@ def test_not_claimed_carries_the_limits_as_data():
     assert "not frozen" in blob and "roadmap 0.6" in blob and "roadmap 0.7" in blob
     assert "generation parity" in blob and "not claimed" in blob
     assert "chat template" in blob and "_encode_prompt" in blob  # finding 4: the decode block
+    assert "decode.greedy" in blob  # the enforced fact, stated rather than dropped
     assert "n loads for n probes" in blob  # finding 3: the standalone path's judge cost
     assert "bypasses those refusals" in blob  # finding 1: eval() is a real door
     assert "eval log" in blob  # capture-class handling for the log's completions
@@ -463,7 +511,8 @@ def test_hf_arms_carry_the_verified_greedy_model_arg():
     # so temperature=0 alone still samples. The pin is what closes that.
     assert GREEDY_PROVIDER_ARGS["hf"] == {"do_sample": False}
     assert check_model_args("hf", None) == {"do_sample": False}
-    assert check_model_args("hf", {"device": "cuda"}) == {"device": "cuda", "do_sample": False}
+    # The pin spelled out by the caller is agreement, not a request to refuse.
+    assert check_model_args("hf", {"do_sample": False}) == {"do_sample": False}
 
 
 def test_model_arg_contradicting_the_greedy_pin_is_refused_not_overwritten():
@@ -471,6 +520,81 @@ def test_model_arg_contradicting_the_greedy_pin_is_refused_not_overwritten():
     # than answer it.
     with pytest.raises(InspectTaskError, match="contradicts the greedy pin"):
         check_model_args("hf", {"do_sample": True})
+
+
+# --- model args cannot change WHICH model generates (the allowlist) ----------------
+# `get_model(spec, **model_args)` forwards to the provider constructor, and on `hf` that
+# reaches `from_pretrained`. Every arm check in the module compares `str(Model)`, which
+# derives from the SPEC — so an arm pointed elsewhere by a model arg is invisible to all
+# of them, and the report keeps naming the spec. These are the refusals that close it.
+
+
+def test_a_model_arg_cannot_substitute_the_checkpoint_that_generates():
+    # The proven consequence, in one line: with `model_path` merged in unchecked,
+    # qsr_eval("hf/org/base", "hf/org/base-awq", baseline_args={"model_path": "/local/other"})
+    # generated the BASELINE from a different checkpoint while check_arms, the
+    # role-rebinding check and check_run_arms all passed — and the emitted report's
+    # `baseline.model` still named "hf/org/base". That publishes drift caused by a
+    # substituted baseline as if it were quantization drift.
+    with pytest.raises(InspectTaskError, match="DIFFERENT checkpoint"):
+        check_model_args("hf", {"model_path": "/local/other"})
+
+
+@pytest.mark.parametrize(
+    ("arg", "value", "match"),
+    [
+        ("model_path", "/local/other", "DIFFERENT checkpoint"),
+        ("revision", "deadbeef", "different commit of the same repo"),
+        ("tokenizer", "org/other-tok", "re-encodes the probe"),
+        ("tokenizer_path", "/local/tok", "re-encodes the probe"),
+        ("chat_template", "{{ messages }}", "template diff rather than a quantization diff"),
+        ("use_chat_template", False, "changes what the model is actually asked"),
+        ("tokenizer_call_args", {"padding": True}, "change the encoded probe"),
+        ("enable_thinking", True, "generation prompt"),
+        ("quantization_config", object(), "'baseline' a quantized model"),
+        ("torch_dtype", "float16", "axis under test"),
+        ("device", "cuda", "changes the kernels"),
+        ("device_map", "auto", "how the weights are sharded"),
+        ("batch_size", 8, "padding a greedy decode runs under"),
+        ("trust_remote_code", True, "arbitrary code execution"),
+        ("auto_model_class", "AutoModelForImageTextToText", "different transformers class"),
+        ("hidden_states", True, "labels, not"),
+    ],
+)
+def test_identity_changing_model_args_are_refused_by_name(arg, value, match):
+    with pytest.raises(InspectTaskError, match=match):
+        check_model_args("hf", {arg: value})
+
+
+def test_an_unknown_model_arg_is_refused_by_the_allowlist_not_forwarded():
+    # `hf` forwards anything it does not collect straight to from_pretrained, so an
+    # unrecognised name is exactly the case that must refuse rather than pass through.
+    with pytest.raises(InspectTaskError, match="not on the model-arg allowlist for provider 'hf'"):
+        check_model_args("hf", {"some_future_transformers_kwarg": 1})
+
+
+def test_the_allowlist_admits_the_greedy_pins_and_mockllms_fixture():
+    # An invariant, not a preference: a pin the allowlist refused could never be applied.
+    for provider, pins in GREEDY_PROVIDER_ARGS.items():
+        assert set(pins) <= MODEL_ARG_ALLOWLIST[provider], provider
+    # mockllm's custom_outputs ARE its generation. It is admitted because mockllm has no
+    # checkpoint to substitute and is a test provider that never carries a measurement —
+    # and it is recorded in the arm's provenance like everything else that survives.
+    assert MODEL_ARG_ALLOWLIST["mockllm"] == frozenset({"custom_outputs"})
+    assert MODEL_ARG_ALLOWLIST["hf"] == frozenset({"do_sample"})
+    # Every named reason describes an arg the allowlist does NOT quietly admit (do_sample
+    # excepted: it is admitted at the pinned value and refused at any other).
+    for provider, allowed in MODEL_ARG_ALLOWLIST.items():
+        assert (set(MODEL_ARG_REFUSALS) & allowed) <= set(GREEDY_PROVIDER_ARGS[provider])
+
+
+def test_model_args_are_recorded_json_safely_for_the_report():
+    # The point of the record is that the arg WAS applied, not what it contained: a
+    # callable fixture has no place in a published artifact, and dropping it entirely
+    # would leave the report unable to say how the arm was built.
+    assert model_args_provenance({"do_sample": False}) == {"do_sample": False}
+    assert model_args_provenance({"custom_outputs": lambda: None}) == {"custom_outputs": "<function>"}
+    assert json.dumps(model_args_provenance({"custom_outputs": object(), "do_sample": False}))
 
 
 # --- protocol refusals (pure) -----------------------------------------------------
@@ -507,6 +631,79 @@ def test_greedy_config_accepted():
     check_generate_config(None)
     check_generate_config(types.SimpleNamespace(temperature=PINNED_TEMPERATURE))
     assert PINNED_TEMPERATURE == 0.0
+
+
+# --- the config check is an ALLOWLIST over GenerateConfig -------------------------
+# It was a denylist over 9 of GenerateConfig's 38 fields, so the other 29 were accepted
+# and then silently discarded — the task runs under its own pinned config and never
+# merges the caller's — which is the exact silent drop the check exists to prevent.
+
+
+@pytest.mark.parametrize("field", sorted(GENERATE_CONFIG_REFUSALS))
+def test_every_refused_generate_config_field_refuses_by_name(field):
+    # One field at a time, so the parametrized case name is the field that must refuse.
+    # Duck-typed on purpose: the rule must hold without inspect_ai installed.
+    with pytest.raises(InspectTaskError, match=field):
+        check_generate_config(types.SimpleNamespace(**{field: 1}))
+
+
+@pytest.mark.parametrize(
+    "field",
+    ["system_message", "stop_seqs", "seed", "logit_bias", "response_schema", "cache", "fallback_models"],
+)
+def test_the_fields_the_denylist_used_to_swallow_now_refuse(field):
+    # Named individually because these are the regression: each one was accepted by the
+    # old check and then dropped on the floor. `seed` in particular reads as a
+    # determinism control and would have made a report look MORE pinned than it was.
+    assert field not in SAMPLING_FIELDS
+    with pytest.raises(InspectTaskError, match=field):
+        check_generate_config(types.SimpleNamespace(**{field: 1}))
+
+
+def test_a_real_generate_config_field_outside_the_allowlist_refuses():
+    # Against the type callers actually pass, not only a stub — a rule about someone
+    # else's dataclass proves nothing if it is only ever tested against a namespace.
+    pytest.importorskip("inspect_ai", reason="the Inspect runner is an optional extra")
+    from inspect_ai.model import GenerateConfig
+
+    with pytest.raises(InspectTaskError, match="system_message"):
+        check_generate_config(GenerateConfig(system_message="you are a helpful assistant"))
+    with pytest.raises(InspectTaskError, match="seed"):
+        check_generate_config(GenerateConfig(seed=1234))
+    # A bare config sets nothing, so nothing is refused; the pinned temperature agrees.
+    check_generate_config(GenerateConfig())
+    check_generate_config(GenerateConfig(temperature=PINNED_TEMPERATURE))
+
+
+def test_every_generate_config_field_is_classified():
+    """The guard against the next inspect-ai release re-opening the hole.
+
+    An allowlist assembled by hand rots the moment upstream adds a field. This fails when
+    the installed `GenerateConfig` carries a field the module has neither allowed nor
+    refused — so a version bump forces a decision instead of a silent admission — and it
+    fails the other way too, when the table names a field that no longer exists.
+    """
+    pytest.importorskip("inspect_ai", reason="the Inspect runner is an optional extra")
+    from inspect_ai.model import GenerateConfig
+
+    installed = set(GenerateConfig.model_fields)
+    classified = set(GENERATE_CONFIG_REFUSALS) | GENERATE_CONFIG_ALLOWED
+    assert installed - classified == set(), (
+        "inspect_ai's GenerateConfig has grown fields this runner has not classified; decide about each one "
+        "(allow it, or refuse it with a reason) in GENERATE_CONFIG_ALLOWED / GENERATE_CONFIG_REFUSALS"
+    )
+    assert classified - installed == set(), "the classification names GenerateConfig fields that no longer exist"
+    assert not (GENERATE_CONFIG_ALLOWED & set(GENERATE_CONFIG_REFUSALS))
+    # The sampling knobs stay refusable by their own name; they are a subset of the rule,
+    # not the rule.
+    assert set(SAMPLING_FIELDS) <= set(GENERATE_CONFIG_REFUSALS)
+
+
+def test_an_unclassified_config_field_is_refused_rather_than_dropped():
+    # What a future inspect_ai field meets before anyone updates the table: the check
+    # reads the object's own attributes too, so it refuses rather than admits.
+    with pytest.raises(InspectTaskError, match="not classified"):
+        check_generate_config(types.SimpleNamespace(some_future_inspect_field=1))
 
 
 @pytest.mark.parametrize(
@@ -669,6 +866,34 @@ def test_scores_that_disagree_about_the_arms_are_refused():
         outcomes_from_scores(stubs)
 
 
+def test_a_score_that_does_not_say_how_its_arms_were_built_is_refused():
+    # Required, not optional: model args can change what generates (which is why they are
+    # refused down to an allowlist first), so a run that recorded none of them is a run
+    # whose report could not be checked against it.
+    stub = _score_stub(0, MAIN.probes[0], True, False)
+    del stub.metadata[ARMS_KEY][ARMS_MODEL_ARGS]
+    with pytest.raises(InspectTaskError, match="no usable arm record"):
+        outcomes_from_scores([types.SimpleNamespace(score=stub)])
+    half = _score_stub(0, MAIN.probes[0], True, False)
+    half.metadata[ARMS_KEY][ARMS_MODEL_ARGS] = {ARM_BASELINE: {}}
+    with pytest.raises(InspectTaskError, match="must name both"):
+        outcomes_from_scores([types.SimpleNamespace(score=half)])
+    wrong_shape = _score_stub(0, MAIN.probes[0], True, False)
+    wrong_shape.metadata[ARMS_KEY][ARMS_MODEL_ARGS] = {ARM_BASELINE: "do_sample=False", ARM_QUANTIZED: {}}
+    with pytest.raises(InspectTaskError, match="must be a mapping"):
+        outcomes_from_scores([types.SimpleNamespace(score=wrong_shape)])
+
+
+def test_scores_that_disagree_about_how_the_arms_were_built_are_refused():
+    # Same specs under different model args is not one measurement — and the report
+    # records ONE set of args for the whole run, so a disagreement must not be averaged
+    # away by taking whichever pair happened to be first.
+    stubs = _sample_score_stubs()
+    stubs[1].score.metadata[ARMS_KEY] = _arms_record(model_args=({"do_sample": False}, {}))
+    with pytest.raises(InspectTaskError, match="do not agree on the model args"):
+        outcomes_from_scores(stubs)
+
+
 @pytest.mark.parametrize("epoch", [2, 3, 1.5, 2.0])
 def test_a_repeated_epoch_is_refused_by_name(epoch):
     # Finding 2: the operator must get "epochs", not a confusing duplicate-pair error.
@@ -791,18 +1016,52 @@ def test_report_decode_records_what_the_inspect_path_did(tmp_path, monkeypatch):
     assert decode == {
         "max_new_tokens": DEFAULT_MAX_NEW_TOKENS,
         "temperature": PINNED_TEMPERATURE,
+        "greedy": True,
         "greedy_model_args": {},  # mockllm is deterministic by construction
         "chat_template": "provider-default (inspect_ai:mockllm) — not verified against verify._encode_prompt",
         "recorded_by": "quantfit.inspect_task",
     }
-    # The two facts the shipped assembler would have asserted are GONE, not merely
-    # supplemented: an Inspect run observed neither.
+    # The false SPELLING is gone — `do_sample` is a transformers generate kwarg this path
+    # never passes — but the PROPERTY is not: see the greedy test below.
     assert "do_sample" not in decode
     assert "model-default when present" not in json.dumps(decode)
     # An hf pair records the greedy pin that WAS applied, because there it is observed.
     assert inspect_decode("hf", 32)["greedy_model_args"] == {"do_sample": False}
     with pytest.raises(InspectTaskError, match="nothing truthful to record"):
         inspect_decode("openai", DEFAULT_MAX_NEW_TOKENS)
+
+
+def test_decode_states_greedy_as_a_machine_comparable_fact():
+    """Dropping `do_sample` was right; dropping GREEDINESS with it broke comparability.
+
+    `quantfit.reproduce`'s T1 compares decode fields as VALUES, so an Inspect report that
+    carried no greediness fact at all made every Inspect-vs-verify comparison `void` — the
+    honest decode block silently disabled the tolerance rule. Greedy decoding is enforced
+    on this path (a sampling config is refused, the task pins temperature=0, and each arm
+    is built with the provider's verified greedy model args), so it is stated as
+    `greedy: true`: an enforced protocol fact, not a claim about a kwarg nobody passed.
+    `reproduce` reads greediness as `(do_sample is False) or (greedy is True)`, so verify's
+    block and this one resolve to the same fact from their own honest spellings.
+    """
+    for provider in GREEDY_PROVIDER_ARGS:
+        decode = inspect_decode(provider, DEFAULT_MAX_NEW_TOKENS)
+        assert decode["greedy"] is True
+        assert (decode.get("do_sample") is False) or (decode.get("greedy") is True)
+        # max_new_tokens stays an exact value: T1 compares it exactly.
+        assert decode["max_new_tokens"] == DEFAULT_MAX_NEW_TOKENS
+        # The template stays PROSE. There is no verified identity between the provider's
+        # templating and verify._encode_prompt, so there is none to assert — it is
+        # provenance a reader judges, and reproduce records it as not machine-comparable
+        # rather than failing T1 on it.
+        assert "not verified against verify._encode_prompt" in decode["chat_template"]
+    # The shipped path's own decode block still spells greediness the transformers way,
+    # which is what the two-spellings contract exists to bridge. Read from verify rather
+    # than restated here, so this test fails if that side ever changes.
+    import inspect as _inspect
+
+    import quantfit.safety.verify as sv
+
+    assert '"do_sample": False' in _inspect.getsource(sv._write_report)
 
 
 def test_report_refuses_arms_the_run_did_not_measure(tmp_path, monkeypatch):
@@ -833,6 +1092,93 @@ def test_write_drift_report_refuses_a_bad_token_budget(tmp_path):
         write_drift_report(str(tmp_path / "r.json"), _outcomes(), _arm(BASELINE_SPEC), _arm(QUANTIZED_SPEC), 0)
 
 
+def test_the_uncorrected_report_never_exists_at_the_published_path(tmp_path, monkeypatch):
+    """The report is assembled, corrected, and only THEN named.
+
+    `verify._write_report` fills the decode block with facts about `_generate_completions`
+    that are false for an Inspect run. Writing to the destination and rewriting it
+    afterwards left a window — a crash, a full disk, an exception in between — in which a
+    schema-VALID, publishable DriftReport sat at the destination asserting decode facts
+    this run never had. So the assembler is pointed at a temp file in the same directory
+    and the destination appears once, by os.replace, already corrected.
+    """
+    import quantfit.safety.verify as sv
+    from quantfit.safety.report import DriftReport
+
+    _stub_env(monkeypatch)
+    out = tmp_path / "atomic.json"
+    observed = {}
+    real_write_report = sv._write_report
+
+    def spy(path, *args, **kwargs):
+        observed["assembler_path"] = path
+        real_write_report(path, *args, **kwargs)
+        # The instant the shipped assembler has finished: a full report exists, with
+        # verify's decode block in it. It must not be at the name anyone would read.
+        observed["destination_exists_mid_write"] = out.exists()
+        observed["uncorrected_decode"] = DriftReport.from_json(path).decode
+
+    monkeypatch.setattr(sv, "_write_report", spy)
+    assert write_drift_report(str(out), _outcomes(), _arm(BASELINE_SPEC), _arm(QUANTIZED_SPEC)) == out
+
+    assert observed["assembler_path"] != str(out)
+    assert observed["destination_exists_mid_write"] is False
+    # The intermediate really was the publishable-but-false artifact, so the window this
+    # closes was a real one and not a hypothetical.
+    assert observed["uncorrected_decode"]["do_sample"] is False
+    assert DriftReport.from_json(str(out)).decode == inspect_decode("mockllm", DEFAULT_MAX_NEW_TOKENS)
+    # And nothing is left behind: the temp file is gone, the report is the only file.
+    assert [p.name for p in tmp_path.iterdir()] == ["atomic.json"]
+
+
+def test_a_failure_after_assembly_publishes_nothing_at_all(tmp_path, monkeypatch):
+    # The other half of atomicity: if the correction raises, the destination must not
+    # exist (rather than hold the uncorrected report) and no temp file may survive.
+    import quantfit.inspect_task as inspect_task_mod
+
+    _stub_env(monkeypatch)
+    out = tmp_path / "never.json"
+
+    def boom(provider, max_new_tokens):
+        raise RuntimeError("disk full")
+
+    monkeypatch.setattr(inspect_task_mod, "inspect_decode", boom)
+    with pytest.raises(RuntimeError, match="disk full"):
+        write_drift_report(str(out), _outcomes(), _arm(BASELINE_SPEC), _arm(QUANTIZED_SPEC))
+
+    assert not out.exists()
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_the_report_records_the_model_args_the_run_actually_applied(tmp_path, monkeypatch):
+    """Finding 2's second half: what survives the allowlist is recorded, from the RUN.
+
+    The arms are the caller's to supply, so an `ArmRun` cannot be trusted to say how the
+    arm was built. The applied model args ride from `check_model_args` through the solver,
+    the Score metadata and the pair outcomes into `engine.model_args`, which is why the
+    artifact cannot silently disagree with the run about them.
+    """
+    from quantfit.safety.report import DriftReport
+
+    _stub_env(monkeypatch)
+    out = tmp_path / "args.json"
+    applied = ({"custom_outputs": "<function>"}, {})
+    outcomes = [
+        replace(outcome, model_args={ARM_BASELINE: applied[0], ARM_QUANTIZED: applied[1]}) for outcome in _outcomes()
+    ]
+    write_drift_report(str(out), outcomes, _arm(BASELINE_SPEC), _arm(QUANTIZED_SPEC))
+
+    parsed = DriftReport.from_json(str(out))
+    assert parsed.baseline.engine["model_args"] == {"custom_outputs": "<function>"}
+    assert parsed.quantized.engine["model_args"] == {}
+    assert parsed.baseline.engine["name"] == "inspect_ai:mockllm"  # the rewrite keeps the rest
+    assert run_model_args(outcomes) == {ARM_BASELINE: applied[0], ARM_QUANTIZED: applied[1]}
+    # An empty record is honest for a run that applied none, and still present: absent
+    # would be indistinguishable from "nobody recorded".
+    write_drift_report(str(tmp_path / "none.json"), _outcomes(), _arm(BASELINE_SPEC), _arm(QUANTIZED_SPEC))
+    assert DriftReport.from_json(str(tmp_path / "none.json")).baseline.engine["model_args"] == {}
+
+
 # --- Inspect-dependent: the task, the solver, the scorer ---------------------------
 
 
@@ -856,7 +1202,14 @@ def test_task_builds_with_the_pinned_dataset_and_judge_revisions(monkeypatch):
     # The task's decode block is the same one the report records: one spelling of what
     # this path actually applied, not a second copy that could drift from it.
     assert task.metadata["decode"] == inspect_decode("mockllm", DEFAULT_MAX_NEW_TOKENS)
+    assert task.metadata["decode"]["greedy"] is True
     assert task.metadata["not_claimed"] == list(NOT_CLAIMED)
+    # The args each arm survived the allowlist with are in the log header too, so a
+    # standalone `inspect eval` records how its arms were built without an aggregation step.
+    assert task.metadata["model_args"] == {
+        BASELINE_ROLE: {"custom_outputs": "<function>"},
+        QUANTIZED_ROLE: {"custom_outputs": "<function>"},
+    }
 
     assert set(task.model_roles) == {BASELINE_ROLE, QUANTIZED_ROLE} == {ARM_BASELINE, ARM_QUANTIZED}
     assert task.config.temperature == PINNED_TEMPERATURE
@@ -883,6 +1236,29 @@ def test_task_refuses_protocol_violations_at_build_time(monkeypatch):
         qsr_paired_diff("hf/org/base", QUANTIZED_SPEC)
     with pytest.raises(InspectTaskError, match="is not quantfit's pin"):
         qsr_paired_diff(BASELINE_SPEC, QUANTIZED_SPEC, judge_revision="deadbeef")
+    # A GenerateConfig field the old denylist swallowed, against the real type.
+    with pytest.raises(InspectTaskError, match="system_message"):
+        qsr_paired_diff(BASELINE_SPEC, QUANTIZED_SPEC, config=GenerateConfig(system_message="be helpful"))
+
+
+def test_a_baseline_pointed_at_another_checkpoint_is_refused_before_it_loads(monkeypatch):
+    """The review's scenario, through the public API: it must not build the arm at all.
+
+    `qsr_eval("hf/org/base", "hf/org/base-awq", baseline_args={"model_path": "/local/other"})`
+    used to generate the baseline from a different checkpoint while check_arms, the
+    role-rebinding check and check_run_arms all passed — they compare `str(Model)`, which
+    derives from the spec — and the report still named "hf/org/base". The refusal has to
+    land at task build, before `get_model` touches a checkpoint: hf specs are used here
+    precisely because reaching the provider would mean a download.
+    """
+    pytest.importorskip("inspect_ai", reason="the Inspect runner is an optional extra")
+    from quantfit.inspect_task import qsr_paired_diff
+
+    _install_probes_and_judge(monkeypatch)
+    with pytest.raises(InspectTaskError, match="DIFFERENT checkpoint"):
+        qsr_paired_diff("hf/org/base", "hf/org/base-awq", baseline_args={"model_path": "/local/other"})
+    with pytest.raises(InspectTaskError, match="DIFFERENT checkpoint"):
+        qsr_paired_diff("hf/org/base", "hf/org/base-awq", quantized_args={"model_path": "/local/other"})
 
 
 def test_solver_vets_its_own_arms():
@@ -917,6 +1293,13 @@ def test_solver_generates_one_greedy_completion_per_arm_per_probe(tmp_path, monk
     assert set(sample.metadata[COMPLETIONS_KEY]) == {ARM_BASELINE, ARM_QUANTIZED}
     assert sample.metadata[ARMS_KEY][ARMS_VETTED] == {ARM_BASELINE: BASELINE_SPEC, ARM_QUANTIZED: QUANTIZED_SPEC}
     assert sample.metadata[ARMS_KEY][ARMS_GENERATED_BY] == sample.metadata[ARMS_KEY][ARMS_ROLE_BOUND]
+    # …and HOW they were built, JSON-safely: the mock arms are driven by custom_outputs,
+    # which is the one arg mockllm's allowlist admits, so the run records it applied.
+    assert sample.metadata[ARMS_KEY][ARMS_MODEL_ARGS] == {
+        ARM_BASELINE: {"custom_outputs": "<function>"},
+        ARM_QUANTIZED: {"custom_outputs": "<function>"},
+    }
+    assert run.outcomes[0].model_args == sample.metadata[ARMS_KEY][ARMS_MODEL_ARGS]
 
 
 def test_qsr_eval_loads_the_judge_once_for_the_whole_run(tmp_path, monkeypatch):

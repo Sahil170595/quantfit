@@ -5,6 +5,51 @@
 > would claim milestone completion, and those completions are gated on runs and
 > decisions that have not happened. 1.0 is the frozen standard (ROADMAP 1.0).
 
+## 0.5.3
+
+ROADMAP 0.8 machinery: the reproduction gate as code, an Inspect-API runner, the
+reference-report registry, and the QSR v1 freeze plan. Scoped to what can be true
+today — **v1 is not frozen** (it needs the ε-calibrated MDE from GO-gated 0.6 and
+the calibrated tolerance from an unrun T4), and **no reference report exists**
+(the 0.5 screen has not run). This ships the machinery and the plan; it
+fabricates neither.
+
+- **`quantfit.reproduce`** turns ROADMAP 0.8's gate — *"one reference report
+  reproduced from scratch on a free T4 within the 0.7 tolerance"* — into a
+  decision made by code. `docs/cross-hardware-tolerance-v0.md` defines the
+  tolerance as a T1–T5 rule over two schema-v2 reports; every predicate quotes
+  BOTH sides' numbers, so a breach is auditable from the artifact alone.
+  Outcomes are a closed vocabulary plus one minted name,
+  `reproduced_t0_unverified`: T0 is a within-hardware property of three
+  replicates and is not computable from the two reports a comparison receives,
+  so omitting that evidence yields a name strictly *harder* than the reserved
+  gate pass rather than the gate pass itself.
+- **`quantfit.inspect_task`** — a QSR-conformant paired diff on the Inspect API,
+  importing quantfit's own judge, at-risk definitions and tabulation. One
+  protocol, one implementation: a second copy would be the divergence channel
+  the spec exists to prevent. The arm and epochs pins are enforced at the layer
+  that can actually see a bypass, and the judge is loaded once per run rather
+  than once per probe.
+- **`quantfit.refreports` + `CITATION.cff`** — the registry ships **empty**,
+  with the three-report cap enforced in code and the rule ROADMAP risk 5 turns
+  on: a report stays valid across tool and dependency bumps and goes stale only
+  when its *spec* version is superseded.
+- **`spec/qsr-v1-freeze-plan.md`** — the blocking ledger with evidence, the
+  section-by-section v0→v1 diff, and the comparability decision under §10.2, so
+  freezing v1 later is transcription plus measured values rather than redesign.
+- **Decode comparability**: T1 compares decode as protocol facts — length and
+  greediness — rather than as prose. Comparing the chat-template policy string
+  for equality had made every honest cross-runner comparison read "not the same
+  measurement", punishing a runner for wording rather than for behavior.
+- CI installs `inspect-ai` (new `inspect` extra) so the Inspect parity test
+  actually runs; `.gitignore` covers Inspect eval logs, which carry completion
+  text the same way captures do.
+
+**Not delivered, so 0.8 is not claimed gate-passed:** QSR v1 is not frozen, zero
+reference reports exist, the free-tier T4 reproduction has not been attempted,
+there is no launch post (the 0.5 screen has not run, so there are no findings to
+lead with), and none of the three new modules is reachable from the CLI.
+
 ## 0.5.2
 
 ROADMAP 0.7 machinery: the pre-release gate, its CI integration, and the

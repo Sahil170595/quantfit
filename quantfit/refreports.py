@@ -431,10 +431,24 @@ def find(slug: str, registry: tuple[ReferenceReport, ...] = REGISTRY) -> Referen
 
 
 def hf_url(entry: ReferenceReport) -> str:
-    """The published URL, built from the entry's own fields (never guessed from the id alone)."""
+    """The published URL, built from the entry's own fields (never guessed from the id alone).
+
+    Refuses an unpinned entry rather than falling back to `main`. The registry's
+    `report_sha256` pins BYTES; a `main` URL resolves to whatever the branch head
+    later becomes, so the pair would advertise a citation whose contents can change
+    out from under the hash that authenticates them — and `verify_published` would
+    then fail against the very URL the registry published. An entry with no commit
+    oid is not yet citable, and saying so is the point (`docs/reference-reports-v0.md`
+    requires the oid to be read from the commit and stored).
+    """
     _require(isinstance(entry, ReferenceReport), f"hf_url expects a ReferenceReport, got {type(entry).__name__}")
-    revision = entry.hf_revision or "main"
-    return f"{_HF_URL_PREFIX[entry.hf_repo_type]}{entry.hf_repo}/blob/{revision}/{entry.hf_path}"
+    _require(
+        bool(entry.hf_revision),
+        f"reference report {entry.slug!r} has no hf_revision, so it has no immutable URL: a 'main' link "
+        f"can change under the pinned report_sha256. Read the commit oid from the upload (CommitInfo.oid) "
+        f"and register it before citing this report.",
+    )
+    return f"{_HF_URL_PREFIX[entry.hf_repo_type]}{entry.hf_repo}/blob/{entry.hf_revision}/{entry.hf_path}"
 
 
 # --- validity ---------------------------------------------------------------------
@@ -616,6 +630,11 @@ def verify_published(entry: ReferenceReport, local_report_path: str) -> dict:
         "matches": matches,
         "spec_version": entry.spec_version,
         "quantfit_version": entry.quantfit_version,
-        "hf_url": hf_url(entry),
+        # None rather than a `main` link when the entry is not pinned: authenticating
+        # bytes you already hold is legitimate before an oid exists, so this must not
+        # raise (a mismatch is a result, not an error — above), but neither may it mint
+        # a mutable URL. `citable` says which of the two states this is.
+        "hf_url": hf_url(entry) if entry.hf_revision else None,
+        "citable": bool(entry.hf_revision),
         "statement": statement,
     }

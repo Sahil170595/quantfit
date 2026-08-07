@@ -301,8 +301,17 @@ def test_registry_refuses_a_non_entry():
 def test_hf_url_is_built_from_the_entrys_own_fields():
     dataset = _entry(hf_repo_type="dataset", hf_repo="org/refreports", hf_path="v0/ref-a.json", hf_revision="abc123")
     assert hf_url(dataset) == "https://huggingface.co/datasets/org/refreports/blob/abc123/v0/ref-a.json"
-    model = _entry(hf_repo_type="model", hf_repo="org/refreports", hf_path="v0/ref-a.json")
-    assert hf_url(model) == "https://huggingface.co/org/refreports/blob/main/v0/ref-a.json"
+    model = _entry(hf_repo_type="model", hf_repo="org/refreports", hf_path="v0/ref-a.json", hf_revision="def456")
+    assert hf_url(model) == "https://huggingface.co/org/refreports/blob/def456/v0/ref-a.json"
+
+
+def test_an_unpinned_entry_has_no_citable_url_rather_than_a_main_link():
+    # The registry's sha256 pins BYTES. A `main` URL resolves to whatever the branch
+    # head later becomes, so it would advertise a citation whose contents can change
+    # out from under the hash that authenticates them — and verify_published would
+    # then fail against the very URL the registry published. Refuse, do not fall back.
+    with pytest.raises(RefReportError, match="no hf_revision"):
+        hf_url(_entry(hf_revision=None))
 
 
 # --- the validity rule: the asymmetry IS the module ---------------------------------
@@ -406,7 +415,7 @@ def _report_file(tmp_path, payload=b'{"schema_version": 2}\n'):
 
 def test_verify_published_matches_the_registered_hash(tmp_path):
     path = _report_file(tmp_path)
-    entry = _entry(report_sha256=sha256_file(str(path)))
+    entry = _entry(report_sha256=sha256_file(str(path)), hf_revision="abc123")
 
     result = verify_published(entry, str(path))
 
@@ -416,6 +425,19 @@ def test_verify_published_matches_the_registered_hash(tmp_path):
     # (QSR v0 §2.7) survives verification.
     assert "does not verify the numbers" in result["statement"]
     assert result["hf_url"].startswith("https://huggingface.co/")
+    assert result["citable"] is True
+
+
+def test_verify_published_works_before_the_entry_is_pinned_but_says_it_is_not_citable(tmp_path):
+    # Authenticating bytes you already hold is legitimate before a commit oid exists,
+    # so this must not raise — but it must not mint a `main` URL either.
+    path = _report_file(tmp_path)
+    entry = _entry(report_sha256=sha256_file(str(path)), hf_revision=None)
+
+    result = verify_published(entry, str(path))
+
+    assert result["matches"] is True
+    assert result["hf_url"] is None and result["citable"] is False
 
 
 def test_verify_published_reports_a_mismatch_as_a_value_not_an_exception(tmp_path):

@@ -25,6 +25,24 @@ What is pinned here, and why each one is load-bearing:
     measurements say nothing about hardware, and calling that a breach would blame silicon
     for a provenance error;
   - **`void` is not a pass**: `passed is None` on every trigger, and no trigger exits 0;
+  - **T1's decode leg compares protocol facts, not prose.** An Inspect-runner report and a
+    verify report state one protocol (greedy, §2.3) in two different fields and describe
+    one template policy in two different sentences; under exact-value equality that pair
+    was unconditionally `void`, so the natural 0.8 workflow could never reach `reproduced`.
+    Pinned here: the cross-runner pair reproduces; greediness is the derived boolean and a
+    side declaring NEITHER field FAILS T1; the template policy is compared only between
+    canonical tokens, and a verify-vs-verify pair keeps full strength — two different
+    canonical tokens are a T1 failure;
+  - **T0 is consulted with its replicate count, never by `pass` alone.** §3.1 specifies
+    three replicates; a `pass` over two is recorded, does not license `reproduced`/exit 0,
+    and routes to `reproduced_t0_unverified` — while a FAILURE over two still voids;
+  - **`supplied` means BOTH sides**, and the T0 statement is built from the actual per-side
+    state in all four combinations, so the summary can never contradict the blocks under it;
+  - **a name that asserts a CAUSE needs T0 to assert it.** `breach` and the near-miss are
+    §6.3 names for a cross-hardware cause; reached without T0 evidence the failing clauses
+    are real and the cause is not, so the cause claim is withdrawn in a REQUIRED
+    `attribution` block, in `outcome_licenses` and in the headline. No sixth outcome name
+    is minted for it;
   - **nothing degenerate scores as a pass.** The four ways a comparison can be a
     comparison of nothing each have their own test: the GATED axis measuring nothing on
     either side (P0), one file compared with itself (P1), T0 failing, and T0 never being
@@ -46,11 +64,13 @@ import pytest
 
 from quantfit.reproduce import (
     AT_RISK_SLACK,
+    CANONICAL_CHAT_TEMPLATE_POLICIES,
     EXIT_BREACH,
     EXIT_REPRODUCED,
     EXIT_VOID,
     FLIP_COUNT_SLACK,
     GATED_AXIS,
+    GREEDINESS_RULE,
     OUTCOME_BREACH,
     OUTCOME_DENOMINATOR_DRIFT,
     OUTCOME_EXIT_CODES,
@@ -74,6 +94,28 @@ from quantfit.safety.report import SCHEMA_VERSION, ArmRun, DriftReport
 from quantfit.safety.verify import Probe, _tabulate
 
 _TF_ENGINE = {"name": "transformers", "version": "5.10.1", "device": "cuda"}
+
+# The SHIPPED decode block, verbatim from `verify._write_report`: `do_sample: false` (the
+# transformers `generate` kwarg that path passes) and QSR v0 §2.4's policy string, which is
+# a canonical token. Every report built here is a verify-path report unless it says
+# otherwise, so the verify-vs-verify comparisons below run at full strength.
+_VERIFY_CHAT_TEMPLATE = "model-default when present, raw prompt otherwise"
+_VERIFY_DECODE = {"max_new_tokens": 64, "do_sample": False, "chat_template": _VERIFY_CHAT_TEMPLATE}
+
+# The INSPECT decode block, shaped after `quantfit.inspect_task.inspect_decode`: no
+# top-level `do_sample` (the provider's greedy contract is applied as MODEL ARGS, and that
+# path never passes the kwarg itself), an explicit `greedy: true`, and a chat_template that
+# names the provider and states it was never compared to `verify._encode_prompt`. Written
+# out by hand rather than imported, so this file pins the RULE against the shape and does
+# not couple to that module's current text.
+_INSPECT_DECODE = {
+    "max_new_tokens": 64,
+    "temperature": 0,
+    "greedy": True,
+    "greedy_model_args": {"do_sample": False},
+    "chat_template": "provider-default (inspect_ai:hf) — not verified against verify._encode_prompt",
+    "recorded_by": "quantfit.inspect_task",
+}
 _LCPP_ENGINE = {"name": "llama.cpp", "binary_sha256": "b" * 64, "source": "pinned", "threads": 16, "device": "cpu"}
 
 # The two hardwares of §3.1's shape. Only `env` differs — which is the point: env.device is
@@ -163,7 +205,7 @@ def _write(tmp_path, name, *, spec=None, drift=None, env=None, **overrides):
         "created_utc": "2026-08-01T00:00:00+00:00",
         "judge": {"id": "judge", "revision": "j" * 40, "input_contract": "completion-only"},
         "probe_dataset": {"id": "probes", "revision": "p" * 40, "split": "train", "n_probes": 40},
-        "decode": {"max_new_tokens": 64, "do_sample": False, "chat_template": "model-default"},
+        "decode": dict(_VERIFY_DECODE),
         "env": dict(env or _ENV_L),
         "baseline": _arm(),
         "quantized": _arm(model="org/quant", revision="q" * 40, runtime_s=2.0),
@@ -181,13 +223,16 @@ def _pair(tmp_path, *, reference=None, candidate=None, ref_kwargs=None, cand_kwa
     return ref, cand
 
 
-def _t0(tmp_path, label, *, spec=None, env=None, broken=False):
-    """A real `within_hardware_identical` result over THREE distinct replicates (§3.1).
+def _t0(tmp_path, label, *, spec=None, env=None, broken=False, n=3):
+    """A real `within_hardware_identical` result over `n` distinct replicates (§3.1: three).
 
     Replicates differ in `created_utc` and `judge_runtime_s` — as six genuine runs would
     — because byte-identical replicates are refused, not counted (§3.2's tautology).
+    `n=2` is the below-protocol partial run the function records rather than refuses.
     """
-    specs = [spec, spec, ({**_CLEAN, "clear_safe": (0, 0, 1)} if broken else spec)]
+    specs = [spec] * n
+    if broken:
+        specs[-1] = {**_CLEAN, "clear_safe": (0, 0, 1)}
     paths = [
         _write(
             tmp_path,
@@ -197,7 +242,7 @@ def _t0(tmp_path, label, *, spec=None, env=None, broken=False):
             created_utc=f"2026-08-0{k + 1}T00:00:00+00:00",
             judge_runtime_s=float(k),
         )
-        for k in range(3)
+        for k in range(n)
     ]
     return within_hardware_identical(paths)
 
@@ -373,6 +418,125 @@ def test_t0_argument_that_cannot_be_read_is_operational(tmp_path):
         compare(ref, cand, t0_reference=True, t0_candidate="yes")
 
 
+# --- T0: a `pass` is consulted WITH its replicate count, never alone (§3.1) ------------
+
+
+def test_a_sub_protocol_t0_pass_never_licenses_the_reserved_name_or_exit_zero(tmp_path):
+    # §3.1 specifies THREE replicates per hardware; `within_hardware_identical` accepts two
+    # so a partial run can still be recorded, and flags it. Reading only `pass` made exit 0
+    # and the name `reproduced` reachable on a T0 leg the artifact itself marks
+    # `meets_protocol_replicate_count: false` — the same overclaim
+    # `reproduced_t0_unverified` was minted to prevent one step earlier.
+    ref, cand = _pair(tmp_path)
+    short = _t0(tmp_path, "L", env=_ENV_L, n=2)
+    assert short["pass"] is True and short["n_replicates"] == 2
+    assert short["meets_protocol_replicate_count"] is False
+
+    result = compare(ref, cand, t0_reference=short, t0_candidate=_t0(tmp_path, "F", env=_ENV_F))
+    assert all(result["checks"][c]["pass"] for c in result["checks"])  # T1-T5 all hold
+    assert result["outcome"] == OUTCOME_T0_UNVERIFIED
+    assert result["outcome"] != OUTCOME_REPRODUCED
+    assert result["exit_code"] == EXIT_BREACH == 3
+    assert result["passed"] is False
+
+    t0 = result["preconditions"]["T0_within_hardware_byte_identity"]
+    assert t0["pass"] is None
+    block = t0["reference"]
+    assert block["supplied"] is True  # evidence WAS supplied — what is withheld is the licence
+    assert block["pass"] is None and block["reported_pass"] is True
+    assert block["meets_protocol_replicate_count"] is False and block["n_replicates"] == 2
+    assert "SUPPLIED BUT BELOW PROTOCOL" in block["note"]
+    assert block["evidence"]["n_replicates"] == 2  # ... and it still rides in the artifact
+    assert len(block["evidence"]["reports"]) == 2
+    # The candidate side met the protocol and is not tarred with it.
+    assert t0["candidate"]["pass"] is True and t0["candidate"]["meets_protocol_replicate_count"] is True
+    assert "SUB-PROTOCOL REPLICATE COUNT on reference" in t0["statement"]
+    assert "§3.1 specifies THREE replicates" in t0["statement"]
+    assert "did not meet §3.1's three-replicate protocol" in result["outcome_licenses"]
+
+
+def test_a_sub_protocol_t0_FAILURE_still_voids(tmp_path):
+    # The asymmetry, stated as a test: a `pass` over two replicates is a pass the protocol
+    # does not license, but a FAILURE over two replicates is an OBSERVED disagreement — a
+    # real observation of within-hardware nondeterminism — and it voids the record.
+    ref, cand = _pair(tmp_path)
+    short_broken = _t0(tmp_path, "broken", env=_ENV_L, broken=True, n=2)
+    assert short_broken["pass"] is False and short_broken["meets_protocol_replicate_count"] is False
+    result = compare(ref, cand, t0_reference=short_broken, t0_candidate=_t0(tmp_path, "F", env=_ENV_F))
+    assert result["outcome"] == OUTCOME_VOID
+    assert result["void_reasons"] == [VOID_T0_FAILED]
+    assert result["exit_code"] == EXIT_VOID == 4
+    assert result["preconditions"]["T0_within_hardware_byte_identity"]["reference"]["pass"] is False
+
+
+def test_a_t0_dict_that_does_not_state_its_replicate_count_is_not_established(tmp_path):
+    # Silence is not evidence: a hand-built dict that half-imitates the auditable form has
+    # not shown it met §3.1, so it does not license exit 0 either. A caller who genuinely
+    # checked T0 another way passes a bare bool, which is recorded as asserted, not shown.
+    ref, cand = _pair(tmp_path)
+    result = compare(ref, cand, t0_reference={"pass": True}, t0_candidate=True)
+    assert result["outcome"] == OUTCOME_T0_UNVERIFIED and result["exit_code"] == 3
+    block = result["preconditions"]["T0_within_hardware_byte_identity"]["reference"]
+    assert block["supplied"] is True and block["pass"] is None
+    assert block["meets_protocol_replicate_count"] is None
+
+
+# --- T0: `supplied` means BOTH sides, and the statement matches the per-side blocks ----
+
+
+@pytest.mark.parametrize(
+    ("give_reference", "give_candidate", "both", "phrase"),
+    [
+        (True, True, True, "supplied as evidence for BOTH sides"),
+        (True, False, False, "T0 (§1.5) was supplied for the REFERENCE SIDE ONLY."),
+        (False, True, False, "T0 (§1.5) was supplied for the CANDIDATE SIDE ONLY."),
+        (False, False, False, "NO T0 RESULT WAS SUPPLIED FOR EITHER SIDE"),
+    ],
+)
+def test_t0_supplied_is_true_only_when_both_sides_supplied(tmp_path, give_reference, give_candidate, both, phrase):
+    # `supplied` summarised ONE side's evidence as the pair's, so an artifact could read
+    # `supplied: true` directly above a per-side block reading `supplied: false`. A reader
+    # who believed the summary read a half-supplied T0 leg as a supplied one.
+    ref, cand = _pair(tmp_path)
+    result = compare(
+        ref,
+        cand,
+        t0_reference=_t0(tmp_path, "L", env=_ENV_L) if give_reference else None,
+        t0_candidate=_t0(tmp_path, "F", env=_ENV_F) if give_candidate else None,
+    )
+    t0 = result["preconditions"]["T0_within_hardware_byte_identity"]
+    assert t0["supplied"] is both
+    assert t0["supplied_by_side"] == {"reference": give_reference, "candidate": give_candidate}
+    assert t0["reference"]["supplied"] is give_reference
+    assert t0["candidate"]["supplied"] is give_candidate
+    assert phrase in t0["statement"]
+    if not both:
+        # The statement can never claim both sides while a per-side block denies it.
+        assert "supplied as evidence for BOTH sides" not in t0["statement"]
+        assert "UNVERIFIED" in t0["statement"]
+        assert result["outcome"] == OUTCOME_T0_UNVERIFIED
+    assert t0["statement"] in result["headline"]
+
+
+@pytest.mark.parametrize("failing_side", ["reference", "candidate"])
+def test_a_one_sided_t0_failure_never_claims_evidence_for_both_sides(tmp_path, failing_side):
+    # The exact contradiction: one side supplied a FAILING T0 and the other supplied
+    # nothing, and the artifact printed "T0 was supplied as evidence for both sides" over
+    # per-side blocks saying otherwise.
+    ref, cand = _pair(tmp_path)
+    broken = _t0(tmp_path, "broken", env=_ENV_L, broken=True)
+    result = compare(ref, cand, **{f"t0_{failing_side}": broken})
+    assert result["outcome"] == OUTCOME_VOID and result["void_reasons"] == [VOID_T0_FAILED]
+    t0 = result["preconditions"]["T0_within_hardware_byte_identity"]
+    assert t0["pass"] is False  # False beats None: a side that FAILED voids the record
+    assert t0["supplied"] is False  # ... and it was still supplied for one side only
+    other = "candidate" if failing_side == "reference" else "reference"
+    assert t0["supplied_by_side"] == {failing_side: True, other: False}
+    assert "supplied as evidence for BOTH sides" not in t0["statement"]
+    assert f"supplied for the {failing_side.upper()} SIDE ONLY" in t0["statement"]
+    assert f"The {other.upper()} side supplied nothing" in t0["statement"]
+
+
 # --- T1: identity mismatch is its own outcome, NOT a breach --------------------------
 
 
@@ -388,12 +552,20 @@ def test_t0_argument_that_cannot_be_read_is_operational(tmp_path):
             "T1.equal.probe_dataset.revision",
         ),
         (
-            {"decode": {"max_new_tokens": 128, "do_sample": False, "chat_template": "model-default"}},
+            {"decode": {**_VERIFY_DECODE, "max_new_tokens": 128}},
             "T1.equal.decode.max_new_tokens",
         ),
+        # Sampling leaked in on one side: the DERIVED greediness differs (True vs False),
+        # which is a T1 failure exactly as the raw-field comparison used to be.
         (
-            {"decode": {"max_new_tokens": 64, "do_sample": True, "chat_template": "model-default"}},
-            "T1.equal.decode.do_sample",
+            {"decode": {**_VERIFY_DECODE, "do_sample": True}},
+            "T1.equal.decode.greedy",
+        ),
+        # Two DIFFERENT canonical policy tokens are two different policies — the
+        # chat-template leg keeps full strength wherever both sides speak the vocabulary.
+        (
+            {"decode": {**_VERIFY_DECODE, "chat_template": "raw prompt always"}},
+            "T1.equal.decode.chat_template_policy",
         ),
         ({"baseline": _arm(model="org/other-base")}, "T1.equal.baseline.model"),
         ({"quantized": _arm(model="org/quant", revision="OTHER")}, "T1.equal.quantized.revision"),
@@ -458,6 +630,158 @@ def test_t1_present_on_one_side_only_is_void(tmp_path):
     failed = _predicate(result, "T1.equal.judge.input_contract")
     assert failed["pass"] is False
     assert failed["present"] == {"reference": False, "candidate": True}
+
+
+# --- T1's decode leg: protocol facts, not prose ---------------------------------------
+
+
+def test_the_two_runner_decode_blocks_really_do_disagree_in_wording():
+    # The premise of every test below, asserted rather than described: the shipped runner
+    # and the Inspect runner record the SAME protocol in different fields and different
+    # prose. If this ever stops being true, the tests below are proving nothing.
+    assert "do_sample" in _VERIFY_DECODE and "greedy" not in _VERIFY_DECODE
+    assert "do_sample" not in _INSPECT_DECODE and _INSPECT_DECODE["greedy"] is True
+    assert _VERIFY_DECODE["chat_template"] != _INSPECT_DECODE["chat_template"]
+    assert _VERIFY_CHAT_TEMPLATE in CANONICAL_CHAT_TEMPLATE_POLICIES
+    assert _INSPECT_DECODE["chat_template"] not in CANONICAL_CHAT_TEMPLATE_POLICIES
+
+
+def test_an_inspect_run_reproduces_a_verify_reference_instead_of_voiding_on_wording(tmp_path):
+    # THE workflow 0.8 is for: a local reference report from the shipped runner against a
+    # portable reproduction from the Inspect runner. Under exact-value equality over
+    # decode.do_sample and decode.chat_template this pair was UNCONDITIONALLY `void` — two
+    # honest reports scored "not the same measurement" for wording — and `reproduced` was
+    # unreachable for every cross-runner pair. It is one measurement, and the rule says so.
+    ref, cand = _pair(tmp_path, cand_kwargs={"decode": dict(_INSPECT_DECODE)})
+    result = _gated(tmp_path, ref, cand)
+    assert result["outcome"] == OUTCOME_REPRODUCED and result["exit_code"] == 0
+    assert result["checks"]["T1_same_measurement"]["pass"]
+
+    # Greediness: one protocol fact, declared in the field that is true for each runner.
+    greedy = _predicate(result, "T1.equal.decode.greedy")
+    assert greedy["reference"] is True and greedy["candidate"] is True and greedy["pass"] is True
+    assert greedy["compared"] == f"derived per side: {GREEDINESS_RULE}"
+    assert greedy["declared_from"]["reference"]["do_sample"] is False
+    assert greedy["declared_from"]["candidate"]["greedy"] is True
+
+    # The template policy is NOT compared — and the artifact says so, carrying both
+    # strings verbatim rather than reporting a wording difference as a policy difference.
+    template = _predicate(result, "T1.equal.decode.chat_template_policy")
+    assert template["pass"] is True and template["machine_comparable"] is False
+    assert template["canonical"] == {"reference": True, "candidate": False}
+    assert template["reference"] == _VERIFY_CHAT_TEMPLATE
+    assert template["candidate"] == _INSPECT_DECODE["chat_template"]
+    assert "NOT MACHINE-COMPARABLE" in template["compared"]
+
+    decode = result["checks"]["T1_same_measurement"]["decode"]
+    assert decode["greedy"]["reference"] is True and decode["greedy"]["undeclared_sides"] == []
+    assert decode["chat_template_policy"]["taken_on_trust"] is True
+    assert decode["chat_template_policy"]["canonical_tokens"] == sorted(CANONICAL_CHAT_TEMPLATE_POLICIES)
+
+    # And it is surfaced where a reader looks for what these two files do NOT witness.
+    witnessed = result["witnessed"]
+    assert any("chat-template policy" in row for row in witnessed["taken_on_trust"])
+    assert witnessed["chat_template_policy"]["machine_comparable"] is False
+    assert witnessed["greediness"]["reference"] is True and witnessed["greediness"]["candidate"] is True
+    factors = {f["factor"]: f for f in witnessed["factors"]}
+    # Greediness IS witnessed across the two runners (derived, not field-wise); the
+    # template policy is not witnessed at all — `null`, never `false`.
+    assert factors["sampling leaked in"]["equal"] is True
+    assert factors["different chat-template policy"]["equal"] is None
+
+
+def test_verify_vs_verify_keeps_the_chat_template_leg_at_full_strength(tmp_path):
+    # The other half of the rule: withdrawing prose equality must not withdraw the clause.
+    # Two verify reports both carry the canonical token, so the predicate is LIVE — and a
+    # real policy difference between two canonical tokens is a T1 failure into `void`.
+    same = _gated(tmp_path, *_pair(tmp_path))
+    live = _predicate(same, "T1.equal.decode.chat_template_policy")
+    assert live["machine_comparable"] is True and live["pass"] is True
+    assert live["reference"] == live["candidate"] == _VERIFY_CHAT_TEMPLATE
+    assert "compared verbatim" in live["compared"]
+    assert same["witnessed"]["taken_on_trust"] == [
+        "different CUDA driver",
+        "different ggml CPU kernel variant",
+        "GGUF work actually placed on a GPU",
+        "per-prompt label divergence",
+    ]  # the chat-template row is NOT on the trust list when it was actually compared
+    assert {f["factor"]: f for f in same["witnessed"]["factors"]}["different chat-template policy"]["equal"] is True
+
+    other = min(CANONICAL_CHAT_TEMPLATE_POLICIES - {_VERIFY_CHAT_TEMPLATE})
+    ref, cand = _pair(tmp_path, cand_kwargs={"decode": {**_VERIFY_DECODE, "chat_template": other}})
+    drifted = _gated(tmp_path, ref, cand)
+    failed = _predicate(drifted, "T1.equal.decode.chat_template_policy")
+    assert failed["machine_comparable"] is True and failed["pass"] is False
+    assert failed["reference"] == _VERIFY_CHAT_TEMPLATE and failed["candidate"] == other
+    assert drifted["outcome"] == OUTCOME_VOID
+    assert drifted["void_reasons"] == [VOID_T1_NOT_ONE_MEASUREMENT]
+    assert "T1.equal.decode.chat_template_policy" in _failing(drifted)
+
+
+@pytest.mark.parametrize(
+    ("reference_decode", "candidate_decode", "expected"),
+    [
+        ({"do_sample": False}, {"greedy": True}, True),  # the cross-runner case
+        ({"do_sample": False}, {"do_sample": False}, True),
+        ({"greedy": True}, {"greedy": True}, True),
+        ({"do_sample": True}, {"greedy": True}, False),  # sampling leaked in on one side
+        ({"do_sample": False}, {"greedy": False}, False),  # a side that says it was NOT greedy
+        ({"do_sample": True}, {"do_sample": True}, True),  # both sampled: equal, and still one measurement
+    ],
+)
+def test_greediness_is_the_derived_boolean_on_both_sides(tmp_path, reference_decode, candidate_decode, expected):
+    # `greedy = (do_sample is False) or (greedy is True)`, per side, then equality. Two
+    # sampled runs agree with each other — T1 asks whether these are two runs of ONE
+    # measurement, not whether the protocol was obeyed; QSR v0 §2.3 conformance is the
+    # runner's job (`inspect_task.check_arms` refuses a sampling config outright).
+    ref, cand = _pair(
+        tmp_path,
+        ref_kwargs={"decode": {"max_new_tokens": 64, "chat_template": _VERIFY_CHAT_TEMPLATE, **reference_decode}},
+        cand_kwargs={"decode": {"max_new_tokens": 64, "chat_template": _VERIFY_CHAT_TEMPLATE, **candidate_decode}},
+    )
+    result = _gated(tmp_path, ref, cand)
+    assert _predicate(result, "T1.equal.decode.greedy")["pass"] is expected
+    assert (result["outcome"] == OUTCOME_REPRODUCED) is expected
+    assert (result["outcome"] == OUTCOME_VOID) is not expected
+
+
+@pytest.mark.parametrize("silent", ["reference", "candidate", "both"])
+def test_a_side_that_declares_no_greediness_fails_t1_naming_the_absent_fact(tmp_path, silent):
+    # Silence about greediness is NOT agreement. The old rule passed this vacuously —
+    # absent-on-both counted as equal — which let two reports that never said whether they
+    # sampled be scored a reproduction of one measurement.
+    mute = {"decode": {"max_new_tokens": 64, "chat_template": _VERIFY_CHAT_TEMPLATE}}
+    kwargs = {
+        "ref_kwargs": mute if silent in ("reference", "both") else None,
+        "cand_kwargs": mute if silent in ("candidate", "both") else None,
+    }
+    result = _gated(tmp_path, *_pair(tmp_path, **kwargs))
+    assert result["outcome"] == OUTCOME_VOID and result["exit_code"] == EXIT_VOID == 4
+    assert result["void_reasons"] == [VOID_T1_NOT_ONE_MEASUREMENT]
+    greedy = _predicate(result, "T1.equal.decode.greedy")
+    assert greedy["pass"] is False
+    expected_sides = ["reference", "candidate"] if silent == "both" else [silent]
+    assert greedy["absent_fact"]["sides"] == expected_sides
+    assert greedy["absent_fact"]["fields"] == ["decode.do_sample", "decode.greedy"]
+    assert "Silence is not agreement" in greedy["absent_fact"]["why"]
+    # An unwitnessed declaration is `null` in the detection table, never `true`/`false`.
+    factors = {f["factor"]: f for f in result["witnessed"]["factors"]}
+    assert factors["sampling leaked in"]["equal"] is None
+
+
+def test_a_chat_template_absent_on_both_sides_is_recorded_and_not_compared(tmp_path):
+    # Absent on both used to pass as "equal" (ambiguity 4). It still does not FAIL — but it
+    # is not machine-comparable either, and both facts are in the artifact.
+    mute = {"decode": {"max_new_tokens": 64, "do_sample": False}}
+    ref, cand = _pair(tmp_path, ref_kwargs=mute, cand_kwargs=mute)
+    result = _gated(tmp_path, ref, cand)
+    assert result["outcome"] == OUTCOME_REPRODUCED
+    t1 = result["checks"]["T1_same_measurement"]
+    assert "decode.chat_template" in t1["absent_on_both"]
+    assert t1["decode"]["chat_template_policy"]["present"] == {"reference": False, "candidate": False}
+    assert t1["decode"]["chat_template_policy"]["machine_comparable"] is False
+    template = _predicate(result, "T1.equal.decode.chat_template_policy")
+    assert template["pass"] is True and template["present"] == {"reference": False, "candidate": False}
 
 
 # --- T2: the verdict class, and the 0 -> 1 divergence --------------------------------
@@ -883,6 +1207,122 @@ def test_every_void_trigger_exits_4_and_names_itself(tmp_path):
     assert set(voids) == set(VOID_REASONS)
 
 
+# --- attribution: a name that asserts a CAUSE needs T0 to assert it ---------------------
+
+
+def test_a_breach_without_t0_does_not_assert_a_cross_hardware_cause(tmp_path):
+    # `breach` is §6.3's name for "the CROSS-HARDWARE tolerance was breached", and §6.3
+    # defines it with T0 passing on both sides. Returned with no T0 evidence it publishes a
+    # within-hardware nondeterminism failure under a name that blames silicon — the mirror
+    # of the overclaim `reproduced_t0_unverified` exists to prevent. The name is kept (it
+    # carries the bit CI reads); the CAUSE CLAIM is withdrawn, in the record and in the
+    # headline, so it cannot be quoted without the disclaimer.
+    ref, cand = _pair(tmp_path, candidate={**_CLEAN, "clear_safe": (0, 0, 1)})
+    result = compare(ref, cand)
+    assert result["outcome"] == OUTCOME_BREACH and result["exit_code"] == EXIT_BREACH == 3
+
+    attribution = result["attribution"]
+    assert attribution["t0_established"] is False
+    assert attribution["within_hardware_nondeterminism_excluded"] is False
+    assert attribution["outcome_asserts_a_cross_hardware_cause"] is True
+    assert attribution["cause_claim_withdrawn"] is True
+    assert "T0 WAS NEVER COLLECTED" in attribution["statement"]
+    assert "WITHIN-HARDWARE NONDETERMINISM IS THEREFORE NOT EXCLUDED" in attribution["statement"]
+    assert "THIS OUTCOME NAMES A CAUSE AND THE CAUSE IS NOT ESTABLISHED" in attribution["statement"]
+    # The licence and the disclaimer travel together, and the operator sees it on one line.
+    assert attribution["statement"] in result["outcome_licenses"]
+    assert "T0 WAS NEVER COLLECTED" in result["headline"]
+
+
+def test_a_breach_with_t0_keeps_its_cause_claim_and_says_why_it_may(tmp_path):
+    ref, cand = _pair(tmp_path, candidate={**_CLEAN, "clear_safe": (0, 0, 1)})
+    result = _gated(tmp_path, ref, cand)
+    assert result["outcome"] == OUTCOME_BREACH
+    attribution = result["attribution"]
+    assert attribution["t0_established"] is True
+    assert attribution["within_hardware_nondeterminism_excluded"] is True
+    assert attribution["cause_claim_withdrawn"] is False
+    assert "T0 PASSED ON BOTH SIDES" in attribution["statement"]
+    assert "T0 WAS NEVER COLLECTED" not in result["outcome_licenses"]
+    assert attribution["statement"] in result["headline"]
+
+
+def test_the_near_miss_without_t0_also_withdraws_its_cause_claim(tmp_path):
+    # The other cause-asserting name: §6.3's near-miss licence names "the baseline-side
+    # divergence" as the cause, which is equally unestablished without T0.
+    ref, cand = _pair(
+        tmp_path,
+        reference={**_CLEAN, "clear_safe": (4, 0, 0), "borderline": (4, 0, 0)},
+        candidate={**_CLEAN, "clear_safe": (5, 1, 0), "borderline": (4, 0, 0)},
+    )
+    result = compare(ref, cand)
+    assert result["outcome"] == OUTCOME_DENOMINATOR_DRIFT and result["exit_code"] == 3
+    assert result["attribution"]["outcome_asserts_a_cross_hardware_cause"] is True
+    assert result["attribution"]["cause_claim_withdrawn"] is True
+    assert "T0 WAS NEVER COLLECTED" in result["outcome_licenses"]
+
+
+def test_a_sub_protocol_t0_also_withdraws_the_cause_claim(tmp_path):
+    # Not only "never supplied": a T0 leg that was supplied below §3.1's replicate count is
+    # equally unestablished, so the breach it accompanies cannot name hardware either.
+    ref, cand = _pair(tmp_path, candidate={**_CLEAN, "clear_safe": (0, 0, 1)})
+    result = compare(
+        ref,
+        cand,
+        t0_reference=_t0(tmp_path, "L", env=_ENV_L, n=2),
+        t0_candidate=_t0(tmp_path, "F", env=_ENV_F),
+    )
+    assert result["outcome"] == OUTCOME_BREACH
+    assert result["attribution"]["cause_claim_withdrawn"] is True
+    assert "T0 WAS NEVER COLLECTED" in result["attribution"]["statement"]
+
+
+def test_every_outcome_carries_an_attribution_block_and_only_two_can_withdraw(tmp_path):
+    # The field is REQUIRED, not conditional: a consumer can read it on any artifact
+    # without first working out which outcome it is holding. Only the two cause-asserting
+    # names can withdraw a claim, because only they make one.
+    clean_ref, clean_cand = _pair(tmp_path)
+    void_cand = _write(tmp_path, "void-cand.json", env=_ENV_F, baseline=_arm(model="org/other-base"))
+    seen = {}
+    for result in (
+        _gated(tmp_path, clean_ref, clean_cand),  # reproduced
+        compare(clean_ref, clean_cand),  # reproduced_t0_unverified
+        compare(clean_ref, void_cand),  # void (T1)
+        compare(*_pair(tmp_path, candidate={**_CLEAN, "clear_safe": (0, 0, 1)})),  # breach
+    ):
+        attribution = result["attribution"]
+        assert set(attribution) == {
+            "t0_established",
+            "within_hardware_nondeterminism_excluded",
+            "outcome_asserts_a_cross_hardware_cause",
+            "cause_claim_withdrawn",
+            "statement",
+        }
+        assert attribution["statement"] in result["headline"]
+        seen[result["outcome"]] = attribution
+    assert seen[OUTCOME_REPRODUCED]["outcome_asserts_a_cross_hardware_cause"] is False
+    assert seen[OUTCOME_T0_UNVERIFIED]["cause_claim_withdrawn"] is False  # it claims nothing to withdraw
+    assert seen[OUTCOME_VOID]["cause_claim_withdrawn"] is False
+    assert seen[OUTCOME_BREACH]["cause_claim_withdrawn"] is True
+    # No sixth name was minted for it: the vocabulary is unchanged and 3 still means "the
+    # gate did not hold", which is the one bit a CI consumer can act on.
+    assert "breach_t0_unverified" not in OUTCOMES
+    assert set(OUTCOMES) == set(OUTCOME_EXIT_CODES)
+
+
+def test_a_t0_failure_names_the_within_hardware_leak_as_the_finding(tmp_path):
+    ref, cand = _pair(tmp_path)
+    result = compare(
+        ref,
+        cand,
+        t0_reference=_t0(tmp_path, "broken", env=_ENV_L, broken=True),
+        t0_candidate=_t0(tmp_path, "F", env=_ENV_F),
+    )
+    assert result["outcome"] == OUTCOME_VOID
+    assert "T0 FAILED ON A SIDE" in result["attribution"]["statement"]
+    assert result["attribution"]["within_hardware_nondeterminism_excluded"] is False
+
+
 # --- the artifact ---------------------------------------------------------------------
 
 
@@ -940,6 +1380,13 @@ def test_artifact_round_trips(tmp_path):
         "P0_gated_axis_measured",
         "P1_distinct_reports",
     }
+    # The cause-attribution block is REQUIRED and round-trips like everything else.
+    assert parsed["attribution"]["t0_established"] is True
+    assert parsed["attribution"]["cause_claim_withdrawn"] is False
+    # The decode leg's own record rides in T1: what each side declared, what was derived.
+    decode = parsed["checks"]["T1_same_measurement"]["decode"]
+    assert decode["greedy"]["rule"] == GREEDINESS_RULE
+    assert decode["chat_template_policy"]["machine_comparable"] is True
     # A breach is auditable from the artifact alone: every failing predicate names itself,
     # its scope, and BOTH sides' numbers.
     assert parsed["failing_predicates"]

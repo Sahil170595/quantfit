@@ -34,7 +34,16 @@ the layers are not equally strong and `inspect_ai.eval(task, ...)` is a real doo
      unread-provider arms, and the module's own `epochs=` argument.
      BYPASSED BY nothing — it runs before an arm object exists.
   2. **`qsr_arm` / `check_model_args`**
-     REFUSES a model arg that contradicts the provider's verified greedy pin.
+     REFUSES a model arg that contradicts the provider's verified greedy pin, AND every
+     model arg that is not on the provider's allowlist — which is every arg that can
+     change WHICH checkpoint, tokenizer or template generates (`model_path`, `revision`,
+     `chat_template`, `use_chat_template`, `device`, `quantization_config`, and anything
+     else forwarded to `from_pretrained`). An arm built from a substituted checkpoint
+     would pass every downstream check — `check_arms`, the role-rebinding check and
+     `check_run_arms` all compare `str(Model)`, which derives from the SPEC — and the
+     report would name the spec while the drift came from something else. What survives
+     the allowlist is RECORDED in the arm's `engine.model_args`, so the artifact cannot
+     silently disagree with the run.
      BYPASSED BY building a `Model` by hand and never calling this.
   3. **the solver** (closed-over arms)
      REFUSES generation from anything but the two `Model`s `check_arms` vetted, and a
@@ -54,8 +63,10 @@ the layers are not equally strong and `inspect_ai.eval(task, ...)` is a real doo
      BYPASSED BY forging `Score.metadata` — this is a containment check, not a signature.
   6. **`write_drift_report`** (the artifact)
      REFUSES a report whose `ArmRun`s name arms other than the ones the scored pairs
-     recorded, or whose arms would not pass `check_arms`; and it sources the judge
-     runtime from the pairs rather than from a parameter.
+     recorded, or whose arms would not pass `check_arms`; it sources the judge runtime
+     and the arms' applied model args from the pairs rather than from a parameter; and it
+     publishes ATOMICALLY (temp + `os.replace`), so the named path never holds an
+     intermediate report asserting decode facts this run did not have.
      BYPASSED BY the same forgery, and by assembling a `DriftReport` by hand.
 
 **The one bypass that matters.** `inspect_ai.eval(task, model_roles=..., epochs=...)`
@@ -133,8 +144,13 @@ operational rather than tracebacks. There is no such surface today: nothing in
 `quantfit/` imports this module, and 0.8 adds no `inspect` subcommand.
 
   - **Sampling.** QSR §2.3 is greedy on both arms; a run that sampled would be two
-    draws from two distributions, not a paired diff. `temperature > 0` or any field in
-    `SAMPLING_FIELDS` is refused, and the task PINS `temperature = 0`.
+    draws from two distributions, not a paired diff. The caller's `config=` is checked
+    against an ALLOWLIST of `GenerateConfig` fields (`GENERATE_CONFIG_ALLOWED`, which is
+    `temperature` at the pinned 0 and nothing else): the task always runs under its own
+    pinned config, so ANY other field a caller sets would be silently discarded, and a
+    denylist over the sampling knobs left the other 29 fields — `system_message`,
+    `stop_seqs`, `seed`, `logit_bias`, `cache`, `fallback_models`, … — accepted and then
+    dropped, which is the exact failure the check exists to prevent.
   - **Greedy is not the same as `temperature=0`, and this is the trap.** VERIFIED by
     reading the installed provider source: `inspect_ai/model/_providers/hf.py` does
     `self.do_sample = do_sample if do_sample is not None else True` and then builds
@@ -188,16 +204,27 @@ reference docs, 2026-08-06:
   `from inspect_ai.scorer import scorer, metric, Score, Target, SampleScore, Value`
     — `@scorer(metrics=[...])`, `async def score(state, target) -> Score`,
       `Score(value, answer, explanation, metadata)`, `MetricProtocol.__call__(scores: list[SampleScore]) -> Value`;
-  `from inspect_ai.model import get_model, GenerateConfig` — `get_model(spec, role=..., **model_args)`.
+  `from inspect_ai.model import get_model, GenerateConfig` — `get_model(spec, role=..., **model_args)`,
+   `GenerateConfig.model_fields` (38 fields on this version, which is what
+   `GENERATE_CONFIG_ALLOWED` + `GENERATE_CONFIG_REFUSALS` is enumerated from and what
+   `tests/test_inspect_task.py` re-checks against the installed package).
+An `ImportError` from any of those symbols is NOT reported as an absent package: a
+version whose API moved is diagnosed as an incompatibility against
+`VERIFIED_INSPECT_AI_VERSION`, because telling an operator to reinstall a package they
+already have is a wrong diagnosis, not a cautious one.
+
 NOT verified: whether an Inspect provider's chat templating reproduces
 `verify._encode_prompt` token-for-token. It is not claimed, no test asserts it, and the
-emitted report's `decode.chat_template` says so in the artifact itself.
+emitted report's `decode.chat_template` says so in the artifact itself — a PROVENANCE
+string, deliberately not a machine-comparable identity claim. What IS machine-comparable
+is `decode.greedy`, which this runner enforces (a sampling config is refused, and each
+arm carries the provider's verified greedy model args) and therefore states as a fact.
 """
 
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from quantfit.safety.verify import (
@@ -263,7 +290,10 @@ NOT_CLAIMED = (
     (
         "Decode facts in an emitted report describe what the INSPECT path did. The chat template is "
         "the provider's, and it has NOT been verified to reproduce verify._encode_prompt; the report "
-        "records that rather than asserting the shipped path's templating policy."
+        "records that as PROVENANCE rather than asserting the shipped path's templating policy, so it "
+        "is not a machine-comparable identity claim. decode.greedy IS one: greedy decoding is enforced "
+        "here (a sampling config is refused and each arm carries the provider's verified greedy model "
+        "args), so it is stated as an enforced protocol fact rather than dropped."
     ),
     (
         "The judge loads once per qsr_eval run (one _classify_refusals call over every completion, in "
@@ -291,9 +321,10 @@ NOT_CLAIMED = (
 #: would silently turn a paired diff into two draws from two distributions.
 PINNED_TEMPERATURE = 0.0
 
-#: GenerateConfig fields that would make the run something other than a paired diff.
-#: Any of them set (to anything) is refused rather than overridden, because silently
-#: dropping a caller's sampling knob is exactly the divergence this module is against.
+#: The GenerateConfig fields that are sampling knobs by name — a NAMED SUBSET of
+#: `GENERATE_CONFIG_REFUSALS`, not the rule. The rule is the allowlist below; this tuple
+#: is kept because §2.3's refusal is the one an operator meets most often and because a
+#: test parametrizes over it. Every name here is refused as sampling, whatever its value.
 SAMPLING_FIELDS = ("top_p", "top_k", "best_of", "frequency_penalty", "presence_penalty")
 
 #: Providers whose greedy contract has been READ, and the model args that force it.
@@ -307,6 +338,176 @@ SAMPLING_FIELDS = ("top_p", "top_k", "best_of", "frequency_penalty", "presence_p
 GREEDY_PROVIDER_ARGS: dict[str, dict[str, Any]] = {
     "hf": {"do_sample": False},
     "mockllm": {},
+}
+
+#: The inspect_ai release every API claim in this module was checked against, by
+#: introspection AND by running an eval. Named so a failed import can say "incompatible
+#: with what this was verified against" instead of "not installed" (see `_import_refusal`),
+#: and so the version an operator has is compared against something, not against memory.
+VERIFIED_INSPECT_AI_VERSION = "0.3.252"
+
+#: Model args a caller may pass to an arm, PER PROVIDER. An allowlist, and a short one:
+#: `get_model(spec, **model_args)` forwards to the provider constructor, and on `hf`
+#: (VERIFIED by reading `model/_providers/hf.py` in 0.3.252) the constructor collects
+#: `model_path`, `tokenizer`, `tokenizer_path`, `chat_template`, `use_chat_template`,
+#: `device`, `auto_model_class`, `trust_remote_code`, … and forwards EVERYTHING ELSE to
+#: `from_pretrained`. Any of those changes which checkpoint, tokenizer or template
+#: produces the completions, while `str(Model)` — what `check_arms`, the role-rebinding
+#: check and `check_run_arms` all compare — derives from the SPEC alone. So an arm built
+#: with `model_path=/somewhere/else` would generate from a different model, pass every
+#: containment check, and land in a report that names the spec: quantization drift
+#: published for a substituted baseline. Refusing is the only check that catches it.
+MODEL_ARG_ALLOWLIST: dict[str, frozenset[str]] = {
+    # The greedy pin itself, and nothing else. It is admitted only so an explicit
+    # `do_sample=False` is agreement rather than a refusal; `do_sample=True` still
+    # contradicts the pin and is refused below.
+    "hf": frozenset({"do_sample"}),
+    # `custom_outputs` IS mockllm's generation, and admitting it is the one honest
+    # exception in this table: mockllm has no checkpoint to substitute, its outputs are
+    # the caller's fixture by construction, and it is a TEST provider that must never
+    # carry a measurement (see GREEDY_PROVIDER_ARGS). It is recorded in the arm's
+    # provenance like every other surviving arg, so a report from a mockllm run says so.
+    "mockllm": frozenset({"custom_outputs"}),
+}
+
+#: Named reasons for the model args an operator is most likely to reach for. Anything not
+#: on the provider's `MODEL_ARG_ALLOWLIST` is refused whether or not it appears here; this
+#: table only buys a diagnosis instead of "not on the allowlist". Names taken from the
+#: installed `hf` provider's own `collect_model_arg` calls plus the `from_pretrained`
+#: kwargs that change what loads.
+MODEL_ARG_REFUSALS: dict[str, str] = {
+    "model_path": "it generates from a DIFFERENT checkpoint than the model spec names, while every arm check "
+    "in this module compares str(Model), which derives from the spec — so the report would name one model and "
+    "the drift would come from another (QSR v0 §3.3, §4.2).",
+    "tokenizer": "a different tokenizer re-encodes the probe, so the two arms would not be fed the same tokens "
+    "(QSR v0 §2.4).",
+    "tokenizer_path": "a different tokenizer re-encodes the probe, so the two arms would not be fed the same "
+    "tokens (QSR v0 §2.4).",
+    "chat_template": "the template is what turns the probe into the model's input; overriding it per arm makes "
+    "the pair a template diff rather than a quantization diff (QSR v0 §2.4), and the report's decode block "
+    "would still describe the provider default.",
+    "use_chat_template": "toggling templating changes what the model is actually asked, and the report's decode "
+    "block would still describe the provider default (QSR v0 §2.4).",
+    "tokenizer_call_args": "these are passed straight to the tokenizer, so they change the encoded probe "
+    "(QSR v0 §2.4).",
+    "enable_thinking": "it changes the template's generation prompt, so the model is asked something other than "
+    "the probe as published (QSR v0 §2.4).",
+    "revision": "forwarded to from_pretrained, it selects a different commit of the same repo — a different "
+    "artifact under the same name, which is the one thing an arm's provenance must not be able to hide "
+    "(QSR v0 §4.2).",
+    "quantization_config": "quantizing an arm here is the measurement, not a setting: it would make the "
+    "'baseline' a quantized model while the report named it the baseline (QSR v0 §3.3).",
+    "torch_dtype": "the loaded precision is the axis under test and is recorded per arm (resolved_dtype, "
+    "QSR v0 §4.2); setting it as a model arg changes what generates while the report's provenance is supplied "
+    "separately by the operator. Run the model as published.",
+    "dtype": "the loaded precision is the axis under test and is recorded per arm (resolved_dtype, QSR v0 §4.2); "
+    "setting it as a model arg changes what generates. Run the model as published.",
+    "device_map": "it changes how the weights are sharded and therefore the kernels that run; QSR v0 §3.4 already "
+    "treats an asserted device as non-evidence, and this runner will not also let it be set invisibly.",
+    "device": "the device changes the kernels that produce the logits, and this runner records no device string "
+    "at all (QSR v0 §3.4: an asserted device is not evidence). Cross-device comparability is the cross-hardware "
+    "tolerance's problem, not a per-arm model arg.",
+    "batch_size": "batching changes the padding a greedy decode runs under, so it is not provably inert on the "
+    "generation path; it is a throughput knob and this runner refuses it rather than assume it cannot move a "
+    "completion.",
+    "trust_remote_code": "it lets the checkpoint ship the code that defines the model and its generation; that is "
+    "a different thing generating, and it is also arbitrary code execution on the operator's box.",
+    "auto_model_class": "it selects a different transformers class to load and generate with (QSR v0 §3.3).",
+    "hidden_states": "it changes what the provider returns per generation; a QSR report carries labels, not "
+    "activations, and an eval log is already capture-class.",
+    "do_sample": "sampling is refused on both arms (QSR v0 §2.3). Only the pinned value is accepted, and only on "
+    "a provider whose greedy contract has been read (GREEDY_PROVIDER_ARGS).",
+}
+
+#: `GenerateConfig` fields a caller may set on `config=`. ONE field, at ONE value.
+#:
+#: The task always runs under its OWN pinned `GenerateConfig` — the caller's object is
+#: never merged — so every field set on it would be silently discarded. This parameter
+#: exists to turn that drop into a refusal, which a DENYLIST cannot do: `GenerateConfig`
+#: has 38 fields on inspect_ai 0.3.252 and the previous check named 9 of them, so
+#: `system_message`, `stop_seqs`, `seed`, `logit_bias`, `response_schema`, `cache`,
+#: `fallback_models` and 22 others were accepted and then dropped — the exact silent
+#: divergence the check was written to prevent. `temperature` is admitted only at the
+#: pinned value, because setting it to 0 is agreement with the pin rather than a request
+#: this runner would have to ignore.
+GENERATE_CONFIG_ALLOWED: frozenset[str] = frozenset({"temperature"})
+
+# Shared reasons, so the table below reads as the classification it is.
+_CFG_SAMPLING = (
+    "configures sampling; QSR v0 §2.3 pins greedy decoding on both arms, so a run that sampled would be two "
+    "draws from two distributions rather than a paired diff."
+)
+_CFG_BEST_OF_N = "is best-of-n; QSR v0 §2.1 allows no re-prompting, no retry, no best-of-n."
+_CFG_REASONING = (
+    "changes how much the model thinks before it answers, so it changes the completion the judge reads; QSR v0 "
+    "§2.4 measures the model as published, under one decode applied identically to both arms."
+)
+_CFG_TOOLS = "configures tool calling; a QSR probe is one prompt to a bare model, with no tools and no scaffolding (QSR v0 §2.4)."
+_CFG_PLUMBING = (
+    "is a transport/plumbing knob, and the task runs under its own pinned GenerateConfig — so setting it here "
+    "would be silently DROPPED. Configure the run through qsr_eval's eval-argument allowlist instead."
+)
+_CFG_CACHE = (
+    "would let a stored completion stand in for a generation, so a 'paired diff' could be a cache hit against a "
+    "fresh draw (QSR v0 §2.1: one completion per probe per arm, generated by the arm)."
+)
+
+#: Every `GenerateConfig` field that is NOT allowed, with the reason. Enumerated from the
+#: installed `GenerateConfig.model_fields` (38 on 0.3.252), not guessed — and
+#: `tests/test_inspect_task.py::test_every_generate_config_field_is_classified` fails if a
+#: future inspect_ai adds a field this table has not classified, so the next release
+#: cannot quietly re-open the hole. At runtime the check does not depend on this table
+#: being complete: a field set on the config object but missing from it is refused too.
+GENERATE_CONFIG_REFUSALS: dict[str, str] = {
+    "max_retries": "retries a failed generation; QSR v0 §2.1 allows no retry — a retried probe is a second draw.",
+    "timeout": _CFG_PLUMBING,
+    "attempt_timeout": _CFG_PLUMBING,
+    "max_connections": _CFG_PLUMBING,
+    "adaptive_connections": _CFG_PLUMBING,
+    "system_message": "puts a system prompt in front of the probe; QSR v0 §2.4 sends the probe UNCHANGED, with no "
+    "system prompt and no evaluator scaffolding.",
+    "max_tokens": "would be dropped: the token budget is set once, by max_new_tokens, and applied identically to "
+    "both arms (QSR v0 §2.3). Pass max_new_tokens instead.",
+    "top_p": _CFG_SAMPLING,
+    "stop_seqs": "truncates the completion at a caller-chosen string, so the judge would read a different text "
+    "than the arm produced (QSR v0 §2.5's input contract is the completion).",
+    "best_of": _CFG_BEST_OF_N,
+    "frequency_penalty": _CFG_SAMPLING,
+    "presence_penalty": _CFG_SAMPLING,
+    "logit_bias": "reweights the distribution the decode picks from, which is a change to what the model would "
+    "have said (QSR v0 §2.3).",
+    "seed": "a seed only matters when something samples, and QSR v0 §2.3 does not; setting one would suggest a "
+    "run whose determinism came from the seed rather than from greedy decoding.",
+    "top_k": _CFG_SAMPLING,
+    "num_choices": _CFG_BEST_OF_N,
+    "logprobs": "asks the provider for extra per-token output; the task runs under its own pinned config, so this "
+    "would be silently dropped, and a QSR report carries labels rather than token statistics.",
+    "top_logprobs": "asks the provider for extra per-token output; the task runs under its own pinned config, so "
+    "this would be silently dropped, and a QSR report carries labels rather than token statistics.",
+    "prompt_logprobs": "asks the provider for extra per-token output; the task runs under its own pinned config, "
+    "so this would be silently dropped, and a QSR report carries labels rather than token statistics.",
+    "parallel_tool_calls": _CFG_TOOLS,
+    "internal_tools": _CFG_TOOLS,
+    "max_tool_output": _CFG_TOOLS,
+    "cache_prompt": _CFG_CACHE,
+    "cache": _CFG_CACHE,
+    "fallback_models": "would let a DIFFERENT model answer a probe when an arm fails, so the drift would pool "
+    "completions from a model nobody vetted (QSR v0 §3.3). A failed generation must fail the run.",
+    "verbosity": _CFG_REASONING,
+    "effort": _CFG_REASONING,
+    "reasoning_effort": _CFG_REASONING,
+    "reasoning_mode": _CFG_REASONING,
+    "reasoning_tokens": _CFG_REASONING,
+    "reasoning_summary": _CFG_REASONING,
+    "reasoning_history": _CFG_REASONING,
+    "response_schema": "constrains the shape of the output, so the judge would read a schema-conformant string "
+    "rather than what the arm would have said to the probe (QSR v0 §2.5).",
+    "extra_headers": _CFG_PLUMBING,
+    "extra_body": "is an opaque provider passthrough: it can carry ANY generation parameter, including the "
+    "sampling knobs refused by name above, and nothing here could tell.",
+    "modalities": "changes the output modality; the judge's input contract is the completion TEXT (QSR v0 §2.5).",
+    "batch": "batches generations, which changes the padding a greedy decode runs under; it is not provably inert "
+    "on the generation path and this runner will not assume it is.",
 }
 
 # Keys the solver writes into TaskState.metadata and the scorer reads back. Named
@@ -327,6 +528,10 @@ PAIR_INDEX_KEY = "pair"  # same name the completion capture uses for the pairing
 ARMS_VETTED = "vetted"
 ARMS_GENERATED_BY = "generated_by"
 ARMS_ROLE_BOUND = "role_bound"
+#: The model args each arm was ACTUALLY built with, after `check_model_args` refused the
+#: identity-changing ones — carried per pair so the report's provenance is sourced from
+#: the run rather than from whatever the caller passes to `write_drift_report`.
+ARMS_MODEL_ARGS = "model_args"
 
 #: `eval()` arguments `qsr_eval` will forward. An ALLOWLIST, not a denylist: inspect_ai's
 #: `eval()` takes ~60 arguments plus the whole `GenerateConfigArgs` surface via `**kwargs`,
@@ -405,12 +610,64 @@ def _require(condition: bool, message: str) -> None:
 # --- lazy inspect_ai access -------------------------------------------------------
 
 
+def _installed_inspect_ai_version() -> str:
+    """The inspect_ai version actually installed, without importing the package.
+
+    `importlib.metadata` reads the distribution's metadata, so it still answers when the
+    package's own import is what failed — which is precisely the case this exists for.
+    """
+    import importlib.metadata
+
+    try:
+        return importlib.metadata.version("inspect_ai")
+    except importlib.metadata.PackageNotFoundError:
+        import sys
+
+        return str(getattr(sys.modules.get("inspect_ai"), "__version__", "unknown"))
+
+
+def _import_refusal(exc: ImportError) -> InspectTaskError:
+    """Distinguish "inspect_ai is not installed" from "inspect_ai is installed and moved".
+
+    Catching every `ImportError` and reporting an absent package is a WRONG diagnosis for
+    the more likely failure: a newer inspect_ai in which one of the symbols this module
+    imports was renamed, moved or removed. That sends an operator to reinstall a package
+    they already have, and reinstalling cannot fix it. `importlib.util.find_spec` answers
+    the actual question — is the package there at all — without importing it, so a broken
+    or incompatible package is still found.
+    """
+    import importlib.util
+    import sys
+
+    try:
+        installed = importlib.util.find_spec("inspect_ai") is not None
+    except (ImportError, ValueError):
+        # ValueError: a partially-initialised `inspect_ai` in sys.modules with no __spec__.
+        # That is a broken/incompatible install, not an absent one.
+        installed = "inspect_ai" in sys.modules
+    if not installed:
+        return InspectTaskError(
+            "inspect_ai is not installed, so the QSR Inspect runner cannot build its task "
+            "(pip install 'quantfit[inspect]'). quantfit's own `verify-safety`, `screen` and `gate` "
+            "paths do not need it — this runner is the optional Inspect-API surface."
+        )
+    return InspectTaskError(
+        f"inspect_ai IS installed (version {_installed_inspect_ai_version()}) but this runner could not import "
+        f"the API it uses: {exc}. That is an INCOMPATIBILITY, not an absence — reinstalling will not fix it. "
+        f"Every inspect_ai symbol here was verified against inspect_ai {VERIFIED_INSPECT_AI_VERSION} (see the "
+        "module docstring's API list), and quantfit's `inspect` extra pins a range around it. Install a version "
+        f"inside that range, or port this module to the moved symbol ({getattr(exc, 'name', None)!r}) in a "
+        "reviewed change — a QSR runner may not guess at an API it has not read."
+    )
+
+
 def _inspect_api() -> dict[str, Any]:
-    """Resolve the `inspect_ai` symbols this module uses, or refuse with the install line.
+    """Resolve the `inspect_ai` symbols this module uses, or refuse with a real diagnosis.
 
     Lazy on purpose: `quantfit` must import — and `quantfit list` must run — on a box
     with neither inspect_ai nor a GPU. The absence is an OPERATIONAL error at use time,
-    never an ImportError at import time.
+    never an ImportError at import time. An import that fails for any OTHER reason is
+    reported as what it is, by `_import_refusal`.
     """
     try:
         import inspect_ai
@@ -421,12 +678,8 @@ def _inspect_api() -> dict[str, Any]:
         from inspect_ai.model import GenerateConfig, get_model
         from inspect_ai.scorer import SampleScore, Score, Value, metric, scorer
         from inspect_ai.solver import solver
-    except ImportError as exc:  # pragma: no cover - exercised only without the extra
-        raise InspectTaskError(
-            "inspect_ai is not installed, so the QSR Inspect runner cannot build its task "
-            "(pip install 'quantfit[inspect]'). quantfit's own `verify-safety`, `screen` and `gate` "
-            "paths do not need it — this runner is the optional Inspect-API surface."
-        ) from exc
+    except ImportError as exc:
+        raise _import_refusal(exc) from exc
     return {
         "version": getattr(inspect_ai, "__version__", "unknown"),
         "Task": Task,
@@ -495,13 +748,47 @@ def check_arms(baseline: str, quantized: str) -> str:
 
 
 def check_model_args(provider: str, model_args: dict[str, Any] | None) -> dict[str, Any]:
-    """Merge caller model args over the provider's greedy pins; refuse a conflict.
+    """Allowlist the caller's model args, merge the provider's greedy pins, refuse the rest.
 
-    A caller passing `do_sample=True` to an `hf` arm is asking for the one thing §2.3
-    forbids, and quietly overwriting it would hide the request rather than answer it.
+    TWO refusals, and the second is the load-bearing one:
+
+    - **a value that contradicts the greedy pin.** A caller passing `do_sample=True` to an
+      `hf` arm is asking for the one thing §2.3 forbids, and quietly overwriting it would
+      hide the request rather than answer it.
+    - **any arg that is not on `MODEL_ARG_ALLOWLIST[provider]`.** `get_model(spec, **args)`
+      forwards to the provider constructor, and on `hf` that means `model_path`,
+      `tokenizer`, `chat_template`, `device`, `revision`, `quantization_config` and
+      anything else `from_pretrained` accepts — every one of which changes WHAT generates
+      while leaving the spec, and therefore `str(Model)`, untouched. Nothing downstream
+      can see that: `check_arms`, the solver's role-rebinding check and `check_run_arms`
+      all compare model NAMES derived from the spec, and the report's `baseline.model`
+      would keep naming the model the operator did not run. So the args are refused here,
+      by name, before an arm exists.
+
+    Returns the args actually applied — pins merged over the survivors — which is what
+    `qsr_arm` builds with and what the run records in the arm's provenance.
     """
+    _require(
+        provider in GREEDY_PROVIDER_ARGS,
+        f"provider {provider!r} has no recorded greedy contract; known: {sorted(GREEDY_PROVIDER_ARGS)}",
+    )
     pins = GREEDY_PROVIDER_ARGS[provider]
+    allowed = MODEL_ARG_ALLOWLIST.get(provider, frozenset())
     extra = dict(model_args or {})
+    for key, value in extra.items():
+        if key in allowed:
+            continue
+        reason = MODEL_ARG_REFUSALS.get(key)
+        if reason is None:
+            raise InspectTaskError(
+                f"model arg {key!r} is not on the model-arg allowlist for provider {provider!r}, so it is refused "
+                f"rather than forwarded to the provider. Only {sorted(allowed)} may be passed: every other model arg "
+                "either changes which checkpoint, tokenizer or template generates, or is forwarded verbatim to the "
+                "provider's loader — and an arm built from a substituted checkpoint would still be reported "
+                "under the spec it was NOT built from (QSR v0 §3.3, §4.2). If this one is genuinely inert, add "
+                "it to MODEL_ARG_ALLOWLIST in a reviewed change that says why."
+            )
+        raise InspectTaskError(f"model arg {key}={value!r} is refused: {reason}")
     for key, pinned in pins.items():
         if key in extra and extra[key] != pinned:
             raise InspectTaskError(
@@ -511,43 +798,66 @@ def check_model_args(provider: str, model_args: dict[str, Any] | None) -> dict[s
     return {**extra, **pins}
 
 
+def model_args_provenance(applied: dict[str, Any]) -> dict[str, Any]:
+    """A JSON-safe record of the model args ONE arm was actually built with.
+
+    Recorded rather than dropped, because "the allowlist refused everything dangerous" is
+    a claim about this version of the allowlist, and a report that carried no trace of the
+    args the run applied could not be checked against the run at all. Values that are not
+    JSON scalars — `mockllm`'s `custom_outputs` callable, for instance — are recorded as
+    their type, since the point is that the arg WAS applied, not what it contained.
+    """
+    return {
+        key: (value if isinstance(value, (str, int, float, bool, type(None))) else f"<{type(value).__name__}>")
+        for key, value in sorted(applied.items())
+    }
+
+
 def check_generate_config(config: Any) -> None:
-    """Refuse a caller `GenerateConfig` that configures sampling or the token budget.
+    """Refuse every `GenerateConfig` field the protocol does not pin. An ALLOWLIST.
 
-    The task always runs under the PINNED config, so this parameter exists to make a
-    caller's setting a refusal rather than a silent drop — which is why `max_tokens` is
-    refused too and not merged: §2.3 applies one budget identically to both arms, and
-    `max_new_tokens` is the single place it is set.
+    The task always runs under its own PINNED config — the caller's object is checked and
+    never merged — so ANY field set on it would be silently discarded. This check exists
+    to make that drop a refusal, and a denylist cannot do it: `GenerateConfig` has 38
+    fields on inspect_ai 0.3.252, an earlier version of this function named 9, and the
+    other 29 (`system_message`, `stop_seqs`, `seed`, `logit_bias`, `response_schema`,
+    `cache`, `fallback_models`, …) were accepted and then dropped — the exact silent
+    divergence the docstring claimed to prevent.
 
-    Duck-typed over the config object's attributes rather than isinstance-checked, so
-    the rule is testable without inspect_ai installed and cannot rot behind an import.
+    So: `temperature` at the pinned value, and nothing else. The fields are read from
+    `GENERATE_CONFIG_ALLOWED` / `GENERATE_CONFIG_REFUSALS` **and** from the object itself,
+    so a field a future inspect_ai adds is refused as unclassified rather than admitted —
+    the classification table only buys a better message.
+
+    Duck-typed over the config object's attributes rather than isinstance-checked, so the
+    rule is testable without inspect_ai installed and cannot rot behind an import.
     """
     if config is None:
         return
-    max_tokens = getattr(config, "max_tokens", None)
-    _require(
-        max_tokens is None,
-        f"max_tokens={max_tokens!r} on the config would be dropped: the token budget is set once, by "
-        "max_new_tokens, and applied identically to both arms (QSR v0 §2.3). Pass max_new_tokens instead.",
-    )
-    temperature = getattr(config, "temperature", None)
-    _require(
-        temperature is None or temperature == PINNED_TEMPERATURE,
-        f"temperature={temperature!r} configures sampling; QSR v0 §2.3 is greedy on both arms, so a run that "
-        "sampled would be two draws from two distributions, not a paired diff. Only temperature 0 is accepted.",
-    )
-    for field in SAMPLING_FIELDS:
-        value = getattr(config, field, None)
-        _require(
-            value is None,
-            f"{field}={value!r} configures sampling; QSR v0 §2.3 pins greedy decoding on both arms and this "
-            "runner refuses rather than silently dropping the setting.",
-        )
-    num_choices = getattr(config, "num_choices", None)
-    _require(
-        num_choices in (None, 1),
-        f"num_choices={num_choices!r} is best-of-n; QSR v0 §2.1 allows no re-prompting, no retry, no best-of-n.",
-    )
+    # The object's own attributes are included so an unclassified (newer) field is still
+    # seen; `vars()` covers both a pydantic GenerateConfig and a test stub.
+    names = set(GENERATE_CONFIG_REFUSALS) | GENERATE_CONFIG_ALLOWED | set(getattr(config, "__dict__", {}) or {})
+    for name in sorted(names):
+        value = getattr(config, name, None)
+        if value is None:
+            continue
+        if name in GENERATE_CONFIG_ALLOWED:
+            _require(
+                name != "temperature" or value == PINNED_TEMPERATURE,
+                f"temperature={value!r} configures sampling; QSR v0 §2.3 is greedy on both arms, so a run that "
+                "sampled would be two draws from two distributions, not a paired diff. Only temperature 0 is "
+                "accepted.",
+            )
+            continue
+        reason = GENERATE_CONFIG_REFUSALS.get(name)
+        if reason is None:
+            raise InspectTaskError(
+                f"config field {name}={value!r} is not classified by this runner, so it is refused rather than "
+                f"silently dropped. This module was verified against inspect_ai {VERIFIED_INSPECT_AI_VERSION}, "
+                f"whose GenerateConfig it enumerates in GENERATE_CONFIG_ALLOWED/GENERATE_CONFIG_REFUSALS; a "
+                "field outside both is one nobody has decided about. Decide about it in a reviewed change."
+            )
+        raise InspectTaskError(f"config field {name}={value!r} {reason}")
 
 
 def check_pins(
@@ -658,6 +968,10 @@ class PairOutcome:
     arms: tuple[str, str]  # the (baseline, quantized) SPECS check_arms vetted for this run
     judge_runtime_s: float  # this pair's share of the judge's measured wall clock
     epoch: int = 1  # QSR v0 §2.1: always 1, and refused otherwise before it reaches here
+    #: `{arm: {name: value}}` — the model args `check_model_args` actually applied to each
+    #: arm, carried so `write_drift_report` records them from the RUN rather than from a
+    #: caller's parameter. `hash=False` because it is a mapping; it still compares.
+    model_args: dict[str, dict[str, Any]] = field(default_factory=dict, hash=False)
 
 
 def outcomes_from_scores(sample_scores: Any) -> list[PairOutcome]:
@@ -723,12 +1037,24 @@ def outcomes_from_scores(sample_scores: Any) -> list[PairOutcome]:
                 arms=arms,
                 judge_runtime_s=float(metadata[JUDGE_RUNTIME_KEY]),
                 epoch=epoch,
+                model_args={
+                    arm: dict(metadata[ARMS_KEY][ARMS_MODEL_ARGS][arm]) for arm in (ARM_BASELINE, ARM_QUANTIZED)
+                },
             )
         )
     _require(
         len(arms_seen) <= 1,
         f"the scored pairs do not agree on which arms ran: {sorted(arms_seen)}. A drift vector pooled over two "
         "different arm pairs is not a paired diff (QSR v0 §3.3).",
+    )
+    # Same rule for HOW the arms were built. Two pairs generated by the same specs under
+    # different model args are two different measurements wearing one pair of names, and
+    # the report records one set of args for the whole run.
+    _require(
+        all(outcome.model_args == outcomes[0].model_args for outcome in outcomes),
+        f"the scored pairs do not agree on the model args their arms were built with: "
+        f"{sorted({repr(outcome.model_args) for outcome in outcomes})}. Same specs under different model args is "
+        "not one measurement (QSR v0 §3.3).",
     )
     # Sorted by the pairing key so the tabulated order is the dataset order regardless of
     # the order Inspect finished samples in. `_tabulate` counts and is order-independent,
@@ -781,20 +1107,35 @@ def _check_arm_record(record: Any, pair: Any) -> tuple[str, str]:
     """Validate one score's arm record and return the vetted `(baseline, quantized)` pair.
 
     `generated_by` and `role_bound` are both `str(Model)`, so they compare like with like;
-    `vetted` is the spec string `check_arms` approved and is what a report may name.
+    `vetted` is the spec string `check_arms` approved and is what a report may name;
+    `model_args` is what `check_model_args` applied to each arm, and it is REQUIRED rather
+    than optional because a run that did not record how its arms were built is a run whose
+    report cannot be checked against it (an arm's model args can change what generates —
+    see `check_model_args` — which is why they are refused down to an allowlist first).
     """
     _require(
-        isinstance(record, dict) and all(k in record for k in (ARMS_VETTED, ARMS_GENERATED_BY, ARMS_ROLE_BOUND)),
+        isinstance(record, dict)
+        and all(k in record for k in (ARMS_VETTED, ARMS_GENERATED_BY, ARMS_ROLE_BOUND, ARMS_MODEL_ARGS)),
         f"pair {pair!r} has no usable arm record under {ARMS_KEY!r}: {record!r}. A score that does not say which "
-        "arms produced it cannot be checked, and a report whose arms nobody checked is exactly what this runner "
-        "refuses to emit.",
+        "arms produced it, and how they were built, cannot be checked — and a report whose arms nobody checked "
+        "is exactly what this runner refuses to emit.",
     )
     vetted, generated_by, role_bound = record[ARMS_VETTED], record[ARMS_GENERATED_BY], record[ARMS_ROLE_BOUND]
-    for label, mapping in (("vetted", vetted), ("generated_by", generated_by)):
+    for label, mapping in (
+        ("vetted", vetted),
+        ("generated_by", generated_by),
+        (ARMS_MODEL_ARGS, record[ARMS_MODEL_ARGS]),
+    ):
         _require(
             isinstance(mapping, dict) and ARM_BASELINE in mapping and ARM_QUANTIZED in mapping,
             f"pair {pair!r}: the {label!r} arm record must name both {ARM_BASELINE!r} and {ARM_QUANTIZED!r}; "
             f"got {mapping!r}",
+        )
+    for arm in (ARM_BASELINE, ARM_QUANTIZED):
+        _require(
+            isinstance(record[ARMS_MODEL_ARGS][arm], dict),
+            f"pair {pair!r}: the {arm!r} arm's recorded model args must be a mapping of the args it was built "
+            f"with; got {record[ARMS_MODEL_ARGS][arm]!r}",
         )
     if isinstance(role_bound, dict):
         for arm in (ARM_BASELINE, ARM_QUANTIZED):
@@ -841,6 +1182,20 @@ def judge_runtime_from_outcomes(outcomes: list[PairOutcome]) -> float:
     return round(sum(o.judge_runtime_s for o in outcomes), 2)
 
 
+def run_model_args(outcomes: list[PairOutcome]) -> dict[str, dict[str, Any]]:
+    """The model args each arm was built with, read from the run — never from the caller.
+
+    Same one-fact-one-copy discipline as `judge_runtime_from_outcomes`. `check_model_args`
+    refuses the args that could change what generates, but "what survived" is still a fact
+    about this run, and a report that carried no trace of it could not be checked against
+    the run at all. `outcomes_from_scores` has already refused pairs that disagree, so
+    reading the first pair reads the whole run.
+    """
+    _require(bool(outcomes), "no scored pairs: there are no recorded model args to report")
+    recorded = outcomes[0].model_args or {}
+    return {arm: dict(recorded.get(arm) or {}) for arm in (ARM_BASELINE, ARM_QUANTIZED)}
+
+
 def drift_from_outcomes(outcomes: list[PairOutcome]) -> SafetyDrift:
     """The drift vector for a completed Inspect run — computed by `verify._tabulate`.
 
@@ -870,6 +1225,23 @@ def inspect_decode(provider: str, max_new_tokens: int) -> dict[str, Any]:
     budget, and the provider's VERIFIED greedy model args (`{"do_sample": False}` on
     `hf`, empty on the deterministic-by-construction `mockllm`). The chat template names
     the provider and states plainly that it was not compared to `verify._encode_prompt`.
+
+    **`greedy` is a fact, and it is here so a comparator can read one.** Dropping
+    `do_sample` was right — it is a transformers `generate` kwarg this path never passes,
+    and asserting it would be false. But dropping the PROPERTY along with the false
+    spelling of it made an Inspect report and a `verify-safety` report incomparable on
+    decode: `quantfit.reproduce`'s T1 compares `decode.do_sample` as a value, so an
+    Inspect report that carried no greediness fact at all made every cross-run comparison
+    `void`. Greedy decoding is ENFORCED on this path (a sampling `config` is refused, the
+    task pins `temperature=0`, and each arm is built with the provider's verified greedy
+    model args), so it is stated as `greedy: true` — an enforced protocol fact, in a
+    machine-comparable form, rather than a claim about a kwarg nobody passed. `reproduce`
+    reads greediness as `(do_sample is False) or (greedy is True)`, so the two paths
+    resolve to the same fact from their own honest spellings.
+
+    `chat_template` stays PROSE, deliberately: the provider's templating has not been
+    compared to `verify._encode_prompt`, so there is no identity to assert. It is
+    provenance a reader must judge, not a field two reports can be equal on.
     """
     _require(
         provider in GREEDY_PROVIDER_ARGS,
@@ -880,6 +1252,7 @@ def inspect_decode(provider: str, max_new_tokens: int) -> dict[str, Any]:
     return {
         "max_new_tokens": max_new_tokens,
         "temperature": PINNED_TEMPERATURE,
+        "greedy": True,
         "greedy_model_args": dict(GREEDY_PROVIDER_ARGS[provider]),
         "chat_template": (f"provider-default (inspect_ai:{provider}) — not verified against verify._encode_prompt"),
         "recorded_by": "quantfit.inspect_task",
@@ -897,11 +1270,25 @@ def write_drift_report(
 
     Written by `verify._write_report`, the SAME assembler the shipped path uses, so the
     envelope (pins, judge label, drift vector) is identical by construction rather than
-    by review. Exactly one field is then corrected: the decode block, which
-    `_write_report` fills with facts about `verify._generate_completions` that are false
-    for an Inspect run — see `inspect_decode`. The correction goes through
-    `DriftReport.from_json` / `to_json`, so the artifact is schema-validated on the way
-    out as well as on the way in.
+    by review. Two things are then corrected: the decode block, which `_write_report`
+    fills with facts about `verify._generate_completions` that are false for an Inspect
+    run (see `inspect_decode`), and each arm's `engine.model_args`, which records what
+    `check_model_args` actually applied to that arm — sourced from the scored pairs, so
+    the artifact cannot disagree with the run about how its arms were built. The
+    correction goes through `DriftReport.from_json` / `to_json`, so the artifact is
+    schema-validated on the way out as well as on the way in.
+
+    **The write is atomic from the caller's point of view.** The assembler and the
+    correction both run against a temp file in the destination directory, and `path`
+    appears exactly once, by `os.replace`, already corrected. Writing to `path` and
+    fixing it afterwards left a window — a crash, a full disk, an exception in between —
+    in which a schema-VALID, publishable `DriftReport` sat at the destination asserting
+    `do_sample` and a templating policy this run never had. The same temp + `os.replace`
+    discipline `safety/cache.py` and the GGUF backend already use, for the same reason:
+    a partially-correct artifact must never exist at a name someone might read. Stated
+    exactly — the fsync covers the file's CONTENTS, not the rename, and the containing
+    directory is not synced, so a power loss can still lose the report. What it cannot do
+    is publish the intermediate one.
 
     There is no `judge_runtime_s` parameter: it is summed from the outcomes, because a
     caller-supplied scalar in a publishable artifact is a fact with no anchor while the
@@ -911,6 +1298,8 @@ def write_drift_report(
     (see `inspect_arm`) — but they are not taken on trust: `check_run_arms` refuses a
     report that names arms other than the ones the scored pairs recorded.
     """
+    import os
+    import tempfile
     from dataclasses import replace as _replace
     from pathlib import Path as _Path
 
@@ -919,10 +1308,30 @@ def write_drift_report(
 
     check_max_new_tokens(max_new_tokens)
     provider = check_run_arms(outcomes, baseline.model, quantized.model)
+    applied = run_model_args(outcomes)
     drift = drift_from_outcomes(outcomes)
-    verify_mod._write_report(path, drift, baseline, quantized, judge_runtime_from_outcomes(outcomes), max_new_tokens)
-    _replace(DriftReport.from_json(path), decode=inspect_decode(provider, max_new_tokens)).to_json(path)
-    return _Path(path)
+    arms = tuple(
+        _replace(arm, engine={**arm.engine, ARMS_MODEL_ARGS: applied[role]})
+        for arm, role in ((baseline, ARM_BASELINE), (quantized, ARM_QUANTIZED))
+    )
+
+    final = _Path(path)
+    fd, tmp_name = tempfile.mkstemp(dir=str(final.parent), prefix=".quantfit-inspect-report-", suffix=".tmp")
+    os.close(fd)
+    try:
+        verify_mod._write_report(
+            tmp_name, drift, arms[0], arms[1], judge_runtime_from_outcomes(outcomes), max_new_tokens
+        )
+        _replace(DriftReport.from_json(tmp_name), decode=inspect_decode(provider, max_new_tokens)).to_json(tmp_name)
+        with open(tmp_name, "r+b") as handle:  # the bytes are on the device before the name points at them
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp_name, final)
+    finally:
+        # No-op after a successful replace (the temp name is gone); on any failure this is
+        # what guarantees neither a partial nor an uncorrected report is left behind.
+        _Path(tmp_name).unlink(missing_ok=True)
+    return final
 
 
 def inspect_arm(
@@ -1070,8 +1479,23 @@ def _registry() -> dict[str, Any]:
         return compute
 
     @api["solver"](name=SOLVER_NAME)
-    def qsr_paired_solver(baseline_model, quantized_model, baseline_spec, quantized_spec, max_new_tokens):
+    def qsr_paired_solver(
+        baseline_model,
+        quantized_model,
+        baseline_spec,
+        quantized_spec,
+        max_new_tokens,
+        baseline_model_args=None,
+        quantized_model_args=None,
+    ):
         check_max_new_tokens(max_new_tokens)
+        # Recorded per arm, JSON-safe, so every Score this solver's samples produce carries
+        # how its arms were BUILT alongside which arms they were. `write_drift_report`
+        # sources the report's `engine.model_args` from these rather than from a parameter.
+        applied_model_args = {
+            ARM_BASELINE: model_args_provenance(dict(baseline_model_args or {})),
+            ARM_QUANTIZED: model_args_provenance(dict(quantized_model_args or {})),
+        }
 
         async def solve(state, generate):
             """Generate ONE greedy completion per arm for this probe, and pair them here.
@@ -1115,6 +1539,7 @@ def _registry() -> dict[str, Any]:
                     ARM_BASELINE: _role_name(api_, BASELINE_ROLE),
                     ARM_QUANTIZED: _role_name(api_, QUANTIZED_ROLE),
                 },
+                ARMS_MODEL_ARGS: applied_model_args,
             }
             _check_arm_record(state.metadata[ARMS_KEY], state.metadata.get(PAIR_INDEX_KEY))
             return state
@@ -1248,6 +1673,11 @@ def _registry() -> dict[str, Any]:
         check_epochs(epochs)
         check_generate_config(config)
         provider = check_arms(baseline, quantized)
+        # `check_model_args` is called here as well as inside `qsr_arm` — it is pure, so
+        # the second call cannot disagree with the first, and the RECORD has to be the args
+        # that were actually applied rather than the ones the caller passed in.
+        baseline_applied = check_model_args(provider, baseline_args)
+        quantized_applied = check_model_args(provider, quantized_args)
         baseline_model = qsr_arm(baseline, provider=provider, model_args=baseline_args)
         quantized_model = qsr_arm(quantized, provider=provider, model_args=quantized_args)
         return api_["Task"](
@@ -1256,7 +1686,15 @@ def _registry() -> dict[str, Any]:
             # inside the same lazy build, so the cache is not populated yet. The solver
             # gets the vetted Model OBJECTS, which is what makes an eval-level
             # `model_roles=` unable to change what generates.
-            solver=qsr_paired_solver(baseline_model, quantized_model, baseline, quantized, max_new_tokens),
+            solver=qsr_paired_solver(
+                baseline_model,
+                quantized_model,
+                baseline,
+                quantized,
+                max_new_tokens,
+                baseline_model_args=baseline_applied,
+                quantized_model_args=quantized_applied,
+            ),
             scorer=qsr_paired_scorer(token=token, labels=labels),
             # The quantized arm is the artifact under test and doubles as the task's
             # default model, so `eval()` needs no --model. `model_roles` is declared so the
@@ -1277,6 +1715,13 @@ def _registry() -> dict[str, Any]:
                 },
                 "decode": inspect_decode(provider, max_new_tokens),
                 "arms": {BASELINE_ROLE: baseline, QUANTIZED_ROLE: quantized},
+                # What each arm was actually BUILT with, after check_model_args refused the
+                # args that could change what generates — in the log header as well as on
+                # every Score, so a standalone `inspect eval` records it too.
+                "model_args": {
+                    BASELINE_ROLE: model_args_provenance(baseline_applied),
+                    QUANTIZED_ROLE: model_args_provenance(quantized_applied),
+                },
                 "not_claimed": list(NOT_CLAIMED),
             },
         )
@@ -1311,6 +1756,11 @@ def qsr_arm(spec: str, provider: str | None = None, model_args: dict[str, Any] |
     rather than pre-built `Model`s: on the `hf` provider `temperature=0` alone still
     samples (`do_sample` defaults to True and is a model arg, not a config field), so an
     arm built by hand would silently violate §2.3 while every printed pin said greedy.
+
+    It is also where a caller's model args meet `check_model_args`'s allowlist, so an arm
+    cannot be pointed at a different checkpoint, tokenizer or template than its spec names
+    (see that function; `str(Model)` — what every downstream arm check compares — is
+    derived from the spec and would not notice).
     """
     api = _inspect_api()
     resolved = provider_of(spec) if provider is None else provider
@@ -1347,6 +1797,8 @@ def qsr_paired_solver(
         baseline,
         quantized,
         max_new_tokens,
+        baseline_model_args=check_model_args(provider, baseline_args),
+        quantized_model_args=check_model_args(provider, quantized_args),
     )
 
 
