@@ -181,6 +181,15 @@ branch on either. An operational failure returns the same envelope with an
 one case you cannot. `schema_version` is there so a consumer can tell when its
 assumptions expired.
 
+**If an assistant is reading this for you.** `llms.txt` in the repository root is
+the retrieval surface coding agents fetch by convention, and it carries the
+command list, the exit-code contract and the stated limits rather than only the
+pitch. `.claude/skills/quantfit/SKILL.md` is the usage-facing skill — distinct
+from `AGENTS.md`, which is a contributor contract and helps an agent modify this
+repo, not use the tool. Both are held to docs=code parity by `quantfit audit`,
+because the surface most likely to be read by something that cannot notice it has
+gone stale is the last one that should be exempt.
+
 **Gate it in CI.** `quantfit gate` is the pre-release check — and it refuses to
 promise resolution it does not have:
 

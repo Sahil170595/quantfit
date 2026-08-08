@@ -125,7 +125,10 @@ CHECKS = (CHECK_COMMANDS, CHECK_CITATIONS, CHECK_EXIT_CODES, CHECK_CONSTANTS, CH
 # constants, ROADMAP.md names both — and the cost of admitting them was measured before
 # they were added rather than assumed: zero new errors on today's tree. A corpus that
 # excludes the documents a newcomer reads first is a corpus chosen to stay green.
-_ROOT_DOCS = ("README.md", "CONTRIBUTING.md", "SECURITY.md", "CHANGELOG.md", "ROADMAP.md")
+# `llms.txt` is in this list deliberately. It is the file coding assistants fetch by
+# convention, so it is the surface most likely to be read by something that cannot notice
+# it has gone stale — which makes it the last file that should be exempt from parity.
+_ROOT_DOCS = ("README.md", "CONTRIBUTING.md", "SECURITY.md", "CHANGELOG.md", "ROADMAP.md", "llms.txt")
 COMMAND_DOC_GLOBS = (*_ROOT_DOCS, "docs/*.md", "spec/*.md")
 CITATION_DOC_GLOBS = (*_ROOT_DOCS, "docs/*.md", "spec/*.md")
 EXIT_CODE_DOC_GLOBS = ("README.md", "CONTRIBUTING.md", "docs/ci-integration.md", "spec/qsr-v0.md")

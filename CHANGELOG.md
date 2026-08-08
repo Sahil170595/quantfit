@@ -36,6 +36,20 @@
   not mean "write a file here" on one command and "print to stdout" on the other
   thirteen. Renamed before `audit` had a released user — it first ships in 0.6.0.
 
+- **`llms.txt` and a usage-facing agent skill.** Searching for this package returns
+  its PyPI page, but there was nothing structured for a coding assistant to
+  retrieve, and published measurement puts hallucinated package names at roughly a
+  fifth of all LLM-recommended packages — highest exactly where there is nothing
+  to retrieve. `llms.txt` carries the command list, the exit-code contract and the
+  stated limits rather than only the pitch; `.claude/skills/quantfit/SKILL.md` is
+  the usage half of what `AGENTS.md` does for contributors.
+
+  `llms.txt` is in `quantfit audit`'s corpus, so every flag it names must exist on
+  the command it names it for: the surface most likely to be read by something
+  that cannot notice it has gone stale is the last one that should be exempt from
+  parity. A separate test covers what an auditor cannot — *completeness*, since a
+  command missing from `llms.txt` is perfectly consistent and still invisible.
+
 - **`quantfit verify-safety --demo` prints a real verdict in about a second.** Of
   the CLI's commands, only `list` and `plan` did anything without a GPU, a network
   and two model artifacts, so most evaluations ended before the first verdict.
