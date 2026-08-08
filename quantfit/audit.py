@@ -1,4 +1,4 @@
-"""docs=code parity auditor — the ROADMAP 1.0 check that every prose claim is checkable.
+"""docs=code parity auditor — the ROADMAP 0.10 check that every prose claim is checkable.
 
 This repository makes an unusually large number of claims that a machine can verify:
 CLI commands and flags, exit codes, `file:symbol` citations, schema field names, and

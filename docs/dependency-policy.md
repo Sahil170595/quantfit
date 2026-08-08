@@ -10,7 +10,7 @@ this policy in prose, not a line-by-line mirror of the suite.
 The bound the repo did not satisfy when this document was first written — an uncapped
 `gptqmodel` — has since been capped; §4 records what closed and what did not.
 
-**Scope.** This document covers ROADMAP 1.0's "dependencies bounded" clause and the
+**Scope.** This document covers ROADMAP 0.10's "dependencies bounded" clause and the
 supply-chain surface that sits next to it. "Every requirement" means the hard set, every
 extra, **and `[build-system].requires`** — a group that escaped this policy entirely until
 §3.6 was written, which is the same failure mode §1 exists to prevent. It makes no claim
@@ -537,7 +537,7 @@ Named so the gaps are visible rather than implied by omission.
   A transitive package with a compromised release is not addressed by any mechanism in §6
   except the llama.cpp binary pin, which is not a Python package at all. **[?]** Hash-pinned
   installs (`pip install --require-hashes`) would address this and are not shipped.
-- **No third-party reproduction, citation or gate adoption exists**, so ROADMAP 1.0's own
+- **No third-party reproduction, citation or gate adoption exists**, so ROADMAP 0.10's own
   gate is not met and this document does not claim otherwise.
 
 ---

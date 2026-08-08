@@ -3,9 +3,38 @@
 > Note on versions: tool versions do not track ROADMAP milestone numbers. 0.5.1
 > shipped 0.6's machinery, 0.5.2 ships 0.7's; a milestone number in a version
 > would claim milestone completion, and those completions are gated on runs and
-> decisions that have not happened. 1.0 is the frozen standard (ROADMAP 1.0).
+> decisions that have not happened. 0.10 is the frozen standard (ROADMAP 0.10).
 
-## 0.5.3
+## 0.6.0
+
+**Publishing accounting, stated because it is the point of this release.** The
+last version on PyPI was **0.5.1**. The sections below for **0.5.2** and **0.5.3**
+describe work that was written, reviewed and merged into a release branch and
+then **never published** — it lived in a five-deep stack of pull requests, each
+based on the previous release branch, and nothing in it was installable. 0.6.0 is
+that stack collapsed into one release. The version steps to 0.6.0 rather than
+0.5.3 so PyPI's history does not show a 0.5.3 arriving with no 0.5.2 before it;
+the milestone-numbering rule above is unchanged, and 0.6.0 still claims no
+ROADMAP milestone.
+
+Shipped here, from the sections below: the 0.7 gate that refuses thresholds it
+cannot resolve, the 0.8 reproduction command and Inspect runner, and the 0.10
+docs=code parity auditor wired into CI.
+
+New in this release itself:
+
+- **`quantfit --version`** answers instead of exiting 2. The subcommand is
+  required, so the top-level parser previously rejected `--version` with a usage
+  dump — the first thing anyone runs to confirm an install looked like a broken
+  install. The `version` action exits during parsing, ahead of that check.
+- **`LICENSE` is the canonical Apache-2.0 text again.** The file had been
+  truncated at 154 lines with the `APPENDIX` section removed, which put it below
+  the similarity threshold GitHub's licence classifier needs: the repository
+  reported `spdx_id: NOASSERTION`, licence "Other". Corporate policy scanners and
+  dependency-review bots read that field and frequently block on it. The declared
+  `license = "Apache-2.0"` in `pyproject.toml` never changed; only the file did.
+
+## 0.5.3 — merged, never published
 
 ROADMAP 0.8 machinery: the reproduction gate as code, an Inspect-API runner, the
 reference-report registry, and the QSR v1 freeze plan. Scoped to what can be true
@@ -49,12 +78,12 @@ fabricates neither.
 reference reports exist, the free-tier T4 reproduction has not been attempted,
 and there is no launch post (the 0.5 screen has not run, so there are no findings
 to lead with). Of the three new modules, `reproduce` and `audit` became CLI
-commands in the 1.0 work below; `refreports` is still library-only, by design —
+commands in the 0.10 work below; `refreports` is still library-only, by design —
 the registry is empty, so a command would be a facade over nothing.
 
-### ROADMAP 1.0 machinery: the checks that keep the docs honest
+### ROADMAP 0.10 machinery: the checks that keep the docs honest
 
-1.0 is the frozen standard, and none of its gate clauses is met here. What ships
+0.10 is the frozen standard, and none of its gate clauses is met here. What ships
 is the machinery that makes the claims checkable, plus the corrections that
 machinery found.
 
@@ -104,7 +133,7 @@ Fixes this round, each found by one of the above or by review of it:
 - **README no longer claims validation on Llama-1B** — that model appears in the
   0.5 screen *target list*, which is a list of things to run, not a record of runs.
 
-## 0.5.2
+## 0.5.2 — merged, never published
 
 ROADMAP 0.7 machinery: the pre-release gate, its CI integration, and the
 protocols they need — built to the milestone's stated goal, *"the pre-release

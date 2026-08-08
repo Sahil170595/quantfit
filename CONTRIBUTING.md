@@ -362,7 +362,7 @@ first.
 **Versions do not track ROADMAP milestone numbers**, and `CHANGELOG.md` opens by
 saying why: 0.5.1 shipped 0.6's machinery, 0.5.2 shipped 0.7's. A milestone number in
 a version would claim a milestone completion that is gated on runs and decisions that
-have not happened. `1.0` is reserved for the frozen standard.
+have not happened. `0.10` is reserved for the frozen standard.
 
 **Version parity is tested, not trusted.** `pyproject.toml` `version`,
 `quantfit/__init__.py` `__version__` and `CITATION.cff` `version` must agree —

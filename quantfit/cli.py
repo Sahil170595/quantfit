@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 
+from quantfit import __version__  # plain module-level string; the heavy surface stays lazy
 from quantfit.gate import TIERS as GATE_TIERS  # tier NAMES only — no torch, no heavy import
 from quantfit.registry import METHODS
 
@@ -24,6 +25,10 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="quantfit",
         description="Quantize an LLM, check it fits your GPU, and verify it still refuses what it should.",
     )
+    # `version` exits during parsing, so it answers even though the subcommand below is
+    # required — `quantfit --version` used to exit 2 with a usage dump, which made the
+    # first thing any caller runs to confirm an install look like a broken install.
+    p.add_argument("--version", "-V", action="version", version=f"quantfit {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     # Shared --token for the commands that hit the Hub (gated / private models).

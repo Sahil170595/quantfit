@@ -76,7 +76,7 @@ jobs:
           quantfit list
           python -c "import quantfit; print('quantfit', quantfit.__version__)"
 
-      # ROADMAP 1.0's gate clause, as a script rather than a promise: every command
+      # ROADMAP 0.10's gate clause, as a script rather than a promise: every command
       # the README advertises must exist in the INSTALLED CLI, and the clean-venv
       # subset must actually run. Commands needing a GPU, the network or multi-GB
       # weights are reported UNRUN with reasons — this gate covers existence plus

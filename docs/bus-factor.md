@@ -2,7 +2,7 @@
 
 **Bus factor: 1.** One person. No co-maintainer, no organization account, no review rota.
 ROADMAP risk 6 names the human half of this ("Solo burnout and labeling exposure … CONTRIBUTING
-at 1.0"); this document is the *artifact* half — the concrete list of things that stop working,
+at 0.10"); this document is the *artifact* half — the concrete list of things that stop working,
 ranked by what would actually stop a third party from reproducing the work.
 
 **Ranked by reproduction impact, not by how alarming they sound.** The ordering is the point.
@@ -119,7 +119,7 @@ the coupling that hurts if the repo goes away and PyPI does not.
 
 1. **Get one fork.** Not a mirror the maintainer owns — a fork by someone else. One
    fork by an unrelated party is the whole mitigation, and it is also literally the
-   1.0 gate's "≥1 third-party reproduction, citation, or gate adoption."
+   0.10 gate's "≥1 third-party reproduction, citation, or gate adoption."
 2. **Ship `spec/` in the sdist** via a three-line `MANIFEST.in`. It makes the PyPI
    artifact self-describing and costs nothing. (Not done here — this document owns
    no packaging file; see `CONTRIBUTING.md` §7 on stating what is not delivered.)
@@ -212,7 +212,7 @@ What is still tacit, honestly:
   runs (Qwen2.5-7B GPTQ over-VRAM on a 12 GB card, ~32 min; AWQ's ~2 h single-layer
   behavior under onloading). Those are one person's box. A successor cannot tell
   which claims are hardware-general without re-running them — which is exactly what
-  ROADMAP 1.0's "every advertised command hardware-validated" is for, and it is not
+  ROADMAP 0.10's "every advertised command hardware-validated" is for, and it is not
   satisfied today.
 - **The judge/corpus construction.** The pinned artifacts' *provenance* — how the
   corpus was curated, how the judge was trained — is summarized in

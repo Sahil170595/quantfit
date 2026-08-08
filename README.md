@@ -11,6 +11,7 @@ matrix, is honest about whether a model fits your GPU, and — uniquely — meas
 ```bash
 pip install quantfit
 
+quantfit --version                                                     # confirm the install
 quantfit check        --model Qwen/Qwen2.5-7B-Instruct                 # will it fit? (no download)
 quantfit plan         --model Qwen/Qwen2.5-7B-Instruct                 # what config would it pick? + why
 quantfit quantize     --model Qwen/Qwen2.5-1.5B-Instruct --method awq --out ./out

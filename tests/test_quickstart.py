@@ -767,7 +767,7 @@ def test_the_real_readme_fence_markers_pair(real_commands):
 
 
 def test_every_readme_command_exists_in_the_shipped_cli(real_commands, real_surface):
-    """ROADMAP 1.0's docs=code parity, as an assertion.
+    """ROADMAP 0.10's docs=code parity, as an assertion.
 
     If this fails, either the README advertises something the CLI no longer defines
     (fix the README) or a flag was renamed without updating it (fix one of them). It
@@ -784,7 +784,14 @@ def test_every_category_a_command_is_a_real_cli_command(real_commands, real_surf
     for item in runnable:
         subcommand = qs.subcommand_of(item.command.argv)
         assert item.command.is_quantfit
-        assert subcommand in real_surface.positional_choices, subcommand
+        if subcommand:
+            assert subcommand in real_surface.positional_choices, subcommand
+        else:
+            # A top-level flag form — `quantfit --version` — is a real command with no
+            # subcommand at all. `subcommand_of` returns "" for it, which is not and should
+            # not be a positional choice; the guarantee is carried by validate_command
+            # below, which resolves the flag against the top-level parser.
+            assert [tok for tok in item.command.argv[1:] if tok.startswith("-")], item.command.argv
         assert qs.validate_command(item.command, real_surface) == []
 
 

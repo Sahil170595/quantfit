@@ -1,6 +1,6 @@
 # Validation matrix — what has actually been run, on what, with what evidence
 
-**Status:** audit. ROADMAP milestone 1.0 requires *"every advertised command
+**Status:** audit. ROADMAP milestone 0.10 requires *"every advertised command
 hardware-validated"*. **That is not true today, and this document is the list of why
 not.** It exists to be uncomfortable: every row that says UNVALIDATED is a claim
 quantfit currently makes on the strength of unit tests and prose alone.
@@ -114,7 +114,7 @@ per row rather than a re-argument.
 
 ---
 
-## 1. Headline verdict against ROADMAP 1.0
+## 1. Headline verdict against ROADMAP 0.10
 
 > "every advertised command hardware-validated"
 
@@ -325,7 +325,7 @@ with no artifact behind it.
    was written and are now advertised (`README.md:126-130`); the finding is narrowed
    rather than deleted, because the reverse-drift check is what keeps it narrow.
 3. **The README quickstart contains exactly two commands a clean venv can run**
-   (`plan`, `list`). ROADMAP 1.0's gate clause — "scripted README-only quickstart passes
+   (`plan`, `list`). ROADMAP 0.10's gate clause — "scripted README-only quickstart passes
    in a clean venv" — is therefore satisfiable today and still nearly vacuous: at the
    2026‑08‑07 22:5x reading, `tools/quickstart_check.py` extracted **22** advertised
    commands and reported **20** of them UNRUN with reasons. That is the honest output,

@@ -1,4 +1,4 @@
-"""ROADMAP 1.0: "dependencies bounded" as a test rather than a promise.
+"""ROADMAP 0.10: "dependencies bounded" as a test rather than a promise.
 
 The standing ROADMAP rule is `ROADMAP.md:10` and `ROADMAP.md:116`: upper-bound pins for
 churning dependencies, and the cap moves only after a validated run on the new minor.

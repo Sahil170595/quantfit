@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""README-only quickstart check — ROADMAP 1.0's gate clause as a script, not a promise.
+"""README-only quickstart check — ROADMAP 0.10's gate clause as a script, not a promise.
 
-ROADMAP 1.0's gate reads, in part: *"scripted README-only quickstart passes in a clean
+ROADMAP 0.10's gate reads, in part: *"scripted README-only quickstart passes in a clean
 venv."* A human reading the README and typing its commands is not a gate — it is a
 memory of a gate. This script is the gate: it reads `README.md`, extracts **every**
 shell command it advertises, classifies each one by what it actually needs, runs the
@@ -19,7 +19,7 @@ literal gate clause.
 must exist, every flag must exist on that subcommand, and every value passed to a
 choice-flag (`--tier smoke`, `--method awq`) must be one of the choices the CLI
 declares. A README that advertises a command, flag or choice the shipped CLI no longer
-defines makes this script **exit 1**. That is the docs=code skew ROADMAP 1.0's audit
+defines makes this script **exit 1**. That is the docs=code skew ROADMAP 0.10's audit
 exists to catch, and category (a) being small does not weaken it: the validation runs
 over commands from every category, because the *existence* of a command costs nothing
 to check and needs no GPU.
@@ -851,7 +851,7 @@ def undocumented_subcommands(commands: Sequence[Command], surface: CommandNode) 
     """CLI subcommands the README never mentions — reverse drift, reported as a note.
 
     A note and not an error on purpose: a README is allowed to be a quickstart rather
-    than a manual. It is listed because ROADMAP 1.0's docs=code parity audit needs the
+    than a manual. It is listed because ROADMAP 0.10's docs=code parity audit needs the
     list, not because an omission fails a build.
     """
     advertised = {subcommand_of(command.argv) for command in commands if command.is_quantfit}
@@ -1046,7 +1046,7 @@ def _default_readme() -> Path:
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="quickstart_check.py",
-        description="Extract, classify and run README.md's advertised commands (ROADMAP 1.0 gate clause).",
+        description="Extract, classify and run README.md's advertised commands (ROADMAP 0.10 gate clause).",
         epilog="exit 0 = clean, 1 = README/CLI drift or a failed clean-venv command, 2 = operational.",
     )
     parser.add_argument("--readme", type=Path, default=None, help="README to audit (default: the repo's)")
