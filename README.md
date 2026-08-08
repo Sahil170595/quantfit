@@ -113,7 +113,8 @@ citations, exit codes, quoted constants, and schema field names:
 
 ```bash
 quantfit audit                    # exit 0 = clean, 3 = drift found, 2 = operational
-quantfit audit --json out.json    # the findings as data, for CI
+quantfit audit --json             # the findings as data, on stdout
+quantfit audit --json-out out.json        # ...or written to a file
 quantfit audit --root /path/to/quantfit   # run it from another directory
 ```
 
@@ -129,6 +130,65 @@ scheme matrix. `quantfit calibrate sheet` / `quantfit calibrate ingest` build a
 blinded judge-calibration labeling sheet from a `--capture` file and ingest the
 filled labels into a per-arm judge-error report — machinery for ROADMAP 0.6,
 which starts only on the 0.5 GO decision.
+
+**See the output before you download anything.** `quantfit verify-safety --demo`
+runs the real tabulation — the same `_tabulate`, the same Wilson bounds, the same
+at-risk denominators — over bundled fixtures, in about a second:
+
+```bash
+quantfit verify-safety --demo
+```
+
+```
+DEMONSTRATION — fixtures, not a measurement
+safety drift over <fixture> probes — REGRESSION DETECTED (both axes)
+  refusal-robustness: harmful-compliance regressions flagged, with a Wilson 95% interval
+```
+
+No model, no network, no weights. The fixture set is its own, much smaller than
+the curated corpus a real run uses, and the probe prompts are placeholders — only
+the statistics are real. Every surface says so: the banner, `"demo": true` in the
+JSON, and a refusal if you pass `--report`, because an artifact indistinguishable
+from a real run's is the one thing a demo must never produce.
+
+The demo's process status is always success, and that is deliberate rather than a
+verdict: the fixture deliberately contains a regression so you can see the shape
+of a finding, but the failing verdict status belongs to a statement about a model,
+and no model ran.
+
+**Every command speaks JSON.** Add `--json` to any of them and stdout carries
+exactly one document — never prose mixed with data, so a caller never has to
+strip lines before parsing:
+
+```bash
+quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --json
+quantfit check --model Qwen/Qwen2.5-7B-Instruct --json
+```
+
+```json
+{
+  "schema_version": 1,
+  "tool": { "name": "quantfit", "version": "0.6.0" },
+  "command": "verify-safety",
+  "exit_code": 3,
+  "result": { "regression_detected": true, "unmeasurable_axes": [], "...": "..." }
+}
+```
+
+The exit code stays the CI contract and the envelope repeats it, so a caller can
+branch on either. An operational failure returns the same envelope with an
+`error` block and `"exit_code": 2` — the case you most need to parse is not the
+one case you cannot. `schema_version` is there so a consumer can tell when its
+assumptions expired.
+
+**If an assistant is reading this for you.** `llms.txt` in the repository root is
+the retrieval surface coding agents fetch by convention, and it carries the
+command list, the exit-code contract and the stated limits rather than only the
+pitch. `.claude/skills/quantfit/SKILL.md` is the usage-facing skill — distinct
+from `AGENTS.md`, which is a contributor contract and helps an agent modify this
+repo, not use the tool. Both are held to docs=code parity by `quantfit audit`,
+because the surface most likely to be read by something that cannot notice it has
+gone stale is the last one that should be exempt.
 
 **Gate it in CI.** `quantfit gate` is the pre-release check — and it refuses to
 promise resolution it does not have:

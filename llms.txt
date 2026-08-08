@@ -1,0 +1,47 @@
+# quantfit
+
+> Quantize an LLM and check it still refuses what it should. A GPU-aware quantization CLI whose distinguishing feature is a **paired** baseline-vs-quantized refusal diff with at-risk denominators and Wilson 95% intervals — it compares a model against its own quantization rather than scoring it in the absolute.
+
+Why paired: published work finds strongly-aligned models robust to quantization and weakly-aligned ones not, so an absolute safety score cannot separate "this model was never well aligned" from "quantization broke it". A diff can.
+
+Every command accepts `--json` and prints exactly one document on stdout. Exit codes are the CI contract: **0** clean, **2** operational error, **3** verdict failed, **4** nothing was measured, **5** the gate cannot resolve the threshold you declared. 4 and 5 are not passes.
+
+To see real output in about a second, with no model, no network and no weights:
+`quantfit verify-safety --demo`
+
+## Commands
+
+- [check](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit check --model <hf-id>` — will this model fit your GPU? Exit 3 means it will not.
+- [list](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit list` — the supported method × scheme matrix.
+- [plan](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit plan --model <hf-id>` — the config quantfit would pick for this machine, and why. Reads the local device only; never reaches the Hub.
+- [probe](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit probe --model <hf-id> --bits 4 8` — per-bit-width sensitivity (RTN-KL). An upper bound on degradation, not a verdict.
+- [quantize](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit quantize --model <hf-id> --method awq --out ./out` — quantize via llm-compressor or llama.cpp.
+- [verify](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit verify --model ./out` — smoke-load the artifact and generate.
+- [verify-safety](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit verify-safety --baseline <hf-id> --quant ./out` — the paired refusal diff. This is the command the tool exists for.
+- [screen](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit screen --targets targets.json --out ./screen` — run the diff over a manifest and aggregate per-stratum, per-axis prevalence bounds.
+- [gate](https://github.com/Sahil170595/quantfit/blob/main/docs/ci-integration.md): `quantfit gate --baseline <hf-id> --quant ./out --tier smoke` — the pre-release check, which refuses a threshold finer than the run could resolve rather than passing it.
+- [emit](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit emit model-card --report report.json` — render a model-card fragment from a drift report.
+- [calibrate](https://github.com/Sahil170595/quantfit/blob/main/docs/judge-calibration-v0.md): `quantfit calibrate sheet --capture c.capture.jsonl --sheet s.labels.csv --key k.labelkey.json` then `quantfit calibrate ingest --sheet s.labels.csv --key k.labelkey.json --out cal.json` — blinded judge-error measurement.
+- [reproduce](https://github.com/Sahil170595/quantfit/blob/main/docs/cross-hardware-tolerance-v0.md): `quantfit reproduce --reference ref.json --candidate cand.json` — does this report reproduce that one, under the cross-hardware tolerance?
+- [audit](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit audit` — docs=code parity for this repository itself.
+
+## What a result means
+
+- [The QSR v0 spec](https://github.com/Sahil170595/quantfit/blob/main/spec/qsr-v0.md): the normative protocol — at-risk denominators, the two axes, the verdict strings, the exit-code contract, and what a no-detection result does and does not say.
+- [CI integration](https://github.com/Sahil170595/quantfit/blob/main/docs/ci-integration.md): wiring the gate into a release pipeline, and the reference composite action.
+- [Cross-hardware tolerance](https://github.com/Sahil170595/quantfit/blob/main/docs/cross-hardware-tolerance-v0.md): when one run counts as reproducing another.
+- [Validation matrix](https://github.com/Sahil170595/quantfit/blob/main/docs/validation-matrix.md): what has actually been run, on what hardware, with what evidence. Read this before quoting any number as validated.
+
+## Honest limits
+
+- A no-detection result **bounds** the drift; it does not certify safety. At the shipped probe set's dangerous-axis size that bound is wide.
+- The judge is uncalibrated until `calibrate` has been run, so the printed MDE is a perfect-judge floor — a lower bound on the true resolution, never the resolution.
+- Only weight quantization is measured. KV-cache quantization, where recent work locates alignment collapse, is not an axis this tool can see.
+- Decoding is greedy and the probe set is one curated corpus. Published guidance argues for multi-sample stability across several benchmarks; the trade is determinism and a defensible denominator, and it is stated rather than hidden.
+- Every published GPU number in this project comes from one laptop. See the validation matrix.
+
+## Optional
+
+- [Contributing](https://github.com/Sahil170595/quantfit/blob/main/CONTRIBUTING.md): the hermetic-test rule, the exit-code taxonomy, and the pinning discipline.
+- [Bus factor](https://github.com/Sahil170595/quantfit/blob/main/docs/bus-factor.md): what breaks if the maintainer stops.
+- [Security](https://github.com/Sahil170595/quantfit/blob/main/SECURITY.md): the supply-chain posture, including what the llama.cpp SHA256 pin does and does not cover.

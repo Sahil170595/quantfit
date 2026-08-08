@@ -23,16 +23,82 @@ docs=code parity auditor wired into CI.
 
 New in this release itself:
 
+- **Every command speaks JSON.** `--json` on any of the fourteen leaf commands puts
+  exactly one document on stdout — never prose mixed with data, so a caller never
+  strips lines before parsing. Until now not one command emitted machine-readable
+  output: the verdict, the Wilson bounds, the MDE and the provenance reached a
+  caller only as a file written to a path, and only from two commands. The exit
+  code carried the verdict faithfully and could not carry the numbers.
+
+  The envelope is `schema_version` / `tool` / `command` / `exit_code` / `result`,
+  versioned from the start because the point of a machine-readable surface is that
+  a consumer can tell when its assumptions expired. `exit_code` is repeated inside
+  the document *and* returned by the process, and a test asserts per command that
+  the two agree — two sources of truth that can disagree are worse than one.
+
+  An operational failure returns the same envelope with an `error` block and
+  `"exit_code": 2`, so the case a caller most needs to parse is not the one case it
+  cannot. A *verdict* failure (exit 3) carries no `error` block: exit 3 is an
+  answer, not a breakage, and the two must not be conflated.
+
+  The flag is attached by walking the parser rather than by hand, so a fifteenth
+  command cannot quietly miss it. It goes on leaves only — argparse lets a
+  subparser's default overwrite a parent's value for the same dest, so putting it
+  on `calibrate` itself would parse and then silently reset it to false, which is
+  precisely the inert-flag defect `plan --token` was. `calibrate sheet` and
+  `calibrate ingest` each take it; the parent deliberately does not.
+
+- **`quantfit audit --json PATH` is now `--json-out PATH`.** One flag name could
+  not mean "write a file here" on one command and "print to stdout" on the other
+  thirteen. Renamed before `audit` had a released user — it first ships in 0.6.0.
+
+- **`llms.txt` and a usage-facing agent skill.** Searching for this package returns
+  its PyPI page, but there was nothing structured for a coding assistant to
+  retrieve, and published measurement puts hallucinated package names at roughly a
+  fifth of all LLM-recommended packages — highest exactly where there is nothing
+  to retrieve. `llms.txt` carries the command list, the exit-code contract and the
+  stated limits rather than only the pitch; `.claude/skills/quantfit/SKILL.md` is
+  the usage half of what `AGENTS.md` does for contributors.
+
+  `llms.txt` is in `quantfit audit`'s corpus, so every flag it names must exist on
+  the command it names it for: the surface most likely to be read by something
+  that cannot notice it has gone stale is the last one that should be exempt from
+  parity. A separate test covers what an auditor cannot — *completeness*, since a
+  command missing from `llms.txt` is perfectly consistent and still invisible.
+
+- **`quantfit verify-safety --demo` prints a real verdict in about a second.** Of
+  the CLI's commands, only `list` and `plan` did anything without a GPU, a network
+  and two model artifacts, so most evaluations ended before the first verdict.
+  `--demo` runs the shipped `_tabulate` over bundled fixtures — the Wilson bounds,
+  the at-risk denominators and the verdict precedence are genuinely computed, not
+  re-implemented, because a second copy of the statistics would be the divergence
+  channel the spec exists to prevent.
+
+  What it is not is enforced rather than mentioned: the probe prompts are
+  placeholders (shipping the curated expected-unsafe corpus in the wheel to
+  prettify a demo would put harmful text in every install), the refusal flags are
+  fixtures, `--report` and `--capture` are **refused** outright, and the exit code
+  is always 0 — the fixture deliberately contains a regression so a reader sees
+  the shape of a finding, but exit 3 is a verdict about a model and no model ran.
+
 - **`quantfit --version`** answers instead of exiting 2. The subcommand is
   required, so the top-level parser previously rejected `--version` with a usage
   dump — the first thing anyone runs to confirm an install looked like a broken
   install. The `version` action exits during parsing, ahead of that check.
+
 - **`LICENSE` is the canonical Apache-2.0 text again.** The file had been
   truncated at 154 lines with the `APPENDIX` section removed, which put it below
   the similarity threshold GitHub's licence classifier needs: the repository
   reported `spdx_id: NOASSERTION`, licence "Other". Corporate policy scanners and
   dependency-review bots read that field and frequently block on it. The declared
   `license = "Apache-2.0"` in `pyproject.toml` never changed; only the file did.
+
+- **The ROADMAP milestone called "1.0" was a mis-render of "0.10"**, and read as a
+  major release this package has not earned. Renamed across 25 references in 11
+  files. Not renamed, because they are not the milestone: the `release/1.0*`
+  branch names (a doc recording which branch it was written against stays true
+  only if left alone), the QSR spec's `v0 → v1` (a spec version, legitimately v1),
+  and `gguf<1.0` / `accelerate>=1.0` / `0.1.0`, which are different numbers.
 
 ## 0.5.3 — merged, never published
 
