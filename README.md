@@ -89,6 +89,41 @@ detection sensitivity" until the recorded sensitivity control passes); and
 paste-ready model-card section with the drift table, provenance, and the exact
 serve command.
 
+**Check a reproduction.** `quantfit reproduce` decides whether one report
+reproduces another under the QSR v0 cross-hardware tolerance, so "it reproduced"
+is a verdict from code rather than an eyeball comparison:
+
+```bash
+quantfit reproduce --reference ref.json --candidate t4.json --out record.json
+```
+
+It compares measurement identity, verdict class, denominators, flip counts and
+per-zone refusals, quoting **both** sides' numbers for every predicate. Exit 0
+means reproduced, 3 means the tolerance was not met, 4 means nothing was
+compared (the two files are not the same measurement, or nothing was measured),
+2 is operational. Within-hardware determinism (T0) is a property of three
+replicate runs and cannot be derived from two reports, so pass them explicitly
+with `--t0-reference` and `--t0-candidate`; without that evidence the outcome is
+never the gate pass.
+
+**Audit the docs against the code.** `quantfit audit` checks that this repo's
+prose still describes the shipped code — CLI commands and flags, `file:symbol`
+citations, exit codes, quoted constants, and schema field names:
+
+```bash
+quantfit audit                 # exit 0 = clean, 3 = drift found, 2 = operational
+quantfit audit --json out.json # the findings as data, for CI
+```
+
+It is wired into CI, so a doc that drifts from the code fails the build. Use
+`--root` to audit a checkout elsewhere.
+
+**The rest of the surface.** `quantfit list` prints the supported method ×
+scheme matrix. `quantfit calibrate sheet` / `quantfit calibrate ingest` build a
+blinded judge-calibration labeling sheet from a `--capture` file and ingest the
+filled labels into a per-arm judge-error report — machinery for ROADMAP 0.6,
+which starts only on the 0.5 GO decision.
+
 **Gate it in CI.** `quantfit gate` is the pre-release check — and it refuses to
 promise resolution it does not have:
 

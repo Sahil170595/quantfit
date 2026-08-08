@@ -172,6 +172,38 @@ def _build_parser() -> argparse.ArgumentParser:
     pg.add_argument("--report", default=None, metavar="PATH", help="also write the schema-v2 drift report")
     pg.add_argument("--out", default=None, metavar="PATH", help="write the gate decision artifact JSON")
 
+    pr = sub.add_parser(
+        "reproduce",
+        help="is this report a reproduction of that one? applies the QSR v0 cross-hardware tolerance "
+        "(exit 0 = reproduced, 3 = breach or not-met, 4 = nothing was compared, 2 = operational error)",
+    )
+    pr.add_argument("--reference", required=True, metavar="PATH", help="the reference schema-v2 drift report")
+    pr.add_argument("--candidate", required=True, metavar="PATH", help="the report claiming to reproduce it")
+    pr.add_argument("--out", default=None, metavar="PATH", help="write the comparison record JSON")
+    pr.add_argument(
+        "--t0-reference",
+        nargs="+",
+        default=None,
+        metavar="REPORT",
+        help="within-hardware replicate reports for the REFERENCE side (3 per the protocol). T0 is not "
+        "computable from two reports, so without this the outcome can never be the gate pass",
+    )
+    pr.add_argument(
+        "--t0-candidate",
+        nargs="+",
+        default=None,
+        metavar="REPORT",
+        help="within-hardware replicate reports for the CANDIDATE side",
+    )
+
+    pau = sub.add_parser(
+        "audit",
+        help="docs=code parity: do the docs still describe the code? "
+        "(exit 0 = clean, 3 = drift found, 2 = operational error)",
+    )
+    pau.add_argument("--root", default=None, metavar="DIR", help="repo root (default: the one containing quantfit)")
+    pau.add_argument("--json", default=None, metavar="PATH", help="also write the findings as JSON")
+
     pq = sub.add_parser("quantize", parents=[tok], help="quantize a model")
     pq.add_argument("--model", required=True, help="HF model id (the full-precision base)")
     pq.add_argument("--method", required=True, choices=tuple(METHODS))
@@ -325,6 +357,33 @@ def _dispatch(args: argparse.Namespace) -> int:
             )
         print(f"calibration report -> {args.out} (counts only, no completion text)")
         return 0
+
+    if args.cmd == "reproduce":
+        from quantfit.reproduce import compare, within_hardware_identical
+
+        # Replicate sets are turned into T0 results HERE rather than inside compare():
+        # T0 is a within-hardware property of three runs, and keeping the conversion at
+        # the boundary is what lets the artifact record which files supplied it.
+        t0_ref = within_hardware_identical(args.t0_reference) if args.t0_reference else None
+        t0_cand = within_hardware_identical(args.t0_candidate) if args.t0_candidate else None
+        decision = compare(args.reference, args.candidate, args.out, t0_reference=t0_ref, t0_candidate=t0_cand)
+        print(decision["headline"])
+        if args.out:
+            print(f"comparison record -> {args.out}")
+        return decision["exit_code"]
+
+    if args.cmd == "audit":
+        from quantfit.audit import audit, summarize
+
+        result = audit(args.root)
+        print(summarize(result))
+        if args.json:
+            import json
+            from pathlib import Path
+
+            Path(args.json).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            print(f"audit findings -> {args.json}")
+        return result["exit_code"]
 
     if args.cmd == "quantize":
         from quantfit.quantize import CannotQuantize, push, quantize

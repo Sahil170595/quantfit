@@ -66,6 +66,36 @@ jobs:
           quantfit list
           python -c "import quantfit; print('quantfit', quantfit.__version__)"
 
+      # ROADMAP 1.0's gate clause, as a script rather than a promise: every command
+      # the README advertises must exist in the INSTALLED CLI, and the clean-venv
+      # subset must actually run. Commands needing a GPU, the network or multi-GB
+      # weights are reported UNRUN with reasons — this gate covers existence plus
+      # that subset only, and says so.
+      - name: README quickstart gate
+        shell: bash
+        run: python tools/quickstart_check.py
+
+  # docs=code parity, enforced. Prose in this repo makes a very large number of
+  # checkable claims (flags, exit codes, file:symbol citations, quoted constants,
+  # schema fields); several drifted silently during development. A doc that no
+  # longer describes the code now fails the build instead of aging quietly.
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # The auditor walks the real argparse parser and reads modules with ast, so it
+      # needs the package importable — but no torch: it must stay a cheap CI step.
+      - run: pip install -e . --no-deps
+
+      - name: docs=code parity audit
+        run: python -m quantfit.cli audit
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -82,7 +112,7 @@ jobs:
       - run: pip install "ruff>=0.16,<0.17"
 
       - name: Ruff check
-        run: ruff check quantfit tests
+        run: ruff check quantfit tests tools
 
       - name: Ruff format
         run: ruff format --check quantfit tests

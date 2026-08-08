@@ -1,5 +1,7 @@
 """CLI parser + dispatch — light commands only (no torch needed)."""
 
+import json
+
 import pytest
 
 from quantfit.cli import _build_parser, main
@@ -27,6 +29,8 @@ def test_parser_accepts_every_command():
         ["calibrate", "ingest", "--sheet", "s.labels.csv", "--key", "k.labelkey.json", "--out", "cal.json"],
         ["gate", "--baseline", "a", "--quant", "b", "--tier", "smoke"],
         ["gate", "--baseline", "a", "--quant", "b", "--threshold", "30"],
+        ["reproduce", "--reference", "a.json", "--candidate", "b.json"],
+        ["audit"],
         ["quantize", "--model", "m", "--method", "awq", "--out", "o"],
     ]
     for argv in cases:
@@ -234,6 +238,61 @@ def test_gate_exit_codes_are_relayed_verbatim(monkeypatch):
 
     monkeypatch.setattr(g, "run_gate", _operational)
     assert main(["gate", "--baseline", "a", "--quant", "b", "--tier", "smoke"]) == 2
+
+
+def test_reproduce_relays_outcome_exit_codes_and_builds_t0_from_replicates(monkeypatch, capsys):
+    # The CLI turns replicate FILES into a T0 result at the boundary; compare() takes
+    # the result. Every outcome's code is relayed verbatim — 3 and 4 are not passes.
+    import quantfit.reproduce as rp
+
+    seen = {}
+
+    def fake_t0(paths):
+        seen.setdefault("t0_calls", []).append(list(paths))
+        return {"pass": True, "n_replicates": len(paths), "meets_protocol_replicate_count": len(paths) >= 3}
+
+    monkeypatch.setattr(rp, "within_hardware_identical", fake_t0)
+    for code in (0, 3, 4):
+        monkeypatch.setattr(rp, "compare", lambda *a, _c=code, **k: {"headline": "h", "exit_code": _c})
+        assert main(["reproduce", "--reference", "a.json", "--candidate", "b.json"]) == code
+
+    def _capture(reference, candidate, out, *, t0_reference=None, t0_candidate=None):
+        seen["t0_reference"] = t0_reference
+        seen["t0_candidate"] = t0_candidate
+        return {"headline": "h", "exit_code": 0}
+
+    monkeypatch.setattr(rp, "compare", _capture)
+    assert main(["reproduce", "--reference", "a.json", "--candidate", "b.json"]) == 0
+    assert seen["t0_reference"] is None and seen["t0_candidate"] is None  # absent, not fabricated
+
+    assert (
+        main(["reproduce", "--reference", "a.json", "--candidate", "b.json", "--t0-reference", "r1", "r2", "r3"]) == 0
+    )
+    assert seen["t0_reference"]["meets_protocol_replicate_count"] is True
+    assert seen["t0_candidate"] is None
+    assert seen["t0_calls"][-1] == ["r1", "r2", "r3"]
+
+    def _operational(*a, **k):
+        raise rp.ReproduceError("unreadable report a.json")
+
+    monkeypatch.setattr(rp, "compare", _operational)
+    assert main(["reproduce", "--reference", "a.json", "--candidate", "b.json"]) == 2
+
+
+def test_audit_relays_its_exit_code_and_can_write_json(monkeypatch, tmp_path, capsys):
+    import quantfit.audit as au
+
+    result = {"exit_code": 3, "ok": False, "counts": {"findings": 1, "errors": 1, "warnings": 0}}
+    monkeypatch.setattr(au, "audit", lambda root=None: result)
+    monkeypatch.setattr(au, "summarize", lambda r, limit=0: "drift: 1 error(s)")
+
+    out = tmp_path / "findings.json"
+    assert main(["audit", "--json", str(out)]) == 3  # drift fails a build, it does not warn
+    assert "drift: 1 error(s)" in capsys.readouterr().out
+    assert json.loads(out.read_text(encoding="utf-8"))["counts"]["errors"] == 1
+
+    monkeypatch.setattr(au, "audit", lambda root=None: {**result, "exit_code": 0, "ok": True})
+    assert main(["audit"]) == 0
 
 
 def test_calibrate_subcommands_dispatch_and_refuse_operationally(monkeypatch, capsys):
