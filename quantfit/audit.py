@@ -17,7 +17,8 @@ Five checks, each answering a question a reader would otherwise have to answer b
                            `file:symbol` MUST resolve (error). `file:line` is fragile by
                            construction — any edit above the line moves it — so it is a
                            warning class, and when the citing sentence quotes the line's
-                           text the quote is checked against the file too.
+                           text the quote is checked against the file too. Fenced blocks
+                           are illustrations, not citations, and are not scanned.
   3. EXIT-CODE PARITY    — do the exit codes documented in `spec/qsr-v0.md` §5.7/§5.8,
                            `docs/ci-integration.md` and `README.md` agree with the
                            constants the modules define, with each other, and with what
@@ -41,10 +42,46 @@ can render it, diff it, or fail a build on it. Exit mapping for a CLI wrapper:
 `EXIT_OPERATIONAL` (2) `AuditError` — the same 0/3/2 shape as every other verdict
 surface in this package (QSR v0 §5.7), so a CI script does not learn a second dialect.
 
-Anti-vacuity: every check reports a `coverage` block (docs read, invocations parsed,
-citations seen, claims matched). An auditor that silently inspects nothing is worse than
-no auditor, because it converts "unchecked" into "checked and clean" — so the numbers
-that would expose that are part of the result, not a debug aid.
+`audit(root)` audits the checkout it was imported from, and refuses any other. Three of
+the five checks read the CLI parser and the constant targets by IMPORT while the document
+legs read `root`; pointing them at different trees would compare one repo's prose against
+another repo's code. That is `AuditError`, not a verdict (`_assert_same_checkout`).
+
+Anti-vacuity, which is this module's main structural risk and gets three mechanisms:
+
+  * Every check reports a `coverage` block (docs read, invocations parsed, citations
+    seen, claims matched, how wide the accepted set was, how much was skipped and why).
+  * A `ConstantClaim` that matched NOTHING anywhere in the corpus emits a
+    `claim_never_asserted` WARNING. A claim that matched nothing verified nothing, and
+    reporting it only as a coverage number converts "unchecked" into "checked and clean"
+    for exactly the pins — judge revisions, llama.cpp commits — where a silent
+    substitution is the supply-chain failure the check exists to notice. It is a warning
+    rather than an error because nothing disagrees: no document states the value at all,
+    so the fix is corpus work, not a broken promise. A real mismatch stays an ERROR, and
+    that asymmetry is the reason there are two severities.
+  * "Documented" is keyed by COMMAND, never by flag name alone. `--report`, `--out` and
+    `--model` exist on most commands here, so a global name check called a brand-new flag
+    documented the moment its spelling appeared anywhere.
+
+COUNTER-EXAMPLE MARKERS. Documents sometimes have to write the very thing this auditor
+rejects: a typo shown as a typo, a key an amendment records as withdrawn, a hypothetical
+citation in a design sketch. Prose cannot say "this token is an example, not a claim", so
+there is a syntax for it — an HTML comment, invisible in rendered markdown:
+
+    <!-- audit: ignore -->              every check skips this line
+    <!-- audit: historical -->          constant values on this line are history, not drift
+    <!-- audit: not-a-field tok ... -->  those exact tokens are not schema fields
+
+`ignore` and `historical` cover the line they sit on, plus the next non-blank line when
+the marker is alone on its line (comment above the thing, the shape a writer reaches for).
+`not-a-field` is token-scoped and applies anywhere in the declaring document, because the
+token and the sentence explaining it are rarely on the same line. There is deliberately NO
+file-level "skip this document": an opt-out that big is a place drift hides. Every use is
+counted in `coverage`, so a reviewer can see how much the auditor was told not to read.
+
+The right fix for a false positive is a marker on the counter-example — never softening
+the sentence until the scanner stops noticing it, which silently trades a document's
+clarity for a green check and leaves nothing to review.
 """
 
 from __future__ import annotations
@@ -82,10 +119,17 @@ CHECKS = (CHECK_COMMANDS, CHECK_CITATIONS, CHECK_EXIT_CODES, CHECK_CONSTANTS, CH
 
 # The corpus. Command claims live in the user-facing surfaces; citations live in the
 # specs and design docs. One tuple each so extending the audit is a one-line edit.
-COMMAND_DOC_GLOBS = ("README.md", "docs/*.md", "spec/*.md")
-CITATION_DOC_GLOBS = ("README.md", "docs/*.md", "spec/*.md")
-EXIT_CODE_DOC_GLOBS = ("README.md", "docs/ci-integration.md", "spec/qsr-v0.md")
-CONSTANT_DOC_GLOBS = ("README.md", "docs/*.md", "spec/*.md")
+#
+# The root-level policy documents are in it too. They make the same kind of claim as the
+# rest — CONTRIBUTING.md shows commands, SECURITY.md and CHANGELOG.md cite files and quote
+# constants, ROADMAP.md names both — and the cost of admitting them was measured before
+# they were added rather than assumed: zero new errors on today's tree. A corpus that
+# excludes the documents a newcomer reads first is a corpus chosen to stay green.
+_ROOT_DOCS = ("README.md", "CONTRIBUTING.md", "SECURITY.md", "CHANGELOG.md", "ROADMAP.md")
+COMMAND_DOC_GLOBS = (*_ROOT_DOCS, "docs/*.md", "spec/*.md")
+CITATION_DOC_GLOBS = (*_ROOT_DOCS, "docs/*.md", "spec/*.md")
+EXIT_CODE_DOC_GLOBS = ("README.md", "CONTRIBUTING.md", "docs/ci-integration.md", "spec/qsr-v0.md")
+CONSTANT_DOC_GLOBS = (*_ROOT_DOCS, "docs/*.md", "spec/*.md")
 
 # Directories that hold build output, caches or vendored copies: a citation resolving
 # into `build/` would authenticate a stale copy of the file it means.
@@ -151,28 +195,148 @@ def _resolve_root(root: str | Path | None) -> Path:
     return path
 
 
+def _assert_same_checkout(root: Path) -> None:
+    """`root` must be the checkout whose `quantfit` package is the importable one.
+
+    Three of the five checks read the CLI parser and the constant targets by IMPORT, and
+    two read documents from `root`. If those are different trees the audit compares one
+    repo's prose against another repo's code and reports the answer as if it were about
+    `root` — a wrong answer wearing the right shape, which is worse than no answer.
+
+    The contract is enforced rather than removed: making all five root-relative would mean
+    exec'ing an arbitrary tree's `cli.py` to walk its parser, which is a larger promise
+    (and a worse one) than "audit the checkout you are running from". A cross-checkout
+    request is therefore operational — `AuditError`, exit 2 — never a verdict.
+    """
+    try:
+        import quantfit
+    except ImportError as exc:  # pragma: no cover - the package is importing this module
+        raise AuditError(f"cannot import the quantfit package: {exc}") from exc
+    package = Path(quantfit.__file__ or "").resolve().parent
+    installed = package.parent
+    if installed != root:
+        raise AuditError(
+            f"audit root {root} is not the checkout being imported ({installed}): "
+            "the parser, exit-code constants and constant-claim targets are read by import, "
+            "so auditing a different tree would compare its prose against this tree's code"
+        )
+
+
+# --- counter-example markers ------------------------------------------------------
+# A document sometimes has to WRITE a thing this auditor is built to reject: a typo shown
+# as a typo, a key an amendment records as withdrawn, a hypothetical citation. Prose has
+# no way to say "this token is an example, not a claim", so the auditor gives it one. The
+# marker is an HTML comment (invisible in rendered markdown), explicit (it names what it
+# exempts), and scoped (a line, or one named token) — never a file-level "skip this doc",
+# which is how an opt-out becomes a place drift hides.
+_MARKER = re.compile(r"<!--\s*audit:\s*(?P<directive>[a-z][a-z-]*)(?P<args>[^>]*?)-->")
+_MARKER_DIRECTIVES = frozenset({"ignore", "not-a-field", "historical"})
+
+
 @dataclass(frozen=True)
 class _Doc:
     rel: str
     text: str
     lines: tuple[str, ...]
     starts: tuple[int, ...]  # byte-free character offset of each line start, for offset->line
+    fenced: frozenset[int] = frozenset()  # 1-indexed lines inside a ``` / ~~~ block
+    ignored: frozenset[int] = frozenset()  # `<!-- audit: ignore -->` / `historical` lines
+    not_fields: frozenset[str] = frozenset()  # tokens `<!-- audit: not-a-field X -->` exempts
 
     def line_of(self, offset: int) -> int:
         return bisect.bisect_right(self.starts, offset)
 
+    def suppressed(self, line: int) -> bool:
+        """True when line `line` carries (or is covered by) an ignore-class marker."""
+        return line in self.ignored
+
+
+def _markers(lines: Sequence[str]) -> tuple[frozenset[int], frozenset[str]]:
+    """(ignored 1-indexed lines, not-a-field tokens) declared by markers in `lines`.
+
+    `<!-- audit: ignore -->` and `<!-- audit: historical -->` exempt the line they sit on;
+    when the marker is ALONE on its line it also exempts the next non-blank line, which is
+    the shape a writer reaches for (comment above the thing, not wedged inside it).
+    `<!-- audit: not-a-field a b -->` exempts those exact tokens from the schema-field
+    check, anywhere in the declaring document — token-scoped rather than line-scoped
+    because the token and the sentence explaining it are rarely on the same line.
+    """
+    ignored: set[int] = set()
+    tokens: set[str] = set()
+    for number, raw in enumerate(lines, start=1):
+        matches = list(_MARKER.finditer(raw))
+        if not matches:
+            continue
+        alone = not _MARKER.sub("", raw).strip()
+        for match in matches:
+            directive = match.group("directive")
+            if directive not in _MARKER_DIRECTIVES:
+                continue  # an unknown directive is a typo in the marker, not an opt-out
+            if directive == "not-a-field":
+                tokens.update(match.group("args").split())
+                continue
+            ignored.add(number)
+            if alone:
+                for follower in range(number + 1, len(lines) + 1):
+                    if lines[follower - 1].strip():
+                        ignored.add(follower)
+                        break
+    return frozenset(ignored), frozenset(tokens)
+
+
+def _fenced_lines(lines: Sequence[str]) -> frozenset[int]:
+    """1-indexed lines inside a fenced block, the fence lines themselves included.
+
+    The same fence state machine `_code_snippets` runs, exposed as a set so the checks
+    that scan RAW text — citations, headings — can be as fence-aware as the command check
+    already is. An illustrative `file.py:symbol` inside a ```` ``` ```` block is an
+    example of a citation, not one, and reading it as a claim is the auditor inventing
+    drift out of a document's own teaching material.
+    """
+    out: set[int] = set()
+    in_fence = False
+    for number, raw in enumerate(lines, start=1):
+        if _FENCE.match(raw):
+            out.add(number)
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            out.add(number)
+    return frozenset(out)
+
+
+def _read_text(path: Path) -> str:
+    """`path` as utf-8, or `AuditError`.
+
+    Both failure modes are operational and both are caught at every read site: a missing
+    file raises `OSError`, but a document saved as cp1252 raises `UnicodeDecodeError`
+    (a `ValueError`, not an `OSError`), and an uncaught one would escape `audit()` as a
+    traceback — making the stated exit-2 contract false for exactly the document whose
+    encoding nobody checked.
+    """
+    try:
+        return path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise AuditError(f"cannot read {path}: {exc}") from exc
+
 
 def _load_doc(root: Path, path: Path) -> _Doc:
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError as exc:  # unreadable doc: the audit cannot be trusted, so it refuses
-        raise AuditError(f"cannot read {path}: {exc}") from exc
+    text = _read_text(path)
     lines = text.splitlines()
     starts, cursor = [], 0
     for line in lines:
         starts.append(cursor)
         cursor += len(line) + 1
-    return _Doc(rel=path.relative_to(root).as_posix(), text=text, lines=tuple(lines), starts=tuple(starts))
+    ignored, not_fields = _markers(lines)
+    return _Doc(
+        rel=path.relative_to(root).as_posix(),
+        text=text,
+        lines=tuple(lines),
+        starts=tuple(starts),
+        fenced=_fenced_lines(lines),
+        ignored=ignored,
+        not_fields=not_fields,
+    )
 
 
 def _load_docs(root: Path, globs: Sequence[str]) -> tuple[_Doc, ...]:
@@ -307,6 +471,27 @@ def _add_target(target: ast.AST, prefix: str, out: set[str]) -> None:
             _add_target(element, prefix, out)
 
 
+def _imported_names(path: Path) -> frozenset[str]:
+    """Names a module imports, at module level or inside a function.
+
+    Part of the module's vocabulary but NOT of its symbol table: a document naming
+    `wilson_interval` beside `screen.py`'s summary is naming the function screen.py calls,
+    which is correct writing, while a citation `screen.py:wilson_interval` would be wrong
+    (the function is defined elsewhere). The two questions get two indexes.
+    """
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError, ValueError):
+        return frozenset()
+    out: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            for alias in node.names:
+                out.add((alias.asname or alias.name).split(".")[0])
+                out.add(alias.name.split(".")[-1])
+    return frozenset(out)
+
+
 def _emitted_keys(path: Path) -> frozenset[str]:
     """String keys a module emits into JSON-ish objects.
 
@@ -355,7 +540,13 @@ _INVOCATION = re.compile(r"(?<!from )(?<!import )(?<![\w./\\-])quantfit\s+(?=[a-
 # ...and only where a shell would start a command. `ruff check quantfit tests` passes the
 # package directory to another tool; reading its next word as a subcommand invents a
 # command that never existed, which is the one mistake this check cannot afford.
-_COMMAND_POSITION = re.compile(r"(?:^|[$|&;(<>]|\d\.\s|[$#]\s)\s*$")
+#
+# A runner prefix still leaves `quantfit` in command position: `uv run quantfit gate ...`
+# is the same invocation, and the docs use it. Only runners that take a command as their
+# tail are listed — `ruff`, `pytest` and friends take FILES there, which is precisely the
+# confusion the rule above exists to prevent.
+_WRAPPERS = r"(?:uv\s+run|uvx|poetry\s+run|pipx\s+run|pdm\s+run|hatch\s+run|rye\s+run|nox\s+-s\s+\S+\s+--)"
+_COMMAND_POSITION = re.compile(r"(?:^|[$|&;(<>]|\d\.\s|[$#]\s)\s*(?:" + _WRAPPERS + r"\s+)?$")
 _FLAG = re.compile(r"(--[A-Za-z][A-Za-z0-9-]*)")
 _NOT_A_COMMAND = frozenset({"import", "as", "install", "pip"})
 # argparse adds these to every parser and they are not part of anyone's documented
@@ -445,6 +636,8 @@ def _parse_invocations(docs: Sequence[_Doc], commands: Iterable[str]) -> list[_I
     out: list[_Invocation] = []
     for doc in docs:
         for line, snippet in _code_snippets(doc):
+            if doc.suppressed(line):
+                continue
             for match in _INVOCATION.finditer(snippet):
                 if not _COMMAND_POSITION.search(snippet[: match.start()]):
                     continue
@@ -485,10 +678,21 @@ def _check_commands(root: Path) -> tuple[list[Finding], dict]:
     findings: list[Finding] = []
 
     documented_commands: set[str] = set()
-    documented_flags: set[str] = set()
-    for doc in docs:  # the global "documented anywhere" set: any flag in any code span
-        for _, snippet in _code_snippets(doc):
-            documented_flags.update(_FLAG.findall(snippet))
+    # Which flags are documented FOR WHICH COMMAND, taken from the parsed invocations. The
+    # corpus-global set below is kept, but only to grade severity: keying "documented" by
+    # name alone meant a brand-new flag on command X counted as documented the moment the
+    # same string appeared on any other command — and `--report`, `--out` and `--model` are
+    # on nearly every command in this CLI, so the global set said "documented" for flags no
+    # document had ever shown on the command that grew them.
+    flags_by_command: dict[str, set[str]] = {}
+    corpus_flags: set[str] = set()
+    marked = 0
+    for doc in docs:
+        for line, snippet in _code_snippets(doc):
+            if doc.suppressed(line):
+                marked += 1
+                continue
+            corpus_flags.update(_FLAG.findall(snippet))
 
     top_level = sorted(c for c in surface if " " not in c)
     for inv in invocations:
@@ -509,6 +713,7 @@ def _check_commands(root: Path) -> tuple[list[Finding], dict]:
         documented_commands.add(inv.command)
         if " " in inv.command:  # `quantfit calibrate sheet` documents `calibrate` too
             documented_commands.add(inv.command.split(" ", 1)[0])
+        flags_by_command.setdefault(inv.command, set()).update(inv.flags)
         if inv.positional is not None:
             choices = [c for c in spec["positionals"].values() if c]
             allowed = {value for group in choices for value in group}
@@ -551,22 +756,35 @@ def _check_commands(root: Path) -> tuple[list[Finding], dict]:
                     actual=f"no invocation in {', '.join(COMMAND_DOC_GLOBS)}",
                 )
             )
+        shown_here = flags_by_command.get(command, set())
         for option, primary in sorted(surface[command]["options"].items()):
-            if option in documented_flags:
+            if option in shown_here:
                 continue
             alias = option != primary
+            # Three states, three severities, and the middle one is the whole point of
+            # keying by command. A flag nothing in the corpus mentions is a surface users
+            # cannot discover: error. A flag the corpus shows on OTHER commands but never
+            # on this one is discoverable but its availability here is undemonstrated —
+            # real, worth a line, not a build-breaker. A legacy alias nothing advertises is
+            # a compatibility shim, not a broken promise.
+            if alias:
+                kind, severity = "undocumented_flag_alias", SEVERITY_WARNING
+                actual = f"no mention in {', '.join(COMMAND_DOC_GLOBS)}"
+            elif option in corpus_flags:
+                kind, severity = "flag_undocumented_for_command", SEVERITY_WARNING
+                actual = f"documented elsewhere, but no `quantfit {command}` invocation shows it"
+            else:
+                kind, severity = "undocumented_flag", SEVERITY_ERROR
+                actual = f"no mention in {', '.join(COMMAND_DOC_GLOBS)}"
             findings.append(
                 Finding(
                     check=CHECK_COMMANDS,
-                    kind="undocumented_flag_alias" if alias else "undocumented_flag",
-                    # A legacy alias that no document advertises is a compatibility
-                    # shim, not a broken promise: warn. A primary flag nothing documents
-                    # is a surface users cannot discover: error.
-                    severity=SEVERITY_WARNING if alias else SEVERITY_ERROR,
+                    kind=kind,
+                    severity=severity,
                     doc="",
                     line=0,
                     claim=f"cli defines `quantfit {command} {option}`" + (f" (alias of {primary})" if alias else ""),
-                    actual=f"no mention in {', '.join(COMMAND_DOC_GLOBS)}",
+                    actual=actual,
                 )
             )
 
@@ -575,7 +793,9 @@ def _check_commands(root: Path) -> tuple[list[Finding], dict]:
         "cli_commands": sorted(surface),
         "invocations_parsed": len(invocations),
         "commands_documented": sorted(documented_commands),
-        "flags_documented": len(documented_flags),
+        "flags_documented_by_command": {k: sorted(v) for k, v in sorted(flags_by_command.items())},
+        "flags_in_corpus": len(corpus_flags),
+        "code_spans_marked_ignore": marked,
     }
     return findings, coverage
 
@@ -631,10 +851,23 @@ def _check_citations(root: Path) -> tuple[list[Finding], dict]:
     findings: list[Finding] = []
     counts = {"symbol": 0, "line": 0, "quoted": 0}
 
+    fenced = skipped = 0
     for doc in docs:
         for match in _CITATION.finditer(doc.text):
             raw_path, target = match.group("path"), match.group("target")
             line = doc.line_of(match.start())
+            # Fenced blocks are illustrations. `{"report": "reports/run.json:sha256"}` in a
+            # sample payload, a hypothetical `module.py:new_symbol` in a design sketch, a
+            # traceback pasted to show what a failure looks like — none of those is the
+            # document citing anything, and the command check has been fence-aware since it
+            # was written for exactly this reason. Reading them raw made an ERROR out of a
+            # document's teaching material.
+            if line in doc.fenced:
+                fenced += 1
+                continue
+            if doc.suppressed(line):
+                skipped += 1
+                continue
             claim = match.group(0)
             candidates = _resolve_cited(root, index, all_files, raw_path)
             is_line = target[0].isdigit()
@@ -663,6 +896,11 @@ def _check_citations(root: Path) -> tuple[list[Finding], dict]:
         "symbol_citations": counts["symbol"],
         "line_citations": counts["line"],
         "quoted_line_citations": counts["quoted"],
+        # Not decoration: an opt-out nobody can count is an opt-out that can grow without
+        # anyone noticing. These two numbers are how a reviewer sees how much of the
+        # corpus the auditor declined to read, and why.
+        "citations_in_fences": fenced,
+        "citations_marked_ignore": skipped,
         "repo_files_indexed": len(all_files),
     }
     return findings, coverage
@@ -692,7 +930,7 @@ def _check_symbol_citation(
             try:
                 if target in path.read_text(encoding="utf-8"):
                     return []
-            except OSError:
+            except (OSError, UnicodeDecodeError):
                 unparseable.append(candidate)
     if unparseable and len(unparseable) == len(candidates):
         return [
@@ -750,7 +988,7 @@ def _check_line_citation(
     for candidate in candidates:
         try:
             body = (root / candidate).read_text(encoding="utf-8").splitlines()
-        except OSError:
+        except (OSError, UnicodeDecodeError):
             misses.append(f"{candidate} is unreadable")
             continue
         if last > len(body) or first < 1:
@@ -940,8 +1178,8 @@ def _dispatch_returns(root: Path) -> dict[str, set[int]]:
     """Literal `return <int>` values per `if args.cmd == "<name>"` branch of `cli._dispatch`."""
     source = root / "quantfit" / "cli.py"
     try:
-        tree = ast.parse(source.read_text(encoding="utf-8"))
-    except (OSError, SyntaxError) as exc:
+        tree = ast.parse(_read_text(source))
+    except SyntaxError as exc:
         raise AuditError(f"cannot parse {source}: {exc}") from exc
     out: dict[str, set[int]] = {}
     for node in ast.walk(tree):
@@ -1236,6 +1474,21 @@ CONSTANT_CLAIMS: tuple[ConstantClaim, ...] = (
         names=("CURRENT_SPEC_VERSION",),
     ),
     ConstantClaim(
+        # The package version is the value most likely to be quoted into a document and
+        # then left behind: it moves every release, while the sentence quoting it does not.
+        # `spec/qsr-v1-freeze-plan.md` asserted CITATION.cff's `version: "0.5.2"` twice,
+        # marked **[V]**, after the file had moved to 0.5.3 — found by a human reviewer, not
+        # by this auditor, because no claim covered it. The patterns cover the two forms the
+        # corpus actually uses: CITATION.cff's `version: "X"` quoted into prose, and
+        # pyproject's `version = "X"`.
+        id="package_version",
+        target="quantfit:__version__",
+        value_re=r"\d+\.\d+\.\d+",
+        names=("__version__", "quantfit.__version__"),
+        patterns=(r"`?version:\s*\"(\d+\.\d+\.\d+)\"`?", r"`?version\s*=\s*\"(\d+\.\d+\.\d+)\"`?"),
+        style="exact",
+    ),
+    ConstantClaim(
         id="reproduce_spec_version",
         target="quantfit.reproduce:SPEC_VERSION",
         value_re=r"v\d+",
@@ -1419,9 +1672,12 @@ def _check_constants(root: Path) -> tuple[list[Finding], dict]:
         value = _load_attribute(claim.target)
         accepted = _renderings(value, claim.style)
         shown = ", ".join(sorted(accepted)) if claim.style == "members" else str(value)
-        matched = mismatched = named_only = 0
+        matched = mismatched = named_only = scoped_out = 0
         for doc in docs:
-            for line, found in _claim_occurrences(doc, claim):
+            for line, found, scoped in _claim_occurrences(doc, claim):
+                if scoped:
+                    scoped_out += 1
+                    continue
                 if found is None:
                     named_only += 1
                     continue
@@ -1440,6 +1696,34 @@ def _check_constants(root: Path) -> tuple[list[Finding], dict]:
                         actual=f"{claim.target} = {shown}",
                     )
                 )
+        if matched == 0 and mismatched == 0:
+            # A claim that matched nothing verified NOTHING. The module's anti-vacuity
+            # argument applies to it one claim at a time: leaving it as a coverage number
+            # converts "unchecked" into "checked and clean" for exactly the pins — judge
+            # revisions, llama.cpp commits, cache protocol versions — where a silent
+            # substitution is the supply-chain failure this check exists to notice.
+            #
+            # WARNING, not ERROR, and the difference is not softness. An error here means
+            # "a document and the code disagree; someone must edit one of them". Nothing
+            # disagrees: no document states this value at all. The fix is to document it
+            # (or to delete a claim about a constant no document quotes), which is work on
+            # the corpus, not a broken promise in it — so it must be visible without being
+            # able to fail a build whose docs are merely quiet. A real mismatch is still an
+            # error, and that asymmetry is the whole point of having two severities.
+            findings.append(
+                Finding(
+                    check=CHECK_CONSTANTS,
+                    kind="claim_never_asserted",
+                    severity=SEVERITY_WARNING,
+                    doc="",
+                    line=0,
+                    claim=f"{claim.id} ({claim.target} = {shown})",
+                    actual=(
+                        f"no document in {', '.join(CONSTANT_DOC_GLOBS)} states this value"
+                        + (f"; named without one {named_only}x" if named_only else "")
+                    ),
+                )
+            )
         coverage[claim.id] = {
             "target": claim.target,
             "asserted_ok": matched,
@@ -1447,6 +1731,8 @@ def _check_constants(root: Path) -> tuple[list[Finding], dict]:
             # Occurrences that name the constant without stating a value. Reported so a
             # claim whose patterns never fire is visible as unchecked rather than clean.
             "named_without_value": named_only,
+            # ...and occurrences a version history or an explicit marker put out of scope.
+            "scoped_out_as_historical": scoped_out,
         }
     return findings, coverage
 
@@ -1454,19 +1740,124 @@ def _check_constants(root: Path) -> tuple[list[Finding], dict]:
 # A name asserts its value when only separators — or a bare copula — stand between them.
 # Any other word ends the run, which is what keeps "`X` in `module.py`" and "`X` namespace,
 # while ..." out of the check while still reading "`X` is 4" as the claim it is.
-_ASSERT_SEP = r"[`\s*|:=@>→—–\-]{0,10}(?:(?:is|are)\s+[`\"'(]{0,2})?"
+#
+# Quote characters and `/` are separators too, and leaving them out silently un-checked
+# the two most common shapes in this corpus: `LLAMACPP_TAG = "b9817"` (a source line
+# quoted into a document) and the `NAME / OTHER | value / value` pairing that the spec's
+# own "Appendix A — Normative constants (verified against code)" table is built from. A
+# separator class narrower than the corpus's punctuation is a check that reports clean on
+# the documents it cannot read.
+_ASSERT_SEP = r"""[`\s*|:=@>→—–/"'“”\-]{0,10}(?:(?:is|are)\s+[`"'(]{0,2})?"""
+
+# Prose recording what a constant USED to be. A version history, an amendment, a
+# "previously" clause: the document and the code do not disagree there, the document is
+# describing the disagreement's history on purpose, and flagging it would make every
+# changelog a finding — the fastest way to get an auditor switched off. Deliberately
+# narrow, and joined by the explicit `<!-- audit: historical -->` marker for the cases
+# prose cannot signal on its own.
+_HISTORICAL_LINE = re.compile(
+    r"\b(?:previously|formerly|superseded|superseding|used to (?:be|read|say|carry)|"
+    r"no longer|deprecat\w*|withdrawn|historical|before\s+(?:v?0\.\d|quantfit\s+\d))\b",
+    re.IGNORECASE,
+)
+# Headings under which every value is a record of the past by construction.
+_HISTORICAL_HEADINGS = ("change log", "changelog", "version history", "revision history", "amendment")
 
 
-def _claim_occurrences(doc: _Doc, claim: ConstantClaim) -> Iterator[tuple[int, str | None]]:
-    """(line, stated value) per occurrence; the value is None when the doc only names it."""
+def _historical_lines(doc: _Doc) -> frozenset[int]:
+    """Lines whose constant values are history, not current claims.
+
+    Two sources, both explicit: a line carrying one of `_HISTORICAL_LINE`'s markers, and
+    every line under a heading `_HISTORICAL_HEADINGS` names. The section machinery is used
+    rather than a bare regex sweep so that "Appendix B — Spec change log" scopes out its
+    whole table without each row having to carry a word.
+    """
+    out: set[int] = set()
+    in_history = False
+    for number, raw in enumerate(doc.lines, start=1):
+        if raw.startswith("#") and number not in doc.fenced:
+            in_history = any(heading in raw.lower() for heading in _HISTORICAL_HEADINGS)
+        if in_history or _HISTORICAL_LINE.search(raw):
+            out.add(number)
+    return frozenset(out)
+
+
+_TABLE_ROW = re.compile(r"^\s*\|(?P<cells>.+)\|\s*$")
+
+
+def _paired_cells(doc: _Doc) -> Iterator[tuple[int, str, str]]:
+    """(line, one name, its value) for `| A / B | va / vb | source |` table rows.
+
+    The spec's Appendix A pairs related constants on one row, and positional pairing is
+    the only thing that binds `LLAMACPP_COMMIT` to the second value — no widening of the
+    separator class can reach it, because a whole other constant's NAME stands between
+    the name and its value. Read positionally or not at all: "verified against code" in
+    that table's own heading is a claim about the table, and leaving it unread is how the
+    heading became true-by-assertion.
+
+    Only rows whose first two cells split into the SAME number of `/`-separated parts,
+    with more than one part, are read. One part is an ordinary row (already handled), and
+    unequal counts mean the `/` is punctuation inside a value, not a pairing.
+    """
+    for number, raw in enumerate(doc.lines, start=1):
+        row = _TABLE_ROW.match(raw)
+        if not row or number in doc.fenced:
+            continue
+        cells = [cell.strip() for cell in row.group("cells").split("|")]
+        if len(cells) < 2:
+            continue
+        names = [part.strip() for part in cells[0].split("/")]
+        values = [part.strip() for part in cells[1].split("/")]
+        if len(names) < 2 or len(names) != len(values):
+            continue
+        for name, value in zip(names, values):
+            yield number, name.strip("`* "), value
+
+
+def _claim_occurrences(doc: _Doc, claim: ConstantClaim) -> Iterator[tuple[int, str | None, bool]]:
+    """(line, stated value, scoped-out) per occurrence; value is None when only named.
+
+    An occurrence on a historical or marker-suppressed line is yielded with `scoped-out`
+    set rather than dropped silently. It is not `named_without_value` — the document is
+    not naming the shipped constant there at all — but it is not invisible either: an
+    opt-out nobody can count is an opt-out that grows unnoticed.
+    """
+    skip = _historical_lines(doc) | doc.ignored
+    paired = list(_paired_cells(doc))
+    for line, name_cell, value_cell in paired:
+        if line in skip:
+            continue
+        # The name cell must be the whole name, not contain it: a positional read is only
+        # as trustworthy as the certainty that column i is this constant's column.
+        if not any(re.fullmatch(name, name_cell) for name in claim.names):
+            continue
+        stated = [found.group(1) for found in re.finditer("(" + claim.value_re + ")", value_cell)]
+        yield from ((line, value, False) for value in stated) if stated else ((line, None, False),)
+    # On a paired row the adjacency rule is actively WRONG: the value sitting next to the
+    # second name is the FIRST name's value (`A / B | va / vb` puts `va` after `B`). Now
+    # that quote and `/` separators are read, that adjacency resolves — into a mismatch
+    # against the wrong column. Positional wins on those rows; nothing else reads them.
+    paired_lines = {line for line, _, _ in paired}
     for name in claim.names:
         asserted = re.compile(name + _ASSERT_SEP + "(" + claim.value_re + ")")
         for match in re.finditer(name, doc.text):
+            line = doc.line_of(match.start())
+            if line in paired_lines:
+                continue
+            if line in skip:
+                yield line, None, True
+                continue
             hit = asserted.match(doc.text, match.start())
-            yield doc.line_of(match.start()), (hit.group(1) if hit else None)
+            yield line, (hit.group(1) if hit else None), False
     for pattern in claim.patterns:
         for match in re.finditer(pattern, doc.text):
-            yield doc.line_of(match.start()), match.group(1)
+            line = doc.line_of(match.start())
+            if line in paired_lines:
+                continue
+            if line in skip:
+                yield line, None, True
+                continue
+            yield line, match.group(1), False
 
 
 # ---------------------------------------------------------------------------------
@@ -1543,11 +1934,22 @@ _CODE_REFERENCE = re.compile(r"\.(?:py|md|json|toml|ya?ml|txt)$|/")
 
 
 def _section_lines(doc: _Doc, sections: Sequence[str]) -> list[tuple[int, str]]:
+    """Lines under a heading `sections` names — fence-aware, so `# comment` stays a comment.
+
+    A shell block's `# regenerate the report` starts with `#` and is not a heading. Read
+    as one it matched no section, switched the scan OFF, and silently ended the scoped
+    region early — the section machinery reporting clean on the half of the section it
+    never looked at.
+    """
     if not sections:
         return list(enumerate(doc.lines, start=1))
     out: list[tuple[int, str]] = []
     active = False
     for number, raw in enumerate(doc.lines, start=1):
+        if number in doc.fenced:
+            if active:
+                out.append((number, raw))
+            continue
         if raw.startswith("#"):
             active = any(section.lower() in raw.lower() for section in sections)
             continue
@@ -1560,43 +1962,57 @@ def _check_schema_fields(root: Path) -> tuple[list[Finding], dict]:
     findings: list[Finding] = []
     coverage: dict[str, dict] = {}
 
-    # Every symbol the package defines, plus every CLI dest/flag: a documented token that
-    # is a function name or a flag is not a schema field, and flagging it would be noise.
-    package_symbols: set[str] = set()
-    for path in sorted((root / "quantfit").rglob("*.py")):
-        symbols = _module_symbols(path)
-        if symbols:
-            package_symbols |= set(symbols)
+    # Every CLI dest and flag: a documented token that is a command-line option is not a
+    # schema field, and flagging it would be noise. NOT the whole package's symbol table —
+    # see `universe` below.
+    cli_names: set[str] = set()
     for spec in _parser_surface().values():
-        package_symbols |= {opt.lstrip("-").replace("-", "_") for opt in spec["options"]}
-        package_symbols |= set(spec["positionals"])
+        cli_names |= {opt.lstrip("-").replace("-", "_") for opt in spec["options"]}
+        cli_names |= set(spec["positionals"])
 
     for claim in SCHEMA_CLAIMS:
         emitted: set[str] = set()
+        claim_symbols: set[str] = set()
         for module in claim.modules:
             path = root / module
             if not path.is_file():
                 raise AuditError(f"schema claim {claim.id} names a missing module: {module}")
             emitted |= set(_emitted_keys(path))
-        universe = emitted | package_symbols | _FIELD_STOPWORDS
-        tokens = 0
+            claim_symbols |= set(_module_symbols(path) or ()) | _imported_names(path)
+        # The accepted universe is THIS artifact's vocabulary — the keys its emitters emit,
+        # the symbols those same emitters define or import (a document naming the function
+        # beside the field is writing correctly), the CLI's own names, and the stoplist.
+        # It used to be
+        # every symbol in every module of the package, which accepted a documented field
+        # whenever its name collided with any local, class or constant anywhere in the tree:
+        # a wrong field name passed because some unrelated module happened to define a
+        # variable with that spelling. A parity check whose accepted set is that much wider
+        # than the thing it checks is a check that mostly agrees.
+        universe = emitted | claim_symbols | cli_names | _FIELD_STOPWORDS
+        tokens = exempted = 0
         for doc_rel in claim.docs:
             path = root / doc_rel
             if not path.is_file():
                 raise AuditError(f"schema claim {claim.id} names a missing document: {doc_rel}")
             doc = _load_doc(root, path)
+            exempt = universe | doc.not_fields
             for number, raw in _section_lines(doc, claim.sections):
+                if doc.suppressed(number):
+                    continue
                 for match in _INLINE_CODE.finditer(raw):
                     token = match.group(1).strip()
                     if not _FIELD_TOKEN.match(token) or ("_" not in token and "." not in token):
                         continue
                     if _CODE_REFERENCE.search(token):
                         continue
+                    if token in doc.not_fields:
+                        exempted += 1
+                        continue
                     parts = token.split(".")
                     if len(parts) > 1 and parts[0] not in emitted:
                         continue  # a module/attribute reference, not a field path
                     tokens += 1
-                    missing = [part for part in parts if part not in universe]
+                    missing = [part for part in parts if part not in exempt]
                     if not missing:
                         continue
                     # The nearest real field is the whole fix when the drift is a rename
@@ -1619,7 +2035,9 @@ def _check_schema_fields(root: Path) -> tuple[list[Finding], dict]:
             "modules": list(claim.modules),
             "docs": list(claim.docs),
             "emitted_keys": len(emitted),
+            "accepted_universe": len(universe),
             "tokens_checked": tokens,
+            "tokens_marked_not_a_field": exempted,
         }
     return findings, coverage
 
@@ -1642,8 +2060,12 @@ def audit(root: str | Path | None = None) -> dict:
 
     Returns the findings, per-check coverage, counts and an `ok` flag. Raises
     `AuditError` when the audit itself cannot run — never a clean result.
+
+    `root` must be the checkout this package was imported from (`_assert_same_checkout`);
+    auditing someone else's tree with this tree's code is refused, not approximated.
     """
     resolved = _resolve_root(root)
+    _assert_same_checkout(resolved)
     checks: dict[str, dict] = {}
     errors = warnings = 0
     for name in CHECKS:

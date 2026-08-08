@@ -111,12 +111,17 @@ prose still describes the shipped code — CLI commands and flags, `file:symbol`
 citations, exit codes, quoted constants, and schema field names:
 
 ```bash
-quantfit audit                 # exit 0 = clean, 3 = drift found, 2 = operational
-quantfit audit --json out.json # the findings as data, for CI
+quantfit audit                    # exit 0 = clean, 3 = drift found, 2 = operational
+quantfit audit --json out.json    # the findings as data, for CI
+quantfit audit --root /path/to/quantfit   # run it from another directory
 ```
 
-It is wired into CI, so a doc that drifts from the code fails the build. Use
-`--root` to audit a checkout elsewhere.
+It is wired into CI, so a doc that drifts from the code fails the build.
+`--root` says *where this checkout is*, not *which checkout to audit*: three of
+the five checks read the parser and the constants by import, so a root that is
+not the tree being imported would compare one repo's prose against another
+repo's code. That request is refused as operational (exit 2) rather than
+answered.
 
 **The rest of the surface.** `quantfit list` prints the supported method ×
 scheme matrix. `quantfit calibrate sheet` / `quantfit calibrate ingest` build a
@@ -189,10 +194,11 @@ group-size 128) is shared across the calibrated methods, so they are comparable.
 ## What it is — and isn't
 
 - It **quantizes** (wrapping llm-compressor + llama.cpp) and **checks safety
-  preservation**. Both run end-to-end, validated on small models (Qwen-1.5B,
-  Llama-1B) and over-VRAM (Qwen2.5-7B GPTQ on a 12 GB card via sequential
+  preservation**. Both run end-to-end, validated on Qwen2.5-1.5B (`CHANGELOG.md`
+  0.1.0) and over-VRAM (Qwen2.5-7B GPTQ on a 12 GB card via sequential
   onloading, telemetry-confirmed CPU spill; the safety check covers 7B GGUF
-  pairs with the F16 baseline in CPU RAM).
+  pairs with the F16 baseline in CPU RAM). Llama-3.2-1B appears in the 0.5 screen
+  target list, which is a list of things to run, not a record of runs.
 - It ships **transparent config help**, not auto-quantization: `quantfit plan --model <id>`
   shows the config a heuristic would pick and *why* (instant, no quantize); `quantfit
   probe --model <id>` measures per-bit-width quantization sensitivity (forward-only RTN-KL,

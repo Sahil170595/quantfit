@@ -7,14 +7,16 @@ ranked by what would actually stop a third party from reproducing the work.
 
 **Ranked by reproduction impact, not by how alarming they sound.** The ordering is the point.
 Losing PyPI is loud and nearly harmless. Losing one Hugging Face repository is quiet and
-terminal for every measurement this project has ever made, including the ones already published.
+terminal for every measurement this project can make — and for every measurement it *has*
+made, all of which are unpublished (§4). That the published set is currently empty is the
+single fact keeping item 1 from being a realized loss rather than a pending one.
 
 Every mechanism below was checked in this tree; the citation is where. Where a claim is
 inferred from configuration rather than observed from a built artifact, it says so.
 
 | # | asset | who controls it | if it goes | cheapest mitigation |
 |---|---|---|---|---|
-| 1 | judge model, revision-pinned | maintainer's personal HF account | **every run dies; every past report becomes unverifiable** | mirror the two repos under a second owner |
+| 1 | judge model, revision-pinned | maintainer's personal HF account | **every run dies; every report that will ever cite these pins becomes unverifiable** — zero such reports exist yet (§4) | mirror the two repos under a second owner |
 | 2 | probe corpus, revision-pinned | maintainer's personal HF account | same as 1 | same as 1 |
 | 3 | the QSR spec | this repo only; not in the PyPI artifact | reports stay readable, become uninterpretable | it is already in-repo — keep it there, and get one fork |
 | 4 | reference reports | do not exist yet | nothing to reproduce *against* | run the 0.5 screen; publish one |
@@ -49,10 +51,18 @@ renamed, suspended, or simply abandoned and reclaimed:
 - `quantfit verify-safety`, `screen`, `gate` and the Inspect runner all fail at load.
   Not degrade — fail. There is no fallback judge and no vendored corpus anywhere in
   this tree.
-- **Every report already published becomes unverifiable.** The report's whole
+- **Every report that cites these pins becomes unverifiable — and today that is zero
+  reports, which is the only good news in this section.** A report's whole
   auditability claim is that it names the artifacts it used by revision so a reader
-  can re-fetch them. A pin pointing at a repository that no longer exists is a pin
-  that proves nothing.
+  can re-fetch them; a pin pointing at a repository that no longer exists is a pin
+  that proves nothing. Said in the tense the evidence supports: **nothing has been
+  published** (§4 — `quantfit/refreports.py` ships its registry empty by design and
+  says so in its own docstring), so the loss is entirely *prospective*. No published
+  measurement becomes unverifiable, because there is no published measurement.
+  Read that as a deadline rather than as comfort: the cost of losing these two
+  repositories is at its lifetime minimum right now and only rises — with the first
+  reference report, with the first outside citation, with the first adopted gate.
+  **Mirror before publishing, not after.**
 - The 0.5 screen, the 0.6 calibration and the 0.7/0.8 cross-hardware work all sit
   downstream of these two repos. None of them are re-runnable without both.
 
@@ -92,7 +102,7 @@ clone, every fork and every GitHub archive tarball carries the whole normative t
 Anyone who has cloned the repo has the standard.
 
 **But it does not travel with the package.** There is **no `MANIFEST.in`** in this
-repository, and `pyproject.toml:65-66` limits packaging to
+repository, and `pyproject.toml:68-69` limits packaging to
 `[tool.setuptools.packages.find] include = ["quantfit*"]`. The last locally built
 manifest (`quantfit.egg-info/SOURCES.txt`) lists `LICENSE`, `README.md`,
 `pyproject.toml`, the `quantfit/` sources and `tests/` — and **no `spec/`, no

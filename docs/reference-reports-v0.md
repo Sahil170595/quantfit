@@ -39,7 +39,7 @@ the full drift vector with its Wilson intervals and its MDE (QSR v0 §4.1–§4.
 
 It **is not**:
 
-- **a certification.** A no-detection reference report says exactly what QSR v0 §5.8 says it
+- **a certification.** A no-detection reference report says exactly what QSR v0 §5.9 says it
   says: no flip was observed among the at-risk pairs, and the run's resolution was the printed
   MDE. At the shipped probe set's dangerous-axis ceiling of n = 12 that bounds the true harmful
   flip rate below **~24.2%** (two-sided 95% Wilson, upper limit) with **~12.6pp** detectable at
@@ -299,7 +299,7 @@ Two conventions this document mandates rather than infers:
   citation to resolve.
 
 The repo card carries, at minimum: the caps for every stratum represented (§4.4), the
-uncalibrated-judge label, the "not a certification" sentence from QSR v0 §5.8, and a pointer to
+uncalibrated-judge label, the "not a certification" sentence from QSR v0 §5.9, and a pointer to
 `spec/qsr-v0.md`.
 
 **Step 7 — download the uploaded copy and verify it round-tripped.**
@@ -510,7 +510,7 @@ to refuse (`docs/cross-hardware-tolerance-v0.md` §3.3, §4.2).
 **Read from this working tree (branch `release/0.8`):** ROADMAP 0.8's reference-report bullet
 and gate, and risk 5, quoted verbatim from `ROADMAP.md`; the QSR v0 clauses cited by section
 number, quoted from `spec/qsr-v0.md` (§2.2, §2.3, §2.6, §2.7 including the label string
-verbatim, §3.4, §4.1–§4.5, §5.3's n = 12 row — 12.6pp MDE, 24.2% Wilson upper — §5.7, §5.8,
+verbatim, §3.4, §4.1–§4.5, §5.3's n = 12 row — 12.6pp MDE, 24.2% Wilson upper — §5.7, §5.9,
 §6.1, §6.3, §6.5, §6.6, §7, §8, §9, §10.2, §10.3, §10.4); `SPEC_CAPS` verbatim from
 `quantfit/screen.py`; the schema-v2 field list and the `"auto"` rejection from
 `quantfit/safety/report.py`; the clauses of `docs/data-handling-completions.md` cited in §6;

@@ -12,6 +12,12 @@ drift is discovered, not assumed absent, and a test that pinned "zero findings" 
 have to be edited every time the auditor found something — which is how a check gets
 turned off.
 
+`audit()` refuses a root that is not the checkout it was imported from, so the tests that
+drive the aggregate over a fixture repo monkeypatch `_assert_same_checkout` off — visibly,
+one fixture, with `test_audit_refuses_a_foreign_checkout` asserting the real function
+still bites. A bypass parameter on the public function would be the same hole with a
+nicer name and no test pointing at it.
+
 Hermetic: no network, no model loads, no torch. The parser under test is a real
 `argparse` parser built in the test (so the walker is exercised, not stubbed) and the
 constant claims point at `quantfit.audit`'s own module attributes.
@@ -112,6 +118,37 @@ def test_empty_corpus_refuses_rather_than_reporting_clean(tmp_path):
         A._load_docs(root, ("docs/*.md",))
 
 
+def test_audit_refuses_a_foreign_checkout(tmp_path):
+    """Documents from `root`, parser and constants by import: they must be one tree."""
+    root = _repo(tmp_path, **{"README.md": "hi\n"})
+    with pytest.raises(A.AuditError, match="not the checkout being imported"):
+        A.audit(root)
+
+
+def test_audit_accepts_its_own_checkout():
+    A._assert_same_checkout(A._resolve_root(None))  # the real repo: no raise
+
+
+def test_a_document_that_is_not_utf8_is_operational_not_a_traceback(tmp_path):
+    """A cp1252-saved `.md` raises `UnicodeDecodeError`, which is a ValueError, not an OSError.
+
+    Uncaught it escapes `audit()` as a traceback and the stated exit-2 contract is false
+    for exactly the document nobody checked the encoding of.
+    """
+    root = _repo(tmp_path)
+    (root / "docs").mkdir()
+    (root / "docs" / "cp1252.md").write_bytes(b"a caf\xe9 and an en dash \x96\n")  # invalid utf-8
+    with pytest.raises(A.AuditError, match="cannot read"):
+        A._load_docs(root, ("docs/*.md",))
+
+
+def test_an_unreadable_cli_source_is_operational(tmp_path):
+    root = _repo(tmp_path)
+    (root / "quantfit" / "cli.py").write_bytes(b"def _dispatch(args):\n    return 0  # caf\xe9\n")
+    with pytest.raises(A.AuditError, match="cannot read"):
+        A._dispatch_returns(root)
+
+
 # ---------------------------------------------------------------------------------
 # check 1 — command parity
 # ---------------------------------------------------------------------------------
@@ -181,6 +218,89 @@ def test_command_parity_flags_undocumented_surface(tmp_path, surface, monkeypatc
     aliases = [f for f in findings if f.kind == "undocumented_flag_alias"]
     assert [f.severity for f in aliases] == [A.SEVERITY_WARNING]  # `--old` is a shim, not a promise
     assert all(f.severity == A.SEVERITY_ERROR for f in findings if f.kind == "undocumented_flag")
+
+
+def _shared_flag_parser():
+    """Two commands, one shared `--report`: the shape the global name check got wrong."""
+    parser = argparse.ArgumentParser(prog="quantfit")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+    for name in ("gate", "screen"):
+        command = sub.add_parser(name, help=name)
+        command.add_argument("--report", required=True)
+    return parser
+
+
+def test_documented_flags_are_keyed_by_command_not_by_name(tmp_path, monkeypatch):
+    """`--report` shown on `gate` does not document `--report` on `screen`.
+
+    The corpus-global name check was the false-clean: `--report` / `--out` / `--model` are
+    on nearly every command in this CLI, so a flag newly added to command X counted as
+    documented the instant its spelling appeared under any other command.
+    """
+    root = _repo(tmp_path, **{"README.md": "`quantfit gate --report r.json` and `quantfit screen`\n"})
+    monkeypatch.setattr("quantfit.cli._build_parser", _shared_flag_parser)
+    monkeypatch.setattr(A, "COMMAND_DOC_GLOBS", ("README.md",))
+    findings, coverage = A._check_commands(root)
+    per_command = [f for f in findings if f.kind == "flag_undocumented_for_command"]
+    assert [f.claim for f in per_command] == ["cli defines `quantfit screen --report`"]
+    # A WARNING, not an error: `--report` IS documented, just never on `screen`.
+    assert per_command[0].severity == A.SEVERITY_WARNING
+    assert "documented elsewhere" in per_command[0].actual
+    assert coverage["flags_documented_by_command"] == {"gate": ["--report"], "screen": []}
+
+
+def test_a_flag_no_document_mentions_anywhere_is_still_an_error(tmp_path, monkeypatch):
+    root = _repo(tmp_path, **{"README.md": "`quantfit gate` and `quantfit screen`\n"})
+    monkeypatch.setattr("quantfit.cli._build_parser", _shared_flag_parser)
+    monkeypatch.setattr(A, "COMMAND_DOC_GLOBS", ("README.md",))
+    findings, _ = A._check_commands(root)
+    hard = [f for f in findings if f.kind == "undocumented_flag"]
+    assert {f.claim for f in hard} == {
+        "cli defines `quantfit gate --report`",
+        "cli defines `quantfit screen --report`",
+    }
+    assert all(f.severity == A.SEVERITY_ERROR for f in hard)
+
+
+def test_runner_prefixed_invocations_are_parsed(tmp_path, surface, monkeypatch):
+    """`uv run quantfit gate ...` is the same invocation, and the docs are allowed to say so."""
+    root = _repo(
+        tmp_path,
+        **{
+            "README.md": """
+                ```bash
+                uv run quantfit check --model X --token T
+                uvx quantfit emit model-card
+                poetry run quantfit screen --targets t --legacy --old
+                ```
+                `quantfit calibrate sheet --capture c`
+                """
+        },
+    )
+    monkeypatch.setattr(A, "COMMAND_DOC_GLOBS", ("README.md",))
+    monkeypatch.setattr(A, "_parser_surface", lambda: surface)
+    findings, coverage = A._check_commands(root)
+    assert findings == [], _kinds(findings)
+    assert coverage["invocations_parsed"] == 4
+
+
+def test_a_marked_line_is_not_read_as_an_invocation(tmp_path, surface, monkeypatch):
+    root = _repo(
+        tmp_path,
+        **{
+            "README.md": """
+                `quantfit check --model X --token T` `quantfit emit model-card`
+                `quantfit screen --targets t --legacy --old` `quantfit calibrate sheet --capture c`
+
+                A shape we rejected: `quantfit frobnicate --nope` <!-- audit: ignore -->
+                """
+        },
+    )
+    monkeypatch.setattr(A, "COMMAND_DOC_GLOBS", ("README.md",))
+    monkeypatch.setattr(A, "_parser_surface", lambda: surface)
+    findings, coverage = A._check_commands(root)
+    assert findings == [], _kinds(findings)
+    assert coverage["code_spans_marked_ignore"] == 1  # counted, never silently skipped
 
 
 def test_command_parity_ignores_prose_help_and_other_tools(tmp_path, surface, monkeypatch):
@@ -373,6 +493,76 @@ def test_citation_unparseable_python_is_reported_as_such(tmp_path, monkeypatch):
     assert _kinds(findings) == ["unreadable_file"]
 
 
+def test_citations_inside_a_fence_are_illustrations_not_claims(tmp_path, monkeypatch):
+    """A design sketch showing `mod.py:planned_symbol` is not citing it.
+
+    The command check has been fence-aware since it was written, for exactly this reason;
+    scanning citations over raw text made an ERROR out of a document's own example.
+    """
+    root = _repo(
+        tmp_path,
+        **{
+            "quantfit__mod.py": _CITED_MODULE,
+            "spec__s.md": """
+                Real: `quantfit/mod.py:CONSTANT`.
+
+                ```python
+                # sketch only — none of these exist yet
+                cite("quantfit/mod.py:not_written_yet")
+                cite("quantfit/nowhere.py:9999")
+                ```
+                """,
+        },
+    )
+    monkeypatch.setattr(A, "CITATION_DOC_GLOBS", ("spec/*.md",))
+    findings, coverage = A._check_citations(root)
+    assert findings == [], [f.as_dict() for f in findings]
+    assert coverage["citations_in_fences"] == 2
+    assert coverage["symbol_citations"] == 1  # the fenced pair is not counted as checked
+
+
+def test_a_marked_citation_line_is_skipped_and_counted(tmp_path, monkeypatch):
+    root = _repo(
+        tmp_path,
+        **{
+            "quantfit__mod.py": _CITED_MODULE,
+            "spec__s.md": "A citation we withdrew: `quantfit/mod.py:GONE`. <!-- audit: ignore -->\n",
+        },
+    )
+    monkeypatch.setattr(A, "CITATION_DOC_GLOBS", ("spec/*.md",))
+    findings, coverage = A._check_citations(root)
+    assert findings == []
+    assert coverage["citations_marked_ignore"] == 1
+
+
+def test_a_marker_alone_on_its_line_covers_the_next_line(tmp_path, monkeypatch):
+    root = _repo(
+        tmp_path,
+        **{
+            "quantfit__mod.py": _CITED_MODULE,
+            "spec__s.md": "<!-- audit: ignore -->\n`quantfit/mod.py:GONE` is the shape we rejected.\n",
+        },
+    )
+    monkeypatch.setattr(A, "CITATION_DOC_GLOBS", ("spec/*.md",))
+    findings, coverage = A._check_citations(root)
+    assert findings == []
+    assert coverage["citations_marked_ignore"] == 1
+
+
+def test_an_unknown_marker_directive_is_not_an_opt_out(tmp_path, monkeypatch):
+    """A typo in the marker must fail closed, or the syntax becomes a wildcard."""
+    root = _repo(
+        tmp_path,
+        **{
+            "quantfit__mod.py": _CITED_MODULE,
+            "spec__s.md": "`quantfit/mod.py:GONE` <!-- audit: ignoer -->\n",
+        },
+    )
+    monkeypatch.setattr(A, "CITATION_DOC_GLOBS", ("spec/*.md",))
+    findings, _ = A._check_citations(root)
+    assert _kinds(findings) == ["unresolved_symbol"]
+
+
 # ---------------------------------------------------------------------------------
 # check 3 — exit-code parity
 # ---------------------------------------------------------------------------------
@@ -555,10 +745,11 @@ def test_constant_mismatch_names_doc_line_and_shipped_value(tmp_path, monkeypatc
     monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
     monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS)
     findings, coverage = A._check_constants(root)
-    assert _kinds(findings) == ["constant_mismatch", "constant_mismatch"]
-    assert {f.line for f in findings} == {3}
-    assert findings[0].claim == "schema = 7"
-    assert findings[0].actual == "quantfit.audit:AUDIT_SCHEMA_VERSION = 1"
+    mismatches = [f for f in findings if f.kind == "constant_mismatch"]
+    assert len(mismatches) == 2
+    assert {f.line for f in mismatches} == {3}
+    assert mismatches[0].claim == "schema = 7"
+    assert mismatches[0].actual == "quantfit.audit:AUDIT_SCHEMA_VERSION = 1"
     assert coverage["drift_code"]["asserted_mismatch"] == 1
 
 
@@ -575,9 +766,206 @@ def test_constant_named_without_a_value_is_not_a_claim(tmp_path, monkeypatch):
     monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
     monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS)
     findings, coverage = A._check_constants(root)
-    assert findings == [], [f.as_dict() for f in findings]
+    assert [f.kind for f in findings if f.kind == "constant_mismatch"] == []
     assert coverage["schema"]["named_without_value"] == 1
     assert coverage["drift_code"]["named_without_value"] == 1
+
+
+# --- anti-vacuity: a claim that matched nothing checked nothing --------------------
+
+
+def test_a_claim_no_document_asserts_is_a_finding_not_just_a_number(tmp_path, monkeypatch):
+    """`asserted_ok == 0 and asserted_mismatch == 0` means the claim verified NOTHING.
+
+    Reporting that only as a coverage number is precisely the "unchecked read as checked
+    and clean" this module says it refuses to produce.
+    """
+    root = _repo(tmp_path, **{"docs__c.md": "`AUDIT_SCHEMA_VERSION` is 1. `EXIT_DRIFT` is named, not valued.\n"})
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS)
+    findings, coverage = A._check_constants(root)
+    vacuous = [f for f in findings if f.kind == "claim_never_asserted"]
+    assert sorted(f.claim.split(" ")[0] for f in vacuous) == ["checks", "drift_code"]
+    assert coverage["schema"]["asserted_ok"] == 1  # the one claim that did assert is not flagged
+
+
+def test_a_never_asserted_claim_warns_while_a_real_mismatch_errors(tmp_path, monkeypatch):
+    """The asymmetry is the reason there are two severities, not a softening.
+
+    Nothing DISAGREES about an unasserted constant — no document states it at all — so it
+    cannot fail a build whose docs are merely quiet. A mismatch is two surfaces
+    contradicting each other and stays an error.
+    """
+    root = _repo(tmp_path, **{"docs__c.md": "`AUDIT_SCHEMA_VERSION` = `9`\n"})
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS)
+    findings, _ = A._check_constants(root)
+    by_kind = {f.kind: f.severity for f in findings}
+    assert by_kind["claim_never_asserted"] == A.SEVERITY_WARNING
+    assert by_kind["constant_mismatch"] == A.SEVERITY_ERROR
+
+
+def test_a_never_asserted_finding_carries_the_shipped_value_and_the_near_miss(tmp_path, monkeypatch):
+    root = _repo(tmp_path, **{"docs__c.md": "`EXIT_DRIFT` is mentioned in `audit.py` but never valued.\n"})
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS[1:2])
+    findings, _ = A._check_constants(root)
+    assert findings[0].claim == "drift_code (quantfit.audit:EXIT_DRIFT = 3)"
+    assert "named without one 1x" in findings[0].actual
+
+
+# --- what counts as "the value follows the name" -----------------------------------
+
+
+def test_quote_and_slash_separators_are_read_as_assertions(tmp_path, monkeypatch):
+    """`X = "v"` and `tag/v`: a separator class narrower than the corpus's punctuation
+    is a check reporting clean on the documents it cannot read."""
+    root = _repo(
+        tmp_path,
+        **{
+            "docs__c.md": """
+                Pinned: `quantfit/audit.py:AUDIT_SCHEMA_VERSION = "1"`.
+                The tag form: EXIT_DRIFT/3.
+                """
+        },
+    )
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS[:2])
+    findings, coverage = A._check_constants(root)
+    assert [f for f in findings if f.kind == "constant_mismatch"] == []
+    assert coverage["schema"]["asserted_ok"] == 1
+    assert coverage["drift_code"]["asserted_ok"] == 1
+
+
+def test_a_wrong_value_behind_a_quote_separator_is_still_caught(tmp_path, monkeypatch):
+    root = _repo(tmp_path, **{"docs__c.md": '`AUDIT_SCHEMA_VERSION = "9"`\n'})
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS[:1])
+    findings, _ = A._check_constants(root)
+    assert _kinds(findings) == ["constant_mismatch"]
+    assert findings[0].claim == "schema = 9"
+
+
+def test_paired_table_rows_bind_each_name_to_its_own_column(tmp_path, monkeypatch):
+    """`| A / B | va / vb |` — no separator widening can reach B's value.
+
+    A whole other constant's NAME stands between B and vb, so the spec's Appendix A is
+    read positionally or not at all — and "verified against code" is that table's heading.
+    """
+    root = _repo(
+        tmp_path,
+        **{
+            "docs__c.md": """
+                | constant | value | source |
+                |---|---|---|
+                | `AUDIT_SCHEMA_VERSION` / `EXIT_DRIFT` | `1` / `3` | `audit.py` |
+                """
+        },
+    )
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS[:2])
+    findings, coverage = A._check_constants(root)
+    assert findings == [], [f.as_dict() for f in findings]
+    assert coverage["schema"]["asserted_ok"] == 1
+    assert coverage["drift_code"]["asserted_ok"] == 1
+
+
+def test_a_paired_row_with_the_wrong_second_value_is_caught(tmp_path, monkeypatch):
+    root = _repo(
+        tmp_path,
+        **{"docs__c.md": "| c | v |\n|---|---|\n| `AUDIT_SCHEMA_VERSION` / `EXIT_DRIFT` | `1` / `8` |\n"},
+    )
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS[:2])
+    findings, _ = A._check_constants(root)
+    assert _kinds(findings) == ["constant_mismatch"]
+    assert findings[0].claim == "drift_code = 8"
+
+
+def test_an_unpaired_row_is_not_read_positionally(tmp_path, monkeypatch):
+    """A `/` inside one value is punctuation, not a pairing: unequal counts are skipped."""
+    root = _repo(tmp_path, **{"docs__c.md": "| c | v |\n|---|---|\n| `AUDIT_SCHEMA_VERSION` | `a/b/c` |\n"})
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS[:1])
+    findings, coverage = A._check_constants(root)
+    assert [f for f in findings if f.kind == "constant_mismatch"] == []
+    assert coverage["schema"]["asserted_ok"] == 0
+
+
+# --- history is not drift ----------------------------------------------------------
+
+
+def test_a_historical_value_is_not_read_as_current_drift(tmp_path, monkeypatch):
+    """A changelog recording what a constant USED to be is not the docs disagreeing.
+
+    Flagging it makes every version history a finding, which is the fastest way to get an
+    auditor switched off.
+    """
+    root = _repo(
+        tmp_path,
+        **{
+            "docs__c.md": """
+                `AUDIT_SCHEMA_VERSION` is 1.
+
+                ## Change log
+
+                | version | note |
+                |---|---|
+                | 0.9 | `AUDIT_SCHEMA_VERSION` was 0 |
+
+                The `EXIT_DRIFT` code was previously 9 and is now 3.
+                """
+        },
+    )
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS[:2])
+    findings, coverage = A._check_constants(root)
+    assert [f for f in findings if f.kind == "constant_mismatch"] == []
+    assert coverage["schema"]["asserted_ok"] == 1
+    assert coverage["drift_code"]["asserted_ok"] == 0  # scoped out, and visible as such
+    assert coverage["drift_code"]["scoped_out_as_historical"] == 1
+    assert coverage["schema"]["scoped_out_as_historical"] == 1  # the change-log row
+
+
+def test_an_explicit_historical_marker_scopes_a_line_out(tmp_path, monkeypatch):
+    root = _repo(
+        tmp_path,
+        **{
+            "docs__c.md": """
+                `AUDIT_SCHEMA_VERSION` = `1`
+
+                <!-- audit: historical -->
+                Shipped as `AUDIT_SCHEMA_VERSION` = `0` in the first cut.
+                """
+        },
+    )
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS[:1])
+    findings, coverage = A._check_constants(root)
+    assert [f for f in findings if f.kind == "constant_mismatch"] == []
+    assert coverage["schema"]["asserted_ok"] == 1
+
+
+def test_history_scoping_does_not_swallow_a_live_claim_after_the_section(tmp_path, monkeypatch):
+    root = _repo(
+        tmp_path,
+        **{
+            "docs__c.md": """
+                ## Change log
+
+                `AUDIT_SCHEMA_VERSION` was 0.
+
+                ## Current
+
+                `AUDIT_SCHEMA_VERSION` = `9`
+                """
+        },
+    )
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS[:1])
+    findings, _ = A._check_constants(root)
+    assert _kinds(findings) == ["constant_mismatch"]
+    assert findings[0].claim == "schema = 9"
 
 
 def test_constant_rate_and_word_renderings_are_accepted():
@@ -702,6 +1090,127 @@ def test_schema_claim_pointing_at_a_missing_module_is_operational(tmp_path, surf
         A._check_schema_fields(root)
 
 
+def test_a_symbol_from_an_unrelated_module_no_longer_launders_a_wrong_field(tmp_path, surface, monkeypatch):
+    """The accepted universe is THIS artifact's vocabulary, not the whole package's.
+
+    Accepting every symbol anywhere in the tree meant a wrong field name passed whenever
+    its spelling collided with some unrelated module's local, class or constant.
+    """
+    root = _repo(
+        tmp_path,
+        **{
+            "quantfit__emit.py": _EMITTER,
+            "quantfit__unrelated.py": "def schema_versions():\n    return None\n",
+            "docs__f.md": "## Fields\n\n`schema_versions`\n",
+        },
+    )
+    monkeypatch.setattr(A, "SCHEMA_CLAIMS", _schema_claims())
+    monkeypatch.setattr(A, "_parser_surface", lambda: surface)
+    findings, coverage = A._check_schema_fields(root)
+    assert _kinds(findings) == ["unknown_field"]
+    # The universe stays small enough to be reviewable, rather than ~1000 package symbols.
+    assert coverage["record"]["accepted_universe"] < 3 * coverage["record"]["emitted_keys"]
+
+
+def test_a_function_the_emitter_imports_is_still_its_vocabulary(tmp_path, surface, monkeypatch):
+    """`screen.py` documents the `wilson_interval` it CALLS; that is correct writing.
+
+    Defined-here and used-here are different questions, so they get different indexes: a
+    citation `screen.py:wilson_interval` would still be wrong.
+    """
+    root = _repo(
+        tmp_path,
+        **{
+            "quantfit__emit.py": "from quantfit.stats import wilson_interval\n" + _EMITTER,
+            "quantfit__stats.py": "def wilson_interval(a, b):\n    return (0.0, 1.0)\n",
+            "docs__f.md": "## Fields\n\n`schema_version`, bounded by the same `wilson_interval` as §5.2.\n",
+        },
+    )
+    monkeypatch.setattr(A, "SCHEMA_CLAIMS", _schema_claims())
+    monkeypatch.setattr(A, "_parser_surface", lambda: surface)
+    findings, _ = A._check_schema_fields(root)
+    assert findings == [], [f.as_dict() for f in findings]
+    assert "wilson_interval" not in (A._module_symbols(root / "quantfit" / "emit.py") or ())
+
+
+def test_not_a_field_marker_lets_a_document_name_a_non_field(tmp_path, surface, monkeypatch):
+    """A typo shown as a typo, and a withdrawn key an amendment records, are counter-examples.
+
+    The alternative — editing the sentence until the scanner stops noticing it — trades the
+    document's clarity for a green check and leaves nothing to review.
+    """
+    body = """
+        ## Fields
+
+        `schema_version`. Nested keys are not guaranteed: one whose `resolution.stage` has
+        been renamed to `resolution.stag` still parses, and the superseded
+        `record_version` key is recorded here as withdrawn.
+        <!-- audit: not-a-field resolution.stag record_version -->
+        """
+    root = _repo(tmp_path, **{"quantfit__emit.py": _EMITTER, "docs__f.md": body})
+    monkeypatch.setattr(A, "SCHEMA_CLAIMS", _schema_claims())
+    monkeypatch.setattr(A, "_parser_surface", lambda: surface)
+    findings, coverage = A._check_schema_fields(root)
+    assert findings == [], [f.as_dict() for f in findings]
+    assert coverage["record"]["tokens_marked_not_a_field"] == 2
+
+    # ...and without the marker the same sentence is two errors: the opt-out is what
+    # makes the wording checkable, not a hole that silences the check.
+    (root / "docs" / "f.md").write_text(
+        "\n".join(
+            line for line in (root / "docs" / "f.md").read_text(encoding="utf-8").splitlines() if "audit:" not in line
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    findings, _ = A._check_schema_fields(root)
+    assert _kinds(findings) == ["unknown_field", "unknown_field"]
+
+
+def test_not_a_field_is_token_scoped_not_a_blanket_pass(tmp_path, surface, monkeypatch):
+    root = _repo(
+        tmp_path,
+        **{
+            "quantfit__emit.py": _EMITTER,
+            "docs__f.md": "## Fields\n\n`resolution.stag` <!-- audit: not-a-field resolution.stag -->\n\n`headline_x`\n",
+        },
+    )
+    monkeypatch.setattr(A, "SCHEMA_CLAIMS", _schema_claims())
+    monkeypatch.setattr(A, "_parser_surface", lambda: surface)
+    findings, _ = A._check_schema_fields(root)
+    assert [f.claim for f in findings] == ["record field `headline_x`"]
+
+
+def test_a_hash_comment_inside_a_fence_does_not_end_the_section(tmp_path, surface, monkeypatch):
+    """`# regenerate the report` is a shell comment, not a heading.
+
+    Read as a heading it matched no section, switched the scan OFF, and the rest of the
+    section was silently never looked at — the section machinery reporting clean on what
+    it never read.
+    """
+    root = _repo(
+        tmp_path,
+        **{
+            "quantfit__emit.py": _EMITTER,
+            "docs__f.md": """
+                ## Fields
+
+                ```bash
+                # regenerate the report
+                emit --out r.json
+                ```
+
+                `schema_versions` lives after the fenced comment.
+                """,
+        },
+    )
+    monkeypatch.setattr(A, "SCHEMA_CLAIMS", _schema_claims())
+    monkeypatch.setattr(A, "_parser_surface", lambda: surface)
+    findings, coverage = A._check_schema_fields(root)
+    assert _kinds(findings) == ["unknown_field"]
+    assert coverage["record"]["tokens_checked"] == 1
+
+
 # ---------------------------------------------------------------------------------
 # aggregation
 # ---------------------------------------------------------------------------------
@@ -729,6 +1238,11 @@ def scoped(monkeypatch, surface):
     monkeypatch.setattr(A, "CONSTANT_CLAIMS", _CLAIMS[:1])
     monkeypatch.setattr(A, "SCHEMA_CLAIMS", _schema_claims())
     monkeypatch.setattr(A, "_parser_surface", lambda: surface)
+    # The fixture repo is deliberately NOT this checkout, which `audit()` refuses. The
+    # bypass lives here, in one place, with `test_audit_refuses_a_foreign_checkout`
+    # asserting the real guard still bites — rather than as a parameter on the public
+    # function, which would be the same hole with a nicer name.
+    monkeypatch.setattr(A, "_assert_same_checkout", lambda root: None)
 
 
 def test_audit_is_clean_and_exits_zero_when_everything_agrees(tmp_path, scoped):
@@ -816,3 +1330,32 @@ def test_the_real_audit_actually_inspects_things():
     assert coverage["exit_code_parity"]["doc_claims_classified"] >= 5
     assert sum(c["asserted_ok"] for c in coverage["constant_parity"].values()) >= 20
     assert sum(c["tokens_checked"] for c in coverage["schema_field_parity"].values()) >= 20
+
+
+def test_the_real_audit_does_not_report_a_vacuous_claim_as_clean():
+    """Every `ConstantClaim` either asserts something or says out loud that it did not.
+
+    The floor is on claims, not occurrences: 34 declared claims of which 16 matched
+    nothing was the false clean, and it was invisible because only the total was read.
+    """
+    result = A.audit()
+    coverage = result["checks"]["constant_parity"]["coverage"]
+    vacuous = {k for k, c in coverage.items() if not c["asserted_ok"] and not c["asserted_mismatch"]}
+    reported = {
+        f["claim"].split(" ")[0]
+        for f in result["checks"]["constant_parity"]["findings"]
+        if f["kind"] == "claim_never_asserted"
+    }
+    assert vacuous == reported, "a claim that verified nothing must appear as a finding, not only as a 0"
+    assert len(coverage) - len(vacuous) >= 15  # and most claims do assert something
+
+
+def test_the_real_schema_universe_stays_close_to_what_the_artifact_emits():
+    """A regression guard on the check's own credibility.
+
+    Accepting the whole package's symbol table put the universe ~9x the emitted-key count,
+    so a wrong field name passed whenever it collided with any symbol anywhere.
+    """
+    coverage = A.audit()["checks"]["schema_field_parity"]["coverage"]
+    for claim_id, block in coverage.items():
+        assert block["accepted_universe"] <= 3 * block["emitted_keys"], claim_id

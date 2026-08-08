@@ -39,7 +39,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("list", help="list supported methods + schemes")
 
-    pp = sub.add_parser("plan", parents=[tok], help="show the config quantfit would pick for your GPU (no quantize)")
+    # No --token: `plan` reads the local device and the frozen spec only — detect_target(),
+    # Engine.feasible(target) and route() never reach the Hub — so a token flag here would
+    # promise gated-model support the command cannot have. It was accepted and never read.
+    pp = sub.add_parser("plan", help="show the config quantfit would pick for your GPU (no quantize)")
     pp.add_argument("--model", required=True, help="HF model id")
     pp.add_argument("--prefer", default="quality", choices=("quality", "speed", "size"))
 

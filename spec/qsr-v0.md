@@ -37,7 +37,7 @@ CI contract (§5); screen aggregation (§6); caps, canary, conditionality labeli
 quantization methods** — QSR measures artifacts, it does not produce better ones; **a harm taxonomy** —
 probes carry a coarse `zone`, not a harm category, and there is no per-block safety attribution; **a
 capability or quality verdict** — refusal behavior only, so a quant that got dumber but still refuses
-is a no-detection result and QSR says so; **certification** — a no-detection result is a bound (§5.8).
+is a no-detection result and QSR says so; **certification** — a no-detection result is a bound (§5.9).
 
 **1.4 Two-class outcome only.** The shipped judge is binary: each completion is **refusal** or
 **compliance** (`safety/verify.py:_classify_refusals`), so every downstream statistic is a binomial
@@ -387,7 +387,7 @@ both directions: it is *optimistic* about resolution (the true MDE is coarser), 
 detection threshold is the *smallest* possible, so a floor-mode FAIL runs at an uncontrolled alpha and
 is a candidate requiring human verification rather than a confirmed regression.
 
-**5.8 What a no-detection result means.** Exactly this: *no flip was observed among the at-risk
+**5.9 What a no-detection result means.** Exactly this: *no flip was observed among the at-risk
 pairs, and the run's resolution was the printed MDE*. At the shipped set's n = 12 dangerous-axis
 at-risk pairs, that bounds the true harmful flip rate below ~24pp (Wilson 95% upper) with ~13pp
 detectable at 80% power. It does not certify safety, and the tool's own output says so on every run.
@@ -603,7 +603,7 @@ the label; only one of them is information. An absent block is `not_run`.
 
 **Scope.** This label is a **screen-level** obligation, attached to prevalence claims (§6). A single
 pair is not a prevalence claim, so a per-pair report and its model card carry the uncalibrated-judge
-label (§2.7), their stratum's caps (§7) and bounded no-detection language (§5.8) — but not the screen's
+label (§2.7), their stratum's caps (§7) and bounded no-detection language (§5.9) — but not the screen's
 conditionality, which would be a claim about a screen they are not part of (§10.4).
 
 ## 10. Versioning

@@ -1,6 +1,10 @@
 """CLI parser + dispatch — light commands only (no torch needed)."""
 
+import argparse
+import ast
+import inspect
 import json
+from pathlib import Path
 
 import pytest
 
@@ -46,6 +50,73 @@ def test_probe_parses_multiple_bits():
 def test_token_flag_on_hub_commands():
     ns = _build_parser().parse_args(["check", "--model", "m", "--token", "xyz"])
     assert ns.token == "xyz"
+
+
+def _subparsers() -> dict:
+    """{command name: its parser}, read off the built parser rather than restated here."""
+    for action in _build_parser()._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            return dict(action.choices)
+    raise AssertionError("the CLI has no subparsers any more")
+
+
+def _dispatch_branches() -> dict[str, ast.If]:
+    """{command name: the `if args.cmd == "<name>":` node in _dispatch}."""
+    tree = ast.parse(Path(inspect.getfile(_build_parser)).read_text(encoding="utf-8"))
+    dispatch = next(node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef) and node.name == "_dispatch")
+    branches = {}
+    for node in ast.walk(dispatch):
+        if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare):
+            continue
+        left, comparators = node.test.left, node.test.comparators
+        if (
+            isinstance(left, ast.Attribute)
+            and left.attr == "cmd"
+            and isinstance(left.value, ast.Name)
+            and left.value.id == "args"
+            and len(comparators) == 1
+            and isinstance(comparators[0], ast.Constant)
+        ):
+            branches[comparators[0].value] = node
+    return branches
+
+
+def test_every_command_that_accepts_token_actually_reads_it():
+    """An accepted-but-unread flag is a lie the parser tells: `--help` advertises gated-model
+    support, `--token hf_...` is accepted without complaint, and the credential is dropped.
+
+    `plan` shipped exactly that — it carried `parents=[tok]` while its dispatch branch never
+    touched `args.token` (nothing in its chain reaches the Hub: detect_target(),
+    Engine.feasible() and route() are all local). The flag was removed rather than wired.
+    This test generalizes the fix: accepting a token and using one must be the same set.
+    """
+    accepting = {
+        name for name, parser in _subparsers().items() if any("--token" in a.option_strings for a in parser._actions)
+    }
+    branches = _dispatch_branches()
+    assert accepting <= set(branches), (
+        f"commands with --token but no dispatch branch: {sorted(accepting - set(branches))}"
+    )
+
+    reading = {
+        name
+        for name, node in branches.items()
+        if any(
+            isinstance(sub, ast.Attribute)
+            and sub.attr == "token"
+            and isinstance(sub.value, ast.Name)
+            and sub.value.id == "args"
+            for sub in ast.walk(node)
+        )
+    }
+    inert = sorted(accepting - reading)
+    undeclared = sorted(reading - accepting)
+    assert not inert, (
+        f"these commands accept --token and never read it: {inert}. Either pass it down to the "
+        "call that reaches the Hub, or drop the flag — an inert credential flag is worse than a "
+        "missing one, because it looks like it worked."
+    )
+    assert not undeclared, f"these commands read args.token without declaring --token: {undeclared}"
 
 
 def test_quantize_requires_method():

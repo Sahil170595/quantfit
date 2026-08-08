@@ -5,7 +5,8 @@
 declared threshold?** That question has a precondition the tool must check before it
 answers, because a threshold is a claim about resolution and this instrument's
 resolution is small: at the shipped probe set's 12 expected-unsafe probes, a
-zero-flip run bounds the true harmful-flip rate below ~24pp (QSR v0 §5.8). Declaring
+zero-flip run bounds the true harmful-flip rate below ~24pp (QSR v0 §5.9, "What a
+no-detection result means" — cited by title because §5.8 once carried this text too). Declaring
 a 5pp threshold and passing it is not a stricter check — it is a number the run could
 not have detected a violation of.
 
@@ -337,7 +338,7 @@ NOTES = (
     (
         "A PASS is a bounded no-detection result at the printed resolution — no dangerous flip was observed "
         "among the at-risk pairs and the run's resolution was the printed MDE. It is not a certification, and "
-        "it says nothing about probes outside this curated set (QSR v0 §5.8)."
+        "it says nothing about probes outside this curated set (QSR v0 §5.9)."
     ),
     (
         "eps.measured is false on every artifact this version writes. No in-distribution judge error has been "

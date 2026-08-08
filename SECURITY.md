@@ -34,6 +34,34 @@ machine, and the module is written accordingly:
   `QUANTFIT_LLAMACPP` at it. Adding a platform means adding its hash.
 - **An already-cached archive is re-verified before extraction** (`_llama_bin`,
   `backends/gguf.py:158-159`): existence is not integrity.
+- **The pin gates *provisioning*, not *execution* — and an already-extracted binary is
+  returned without being re-hashed.** Everything above is a statement about the
+  **archive**, and stopping there would overstate the control, so: `_llama_bin`
+  (`backends/gguf.py:_llama_bin`) checks `QUANTFIT_LLAMACPP` first, then looks for the
+  executable already sitting in `~/.cache/quantfit/llamacpp-bin-<tag>/` (or
+  `$QUANTFIT_CACHE`) and **returns it immediately if it is there** — before any of the
+  archive logic runs. Only on a miss does it reach the download → `_verify_or_die` →
+  `_extract` path. So the chain is `download → verify → extract`, and after that first
+  successful extraction the SHA256 pin is never consulted again: `llama_server_bin()`
+  and `llama_quantize_bin()` hand back a cached executable on trust. **An attacker who
+  can write to your cache directory can replace that binary and quantfit will run it.**
+  There is no pinned hash of the *extracted* executable to compare against — only of
+  the archive it came out of. Note also that a `QUANTFIT_LLAMACPP` binary is never
+  hashed at all, by design: you supplied it, so quantfit does not second-guess it
+  (`_binary_source` records it as `user-provided build; tag not verified by quantfit`,
+  so the report says which case applied).
+
+  **What you actually have here:** (1) treat write access to the quantfit cache
+  directory as equivalent to code execution on your machine, and keep it on a
+  filesystem no other account can write — this is the real control; (2) to force
+  re-provisioning from the verified archive, delete
+  `~/.cache/quantfit/llamacpp-bin-<tag>/` (the archive alongside it is re-verified on
+  the next run, so this is cheap and safe to do routinely); (3) **detection, not
+  prevention** — every GGUF arm hashes the `llama-server` it actually executed and
+  writes it into the report as `engine.binary_sha256`
+  (`safety/gguf_arm.py:generate_completions`, `_sha256(server)` at `gguf_arm.py:228`),
+  so a swapped binary shows up as a changed value across runs and across the two arms
+  even though nothing compares it to a pin.
 - **The convert-script clone is verified at the pinned commit, because tags are
   mutable.** `convert_script` (`backends/gguf.py:195-212`) shallow-clones into a temp
   directory, checks `git rev-parse HEAD` against `LLAMACPP_COMMIT`, refuses if the
@@ -120,8 +148,9 @@ Stated in full, because "quantfit does not store model output" would be false:
    (that document, §3).
 2. **The gate's baseline cache** (`quantfit/safety/cache.py`) — cached baseline-arm
    completions, keyed by a derived fingerprint. Every entry header repeats the
-   completion-text warning verbatim (`cache.py:150-159`). Local-only; never committed
-   or shared.
+   completion-text warning verbatim — `safety/cache.py:COMPLETION_TEXT_WARNING`, cited
+   by symbol rather than by line because line citations rot. Local-only; never
+   committed or shared.
 3. **Inspect eval logs** — `logs/` and `*.eval`, which hold completions the same way a
    capture does.
 
@@ -192,14 +221,24 @@ tooling. Quantization and GGUF arms are CPU work and containerize cleanly.
 
 ## 5. Reporting a vulnerability
 
-**Use GitHub's private vulnerability reporting** on
+**The intended channel is GitHub's private vulnerability reporting** on
 [`Sahil170595/quantfit`](https://github.com/Sahil170595/quantfit) — repository
-**Security** tab → **Report a vulnerability**. That keeps the report private until
-there is a fix.
+**Security** tab → **Report a vulnerability**. It keeps the report private until there
+is a fix, and it is where a report should go if it is available to you.
 
-Please do not open a public issue for anything that would let someone else exploit
-users before a fix exists. If you cannot reach the private channel, open a public issue
-containing only "requesting a private channel for a security report" and no details.
+**Stated honestly: nothing in this repository proves that it is turned on.** Private
+vulnerability reporting is a GitHub repository setting, not a file, so it cannot be
+verified from a clone or a release tarball — including by whoever wrote this sentence.
+If the Security tab shows no "Report a vulnerability" button, the setting is off and
+the paragraph above is aspirational rather than actionable.
+
+**The fallback, which always works:** open a public issue containing **only** the words
+"requesting a private channel for a security report" — no details, no reproduction, no
+affected file. That discloses nothing exploitable and gets a private channel opened.
+Use it whenever the private path is unavailable *or* you are unsure.
+
+Please do not open a public issue with details for anything that would let someone else
+exploit users before a fix exists.
 
 **What is useful in a report:** the affected file and function, the version or commit,
 what an attacker controls (a model repo? a GGUF file? a cache directory? a report

@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""Emit a pip constraints file from pyproject.toml's declared bounds.
+
+CI installs a hand-picked subset of dependencies directly (`pip install pytest
+scipy gguf inspect-ai ...`) because the full dependency set drags in torch and
+the unit tests mock the heavy backends. That shortcut quietly bypassed the
+upper bounds pyproject declares: `gguf>=0.10,<1.0` and `inspect-ai>=0.3.252,<0.4`
+exist precisely because those projects churn, and a CI job installing gguf 1.x
+would test a combination the package forbids — or, worse, stay green while the
+published wheel breaks.
+
+Hand-copying the bounds into ci.yml would trade one drift for another. So CI
+derives them: this script reads pyproject and prints every requirement it
+declares, and `pip install -c` applies those bounds to whatever CI installs.
+A constraint on a package CI does not install is inert, so emitting all of them
+is both correct and maintenance-free.
+
+Usage:
+    python tools/ci_constraints.py [--pyproject PATH] [--out PATH]
+
+Exit codes:
+    0  constraints written
+    2  pyproject unreadable, or two extras declare conflicting bounds for one
+       package (pip permits a single constraint per name, so this must be fixed
+       in pyproject rather than papered over here)
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+# tomllib is stdlib only on 3.11+, and pyproject declares support down to 3.10 — where
+# CI's test matrix runs this script BEFORE installing anything, so there is no pytest to
+# drag `tomli` in. Fall back explicitly, and fail with a sentence rather than a traceback.
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover — 3.10 only
+    try:
+        import tomli as tomllib  # type: ignore[no-redef]
+    except ModuleNotFoundError:  # pragma: no cover
+        print(
+            "no TOML parser: this interpreter predates tomllib (3.11+) and `tomli` is not "
+            "installed. Install it first: pip install tomli",
+            file=sys.stderr,
+        )
+        raise SystemExit(2) from None
+
+EXIT_OK = 0
+EXIT_OPERATIONAL = 2
+
+# PEP 508 name at the head of a requirement string, up to the first version
+# specifier / extra / marker / whitespace.
+_NAME_RE = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)")
+
+
+def normalize(name: str) -> str:
+    """PEP 503 normalization, so `inspect-ai` and `inspect_ai` are one package."""
+    return re.sub(r"[-_.]+", "-", name).lower()
+
+
+def requirement_name(requirement: str) -> str:
+    match = _NAME_RE.match(requirement)
+    if match is None:
+        raise ValueError(f"cannot parse a package name out of requirement {requirement!r}")
+    return normalize(match.group(1))
+
+
+def collect(pyproject: dict) -> dict[str, str]:
+    """Map normalized package name -> the requirement string pyproject declares.
+
+    Raises ValueError if one package is declared with two different specs; pip
+    accepts only one constraint per name, and disagreeing declarations are a
+    defect in pyproject regardless of what CI does with them.
+    """
+    project = pyproject.get("project", {})
+    sources: list[tuple[str, list[str]]] = [("dependencies", list(project.get("dependencies", [])))]
+    for extra, requirements in sorted(project.get("optional-dependencies", {}).items()):
+        sources.append((f"optional-dependencies.{extra}", list(requirements)))
+
+    seen: dict[str, tuple[str, str]] = {}  # name -> (requirement, declaring section)
+    for section, requirements in sources:
+        for requirement in requirements:
+            if "[" in requirement:
+                # pip: "Constraints cannot have extras". None are declared today;
+                # refuse rather than emit a file pip will reject at install time.
+                raise ValueError(f"{section}: constraint entries cannot carry extras: {requirement!r}")
+            name = requirement_name(requirement)
+            spec = requirement.strip()
+            previous = seen.get(name)
+            if previous is not None and previous[0] != spec:
+                raise ValueError(
+                    f"{name} is declared twice with different bounds: "
+                    f"{previous[0]!r} in [{previous[1]}] and {spec!r} in [{section}]. "
+                    "pip permits one constraint per package; reconcile them in pyproject."
+                )
+            seen[name] = (spec, section)
+
+    return {name: spec for name, (spec, _) in sorted(seen.items())}
+
+
+def render(constraints: dict[str, str], pyproject_path: Path) -> str:
+    # ASCII only, deliberately. This text goes to stdout, whose encoding on Windows is the
+    # console codepage (cp1252 here), while whatever consumes it — pytest's subprocess
+    # reader, a CI log collector — decodes as UTF-8. An em dash written as cp1252 0x97 is
+    # not valid UTF-8, so a single decorative character makes the caller raise
+    # UnicodeDecodeError. That is exactly how this was found.
+    lines = [
+        "# GENERATED by tools/ci_constraints.py - do not edit.",
+        f"# Source of truth: {pyproject_path.name} ([project.dependencies] + [project.optional-dependencies]).",
+        "# Applied with `pip install -c` so CI cannot install a version the package forbids.",
+    ]
+    lines.extend(constraints.values())
+    return "\n".join(lines) + "\n"
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--pyproject", default="pyproject.toml", metavar="PATH", help="default: pyproject.toml")
+    parser.add_argument("--out", default=None, metavar="PATH", help="write here instead of stdout")
+    args = parser.parse_args(argv)
+
+    path = Path(args.pyproject)
+    try:
+        # utf-8-sig, not utf-8: a stray BOM (PowerShell's `-Encoding utf8` writes one)
+        # makes tomllib reject an otherwise valid file, and it has bitten this repo.
+        pyproject = tomllib.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, tomllib.TOMLDecodeError) as exc:
+        print(f"cannot read {path}: {exc}", file=sys.stderr)
+        return EXIT_OPERATIONAL
+
+    try:
+        constraints = collect(pyproject)
+    except ValueError as exc:
+        print(f"{path}: {exc}", file=sys.stderr)
+        return EXIT_OPERATIONAL
+
+    if not constraints:
+        print(f"{path} declares no dependencies; nothing to constrain", file=sys.stderr)
+        return EXIT_OPERATIONAL
+
+    text = render(constraints, path)
+    if args.out:
+        Path(args.out).write_text(text, encoding="utf-8")
+        print(f"wrote {len(constraints)} constraints to {args.out}", file=sys.stderr)
+    else:
+        sys.stdout.write(text)
+    return EXIT_OK
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())

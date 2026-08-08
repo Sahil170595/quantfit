@@ -87,7 +87,7 @@ nothing but the writing; **F** waits on nothing but one editorial reading.
 | A | ε-calibrated MDE | `safety/calibrate.py:ingest_labels` → `mde_epsilon_upper`; `safety/mde.py:effective_mde` / `detection_threshold` — **complete and unrun** **[V]** | any ε at all. Zero completions labeled | a calibration report at N = 480 (`docs/judge-calibration-v0.md:401`) | ROADMAP 0.6 labeling, gated on the 0.5 GO |
 | B | calibrated cross-hardware tolerance | T1–T5 rule, `docs/cross-hardware-tolerance-v0.md` §1.3 — **specified and unrun** **[V]** | every side-F report; all replicates; the free-tier fingerprint | the T4 run, recorded in that doc's §6.3 record | ROADMAP 0.7 hardware run |
 | C | per-format runtime and baseline policy | per-arm `runtime_s` in the schema **[V]**; per-format baseline *identity* mandates already normative (§3.1/§3.2) **[V]** | a runtime policy (nothing normative exists), a compressed-tensors runtime datum, and a baseline-**cache** policy | a maintainer decision + one transformers-pair runtime observation | a decision, plus wiring `safety/cache.py` into a command |
-| D | decision rules | spec §5.6, §5.7, both §5.8s; `quantfit/gate.py` exit codes and tiers **[V]** | the floor-clause successor (its sunset is written into v0), the duplicate-§5.8 renumber, and whether tier thresholds become normative | ε for the first; editorial for the second; a decision for the third | A, then a decision |
+| D | decision rules | spec §5.6, §5.7, §5.8 (gate exit 5), §5.9 (no-detection meaning); `quantfit/gate.py` exit codes and tiers **[V]** | the floor-clause successor (its sunset is written into v0), the duplicate-§5.8 renumber, and whether tier thresholds become normative | ε for the first; editorial for the second; a decision for the third | A, then a decision |
 | E | terminology note (drift, not tax) | decided in `ROADMAP.md:8,22`, shipped in `CHANGELOG.md:293`, enforced by `tests/test_meta.py:23` **[V]** | **the spec never states it** — the word "tax" does not appear in `spec/qsr-v0.md` except inside "taxonomy" **[V]** | writing it. Nothing gates this | nothing |
 | F | CI method | §5.2's two-sided Wilson 95% interval (`verify.py:wilson_interval`, `_Z_95 = 1.959963984540054`, scipy-cross-checked to 1e-9 in `tests/test_stats_scipy.py`) **[V]**, *and* §5.7, whose own title is "The CI contract (exit codes)" **[V]** — **both already normative in v0** | no measurement. Two editorial gaps: (i) which sense ROADMAP means — this repo uses "CI" for both (`ROADMAP.md:71,81,120` = confidence interval; `:27,29,36,40,77` = continuous integration) **[V]**; (ii) under the exit-code sense, the spec covers three consumers of the code space — `verify-safety` and `screen` in §5.7, the gate with its two stated divergences in §5.8 **[V]** — and `quantfit/reproduce.py` is now a fourth, covered nowhere **[V]** | transcription of §5.2 and §5.7 + one maintainer decision on the reading | nothing — editorial |
 
@@ -109,11 +109,13 @@ a verified fact. The true state: `CITATION.cff` is on disk on `release/0.8`, CFF
 and `tests/test_refreports.py` parses it, checks CFF 1.2.0's four required keys, and pins
 its `version` to `pyproject.toml` and `quantfit/__init__.py` **[V]**.
 
-**Its only version field is a *software* version — `version: "0.5.2"` — and it names no
-spec version at all** **[V]**. That is what makes it exempt from step 9's ordering rule
-rather than a violation of it; see the exemption stated at step 9. The same file already
-applies the discipline in the other direction, which is why it can land this early: it
-omits `date-released` because this repo records no release date for 0.5.2, and omits its
+**Its only version field is a *software* version — `version: "0.5.3"`, tracking
+`pyproject.toml` release by release — and it names no spec version at all** **[V]**. The
+durable claim is the pin, not the digits: the test re-reads all three on every run, so the
+value here is a snapshot and the pin is the invariant. That is what makes the file exempt
+from step 9's ordering rule rather than a violation of it; see the exemption stated at step
+9. The same file already applies the discipline in the other direction, which is why it can
+land this early: it omits `date-released` because this repo records no release date, and omits its
 `references` entry for arXiv 2606.10154 because CFF 1.2.0 requires an `authors` list it
 declines to invent — both omissions written into the file as comments **[V]**.
 
@@ -275,7 +277,7 @@ established and what is not.
    from cache. **[?]** All three are decisions, not measurements — nothing gates them but
    the maintainer, and wiring the cache into a command first is the honest order **[I]**.
 
-### 1.5 D — decision rules: §5.6–§5.8 exist. Two change, one is a defect.
+### 1.5 D — decision rules: §5.6–§5.9 exist. Two change, and the numbering defect is fixed.
 
 **Unchanged at v1 [I], on the reasoning in §3:** §5.6's five verdict strings in
 precedence order, §5.7's exit-code table (0/3/4/2) with 3 outranking 4, and the screen's
@@ -283,7 +285,8 @@ reuse of the same code space one level up **[V]** — all read out of fields who
 definitions v1 does not touch.
 
 **Changes at v1 — the floor clause, which v0 wrote with its own sunset.** Spec §5.8
-(the gate one) says: *"Until an in-distribution judge error exists (§9, ROADMAP 0.6), the
+(the gate section; the duplicate numbering this plan recorded as a defect was fixed by
+renumbering "What a no-detection result means" to §5.9) says: *"Until an in-distribution judge error exists (§9, ROADMAP 0.6), the
 printed MDE is a **perfect-judge floor**: it is a lower bound on the true resolution,
 never the resolution, and every surface that prints it MUST say so"* **[V]**. That clause
 is written to expire. It also states the two-directional disclosure — the floor is
@@ -298,15 +301,23 @@ because a third-party implementation that has not run its own calibration still 
 rules. Deleting the floor mode at v1 would leave conformant-but-uncalibrated
 implementations unspecified. **[I]**
 
-**A defect v1 must fix: `spec/qsr-v0.md` has two sections numbered 5.8.**
-`spec/qsr-v0.md:353` is *"5.8 The gate adds exit 5"* and `spec/qsr-v0.md:390` is
-*"5.8 What a no-detection result means"* **[V]**. The cross-references are already
-ambiguous in shipped surfaces: `spec/qsr-v0.md:40`, `spec/qsr-v0.md:606`,
-`quantfit/gate.py:8`, `quantfit/gate.py:340`, `docs/ci-integration.md:234` and
-`docs/ci-integration.md:398` all mean the *no-detection* §5.8, while
-`spec/qsr-v0.md:642` and `CHANGELOG.md:28` mean the *gate* §5.8 **[V]**. v1 renumbers the
-second to **§5.9** and every citation above moves with it. This is editorial and blocked
-on nothing.
+**A defect this plan found and v0 already fixed: `spec/qsr-v0.md` had two sections
+numbered 5.8.** `spec/qsr-v0.md:353` is *"5.8 The gate adds exit 5"* and what was a second
+*"5.8 What a no-detection result means"* is now **§5.9** **[V]**. It was editorial and
+blocked on nothing, so it did not wait for v1: holding a known-ambiguous citation open
+across a release is how the ambiguity gets copied into things that cite it.
+
+The citations moved with it. Meaning the *no-detection* section, all now §5.9: `spec/qsr-v0.md:40`,
+`spec/qsr-v0.md:606`, `quantfit/gate.py` (module docstring and the PASS caveat string),
+`docs/ci-integration.md` (the exit-0 table row and the "not a certification" bullet), and
+`docs/reference-reports-v0.md` (three sites the original survey missed — its "not a
+certification" bullet, the repo-card contents list, and the cited-clause inventory) **[V]**.
+Meaning the *gate* section and unchanged at §5.8: `spec/qsr-v0.md:642`, `CHANGELOG.md`,
+`CONTRIBUTING.md`, `quantfit/audit.py`, `quantfit/reproduce.py` and `tests/test_reproduce.py` **[V]**.
+
+The lesson is recorded in `CONTRIBUTING.md`: cite these two by **title as well as number**,
+because a bare "§5.8" is a citation that can come to mean a different section without
+anything in the citing file changing.
 
 **A decision, not a measurement: are tier thresholds normative?** `SMOKE_THRESHOLD = 0.30`
 and `FULL_THRESHOLD = 0.15` live in `gate.py:407-408` **[V]**, and grepping
@@ -415,7 +426,7 @@ freezing v1 is transcription plus measured values.
 | §5.6 verdict strings | changes narrowly, or not at all | case 5 embeds an MDE; whether its *basis* moves is a v1 choice under §2.6(a), not a consequence of ε (§2.7) |
 | §5.7 CI contract (exit codes) | unchanged, or gains one consumer row | §1.1's F row under the exit-code reading: `reproduce.py` reuses the 0/3/4/2 space and no spec section names it **[V]** |
 | §5.8 gate / exit 5 | **changes** | floor clause → two modes |
-| §5.8 no-detection meaning | **renumbered to §5.9**, content changes | its "~24pp at n=12" is an ε = 0 figure |
+| §5.9 no-detection meaning | **already renumbered from §5.8 in v0**; content changes at v1 | its "~24pp at n=12" is an ε = 0 figure |
 | §6.1–6.4 screen aggregation | structurally unchanged | §6.4's disclosed MDE follows whatever §5.3/§5.6 settle on; it decides nothing itself |
 | §6.5 human verification | **unchanged, and made permanent** | |
 | §6.6 what a screen may not claim | unchanged | |
@@ -883,8 +894,9 @@ near-miss it is **[V]**. And the claim names *which* report — a T4 reproductio
 (`cross-hardware-tolerance-v0.md:750-753`) **[V]**.
 
 **8. Transcribe.** Write `spec/qsr-v1.md` from §2's diff, filling the named holes with the
-measured values from steps 2–7. Renumber the duplicate §5.8 → §5.9 and update every
-citation listed in §1.5 **[V]**. Put §3's selected comparability paragraph into §10.3.
+measured values from steps 2–7. The duplicate §5.8 → §5.9 renumber and its citation sweep
+are already done in v0 (§1.5), so this step inherits an unambiguous numbering rather than
+performing one **[V]**. Put §3's selected comparability paragraph into §10.3.
 Add the Appendix B v1 entry.
 
 **9. Then, and only then, the artifacts that name a spec version.** Three reference
@@ -905,7 +917,7 @@ it.** The rule is scoped to artifacts that name a **spec** version, and it is am
 say so explicitly: *an artifact naming only a software version is outside step 9 and may
 land at any time; an artifact naming a spec version may not precede step 8.* `CITATION.cff`
 landed in this PR, ahead of steps 1–8 **[V]**, and is exempt on exactly that ground — its
-sole version field is `version: "0.5.2"`, the tool version, pinned to `pyproject.toml` and
+sole version field is `version: "0.5.3"`, the tool version, pinned to `pyproject.toml` and
 `quantfit/__init__.py` by `tests/test_refreports.py` **[V]**, and it names no spec version
 anywhere **[V]**. This is an amendment, not a deviation: a citation file that cites the
 *software* has nothing to wait for, while one that cites a frozen spec version before that

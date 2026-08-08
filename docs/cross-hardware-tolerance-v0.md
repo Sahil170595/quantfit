@@ -1441,7 +1441,9 @@ artifact under `GATE_SCHEMA_VERSION` rather than in the drift report);
 `screen.py` (`SPEC_CAPS`, both strings quoted in full in §4.4); `cli.py` (the
 `verify-safety` branch's exit-code order, the `gate` branch returning
 `decision["exit_code"]`, and the `--fp16` legacy-alias comment quoted verbatim in §3.3);
-`quantfit/__init__.py` (`__version__` = 0.5.1).
+<!-- audit: historical -->
+`quantfit/__init__.py` (`__version__` = 0.5.1 at the time of this reading; it tracks
+`pyproject.toml` release by release, so the value here is a timestamp, not a claim).
 
 **The judge's execution device** (§2.1, §2.3, §5.3) — read from three call sites, since no
 single field records it: `verify.py:_classify_refusals` calls `torchrt.pick_device()` and

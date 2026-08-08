@@ -240,6 +240,99 @@ def test_non_command_backticks_are_ignored(tmp_path):
 
 
 # --------------------------------------------------------------------------------
+# Fence pairing — the failure that halves the audited surface while exiting 0
+# --------------------------------------------------------------------------------
+
+
+def test_an_odd_fence_marker_count_is_refused(tmp_path):
+    """ONE stray ``` flips every later open/close. Silently auditing half a README is
+    strictly worse than refusing to start, so this is exit 2, not a quiet pass."""
+    text = readme(tmp_path, "```bash\nquantfit list\n```\n\n```\nstray, never closed\n")
+    with pytest.raises(qs.QuickstartCheckError, match="odd number"):
+        qs.extract_commands(text)
+
+
+def test_a_desynced_closer_with_an_info_string_is_refused(tmp_path):
+    """Even marker count, still desynced: a 'closer' carrying an info string is the
+    alternation telling you an earlier marker was stray. Real closers never do."""
+    text = readme(tmp_path, "```bash\nquantfit list\n```bash\nquantfit check --model m\n```\n```\n")
+    assert len(qs._FENCE_RE.findall(text)) == 4, "fixture must be EVEN, or the odd-count check fires first"
+    with pytest.raises(qs.QuickstartCheckError, match="CLOSING position"):
+        qs.extract_commands(text)
+
+
+def test_a_stray_fence_would_otherwise_have_halved_the_surface(tmp_path):
+    """The regression this guards, spelled out: without the refusal, two of the three
+    advertised commands below vanish from the audit and the gate still exits 0."""
+    body = "```bash\nquantfit list\n```\n\n```\noutput\n\n```bash\nquantfit check --model m\n```\n"
+    with pytest.raises(qs.QuickstartCheckError):
+        qs.extract_commands(body)
+    # Balanced, the same README yields both commands: the refusal is about pairing only.
+    fixed = body.replace("```\noutput\n\n", "```\noutput\n```\n\n")
+    assert [c.text for c in qs.extract_commands(fixed)] == ["quantfit list", "quantfit check --model m"]
+
+
+def test_a_tilde_fence_is_refused_rather_than_silently_unread(tmp_path):
+    """`~~~` blocks are invisible to _FENCE_RE. Half-support is the bug; refusal is not."""
+    text = readme(tmp_path, "```bash\nquantfit list\n```\n\n~~~bash\nquantfit check --model m\n~~~\n")
+    with pytest.raises(qs.QuickstartCheckError, match="~~~"):
+        qs.extract_commands(text)
+
+
+def _main_against_fake_cli(monkeypatch, tmp_path: Path, body: str, *extra: str) -> int:
+    """Run `main` end to end with the canned CLI surface: no subprocess, no wheel."""
+    (tmp_path / "README.md").write_text(body, encoding="utf-8")
+    monkeypatch.setattr(qs, "subprocess_runner", lambda _prefix: fake_runner())
+    return qs.main(["--readme", str(tmp_path / "README.md"), "--no-run", *extra])
+
+
+def test_the_fence_refusal_is_operational_not_drift(monkeypatch, tmp_path):
+    """Exit 2, not 1: an unpairable README is a reader that cannot read, not a verdict."""
+    assert _main_against_fake_cli(monkeypatch, tmp_path, "```bash\nquantfit list\n") == qs.EXIT_OPERATIONAL
+
+
+# --------------------------------------------------------------------------------
+# Unparseable commands are findings, never silent drops
+# --------------------------------------------------------------------------------
+
+
+def test_an_unparseable_fenced_command_is_reported_not_dropped(tmp_path):
+    text = readme(tmp_path, '```bash\nquantfit check --model "unclosed\nquantfit list\n```\n')
+    unparsed: list = []
+    commands = qs.extract_commands(text, unparsed=unparsed)
+    assert [c.text for c in commands] == ["quantfit list"]
+    (dropped,) = unparsed
+    assert dropped.raw == 'quantfit check --model "unclosed'
+    assert dropped.line == 2 and dropped.source == qs.SOURCE_FENCED
+    (finding,) = qs.unparsed_findings(unparsed)
+    assert finding.kind == "unparseable-command"
+    assert finding.severity == qs.SEVERITY_ERROR
+    assert finding.line == 2
+    assert finding.command == 'quantfit check --model "unclosed'  # the RAW line, for fixing
+
+
+def test_an_unparseable_inline_command_is_reported(tmp_path):
+    text = readme(tmp_path, 'prose about `quantfit check --model "oops`\n')
+    unparsed: list = []
+    assert qs.extract_commands(text, unparsed=unparsed) == []
+    assert [(u.line, u.source) for u in unparsed] == [(1, qs.SOURCE_INLINE)]
+
+
+def test_an_unparseable_command_fails_the_gate(monkeypatch, tmp_path):
+    """A quoting typo must be LOUDER than no command at all, not quieter."""
+    body = '```bash\nquantfit list\nquantfit check --model "unclosed\n```\n'
+    assert _main_against_fake_cli(monkeypatch, tmp_path, body) == qs.EXIT_DRIFT
+    # ...and the same README without the typo passes, so the FAIL is the typo's doing.
+    assert _main_against_fake_cli(monkeypatch, tmp_path, body.replace('"unclosed', "m")) == qs.EXIT_OK
+
+
+def test_extract_commands_still_works_without_the_unparsed_channel(tmp_path):
+    """Callers that pass no list keep the old signature; only `main` opts in."""
+    text = readme(tmp_path, '```bash\nquantfit check --model "unclosed\nquantfit list\n```\n')
+    assert [c.text for c in qs.extract_commands(text)] == ["quantfit list"]
+
+
+# --------------------------------------------------------------------------------
 # Classification
 # --------------------------------------------------------------------------------
 
@@ -286,10 +379,36 @@ def test_transformers_pair_keeps_the_gpu_requirement():
 
 
 def test_artifact_consumers_are_not_runnable():
-    for text in ("quantfit emit model-card --report drift.json", "quantfit screen --targets t.json --out d"):
+    for text in (
+        "quantfit emit model-card --report drift.json",
+        "quantfit screen --targets t.json --out d",
+        # `reproduce` reads two reports; `audit` reads a source checkout (--root defaults
+        # to the tree containing quantfit, which in a clean venv is site-packages).
+        "quantfit reproduce --reference ref.json --candidate t4.json",
+        "quantfit audit",
+    ):
         item = _classify(text)
         assert item.category == qs.CAT_NOT_RUNNABLE, text
-        assert qs.REQ_ARTIFACT in item.requirements
+        assert qs.REQ_ARTIFACT in item.requirements, text
+
+
+def test_every_shipped_subcommand_has_a_classification_rule():
+    """A quantfit subcommand with no entry lands in REQ_UNCLASSIFIED, whose reason reads
+    "no classification rule covers this program or subcommand" — true, but it is a hole in
+    the classifier reported as a fact about the README. `reproduce` and `audit` sat in it.
+
+    Read from the shipped parser, so wiring a new subcommand into the CLI without deciding
+    what it needs fails here rather than being silently filed as not-runnable.
+    """
+    from quantfit.cli import _build_parser
+
+    shipped = set(_subparser_map(_build_parser()))
+    assert shipped, "the shipped parser exposes no subcommands; this reader is stale"
+    missing = sorted(shipped - set(qs.SUBCOMMAND_REQUIREMENTS))
+    assert not missing, (
+        f"{missing} are shipped subcommands with no entry in SUBCOMMAND_REQUIREMENTS, so they are classified "
+        "'unclassified' rather than by what they actually need. Add an entry with a cited reason."
+    )
 
 
 def test_placeholder_commands_are_never_runnable():
@@ -482,6 +601,39 @@ def test_decide_fails_on_findings_and_on_a_short_runnable_set():
     assert qs.decide([], [], [], require_runnable=1)[:2] == ("FAIL", qs.EXIT_DRIFT)
 
 
+def test_decide_enforces_a_floor_on_the_audited_surface(tmp_path):
+    """The count floor: a collapse in extraction must fail the build, not shrink quietly."""
+    text = readme(tmp_path, "```bash\nquantfit list\nquantfit plan --model m\n```\n")
+    classifications = [qs.classify(c) for c in qs.extract_commands(text)]
+    assert qs.decide(classifications, [], [], min_commands=2)[:2] == ("PASS", qs.EXIT_OK)
+    verdict, exit_code, why = qs.decide(classifications, [], [], min_commands=3)
+    assert (verdict, exit_code) == ("FAIL", qs.EXIT_DRIFT)
+    assert why["n_commands"] == 2 and why["short_of_min_commands"]
+
+
+def test_min_commands_is_wired_through_main(monkeypatch, tmp_path):
+    body = "```bash\nquantfit list\n```\n"
+    assert _main_against_fake_cli(monkeypatch, tmp_path, body, "--min-commands", "1") == qs.EXIT_OK
+    assert _main_against_fake_cli(monkeypatch, tmp_path, body, "--min-commands", "2") == qs.EXIT_DRIFT
+
+
+def test_the_validator_gaps_are_documented_decisions_not_oversights():
+    """Two things `validate_command` does not check, pinned so they stay deliberate.
+
+    Required args and extra positionals both pass. That is a decision — the README names
+    commands in prose by bare name (`quantfit gate`, `quantfit audit`), and rejecting those
+    would fail the build on correct English — and the module docstring has to keep saying
+    so. If either gap is ever closed, this test is what forces the docstring to follow.
+    """
+    surface = qs.discover_surface(fake_runner())
+    assert _validate("quantfit gate", surface) == []  # required --baseline/--quant missing
+    assert _validate("quantfit list extra-junk", surface) == []  # positional the CLI rejects
+    doc = qs.__doc__ or ""
+    assert "Required arguments are not checked" in doc
+    assert "Extra or malformed positionals are not checked" in doc
+    assert "Only ``` fences are read" in doc
+
+
 def test_missing_readme_is_operational_not_drift(tmp_path):
     assert qs.main(["--readme", str(tmp_path / "nope.md"), "--no-run"]) == qs.EXIT_OPERATIONAL
 
@@ -494,6 +646,21 @@ def test_the_sandbox_removes_the_network_and_the_gpu():
     assert qs.SANDBOX_ENV["TRANSFORMERS_OFFLINE"] == "1"
     assert qs.SANDBOX_ENV["HF_DATASETS_OFFLINE"] == "1"
     assert qs.SANDBOX_ENV["CUDA_VISIBLE_DEVICES"] == "-1"
+
+
+def test_the_docstring_does_not_claim_the_gpu_mask_fails_loudly():
+    """The sandbox's two halves are not equally strong, and the docstring must say so.
+
+    `HF_HUB_OFFLINE=1` makes a misclassified network command RAISE. `CUDA_VISIBLE_DEVICES=-1`
+    does not: `torch.cuda.is_available()` simply returns False and code that branches on it
+    takes its CPU path and exits 0. `quantfit plan` is exactly that shape — it reroutes to
+    route() rule 1 and PASSes — so a docstring claiming a misclassified GPU command "fails
+    loudly here" would be describing a guarantee this tool does not provide.
+    """
+    doc = qs.__doc__ or ""
+    assert "silently REROUTED, not failed" in doc
+    assert "quantfit plan" in doc, "the one device-consulting category-(a) command must be named"
+    assert "fails loudly here" not in doc
 
 
 def test_the_tool_is_stdlib_only_and_never_imports_quantfit():
@@ -557,11 +724,46 @@ def real_commands():
     return qs.extract_commands((_ROOT / "README.md").read_text(encoding="utf-8"))
 
 
+#: The floor on the audited surface. The README advertised 21 commands when this was
+#: written; 15 is a deliberately slack floor that still fails on the collapse mode that
+#: matters — a fence desync roughly halves the count. Raise it, never lower it silently.
+MIN_README_COMMANDS = 15
+
+
 def test_the_real_readme_parses(real_commands):
     assert real_commands, "no commands extracted from README.md - the extractor went blind"
     assert all(command.argv for command in real_commands)
     assert any(command.source == qs.SOURCE_FENCED for command in real_commands)
     assert any(command.source == qs.SOURCE_INLINE for command in real_commands)
+
+
+def test_the_real_readme_has_no_unparseable_command():
+    """The gate would exit 1 on these; catching them here names the line in a unit run."""
+    unparsed: list = []
+    qs.extract_commands((_ROOT / "README.md").read_text(encoding="utf-8"), unparsed=unparsed)
+    assert not unparsed, [f"L{u.line}: {u.raw!r} ({u.error})" for u in unparsed]
+
+
+def test_the_real_readme_surface_has_not_collapsed(real_commands):
+    """A floor, so a silent halving of the audited surface fails the unit suite too.
+
+    `_iter_fences` now refuses a marker desync outright, which is the mechanism this
+    guards against; the count floor is the belt to that braces, and it fails for any other
+    way extraction could quietly shrink.
+    """
+    assert len(real_commands) >= MIN_README_COMMANDS, (
+        f"README.md now yields {len(real_commands)} commands, below the recorded floor of "
+        f"{MIN_README_COMMANDS}. Either the README genuinely shrank (lower the floor on purpose, in the same "
+        "commit) or extraction collapsed."
+    )
+
+
+def test_the_real_readme_fence_markers_pair(real_commands):
+    """The desync precondition, asserted against the file the gate actually reads."""
+    text = (_ROOT / "README.md").read_text(encoding="utf-8")
+    markers = qs._FENCE_RE.findall(text)
+    assert len(markers) % 2 == 0, f"README.md has {len(markers)} ``` markers; one is unpaired"
+    assert not qs._TILDE_FENCE_RE.search(text), "README.md gained a ~~~ fence, which this extractor cannot read"
 
 
 def test_every_readme_command_exists_in_the_shipped_cli(real_commands, real_surface):

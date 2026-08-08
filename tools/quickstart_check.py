@@ -52,7 +52,7 @@ anyway". Each is reported as UNRUN with the specific reason it was not run, so t
 output is a list of what this gate does *not* cover. That list is the deliverable.
 
 --------------------------------------------------------------------------------
-## What makes the (a) run trustworthy
+## What the (a) run is evidence for — and what it is not
 
 Category (a) commands are executed with the network and the GPU **removed from the
 environment**, not merely assumed absent:
@@ -60,19 +60,62 @@ environment**, not merely assumed absent:
     HF_HUB_OFFLINE=1  TRANSFORMERS_OFFLINE=1  HF_DATASETS_OFFLINE=1
     HF_HUB_DISABLE_TELEMETRY=1  CUDA_VISIBLE_DEVICES=-1
 
-So a misclassification cannot pass silently: a command classified (a) that in fact
-reaches for the Hub or a CUDA device fails loudly here instead of succeeding on a
-developer box and failing on a reader's. The same environment is used for the `--help`
-introspection calls.
+The two halves are **not** equally strong, and the difference decides what a PASS means:
+
+* **Network: removed, and a misclassification fails loudly.** `HF_HUB_OFFLINE=1`
+  makes a Hub call raise rather than succeed, so a command classified (a) that in
+  fact reaches the Hub exits nonzero here instead of passing on a networked
+  developer box and failing on a reader's.
+
+* **GPU: masked, and a misclassification is silently REROUTED, not failed.**
+  `CUDA_VISIBLE_DEVICES=-1` makes `torch.cuda.is_available()` return False. Code
+  that *branches* on availability therefore takes its CPU path and exits 0. The
+  concrete case is `quantfit plan` — the one category-(a) command in this README
+  that consults a device at all: `policy/target.py:detect_target` sees no CUDA,
+  `policy/route.py` rule 1 fires, and it prints a CPU recommendation (GGUF Q4_K_M).
+  Its PASS is evidence for the **CPU branch only**; the CUDA branch a reader with a
+  GPU actually hits is not exercised here and has no recorded run
+  (`docs/validation-matrix.md` §2, `plan`). The other (a) command, `quantfit list`,
+  is a constant table and consults no device at all.
+
+So: this gate proves the (a) commands *run*, on the branch a masked, offline host
+takes. It does not prove they run on the branch a reader takes. `-1` rather than
+`""` is itself load-bearing — with `""`, `is_available()` stays True while
+`device_count()` is 0, which crashes `detect_target` (`docs/validation-matrix.md` §5,
+defect 1). The same environment is used for the `--help` introspection calls.
+
+--------------------------------------------------------------------------------
+## What the drift validation does NOT check
+
+Stated explicitly, because a validator's silent gaps are indistinguishable from
+coverage:
+
+* **Required arguments are not checked.** `quantfit gate` with no `--baseline` would
+  be rejected by argparse, and passes here. This is deliberate: the README names
+  several commands in prose by bare name (`quantfit gate`, `quantfit reproduce`,
+  `quantfit audit`) as sentence subjects rather than as invocations, and this
+  extractor cannot tell the two apart. Enforcing required args would fail the build
+  on correct English. Category-(a) commands are exempt from the gap by construction —
+  they are actually executed, so a missing required arg fails there.
+* **Extra or malformed positionals are not checked** beyond `choices=`. A bare token
+  that is not a known subcommand or choice is assumed to be a value (a model id, a
+  path, a repeated `--bits` value) and skipped, so `quantfit list extra-junk` passes.
+* **Only ``` fences are read.** A `~~~`-fenced block is invisible to the extractor.
+  Rather than half-support it, a `~~~` marker anywhere in the README is an
+  **operational failure** (exit 2) naming the line — an unaudited block is worse than
+  a refusal to start.
+* **Nothing validates output text.** A command can exist, run, exit 0, and still
+  document a lie.
 
 --------------------------------------------------------------------------------
 ## Exit codes
 
   0  every extracted command validated against the CLI, and every category-(a)
      command ran and exited 0.
-  1  drift or failure: an unknown subcommand/flag/choice in the README, or a
-     category-(a) command that failed.
-  2  operational: no README, no runnable `quantfit` binary, unparseable `--help`.
+  1  drift or failure: an unknown subcommand/flag/choice in the README, a README
+     command that will not shlex-parse, or a category-(a) command that failed.
+  2  operational: no README, no runnable `quantfit` binary, unparseable `--help`,
+     or a README whose fences this extractor cannot pair (see below).
 
 Exit 0 means *the README's commands exist and its clean-venv subset works*. It does
 not mean the README is correct — a command can exist, run, and still document a lie.
@@ -163,6 +206,14 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     "emit": (REQ_ARTIFACT,),
     # Pure local — but of a capture / labeling sheet that must already exist.
     "calibrate": (REQ_ARTIFACT,),
+    # Pure local JSON comparison — of TWO drift reports that must already exist
+    # (quantfit/reproduce.py: --reference and --candidate are both read from disk).
+    "reproduce": (REQ_ARTIFACT,),
+    # Pure local, no network, no GPU — but it audits a SOURCE CHECKOUT: `--root`
+    # defaults to "the one containing quantfit" (quantfit/cli.py), which in a clean
+    # venv is site-packages, where the README, docs/ and spec/ it reads do not exist.
+    # A repo checkout is an input artifact like any other.
+    "audit": (REQ_ARTIFACT,),
 }
 
 # Non-quantfit programs the README is allowed to advertise.
@@ -184,7 +235,7 @@ _REASONS: Mapping[str, str] = {
     REQ_GPU: "loads weights through torch / llm-compressor",
     REQ_ARTIFACT: "consumes an artifact a clean venv does not have",
     REQ_PLACEHOLDER: "contains a <placeholder> and cannot be run verbatim",
-    REQ_UNCLASSIFIED: "no classification rule covers this program",
+    REQ_UNCLASSIFIED: "no classification rule covers this program or subcommand",
 }
 
 # The offline+no-GPU environment category (a) runs are executed under. Removing the
@@ -253,6 +304,10 @@ class Command:
 
 
 _FENCE_RE = re.compile(r"^(?P<indent>[ \t]*)```(?P<info>[^\n]*)$", re.MULTILINE)
+# Only ``` is recognized. A `~~~` block would be invisible to the extractor, which is
+# the failure mode this whole module exists to prevent, so its mere presence is refused
+# loudly rather than half-supported. See the module docstring.
+_TILDE_FENCE_RE = re.compile(r"^[ \t]*~~~", re.MULTILINE)
 # Shell prompts only. `#` is deliberately NOT a prompt here: stripping it would turn
 # every comment line in a fenced block into a command.
 _PROMPT_RE = re.compile(r"^\s*(?:\$|>)\s+")
@@ -269,15 +324,54 @@ class _Fence:
     first_body_line: int
 
 
+def _line_of(text: str, offset: int) -> int:
+    return text.count("\n", 0, offset) + 1
+
+
 def _iter_fences(text: str) -> list[_Fence]:
-    """Fenced blocks, paired by alternation (open, close, open, close, ...)."""
+    """Fenced blocks, paired by alternation (open, close, open, close, ...).
+
+    Alternation is only correct while every marker is matched. ONE stray ``` — a
+    third marker in a run of three, a fence opened in an example and never closed —
+    flips the sense of every marker after it: former openers become closers, whole
+    blocks stop being blocks, and the audited surface silently halves while the gate
+    still exits 0. Silently auditing half a README is the worst outcome available to
+    this tool, so both symptoms of a desync are refused instead:
+
+      1. an ODD number of markers — the last one has no partner;
+      2. a marker in CLOSING position that carries an info string — real closing
+         fences never do (CommonMark forbids it), so `n` blocks that all look like
+         `open`/`open` is the alternation reporting its own desync.
+
+    Both raise `QuickstartCheckError` (exit 2, operational): a README this reader
+    cannot pair is not a README verdict, it is a reader that must not pretend.
+    """
+    tilde = _TILDE_FENCE_RE.search(text)
+    if tilde:
+        raise QuickstartCheckError(
+            f"README line {_line_of(text, tilde.start())} opens a `~~~` fence. This extractor reads ``` fences "
+            "only, so that block and every command in it would be audited by nothing. Convert it to ``` "
+            "(or teach _FENCE_RE about tildes on purpose)."
+        )
+
     fences = list(_FENCE_RE.finditer(text))
+    if len(fences) % 2:
+        lines = [_line_of(text, m.start()) for m in fences]
+        raise QuickstartCheckError(
+            f"README has {len(fences)} ``` markers, an odd number, so one is unpaired and every block after it "
+            f"is mispaired. Markers are at lines {lines}. Fix the README fence; this checker will not audit "
+            "half of it quietly."
+        )
+
     blocks: list[_Fence] = []
-    index = 0
-    i = 0
-    while i < len(fences) - 1:
+    for index, i in enumerate(range(0, len(fences), 2), start=1):
         opener, closer = fences[i], fences[i + 1]
-        index += 1
+        if closer.group("info").strip():
+            raise QuickstartCheckError(
+                f"README line {_line_of(text, closer.start())} is a ``` marker in CLOSING position but carries "
+                f"the info string {closer.group('info').strip()!r}. Closing fences never do, so the open/close "
+                "alternation has desynced — an earlier marker is stray or unpaired."
+            )
         blocks.append(
             _Fence(
                 index=index,
@@ -289,7 +383,6 @@ def _iter_fences(text: str) -> list[_Fence]:
                 first_body_line=text[: opener.end()].count("\n") + 2,
             )
         )
-        i += 2
     return blocks
 
 
@@ -307,17 +400,47 @@ def _blank_out_fenced(text: str) -> str:
     return "".join(out)
 
 
-def _split_command(raw: str) -> tuple[str, ...]:
-    """shlex a single logical command line; `()` when it is empty or unparseable."""
+@dataclass(frozen=True)
+class Unparsed:
+    """A README line that looks like a command but will not shlex-parse.
+
+    Returning `()` for these and letting `if argv:` drop them made a quoting typo in
+    the README *quieter* than no README at all: the command vanished from the audited
+    set, the count silently fell by one, and the gate still exited 0. A typo must
+    surface as a finding, with the raw line and where to find it.
+    """
+
+    raw: str
+    line: int
+    source: str
+    block: int | None
+    error: str
+
+
+def _split_command(raw: str) -> tuple[tuple[str, ...] | None, str]:
+    """`(argv, "")`, or `(None, reason)` when shlex refuses the line."""
     try:
-        return tuple(shlex.split(raw, comments=True))
-    except ValueError:
-        return ()
+        return tuple(shlex.split(raw, comments=True)), ""
+    except ValueError as exc:
+        return None, str(exc) or "unbalanced quoting"
 
 
-def extract_fenced_commands(text: str) -> list[Command]:
-    """Every command in every ```bash-family fenced block, `\\`-continuations joined."""
+def extract_fenced_commands(text: str, *, unparsed: list[Unparsed] | None = None) -> list[Command]:
+    """Every command in every ```bash-family fenced block, `\\`-continuations joined.
+
+    Pass `unparsed` to collect the lines shlex refused; they are never silently dropped.
+    """
     commands: list[Command] = []
+
+    def take(joined: str, line: int, block: int) -> None:
+        argv, error = _split_command(joined)
+        if argv is None:
+            if unparsed is not None:
+                unparsed.append(Unparsed(raw=joined, line=line, source=SOURCE_FENCED, block=block, error=error))
+            return
+        if argv:
+            commands.append(Command(text=joined, argv=argv, source=SOURCE_FENCED, line=line, block=block))
+
     for fence in _iter_fences(text):
         words = fence.info.split()
         if not words or words[0].lower() not in BASH_INFO_STRINGS:
@@ -341,18 +464,17 @@ def extract_fenced_commands(text: str) -> list[Command]:
             pending = []
             if not joined or joined.startswith("#"):
                 continue
-            argv = _split_command(joined)
-            if argv:
-                commands.append(Command(text=joined, argv=argv, source=SOURCE_FENCED, line=pending_line, block=index))
+            take(joined, pending_line, index)
         if pending:  # a trailing `\` at the end of a block: keep it, do not drop it
             joined = " ".join(part for part in pending if part).strip()
-            argv = _split_command(joined)
-            if argv:
-                commands.append(Command(text=joined, argv=argv, source=SOURCE_FENCED, line=pending_line, block=index))
+            if joined:
+                take(joined, pending_line, index)
     return commands
 
 
-def extract_inline_commands(text: str, program: str = QUANTFIT) -> list[Command]:
+def extract_inline_commands(
+    text: str, program: str = QUANTFIT, *, unparsed: list[Unparsed] | None = None
+) -> list[Command]:
     """`quantfit ...` spans in backticked prose, outside fenced blocks.
 
     The README advertises `screen` and `emit` only in prose, so an extractor that read
@@ -365,20 +487,30 @@ def extract_inline_commands(text: str, program: str = QUANTFIT) -> list[Command]
         span = " ".join(match.group(1).split())
         if not span.startswith(program + " "):
             continue
-        argv = _split_command(span)
+        line = text[: match.start()].count("\n") + 1
+        argv, error = _split_command(span)
+        if argv is None:
+            if unparsed is not None:
+                unparsed.append(Unparsed(raw=span, line=line, source=SOURCE_INLINE, block=None, error=error))
+            continue
         if not argv:
             continue
-        commands.append(
-            Command(text=span, argv=argv, source=SOURCE_INLINE, line=text[: match.start()].count("\n") + 1, block=None)
-        )
+        commands.append(Command(text=span, argv=argv, source=SOURCE_INLINE, line=line, block=None))
     return commands
 
 
-def extract_commands(text: str, *, include_inline: bool = True) -> list[Command]:
-    """Every advertised command, fenced first, then inline, in README order."""
-    commands = extract_fenced_commands(text)
+def extract_commands(
+    text: str, *, include_inline: bool = True, unparsed: list[Unparsed] | None = None
+) -> list[Command]:
+    """Every advertised command, fenced first, then inline, in README order.
+
+    `unparsed`, when given, is filled with the lines shlex refused. Callers that pass
+    nothing get the old behaviour; `main` always passes a list, because dropping a
+    malformed command is how README drift hides from the gate that exists to find it.
+    """
+    commands = extract_fenced_commands(text, unparsed=unparsed)
     if include_inline:
-        commands += extract_inline_commands(text)
+        commands += extract_inline_commands(text, unparsed=unparsed)
     return sorted(commands, key=lambda c: (c.line, c.source != SOURCE_FENCED))
 
 
@@ -623,8 +755,36 @@ class Finding:
     detail: str
 
 
+def unparsed_findings(unparsed: Sequence[Unparsed]) -> list[Finding]:
+    """A README line that will not shlex-parse is an ERROR, not a line to skip.
+
+    The old behaviour returned `()` from the splitter and let `if argv:` drop it, so a
+    stray quote in the README made a command disappear from the audit while the gate
+    still exited 0 — the failure mode was *quieter* than the bug it hid. The raw line and
+    its README line number are both in the finding so it is fixable without a bisect.
+    """
+    return [
+        Finding(
+            kind="unparseable-command",
+            severity=SEVERITY_ERROR,
+            command=item.raw,
+            line=item.line,
+            detail=(
+                f"{item.source} command at README line {item.line} will not shlex-parse ({item.error}); "
+                "it was NOT audited or run. Fix the quoting in the README."
+            ),
+        )
+        for item in unparsed
+    ]
+
+
 def validate_command(command: Command, surface: CommandNode) -> list[Finding]:
-    """Every subcommand, flag and choice the README uses must exist in the CLI."""
+    """Every subcommand, flag and choice the README uses must exist in the CLI.
+
+    Deliberately does NOT check required arguments or reject unrecognized positionals —
+    see "What the drift validation does NOT check" in the module docstring for why, and
+    for what covers the gap.
+    """
     if not command.is_quantfit:
         return []
 
@@ -906,6 +1066,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
         metavar="N",
         help="fail unless at least N category-(a) commands were found (default 0: report the gap, do not fail)",
     )
+    parser.add_argument(
+        "--min-commands",
+        type=int,
+        default=0,
+        metavar="N",
+        help=(
+            "fail unless at least N commands were EXTRACTED (default 0). A floor on the audited surface: "
+            "a collapse in the extractor shows up as a smaller number, not as a quiet pass"
+        ),
+    )
     return parser
 
 
@@ -915,23 +1085,34 @@ def decide(
     runs: Sequence[RunResult],
     *,
     require_runnable: int = 0,
+    min_commands: int = 0,
 ) -> tuple[str, int, dict]:
     """(verdict, exit_code, why) — the whole pass/fail rule, in one testable place.
 
-    Three independent ways to fail, and none of them is "the README looks wrong":
-    an advertised command that does not exist, a clean-venv command that did not
-    run clean, and (opt-in) a quickstart with fewer runnable commands than the
-    caller demanded. Notes never fail a build.
+    Four independent ways to fail, and none of them is "the README looks wrong": an
+    advertised command that does not exist or will not parse, a clean-venv command that
+    did not run clean, (opt-in) a quickstart with fewer runnable commands than the caller
+    demanded, and (opt-in) a smaller audited surface than the caller expects. Notes never
+    fail a build.
+
+    `min_commands` is the belt to the fence-pairing braces: `_iter_fences` now refuses a
+    desync outright, but a floor on the extracted count fails the build for any *other*
+    way the surface could silently shrink, without this file having to predict it.
     """
     n_runnable = sum(1 for item in classifications if item.runnable)
     why = {
+        "n_commands": len(classifications),
         "n_runnable": n_runnable,
         "n_errors": sum(1 for f in findings if f.severity == SEVERITY_ERROR),
         "n_failed_runs": sum(1 for r in runs if not r.ok),
         "short_of_required_runnable": n_runnable < require_runnable,
         "require_runnable": require_runnable,
+        "short_of_min_commands": len(classifications) < min_commands,
+        "min_commands": min_commands,
     }
-    failed = bool(why["n_errors"] or why["n_failed_runs"] or why["short_of_required_runnable"])
+    failed = bool(
+        why["n_errors"] or why["n_failed_runs"] or why["short_of_required_runnable"] or why["short_of_min_commands"]
+    )
     return ("FAIL", EXIT_DRIFT, why) if failed else ("PASS", EXIT_OK, why)
 
 
@@ -959,13 +1140,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"error: cannot read {readme}: {exc}", file=sys.stderr)
         return EXIT_OPERATIONAL
 
-    commands = extract_commands(text, include_inline=not args.no_inline)
-    classifications = [classify(command) for command in commands]
-
     runner = subprocess_runner(prefix)
+    # Extraction is INSIDE the try: an unpairable fence is an operational refusal
+    # (exit 2), not a README verdict, and it must not escape as a traceback.
     try:
+        unparsed: list[Unparsed] = []
+        commands = extract_commands(text, include_inline=not args.no_inline, unparsed=unparsed)
+        classifications = [classify(command) for command in commands]
         surface = discover_surface(runner, timeout=args.timeout)
-        findings: list[Finding] = []
+        findings: list[Finding] = list(unparsed_findings(unparsed))
         for command in commands:
             findings.extend(validate_command(command, surface))
         undocumented = undocumented_subcommands(commands, surface)
@@ -977,7 +1160,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     report = build_report(readme, prefix, classifications, findings, runs, undocumented, ran=not args.no_run)
     _print_report(report, runs, classifications)
 
-    verdict, exit_code, why = decide(classifications, findings, runs, require_runnable=args.require_runnable)
+    verdict, exit_code, why = decide(
+        classifications,
+        findings,
+        runs,
+        require_runnable=args.require_runnable,
+        min_commands=args.min_commands,
+    )
     n_runnable = why["n_runnable"]
     report["verdict"] = verdict
     report["exit_code"] = exit_code
@@ -994,6 +1183,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"\nreport -> {args.json}")
 
     print()
+    if why["short_of_min_commands"]:
+        print(
+            f"FAIL: --min-commands {args.min_commands} but only {len(commands)} command(s) were extracted from "
+            "the README. The audited surface shrank; check the fenced blocks before relaxing the floor."
+        )
     if why["short_of_required_runnable"]:
         print(
             f"FAIL: --require-runnable {args.require_runnable} but only {n_runnable} category-(a) command(s) "

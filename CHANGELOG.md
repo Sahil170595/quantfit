@@ -47,8 +47,62 @@ fabricates neither.
 
 **Not delivered, so 0.8 is not claimed gate-passed:** QSR v1 is not frozen, zero
 reference reports exist, the free-tier T4 reproduction has not been attempted,
-there is no launch post (the 0.5 screen has not run, so there are no findings to
-lead with), and none of the three new modules is reachable from the CLI.
+and there is no launch post (the 0.5 screen has not run, so there are no findings
+to lead with). Of the three new modules, `reproduce` and `audit` became CLI
+commands in the 1.0 work below; `refreports` is still library-only, by design —
+the registry is empty, so a command would be a facade over nothing.
+
+### ROADMAP 1.0 machinery: the checks that keep the docs honest
+
+1.0 is the frozen standard, and none of its gate clauses is met here. What ships
+is the machinery that makes the claims checkable, plus the corrections that
+machinery found.
+
+- **`quantfit audit`** — docs=code parity as a command and a CI job: CLI commands
+  and flags walked off the real argparse parser, `file:symbol` citations resolved
+  by `ast`, exit codes, quoted constants, and schema field names. Exit 0 clean, 3
+  drift, 2 operational. It proved itself on its authors: wiring it made it fail
+  immediately with eight undocumented flags. Documents can say "this token is an
+  example, not a claim" with an `<!-- audit: ... -->` marker, because an auditor
+  that cannot be told about a counter-example is an auditor that gets switched off.
+- **`quantfit reproduce`** — the cross-hardware tolerance as a command. Replicate
+  files become a T0 result at the CLI boundary, so the record states which files
+  supplied it, and without `--t0-*` the outcome can never be the gate pass.
+- **The README quickstart is gated against the installed wheel**, with a
+  `--min-commands` floor so a fence-desynced README fails the build instead of
+  quietly shrinking the audited surface to nothing.
+- **CI derives dependency caps from `pyproject.toml`** (`tools/ci_constraints.py`).
+  The test job had been installing `gguf` and `inspect-ai` with no constraint at
+  all, ignoring the very caps pyproject declares — CI could have gone green on a
+  combination the package forbids. Restating the caps in the workflow would have
+  swapped one drift for another.
+- **The dependency policy is a test, not a paragraph** — every declared
+  requirement, including `[build-system].requires`, is bounded or carries a
+  classified exemption whose premise is re-checked against installed metadata.
+  Inert floors and majors crossed under an exemption are recorded, so a *new* one
+  fails rather than accumulating quietly.
+
+Fixes this round, each found by one of the above or by review of it:
+
+- **`detect_target()` crashed instead of exiting cleanly on a masked GPU.** With
+  `CUDA_VISIBLE_DEVICES=""`, `torch.cuda.is_available()` is True while
+  `device_count()` is 0; probing the device then raised `AssertionError: Invalid
+  device id`, which is outside quantfit's `(RuntimeError, OSError)` taxonomy, so
+  `quantfit plan` exited 1 with a traceback rather than the documented 2. Zero
+  visible devices is now read as what it is — a CPU machine — and any other probe
+  failure becomes a `RuntimeError`.
+- **`plan --token` was inert**: accepted by the parser, never read, and nothing in
+  `plan`'s path reaches the Hub. Removed, with a test that accepting a token and
+  using one must be the same set of commands.
+- **Spec §5.8 was two different sections.** The no-detection section is now §5.9,
+  and every citation moved with it — cited by title as well as number, because a
+  bare number can come to mean something else without the citing file changing.
+- **The GGUF report no longer overstates its own supply chain**: the SHA256 pin
+  gates *provisioning*, and a cached binary is not re-hashed, so the arm records
+  "provisioned from" rather than a verification it did not perform on that run.
+  `SECURITY.md` now discloses the same gap instead of implying the check.
+- **README no longer claims validation on Llama-1B** — that model appears in the
+  0.5 screen *target list*, which is a list of things to run, not a record of runs.
 
 ## 0.5.2
 
