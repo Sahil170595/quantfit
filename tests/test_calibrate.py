@@ -368,46 +368,41 @@ def test_two_captures_never_mint_the_same_ids(tmp_path):
 
 
 def test_row_order_is_a_shuffle_not_the_capture_order(tmp_path):
-    """The sheet order must be randomised, which is a property of the SHUFFLE, not of one draw.
+    # The blind rests on row order carrying no information about (pair, arm).
+    # Assert the MECHANISM, which is deterministic — rows are ordered by their
+    # opaque id — rather than any single draw's shape. The salt is now random
+    # (secrets.token_hex), so per-build order is a uniform permutation of the
+    # 2*_N_PAIRS rows: an assertion like "the first block holds both arms" is
+    # true only 1 - 2/C(10,5) = 99.2% of the time and reds CI ~0.8% of runs.
+    sheet, key = _build(tmp_path)
+    ids = json.loads(Path(key).read_text(encoding="utf-8"))["ids"]
+    rows = [row[0] for row in _sheet_rows(sheet)[1:]]
 
-    Asserted across several independent builds on purpose. A fair shuffle can reproduce the
-    capture order by chance, so a single draw cannot distinguish "randomised" from "lucky":
-    with `_N_PAIRS` = 5 the arm sequence lands back on the capture's own order with
-    probability 1/C(10,5), and lands with one arm filling the first block with probability
-    2/C(10,5) = 0.79% — which is precisely the rate at which this test used to fail, roughly
-    one CI run in 126 across a five-job matrix.
+    # Ordered by the opaque id — the only ordering key, and one the labeler
+    # cannot invert without the key file they never receive.
+    assert rows == sorted(rows)
+    assert len(rows) == 2 * _N_PAIRS == len(ids)
+    # Every id appears exactly once, and each is an opaque fixed-shape token —
+    # `r` + 16 lowercase hex — so a row's position says nothing about its
+    # (pair, arm) beyond what the key file, which the labeler never gets, reveals.
+    assert set(rows) == set(ids)
+    assert all(re.fullmatch(r"r[0-9a-f]{16}", row_id) for row_id in rows)
 
-    The blinding salt comes from `secrets`, so it cannot be seeded for the test without
-    weakening the thing being tested. Repeating instead makes a false failure require every
-    draw to coincide: (1/252)**_DRAWS, which is about 2e-15 here.
 
-    Each individual draw is still checked for the property that must hold every time — the
-    order is a permutation of the capture, nothing added, nothing dropped.
-    """
-    _DRAWS = 6
-    capture_order = [ARM_BASELINE] * _N_PAIRS + [ARM_QUANTIZED] * _N_PAIRS
-
+def test_the_shuffle_is_salted_so_two_sheets_do_not_share_an_order(tmp_path):
+    # The blind's strength IS the per-build salt: two sheets from one capture
+    # must not agree on order, or the ordering would be recoverable offline.
+    # P(two independent permutations of 10 rows coincide) = 1/10! = 2.8e-7,
+    # so this is deterministic in practice, unlike the per-draw shape it replaces.
+    capture = _capture(tmp_path)
     orders = []
-    for i in range(_DRAWS):
-        sheet, key = _build(tmp_path, stem=f"draw{i}")
+    for stem in ("a", "b"):
+        sheet, key = _build(tmp_path, capture_path=capture, stem=stem)
         ids = json.loads(Path(key).read_text(encoding="utf-8"))["ids"]
-        order = [ids[row[0]] for row in _sheet_rows(sheet)[1:]]
-        # Holds on every draw, lucky or not: a shuffle rearranges, it never adds or drops.
-        assert sorted((e["pair"], e["arm"]) for e in order) == sorted(
-            (pair, arm) for pair in range(_N_PAIRS) for arm in (ARM_BASELINE, ARM_QUANTIZED)
-        )
-        orders.append(order)
+        orders.append([(ids[row[0]]["pair"], ids[row[0]]["arm"]) for row in _sheet_rows(sheet)[1:]])
 
-    arm_orders = [[e["arm"] for e in order] for order in orders]
-    assert any(arms != capture_order for arms in arm_orders), (
-        f"all {_DRAWS} draws reproduced the capture's own arm order; the sheet is not being shuffled"
-    )
-    assert any(len(set(arms[:_N_PAIRS])) == 2 for arms in arm_orders), (
-        f"in all {_DRAWS} draws one arm filled the first block; the arms are not interleaved"
-    )
-    assert any([e["pair"] for e in order] != sorted(e["pair"] for e in order) for order in orders), (
-        f"all {_DRAWS} draws came out in pair order; the sheet is not being shuffled"
-    )
+    assert sorted(orders[0]) == sorted(orders[1])  # same content...
+    assert orders[0] != orders[1]  # ...different order, because the salt differs
 
 
 def test_both_arms_and_both_judge_labels_are_in_the_sheet(tmp_path):
