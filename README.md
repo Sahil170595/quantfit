@@ -113,7 +113,8 @@ citations, exit codes, quoted constants, and schema field names:
 
 ```bash
 quantfit audit                    # exit 0 = clean, 3 = drift found, 2 = operational
-quantfit audit --json out.json    # the findings as data, for CI
+quantfit audit --json             # the findings as data, on stdout
+quantfit audit --json-out out.json        # ...or written to a file
 quantfit audit --root /path/to/quantfit   # run it from another directory
 ```
 
@@ -129,6 +130,31 @@ scheme matrix. `quantfit calibrate sheet` / `quantfit calibrate ingest` build a
 blinded judge-calibration labeling sheet from a `--capture` file and ingest the
 filled labels into a per-arm judge-error report — machinery for ROADMAP 0.6,
 which starts only on the 0.5 GO decision.
+
+**Every command speaks JSON.** Add `--json` to any of them and stdout carries
+exactly one document — never prose mixed with data, so a caller never has to
+strip lines before parsing:
+
+```bash
+quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --json
+quantfit check --model Qwen/Qwen2.5-7B-Instruct --json
+```
+
+```json
+{
+  "schema_version": 1,
+  "tool": { "name": "quantfit", "version": "0.6.0" },
+  "command": "verify-safety",
+  "exit_code": 3,
+  "result": { "regression_detected": true, "unmeasurable_axes": [], "...": "..." }
+}
+```
+
+The exit code stays the CI contract and the envelope repeats it, so a caller can
+branch on either. An operational failure returns the same envelope with an
+`error` block and `"exit_code": 2` — the case you most need to parse is not the
+one case you cannot. `schema_version` is there so a consumer can tell when its
+assumptions expired.
 
 **Gate it in CI.** `quantfit gate` is the pre-release check — and it refuses to
 promise resolution it does not have:

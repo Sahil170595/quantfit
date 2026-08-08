@@ -3,11 +3,64 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from collections.abc import Callable
 
 from quantfit import __version__  # plain module-level string; the heavy surface stays lazy
 from quantfit.gate import TIERS as GATE_TIERS  # tier NAMES only — no torch, no heavy import
 from quantfit.registry import METHODS
+
+# The envelope every `--json` run prints. Versioned from the start: the whole point of a
+# machine-readable surface is that a consumer can tell when its assumptions expired, and a
+# bare top-level array — which is what the sibling planner emits — leaves nowhere to say so.
+CLI_JSON_SCHEMA_VERSION = 1
+
+
+def _emit(args: argparse.Namespace, command: str, code: int, result: dict, human: Callable[[], None]) -> int:
+    """Print one JSON document, or the prose rendering, and return the exit code.
+
+    Under `--json`, stdout carries exactly one document and nothing else. Anything that
+    would otherwise be a human notice ("report -> path") is either a field in `result` or
+    goes to stderr, because a caller that has to strip lines before parsing does not have a
+    contract. The exit code is unchanged either way — it stays the CI contract, and the
+    document merely carries the numbers the exit code cannot.
+    """
+    if not getattr(args, "json", False):
+        human()
+        return code
+    document = {
+        "schema_version": CLI_JSON_SCHEMA_VERSION,
+        "tool": {"name": "quantfit", "version": __version__},
+        "command": command,
+        "exit_code": code,
+        "result": result,
+    }
+    json.dump(document, sys.stdout, indent=2, default=str)
+    sys.stdout.write("\n")
+    return code
+
+
+def _emit_error(args: argparse.Namespace, message: str, kind: str) -> int:
+    """The operational-failure path, in whichever rendering was asked for.
+
+    A caller that passed `--json` gets JSON even when the run failed; otherwise the very
+    case it most needs to parse — the failure — is the one case it cannot.
+    """
+    if not getattr(args, "json", False):
+        print(f"error: {message}")
+        return 2
+    document = {
+        "schema_version": CLI_JSON_SCHEMA_VERSION,
+        "tool": {"name": "quantfit", "version": __version__},
+        "command": getattr(args, "cmd", None),
+        "exit_code": 2,
+        "result": None,
+        "error": {"kind": kind, "message": message},
+    }
+    json.dump(document, sys.stdout, indent=2, default=str)
+    sys.stdout.write("\n")
+    return 2
 
 
 def _force_utf8_stdio() -> None:
@@ -210,7 +263,10 @@ def _build_parser() -> argparse.ArgumentParser:
         "(exit 0 = clean, 3 = drift found, 2 = operational error)",
     )
     pau.add_argument("--root", default=None, metavar="DIR", help="repo root (default: the one containing quantfit)")
-    pau.add_argument("--json", default=None, metavar="PATH", help="also write the findings as JSON")
+    # `--json-out PATH`, not `--json PATH`: `--json` is the tool-wide boolean below, and one
+    # flag name may not mean "write a file here" on one command and "print to stdout" on the
+    # other twelve. Renamed before `audit` had a released user; it first ships in 0.6.0.
+    pau.add_argument("--json-out", default=None, metavar="PATH", help="also write the findings as a JSON file")
 
     pq = sub.add_parser("quantize", parents=[tok], help="quantize a model")
     pq.add_argument("--model", required=True, help="HF model id (the full-precision base)")
@@ -220,7 +276,32 @@ def _build_parser() -> argparse.ArgumentParser:
     pq.add_argument("--push", default=None, help="HF repo id to upload the result to")
     pq.add_argument("--private", action="store_true", help="push as a private repo")
     pq.add_argument("--no-check", action="store_true", help="skip the GPU pre-flight")
+
+    _add_json_flag(p)
     return p
+
+
+def _add_json_flag(parser: argparse.ArgumentParser) -> None:
+    """Give every leaf subcommand `--json`, by walking the parser rather than by hand.
+
+    Hand-writing the flag thirteen times has one failure mode — the fourteenth command
+    quietly not getting it — and that is exactly the class of gap this flag exists to
+    close. Only LEAVES get it: argparse lets a subparser's default overwrite a parent's
+    value for the same dest, so `quantfit calibrate --json sheet` would parse and then
+    silently reset `json` to False. `calibrate` alone is not a runnable command, so
+    nothing is lost by skipping it.
+    """
+    subactions = [a for a in parser._actions if isinstance(a, argparse._SubParsersAction)]
+    if not subactions:
+        parser.add_argument(
+            "--json",
+            action="store_true",
+            help="emit one JSON document on stdout instead of prose (notices go to stderr)",
+        )
+        return
+    for action in subactions:
+        for child in action.choices.values():
+            _add_json_flag(child)
 
 
 def _dispatch(args: argparse.Namespace) -> int:
@@ -228,14 +309,50 @@ def _dispatch(args: argparse.Namespace) -> int:
         from quantfit.fit import capacity_plan
 
         cap = capacity_plan(args.model, token=args.token)
-        print(cap.reason())
-        return 0 if cap.fits else 3  # 3 = the doesn't-fit verdict; 2 stays operational-error
+        code = 0 if cap.fits else 3  # 3 = the doesn't-fit verdict; 2 stays operational-error
+        return _emit(
+            args,
+            "check",
+            code,
+            {
+                "model_id": cap.model_id,
+                "fits": cap.fits,
+                "mode": cap.mode,
+                "limit": cap.limit or None,
+                "bytes": {
+                    "fp16": cap.fp16_bytes,
+                    "gpu_free": cap.gpu_free,
+                    "ram_available": cap.ram_available,
+                    "disk_free": cap.disk_free,
+                    "disk_need": cap.disk_need,
+                },
+                "reason": cap.reason(),
+            },
+            lambda: print(cap.reason()),
+        )
 
     if args.cmd == "list":
-        from quantfit.registry import catalog
+        from quantfit.registry import METHODS, SCHEMES, catalog
 
-        print(catalog())
-        return 0
+        return _emit(
+            args,
+            "list",
+            0,
+            {
+                "methods": [
+                    {
+                        "name": m.name,
+                        "backend": m.backend,
+                        "default_scheme": m.default_scheme,
+                        "needs_calibration": m.needs_calibration,
+                        "summary": m.summary,
+                    }
+                    for m in METHODS.values()
+                ],
+                "schemes": list(SCHEMES),
+            },
+            lambda: print(catalog()),
+        )
 
     if args.cmd == "plan":
         from quantfit.engines.base import Budget
@@ -246,28 +363,79 @@ def _dispatch(args: argparse.Namespace) -> int:
 
         target = detect_target()
         routed = route(args.model, target, Budget(prefer=args.prefer), [CompressedTensorsEngine(), GgufEngine()])
-        print(f"target: {target.device}/{target.gpu_arch or '-'} serve={target.serve}")
-        print(f"pick:   {routed.config.method} {routed.config.scheme}  [{routed.config.engine}]")
-        print(f"why:    {routed.rationale}")
-        return 0
+
+        def _human_plan() -> None:
+            print(f"target: {target.device}/{target.gpu_arch or '-'} serve={target.serve}")
+            print(f"pick:   {routed.config.method} {routed.config.scheme}  [{routed.config.engine}]")
+            print(f"why:    {routed.rationale}")
+
+        return _emit(
+            args,
+            "plan",
+            0,
+            {
+                "target": {
+                    "device": target.device,
+                    "gpu_arch": target.gpu_arch,
+                    "vram_bytes": target.vram_bytes,
+                    "serve": target.serve,
+                },
+                "pick": {
+                    "method": routed.config.method,
+                    "scheme": routed.config.scheme,
+                    "engine": routed.config.engine,
+                },
+                "rationale": routed.rationale,
+            },
+            _human_plan,
+        )
 
     if args.cmd == "probe":
         from quantfit.policy.probe import probe_sensitivity
 
-        print("sensitivity — mean per-token RTN-KL(fp16 || quant); higher = more degradation:")
-        for bits in args.bits:
-            r = probe_sensitivity(args.model, bits=bits, token=args.token)
-            print(f"  {bits}-bit: KL {r.mean_kl:.3f}  (n={r.n_samples})")
-        print("note: RTN is the worst case — LOW KL = safe bit-width; HIGH KL can over-escalate")
-        print("      (calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict.")
-        return 0
+        rows = [probe_sensitivity(args.model, bits=bits, token=args.token) for bits in args.bits]
+
+        def _human_probe() -> None:
+            print("sensitivity — mean per-token RTN-KL(fp16 || quant); higher = more degradation:")
+            for bits, r in zip(args.bits, rows, strict=True):
+                print(f"  {bits}-bit: KL {r.mean_kl:.3f}  (n={r.n_samples})")
+            print("note: RTN is the worst case — LOW KL = safe bit-width; HIGH KL can over-escalate")
+            print("      (calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict.")
+
+        return _emit(
+            args,
+            "probe",
+            0,
+            {
+                "model": args.model,
+                "metric": "mean per-token RTN-KL(fp16 || quant)",
+                # The caveat travels WITH the numbers. A consumer that reads only the JSON
+                # would otherwise get the measurement without the sentence that says a high
+                # value is an upper bound, not a verdict.
+                "interpretation": (
+                    "RTN is the worst case — LOW KL = safe bit-width; HIGH KL can over-escalate "
+                    "(calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict."
+                ),
+                "by_bits": [
+                    {"bits": bits, "mean_kl": r.mean_kl, "n_samples": r.n_samples}
+                    for bits, r in zip(args.bits, rows, strict=True)
+                ],
+            },
+            _human_probe,
+        )
 
     if args.cmd == "verify":
         from quantfit.verify import verify
 
         ok, msg = verify(args.model)
-        print(("PASS: " if ok else "FAIL: ") + msg)
-        return 0 if ok else 3  # 3 = the smoke-test verdict; 2 stays operational-error
+        code = 0 if ok else 3  # 3 = the smoke-test verdict; 2 stays operational-error
+        return _emit(
+            args,
+            "verify",
+            code,
+            {"path": args.model, "passed": ok, "message": msg},
+            lambda: print(("PASS: " if ok else "FAIL: ") + msg),
+        )
 
     if args.cmd == "verify-safety":
         from quantfit.safety.verify import verify_safety
@@ -280,46 +448,86 @@ def _dispatch(args: argparse.Namespace) -> int:
             report_path=args.report,
             capture_path=args.capture,
         )
-        print(drift.summary())  # aggregates only — never echoes raw probe prompts/completions
-        if args.report:
-            print(f"report -> {args.report}")
         # Exit codes are the CI contract; they must not collide with 2 (operational
         # failure, from main's handler) or an unmeasured run would read as a verdict.
         if drift.regression_detected:
-            return 3
-        if drift.unmeasurable_axes:
-            return 4  # zero at-risk pairs on an axis: nothing was measured, not a pass
-        return 0
+            code = 3
+        elif drift.unmeasurable_axes:
+            code = 4  # zero at-risk pairs on an axis: nothing was measured, not a pass
+        else:
+            code = 0
+
+        def _human_vs() -> None:
+            print(drift.summary())  # aggregates only — never echoes raw prompts/completions
+            if args.report:
+                print(f"report -> {args.report}")
+
+        return _emit(
+            args,
+            "verify-safety",
+            code,
+            {
+                # The schema-v2 report is the artifact of record; the envelope carries the
+                # same aggregates so a caller need not write a file to read a verdict. Both
+                # are aggregates only — no probe text crosses this boundary either way.
+                "regression_detected": drift.regression_detected,
+                "unmeasurable_axes": list(drift.unmeasurable_axes),
+                "summary": drift.summary(),
+                "report_path": args.report,
+                "capture_path": args.capture,
+            },
+            _human_vs,
+        )
 
     if args.cmd == "screen":
         from quantfit.screen import STATUS_REGRESSION, STATUS_UNMEASURABLE, run_screen
 
         summary = run_screen(args.targets, args.out, token=args.token, max_new_tokens=args.max_new_tokens)
-        for stratum, agg in sorted(summary["by_stratum"].items()):
-            print(f"{stratum}: {agg['n_completed']}/{agg['n_targets']} completed, {agg['n_operational_errors']} errors")
-            for axis in ("refusal_robustness", "over_refusal"):
-                a = agg[axis]
-                lo, hi = a["prevalence_bound_wilson95"]
-                label = f" [{a['conditionality']}]" if a["conditionality"] else ""
+
+        def _human_screen() -> None:
+            for stratum, agg in sorted(summary["by_stratum"].items()):
                 print(
-                    f"  {axis}: {a['n_regressed']}/{a['n_measured']} flagged "
-                    f"(95% CI {lo * 100:.1f}-{hi * 100:.1f}%){label}"
+                    f"{stratum}: {agg['n_completed']}/{agg['n_targets']} completed, "
+                    f"{agg['n_operational_errors']} errors"
                 )
-        print(f"summary -> {args.out}/screen-summary.json")
+                for axis in ("refusal_robustness", "over_refusal"):
+                    a = agg[axis]
+                    lo, hi = a["prevalence_bound_wilson95"]
+                    label = f" [{a['conditionality']}]" if a["conditionality"] else ""
+                    print(
+                        f"  {axis}: {a['n_regressed']}/{a['n_measured']} flagged "
+                        f"(95% CI {lo * 100:.1f}-{hi * 100:.1f}%){label}"
+                    )
+            print(f"summary -> {args.out}/screen-summary.json")
+
         statuses = {row["status"] for row in summary["rows"]}
         axes = [a for agg in summary["by_stratum"].values() for a in (agg["refusal_robustness"], agg["over_refusal"])]
         # Same contract as verify-safety: a flagged regression outranks unmeasured.
         if STATUS_REGRESSION in statuses:
-            return 3
-        if STATUS_UNMEASURABLE in statuses or any(a["n_measured"] == 0 for a in axes):
-            return 4  # an axis nothing was measured on is not a clean screen
-        return 0
+            code = 3
+        elif STATUS_UNMEASURABLE in statuses or any(a["n_measured"] == 0 for a in axes):
+            code = 4  # an axis nothing was measured on is not a clean screen
+        else:
+            code = 0
+        return _emit(
+            args,
+            "screen",
+            code,
+            {**summary, "summary_path": f"{args.out}/screen-summary.json"},
+            _human_screen,
+        )
 
     if args.cmd == "emit":
         from quantfit.modelcard import model_card_fragment
 
-        print(model_card_fragment(args.report), end="")  # fragment carries its own trailing newline
-        return 0
+        fragment = model_card_fragment(args.report)
+        return _emit(
+            args,
+            "emit",
+            0,
+            {"kind": args.what, "report_path": args.report, "fragment": fragment},
+            lambda: print(fragment, end=""),  # fragment carries its own trailing newline
+        )
 
     if args.cmd == "gate":
         from quantfit.gate import run_gate
@@ -340,31 +548,66 @@ def _dispatch(args: argparse.Namespace) -> int:
             report_path=args.report,
             out_path=args.out,
         )
-        print(decision["headline"])
-        if args.out:
-            print(f"gate decision -> {args.out}")
-        return decision["exit_code"]
+
+        def _human_gate() -> None:
+            print(decision["headline"])
+            if args.out:
+                print(f"gate decision -> {args.out}")
+
+        return _emit(
+            args,
+            "gate",
+            decision["exit_code"],
+            {**decision, "decision_path": args.out, "report_path": args.report},
+            _human_gate,
+        )
 
     if args.cmd == "calibrate":
         if args.calibrate_cmd == "sheet":
             from quantfit.safety.calibrate import build_labeling_sheet
 
             sheet, key = build_labeling_sheet(args.capture, args.sheet, args.key)
-            print(f"blinded sheet -> {sheet}")
-            print(f"unblinding key -> {key} (labeler never sees this file)")
-            return 0
+
+            def _human_sheet() -> None:
+                print(f"blinded sheet -> {sheet}")
+                print(f"unblinding key -> {key} (labeler never sees this file)")
+
+            return _emit(
+                args,
+                "calibrate sheet",
+                0,
+                {
+                    "subcommand": "sheet",
+                    "capture_path": args.capture,
+                    "sheet_path": str(sheet),
+                    "key_path": str(key),
+                    # Said in the payload as well as the prose: a caller that automates this
+                    # must not treat the key as an ordinary output to ship alongside the sheet.
+                    "note": "the labeler never sees the key file; blinding depends on it",
+                },
+                _human_sheet,
+            )
         from quantfit.safety.calibrate import ingest_labels
 
         report = ingest_labels(args.sheet, args.key, args.out)
-        for arm in ("baseline", "quantized"):
-            block = report[arm]
-            eps = block["epsilon"]
-            print(
-                f"{arm}: n={block['n']} judge_errors={block['judge_errors']} "
-                f"epsilon={'unmeasured' if eps is None else f'{eps:.4f}'}"
-            )
-        print(f"calibration report -> {args.out} (counts only, no completion text)")
-        return 0
+
+        def _human_ingest() -> None:
+            for arm in ("baseline", "quantized"):
+                block = report[arm]
+                eps = block["epsilon"]
+                print(
+                    f"{arm}: n={block['n']} judge_errors={block['judge_errors']} "
+                    f"epsilon={'unmeasured' if eps is None else f'{eps:.4f}'}"
+                )
+            print(f"calibration report -> {args.out} (counts only, no completion text)")
+
+        return _emit(
+            args,
+            "calibrate ingest",
+            0,
+            {**report, "subcommand": "ingest", "report_path": args.out},
+            _human_ingest,
+        )
 
     if args.cmd == "reproduce":
         from quantfit.reproduce import compare, within_hardware_identical
@@ -375,23 +618,41 @@ def _dispatch(args: argparse.Namespace) -> int:
         t0_ref = within_hardware_identical(args.t0_reference) if args.t0_reference else None
         t0_cand = within_hardware_identical(args.t0_candidate) if args.t0_candidate else None
         decision = compare(args.reference, args.candidate, args.out, t0_reference=t0_ref, t0_candidate=t0_cand)
-        print(decision["headline"])
-        if args.out:
-            print(f"comparison record -> {args.out}")
-        return decision["exit_code"]
+
+        def _human_reproduce() -> None:
+            print(decision["headline"])
+            if args.out:
+                print(f"comparison record -> {args.out}")
+
+        return _emit(
+            args,
+            "reproduce",
+            decision["exit_code"],
+            {**decision, "record_path": args.out},
+            _human_reproduce,
+        )
 
     if args.cmd == "audit":
+        from pathlib import Path
+
         from quantfit.audit import audit, summarize
 
         result = audit(args.root)
-        print(summarize(result))
-        if args.json:
-            import json
-            from pathlib import Path
+        if args.json_out:
+            Path(args.json_out).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-            Path(args.json).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-            print(f"audit findings -> {args.json}")
-        return result["exit_code"]
+        def _human_audit() -> None:
+            print(summarize(result))
+            if args.json_out:
+                print(f"audit findings -> {args.json_out}")
+
+        return _emit(
+            args,
+            "audit",
+            result["exit_code"],
+            {**result, "findings_path": args.json_out},
+            _human_audit,
+        )
 
     if args.cmd == "quantize":
         from quantfit.quantize import CannotQuantize, push, quantize
@@ -407,12 +668,27 @@ def _dispatch(args: argparse.Namespace) -> int:
                 run_check=not args.no_check,
             )
         except (CannotQuantize, UnsupportedCombo) as exc:
-            print(exc)
-            return 2
-        print(f"quantized -> {out}")
-        if args.push:
-            print(f"pushed -> {push(str(out), args.push, token=args.token, private=args.private)}")
-        return 0
+            return _emit_error(args, str(exc), type(exc).__name__)
+        pushed = push(str(out), args.push, token=args.token, private=args.private) if args.push else None
+
+        def _human_quantize() -> None:
+            print(f"quantized -> {out}")
+            if pushed:
+                print(f"pushed -> {pushed}")
+
+        return _emit(
+            args,
+            "quantize",
+            0,
+            {
+                "model": args.model,
+                "method": args.method,
+                "scheme": args.scheme,
+                "out": str(out),
+                "pushed_to": pushed,
+            },
+            _human_quantize,
+        )
 
     return 1  # unreachable: subparser is required
 
@@ -427,8 +703,7 @@ def main(argv: list[str] | None = None) -> int:
         # calibration/probe datasets — quantfit raises its own as RuntimeError) ->
         # a clean message + exit 2, not a traceback. Programming errors, including
         # ValueError from anywhere in the torch/transformers stack, surface raw.
-        print(f"error: {exc}")
-        return 2
+        return _emit_error(args, str(exc), type(exc).__name__)
 
 
 if __name__ == "__main__":

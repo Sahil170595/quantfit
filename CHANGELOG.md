@@ -5,6 +5,36 @@
 > would claim milestone completion, and those completions are gated on runs and
 > decisions that have not happened. 0.10 is the frozen standard (ROADMAP 0.10).
 
+## Unreleased
+
+- **Every command speaks JSON.** `--json` on any of the fourteen leaf commands puts
+  exactly one document on stdout — never prose mixed with data, so a caller never
+  strips lines before parsing. Until now not one command emitted machine-readable
+  output: the verdict, the Wilson bounds, the MDE and the provenance reached a
+  caller only as a file written to a path, and only from two commands. The exit
+  code carried the verdict faithfully and could not carry the numbers.
+
+  The envelope is `schema_version` / `tool` / `command` / `exit_code` / `result`,
+  versioned from the start because the point of a machine-readable surface is that
+  a consumer can tell when its assumptions expired. `exit_code` is repeated inside
+  the document *and* returned by the process, and a test asserts per command that
+  the two agree — two sources of truth that can disagree are worse than one.
+
+  An operational failure returns the same envelope with an `error` block and
+  `"exit_code": 2`, so the case a caller most needs to parse is not the one case it
+  cannot. A *verdict* failure (exit 3) carries no `error` block: exit 3 is an
+  answer, not a breakage, and the two must not be conflated.
+
+  The flag is attached by walking the parser rather than by hand, so a fifteenth
+  command cannot quietly miss it. It goes on leaves only — argparse lets a
+  subparser's default overwrite a parent's value for the same dest, so
+  `quantfit calibrate --json sheet` would parse and then silently reset it to
+  false, which is precisely the inert-flag defect `plan --token` was.
+
+- **`quantfit audit --json PATH` is now `--json-out PATH`.** One flag name could
+  not mean "write a file here" on one command and "print to stdout" on the other
+  thirteen. Renamed before `audit` had a released user — it first ships in 0.6.0.
+
 ## 0.6.0
 
 **Publishing accounting, stated because it is the point of this release.** The

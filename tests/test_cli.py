@@ -358,7 +358,10 @@ def test_audit_relays_its_exit_code_and_can_write_json(monkeypatch, tmp_path, ca
     monkeypatch.setattr(au, "summarize", lambda r, limit=0: "drift: 1 error(s)")
 
     out = tmp_path / "findings.json"
-    assert main(["audit", "--json", str(out)]) == 3  # drift fails a build, it does not warn
+    # `--json-out PATH` writes the file; `--json` (no value) is the tool-wide boolean that
+    # puts one document on stdout. They were the same flag until the envelope landed, and
+    # one name could not mean both things on one command.
+    assert main(["audit", "--json-out", str(out)]) == 3  # drift fails a build, it does not warn
     assert "drift: 1 error(s)" in capsys.readouterr().out
     assert json.loads(out.read_text(encoding="utf-8"))["counts"]["errors"] == 1
 
