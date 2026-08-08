@@ -12,12 +12,24 @@ matrix, is honest about whether a model fits your GPU, and — uniquely — meas
 pip install quantfit
 
 quantfit --version                                                     # confirm the install
+quantfit verify-safety --demo                                          # a real verdict in ~1s, no model needed
+```
+
+That last one runs the actual tabulation over bundled fixtures, so you can see
+what the tool says before downloading a single weight. Then the real thing:
+
+```bash
 quantfit check        --model Qwen/Qwen2.5-7B-Instruct                 # will it fit? (no download)
 quantfit plan         --model Qwen/Qwen2.5-7B-Instruct                 # what config would it pick? + why
 quantfit quantize     --model Qwen/Qwen2.5-1.5B-Instruct --method awq --out ./out
 quantfit probe        --model Qwen/Qwen2.5-1.5B-Instruct --bits 4 8    # per-bit-width quant sensitivity
 quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out  # did quantization break refusals?
 ```
+
+Every command takes `--json` and prints exactly one document on stdout, so any of
+this drops into a pipeline. Exit codes are the CI contract: **0** clean, **2**
+operational, **3** verdict failed, **4** nothing measured, **5** the gate cannot
+resolve your threshold. 4 and 5 are not passes.
 
 ## The safety check — what nothing else does
 
