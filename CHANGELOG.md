@@ -5,7 +5,23 @@
 > would claim milestone completion, and those completions are gated on runs and
 > decisions that have not happened. 0.10 is the frozen standard (ROADMAP 0.10).
 
-## Unreleased
+## 0.6.0
+
+**Publishing accounting, stated because it is the point of this release.** The
+last version on PyPI was **0.5.1**. The sections below for **0.5.2** and **0.5.3**
+describe work that was written, reviewed and merged into a release branch and
+then **never published** — it lived in a five-deep stack of pull requests, each
+based on the previous release branch, and nothing in it was installable. 0.6.0 is
+that stack collapsed into one release. The version steps to 0.6.0 rather than
+0.5.3 so PyPI's history does not show a 0.5.3 arriving with no 0.5.2 before it;
+the milestone-numbering rule above is unchanged, and 0.6.0 still claims no
+ROADMAP milestone.
+
+Shipped here, from the sections below: the 0.7 gate that refuses thresholds it
+cannot resolve, the 0.8 reproduction command and Inspect runner, and the 0.10
+docs=code parity auditor wired into CI.
+
+New in this release itself:
 
 - **Every command speaks JSON.** `--json` on any of the fourteen leaf commands puts
   exactly one document on stdout — never prose mixed with data, so a caller never
@@ -65,34 +81,24 @@
   is always 0 — the fixture deliberately contains a regression so a reader sees
   the shape of a finding, but exit 3 is a verdict about a model and no model ran.
 
-## 0.6.0
-
-**Publishing accounting, stated because it is the point of this release.** The
-last version on PyPI was **0.5.1**. The sections below for **0.5.2** and **0.5.3**
-describe work that was written, reviewed and merged into a release branch and
-then **never published** — it lived in a five-deep stack of pull requests, each
-based on the previous release branch, and nothing in it was installable. 0.6.0 is
-that stack collapsed into one release. The version steps to 0.6.0 rather than
-0.5.3 so PyPI's history does not show a 0.5.3 arriving with no 0.5.2 before it;
-the milestone-numbering rule above is unchanged, and 0.6.0 still claims no
-ROADMAP milestone.
-
-Shipped here, from the sections below: the 0.7 gate that refuses thresholds it
-cannot resolve, the 0.8 reproduction command and Inspect runner, and the 0.10
-docs=code parity auditor wired into CI.
-
-New in this release itself:
-
 - **`quantfit --version`** answers instead of exiting 2. The subcommand is
   required, so the top-level parser previously rejected `--version` with a usage
   dump — the first thing anyone runs to confirm an install looked like a broken
   install. The `version` action exits during parsing, ahead of that check.
+
 - **`LICENSE` is the canonical Apache-2.0 text again.** The file had been
   truncated at 154 lines with the `APPENDIX` section removed, which put it below
   the similarity threshold GitHub's licence classifier needs: the repository
   reported `spdx_id: NOASSERTION`, licence "Other". Corporate policy scanners and
   dependency-review bots read that field and frequently block on it. The declared
   `license = "Apache-2.0"` in `pyproject.toml` never changed; only the file did.
+
+- **The ROADMAP milestone called "1.0" was a mis-render of "0.10"**, and read as a
+  major release this package has not earned. Renamed across 25 references in 11
+  files. Not renamed, because they are not the milestone: the `release/1.0*`
+  branch names (a doc recording which branch it was written against stays true
+  only if left alone), the QSR spec's `v0 → v1` (a spec version, legitimately v1),
+  and `gguf<1.0` / `accelerate>=1.0` / `0.1.0`, which are different numbers.
 
 ## 0.5.3 — merged, never published
 
