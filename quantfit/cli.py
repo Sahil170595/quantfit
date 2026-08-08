@@ -5,6 +5,8 @@ from __future__ import annotations
 import argparse
 import sys
 
+from quantfit import __version__  # plain module-level string; the heavy surface stays lazy
+from quantfit.gate import TIERS as GATE_TIERS  # tier NAMES only — no torch, no heavy import
 from quantfit.registry import METHODS
 
 
@@ -23,6 +25,10 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="quantfit",
         description="Quantize an LLM, check it fits your GPU, and verify it still refuses what it should.",
     )
+    # `version` exits during parsing, so it answers even though the subcommand below is
+    # required — `quantfit --version` used to exit 2 with a usage dump, which made the
+    # first thing any caller runs to confirm an install look like a broken install.
+    p.add_argument("--version", "-V", action="version", version=f"quantfit {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     # Shared --token for the commands that hit the Hub (gated / private models).
@@ -38,7 +44,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("list", help="list supported methods + schemes")
 
-    pp = sub.add_parser("plan", parents=[tok], help="show the config quantfit would pick for your GPU (no quantize)")
+    # No --token: `plan` reads the local device and the frozen spec only — detect_target(),
+    # Engine.feasible(target) and route() never reach the Hub — so a token flag here would
+    # promise gated-model support the command cannot have. It was accepted and never read.
+    pp = sub.add_parser("plan", help="show the config quantfit would pick for your GPU (no quantize)")
     pp.add_argument("--model", required=True, help="HF model id")
     pp.add_argument("--prefer", default="quality", choices=("quality", "speed", "size"))
 
@@ -135,6 +144,73 @@ def _build_parser() -> argparse.ArgumentParser:
     pci.add_argument("--sheet", required=True, metavar="PATH", help="the filled labeling sheet")
     pci.add_argument("--key", required=True, metavar="PATH", help="the key written next to it")
     pci.add_argument("--out", required=True, metavar="PATH", help="calibration report JSON to write (counts only)")
+
+    pg = sub.add_parser(
+        "gate",
+        parents=[tok],
+        help="pre-release gate: does this quant hold a declared refusal-robustness threshold? "
+        "(exit 0 = pass, 3 = fail, 4 = gated axis unmeasurable, 5 = threshold finer than the "
+        "instrument's resolution, 2 = operational error)",
+    )
+    pg.add_argument("--baseline", "--fp16", dest="baseline", required=True, help="the unquantized baseline arm")
+    pg.add_argument("--quant", required=True, help="the quantized artifact to gate")
+    gthr = pg.add_mutually_exclusive_group(required=True)
+    gthr.add_argument(
+        "--threshold",
+        type=float,
+        metavar="PP",
+        help="declared dangerous-axis flip-rate threshold in PERCENTAGE POINTS (e.g. 30 = 30pp)",
+    )
+    gthr.add_argument("--tier", choices=tuple(GATE_TIERS), help="a named tier instead of a raw threshold")
+    pg.add_argument(
+        "--eps-upper",
+        type=float,
+        default=None,
+        metavar="RATE",
+        help="per-arm upper bound on BOTH directional judge-error rates (a calibration report's "
+        "mde_epsilon_upper). Without it the gate prints a perfect-judge FLOOR, not a resolution",
+    )
+    pg.add_argument(
+        "--eps-source",
+        default=None,
+        metavar="STR",
+        help="where --eps-upper came from (required with it: an unsourced epsilon is not evidence)",
+    )
+    pg.add_argument("--max-new-tokens", type=int, default=64, help="completion length per probe (default 64)")
+    pg.add_argument("--report", default=None, metavar="PATH", help="also write the schema-v2 drift report")
+    pg.add_argument("--out", default=None, metavar="PATH", help="write the gate decision artifact JSON")
+
+    pr = sub.add_parser(
+        "reproduce",
+        help="is this report a reproduction of that one? applies the QSR v0 cross-hardware tolerance "
+        "(exit 0 = reproduced, 3 = breach or not-met, 4 = nothing was compared, 2 = operational error)",
+    )
+    pr.add_argument("--reference", required=True, metavar="PATH", help="the reference schema-v2 drift report")
+    pr.add_argument("--candidate", required=True, metavar="PATH", help="the report claiming to reproduce it")
+    pr.add_argument("--out", default=None, metavar="PATH", help="write the comparison record JSON")
+    pr.add_argument(
+        "--t0-reference",
+        nargs="+",
+        default=None,
+        metavar="REPORT",
+        help="within-hardware replicate reports for the REFERENCE side (3 per the protocol). T0 is not "
+        "computable from two reports, so without this the outcome can never be the gate pass",
+    )
+    pr.add_argument(
+        "--t0-candidate",
+        nargs="+",
+        default=None,
+        metavar="REPORT",
+        help="within-hardware replicate reports for the CANDIDATE side",
+    )
+
+    pau = sub.add_parser(
+        "audit",
+        help="docs=code parity: do the docs still describe the code? "
+        "(exit 0 = clean, 3 = drift found, 2 = operational error)",
+    )
+    pau.add_argument("--root", default=None, metavar="DIR", help="repo root (default: the one containing quantfit)")
+    pau.add_argument("--json", default=None, metavar="PATH", help="also write the findings as JSON")
 
     pq = sub.add_parser("quantize", parents=[tok], help="quantize a model")
     pq.add_argument("--model", required=True, help="HF model id (the full-precision base)")
@@ -245,6 +321,30 @@ def _dispatch(args: argparse.Namespace) -> int:
         print(model_card_fragment(args.report), end="")  # fragment carries its own trailing newline
         return 0
 
+    if args.cmd == "gate":
+        from quantfit.gate import run_gate
+
+        # --threshold is percentage points at the CLI boundary; run_gate takes a rate.
+        # The conversion lives here so the machinery has one unit and the operator has
+        # the one they think in (a silent 100x is the failure mode this splits apart).
+        threshold = args.threshold / 100 if args.threshold is not None else None
+        decision = run_gate(
+            args.baseline,
+            args.quant,
+            threshold=threshold,
+            tier=args.tier,
+            eps_upper=args.eps_upper,
+            eps_source=args.eps_source,
+            token=args.token,
+            max_new_tokens=args.max_new_tokens,
+            report_path=args.report,
+            out_path=args.out,
+        )
+        print(decision["headline"])
+        if args.out:
+            print(f"gate decision -> {args.out}")
+        return decision["exit_code"]
+
     if args.cmd == "calibrate":
         if args.calibrate_cmd == "sheet":
             from quantfit.safety.calibrate import build_labeling_sheet
@@ -265,6 +365,33 @@ def _dispatch(args: argparse.Namespace) -> int:
             )
         print(f"calibration report -> {args.out} (counts only, no completion text)")
         return 0
+
+    if args.cmd == "reproduce":
+        from quantfit.reproduce import compare, within_hardware_identical
+
+        # Replicate sets are turned into T0 results HERE rather than inside compare():
+        # T0 is a within-hardware property of three runs, and keeping the conversion at
+        # the boundary is what lets the artifact record which files supplied it.
+        t0_ref = within_hardware_identical(args.t0_reference) if args.t0_reference else None
+        t0_cand = within_hardware_identical(args.t0_candidate) if args.t0_candidate else None
+        decision = compare(args.reference, args.candidate, args.out, t0_reference=t0_ref, t0_candidate=t0_cand)
+        print(decision["headline"])
+        if args.out:
+            print(f"comparison record -> {args.out}")
+        return decision["exit_code"]
+
+    if args.cmd == "audit":
+        from quantfit.audit import audit, summarize
+
+        result = audit(args.root)
+        print(summarize(result))
+        if args.json:
+            import json
+            from pathlib import Path
+
+            Path(args.json).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            print(f"audit findings -> {args.json}")
+        return result["exit_code"]
 
     if args.cmd == "quantize":
         from quantfit.quantize import CannotQuantize, push, quantize

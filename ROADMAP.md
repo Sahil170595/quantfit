@@ -95,13 +95,13 @@ No maintained tool ships the paired fp16-vs-quant refusal diff with pinned prove
 
 **Gate:** one reference report reproduced from scratch on a free T4 within the 0.7 tolerance.
 
-## 1.0 — Frozen standard
+## 0.10 — Frozen standard
 
 Spec and schema frozen; dependencies bounded; every advertised command hardware-validated; docs=code parity audit; honest offload wording; CONTRIBUTING and bus-factor docs.
 
 **Gate:** ≥1 third-party reproduction, citation, or gate adoption; two cross-release runs identical on a pinned stack; scripted README-only quickstart passes in a clean venv.
 
-## Non-goals (through 1.0)
+## Non-goals (through 0.10)
 
 No new quantization methods (including sub-4-bit compressed-tensors, AQLM/QuIP#, FP4, QAT, kernels). No AMQ-style learned routing (5–44 GPU-hours per model per AMQ Table 4 — infeasible here). No raw harmful corpora or archived harmful long-form completions without an explicit recorded data-handling decision — never a silent reversal. No harm taxonomy, MoE, ROCm/Apple/Intel breadth, GGUF-production investment, hosted service, or compliance/EU-AI-Act claims. No three-class "degraded" outcome until a validated detector exists. No externally staked numbers from an uncalibrated judge. No per-block safety attribution. No convenience-wedge race against auto-round/Unsloth/Ollama.
 

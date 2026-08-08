@@ -11,6 +11,7 @@ matrix, is honest about whether a model fits your GPU, and — uniquely — meas
 ```bash
 pip install quantfit
 
+quantfit --version                                                     # confirm the install
 quantfit check        --model Qwen/Qwen2.5-7B-Instruct                 # will it fit? (no download)
 quantfit plan         --model Qwen/Qwen2.5-7B-Instruct                 # what config would it pick? + why
 quantfit quantize     --model Qwen/Qwen2.5-1.5B-Instruct --method awq --out ./out
@@ -89,6 +90,72 @@ detection sensitivity" until the recorded sensitivity control passes); and
 paste-ready model-card section with the drift table, provenance, and the exact
 serve command.
 
+**Check a reproduction.** `quantfit reproduce` decides whether one report
+reproduces another under the QSR v0 cross-hardware tolerance, so "it reproduced"
+is a verdict from code rather than an eyeball comparison:
+
+```bash
+quantfit reproduce --reference ref.json --candidate t4.json --out record.json
+```
+
+It compares measurement identity, verdict class, denominators, flip counts and
+per-zone refusals, quoting **both** sides' numbers for every predicate. Exit 0
+means reproduced, 3 means the tolerance was not met, 4 means nothing was
+compared (the two files are not the same measurement, or nothing was measured),
+2 is operational. Within-hardware determinism (T0) is a property of three
+replicate runs and cannot be derived from two reports, so pass them explicitly
+with `--t0-reference` and `--t0-candidate`; without that evidence the outcome is
+never the gate pass.
+
+**Audit the docs against the code.** `quantfit audit` checks that this repo's
+prose still describes the shipped code — CLI commands and flags, `file:symbol`
+citations, exit codes, quoted constants, and schema field names:
+
+```bash
+quantfit audit                    # exit 0 = clean, 3 = drift found, 2 = operational
+quantfit audit --json out.json    # the findings as data, for CI
+quantfit audit --root /path/to/quantfit   # run it from another directory
+```
+
+It is wired into CI, so a doc that drifts from the code fails the build.
+`--root` says *where this checkout is*, not *which checkout to audit*: three of
+the five checks read the parser and the constants by import, so a root that is
+not the tree being imported would compare one repo's prose against another
+repo's code. That request is refused as operational (exit 2) rather than
+answered.
+
+**The rest of the surface.** `quantfit list` prints the supported method ×
+scheme matrix. `quantfit calibrate sheet` / `quantfit calibrate ingest` build a
+blinded judge-calibration labeling sheet from a `--capture` file and ingest the
+filled labels into a per-arm judge-error report — machinery for ROADMAP 0.6,
+which starts only on the 0.5 GO decision.
+
+**Gate it in CI.** `quantfit gate` is the pre-release check — and it refuses to
+promise resolution it does not have:
+
+```bash
+quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --tier smoke --out gate.json
+```
+
+You declare the resolution you need; the gate proves it can deliver it — once
+**before any model loads** (best-case at-risk pairs) and again at the run's
+realized n — and refuses with exit **5** if it cannot, naming the threshold, the
+printed MDE, the n, and where the judge-error bound came from. The PASS/FAIL
+itself is an exact binomial test at that printed bound rather than a comparison
+against your number: with any real judge error a single flip stops being a
+rejection, so the gate prints the flip count *and* the detection threshold and
+leaves the arithmetic auditable. Exit 0 pass, 3 fail, 4 the gated axis measured
+nothing, 5 unresolvable, 2 operational — **4 and 5 are not passes**.
+
+Because no in-distribution judge error has been measured yet (that is ROADMAP
+0.6, gated on the 0.5 GO), the printed MDE is labeled a perfect-judge **floor** —
+a lower bound on the true resolution, never the resolution — unless you supply
+`--eps-upper` with an `--eps-source`. The floor cuts both ways and the gate says
+both: optimistic about resolution, and permissive about detection (at ε=0 the
+detection threshold is the smallest possible, so a floor-mode FAIL runs at an
+uncontrolled α and is a candidate for human verification). A reference GitHub
+Action and a weekly CPU canary ship in `.github/`; see `docs/ci-integration.md`.
+
 ## GPU-aware quantization
 
 **3-tier capacity.** `check` reads HF metadata (no download) to estimate the footprint:
@@ -128,10 +195,11 @@ group-size 128) is shared across the calibrated methods, so they are comparable.
 ## What it is — and isn't
 
 - It **quantizes** (wrapping llm-compressor + llama.cpp) and **checks safety
-  preservation**. Both run end-to-end, validated on small models (Qwen-1.5B,
-  Llama-1B) and over-VRAM (Qwen2.5-7B GPTQ on a 12 GB card via sequential
+  preservation**. Both run end-to-end, validated on Qwen2.5-1.5B (`CHANGELOG.md`
+  0.1.0) and over-VRAM (Qwen2.5-7B GPTQ on a 12 GB card via sequential
   onloading, telemetry-confirmed CPU spill; the safety check covers 7B GGUF
-  pairs with the F16 baseline in CPU RAM).
+  pairs with the F16 baseline in CPU RAM). Llama-3.2-1B appears in the 0.5 screen
+  target list, which is a list of things to run, not a record of runs.
 - It ships **transparent config help**, not auto-quantization: `quantfit plan --model <id>`
   shows the config a heuristic would pick and *why* (instant, no quantize); `quantfit
   probe --model <id>` measures per-bit-width quantization sensitivity (forward-only RTN-KL,

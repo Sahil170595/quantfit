@@ -24,7 +24,20 @@ jobs:
       # The unit tests mock the heavy backends; they only need these at import time.
       # scipy is the independent reference for the Wilson-CI / power cross-checks;
       # gguf crafts + reads the tiny GGUF files in the verify-safety arm tests.
-      - run: pip install pytest huggingface_hub psutil scipy gguf
+      # inspect-ai: pure python, and the Inspect runner's parity-with-_tabulate
+      # test is the only thing that substantiates "comparable artifacts" — a
+      # permanently-skipped test would leave that claim untested.
+      # The bounds pyproject declares (gguf<1.0, inspect-ai<0.4, ...) exist because
+      # those projects churn — but a bare `pip install gguf inspect-ai` ignores them,
+      # so CI could green-light a combination the package forbids. Derive the caps
+      # from pyproject instead of hand-copying them here, where they would drift.
+      - name: Derive dependency caps from pyproject
+        run: |
+          # 3.10 has no stdlib tomllib, and nothing is installed yet at this point.
+          python -c "import tomllib" 2>/dev/null || pip install tomli
+          python tools/ci_constraints.py --out ci-constraints.txt
+          cat ci-constraints.txt
+      - run: pip install -c ci-constraints.txt pytest huggingface_hub psutil scipy gguf inspect-ai
       # Build + install the package itself (no heavy deps) so import, the entry point,
       # and PEP 621/639 packaging metadata are exercised — not just the source tree.
       - run: pip install -e . --no-deps
@@ -63,6 +76,40 @@ jobs:
           quantfit list
           python -c "import quantfit; print('quantfit', quantfit.__version__)"
 
+      # ROADMAP 0.10's gate clause, as a script rather than a promise: every command
+      # the README advertises must exist in the INSTALLED CLI, and the clean-venv
+      # subset must actually run. Commands needing a GPU, the network or multi-GB
+      # weights are reported UNRUN with reasons — this gate covers existence plus
+      # that subset only, and says so.
+      # `--min-commands` is the floor against silent collapse: the extractor reads fenced
+      # blocks, so a README edit that desyncs the fences could shrink the audited surface to
+      # nothing and still exit 0 — a gate that passes because it checked almost nothing.
+      # 22 commands are extracted today; 20 leaves room to delete a couple on purpose.
+      - name: README quickstart gate
+        shell: bash
+        run: python tools/quickstart_check.py --min-commands 20
+
+  # docs=code parity, enforced. Prose in this repo makes a very large number of
+  # checkable claims (flags, exit codes, file:symbol citations, quoted constants,
+  # schema fields); several drifted silently during development. A doc that no
+  # longer describes the code now fails the build instead of aging quietly.
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # The auditor walks the real argparse parser and reads modules with ast, so it
+      # needs the package importable — but no torch: it must stay a cheap CI step.
+      - run: pip install -e . --no-deps
+
+      - name: docs=code parity audit
+        run: python -m quantfit.cli audit
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -75,11 +122,14 @@ jobs:
 
       # Bounded like every churning dep (ROADMAP standing rule): 0.16.0 shipped new
       # default rules mid-cycle and broke a green branch. The cap moves only after
-      # a validated local run on the new minor.
-      - run: pip install "ruff>=0.16,<0.17"
+      # a validated local run on the new minor — and it lives in pyproject's `dev`
+      # extra, so read it from there rather than restating it.
+      - name: Derive dependency caps from pyproject
+        run: python tools/ci_constraints.py --out ci-constraints.txt
+      - run: pip install -c ci-constraints.txt ruff
 
       - name: Ruff check
-        run: ruff check quantfit tests
+        run: ruff check quantfit tests tools
 
       - name: Ruff format
         run: ruff format --check quantfit tests

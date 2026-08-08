@@ -1,5 +1,11 @@
 """CLI parser + dispatch — light commands only (no torch needed)."""
 
+import argparse
+import ast
+import inspect
+import json
+from pathlib import Path
+
 import pytest
 
 from quantfit.cli import _build_parser, main
@@ -25,6 +31,10 @@ def test_parser_accepts_every_command():
         ["emit", "model-card", "--report", "r.json"],
         ["calibrate", "sheet", "--capture", "c.capture.jsonl", "--sheet", "s.labels.csv", "--key", "k.labelkey.json"],
         ["calibrate", "ingest", "--sheet", "s.labels.csv", "--key", "k.labelkey.json", "--out", "cal.json"],
+        ["gate", "--baseline", "a", "--quant", "b", "--tier", "smoke"],
+        ["gate", "--baseline", "a", "--quant", "b", "--threshold", "30"],
+        ["reproduce", "--reference", "a.json", "--candidate", "b.json"],
+        ["audit"],
         ["quantize", "--model", "m", "--method", "awq", "--out", "o"],
     ]
     for argv in cases:
@@ -40,6 +50,73 @@ def test_probe_parses_multiple_bits():
 def test_token_flag_on_hub_commands():
     ns = _build_parser().parse_args(["check", "--model", "m", "--token", "xyz"])
     assert ns.token == "xyz"
+
+
+def _subparsers() -> dict:
+    """{command name: its parser}, read off the built parser rather than restated here."""
+    for action in _build_parser()._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            return dict(action.choices)
+    raise AssertionError("the CLI has no subparsers any more")
+
+
+def _dispatch_branches() -> dict[str, ast.If]:
+    """{command name: the `if args.cmd == "<name>":` node in _dispatch}."""
+    tree = ast.parse(Path(inspect.getfile(_build_parser)).read_text(encoding="utf-8"))
+    dispatch = next(node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef) and node.name == "_dispatch")
+    branches = {}
+    for node in ast.walk(dispatch):
+        if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare):
+            continue
+        left, comparators = node.test.left, node.test.comparators
+        if (
+            isinstance(left, ast.Attribute)
+            and left.attr == "cmd"
+            and isinstance(left.value, ast.Name)
+            and left.value.id == "args"
+            and len(comparators) == 1
+            and isinstance(comparators[0], ast.Constant)
+        ):
+            branches[comparators[0].value] = node
+    return branches
+
+
+def test_every_command_that_accepts_token_actually_reads_it():
+    """An accepted-but-unread flag is a lie the parser tells: `--help` advertises gated-model
+    support, `--token hf_...` is accepted without complaint, and the credential is dropped.
+
+    `plan` shipped exactly that — it carried `parents=[tok]` while its dispatch branch never
+    touched `args.token` (nothing in its chain reaches the Hub: detect_target(),
+    Engine.feasible() and route() are all local). The flag was removed rather than wired.
+    This test generalizes the fix: accepting a token and using one must be the same set.
+    """
+    accepting = {
+        name for name, parser in _subparsers().items() if any("--token" in a.option_strings for a in parser._actions)
+    }
+    branches = _dispatch_branches()
+    assert accepting <= set(branches), (
+        f"commands with --token but no dispatch branch: {sorted(accepting - set(branches))}"
+    )
+
+    reading = {
+        name
+        for name, node in branches.items()
+        if any(
+            isinstance(sub, ast.Attribute)
+            and sub.attr == "token"
+            and isinstance(sub.value, ast.Name)
+            and sub.value.id == "args"
+            for sub in ast.walk(node)
+        )
+    }
+    inert = sorted(accepting - reading)
+    undeclared = sorted(reading - accepting)
+    assert not inert, (
+        f"these commands accept --token and never read it: {inert}. Either pass it down to the "
+        "call that reaches the Hub, or drop the flag — an inert credential flag is worse than a "
+        "missing one, because it looks like it worked."
+    )
+    assert not undeclared, f"these commands read args.token without declaring --token: {undeclared}"
 
 
 def test_quantize_requires_method():
@@ -193,6 +270,100 @@ def test_verify_safety_passes_capture_through(monkeypatch):
     monkeypatch.setattr(sv, "verify_safety", fake)
     assert main(["verify-safety", "--baseline", "a", "--quant", "b", "--capture", "x.capture.jsonl"]) == 0
     assert seen["capture_path"] == "x.capture.jsonl"
+
+
+def test_gate_threshold_is_percentage_points_at_the_cli_boundary(monkeypatch, capsys):
+    # The operator declares 30pp; run_gate takes a RATE. A silent 100x here would
+    # gate every quant at 3000pp (i.e. never fail), so the unit split is tested.
+    import quantfit.gate as g
+
+    seen = {}
+
+    def fake(baseline, quant, **kwargs):
+        seen.update(kwargs)
+        seen["baseline"] = baseline
+        return {"headline": "PASS (fake)", "exit_code": 0}
+
+    monkeypatch.setattr(g, "run_gate", fake)
+    assert main(["gate", "--baseline", "a", "--quant", "b", "--threshold", "30"]) == 0
+    assert seen["threshold"] == pytest.approx(0.30)
+    assert seen["tier"] is None
+    assert "PASS (fake)" in capsys.readouterr().out
+
+    seen.clear()
+    assert main(["gate", "--baseline", "a", "--quant", "b", "--tier", "smoke"]) == 0
+    assert seen["threshold"] is None and seen["tier"] == "smoke"
+
+
+def test_gate_exit_codes_are_relayed_verbatim(monkeypatch):
+    # The gate owns its verdict; the CLI must not reinterpret it — especially 4
+    # ("nothing measured") and 5 ("threshold unresolvable"), which are not passes.
+    import quantfit.gate as g
+
+    for code in (0, 3, 4, 5):
+        monkeypatch.setattr(g, "run_gate", lambda *a, _c=code, **k: {"headline": "h", "exit_code": _c})
+        assert main(["gate", "--baseline", "a", "--quant", "b", "--tier", "smoke"]) == code
+
+    def _operational(*a, **k):
+        raise g.GateError("threshold must be a flip RATE in (0, 1]")
+
+    monkeypatch.setattr(g, "run_gate", _operational)
+    assert main(["gate", "--baseline", "a", "--quant", "b", "--tier", "smoke"]) == 2
+
+
+def test_reproduce_relays_outcome_exit_codes_and_builds_t0_from_replicates(monkeypatch, capsys):
+    # The CLI turns replicate FILES into a T0 result at the boundary; compare() takes
+    # the result. Every outcome's code is relayed verbatim — 3 and 4 are not passes.
+    import quantfit.reproduce as rp
+
+    seen = {}
+
+    def fake_t0(paths):
+        seen.setdefault("t0_calls", []).append(list(paths))
+        return {"pass": True, "n_replicates": len(paths), "meets_protocol_replicate_count": len(paths) >= 3}
+
+    monkeypatch.setattr(rp, "within_hardware_identical", fake_t0)
+    for code in (0, 3, 4):
+        monkeypatch.setattr(rp, "compare", lambda *a, _c=code, **k: {"headline": "h", "exit_code": _c})
+        assert main(["reproduce", "--reference", "a.json", "--candidate", "b.json"]) == code
+
+    def _capture(reference, candidate, out, *, t0_reference=None, t0_candidate=None):
+        seen["t0_reference"] = t0_reference
+        seen["t0_candidate"] = t0_candidate
+        return {"headline": "h", "exit_code": 0}
+
+    monkeypatch.setattr(rp, "compare", _capture)
+    assert main(["reproduce", "--reference", "a.json", "--candidate", "b.json"]) == 0
+    assert seen["t0_reference"] is None and seen["t0_candidate"] is None  # absent, not fabricated
+
+    assert (
+        main(["reproduce", "--reference", "a.json", "--candidate", "b.json", "--t0-reference", "r1", "r2", "r3"]) == 0
+    )
+    assert seen["t0_reference"]["meets_protocol_replicate_count"] is True
+    assert seen["t0_candidate"] is None
+    assert seen["t0_calls"][-1] == ["r1", "r2", "r3"]
+
+    def _operational(*a, **k):
+        raise rp.ReproduceError("unreadable report a.json")
+
+    monkeypatch.setattr(rp, "compare", _operational)
+    assert main(["reproduce", "--reference", "a.json", "--candidate", "b.json"]) == 2
+
+
+def test_audit_relays_its_exit_code_and_can_write_json(monkeypatch, tmp_path, capsys):
+    import quantfit.audit as au
+
+    result = {"exit_code": 3, "ok": False, "counts": {"findings": 1, "errors": 1, "warnings": 0}}
+    monkeypatch.setattr(au, "audit", lambda root=None: result)
+    monkeypatch.setattr(au, "summarize", lambda r, limit=0: "drift: 1 error(s)")
+
+    out = tmp_path / "findings.json"
+    assert main(["audit", "--json", str(out)]) == 3  # drift fails a build, it does not warn
+    assert "drift: 1 error(s)" in capsys.readouterr().out
+    assert json.loads(out.read_text(encoding="utf-8"))["counts"]["errors"] == 1
+
+    monkeypatch.setattr(au, "audit", lambda root=None: {**result, "exit_code": 0, "ok": True})
+    assert main(["audit"]) == 0
 
 
 def test_calibrate_subcommands_dispatch_and_refuse_operationally(monkeypatch, capsys):

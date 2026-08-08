@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantfit"
-version = "0.5.1"
+version = "0.6.0"
 description = "Quantize an LLM and check it still refuses what it should — a GPU-aware quantization CLI that measures the safety drift of the quantization it just performed."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -45,8 +45,18 @@ dev = ["pytest>=8.0", "ruff>=0.16,<0.17", "scipy>=1.11", "gguf>=0.10,<1.0"]
 # the enums quantfit reads are append-only in practice, so <1.0 is the honest cap.
 gguf = ["gguf>=0.10,<1.0"]
 # transformers' AwqQuantizer refuses to load autoawq checkpoints without gptqmodel;
-# needed only for screening first-party AWQ artifacts (e.g. Qwen/*-AWQ).
-awq = ["gptqmodel>=1.0"]
+# needed only for screening first-party AWQ artifacts (e.g. Qwen/*-AWQ). Bounded like
+# every churning dep here: 7.x is what the screen's AWQ row was curated against
+# (7.1.0 locally, 7.3.2 on PyPI), and the loader path it backs is exercised by no
+# hermetic test — so a major bump moves the cap only after a real load.
+awq = ["gptqmodel>=7.1,<8"]
+# The Inspect-API runner (ROADMAP 0.8). Pure python, so CI installs it to run the
+# parity test — a parity claim whose only test permanently skips is not a claim.
+# Upper-bounded like every churning dep here: the runner depends on inspect_ai
+# internals (SampleScore/Score/Value, inspect_ai.score, and the epoch-reduction
+# behaviour of Score.value) and is VERIFIED against 0.3.252. The cap moves only
+# after a validated run on the new minor — the standing ROADMAP rule.
+inspect = ["inspect-ai>=0.3.252,<0.4"]
 
 [project.urls]
 Homepage = "https://github.com/Sahil170595/quantfit"

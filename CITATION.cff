@@ -1,0 +1,82 @@
+# Citation File Format 1.2.0 — https://citation-file-format.github.io
+#
+# Every field below is copied from a file in this repository, named in the comment
+# above it. Nothing here is remembered, inferred, or filled in to look complete.
+#
+# Two fields a reader may expect and will not find, each omitted deliberately:
+#
+#   date-released — NOT INCLUDED. It is optional in CFF 1.2.0, and this repository
+#     records no release date for the version it ships: CHANGELOG.md carries no dates
+#     on any release heading (0.1.0 through 0.5.3), and the version below is the one on
+#     this branch rather than a tagged, dated release. A date guessed from a file mtime
+#     or from "today" would be a fabricated bibliographic fact in the one file whose
+#     whole job is not to have any. Whoever cuts the release adds it there, at tag time,
+#     in exactly this form — QUOTED:
+#
+#         date-released: "2026-08-06"
+#
+#     The quotes are not decoration. Unquoted, `2026-08-06` is a YAML timestamp: both
+#     parsers in tests/test_refreports.py resolve it to a `datetime.date` (they agree
+#     with each other in either spelling — that is tested), but the file would then hold
+#     two spellings of one field. tests/test_refreports.py mandates the quoted string,
+#     so this instruction and that test say the same thing.
+#
+#   references (arXiv 2606.10154) — NOT INCLUDED, and the reason is specific. The
+#     repository cites that paper twice and both citations are quotable:
+#       quantfit/policy/probe.py: "Quality Is Not a Safety Proxy Under Quantization",
+#         https://arxiv.org/abs/2606.10154
+#       ROADMAP.md: "our own paper's point (arXiv 2606.10154)"; risk 3 calls it "the
+#         maintainer's paper"; 0.5 lists a "Replication package for arXiv 2606.10154".
+#     What is NOT in this repository is an author list. CFF 1.2.0 requires `authors`
+#     on every entry of `references`, and naming one author on a paper whose author
+#     list I have not read would invent the field. Resolve it by opening
+#     https://arxiv.org/abs/2606.10154 and copying the authors verbatim; the title and
+#     URL above are already verified against probe.py and may be used as-is. The block
+#     that edit produces — a nested `authors:` sequence inside a `references:` item —
+#     is supported by tests/test_refreports.py's reader and is exercised there against
+#     both parsers, so adding it SATISFIES the no-unsourced-claim test rather than
+#     breaking the file:
+#
+#         references:
+#           - type: "article"
+#             title: "Quality Is Not a Safety Proxy Under Quantization"
+#             url: "https://arxiv.org/abs/2606.10154"
+#             authors:
+#               - family-names: "<verbatim from the arXiv record>"
+#                 given-names: "<verbatim from the arXiv record>"
+
+cff-version: "1.2.0"
+message: "If you use quantfit or the QSR measurement protocol, please cite this software."
+title: "quantfit"
+type: software
+
+# pyproject.toml [project] authors = [{ name = "Sahil Kadadekar" }]
+authors:
+  - family-names: "Kadadekar"
+    given-names: "Sahil"
+
+# pyproject.toml `version = "0.6.0"`, and quantfit/__init__.py `__version__ = "0.6.0"`.
+# tests/test_meta.py already pins those two to each other; tests/test_refreports.py
+# pins this line to both, so the citation cannot drift from what the tool ships.
+version: "0.6.0"
+
+# pyproject.toml `license = "Apache-2.0"` (PEP 639 SPDX expression); LICENSE is Apache 2.0.
+license: "Apache-2.0"
+
+# pyproject.toml [project.urls] Repository / Homepage
+repository-code: "https://github.com/Sahil170595/quantfit"
+url: "https://github.com/Sahil170595/quantfit"
+
+# pyproject.toml [project] description, verbatim.
+abstract: "Quantize an LLM and check it still refuses what it should — a GPU-aware quantization CLI that measures the safety drift of the quantization it just performed."
+
+# pyproject.toml [project] keywords, verbatim and in order.
+keywords:
+  - "llm"
+  - "quantization"
+  - "awq"
+  - "gptq"
+  - "gguf"
+  - "fp8"
+  - "gpu"
+  - "safety"

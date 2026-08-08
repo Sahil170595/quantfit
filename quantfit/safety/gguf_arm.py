@@ -245,7 +245,13 @@ def _binary_source(server: Path) -> str:
     env = os.environ.get("QUANTFIT_LLAMACPP")
     if env and server.is_relative_to(Path(env)):
         return "QUANTFIT_LLAMACPP (user-provided build; tag not verified by quantfit)"
-    return f"pinned release archive {LLAMACPP_TAG} (SHA256-verified)"
+    # The pin gates PROVISIONING, not this execution. `gguf._llama_bin` returns an
+    # already-extracted binary from `llamacpp-bin-<tag>/` before any archive logic runs, so
+    # a cached executable is never re-hashed against the archive it came from. Saying
+    # "SHA256-verified" flat would claim of *this run* what was only checked when the cache
+    # was filled. The ground truth for the arm is the `binary_sha256` field beside this one:
+    # the hash of the binary that actually ran.
+    return f"provisioned from pinned release archive {LLAMACPP_TAG} (archive SHA256-verified when provisioned)"
 
 
 def _threads() -> int:

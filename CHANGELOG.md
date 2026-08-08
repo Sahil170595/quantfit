@@ -1,5 +1,204 @@
 # Changelog
 
+> Note on versions: tool versions do not track ROADMAP milestone numbers. 0.5.1
+> shipped 0.6's machinery, 0.5.2 ships 0.7's; a milestone number in a version
+> would claim milestone completion, and those completions are gated on runs and
+> decisions that have not happened. 0.10 is the frozen standard (ROADMAP 0.10).
+
+## 0.6.0
+
+**Publishing accounting, stated because it is the point of this release.** The
+last version on PyPI was **0.5.1**. The sections below for **0.5.2** and **0.5.3**
+describe work that was written, reviewed and merged into a release branch and
+then **never published** — it lived in a five-deep stack of pull requests, each
+based on the previous release branch, and nothing in it was installable. 0.6.0 is
+that stack collapsed into one release. The version steps to 0.6.0 rather than
+0.5.3 so PyPI's history does not show a 0.5.3 arriving with no 0.5.2 before it;
+the milestone-numbering rule above is unchanged, and 0.6.0 still claims no
+ROADMAP milestone.
+
+Shipped here, from the sections below: the 0.7 gate that refuses thresholds it
+cannot resolve, the 0.8 reproduction command and Inspect runner, and the 0.10
+docs=code parity auditor wired into CI.
+
+New in this release itself:
+
+- **`quantfit --version`** answers instead of exiting 2. The subcommand is
+  required, so the top-level parser previously rejected `--version` with a usage
+  dump — the first thing anyone runs to confirm an install looked like a broken
+  install. The `version` action exits during parsing, ahead of that check.
+- **`LICENSE` is the canonical Apache-2.0 text again.** The file had been
+  truncated at 154 lines with the `APPENDIX` section removed, which put it below
+  the similarity threshold GitHub's licence classifier needs: the repository
+  reported `spdx_id: NOASSERTION`, licence "Other". Corporate policy scanners and
+  dependency-review bots read that field and frequently block on it. The declared
+  `license = "Apache-2.0"` in `pyproject.toml` never changed; only the file did.
+
+## 0.5.3 — merged, never published
+
+ROADMAP 0.8 machinery: the reproduction gate as code, an Inspect-API runner, the
+reference-report registry, and the QSR v1 freeze plan. Scoped to what can be true
+today — **v1 is not frozen** (it needs the ε-calibrated MDE from GO-gated 0.6 and
+the calibrated tolerance from an unrun T4), and **no reference report exists**
+(the 0.5 screen has not run). This ships the machinery and the plan; it
+fabricates neither.
+
+- **`quantfit.reproduce`** turns ROADMAP 0.8's gate — *"one reference report
+  reproduced from scratch on a free T4 within the 0.7 tolerance"* — into a
+  decision made by code. `docs/cross-hardware-tolerance-v0.md` defines the
+  tolerance as a T1–T5 rule over two schema-v2 reports; every predicate quotes
+  BOTH sides' numbers, so a breach is auditable from the artifact alone.
+  Outcomes are a closed vocabulary plus one minted name,
+  `reproduced_t0_unverified`: T0 is a within-hardware property of three
+  replicates and is not computable from the two reports a comparison receives,
+  so omitting that evidence yields a name strictly *harder* than the reserved
+  gate pass rather than the gate pass itself.
+- **`quantfit.inspect_task`** — a QSR-conformant paired diff on the Inspect API,
+  importing quantfit's own judge, at-risk definitions and tabulation. One
+  protocol, one implementation: a second copy would be the divergence channel
+  the spec exists to prevent. The arm and epochs pins are enforced at the layer
+  that can actually see a bypass, and the judge is loaded once per run rather
+  than once per probe.
+- **`quantfit.refreports` + `CITATION.cff`** — the registry ships **empty**,
+  with the three-report cap enforced in code and the rule ROADMAP risk 5 turns
+  on: a report stays valid across tool and dependency bumps and goes stale only
+  when its *spec* version is superseded.
+- **`spec/qsr-v1-freeze-plan.md`** — the blocking ledger with evidence, the
+  section-by-section v0→v1 diff, and the comparability decision under §10.2, so
+  freezing v1 later is transcription plus measured values rather than redesign.
+- **Decode comparability**: T1 compares decode as protocol facts — length and
+  greediness — rather than as prose. Comparing the chat-template policy string
+  for equality had made every honest cross-runner comparison read "not the same
+  measurement", punishing a runner for wording rather than for behavior.
+- CI installs `inspect-ai` (new `inspect` extra) so the Inspect parity test
+  actually runs; `.gitignore` covers Inspect eval logs, which carry completion
+  text the same way captures do.
+
+**Not delivered, so 0.8 is not claimed gate-passed:** QSR v1 is not frozen, zero
+reference reports exist, the free-tier T4 reproduction has not been attempted,
+and there is no launch post (the 0.5 screen has not run, so there are no findings
+to lead with). Of the three new modules, `reproduce` and `audit` became CLI
+commands in the 0.10 work below; `refreports` is still library-only, by design —
+the registry is empty, so a command would be a facade over nothing.
+
+### ROADMAP 0.10 machinery: the checks that keep the docs honest
+
+0.10 is the frozen standard, and none of its gate clauses is met here. What ships
+is the machinery that makes the claims checkable, plus the corrections that
+machinery found.
+
+- **`quantfit audit`** — docs=code parity as a command and a CI job: CLI commands
+  and flags walked off the real argparse parser, `file:symbol` citations resolved
+  by `ast`, exit codes, quoted constants, and schema field names. Exit 0 clean, 3
+  drift, 2 operational. It proved itself on its authors: wiring it made it fail
+  immediately with eight undocumented flags. Documents can say "this token is an
+  example, not a claim" with an `<!-- audit: ... -->` marker, because an auditor
+  that cannot be told about a counter-example is an auditor that gets switched off.
+- **`quantfit reproduce`** — the cross-hardware tolerance as a command. Replicate
+  files become a T0 result at the CLI boundary, so the record states which files
+  supplied it, and without `--t0-*` the outcome can never be the gate pass.
+- **The README quickstart is gated against the installed wheel**, with a
+  `--min-commands` floor so a fence-desynced README fails the build instead of
+  quietly shrinking the audited surface to nothing.
+- **CI derives dependency caps from `pyproject.toml`** (`tools/ci_constraints.py`).
+  The test job had been installing `gguf` and `inspect-ai` with no constraint at
+  all, ignoring the very caps pyproject declares — CI could have gone green on a
+  combination the package forbids. Restating the caps in the workflow would have
+  swapped one drift for another.
+- **The dependency policy is a test, not a paragraph** — every declared
+  requirement, including `[build-system].requires`, is bounded or carries a
+  classified exemption whose premise is re-checked against installed metadata.
+  Inert floors and majors crossed under an exemption are recorded, so a *new* one
+  fails rather than accumulating quietly.
+
+Fixes this round, each found by one of the above or by review of it:
+
+- **`detect_target()` crashed instead of exiting cleanly on a masked GPU.** With
+  `CUDA_VISIBLE_DEVICES=""`, `torch.cuda.is_available()` is True while
+  `device_count()` is 0; probing the device then raised `AssertionError: Invalid
+  device id`, which is outside quantfit's `(RuntimeError, OSError)` taxonomy, so
+  `quantfit plan` exited 1 with a traceback rather than the documented 2. Zero
+  visible devices is now read as what it is — a CPU machine — and any other probe
+  failure becomes a `RuntimeError`.
+- **`plan --token` was inert**: accepted by the parser, never read, and nothing in
+  `plan`'s path reaches the Hub. Removed, with a test that accepting a token and
+  using one must be the same set of commands.
+- **Spec §5.8 was two different sections.** The no-detection section is now §5.9,
+  and every citation moved with it — cited by title as well as number, because a
+  bare number can come to mean something else without the citing file changing.
+- **The GGUF report no longer overstates its own supply chain**: the SHA256 pin
+  gates *provisioning*, and a cached binary is not re-hashed, so the arm records
+  "provisioned from" rather than a verification it did not perform on that run.
+  `SECURITY.md` now discloses the same gap instead of implying the check.
+- **README no longer claims validation on Llama-1B** — that model appears in the
+  0.5 screen *target list*, which is a list of things to run, not a record of runs.
+
+## 0.5.2 — merged, never published
+
+ROADMAP 0.7 machinery: the pre-release gate, its CI integration, and the
+protocols they need — built to the milestone's stated goal, *"the pre-release
+check a quantizer runs on their own GPU, which refuses to promise resolution it
+does not have."*
+
+- **`quantfit gate --baseline B --quant Q --tier smoke|full` (or `--threshold PP`)**:
+  runs the paired diff and answers PASS/FAIL on the refusal-robustness axis —
+  but only after proving it can resolve the resolution you declared. Resolution
+  is checked twice: **before any model loads**, against the best-case at-risk
+  pairs the pinned probe set can supply, and again against the realized at-risk
+  n after the run. Either refusal exits **5** and names the threshold, the
+  printed MDE, the n, and where epsilon came from. A gate that cannot fail is
+  refused too (a declared threshold coarser than 30pp is an operational error).
+  Note what the threshold does and does not do: it governs the *resolution* leg
+  only. The verdict is an exact binomial test at the printed bound, not a
+  comparison of the observed rate against your number — with any real judge
+  error a single flip stops being a rejection — and the gate prints both the
+  flip count and the detection threshold so the arithmetic is auditable.
+- **Exit codes as a CI contract** (now spec §5.8): 0 pass, 3 fail (H0 rejected
+  on the gated axis), 4 the gated axis had zero at-risk pairs, 5 unresolvable,
+  2 operational. **4 and 5 are not passes** and must fail a build. Two stated
+  divergences from `verify-safety`: the gate's 4 is narrowed to the gated axis,
+  and its 3 is threshold-relative on one axis — so when the underlying run
+  detects an over-refusal regression the gate can still exit 0, and it therefore
+  carries the protocol's own verdict verbatim, flags the ungated axis, and names
+  it in the headline.
+- **The floor disclosure.** No in-distribution judge error has been measured
+  (ROADMAP 0.6 is GO-gated), so without an operator-supplied `--eps-upper` the
+  gate prints a **perfect-judge floor** — a lower bound on the true resolution,
+  never the resolution — and says so on every surface. The floor cuts both ways
+  and the gate discloses both: it is optimistic about resolution, and at
+  epsilon = 0 the detection threshold is the smallest possible, so a floor-mode
+  FAIL runs at an uncontrolled alpha and is a candidate for human verification.
+  `--eps-upper` requires `--eps-source`; an unsourced epsilon is not evidence,
+  and an epsilon of exactly 0 is refused (no Wilson upper bound is ever 0).
+- **Fingerprint-keyed baseline caching** (`quantfit.safety.cache`): a wrong hit
+  fabricates half a paired diff, so the fingerprint covers every input that can
+  change a completion — model, digest-shaped revision, resolved precision,
+  engine identity (transformers version, or llama.cpp binary hash + threads +
+  device), decode params, probe pins, and the execution environment. A floating
+  ref like `main` confers no content identity and is refused rather than cached.
+  Entries re-derive their own fingerprint on load, so a hand-edited entry is
+  never served. Cache entries hold completion text and are governed by
+  `docs/data-handling-completions.md`; `.gitignore` backstops
+  `*.baseline-cache.json`. Budgets assume zero hits — a hit is a speedup, never
+  a planning assumption.
+- **Reference CI integration**: a composite action (`.github/actions/quantfit-gate`)
+  a third-party quantizer copies, a weekly CPU canary
+  (`.github/workflows/canary.yml`) that asserts the determinism canary's
+  zero-flips-by-construction property without downloading a large model, and
+  `docs/ci-integration.md` — the exit-code table, what the gate does not
+  promise, secret handling, and artifact rules.
+- **`docs/cross-hardware-tolerance-v0.md`**: the tolerance protocol 0.8's
+  reproduction gate will consume — what a tolerance covers (GPU model, driver,
+  kernel nondeterminism, host threads, and the judge's own forward pass) versus
+  what it cannot, which of those the shipped report can witness from its own
+  fields, and the recorded deviation where ROADMAP's "dtype pinned fp16 on all
+  arms" cannot hold on the GGUF stratum by construction.
+
+**Not in this release:** the cross-hardware T4 run, the injected-catastrophe
+canary, a rendered HF model-card page, and any measured judge error — so ROADMAP
+0.7's gate criteria are not claimed as met. The baseline cache is library
+surface: `quantfit gate` does not yet call it.
+
 ## 0.5.1
 
 Judge-calibration MACHINERY for ROADMAP 0.6 — with GO-gated activation. The
