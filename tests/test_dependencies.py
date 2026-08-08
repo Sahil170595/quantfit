@@ -615,12 +615,25 @@ def test_a_major_boundary_crossed_under_an_exemption_is_recorded():
     so the honest substitute is a recorded list. Resolved against INSTALLED metadata, so it
     describes a real resolution rather than a guess about the index. Skips entirely where
     nothing is installed (CI's `--no-deps` unit job).
+
+    `[build-system].requires` is deliberately outside this check, and the exclusion is not
+    a convenience: a build requirement's *installed* version is not the version that built
+    anything. PEP 517 frontends build in an isolated environment this metadata cannot see,
+    so what `md.version("setuptools")` reports is whatever the interpreter image happens to
+    ship — 79 on GitHub's 3.10 and 3.11 runners, absent entirely on 3.12+, which no longer
+    bundle it, and 70.2.0 on the maintainer's box. Reading it measured the runner rather
+    than quantfit: the check passed everywhere setuptools was old or missing and turned CI
+    red on exactly the two images where it was new. Build requirements remain fully inside
+    the bounded-or-exempt policy (`test_every_build_requirement_is_bounded_or_exempt`);
+    it is only this ambient-metadata inference they are excluded from.
     """
     import importlib.metadata as md
 
     observed: dict[str, tuple[str, int]] = {}
     resolved = 0
-    for _group, req in _all_requirements():
+    for group, req in _all_requirements():
+        if group == _BUILD_SYSTEM_GROUP:
+            continue
         floor = _lower_bound(req)
         if floor is None or req.name not in _EXEMPTIONS:
             continue
@@ -652,6 +665,42 @@ def test_a_major_boundary_crossed_under_an_exemption_is_recorded():
         f"crossed a FURTHER major since this was recorded (recorded -> installed): {further}. Re-argue the "
         "exemption on the new major or move the floor; do not just bump the number."
     )
+
+
+def test_the_major_crossing_check_ignores_build_requirements():
+    """Pin the exclusion above, because reverting it turns CI red on two images only.
+
+    The build requirements are exempt AND uncapped AND carry floors, so they satisfy every
+    precondition of the major-crossing scan; the only thing keeping them out is the group
+    check. Without it, `setuptools>=77` against the 79 that GitHub's 3.10 and 3.11 images
+    ship is a "newly crossed a major boundary" failure — on those two jobs and nowhere
+    else, since 3.12+ images do not bundle setuptools at all. That is a hard failure to
+    diagnose from a local run, so it gets a test rather than a comment alone.
+    """
+    build = [req for group, req in _all_requirements() if group == _BUILD_SYSTEM_GROUP]
+    assert build, "pyproject declares no [build-system].requires; this reader is stale"
+    qualifying = [
+        req.name
+        for req in build
+        if _lower_bound(req) is not None and req.name in _EXEMPTIONS and not req.has_upper_bound
+    ]
+    assert qualifying, (
+        "no build requirement is exempt-with-a-floor any more, so this guard has no subject. "
+        "Re-point it or delete it deliberately."
+    )
+    # The scan must not observe them even when they are installed with a higher major.
+    import importlib.metadata as md
+
+    for name in qualifying:
+        try:
+            md.version(name)
+        except md.PackageNotFoundError:
+            continue
+        break
+    else:
+        pytest.skip("no qualifying build requirement is installed here, so there is nothing to have excluded")
+
+    test_a_major_boundary_crossed_under_an_exemption_is_recorded()  # must not fail on their account
 
 
 def test_psutil_is_used_through_exactly_one_api():

@@ -140,6 +140,17 @@ workflow-side number to keep in step.**
 `line-length = 120`, `target-version = "py310"` (`pyproject.toml:75-77`). Run
 `ruff format` (without `--check`) to apply; do not hand-reflow to dodge it.
 
+**Two ways a clean local lint still goes red in CI**, both of which have happened:
+
+- **The cap is a range, so CI may run a newer ruff than you.** A green branch failed on
+  0.16.2 while the maintainer's box was on 0.16.0. Before pushing a lint-sensitive
+  change, `pip install --upgrade "ruff>=0.16,<0.17"` so you are running what CI resolves.
+- **`EXE001` cannot fire on Windows.** "Shebang is present but file is not executable"
+  is a check on the file mode, and Windows has none to check — so a new script under
+  `tools/` passes locally and fails on the Linux `lint` job. If you add one with a
+  `#!/usr/bin/env python3` line, make the shebang true in the index:
+  `git update-index --chmod=+x tools/your_script.py`.
+
 ---
 
 ## 3. The exit-code contract a change must not break
