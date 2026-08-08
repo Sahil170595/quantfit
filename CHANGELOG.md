@@ -5,6 +5,36 @@
 > would claim milestone completion, and those completions are gated on runs and
 > decisions that have not happened. 0.10 is the frozen standard (ROADMAP 0.10).
 
+## 0.6.1
+
+The README is the package's `long_description`, so it **is** the PyPI page — and as
+a package front page it had gaps that only show up once someone lands on it from
+outside the repository.
+
+- **Nothing was linkable.** Two links in 280 lines, both to arXiv. Every reference
+  to this project's own material — the spec, the CI-integration guide, the
+  changelog, the roadmap, `llms.txt` — was a bare code span, which a reader on
+  PyPI cannot follow. Those are now links, and only for paths that exist: a link
+  that 404s is worse than the code span it replaced, because it looks
+  authoritative. All fifteen URLs in the file were checked and resolve.
+- **No badges.** Version, supported Pythons, licence and CI status are the trust
+  signals people actually check before adopting a package, and the adoption
+  research that prompted this work found exactly that. The licence badge is also
+  the visible confirmation that 0.6.0's `LICENSE` repair worked — it reads
+  Apache-2.0 rather than "Other".
+- **The quickstart buried the point.** `--version` and `verify-safety --demo` now
+  open it, so the first thing a reader can do costs a second rather than a
+  multi-gigabyte download, with the heavier commands following.
+
+Also in this release, and not visible in any file: the **GitHub repository
+description** still said "a built-in safety-**tax** check". This project renamed
+that vocabulary to "safety drift" deliberately — a safety *tax* in the alignment
+literature is capability paid for safety, close to the inverse of what is measured
+here — and enforces the rename with a purge test. `pyproject.toml` and the README
+both said "drift"; only the repository blurb, which is the first line anyone reads
+and lives in GitHub's metadata rather than the tree, was stale. No test could have
+caught it. Fixed, along with adding topics to a repository that had none.
+
 ## 0.6.0
 
 **Publishing accounting, stated because it is the point of this release.** The

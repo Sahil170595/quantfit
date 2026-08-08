@@ -59,7 +59,7 @@ Every command takes `--json` and prints exactly one document on stdout, with dia
 stderr:
 
 ```json
-{ "schema_version": 1, "tool": { "name": "quantfit", "version": "0.6.0" },
+{ "schema_version": 1, "tool": { "name": "quantfit", "version": "0.6.1" },
   "command": "verify-safety", "exit_code": 3,
   "result": { "regression_detected": true, "unmeasurable_axes": [] } }
 ```

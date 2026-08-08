@@ -1,5 +1,10 @@
 # quantfit
 
+[![PyPI](https://img.shields.io/pypi/v/quantfit.svg)](https://pypi.org/project/quantfit/)
+[![Python](https://img.shields.io/pypi/pyversions/quantfit.svg)](https://pypi.org/project/quantfit/)
+[![License](https://img.shields.io/pypi/l/quantfit.svg)](https://github.com/Sahil170595/quantfit/blob/main/LICENSE)
+[![CI](https://github.com/Sahil170595/quantfit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Sahil170595/quantfit/actions/workflows/ci.yml)
+
 **Quantize an LLM — and check it still refuses what it should.**
 
 Quantization makes a model cheaper to serve. It can also quietly strip safety
@@ -93,7 +98,7 @@ environment fingerprint, per-arm runtimes, and the full drift vector with CIs �
 enough to audit, diff against a rerun, or cite.
 
 **Scale it and publish it.** The protocol is versioned as **QSR v0**
-(`spec/qsr-v0.md`); `quantfit screen --targets targets.json --out reports/` runs
+([`spec/qsr-v0.md`](https://github.com/Sahil170595/quantfit/blob/main/spec/qsr-v0.md)); `quantfit screen --targets targets.json --out reports/` runs
 the paired diff over a whole manifest of quants and aggregates per-stratum,
 per-axis Wilson prevalence bounds (flagged flips stay candidates until
 human-verified, and every bound is labeled "conditional on undemonstrated
@@ -180,7 +185,7 @@ quantfit check --model Qwen/Qwen2.5-7B-Instruct --json
 ```json
 {
   "schema_version": 1,
-  "tool": { "name": "quantfit", "version": "0.6.0" },
+  "tool": { "name": "quantfit", "version": "0.6.1" },
   "command": "verify-safety",
   "exit_code": 3,
   "result": { "regression_detected": true, "unmeasurable_axes": [], "...": "..." }
@@ -193,7 +198,7 @@ branch on either. An operational failure returns the same envelope with an
 one case you cannot. `schema_version` is there so a consumer can tell when its
 assumptions expired.
 
-**If an assistant is reading this for you.** `llms.txt` in the repository root is
+**If an assistant is reading this for you.** [`llms.txt`](https://github.com/Sahil170595/quantfit/blob/main/llms.txt) in the repository root is
 the retrieval surface coding agents fetch by convention, and it carries the
 command list, the exit-code contract and the stated limits rather than only the
 pitch. `.claude/skills/quantfit/SKILL.md` is the usage-facing skill — distinct
@@ -226,7 +231,7 @@ a lower bound on the true resolution, never the resolution — unless you supply
 both: optimistic about resolution, and permissive about detection (at ε=0 the
 detection threshold is the smallest possible, so a floor-mode FAIL runs at an
 uncontrolled α and is a candidate for human verification). A reference GitHub
-Action and a weekly CPU canary ship in `.github/`; see `docs/ci-integration.md`.
+Action and a weekly CPU canary ship in `.github/`; see [`docs/ci-integration.md`](https://github.com/Sahil170595/quantfit/blob/main/docs/ci-integration.md).
 
 ## GPU-aware quantization
 
@@ -267,7 +272,7 @@ group-size 128) is shared across the calibrated methods, so they are comparable.
 ## What it is — and isn't
 
 - It **quantizes** (wrapping llm-compressor + llama.cpp) and **checks safety
-  preservation**. Both run end-to-end, validated on Qwen2.5-1.5B (`CHANGELOG.md`
+  preservation**. Both run end-to-end, validated on Qwen2.5-1.5B ([`CHANGELOG.md`](https://github.com/Sahil170595/quantfit/blob/main/CHANGELOG.md)
   0.1.0) and over-VRAM (Qwen2.5-7B GPTQ on a 12 GB card via sequential
   onloading, telemetry-confirmed CPU spill; the safety check covers 7B GGUF
   pairs with the F16 baseline in CPU RAM). Llama-3.2-1B appears in the 0.5 screen
@@ -279,12 +284,12 @@ group-size 128) is shared across the calibrated methods, so they are comparable.
 - It does **not** *auto-pick the method and quantize* for you — you pass `--method`.
   Learned routing ([AMQ](https://arxiv.org/abs/2509.12019),
   [KL-Lens](https://arxiv.org/abs/2604.13440)) exists as published research, but it is
-  explicitly out of scope here (see `ROADMAP.md`): quantfit's bet is honest
+  explicitly out of scope here (see [`ROADMAP.md`](https://github.com/Sahil170595/quantfit/blob/main/ROADMAP.md)): quantfit's bet is honest
   measurement, and `plan`/`probe` stay transparent diagnostics.
 
 ## Docker
 
-`Dockerfile` builds an isolated CUDA image. For GGUF in Docker, the official
+[`Dockerfile`](https://github.com/Sahil170595/quantfit/blob/main/Dockerfile) builds an isolated CUDA image. For GGUF in Docker, the official
 `ghcr.io/ggml-org/llama.cpp:full` image carries the convert + quantize tooling.
 
 ## License
