@@ -368,14 +368,46 @@ def test_two_captures_never_mint_the_same_ids(tmp_path):
 
 
 def test_row_order_is_a_shuffle_not_the_capture_order(tmp_path):
-    sheet, key = _build(tmp_path)
-    ids = json.loads(Path(key).read_text(encoding="utf-8"))["ids"]
-    order = [ids[row[0]] for row in _sheet_rows(sheet)[1:]]
+    """The sheet order must be randomised, which is a property of the SHUFFLE, not of one draw.
 
-    arms = [entry["arm"] for entry in order]
-    assert arms != [ARM_BASELINE] * _N_PAIRS + [ARM_QUANTIZED] * _N_PAIRS  # the capture's own order
-    assert [entry["pair"] for entry in order] != sorted(entry["pair"] for entry in order)
-    assert len(set(arms[:_N_PAIRS])) == 2  # both arms are interleaved from the first block on
+    Asserted across several independent builds on purpose. A fair shuffle can reproduce the
+    capture order by chance, so a single draw cannot distinguish "randomised" from "lucky":
+    with `_N_PAIRS` = 5 the arm sequence lands back on the capture's own order with
+    probability 1/C(10,5), and lands with one arm filling the first block with probability
+    2/C(10,5) = 0.79% — which is precisely the rate at which this test used to fail, roughly
+    one CI run in 126 across a five-job matrix.
+
+    The blinding salt comes from `secrets`, so it cannot be seeded for the test without
+    weakening the thing being tested. Repeating instead makes a false failure require every
+    draw to coincide: (1/252)**_DRAWS, which is about 2e-15 here.
+
+    Each individual draw is still checked for the property that must hold every time — the
+    order is a permutation of the capture, nothing added, nothing dropped.
+    """
+    _DRAWS = 6
+    capture_order = [ARM_BASELINE] * _N_PAIRS + [ARM_QUANTIZED] * _N_PAIRS
+
+    orders = []
+    for i in range(_DRAWS):
+        sheet, key = _build(tmp_path, stem=f"draw{i}")
+        ids = json.loads(Path(key).read_text(encoding="utf-8"))["ids"]
+        order = [ids[row[0]] for row in _sheet_rows(sheet)[1:]]
+        # Holds on every draw, lucky or not: a shuffle rearranges, it never adds or drops.
+        assert sorted((e["pair"], e["arm"]) for e in order) == sorted(
+            (pair, arm) for pair in range(_N_PAIRS) for arm in (ARM_BASELINE, ARM_QUANTIZED)
+        )
+        orders.append(order)
+
+    arm_orders = [[e["arm"] for e in order] for order in orders]
+    assert any(arms != capture_order for arms in arm_orders), (
+        f"all {_DRAWS} draws reproduced the capture's own arm order; the sheet is not being shuffled"
+    )
+    assert any(len(set(arms[:_N_PAIRS])) == 2 for arms in arm_orders), (
+        f"in all {_DRAWS} draws one arm filled the first block; the arms are not interleaved"
+    )
+    assert any([e["pair"] for e in order] != sorted(e["pair"] for e in order) for order in orders), (
+        f"all {_DRAWS} draws came out in pair order; the sheet is not being shuffled"
+    )
 
 
 def test_both_arms_and_both_judge_labels_are_in_the_sheet(tmp_path):
