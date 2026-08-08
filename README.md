@@ -131,6 +131,31 @@ blinded judge-calibration labeling sheet from a `--capture` file and ingest the
 filled labels into a per-arm judge-error report — machinery for ROADMAP 0.6,
 which starts only on the 0.5 GO decision.
 
+**See the output before you download anything.** `quantfit verify-safety --demo`
+runs the real tabulation — the same `_tabulate`, the same Wilson bounds, the same
+at-risk denominators — over bundled fixtures, in about a second:
+
+```bash
+quantfit verify-safety --demo
+```
+
+```
+DEMONSTRATION — fixtures, not a measurement
+safety drift over <fixture> probes — REGRESSION DETECTED (both axes)
+  refusal-robustness: harmful-compliance regressions flagged, with a Wilson 95% interval
+```
+
+No model, no network, no weights. The fixture set is its own, much smaller than
+the curated corpus a real run uses, and the probe prompts are placeholders — only
+the statistics are real. Every surface says so: the banner, `"demo": true` in the
+JSON, and a refusal if you pass `--report`, because an artifact indistinguishable
+from a real run's is the one thing a demo must never produce.
+
+The demo's process status is always success, and that is deliberate rather than a
+verdict: the fixture deliberately contains a regression so you can see the shape
+of a finding, but the failing verdict status belongs to a statement about a model,
+and no model ran.
+
 **Every command speaks JSON.** Add `--json` to any of them and stdout carries
 exactly one document — never prose mixed with data, so a caller never has to
 strip lines before parsing:

@@ -27,13 +27,29 @@
 
   The flag is attached by walking the parser rather than by hand, so a fifteenth
   command cannot quietly miss it. It goes on leaves only — argparse lets a
-  subparser's default overwrite a parent's value for the same dest, so
-  `quantfit calibrate --json sheet` would parse and then silently reset it to
-  false, which is precisely the inert-flag defect `plan --token` was.
+  subparser's default overwrite a parent's value for the same dest, so putting it
+  on `calibrate` itself would parse and then silently reset it to false, which is
+  precisely the inert-flag defect `plan --token` was. `calibrate sheet` and
+  `calibrate ingest` each take it; the parent deliberately does not.
 
 - **`quantfit audit --json PATH` is now `--json-out PATH`.** One flag name could
   not mean "write a file here" on one command and "print to stdout" on the other
   thirteen. Renamed before `audit` had a released user — it first ships in 0.6.0.
+
+- **`quantfit verify-safety --demo` prints a real verdict in about a second.** Of
+  the CLI's commands, only `list` and `plan` did anything without a GPU, a network
+  and two model artifacts, so most evaluations ended before the first verdict.
+  `--demo` runs the shipped `_tabulate` over bundled fixtures — the Wilson bounds,
+  the at-risk denominators and the verdict precedence are genuinely computed, not
+  re-implemented, because a second copy of the statistics would be the divergence
+  channel the spec exists to prevent.
+
+  What it is not is enforced rather than mentioned: the probe prompts are
+  placeholders (shipping the curated expected-unsafe corpus in the wheel to
+  prettify a demo would put harmful text in every install), the refusal flags are
+  fixtures, `--report` and `--capture` are **refused** outright, and the exit code
+  is always 0 — the fixture deliberately contains a regression so a reader sees
+  the shape of a finding, but exit 3 is a verdict about a model and no model ran.
 
 ## 0.6.0
 

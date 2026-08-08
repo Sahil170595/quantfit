@@ -125,16 +125,26 @@ def _build_parser() -> argparse.ArgumentParser:
         "--baseline",
         "--fp16",  # legacy alias from 0.1-0.3; the baseline loads at its NATIVE dtype (often bf16)
         dest="baseline",
-        required=True,
+        # Not argparse-required, because `--demo` is a valid invocation without it. The pair
+        # is still mandatory for a real run; that check moved into the dispatch so its
+        # failure is a quantfit RuntimeError -> exit 2 with a clean message, which is also
+        # the only form `--json` can carry. An argparse usage dump is not parseable.
+        default=None,
         help="the unquantized baseline: an HF id (loaded at its native dtype — often bf16), or for "
         "GGUF pairs an F16/BF16/F32 GGUF (*.gguf path or hf:<org>/<repo>/<file>.gguf) run under "
         "the identical pinned llama.cpp binary as --quant",
     )
     pvs.add_argument(
         "--quant",
-        required=True,
+        default=None,  # see --baseline: mandatory for a real run, checked in the dispatch
         help="the quantized artifact: an output dir, or a *.gguf / hf:<org>/<repo>/<file>.gguf ref "
         "(GGUF quant requires a GGUF baseline — both arms one binary, CPU)",
+    )
+    pvs.add_argument(
+        "--demo",
+        action="store_true",
+        help="run the real tabulation over bundled FIXTURES and print the report shape — no model, "
+        "no network, no weights, nothing measured. Refuses --report; always exits 0",
     )
     pvs.add_argument(
         "--max-new-tokens",
@@ -439,6 +449,42 @@ def _dispatch(args: argparse.Namespace) -> int:
 
     if args.cmd == "verify-safety":
         from quantfit.safety.verify import verify_safety
+
+        if args.demo:
+            from quantfit.safety.demo import DEMO_NOTE, demo_drift, demo_summary
+
+            # A demonstration must not be able to leave an artifact a reader could mistake
+            # for a measurement, so the flags that write one are refused rather than ignored.
+            for flag, value in (("--report", args.report), ("--capture", args.capture)):
+                if value:
+                    raise RuntimeError(
+                        f"--demo cannot be combined with {flag}: the demo measures nothing, and an "
+                        "artifact it wrote would be indistinguishable from a real run's"
+                    )
+            demo = demo_drift()
+            # Exit 0 regardless of what the fixture shows. The fixture DOES contain a
+            # regression — a no-detection demo would teach the output shape but not the
+            # shape of a finding — but exit 3 is a verdict about a model, and no model ran.
+            return _emit(
+                args,
+                "verify-safety",
+                0,
+                {
+                    "demo": True,
+                    "measured": False,
+                    "note": DEMO_NOTE,
+                    "regression_detected": demo.regression_detected,
+                    "unmeasurable_axes": list(demo.unmeasurable_axes),
+                    "summary": demo_summary(demo),
+                },
+                lambda: print(demo_summary(demo)),
+            )
+
+        if not args.baseline or not args.quant:
+            raise RuntimeError(
+                "verify-safety needs --baseline and --quant. For the report shape without a model, "
+                "run `quantfit verify-safety --demo`."
+            )
 
         drift = verify_safety(
             args.baseline,

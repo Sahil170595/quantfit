@@ -41,13 +41,35 @@ _ROOT = Path(__file__).resolve().parent.parent
 # CUDA masked: these must be decided by the CLI, not by whether the test box has a GPU.
 _ENV = dict(os.environ, PYTHONIOENCODING="utf-8", CUDA_VISIBLE_DEVICES="-1")
 
+# Stub packages that raise on import, prepended to the child's path. CI's `test` job
+# installs neither torch nor transformers (CONTRIBUTING §2, the hermetic-test rule), so a
+# case whose command imports a backend passes on a dev box and fails on all five matrix
+# jobs — which is exactly what `plan` and `verify` did the first time this file was
+# written. Blocking them here reproduces CI's environment on any machine, so the mistake
+# cannot come back silently.
+_BLOCKED = ("torch", "transformers", "datasets", "llmcompressor")
 
-def _run(*argv: str) -> subprocess.CompletedProcess:
+
+def _blocked_backend_path(tmp: Path) -> str:
+    for name in _BLOCKED:
+        (tmp / f"{name}.py").write_text(
+            f"raise ImportError({name!r} + ' is deliberately blocked: this command must run "
+            "without a backend, the way CI's test job runs it')\n",
+            encoding="utf-8",
+        )
+    return str(tmp)
+
+
+def _run(*argv: str, block_backends: Path | None = None) -> subprocess.CompletedProcess:
+    env = dict(_ENV)
+    if block_backends is not None:
+        stub = _blocked_backend_path(block_backends)
+        env["PYTHONPATH"] = stub + os.pathsep + env.get("PYTHONPATH", "")
     return subprocess.run(
         [sys.executable, "-m", "quantfit.cli", *argv],
         capture_output=True,
         cwd=str(_ROOT),
-        env=_ENV,
+        env=env,
         check=False,
         timeout=300,
     )
@@ -116,21 +138,30 @@ def test_json_is_not_a_flag_on_the_parent_of_a_subcommand():
 # 2-4. The stream contract, per command, on paths reachable without a GPU
 # --------------------------------------------------------------------------------
 
-# (label, argv, expected exit code). Heavy commands are exercised on their ERROR path,
-# which is both reachable here and the path a caller most needs to be able to parse.
+# (label, argv, expected exit code).
+#
+# Every case must run with NO torch and NO transformers installed. CI's `test` job
+# deliberately installs neither (CONTRIBUTING §2, "the hermetic-test rule"), and these
+# spawn the real CLI, so a case whose command imports a backend passes on a dev box and
+# fails on all five matrix jobs. `plan` (imports torch via detect_target) and `verify`
+# (imports transformers) were in this list and did exactly that.
+#
+# Heavy commands are covered on their ERROR path where that path is reachable without a
+# backend — which is also the path a caller most needs to be able to parse.
 _CASES = [
     ("list", ["list"], 0),
-    ("plan", ["plan", "--model", "Qwen/Qwen2.5-7B-Instruct"], 0),
     ("audit", ["audit"], None),  # 0 or 3 depending on the tree; both are verdicts
-    ("verify-missing", ["verify", "--model", "no-such-artifact-xyz"], 3),
+    ("verify-safety-demo", ["verify-safety", "--demo"], 0),
+    ("verify-safety-missing-arms", ["verify-safety"], 2),
     ("emit-missing", ["emit", "model-card", "--report", "no-such-report-xyz.json"], 2),
     ("reproduce-missing", ["reproduce", "--reference", "no-a.json", "--candidate", "no-b.json"], 2),
 ]
 
 
 @pytest.mark.parametrize(("label", "argv", "expected"), _CASES, ids=[c[0] for c in _CASES])
-def test_json_stdout_is_exactly_one_document(label, argv, expected):
-    result = _run(*argv, "--json")
+def test_json_stdout_is_exactly_one_document(label, argv, expected, tmp_path):
+    # Backends blocked: every case here must hold in CI's dependency-free test job.
+    result = _run(*argv, "--json", block_backends=tmp_path)
     stdout = result.stdout.decode("utf-8", "replace")
 
     document = json.loads(stdout)  # the assertion: raises if anything else is on stdout
@@ -158,9 +189,9 @@ def test_prose_mode_is_unchanged_and_is_not_json(label, argv, expected):
             json.loads(stdout)
 
 
-def test_an_operational_failure_is_still_json():
+def test_an_operational_failure_is_still_json(tmp_path):
     """The path a caller most needs to parse is the one that failed."""
-    result = _run("emit", "model-card", "--report", "no-such-report-xyz.json", "--json")
+    result = _run("emit", "model-card", "--report", "no-such-report-xyz.json", "--json", block_backends=tmp_path)
     document = json.loads(result.stdout.decode("utf-8", "replace"))
     assert document["exit_code"] == 2
     assert result.returncode == 2
@@ -169,13 +200,31 @@ def test_an_operational_failure_is_still_json():
     assert document["error"]["kind"], "the exception class is what a caller branches on"
 
 
-def test_a_verdict_failure_is_not_reported_as_an_error():
-    """Exit 3 is an answer, not a failure. It must not carry an `error` block."""
-    result = _run("verify", "--model", "no-such-artifact-xyz", "--json")
-    document = json.loads(result.stdout.decode("utf-8", "replace"))
+def test_a_verdict_failure_is_not_reported_as_an_error(monkeypatch, capsys):
+    """Exit 3 is an answer, not a failure. It must not carry an `error` block.
+
+    In-process with a monkeypatched `verify_safety`, because the only commands that return
+    3 need a backend to reach that state — and the subprocess cases above are deliberately
+    run with backends blocked. The distinction under test is in the envelope, not in the
+    measurement, so a stubbed drift exercises it exactly.
+    """
+    import quantfit.safety.verify as sv
+    from quantfit.cli import main
+
+    drift = sv._tabulate(
+        [sv.Probe("p", "clear_unsafe", sv.EXPECTED_UNSAFE)],
+        [True],
+        [False],  # baseline refused, quant complied: a dangerous flip
+    )
+    monkeypatch.setattr(sv, "verify_safety", lambda *a, **k: drift)
+
+    code = main(["verify-safety", "--baseline", "a", "--quant", "b", "--json"])
+    document = json.loads(capsys.readouterr().out)
+
+    assert code == 3
     assert document["exit_code"] == 3
     assert "error" not in document, "a verdict is not an operational failure"
-    assert document["result"]["passed"] is False
+    assert document["result"]["regression_detected"] is True
 
 
 def test_notices_do_not_leak_onto_stdout_under_json(tmp_path):
