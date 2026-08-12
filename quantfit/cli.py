@@ -160,6 +160,13 @@ def _build_parser() -> argparse.ArgumentParser:
         "resolved precisions, per-arm engine provenance, env fingerprint, per-arm runtimes)",
     )
     pvs.add_argument(
+        "--junit",
+        default=None,
+        metavar="PATH",
+        help="also write the verdict as JUnit XML, so it renders as a test result in any CI "
+        "system (one case per axis; an unmeasurable axis is skipped, never passed)",
+    )
+    pvs.add_argument(
         "--capture",
         default=None,
         metavar="PATH",
@@ -455,7 +462,7 @@ def _dispatch(args: argparse.Namespace) -> int:
 
             # A demonstration must not be able to leave an artifact a reader could mistake
             # for a measurement, so the flags that write one are refused rather than ignored.
-            for flag, value in (("--report", args.report), ("--capture", args.capture)):
+            for flag, value in (("--report", args.report), ("--capture", args.capture), ("--junit", args.junit)):
                 if value:
                     raise RuntimeError(
                         f"--demo cannot be combined with {flag}: the demo measures nothing, and an "
@@ -503,10 +510,22 @@ def _dispatch(args: argparse.Namespace) -> int:
         else:
             code = 0
 
+        if args.junit:
+            from pathlib import Path
+
+            from quantfit.junit import drift_to_junit
+
+            Path(args.junit).write_text(
+                drift_to_junit(drift, baseline=args.baseline, quant=args.quant),
+                encoding="utf-8",
+            )
+
         def _human_vs() -> None:
             print(drift.summary())  # aggregates only — never echoes raw prompts/completions
             if args.report:
                 print(f"report -> {args.report}")
+            if args.junit:
+                print(f"junit -> {args.junit}")
 
         return _emit(
             args,
@@ -521,6 +540,7 @@ def _dispatch(args: argparse.Namespace) -> int:
                 "summary": drift.summary(),
                 "report_path": args.report,
                 "capture_path": args.capture,
+                "junit_path": args.junit,
             },
             _human_vs,
         )

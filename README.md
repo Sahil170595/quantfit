@@ -207,6 +207,27 @@ repo, not use the tool. Both are held to docs=code parity by `quantfit audit`,
 because the surface most likely to be read by something that cannot notice it has
 gone stale is the last one that should be exempt.
 
+**It reports as a test.** Add `--junit` and the verdict renders natively in
+GitHub Actions, GitLab, Jenkins, Buildkite or CircleCI, with no adapter:
+
+```bash
+quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --junit drift.xml
+```
+
+One test case per axis, not one for the run — a scalar pass/fail hides the case
+the two-axis design exists to catch. An axis with **zero at-risk pairs is
+`skipped`, never `passed`**: "nothing was measured" and "nothing was wrong" are
+different results, and a green tick is the wrong summary for the first. The
+at-risk denominator travels with the flip count (`1/3 at-risk pairs flipped`),
+because reading flips against the full probe set is the commonest way to
+understate the result. Aggregates only — no probe text reaches a file you upload
+as a CI artifact.
+
+This is deliberately not a plugin for promptfoo, garak or PyRIT: those evaluate a
+model against prompts, while quantfit gates a model artifact after quantization —
+a different point in the pipeline. JUnit is what every runner already reads, so
+quantfit becomes a step in whatever stack you have rather than one you adopt.
+
 **Gate it in CI.** `quantfit gate` is the pre-release check — and it refuses to
 promise resolution it does not have:
 

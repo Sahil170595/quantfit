@@ -18,6 +18,7 @@ To see real output in about a second, with no model, no network and no weights:
 - [quantize](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit quantize --model <hf-id> --method awq --out ./out` — quantize via llm-compressor or llama.cpp.
 - [verify](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit verify --model ./out` — smoke-load the artifact and generate.
 - [verify-safety](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit verify-safety --baseline <hf-id> --quant ./out` — the paired refusal diff. This is the command the tool exists for.
+- **CI**: add `--junit drift.xml` to any verdict command and the result renders as a test in GitHub Actions, GitLab, Jenkins, Buildkite or CircleCI. One case per axis; an axis with zero at-risk pairs is `skipped`, never `passed`.
 - [screen](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit screen --targets targets.json --out ./screen` — run the diff over a manifest and aggregate per-stratum, per-axis prevalence bounds.
 - [gate](https://github.com/Sahil170595/quantfit/blob/main/docs/ci-integration.md): `quantfit gate --baseline <hf-id> --quant ./out --tier smoke` — the pre-release check, which refuses a threshold finer than the run could resolve rather than passing it.
 - [emit](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit emit model-card --report report.json` — render a model-card fragment from a drift report.
