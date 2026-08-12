@@ -198,6 +198,11 @@ branch on either. An operational failure returns the same envelope with an
 one case you cannot. `schema_version` is there so a consumer can tell when its
 assumptions expired.
 
+**Every flag, in one place.** [`docs/cli-reference.md`](https://github.com/Sahil170595/quantfit/blob/main/docs/cli-reference.md)
+is the complete surface — every command, every flag, with a worked invocation.
+`quantfit audit` checks it against the real parser, so it fails the build rather
+than rotting.
+
 **If an assistant is reading this for you.** [`llms.txt`](https://github.com/Sahil170595/quantfit/blob/main/llms.txt) in the repository root is
 the retrieval surface coding agents fetch by convention, and it carries the
 command list, the exit-code contract and the stated limits rather than only the
