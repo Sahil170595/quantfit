@@ -5,6 +5,60 @@
 > would claim milestone completion, and those completions are gated on runs and
 > decisions that have not happened. 0.10 is the frozen standard (ROADMAP 0.10).
 
+## 0.7.0
+
+A minor rather than a patch, because `--junit` is new surface. The theme is the
+same one 0.6.0 started: a correct measurement that nothing downstream can consume
+is a measurement nobody acts on.
+
+- **`quantfit verify-safety --junit drift.xml`** renders the verdict as a test
+  result in any CI system — GitHub Actions, GitLab, Jenkins, Buildkite, CircleCI —
+  with no adapter.
+
+  Deliberately *not* a plugin for promptfoo, garak or PyRIT. Those evaluate a
+  **model against prompts**; quantfit gates a **model artifact after
+  quantization**, which is a different point in the pipeline, reached at release
+  time rather than at prompt-change time. So the integration surface is CI itself,
+  and JUnit is what every runner already reads. One file makes quantfit a step in
+  whatever stack a team has, instead of a step in one particular tool.
+
+  Three mapping decisions, each because the obvious version says something false
+  to a reader who will never open the spec:
+
+  - **One test case per axis**, not one for the run. A scalar pass/fail hides
+    exactly the case the two-axis design exists to catch — both axes moving in
+    opposite directions while the total refusal count is unchanged.
+  - **An unmeasurable axis is `skipped`, never `passed`.** Zero at-risk pairs
+    means the run *could not* have detected a regression on that axis, and CI
+    renders a pass as a green tick. `skipped` is the only JUnit state that says
+    "no result" rather than "good result".
+  - **The at-risk denominator travels with the count** — `1/3 at-risk pairs
+    flipped`, never `1 flip`. Reading flips against the full probe set is the
+    commonest way to understate this tool, and a CI summary line is where that
+    would happen.
+
+  Aggregates only: no probe text reaches the XML, because a JUnit file is uploaded
+  as a build artifact and shared. `--demo --junit` is refused alongside `--report`
+  and `--capture` — a demonstration verdict sitting in a CI report is
+  indistinguishable from a real one.
+
+- **`docs/cli-reference.md`** — every command, every flag, with a worked
+  invocation. It exists because the parity auditor was carrying 21 warnings for
+  flags that appear in no example, and a flag nobody can find is a flag nobody
+  uses. It records what `--help` cannot: that `--token`'s *absence* on `plan` is
+  deliberate (nothing in its path reaches the Hub), that `probe` is a conservative
+  upper bound rather than a verdict, and why `--fp16` was renamed to `--baseline`
+  — the baseline loads at its native dtype, frequently bf16, so the old name
+  stated a precision the run does not necessarily use.
+
+- **`docs/artifacts-and-versions.md`** — every artifact quantfit writes, its
+  filename, and its schema version. Fourteen constants had no document stating
+  their value, which meant fourteen numbers a consumer could only learn by reading
+  the source. Each is now checked against the shipped constant by the auditor, so
+  the table fails the build rather than going stale.
+
+**`quantfit audit` now reports 0 errors and 0 warnings** for the first time.
+
 ## 0.6.1
 
 The README is the package's `long_description`, so it **is** the PyPI page — and as
