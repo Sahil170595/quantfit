@@ -13,9 +13,11 @@ spec:
 - **one test case per axis**, not one for the whole run. A scalar pass/fail hides the case
   the two-axis design exists to catch — both axes moving in opposite directions while the
   total refusal count is unchanged.
-- **an unmeasurable axis is `skipped`, never `passed`.** Zero at-risk pairs means nothing
-  was measured, and CI's green tick is exactly the wrong summary for that. `skipped` is the
-  only JUnit state that says "no result" rather than "good result".
+- **`skipped` means "this case contributed no verdict", and the message always says why.**
+  There are exactly two reasons, and conflating them with a pass would be a lie in both
+  directions: an axis with zero at-risk pairs was *not measured*, and the gate's ungated
+  axis is *not gating* by design. Neither is "good result", and CI's green tick is the
+  wrong summary for both. `skipped` is the only JUnit state that says "no result".
 - **the at-risk denominator travels with the number.** `2/7 at-risk pairs flipped` is the
   claim; `2 flips` alone invites reading it against the full probe set, which is the
   commonest way to misread this tool.
@@ -122,5 +124,155 @@ def drift_to_junit(drift, *, baseline: str, quant: str, runtime_s: float | None 
 
     suites = ET.Element("testsuites", {"tests": "2", "failures": str(failures), "errors": "0"})
     suites.append(suite)
+    return _render(suites)
+
+
+def _render(suites: ET.Element) -> str:
     ET.indent(suites, space="  ")
     return '<?xml version="1.0" encoding="utf-8"?>\n' + ET.tostring(suites, encoding="unicode") + "\n"
+
+
+def _finalise(suite: ET.Element, name: str) -> str:
+    """Count outcomes off the tree rather than tracking them, so they cannot disagree."""
+    cases = list(suite.iter("testcase"))
+    failures = sum(1 for c in cases if c.find("failure") is not None)
+    skipped = sum(1 for c in cases if c.find("skipped") is not None)
+    suite.set("name", name)
+    suite.set("tests", str(len(cases)))
+    suite.set("failures", str(failures))
+    suite.set("skipped", str(skipped))
+    suite.set("errors", "0")
+    suites = ET.Element("testsuites", {"tests": str(len(cases)), "failures": str(failures), "errors": "0"})
+    suites.append(suite)
+    return _render(suites)
+
+
+GATE_SUITE_NAME = "quantfit.gate"
+SCREEN_SUITE_NAME = "quantfit.screen"
+
+# The gate's own exit-code space, mirrored here so the mapping is stated once.
+_GATE_EXIT_MEANING = {
+    0: "the declared threshold was not breached",
+    2: "operational failure — nothing ran",
+    3: "the declared threshold was breached",
+    4: "the gated axis had zero at-risk pairs — nothing was measured",
+    5: "the declared threshold is finer than this run could resolve",
+}
+
+
+def gate_to_junit(decision: dict, *, baseline: str, quant: str) -> str:
+    """Render a `run_gate` decision as JUnit.
+
+    The gate's shape is not `verify-safety`'s, and flattening it would lose the two things
+    that make the gate worth having:
+
+    - **Exit 5 is a refusal, not a failed threshold.** "I cannot resolve what you asked" and
+      "you failed what you asked" are different build outcomes with the same colour, so the
+      resolution gets its own test case and its own failure type.
+    - **Exit 0 does not mean the run found nothing.** The gate gates one axis; the ungated
+      over-refusal axis can carry a regression under a passing gate, which the spec requires
+      an implementation to state rather than let a reader assume. It gets a case that never
+      fails the build — changing that would contradict the gate's own contract — but is
+      `skipped` with the regression named, so a green run does not silently swallow it.
+    """
+    classname = f"{baseline}->{quant}"
+    exit_code = decision.get("exit_code")
+    suite = ET.Element("testsuite")
+
+    # 1. Resolution: could the run answer the question at all?
+    resolution = _case(suite, "resolution", classname)
+    if exit_code == 5:
+        failure = ET.SubElement(
+            resolution,
+            "failure",
+            {"type": "ThresholdUnresolvable", "message": _GATE_EXIT_MEANING[5]},
+        )
+        failure.text = str(decision.get("message") or decision.get("note") or "").strip() or None
+    elif decision.get("resolution_proven") is False:
+        ET.SubElement(
+            resolution,
+            "skipped",
+            {
+                "message": "not gating: resolution is a perfect-judge FLOOR, not a proven "
+                "resolution — run `quantfit calibrate` to measure judge error"
+            },
+        )
+
+    # 2. The gated axis: the verdict CI acts on.
+    gated = _case(suite, f"{AXIS_REFUSAL_ROBUSTNESS} (gated)", classname)
+    if exit_code == 3:
+        ET.SubElement(
+            gated,
+            "failure",
+            {"type": "ThresholdBreached", "message": _GATE_EXIT_MEANING[3]},
+        )
+    elif exit_code == 4:
+        ET.SubElement(
+            gated,
+            "skipped",
+            {"message": f"not measured: {_GATE_EXIT_MEANING[4]}"},
+        )
+
+    # 3. The ungated axis: recorded, never gating.
+    ungated = _case(suite, f"{AXIS_OVER_REFUSAL} (ungated)", classname)
+    if decision.get("ungated_axis_regressed"):
+        ET.SubElement(
+            ungated,
+            "skipped",
+            {
+                "message": "not gating: this axis REGRESSED but the gate does not gate on it "
+                "— a passing gate does not mean the run detected nothing"
+            },
+        )
+
+    out = ET.SubElement(suite, "system-out")
+    out.text = "\n".join(
+        part
+        for part in (
+            str(decision.get("message") or "").strip(),
+            f"gate exit {exit_code}: {_GATE_EXIT_MEANING.get(exit_code, 'unknown')}",
+            "A pass is a bounded no-detection result at the printed resolution, not a certification.",
+        )
+        if part
+    )
+    return _finalise(suite, GATE_SUITE_NAME)
+
+
+def screen_to_junit(summary: dict) -> str:
+    """Render a screen summary as JUnit — one test case per target.
+
+    A screen runs the paired diff over a manifest, so the useful unit is the target: a
+    fifteen-target screen should show fifteen cases, not one aggregate that says "something
+    regressed somewhere". An operational error on one target is an `error`, not a failure —
+    the target did not produce a verdict, and calling that a failed test would report a
+    missing measurement as a detected regression.
+    """
+    suite = ET.Element("testsuite")
+    for row in summary.get("rows", ()):
+        name = row.get("name") or f"{row.get('baseline')}->{row.get('quant')}"
+        case = _case(suite, name, SCREEN_SUITE_NAME)
+        status = row.get("status")
+        if status == "regression":
+            ET.SubElement(
+                case,
+                "failure",
+                {"type": "SafetyDrift", "message": f"{name}: regression flagged (candidate until human-verified)"},
+            )
+        elif status == "operational_error":
+            ET.SubElement(
+                case,
+                "error",
+                {"type": "OperationalError", "message": f"{name}: {row.get('notes') or 'run failed'}"},
+            )
+        elif status == "unmeasurable":
+            ET.SubElement(
+                case,
+                "skipped",
+                {"message": f"{name}: not measured — an axis had zero at-risk pairs"},
+            )
+
+    cases = list(suite.iter("testcase"))
+    errors = sum(1 for c in cases if c.find("error") is not None)
+    xml = _finalise(suite, SCREEN_SUITE_NAME)
+    # _finalise writes errors="0"; a screen is the one surface that can carry real errors.
+    return xml.replace('errors="0"', f'errors="{errors}"') if errors else xml
