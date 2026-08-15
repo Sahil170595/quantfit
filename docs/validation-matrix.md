@@ -11,13 +11,23 @@ and cites it. Nothing is included because it "obviously works". Where a run is
 *implied* by a bug fix rather than *recorded* with numbers, the row says so and does
 not count as validation.
 
-**Scope note, stated first.** No run artifact of any kind is committed to this
-repository: `out/` and `.benchmarks/` are empty, `quantfit/refreports.py:REGISTRY` is
-`()`, and no drift report, gate artifact or screen summary is tracked. Every
-quantitative claim below is therefore **transcribed CHANGELOG prose**, not a file you
-can re-hash. That is itself a finding, and it is the ceiling on how strong any row can
-be until the 0.5 screen runs and a reference report exists
-(`docs/reference-reports-v0.md`, front matter).
+**Scope note, stated first — and partially superseded on 2026-08-14.** This document
+opened by observing that no run artifact of any kind was committed here, so every
+quantitative claim below was **transcribed CHANGELOG prose**, not a file you could
+re-hash — the ceiling on how strong any row could be.
+
+That ceiling is now lifted **for two runs and no others**. `validation/` holds
+committed schema-v2 drift reports, gate decision artifacts and JUnit XML from two real
+sessions on machine **L** (`validation/2026-08-14-qwen1.5b-awq/`,
+`validation/2026-08-14-smollm2-determinism/`). Rows citing those files are checkable
+against bytes in this repository; every other row is still transcribed prose and still
+carries the old ceiling.
+
+Unchanged: `out/` and `.benchmarks/` are empty, `quantfit/refreports.py:REGISTRY` is
+`()`, and **no reference report exists** — `validation/` is deliberately a different
+class of artifact from `docs/reference-reports-v0.md`'s three-report registry, and
+nothing in it is citable as one (`validation/README.md`, "What this is NOT"). No screen
+summary is tracked, because the 0.5 screen has still never run.
 
 ---
 
@@ -57,7 +67,7 @@ load a model.
 
 | id | hardware | what ran on it | evidence |
 |---|---|---|---|
-| **L** | RTX 4080 Laptop (Ada, sm_89, 12 GB), 68.3 GB RAM, 32 logical cores, Windows | both 0.4b hardware gates; the only GPU any recorded quantfit run has used | `CHANGELOG.md` §0.4.1; `docs/cross-hardware-tolerance-v0.md` §"L"; `docs/sensitivity-control-v0.md` §3.1 |
+| **L** | RTX 4080 Laptop (Ada, sm_89, 12 GB), 68.3 GB RAM, 32 logical cores, Windows | both 0.4b hardware gates; **and, 2026-08-14, the six runs behind `validation/`**: two `verify-safety` (one real quant pair, one identical-arms determinism), two `gate` (`--tier smoke` on each pair), `gate --threshold 1`, `emit model-card`, `reproduce`. Still the only GPU any recorded quantfit run has used | `CHANGELOG.md` §0.4.1; `validation/2026-08-14-qwen1.5b-awq/`, `validation/2026-08-14-smollm2-determinism/`; `docs/cross-hardware-tolerance-v0.md` §"L"; `docs/sensitivity-control-v0.md` §3.1 |
 | **CI‑linux** | GitHub-hosted `ubuntu-latest`, x86‑64, **no GPU** | `pytest tests/` on py3.10–3.14 (`test` is **not** an OS matrix — it is ubuntu-only, `ci.yml:10`); `python -m quantfit.cli audit`; ruff | `.github/workflows/ci.yml` (`test`, `audit`, `lint`) |
 | **CI‑both** | GitHub-hosted `ubuntu-latest` **and** `windows-latest`, py3.12, **no GPU** | wheel build + clean-venv install of that wheel + `quantfit --help` / `quantfit list` + `import quantfit`; and, new on this branch, `tools/quickstart_check.py` | `.github/workflows/ci.yml` (`install-smoke`, `ci.yml:48-86`) — the OS matrix lives **only** here |
 | **W** | this checkout's box, Windows 11, py3.13.1, torch 2.11.0+cu128, GPU masked | two `quantfit` runs, 2026‑08‑07, via `tools/quickstart_check.py`: `plan --model Qwen/Qwen2.5-7B-Instruct` and `list`, both exit 0 | §2 `plan` and `list` rows |
@@ -82,11 +92,32 @@ project has ever published comes from one laptop.
 
 `.github/workflows/canary.yml` asserts real properties (zero flips under identical
 arms; `gate --threshold 1` must exit 5). It is **not cited as validation anywhere
-below**, because no run of it is evidenced: `.github/workflows/canary.yml:28` says its own
-runtime budget is "ESTIMATED — not yet measured on a runner; the first scheduled run
-replaces these numbers" **[V]**, and GitHub runs `schedule:` triggers only on the default
-branch. Whether it has ever executed cannot be established from this repository. When a
-run exists, several E0 rows below become E2 and this section is what should be edited.
+below** — and the reason has changed, so the old reason is recorded before the new one.
+
+**This section used to say "whether it has ever executed cannot be established from
+this repository." That is now answerable, and the answer is: once, and it failed.**
+[Run 31368745628](https://github.com/Sahil170595/quantfit/actions/runs/31368745628),
+scheduled, 2026-08-10, on `main`. The `determinism-canary` job died in its install
+step; both `quickstart-install` jobs passed. Root cause: `canary.yml` installs
+`-e . --no-deps` plus a hand-written list of "the four runtime deps verify-safety
+actually imports", and quantfit never *imports* `accelerate` — `_generate_completions`
+reaches it through the `device_map=` keyword, which transformers >=5 refuses outright
+without it. An import-audited list structurally cannot see that dependency. Fixed by
+adding `accelerate>=1.0` to the job's install; the fix is CI-only, because a real
+`pip install quantfit` resolves it from `pyproject.toml`.
+
+So the section's rule survives its own test: the canary is **still** not citable, now
+because its one run went red rather than because no run could be found. The
+`canary.yml:28` runtime budget is still "ESTIMATED" — a job that failed during install
+measured nothing. `schedule:` still fires only from the default branch, so only a
+merged fix can produce the first green run. When one exists, several E0 rows below
+become E2 and this section is what should be edited.
+
+A separate lesson the failure taught, worth stating because it generalizes past this
+workflow: **an unrun assertion can be wrong in ways review does not catch.** This
+section already refused to credit the canary's assertions as evidence. It was right
+for a reason stronger than the one given — the job could not run at all, and no amount
+of reading it would have shown that.
 
 **This rule was being broken by the table it governs, and the fix went the honest way.**
 Three places credited the canary while this section declared it uncitable:
@@ -118,21 +149,32 @@ per row rather than a re-argument.
 
 > "every advertised command hardware-validated"
 
-**NOT MET.** Of 14 leaf command paths (§0.1):
+**NOT MET.** Of 14 leaf command paths (§0.1), as of 2026-08-14:
 
-- **3 have an E1 run on real GPU hardware**: `quantize`, `verify`, `verify-safety` —
-  all on machine **L**, all from the 0.4b gates, and all **partially** (see §2).
-- **2 more have a recorded no-GPU execution** that is the right validation for them:
-  `list` (E2, both OSes) and `plan` (one E1‑weak local run on **W**; E2‑pending on the
-  new `ci.yml:84-86` step).
-- **9 have no recorded execution at all**: `check`, `probe`, `screen`,
-  `emit model-card`, `calibrate sheet`, `calibrate ingest`, `gate`, `reproduce`, and
-  `audit` (E2‑pending — the `ci.yml:92-107` job is new on this branch, §0.4).
+- **6 have an E1 run**: `quantize`, `verify`, `verify-safety` (0.4b gates), and
+  `gate`, `emit model-card`, `reproduce` (2026-08-14, `validation/`). All on machine
+  **L**, all **partially** (see §2). The last three need no GPU — for a pure
+  renderer or comparator, "hardware validation" means *run once on a real report*,
+  and until 2026-08-14 no real report existed to run them on.
+- **3 have a recorded no-GPU execution** that is the right validation for them:
+  `list`, `plan` and `audit`, all now **E2** rather than E2‑pending — `ci.yml`'s
+  quickstart and `audit` jobs ran green on
+  [31772386477](https://github.com/Sahil170595/quantfit/actions/runs/31772386477),
+  which is the "first green run" §0.4 named as the condition.
+- **5 have no recorded execution at all**: `check`, `probe`, `screen`,
+  `calibrate sheet`, `calibrate ingest`.
 
 Filter used for that count: the 14 leaf paths of §0.1; a path counts as "run" only if
-some artifact in this repo asserts an execution of *that path*. 3 + 2 + 9 = 14. The two
-paths added since the last revision (`reproduce`, `audit`) both land in the third bucket,
-so wiring them into the CLI moved the milestone *further* from met, not closer.
+some artifact in this repo asserts an execution of *that path*. 6 + 3 + 5 = 14. The
+previous revision recorded 3 / 2 / 9 against the same filter.
+
+**What did not change, and is the reason the milestone is still NOT MET.** The four
+commands that moved were the cheap ones — three of them needed no hardware, only an
+input that did not exist. The five that remain are the ones that need either a real
+model run nobody has made (`check`, `probe`), a GO decision (`calibrate sheet`,
+`calibrate ingest`), or the 0.5 screen itself (`screen`). Moving six rows costs an
+hour; moving the last five costs the milestone. Two further clauses of ROADMAP 0.10
+are also untouched below.
 
 Two further clauses of the same milestone, for the record: the **spec cannot be
 frozen** (`spec/qsr-v1-freeze-plan.md` — v1 needs the ε‑calibrated MDE from GO‑gated
@@ -162,7 +204,7 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Hardware** | W (GPU masked). Never recorded on a GPU, so the `device=cuda` branch of `detect_target()` — the one the README's example actually hits on a reader's box — has **no recorded run**. |
 | **Evidence** | this PR's `tools/quickstart_check.py` run; `tests/test_route.py` (8), `tests/test_engines.py` (5), `tests/test_target.py` (1) — all E3. |
 | **NOT validated** | The CUDA branch; `--prefer speed` on an FP8-native arch; `--prefer size`; the rationale strings on any real GPU; behavior on a CUDA host with zero visible devices — where it is **known broken** (§5, defect 1). Note what the masked run does *not* prove: `CUDA_VISIBLE_DEVICES=-1` does not make a GPU-reaching command fail, it makes `route()` take a different branch, so this PASS is evidence for the CPU branch and nothing else (`tools/quickstart_check.py`, "What the (a) run is evidence for"). |
-| **Becomes E2 when** | the first green run of `ci.yml:84-86` — `install-smoke` now runs `tools/quickstart_check.py` on ubuntu **and** windows, which executes this command. E2‑**pending** and not E2 because that step is new on this branch and no run of it is evidenced (§0.4). Still not wired into `canary.yml`'s `quickstart-install` (§6). |
+| **Now E2** | The condition this cell named has been met. `ci.yml:84-86` — `install-smoke` running `tools/quickstart_check.py` on ubuntu **and** windows, which executes this command — went green on [31772386477](https://github.com/Sahil170595/quantfit/actions/runs/31772386477) (2026-08-14, both OSes). Promoted from E2‑pending to **E2**. Still not wired into `canary.yml`'s `quickstart-install`, which is the only genuinely clean-venv path (§6). |
 
 ### `quantfit check --model <id>`
 
@@ -205,10 +247,12 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 | | |
 |---|---|
-| **Validated** | **E1, GGUF stratum only.** On **L**: `bartowski/Qwen2.5-7B-Instruct-GGUF` Q4_K_M vs its F16 under the identical pinned llama.cpp binary, both arms CPU, F16 arm (15.24 GB) 559 s, Q4 arm 225 s, 16 threads. Verdict: over-refusal 2/14 at-risk (14.3%, 95% CI 4.0–39.9%) with the scalar refusal count unchanged (14→14); dangerous axis 0/12 (upper 24.2%). Drift vector byte-identical on rerun (0.5B pair). |
+| **Validated** | **E1 on both strata.** GGUF, on **L**: `bartowski/Qwen2.5-7B-Instruct-GGUF` Q4_K_M vs its F16 under the identical pinned llama.cpp binary, both arms CPU, F16 arm (15.24 GB) 559 s, Q4 arm 225 s, 16 threads. Verdict: over-refusal 2/14 at-risk (14.3%, 95% CI 4.0–39.9%) with the scalar refusal count unchanged (14→14); dangerous axis 0/12 (upper 24.2%). Drift vector byte-identical on rerun (0.5B pair). **Transformers-vs-transformers, 2026-08-14 on L, artifact committed**: `Qwen/Qwen2.5-1.5B-Instruct` (bf16, 238.1 s) vs `Crusadersk/qwen2.5-1.5b-awq-4bit`, exit 3, over-refusal 2/10 at-risk (20.0%, CI 5.7–51.0%) with the scalar count moving the *wrong way* (18→17); dangerous axis 0/12 (upper 24.2%) — `validation/2026-08-14-qwen1.5b-awq/drift.json`. Identical-arms determinism run, same date: zero flips both axes, `validation/2026-08-14-smollm2-determinism/drift.json`. |
 | **Hardware** | L, **CPU** (that is the GGUF path's design — one binary, both arms). |
 | **Evidence** | `CHANGELOG.md` §0.4.1; `tests/test_safety.py` (18), `tests/test_gguf_arm.py` (17), `tests/test_report.py` (12), `tests/test_stats_scipy.py` (2, scipy cross-check) — all E3. |
-| **NOT validated** | **The transformers-vs-transformers path under the shipped verdict machinery** — i.e. the README's own headline example. A transformers-arm run is *implied* by 0.4.0 ("the live report proved the arm loads at its NATIVE dtype"), but that produced a **schema‑v1** report, which the shipped parser now refuses outright; no artifact survives. Also unvalidated: `--capture` (never run: `docs/judge-calibration-v0.md` — "No completion has been labeled"), `--max-new-tokens` at any value but the default, any GPU-resident arm on any GPU but L, and every model family outside Qwen2.5. |
+| **NOT validated** | `--capture` (never run: `docs/judge-calibration-v0.md` — "No completion has been labeled"), any GPU-resident arm on any GPU but **L**, and every model family outside Qwen2.5 and SmolLM2. **The 2/10 flips are not human-verified**, which the 0.5 protocol requires before a flagged flip counts as a positive existence claim — so that number is an instrument reading, not a confirmed finding. |
+| **CLOSED 2026-08-14** | The transformers-vs-transformers path under the shipped verdict machinery — the README's own headline example, and the largest gap this document carried. The 0.4.0-era transformers run produced a **schema‑v1** report the shipped parser refuses, and no artifact survived; the row is now backed by committed bytes instead. The reproduction is worth its own note: the 1.5B pair's figures (2/10, 20.0%, CI 5.7–51.0%, dangerous 0/12) **match a finding first measured in the 0.3-era stack**, across a schema rewrite, the `safety tax`→`safety drift` rename and the bounded-verdict rework. Stated at its true strength: the earlier artifact does not survive, so this is a match against a recorded figure, **not** a byte-level re-verification, and it is **not** ROADMAP 0.10's "two cross-release runs identical" clause, which needs two artifacts and there is one. |
+| **Note** | `--max-new-tokens` is no longer default-only: the determinism run used **32**, the canary's value (§3). |
 
 ### `quantfit screen --targets <manifest> --out <dir>`
 
@@ -223,10 +267,10 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 | | |
 |---|---|
-| **Validated** | **Nothing.** No run recorded, and there is no report to feed it: zero drift reports are committed. |
-| **Hardware** | none (it needs none — it is a pure renderer; "hardware validation" for this command means "run once on a real report"). |
-| **Evidence** | `CHANGELOG.md` §0.5.0 (shipped); `tests/test_modelcard.py` (21, E3, synthetic reports). |
-| **NOT validated** | Rendering a report produced by an actual run; the `vllm serve` / `llama-server` command strings it emits have never been executed. |
+| **Validated** | **E1, 2026-08-14.** Run twice on real reports — the identical-arms run (`NO REGRESSION DETECTED`) and the 1.5B AWQ pair (`REGRESSION DETECTED (over-refusal axis)`), both exit 0. The card renders the two-axis table with flips/at-risk, Wilson CIs and per-axis MDE, plus full provenance: judge and probe revisions, both arms' revisions and **resolved dtypes**, decode settings, and the scale cap. |
+| **Hardware** | none (it needs none — it is a pure renderer; "hardware validation" for this command means "run once on a real report", which is precisely what was missing until a real report existed). |
+| **Evidence** | rendered from `validation/2026-08-14-qwen1.5b-awq/drift.json` and `validation/2026-08-14-smollm2-determinism/drift.json`; `CHANGELOG.md` §0.5.0 (shipped); `tests/test_modelcard.py` (21, E3, synthetic reports). |
+| **NOT validated** | **The card has never been placed on a Hugging Face page**, which is the form ROADMAP 0.7's gate clause actually names ("the model-card fragment renders on a real HF page") — rendering correct Markdown locally is a weaker claim than a page that renders. The `vllm serve` / `llama-server` command strings it emits have still never been executed. |
 
 ### `quantfit calibrate sheet` / `quantfit calibrate ingest`
 
@@ -241,25 +285,26 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 | | |
 |---|---|
-| **Validated** | **Nothing.** No gate has been run on hardware. `CHANGELOG.md` §0.5.2 states it outright: "Not in this release: … any measured judge error — so ROADMAP 0.7's gate criteria are not claimed as met." |
-| **Hardware** | none. `gate --help` runs in `.github/workflows/canary.yml:362` — the **weekly canary**, which §0.4 rules uncitable, and a help string is not the command in any case. It runs in no `ci.yml` job. |
-| **Evidence** | `tests/test_gate.py` (60, E3 — `verify_safety` monkeypatched, so no model is ever loaded); `tests/test_mde.py` (34), `tests/test_stats_scipy.py`. |
-| **NOT validated** | Both resolution refusals against a real run; the exact-binomial verdict at a realized `n`; the exit‑5 pre-run refusal on real hardware (asserted only in the unrun canary); `--eps-upper` (no ε exists to supply — supplying one today is a hypothetical, per `quantfit/gate.py`); `--report` / `--out` artifacts from a live gate. **The baseline cache (`quantfit/safety/cache.py`) is not called by `gate` at all** — §0.5.2, "The baseline cache is library surface: `quantfit gate` does not yet call it." |
+| **Validated** | **E1, 2026-08-14 on L, three runs, artifacts committed.** (1) `--tier smoke` on the real 1.5B AWQ pair: exit 0, PASS at 30.0pp, 0/12 at-risk flipped on the gated axis, effective MDE 12.6pp — `validation/2026-08-14-qwen1.5b-awq/gate.json`. (2) `--tier smoke` on the identical-arms pair: exit 0 — `validation/2026-08-14-smollm2-determinism/gate.json`. (3) **`--threshold 1` → exit 5**, refused *before loading any model or judge*, naming the corpus revision the refusal was computed from. |
+| **Hardware** | L. `gate --help` also runs in `.github/workflows/canary.yml:362` — the weekly canary, which §0.4 still rules uncitable, and a help string is not the command in any case. |
+| **Evidence** | `validation/2026-08-14-qwen1.5b-awq/{gate.json,gate.xml}`, `validation/2026-08-14-smollm2-determinism/{gate.json,gate.xml}`; `tests/test_gate.py` (60, E3 — `verify_safety` monkeypatched, so no model is ever loaded); `tests/test_mde.py` (34), `tests/test_stats_scipy.py`. |
+| **The run that mattered most** | Run (1) is the **ungated-axis divergence**, which no test had ever produced from real data: the gate exits **0** on a pair whose own verdict is `REGRESSION DETECTED`, because the regression is on the axis this tier does not gate. The headline says so unprompted — "UNGATED AXIS REGRESSED … do not read this result as 'no regression was detected'" — and `gate.xml` renders that axis `skipped`, never passed. Every prior exercise of that path was a unit test with the run monkeypatched. |
+| **NOT validated** | The exit‑3 **breach** path — no gate has ever failed on a real pair, because the dangerous axis has been clean in every run this project has made. `--eps-upper` / `--eps-source` (no ε exists to supply; every MDE above is a perfect-judge floor, which the artifacts state in their own text). `--tier full`. Any hardware but **L**. **The baseline cache (`quantfit/safety/cache.py`) is still not called by `gate` at all** — §0.5.2, "The baseline cache is library surface: `quantfit gate` does not yet call it"; the two gate runs above each re-ran both arms from scratch, which is the cache's whole purpose going unused. |
 
 ### `quantfit reproduce --reference R --candidate C [--out P] [--t0-reference P --t0-candidate P]`
 
 | | |
 |---|---|
-| **Validated** | **Nothing.** Newly reachable from the CLI on this branch; no execution of the command path is recorded anywhere. There is also nothing to feed it: the reproduction it decides is between two drift reports, and zero drift reports are committed (§0 scope note). |
+| **Validated** | **E1, 2026-08-14, partial — and the partiality is the result.** Run on two reports from genuinely separate executions of the identical-arms pair: **T1–T5 all hold**, and the command still **withheld** the reserved `reproduced` outcome and exited **3**, because no T0 replicate set was supplied for either side. It separately recorded that no cross-hardware difference was witnessed at all (`env.device` identical on both sides). Two independent refusals to overclaim, on first contact with real input, neither of them asked for — `validation/2026-08-14-smollm2-determinism/reproduce.json`. |
 | **Hardware** | none (it needs none — it is a pure comparison of two JSON reports). |
-| **Evidence** | `tests/test_reproduce.py` (75, E3, synthetic report pairs). No CI job invokes it. |
-| **NOT validated** | Every predicate against a real pair — T1–T5 have never been applied to two reports produced by actual runs, on any hardware (`docs/cross-hardware-tolerance-v0.md` §6.1: "No cross-hardware comparison. No pair of reports has been checked against T1–T5, on any hardware"). The T0 replicate path (`--t0-reference` / `--t0-candidate`) needs three replicate runs that do not exist. Exit 3 / 4 have never been observed from real inputs. |
+| **Evidence** | `validation/2026-08-14-smollm2-determinism/reproduce.json`; `tests/test_reproduce.py` (75, E3, synthetic report pairs). No CI job invokes it. |
+| **NOT validated** | The thing the command exists for: **a real cross-hardware comparison**. Both inputs above came from one box, so T1–T5 holding says the tool agrees with itself, not that two hardwares agree (`docs/cross-hardware-tolerance-v0.md` §6.1 remains true in the way that matters: no second machine exists). The T0 replicate path (`--t0-reference` / `--t0-candidate`) still needs three replicate runs per side that do not exist. Exit 0 and exit 4 have never been observed from real inputs — and exit 0 **cannot** be until a T0 set is collected. |
 
 ### `quantfit audit [--root DIR] [--json PATH]`
 
 | | |
 |---|---|
-| **Validated** | **E2‑pending.** `.github/workflows/ci.yml:106-107` runs `python -m quantfit.cli audit` on `ubuntu-latest` with the exit status asserted, which is the right validation for a pure-local checker — but that job is new on this branch and no run of it is evidenced from this repository (§0.4). It runs clean locally on **W** (0 errors, warnings only), which is E1‑weak at best: no numbers, one box. |
+| **Validated** | **E2.** `.github/workflows/ci.yml:106-107` runs `python -m quantfit.cli audit` on `ubuntu-latest` with the exit status asserted, which is the right validation for a pure-local checker, and the job went green on [31772386477](https://github.com/Sahil170595/quantfit/actions/runs/31772386477) (2026-08-14) — the first evidenced run, promoting this from E2‑pending. Locally it now reports **0 errors and 0 warnings** across all five checks (command / citation / exit-code / constant / schema-field parity), where this cell previously recorded "0 errors, warnings only". |
 | **Hardware** | none needed; CI‑linux once the job has run. |
 | **Evidence** | `.github/workflows/ci.yml` (`audit`); `tests/` coverage for `quantfit/audit.py`. |
 | **NOT validated** | That it FAILS when it should — no run of this command against a genuinely drifted document is recorded, so the exit‑3 path has never been observed. `--root` on a checkout other than its own, and `--json` output being consumed by anything, are both E0. Note the scope limit that makes this weaker than it reads: `audit` needs a **source checkout** (`--root` defaults to the tree containing `quantfit`), so the clean-venv wheel install cannot run it, and `tools/quickstart_check.py` classifies it not-runnable for exactly that reason. |
@@ -281,7 +326,7 @@ only required argument that command has.
 | `--model` | check, plan, probe, quantize, verify | E1 for quantize/verify on L; E0 elsewhere | §2 |
 | `--method` | quantize | `gptq` E1 (over‑VRAM, L); `awq`/`fp8`/`smoothquant`/`gguf` E1‑weak (0.1.0, 1.5B); **`rtn` E0** | `CHANGELOG.md` §0.1.0 omits `rtn` from the validated list |
 | `--scheme` | quantize | **defaults only.** `quantfit/registry.py`: "The per-method DEFAULT schemes are validated end-to-end; the other presets are accepted and emitted, not each individually load-tested" | `quantfit/registry.py:SCHEMES` advertises 9; the 5 methods' defaults cover 4 distinct ones (`W4A16`, `W4A16_ASYM`, `W8A8`, `FP8_DYNAMIC`), so 5 of 9 schemes have never been produced by a validated run; `NVFP4`/`MXFP4` need Blackwell to serve and no Blackwell has run anything |
-| `--out` | quantize, screen, gate, calibrate | E1 for quantize (L); E0 elsewhere | §2 |
+| `--out` | quantize, screen, gate, calibrate | E1 for quantize and **gate** (both L; the gate decision artifacts are committed); E0 for screen and calibrate | §2; `validation/*/gate.json` |
 | `--push` / `--private` | quantize | **E0** — no upload to the Hub has ever been recorded | no CHANGELOG entry claims one |
 | `--no-check` | quantize | E3 only (`tests/test_dispatch.py`) | never exercised against a real too-big model |
 | `--token` | check, probe, verify-safety, screen, gate, quantize (**six** — `plan` no longer takes it) | **E0** — no gated/private model run is recorded | parser-level only (`tests/test_cli.py`). `plan` accepted this flag and its dispatch branch never read it: an **inert** flag, accepted by the parser and silently ignored, which is an error in the unsafe direction — a user supplying a token for a gated repo would have been told nothing. It was removed on this branch, and `quantfit/cli.py:42` records why (`plan` reads the local device and the frozen spec only). Removal is not validation: the six that remain are still E0 |
@@ -289,18 +334,23 @@ only required argument that command has.
 | `--bits` | probe | **E0** | parser-level only |
 | `--baseline` / `--fp16` | verify-safety, gate | E1 for the GGUF arm on L; the legacy `--fp16` alias is parser-tested only | `CHANGELOG.md` §0.4.0 (rename), §0.4.1 |
 | `--quant` | verify-safety, gate | E1 (GGUF, L) | §2 |
-| `--max-new-tokens` | verify-safety, screen, gate | **only the default (64) has ever run** | the canary's 32 is unrun (§0.4) |
-| `--report` | verify-safety, gate (as **output**); emit (as **input**, and required) | E1‑implied for the 0.4b GGUF run (schema v2 numbers are quoted from it); **the file is not committed**. `emit --report` is **E0** — the renderer has never been pointed at a real report, because there is none | `CHANGELOG.md` §0.4.1; §2 `emit` row |
+| `--max-new-tokens` | verify-safety, screen, gate | **E1 at two values.** The default 64 (the 1.5B AWQ pair) and **32**, the canary's value, on the determinism run — this row previously said only the default had ever run | `validation/2026-08-14-qwen1.5b-awq/drift.json` (64), `validation/2026-08-14-smollm2-determinism/drift.json` (32) |
+| `--report` | verify-safety, gate (as **output**); emit (as **input**, and required) | **E1, and the files are committed** — four schema-v2 reports written by real `verify-safety` and `gate` runs on 2026-08-14, which is the first time any report produced by this tool has been tracked in the repository. `emit --report` is **E1**: the renderer has now been pointed at two real reports | `validation/*/drift.json`, `validation/*/gate-drift.json`; §2 `emit` row |
+| `--junit` | verify-safety, gate, screen | **E1 on verify-safety and gate; E0 on screen.** Both real shapes rendered: a `<failure type="SafetyDrift">` carrying its at-risk denominator (`over-refusal: 2/10 at-risk pairs flipped`), and the gate's three-case form where the ungated axis comes back **`skipped`** with the regression named rather than as a green pass. `screen --junit` has never run, because `screen` has never run | `validation/2026-08-14-qwen1.5b-awq/{drift.xml,gate.xml}`; §2 `screen` row |
 | `--capture` | verify-safety (writes), calibrate sheet (reads) | **E0 on both ends** — nothing has been captured, so nothing has been read | `docs/judge-calibration-v0.md`: nothing captured, nothing labeled |
 | `--eps-upper` / `--eps-source` | gate | **E0, and unusable**: no ε has been measured for this instrument | `quantfit/gate.py` "Epsilon: the number nobody has measured"; `CHANGELOG.md` §0.5.1 |
 | `--targets` | screen | **E0** | the screen has not run |
-| `--threshold` | gate | **E0.** The gate's PRIMARY resolution declaration — you state the resolution you need and the gate refuses if it cannot deliver it — and it has never been supplied to a real run. The one place a value is exercised at all is `canary.yml:232` (`--threshold 1` must exit 5), which §0.4 rules uncitable and which tests the *refusal*, not a pass | §2 `gate` row; `tests/test_gate.py` (60, E3) |
-| `--tier smoke` / `--tier full` | gate | **E0.** The tier CONSTANTS (threshold 0.30, the ">=30pp" disclosure) are asserted at `canary.yml:368-385`, in the **unrun** weekly canary — wiring, not evidence (§0.4). The tiers have never gated a real quant | `.github/workflows/canary.yml` (`quickstart-install`, "smoke tier OK") — cited as the wiring that exists, not as a run |
+| `--threshold` | gate | **E1 for the refusal leg, E0 for a pass.** `--threshold 1` was supplied to a real run on 2026-08-14 and **exited 5 before loading any model or judge**, naming the corpus revision the refusal was computed from. That is ROADMAP 0.7's "a too-fine threshold is refused with the documented exit code", previously asserted only in the uncitable canary. No *resolvable* raw threshold has been passed to a real run — every real gate run so far used `--tier` | §2 `gate` row; `tests/test_gate.py` (60, E3) |
+| `--tier smoke` | gate | **E1.** Gated two real pairs on 2026-08-14, both exit 0, artifacts committed. The tier constants (threshold 0.30, the ">=30pp" disclosure) print in both artifacts, so they are no longer evidenced only by the unrun canary's assertion | `validation/2026-08-14-qwen1.5b-awq/gate.json`, `validation/2026-08-14-smollm2-determinism/gate.json` |
+| `--tier full` | gate | **E0** — never run. It is the tier that would gate something finer than catastrophic, and nothing has asked it to | §2 `gate` row |
 | `--sheet` | calibrate sheet (writes), calibrate ingest (reads) | **E0.** The blinded CSV has never been written from a real capture or opened by a labeler; spreadsheet mangling on the round trip is the documented threat model and is therefore untested against the thing it fears | `docs/judge-calibration-v0.md` front matter; `tests/test_calibrate.py` (53, E3) |
 | `--key` | calibrate sheet (writes), calibrate ingest (reads) | **E0.** The unblinding key is the artifact that makes the round trip auditable, and no round trip has happened | as `--sheet` |
-| `--reference` / `--candidate` | reproduce | **E0** — no two real reports exist to compare | §2 `reproduce` row |
+| `--reference` / `--candidate` | reproduce | **E1, same-hardware only.** Two reports from separate real runs were compared on 2026-08-14: T1–T5 all held and the command still exited 3, withholding `reproduced` for want of a T0 set. What it has never seen is two reports from *different* hardware, which is the only comparison it was built for | `validation/2026-08-14-smollm2-determinism/reproduce.json`; §2 `reproduce` row |
 | `--t0-reference` / `--t0-candidate` | reproduce | **E0.** T0 needs three replicate runs; one replicate pair exists (0.4.1's byte-identical rerun at 0.5B) and three do not | `docs/cross-hardware-tolerance-v0.md` §6.1, "No replicate set" |
-| `--root` / `--json` | audit | **E0.** `audit` itself is E2‑pending (§2), but it runs there with neither flag: `--root` on a foreign checkout and `--json` consumed by anything are both unexercised | `.github/workflows/ci.yml:106-107` runs the bare command |
+| `--root` / `--json-out` | audit | **E0.** `audit` itself is E2 (§2), but it runs there with neither flag: `--root` on a foreign checkout, and `--json-out` consumed by anything, are both unexercised. **This row previously named the flag `--json`, which is a different flag on the same command** — `--json-out PATH` writes the findings file, `--json` emits the stdout envelope. One row described one flag under the other's name | `.github/workflows/ci.yml:106-107` runs the bare command; `quantfit/cli.py:286` |
+| `--json` | all 14 leaf commands | **E1 on `audit` only** (run locally 2026-08-14, 0 errors / 0 warnings across five checks). E0 on the other thirteen — the envelope that `CHANGELOG.md` §0.6.0 describes as the point of a machine-readable surface has never been consumed by a caller | `tests/` per-command envelope assertions are E3 |
+| `--version` / `-V` | top level | **E2.** Executed by `tools/quickstart_check.py` as a clean-venv command on ubuntu **and** windows in `install-smoke`, green on run 31772386477 | `tools/quickstart_check.py` (`[PASS] L19 quantfit --version`) |
+| `--demo` | verify-safety | **E1‑weak, and misclassified by the gate that should cover it.** Run locally 2026-08-14 under `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 CUDA_VISIBLE_DEVICES=-1`: exit 0, sub-second, fixture verdict printed with its own "No model was loaded and nothing was judged" disclaimer. It is **not** run by `install-smoke`, because `quickstart_check.py` files it under `c:gpu` — see §4 finding 6 | §4 finding 6 |
 
 ---
 
@@ -340,7 +390,29 @@ with no artifact behind it.
    E3 coverage only (`tests/test_refreports.py` 41, `tests/test_inspect_task.py` 79) and
    are therefore **out of scope for "every advertised *command*"** — but they are
    advertised in the CHANGELOG.
-5. **`quantfit/safety/cache.py` is dead weight at runtime**: 53 tests, no caller.
+5. **`quantfit/safety/cache.py` is dead weight at runtime**: 53 tests, no caller. Still
+   true on 2026‑08‑14, and now with a cost attached: the two committed `gate` runs each
+   re-ran both arms from scratch, which is exactly the work the cache exists to skip.
+6. **`tools/quickstart_check.py` classifies by subcommand, not by invocation, and the
+   casualty is the README's second command.** `verify-safety --demo` is filed under
+   `c:gpu` with the reason *"materializes multi-GB weights; loads weights through torch
+   / llm-compressor; reaches the network"*. Every clause of that is false for this
+   invocation: `--demo` runs the tabulation over bundled fixtures, and its own help says
+   "no model, no network, no weights, nothing measured". **Verified 2026‑08‑14** by
+   running it under `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 CUDA_VISIBLE_DEVICES=-1` —
+   exit 0, sub-second, no network, no GPU.
+
+   The classifier reads the subcommand and stops, so a flag that changes what the
+   command *does* cannot change how it is classified. The consequence is not
+   cosmetic: `--demo` is the command `CHANGELOG.md` §0.6.1 added to the README opening
+   specifically so a reader's first action costs a second instead of a multi-gigabyte
+   download, and it is the one command in that opening the gate declines to run. Moving
+   it to `a:clean-venv` would make it **E2 on both OSes at zero marginal CI cost**,
+   since `install-smoke` already invokes the checker.
+
+   Filed as a finding rather than fixed here: the classifier is a heuristic over README
+   prose, and the honest fix is per-invocation classification rather than a special case
+   for one flag.
 
 ---
 
@@ -368,18 +440,43 @@ branch and reaches line 43. `AssertionError` is neither `RuntimeError` nor `OSEr
 clean message. `tools/quickstart_check.py` therefore masks the GPU with `-1` rather
 than `""`, and this row records why.
 
+**Defect 2 — a missing optional dependency exits 1 with a traceback, and the exit-code
+contract says operational failures exit 2.** Not a bug report: `quantfit/cli.py`
+catches `(RuntimeError, OSError)` and states the exclusion deliberately — *"Programming
+errors, including ValueError from anywhere in the torch/transformers stack, surface
+raw."* The tension is that transformers raises `ValueError` for a **missing install**,
+which is an environment problem rather than a programming error, and it is the class of
+failure a CI consumer most needs to distinguish from a verdict.
+
+Observed in [run 31368745628](https://github.com/Sahil170595/quantfit/actions/runs/31368745628)
+(2026-08-10): `verify-safety` exited **1** with a traceback when `accelerate` was
+absent, and `canary.yml`'s own triage classified that under "operational error (exit
+$code) — the canary could not run", i.e. the workflow already treats it as operational
+while the CLI does not. Recorded here as an open decision, not a fix: narrowing the
+handler to catch import-shaped `ValueError` would trade one clean contract for a
+heuristic, and that trade should be made deliberately or not at all.
+
 ---
 
 ## 6. What would move each row, cheapest first
 
+Six rows on this table were paid on 2026-08-14 and are struck through rather than
+deleted — the cost estimate that turned out right is the reason to trust the ones
+below it. The pattern in what moved: **everything cheap was blocked on a single
+missing input.** `emit`, `reproduce` and the whole `--junit` surface needed no
+hardware at all, only one real drift report; none had ever run because none had ever
+existed. The remaining rows are not like that.
+
 | cost | action | rows it fixes |
 |---|---|---|
-| zero — already wired, awaiting a run | `tools/quickstart_check.py` is in `install-smoke` (`ci.yml:84-86`); `python -m quantfit.cli audit` is in the `audit` job (`ci.yml:106-107`) | `plan`, `list`, `audit` → E2 on the first green run (E2‑pending until then, §0.4) |
+| ~~zero — already wired, awaiting a run~~ **DONE** | `tools/quickstart_check.py` in `install-smoke` (`ci.yml:84-86`) and `python -m quantfit.cli audit` in the `audit` job (`ci.yml:106-107`) both went green on run 31772386477 | ~~`plan`, `list`, `audit` → E2~~ **promoted** |
 | minutes, CI | wire `tools/quickstart_check.py` into `canary.yml`'s `quickstart-install` too — the only job that installs from a wheel into a genuinely clean venv, which is the environment the gate clause actually names | `plan` / `list` on the true clean-venv path, not just a checkout with a wheel |
 | minutes, CI | pass `--min-commands N` to the quickstart gate so a collapse in the audited surface fails the build rather than shrinking quietly | the audited-surface floor |
-| minutes, local | run `check`, `probe`, `emit`, `calibrate sheet/ingest`, `reproduce` once each and record the output in the CHANGELOG | 6 rows E0 → E1‑weak |
-| one GPU hour, L | one transformers-vs-transformers `verify-safety` at 1.5B **with `--report`**, artifact committed | closes the biggest gap in §2 — the README's headline example |
-| one GPU hour, L | one `gate --tier smoke` end-to-end against that pair, `--out` artifact committed | `gate` E0 → E1 |
+| minutes, local | run `check`, `probe`, `calibrate sheet/ingest` once each and record the output | 4 rows E0 → E1‑weak. **`emit` and `reproduce` are done** — both were run on real reports and are now E1 |
+| ~~one GPU hour, L~~ **DONE** | transformers-vs-transformers `verify-safety` at 1.5B with `--report`, artifact committed — `Qwen/Qwen2.5-1.5B-Instruct` vs `Crusadersk/qwen2.5-1.5b-awq-4bit`, exit 3, 2/10 over-refusal | ~~the biggest gap in §2, the README's headline example~~ **closed** |
+| ~~one GPU hour, L~~ **DONE** | `gate --tier smoke` end-to-end against that pair, `--out` committed; plus `--threshold 1` → exit 5 | ~~`gate` E0 → E1~~ **promoted**, and ROADMAP 0.7's refusal clause met |
+| minutes, outward-facing | put the rendered model-card fragment on a real HF page | ROADMAP 0.7's third gate clause. The fragment renders (§2 `emit`); a local render is not a page |
+| hours, local | wire `quantfit/safety/cache.py` into `gate` — 53 tests, still no caller, and the two committed gate runs each re-ran both arms from scratch | ROADMAP 0.7's baseline-caching deliverable |
 | one GPU day, L | `quantize --method rtn` and one non-default `--scheme`, each `verify`-checked | `--method rtn`, `--scheme` |
 | the 0.5 GO | the screen, the sensitivity control, then ε calibration | `screen`, `calibrate`, `--eps-upper`, and QSR v1's preconditions |
 | a free T4 | the 0.8 reproduction | `docs/cross-hardware-tolerance-v0.md` §6.1, and the second machine this project has never had |
@@ -388,7 +485,18 @@ than `""`, and this row records why.
 
 ## 7. Provenance of this document
 
-Written 2026‑08‑07 against branch `release/1.0`; revised the same day against
+**Revised 2026‑08‑14** against `evidence/first-run-artifacts`, the first revision where
+rows were moved by *runs* rather than by reading. Six commands were executed on machine
+**L** and their artifacts committed to `validation/`, which retires this document's
+opening scope note for those two runs and no others; §0.4's "whether the canary has ever
+executed cannot be established" was answered (once, red) and the cause fixed; and
+`plan` / `list` / `audit` were promoted from E2‑pending to E2 by the first green
+`ci.yml` run. The command and flag enumerations of §0.1 and §3 were **not** re-read from
+`_build_parser()` on this pass — `--junit` was added to §3 because this session used it,
+so any *other* surface added since 2026‑08‑07 is still missing from these tables. That
+re-read is owed.
+
+Originally written 2026‑08‑07 against branch `release/1.0`; revised the same day against
 `release/1.0-wiring`, where `reproduce` and `audit` were wired into the CLI, `plan`'s inert
 `--token` was removed, and `tools/quickstart_check.py` was wired into `install-smoke`. The
 command and flag enumerations in §0.1 and §3 were re-read from `_build_parser()` at 22:25
