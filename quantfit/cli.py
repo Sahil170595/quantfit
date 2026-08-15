@@ -186,6 +186,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "--out", required=True, metavar="DIR", help="output dir: one drift report per target + screen-summary.json"
     )
     ps.add_argument(
+        "--junit",
+        default=None,
+        metavar="PATH",
+        help="also write the screen as JUnit XML — one test case per target",
+    )
+    ps.add_argument(
         "--max-new-tokens",
         type=int,
         default=64,
@@ -249,6 +255,13 @@ def _build_parser() -> argparse.ArgumentParser:
     pg.add_argument("--max-new-tokens", type=int, default=64, help="completion length per probe (default 64)")
     pg.add_argument("--report", default=None, metavar="PATH", help="also write the schema-v2 drift report")
     pg.add_argument("--out", default=None, metavar="PATH", help="write the gate decision artifact JSON")
+    pg.add_argument(
+        "--junit",
+        default=None,
+        metavar="PATH",
+        help="also write the gate verdict as JUnit XML: resolution, gated axis and ungated "
+        "axis as separate cases, so exit 5 fails as a refusal rather than as a breached threshold",
+    )
 
     pr = sub.add_parser(
         "reproduce",
@@ -550,6 +563,13 @@ def _dispatch(args: argparse.Namespace) -> int:
 
         summary = run_screen(args.targets, args.out, token=args.token, max_new_tokens=args.max_new_tokens)
 
+        if args.junit:
+            from pathlib import Path
+
+            from quantfit.junit import screen_to_junit
+
+            Path(args.junit).write_text(screen_to_junit(summary), encoding="utf-8")
+
         def _human_screen() -> None:
             for stratum, agg in sorted(summary["by_stratum"].items()):
                 print(
@@ -579,7 +599,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             args,
             "screen",
             code,
-            {**summary, "summary_path": f"{args.out}/screen-summary.json"},
+            {**summary, "summary_path": f"{args.out}/screen-summary.json", "junit_path": args.junit},
             _human_screen,
         )
 
@@ -615,16 +635,28 @@ def _dispatch(args: argparse.Namespace) -> int:
             out_path=args.out,
         )
 
+        if args.junit:
+            from pathlib import Path
+
+            from quantfit.junit import gate_to_junit
+
+            Path(args.junit).write_text(
+                gate_to_junit(decision, baseline=args.baseline, quant=args.quant),
+                encoding="utf-8",
+            )
+
         def _human_gate() -> None:
             print(decision["headline"])
             if args.out:
                 print(f"gate decision -> {args.out}")
+            if args.junit:
+                print(f"junit -> {args.junit}")
 
         return _emit(
             args,
             "gate",
             decision["exit_code"],
-            {**decision, "decision_path": args.out, "report_path": args.report},
+            {**decision, "decision_path": args.out, "report_path": args.report, "junit_path": args.junit},
             _human_gate,
         )
 

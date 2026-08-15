@@ -5,6 +5,33 @@
 > would claim milestone completion, and those completions are gated on runs and
 > decisions that have not happened. 0.10 is the frozen standard (ROADMAP 0.10).
 
+## Unreleased
+
+- **`--junit` on `gate` and `screen`.** 0.7.0 shipped it on `verify-safety` only,
+  which is the command a person runs; `gate` is the one a release pipeline runs and
+  `screen` is the batch one, so the flag was missing from exactly the two places a
+  JUnit file is written for. Neither is `verify-safety`'s shape, and flattening them
+  into it would cost the thing that makes each command worth having:
+
+  - **The gate has an outcome `verify-safety` does not** — exit 5, "I cannot resolve
+    what you asked". That is a refusal, not a failed threshold, and rendered as one
+    test case the two would share a colour and a message. The resolution gets its own
+    case and its own failure type, `ThresholdUnresolvable`, distinct from
+    `ThresholdBreached`, so a reader can tell from the report which happened.
+  - **The gate passes on ONE axis.** A regression on the ungated over-refusal axis is
+    real and exit 0 is still correct, so that axis gets a case that never fails the
+    build — failing it would contradict the gate's own contract — but is `skipped`
+    with the regression named, so a green run cannot swallow it. Same for a
+    floor-mode run: `resolution_proven=false` says the resolution is a perfect-judge
+    floor, because a green gate under a floor is a weaker claim than one under a
+    measured judge error.
+  - **`screen`'s useful unit is the target, not the run.** Fifteen targets render as
+    fifteen cases rather than one aggregate saying "something regressed somewhere".
+
+  The rule 0.7.0 set holds throughout: an axis that could not be measured is
+  `skipped`, never `passed`, and the at-risk denominator travels with every count.
+  Aggregates only — no probe text reaches the XML, on either command.
+
 ## 0.7.0
 
 A minor rather than a patch, because `--junit` is new surface. The theme is the

@@ -117,18 +117,23 @@ would be indistinguishable from one from a measurement.
 
 ```bash
 quantfit screen --targets screens/targets-0.5.json --out reports/ \
-  --token "$HF_TOKEN" --max-new-tokens 64 --json
+  --token "$HF_TOKEN" --max-new-tokens 64 --junit screen.xml --json
 ```
 
 Runs the paired diff over every target and aggregates per-stratum, per-axis Wilson
 prevalence bounds. Exits `4` if an axis went unmeasured anywhere, which is not a pass.
+
+`--junit` writes **one test case per target**, so a fifteen-target screen shows fifteen
+cases rather than one aggregate saying "something regressed somewhere". A target that
+failed to run is an `error`, not a `failure` — it produced no verdict, and calling that a
+failed test would report a missing measurement as a detected regression.
 
 ## Gate a release
 
 ```bash
 quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out \
   --tier smoke --max-new-tokens 64 --token "$HF_TOKEN" \
-  --report drift.json --out gate.json --json
+  --report drift.json --out gate.json --junit gate.xml --json
 
 # Or declare the resolution you need explicitly, in percentage points.
 quantfit gate --fp16 Qwen/Qwen2.5-1.5B-Instruct --quant ./out --threshold 30 --json
@@ -139,6 +144,14 @@ quantfit gate --fp16 Qwen/Qwen2.5-1.5B-Instruct --quant ./out --threshold 30 --j
 from — without them the printed MDE is a perfect-judge floor. `--out` writes the gate
 decision artifact. The gate exits `5` rather than passing a threshold the run could not
 have resolved.
+
+`--junit` renders the gate as three cases rather than one. **Exit 5 fails as a refusal, not
+as a breached threshold** — "I cannot resolve what you asked" and "you failed what you
+asked" are different facts that would otherwise share a colour and a message. The ungated
+over-refusal axis gets its own case: a regression there never fails the build, because the
+gate does not gate on it, but it is recorded rather than swallowed by a green tick. And a
+run whose resolution is a perfect-judge floor says so, because a green gate under a floor
+is a weaker claim than one under a measured judge error.
 
 ## Judge calibration
 
