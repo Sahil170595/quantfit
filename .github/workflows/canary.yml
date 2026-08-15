@@ -105,12 +105,20 @@ jobs:
           # a runner with no GPU. Deliberately UNPINNED within pyproject's >=2.4 floor —
           # catching upstream churn is this job's entire purpose.
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-          # --no-deps + the four runtime deps verify-safety actually imports. The
+          # --no-deps + the five runtime deps the verify-safety path actually needs. The
           # quantize side (llmcompressor) is never touched by this job; the full
           # dependency resolution is the quickstart-install job's problem, and testing it
           # twice would double the weekly cost for no extra signal.
+          #
+          # accelerate is the fifth, and its absence is what broke the first scheduled
+          # run (2026-08-10, run 31368745628). It is not imported by quantfit at all —
+          # `_generate_completions` passes `device_map=` to `from_pretrained`, and
+          # transformers >=5 refuses that outright without accelerate installed. A dep
+          # reached only through a keyword argument is exactly the kind --no-deps drops
+          # silently, so the floor here tracks pyproject's `accelerate>=1.0` rather than
+          # being chosen independently.
           pip install -e . --no-deps
-          pip install "transformers>=4.56" "huggingface_hub>=0.25" "datasets>=3.0" "psutil>=5.9"
+          pip install "transformers>=4.56" "huggingface_hub>=0.25" "datasets>=3.0" "psutil>=5.9" "accelerate>=1.0"
           python -c "import torch, transformers; print('torch', torch.__version__, 'transformers', transformers.__version__)"
           python -c "import quantfit; print('quantfit', quantfit.__version__)"
           # No HF cache restore, on purpose: the canary must exercise a COLD download of
