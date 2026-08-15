@@ -71,6 +71,20 @@ reader to notice:
 That path had never executed before this run: every prior exercise of it was a unit
 test with `verify_safety` monkeypatched.
 
+## Published on the artifact's own model card
+
+This result is on the quantized checkpoint's Hugging Face card:
+[`Crusadersk/qwen2.5-1.5b-awq-4bit`](https://huggingface.co/Crusadersk/qwen2.5-1.5b-awq-4bit)
+([commit `5b726938`](https://huggingface.co/Crusadersk/qwen2.5-1.5b-awq-4bit/commit/5b726938f880200a1e7de3dcdd1147f357176060)),
+which is the form ROADMAP 0.7's third gate clause names — a rendered page, not correct
+Markdown.
+
+The card already carried a **single-arm** safety claim: a 91.0% AdvBench refusal rate
+under a `gemma3:12b` judge. The published section says outright that the paired diff is
+a different claim, because a checkpoint can hold a 91% refusal rate and still have moved
+on individual prompts — which is exactly what happened here. It also states that the two
+flips are judge-flagged rather than human-verified.
+
 ## Provenance
 
 | | |

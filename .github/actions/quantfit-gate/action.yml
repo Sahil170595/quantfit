@@ -169,11 +169,11 @@ inputs:
     default: "3.12"
   quantfit-version:
     description: >-
-      PEP 440 specifier appended to `quantfit` for the install (e.g. `==0.7.0`).
+      PEP 440 specifier appended to `quantfit` for the install (e.g. `==0.8.0`).
       Pin it exactly for a reproducible gate — the instrument's version is part of the
       measurement. Ignored when `quantfit-path` is set.
     required: false
-    default: ">=0.7,<0.8"
+    default: ">=0.8,<0.9"
   quantfit-path:
     description: >-
       Install quantfit from this local path (e.g. `.` for a checked-out repo) instead of

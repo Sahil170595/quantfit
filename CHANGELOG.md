@@ -5,7 +5,97 @@
 > would claim milestone completion, and those completions are gated on runs and
 > decisions that have not happened. 0.10 is the frozen standard (ROADMAP 0.10).
 
-## Unreleased
+## 0.8.0
+
+A minor for the same reason 0.7.0 was: `--junit` on two more commands is new
+surface. But the release this file will be remembered for is the other half —
+**this is the first version whose claims you can check against files instead of
+against this changelog.**
+
+- **`validation/` — the first run artifacts this repository has ever tracked.**
+  `docs/validation-matrix.md` opened by declaring its own ceiling: no run artifact
+  of any kind was committed here, so every quantitative claim in it was transcribed
+  prose rather than something a reader could re-hash. Six commands were run on the
+  RTX 4080 Laptop on 2026-08-14 and their artifacts committed, which retires that
+  ceiling for two runs and no others.
+
+  The run that mattered: `Qwen/Qwen2.5-1.5B-Instruct` vs
+  `Crusadersk/qwen2.5-1.5b-awq-4bit`, exit 3, **2/10 at-risk pairs flipped on the
+  over-refusal axis** (20.0%, 95% CI 5.7–51.0%) with the dangerous axis clean at
+  0/12. That is the transformers-vs-transformers path under the shipped verdict
+  machinery — the README's own headline example, and the largest gap the matrix
+  carried, because the 0.4.0-era run of it produced a schema-v1 report the shipped
+  parser refuses and no file survived.
+
+  **The scalar refusal count went 18 → 17.** A total-refusals metric reads that as
+  the quantized model becoming *less* restrictive; what happened is that two safe
+  prompts newly became refused, offset by three going the other way. Offsetting
+  flips are the case the two-axis design exists to catch, and this is the second one
+  recorded here — the 7B GGUF pair was 14→14 (§0.4.1). A scalar would have missed
+  both, which is the whole argument for the vector, arriving unprompted in real data.
+
+  Four commands ran for the first time ever, all previously with no recorded
+  execution of any kind: `gate --threshold 1` (exit 5, refused *before* loading any
+  model), `gate --tier smoke` (exit 0 on both pairs), `emit model-card` (on two real
+  reports), and `reproduce` — which found T1–T5 all holding and **still** withheld
+  the reserved `reproduced` name for want of a T0 replicate set. On first contact
+  with real input it declined to overclaim in two independent ways nobody asked it
+  to.
+
+  `validation/` is deliberately **not** the reference-report registry: no cap
+  consumed, nothing citable as a reference report, no spec-bump regeneration
+  obligation.
+
+- **The weekly canary had never run green, and nobody knew.** Its first scheduled
+  run (2026-08-10) failed, in its install step's blind spot rather than at anything
+  it was watching. The job installs `-e . --no-deps` plus a hand-written list of
+  "the four runtime deps verify-safety actually imports" — and imports were the
+  wrong test. quantfit never imports `accelerate`; it reaches it through the
+  `device_map=` keyword, which transformers >=5 refuses outright without it. A
+  dependency reached through a keyword argument is exactly what a hand-audited
+  import list cannot see, which is the general hazard of `--no-deps`.
+
+  CI-only — a real `pip install quantfit` resolves `accelerate>=1.0` from
+  `pyproject.toml`, so no user could hit it. The floor added to the job tracks
+  pyproject's rather than being chosen independently, so the two cannot drift apart
+  silently.
+
+  **The canary then went green for the first time** (run 31855507815), and the green
+  run is what produced the next entry.
+
+- **The cross-hardware tolerance is breached, and the breach is published rather
+  than absorbed.** `docs/cross-hardware-tolerance-v0.md` §6.1 said "No cross-hardware
+  comparison. No pair of reports has been checked against T1–T5, on any hardware."
+  The second machine turned out not to be a GPU: it is the GitHub Actions runner the
+  canary runs on, which emits a schema-v2 report for the same model, probe revision
+  and decode settings as a local run. `reproduce` was pointed at that pair.
+
+  **T3 fails on both axes.** The at-risk denominators differ — 8 vs 7 on
+  refusal-robustness, 4 vs 3 on over-refusal, with `slack=0`, since T3 admits no
+  tolerance there — and the derived MDEs move with them, 18.2pp → 20.5pp and
+  33.1pp → 41.5pp.
+
+  What did *not* move is the point: both sides return zero flips on both axes and
+  both verdicts read `NO REGRESSION DETECTED`. **The paired drift vector is stable
+  across the two machines; the resolution is not.** A reader comparing two reports
+  from different stacks can trust "no regression detected" and must not read "~18pp"
+  and "~21pp" as the same measurement. §6.3's recording rule is explicit that this
+  gets published and the rule does not get widened to fit it.
+
+  It is **not** evidence that hardware caused it. Four things differ at once — device,
+  python, torch, and transformers (5.10.1 vs 5.15.0, which is enough on its own to move
+  a chat template or a generation default). `reproduce` refused the attribution
+  unprompted — "THIS OUTCOME NAMES A CAUSE AND THE CAUSE IS NOT ESTABLISHED … collect
+  T0 on both sides, and re-run before attributing any of it to silicon" — and withheld
+  the reserved `breach` name for want of a T0 replicate set, exactly as it withheld
+  `reproduced` the day before. Artifacts and the two experiments that would settle it:
+  `validation/2026-08-15-crosshw-smollm2/`.
+
+- **The reference action's default version specifier moved to `>=0.8,<0.9`.** It was
+  `>=0.7,<0.8`, which this release would have excluded — anyone using the action with
+  defaults would have kept installing 0.7.x and silently not received the `--junit`
+  gate below. A version cap is a correctness surface, and releasing past one without
+  moving it is how a reference integration goes quietly stale.
 
 - **`--junit` on `gate` and `screen`.** 0.7.0 shipped it on `verify-safety` only,
   which is the command a person runs; `gate` is the one a release pipeline runs and
@@ -31,6 +121,30 @@
   The rule 0.7.0 set holds throughout: an axis that could not be measured is
   `skipped`, never `passed`, and the at-risk denominator travels with every count.
   Aggregates only — no probe text reaches the XML, on either command.
+
+  **The ungated-axis case above stopped being hypothetical in this same release.**
+  The 1.5B AWQ pair passes the smoke gate — exit 0, dangerous axis clean — while its
+  own verdict is `REGRESSION DETECTED`. `gate.xml` marks that axis `skipped` with the
+  regression named, and the headline says "do not read this result as 'no regression
+  was detected'". Every prior exercise of that path was a unit test with the run
+  monkeypatched; the artifact is now in `validation/2026-08-14-qwen1.5b-awq/`.
+
+- **The model-card fragment is on a real Hugging Face page.** ROADMAP 0.7's gate
+  clause names a rendered page, not correct Markdown, and
+  [`Crusadersk/qwen2.5-1.5b-awq-4bit`](https://huggingface.co/Crusadersk/qwen2.5-1.5b-awq-4bit)
+  now carries its own paired-diff result — a published `REGRESSION DETECTED` on the
+  maintainer's own artifact. The section states outright that it is a different claim
+  from the single-arm AdvBench refusal rate already on that card, and that the flips
+  are judge-flagged rather than human-verified.
+
+Two findings surfaced while writing the matrix revision, both recorded rather than
+quietly fixed: `docs/validation-matrix.md` §3 named `audit`'s findings-file flag
+`--json` when it is `--json-out` (a different flag on the same command), and
+`tools/quickstart_check.py` classifies by subcommand rather than by invocation — so
+`verify-safety --demo` is filed as a GPU/network command on the strength of its
+subcommand's name, when it runs offline with the GPU masked in under a second. It is
+the command 0.6.1 added to the README opening precisely so a first action is cheap,
+and it is the one command there the quickstart gate declines to run.
 
 ## 0.7.0
 

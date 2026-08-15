@@ -1133,8 +1133,23 @@ the resolution. Stated in that direction on purpose.
 ### 6.1 What has not been run
 
 - **No T4 or Colab or Kaggle run of any kind.** No side-F report exists.
-- **No cross-hardware comparison.** No pair of reports has been checked against
-  T1–T5, on any hardware.
+- ~~**No cross-hardware comparison.**~~ **Superseded 2026-08-15 — and the result is a
+  T3 failure.** A pair was checked against T1–T5 between machine **L** and the GitHub
+  Actions CPU runner, which the weekly canary already runs the measurement on. The
+  second machine was never going to be the T4 this section was waiting for; it was
+  sitting in CI, free, and weekly.
+
+  **T3 failed on both axes**: `at_risk` 8 vs 7 (refusal-robustness) and 4 vs 3
+  (over-refusal), at `slack=0`, with the derived MDEs moving 18.2→20.5pp and
+  33.1→41.5pp. Both sides returned **zero flips and the same verdict** — so the paired
+  drift vector survived the change of machine and the *resolution* did not.
+
+  Per §6.3's first recording rule, the deltas are published and the rule is not
+  widened. **No cause is attributed**: device, python, torch and transformers all
+  differ between the two sides (transformers 5.10.1 vs 5.15.0 alone could move a chat
+  template or a generation default), and `reproduce` withheld the reserved `breach`
+  name because no T0 set exists on either side. Artifacts, and the two experiments
+  that would separate the variables: `validation/2026-08-15-crosshw-smollm2/`.
 - **No replicate set.** T0 has been demonstrated once, at 0.5B, on one machine
   (CHANGELOG 0.4.1's byte-identical rerun) — not three times, and not on two
   hardwares.

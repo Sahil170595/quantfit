@@ -68,7 +68,7 @@ load a model.
 | id | hardware | what ran on it | evidence |
 |---|---|---|---|
 | **L** | RTX 4080 Laptop (Ada, sm_89, 12 GB), 68.3 GB RAM, 32 logical cores, Windows | both 0.4b hardware gates; **and, 2026-08-14, the six runs behind `validation/`**: two `verify-safety` (one real quant pair, one identical-arms determinism), two `gate` (`--tier smoke` on each pair), `gate --threshold 1`, `emit model-card`, `reproduce`. Still the only GPU any recorded quantfit run has used | `CHANGELOG.md` §0.4.1; `validation/2026-08-14-qwen1.5b-awq/`, `validation/2026-08-14-smollm2-determinism/`; `docs/cross-hardware-tolerance-v0.md` §"L"; `docs/sensitivity-control-v0.md` §3.1 |
-| **CI‑linux** | GitHub-hosted `ubuntu-latest`, x86‑64, **no GPU** | `pytest tests/` on py3.10–3.14 (`test` is **not** an OS matrix — it is ubuntu-only, `ci.yml:10`); `python -m quantfit.cli audit`; ruff | `.github/workflows/ci.yml` (`test`, `audit`, `lint`) |
+| **CI‑linux** | GitHub-hosted `ubuntu-latest`, x86‑64, **no GPU**; py3.12.13, torch 2.13.0+cpu, transformers 5.15.0 | `pytest tests/` on py3.10–3.14 (`test` is **not** an OS matrix — it is ubuntu-only, `ci.yml:10`); `python -m quantfit.cli audit`; ruff. **And, 2026-08-15, a real `verify-safety` run**: identical arms on SmolLM2-135M, exit 0, zero flips both axes — the second machine ever to run this tool's measurement path, and the other half of the first cross-hardware report pair | `.github/workflows/ci.yml` (`test`, `audit`, `lint`); canary [run 31855507815](https://github.com/Sahil170595/quantfit/actions/runs/31855507815); `validation/2026-08-15-crosshw-smollm2/ci-drift.json` |
 | **CI‑both** | GitHub-hosted `ubuntu-latest` **and** `windows-latest`, py3.12, **no GPU** | wheel build + clean-venv install of that wheel + `quantfit --help` / `quantfit list` + `import quantfit`; and, new on this branch, `tools/quickstart_check.py` | `.github/workflows/ci.yml` (`install-smoke`, `ci.yml:48-86`) — the OS matrix lives **only** here |
 | **W** | this checkout's box, Windows 11, py3.13.1, torch 2.11.0+cu128, GPU masked | two `quantfit` runs, 2026‑08‑07, via `tools/quickstart_check.py`: `plan --model Qwen/Qwen2.5-7B-Instruct` and `list`, both exit 0 | §2 `plan` and `list` rows |
 
@@ -86,7 +86,14 @@ Never used, by anything: **Tesla T4, Colab, Kaggle, any free tier**
 (`docs/cross-hardware-tolerance-v0.md` §6.1, verbatim: "**No T4 or Colab or Kaggle run of
 any kind.** No side-F report exists."), **Ampere, Hopper, Blackwell, A100/H100/L4**,
 **macOS**, **ARM**, **multi-GPU**, **any non-Windows GPU host**. Every GPU number this
-project has ever published comes from one laptop.
+project has ever published still comes from one laptop.
+
+The rest of that §6.1 quote — "No cross-hardware comparison. No pair of reports has been
+checked against T1–T5, on any hardware" — is **no longer true as of 2026-08-15**, and the
+second machine is the one nobody was looking for: the CPU GitHub runner, not a T4. It
+cost nothing, because the canary was already running the measurement there weekly. The
+comparison breached T3 (§2, `reproduce`). `docs/cross-hardware-tolerance-v0.md` §6.1
+needs the same edit and has not received it here.
 
 ### 0.4 The weekly canary is not evidence of anything yet
 
@@ -106,12 +113,25 @@ without it. An import-audited list structurally cannot see that dependency. Fixe
 adding `accelerate>=1.0` to the job's install; the fix is CI-only, because a real
 `pip install quantfit` resolves it from `pyproject.toml`.
 
-So the section's rule survives its own test: the canary is **still** not citable, now
-because its one run went red rather than because no run could be found. The
-`canary.yml:28` runtime budget is still "ESTIMATED" — a job that failed during install
-measured nothing. `schedule:` still fires only from the default branch, so only a
-merged fix can produce the first green run. When one exists, several E0 rows below
-become E2 and this section is what should be edited.
+**And then it went green.** Once the fix was on `main`, a `workflow_dispatch` run —
+[31855507815](https://github.com/Sahil170595/quantfit/actions/runs/31855507815),
+2026-08-15 — passed all three jobs. **The canary is citable from this point forward**,
+and the conditional this section has carried since it was written is discharged:
+
+- `verify-safety` on a **CPU GitHub runner**: exit 0, zero flips on both axes with
+  identical arms (7→7 dangerous, 25→25 safe). That is E2 for the transformers arm on a
+  second machine.
+- The **smoke-tier constants** are read off the shipped constant in a clean-venv wheel
+  install and asserted (`smoke tier OK: 0.3 | anything finer than 30pp…`) — §3's
+  `--tier smoke` row no longer rests on the local run alone.
+- `--max-new-tokens 32` runs there, so §3's row covers two values on two machines.
+
+The `canary.yml:28` runtime budget is still marked "ESTIMATED" and should now be
+replaced with this run's real numbers — that edit is owed and is not made here.
+
+The run also produced something nobody planned: **the first cross-hardware report pair
+this project has ever had**, and pointing `reproduce` at it breached T3. See the
+`reproduce` row in §2 and `validation/2026-08-15-crosshw-smollm2/`.
 
 A separate lesson the failure taught, worth stating because it generalizes past this
 workflow: **an unrun assertion can be wrong in ways review does not catch.** This
@@ -270,7 +290,8 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Validated** | **E1, 2026-08-14.** Run twice on real reports — the identical-arms run (`NO REGRESSION DETECTED`) and the 1.5B AWQ pair (`REGRESSION DETECTED (over-refusal axis)`), both exit 0. The card renders the two-axis table with flips/at-risk, Wilson CIs and per-axis MDE, plus full provenance: judge and probe revisions, both arms' revisions and **resolved dtypes**, decode settings, and the scale cap. |
 | **Hardware** | none (it needs none — it is a pure renderer; "hardware validation" for this command means "run once on a real report", which is precisely what was missing until a real report existed). |
 | **Evidence** | rendered from `validation/2026-08-14-qwen1.5b-awq/drift.json` and `validation/2026-08-14-smollm2-determinism/drift.json`; `CHANGELOG.md` §0.5.0 (shipped); `tests/test_modelcard.py` (21, E3, synthetic reports). |
-| **NOT validated** | **The card has never been placed on a Hugging Face page**, which is the form ROADMAP 0.7's gate clause actually names ("the model-card fragment renders on a real HF page") — rendering correct Markdown locally is a weaker claim than a page that renders. The `vllm serve` / `llama-server` command strings it emits have still never been executed. |
+| **On a real HF page** | **Done, 2026-08-14** — the fragment is live on [`Crusadersk/qwen2.5-1.5b-awq-4bit`](https://huggingface.co/Crusadersk/qwen2.5-1.5b-awq-4bit) ([commit `5b726938`](https://huggingface.co/Crusadersk/qwen2.5-1.5b-awq-4bit/commit/5b726938f880200a1e7de3dcdd1147f357176060)), which is the form ROADMAP 0.7's gate clause actually names; correct Markdown rendered locally was the weaker claim. Verified after publishing rather than assumed: the Hub re-parsed the YAML front matter (licence, `base_model`, `pipeline_tag`, `library_name`, all five tags returned by the API), and the live file was re-fetched and compared byte-for-byte against the local source. The edit is purely additive — 73 lines added, **0 deleted** — and the card's pre-existing UTF-8 BOM was preserved rather than silently normalised. |
+| **NOT validated** | The `vllm serve` / `llama-server` command strings it emits have still never been executed. |
 
 ### `quantfit calibrate sheet` / `quantfit calibrate ingest`
 
@@ -298,7 +319,8 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Validated** | **E1, 2026-08-14, partial — and the partiality is the result.** Run on two reports from genuinely separate executions of the identical-arms pair: **T1–T5 all hold**, and the command still **withheld** the reserved `reproduced` outcome and exited **3**, because no T0 replicate set was supplied for either side. It separately recorded that no cross-hardware difference was witnessed at all (`env.device` identical on both sides). Two independent refusals to overclaim, on first contact with real input, neither of them asked for — `validation/2026-08-14-smollm2-determinism/reproduce.json`. |
 | **Hardware** | none (it needs none — it is a pure comparison of two JSON reports). |
 | **Evidence** | `validation/2026-08-14-smollm2-determinism/reproduce.json`; `tests/test_reproduce.py` (75, E3, synthetic report pairs). No CI job invokes it. |
-| **NOT validated** | The thing the command exists for: **a real cross-hardware comparison**. Both inputs above came from one box, so T1–T5 holding says the tool agrees with itself, not that two hardwares agree (`docs/cross-hardware-tolerance-v0.md` §6.1 remains true in the way that matters: no second machine exists). The T0 replicate path (`--t0-reference` / `--t0-candidate`) still needs three replicate runs per side that do not exist. Exit 0 and exit 4 have never been observed from real inputs — and exit 0 **cannot** be until a T0 set is collected. |
+| **Cross-hardware, 2026-08-15** | **Done, and it breached.** The second machine is the CI runner, not a GPU: the canary's green run emits a schema-v2 report for the same model, probe revision and decode settings. **T3 failed on both axes** — `at_risk` 8 vs 7 and 4 vs 3 at `slack=0`, MDEs 18.2→20.5pp and 33.1→41.5pp — while both sides returned zero flips and the same verdict. The paired drift vector is stable across machines; the *resolution* is not. `docs/cross-hardware-tolerance-v0.md` §6.1's "no cross-hardware comparison" is retired — `validation/2026-08-15-crosshw-smollm2/`. |
+| **NOT validated** | **That hardware is the cause.** Four variables differ at once (device, python 3.13.1/3.12.13, torch 2.11.0+cu128/2.13.0+cpu, transformers 5.10.1/5.15.0), and `reproduce` refused the attribution itself rather than being told to. The T0 replicate path (`--t0-reference` / `--t0-candidate`) still needs three replicate runs per side that do not exist, so the reserved `breach` name is withheld exactly as `reproduced` was. Exit 0 and exit 4 have never been observed — and exit 0 **cannot** be until a T0 set is collected. |
 
 ### `quantfit audit [--root DIR] [--json PATH]`
 
@@ -345,7 +367,7 @@ only required argument that command has.
 | `--tier full` | gate | **E0** — never run. It is the tier that would gate something finer than catastrophic, and nothing has asked it to | §2 `gate` row |
 | `--sheet` | calibrate sheet (writes), calibrate ingest (reads) | **E0.** The blinded CSV has never been written from a real capture or opened by a labeler; spreadsheet mangling on the round trip is the documented threat model and is therefore untested against the thing it fears | `docs/judge-calibration-v0.md` front matter; `tests/test_calibrate.py` (53, E3) |
 | `--key` | calibrate sheet (writes), calibrate ingest (reads) | **E0.** The unblinding key is the artifact that makes the round trip auditable, and no round trip has happened | as `--sheet` |
-| `--reference` / `--candidate` | reproduce | **E1, same-hardware only.** Two reports from separate real runs were compared on 2026-08-14: T1–T5 all held and the command still exited 3, withholding `reproduced` for want of a T0 set. What it has never seen is two reports from *different* hardware, which is the only comparison it was built for | `validation/2026-08-14-smollm2-determinism/reproduce.json`; §2 `reproduce` row |
+| `--reference` / `--candidate` | reproduce | **E1 on both comparisons that exist.** Same-hardware (2026-08-14): T1–T5 held, exit 3. **Cross-hardware (2026-08-15): T3 failed on both axes** between **L** and the CI runner, `cross-hardware difference witnessed: yes`, exit 3 | `validation/2026-08-14-smollm2-determinism/reproduce.json`, `validation/2026-08-15-crosshw-smollm2/reproduce.json` |
 | `--t0-reference` / `--t0-candidate` | reproduce | **E0.** T0 needs three replicate runs; one replicate pair exists (0.4.1's byte-identical rerun at 0.5B) and three do not | `docs/cross-hardware-tolerance-v0.md` §6.1, "No replicate set" |
 | `--root` / `--json-out` | audit | **E0.** `audit` itself is E2 (§2), but it runs there with neither flag: `--root` on a foreign checkout, and `--json-out` consumed by anything, are both unexercised. **This row previously named the flag `--json`, which is a different flag on the same command** — `--json-out PATH` writes the findings file, `--json` emits the stdout envelope. One row described one flag under the other's name | `.github/workflows/ci.yml:106-107` runs the bare command; `quantfit/cli.py:286` |
 | `--json` | all 14 leaf commands | **E1 on `audit` only** (run locally 2026-08-14, 0 errors / 0 warnings across five checks). E0 on the other thirteen — the envelope that `CHANGELOG.md` §0.6.0 describes as the point of a machine-readable surface has never been consumed by a caller | `tests/` per-command envelope assertions are E3 |
@@ -475,7 +497,7 @@ existed. The remaining rows are not like that.
 | minutes, local | run `check`, `probe`, `calibrate sheet/ingest` once each and record the output | 4 rows E0 → E1‑weak. **`emit` and `reproduce` are done** — both were run on real reports and are now E1 |
 | ~~one GPU hour, L~~ **DONE** | transformers-vs-transformers `verify-safety` at 1.5B with `--report`, artifact committed — `Qwen/Qwen2.5-1.5B-Instruct` vs `Crusadersk/qwen2.5-1.5b-awq-4bit`, exit 3, 2/10 over-refusal | ~~the biggest gap in §2, the README's headline example~~ **closed** |
 | ~~one GPU hour, L~~ **DONE** | `gate --tier smoke` end-to-end against that pair, `--out` committed; plus `--threshold 1` → exit 5 | ~~`gate` E0 → E1~~ **promoted**, and ROADMAP 0.7's refusal clause met |
-| minutes, outward-facing | put the rendered model-card fragment on a real HF page | ROADMAP 0.7's third gate clause. The fragment renders (§2 `emit`); a local render is not a page |
+| ~~minutes, outward-facing~~ **DONE** | the rendered fragment is live on the `qwen2.5-1.5b-awq-4bit` card, front matter re-parsed by the Hub and the live file byte-compared | ~~ROADMAP 0.7's third gate clause~~ **met** — see §2 `emit` |
 | hours, local | wire `quantfit/safety/cache.py` into `gate` — 53 tests, still no caller, and the two committed gate runs each re-ran both arms from scratch | ROADMAP 0.7's baseline-caching deliverable |
 | one GPU day, L | `quantize --method rtn` and one non-default `--scheme`, each `verify`-checked | `--method rtn`, `--scheme` |
 | the 0.5 GO | the screen, the sensitivity control, then ε calibration | `screen`, `calibrate`, `--eps-upper`, and QSR v1's preconditions |
