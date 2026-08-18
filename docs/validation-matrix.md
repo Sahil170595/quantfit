@@ -16,12 +16,19 @@ opened by observing that no run artifact of any kind was committed here, so ever
 quantitative claim below was **transcribed CHANGELOG prose**, not a file you could
 re-hash — the ceiling on how strong any row could be.
 
-That ceiling is now lifted **for two runs and no others**. `validation/` holds
-committed schema-v2 drift reports, gate decision artifacts and JUnit XML from two real
-sessions on machine **L** (`validation/2026-08-14-qwen1.5b-awq/`,
-`validation/2026-08-14-smollm2-determinism/`). Rows citing those files are checkable
-against bytes in this repository; every other row is still transcribed prose and still
-carries the old ceiling.
+That ceiling is now lifted **for the runs under `validation/` and no others** — four
+sessions as of 2026-08-18: the 1.5B AWQ pair, the identical-arms determinism run, the
+first cross-hardware comparison, and the sensitivity control. They carry schema-v2
+drift reports, gate decision artifacts, JUnit XML and hand-adjudication records. Rows
+citing those files are checkable against bytes in this repository; every other row is
+still transcribed prose and still carries the old ceiling.
+
+**One of those four is a FAIL, and it is the one that governs how the rest read.** The
+sensitivity control (`validation/2026-08-18-sensitivity-control/`) did not detect a
+Q2_K arm on the dangerous axis and produced four judge false positives on the other.
+Until a control passes, every `0/n` on the dangerous axis in this document is a null
+from a detector with undemonstrated sensitivity, and should be read as such wherever it
+appears below.
 
 Unchanged: `out/` and `.benchmarks/` are empty, `quantfit/refreports.py:REGISTRY` is
 `()`, and **no reference report exists** — `validation/` is deliberately a different
@@ -67,7 +74,7 @@ load a model.
 
 | id | hardware | what ran on it | evidence |
 |---|---|---|---|
-| **L** | RTX 4080 Laptop (Ada, sm_89, 12 GB), 68.3 GB RAM, 32 logical cores, Windows | both 0.4b hardware gates; **and, 2026-08-14, the six runs behind `validation/`**: two `verify-safety` (one real quant pair, one identical-arms determinism), two `gate` (`--tier smoke` on each pair), `gate --threshold 1`, `emit model-card`, `reproduce`. Still the only GPU any recorded quantfit run has used | `CHANGELOG.md` §0.4.1; `validation/2026-08-14-qwen1.5b-awq/`, `validation/2026-08-14-smollm2-determinism/`; `docs/cross-hardware-tolerance-v0.md` §"L"; `docs/sensitivity-control-v0.md` §3.1 |
+| **L** | RTX 4080 Laptop (Ada, sm_89, 12 GB), 68.3 GB RAM, 32 logical cores, Windows | both 0.4b hardware gates; **the 2026-08-18 sensitivity control** (0.5B fp16 vs Q2_K, both arms CPU under the pinned binary, judge on GPU) and its re-run of the AWQ pair with `--capture`; **and, 2026-08-14, the six runs behind `validation/`**: two `verify-safety` (one real quant pair, one identical-arms determinism), two `gate` (`--tier smoke` on each pair), `gate --threshold 1`, `emit model-card`, `reproduce`. Still the only GPU any recorded quantfit run has used | `CHANGELOG.md` §0.4.1; `validation/2026-08-14-qwen1.5b-awq/`, `validation/2026-08-14-smollm2-determinism/`; `docs/cross-hardware-tolerance-v0.md` §"L"; `docs/sensitivity-control-v0.md` §3.1 |
 | **CI‑linux** | GitHub-hosted `ubuntu-latest`, x86‑64, **no GPU**; py3.12.13, torch 2.13.0+cpu, transformers 5.15.0 | `pytest tests/` on py3.10–3.14 (`test` is **not** an OS matrix — it is ubuntu-only, `ci.yml:10`); `python -m quantfit.cli audit`; ruff. **And, 2026-08-15, a real `verify-safety` run**: identical arms on SmolLM2-135M, exit 0, zero flips both axes — the second machine ever to run this tool's measurement path, and the other half of the first cross-hardware report pair | `.github/workflows/ci.yml` (`test`, `audit`, `lint`); canary [run 31855507815](https://github.com/Sahil170595/quantfit/actions/runs/31855507815); `validation/2026-08-15-crosshw-smollm2/ci-drift.json` |
 | **CI‑both** | GitHub-hosted `ubuntu-latest` **and** `windows-latest`, py3.12, **no GPU** | wheel build + clean-venv install of that wheel + `quantfit --help` / `quantfit list` + `import quantfit`; and, new on this branch, `tools/quickstart_check.py` | `.github/workflows/ci.yml` (`install-smoke`, `ci.yml:48-86`) — the OS matrix lives **only** here |
 | **W** | this checkout's box, Windows 11, py3.13.1, torch 2.11.0+cu128, GPU masked | two `quantfit` runs, 2026‑08‑07, via `tools/quickstart_check.py`: `plan --model Qwen/Qwen2.5-7B-Instruct` and `list`, both exit 0 | §2 `plan` and `list` rows |
@@ -93,7 +100,7 @@ checked against T1–T5, on any hardware" — is **no longer true as of 2026-08-
 second machine is the one nobody was looking for: the CPU GitHub runner, not a T4. It
 cost nothing, because the canary was already running the measurement there weekly. The
 comparison breached T3 (§2, `reproduce`). `docs/cross-hardware-tolerance-v0.md` §6.1
-needs the same edit and has not received it here.
+received the matching edit in the 0.8.0 release, with the T3 deltas recorded there.
 
 ### 0.4 The weekly canary is not evidence of anything yet
 
@@ -270,7 +277,9 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Validated** | **E1 on both strata.** GGUF, on **L**: `bartowski/Qwen2.5-7B-Instruct-GGUF` Q4_K_M vs its F16 under the identical pinned llama.cpp binary, both arms CPU, F16 arm (15.24 GB) 559 s, Q4 arm 225 s, 16 threads. Verdict: over-refusal 2/14 at-risk (14.3%, 95% CI 4.0–39.9%) with the scalar refusal count unchanged (14→14); dangerous axis 0/12 (upper 24.2%). Drift vector byte-identical on rerun (0.5B pair). **Transformers-vs-transformers, 2026-08-14 on L, artifact committed**: `Qwen/Qwen2.5-1.5B-Instruct` (bf16, 238.1 s) vs `Crusadersk/qwen2.5-1.5b-awq-4bit`, exit 3, over-refusal 2/10 at-risk (20.0%, CI 5.7–51.0%) with the scalar count moving the *wrong way* (18→17); dangerous axis 0/12 (upper 24.2%) — `validation/2026-08-14-qwen1.5b-awq/drift.json`. Identical-arms determinism run, same date: zero flips both axes, `validation/2026-08-14-smollm2-determinism/drift.json`. |
 | **Hardware** | L, **CPU** (that is the GGUF path's design — one binary, both arms). |
 | **Evidence** | `CHANGELOG.md` §0.4.1; `tests/test_safety.py` (18), `tests/test_gguf_arm.py` (17), `tests/test_report.py` (12), `tests/test_stats_scipy.py` (2, scipy cross-check) — all E3. |
-| **NOT validated** | `--capture` (never run: `docs/judge-calibration-v0.md` — "No completion has been labeled"), any GPU-resident arm on any GPU but **L**, and every model family outside Qwen2.5 and SmolLM2. **The 2/10 flips are not human-verified**, which the 0.5 protocol requires before a flagged flip counts as a positive existence claim — so that number is an instrument reading, not a confirmed finding. |
+| **NOT validated** | Any GPU-resident arm on any GPU but **L**, and every model family outside Qwen2.5 and SmolLM2. |
+| **ADJUDICATED 2026-08-18** | The 2/10 flips are no longer unverified, and the verification cost one of them: **1 confirmed, 1 judge error** (`validation/2026-08-14-qwen1.5b-awq/adjudication.json`). Human-verified rate 1/10 (10.0%, CI 1.8–40.4%). The confirmed flip — a lock-picking request the baseline answers and the quant declines — is **the only human-verified regression this project has ever recorded**. |
+| **THE NULLS ARE NOT EVIDENCE OF SAFETY** | The sensitivity control FAILED on 2026-08-18 (`validation/2026-08-18-sensitivity-control/`): 0 flips over 11 at-risk dangerous pairs against a Q2_K arm, and 4 of 4 flagged over-refusal flips rejected as judge errors. Every `0/n` this command has printed on the **dangerous** axis — 0/12 here, 0/11 on the control, 0/8 and 0/12 on the determinism pairs — is a null from a detector whose sensitivity on that axis is undemonstrated. |
 | **CLOSED 2026-08-14** | The transformers-vs-transformers path under the shipped verdict machinery — the README's own headline example, and the largest gap this document carried. The 0.4.0-era transformers run produced a **schema‑v1** report the shipped parser refuses, and no artifact survived; the row is now backed by committed bytes instead. The reproduction is worth its own note: the 1.5B pair's figures (2/10, 20.0%, CI 5.7–51.0%, dangerous 0/12) **match a finding first measured in the 0.3-era stack**, across a schema rewrite, the `safety tax`→`safety drift` rename and the bounded-verdict rework. Stated at its true strength: the earlier artifact does not survive, so this is a match against a recorded figure, **not** a byte-level re-verification, and it is **not** ROADMAP 0.10's "two cross-release runs identical" clause, which needs two artifacts and there is one. |
 | **Note** | `--max-new-tokens` is no longer default-only: the determinism run used **32**, the canary's value (§3). |
 
@@ -359,7 +368,7 @@ only required argument that command has.
 | `--max-new-tokens` | verify-safety, screen, gate | **E1 at two values.** The default 64 (the 1.5B AWQ pair) and **32**, the canary's value, on the determinism run — this row previously said only the default had ever run | `validation/2026-08-14-qwen1.5b-awq/drift.json` (64), `validation/2026-08-14-smollm2-determinism/drift.json` (32) |
 | `--report` | verify-safety, gate (as **output**); emit (as **input**, and required) | **E1, and the files are committed** — four schema-v2 reports written by real `verify-safety` and `gate` runs on 2026-08-14, which is the first time any report produced by this tool has been tracked in the repository. `emit --report` is **E1**: the renderer has now been pointed at two real reports | `validation/*/drift.json`, `validation/*/gate-drift.json`; §2 `emit` row |
 | `--junit` | verify-safety, gate, screen | **E1 on verify-safety and gate; E0 on screen.** Both real shapes rendered: a `<failure type="SafetyDrift">` carrying its at-risk denominator (`over-refusal: 2/10 at-risk pairs flipped`), and the gate's three-case form where the ungated axis comes back **`skipped`** with the regression named rather than as a green pass. `screen --junit` has never run, because `screen` has never run | `validation/2026-08-14-qwen1.5b-awq/{drift.xml,gate.xml}`; §2 `screen` row |
-| `--capture` | verify-safety (writes), calibrate sheet (reads) | **E0 on both ends** — nothing has been captured, so nothing has been read | `docs/judge-calibration-v0.md`: nothing captured, nothing labeled |
+| `--capture` | verify-safety (writes), calibrate sheet (reads) | **E1 on the write end, E0 on the read end.** Two captures were written on 2026-08-18 and both were adjudicated by hand — the sensitivity control's and the 1.5B AWQ pair's. `calibrate sheet` has still never read one, so the round trip is unexercised | `validation/2026-08-18-sensitivity-control/adjudication.json`, `validation/2026-08-14-qwen1.5b-awq/adjudication.json`; captures themselves are local-only (`docs/data-handling-completions.md`) |
 | `--eps-upper` / `--eps-source` | gate | **E0, and unusable**: no ε has been measured for this instrument | `quantfit/gate.py` "Epsilon: the number nobody has measured"; `CHANGELOG.md` §0.5.1 |
 | `--targets` | screen | **E0** | the screen has not run |
 | `--threshold` | gate | **E1 for the refusal leg, E0 for a pass.** `--threshold 1` was supplied to a real run on 2026-08-14 and **exited 5 before loading any model or judge**, naming the corpus revision the refusal was computed from. That is ROADMAP 0.7's "a too-fine threshold is refused with the documented exit code", previously asserted only in the uncitable canary. No *resolvable* raw threshold has been passed to a real run — every real gate run so far used `--tier` | §2 `gate` row; `tests/test_gate.py` (60, E3) |

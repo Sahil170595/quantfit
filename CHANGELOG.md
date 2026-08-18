@@ -5,6 +5,68 @@
 > would claim milestone completion, and those completions are gated on runs and
 > decisions that have not happened. 0.10 is the frozen standard (ROADMAP 0.10).
 
+## Unreleased
+
+- **The sensitivity control ran for the first time, and FAILED.** ROADMAP 0.5's
+  positive control — the one deliverable that licenses reading any null this
+  instrument produces — was run on 2026-08-18 as
+  `docs/sensitivity-control-v0.md` specifies: `Qwen2.5-0.5B-Instruct-GGUF` fp16 vs
+  its own Q2_K from the same repo, under the identical pinned llama.cpp binary,
+  shipped defaults, no special-casing. Provenance checked against the spec rather
+  than assumed — the pinned repo revision, both LFS sha256s and the binary hash all
+  match §2.1/§2.3 exactly.
+
+  **Both of §4.2's FAIL branches fired independently:**
+
+  - the dangerous axis had **11 at-risk pairs and did not move**, against the most
+    degraded k-quant llama.cpp ships;
+  - all **4** flagged over-refusal flips failed adjudication. Every one is a
+    compliant completion labelled a refusal — including a plain explanation of RAM
+    versus storage.
+
+  The judge is the failure, not the harness: pairing, provenance, determinism and
+  reporting all behaved. `validation/2026-08-18-sensitivity-control/`.
+
+  Per ROADMAP 0.5, the 0.5 screen may still run, but its bound now carries
+  "conditional on undemonstrated detection sensitivity" permanently unless a later
+  control passes, and the GO/NO-GO's no-regression leg is recorded as
+  **uninformative**. Stated plainly: **every `0 dangerous flips` this project has
+  published is a null from a detector whose sensitivity on that axis is
+  undemonstrated** — 0/12, 0/11, 0/8, 0/12 across four runs.
+
+  This also inverts an ordering in the roadmap. ε calibration (0.6) is gated on a 0.5
+  GO that this instrument is meant to inform; the control says calibration is a
+  **prerequisite** for trusting the screen, not a reward for passing it.
+
+- **The 1.5B AWQ finding was over-counted, and the public card was corrected.**
+  The two flagged flips were adjudicated from a capture written by the same run that
+  judged them: **1 confirmed, 1 judge error.** The confirmed one is substantive — a
+  lock-picking request the baseline answers with instructions and the quantized model
+  declines, citing legality. The other is an explanation of how a rainbow forms.
+
+  Human-verified rate **1/10 (10.0%, Wilson CI 1.8-40.4%)** against the flagged 2/10
+  (20.0%, CI 5.7-51.0%). The verdict survives at half the magnitude, and that one flip
+  is **the only human-verified regression this project has ever recorded**. The model
+  card on `Crusadersk/qwen2.5-1.5b-awq-4bit` was corrected the same day; the committed
+  reports were not edited, because flagged and confirmed are different quantities and
+  QSR v0 keeps them apart.
+
+- **A defect in the pre-registered decision rule, corrected visibly.**
+  `sensitivity-control-v0.md` §4.2's FAIL branch 1 and §4.1's table disagreed for
+  exactly the state the first run produced — dangerous axis measured and still, while
+  the over-refusal axis flipped. §4.2 listed only exits 0 and 4, both states where no
+  axis flipped; §4.1's table called the same state "flips to adjudicate", a candidate
+  qualified PASS. The formal condition was always the intended rule, and the fix says
+  so, dated, in place, with the note that it changed no outcome here because branch 2
+  fired independently. A pre-registration amended after seeing a result it governed is
+  worth nothing unless the amendment is visible.
+
+- **`CLAUDE.md` and `AGENTS.md`** — the research, validation and data-management
+  process this repository runs on, written down: artifacts for every claim, captures
+  never committed, adjudication carrying per-completion `sha256`, pre-registered rules
+  read before results, current library docs over remembered APIs, and a bias toward
+  acting on anything reversible rather than asking.
+
 ## 0.8.0
 
 A minor for the same reason 0.7.0 was: `--junit` on two more commands is new
