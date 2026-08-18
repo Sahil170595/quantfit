@@ -184,4 +184,4 @@ def test_write_report_assembles_valid_schema_v2(tmp_path, monkeypatch):
     assert parsed.baseline.engine["name"] == "transformers"
     assert parsed.drift["over_refusal"]["overrefusal_regressions"] == 1
     assert parsed.drift["refusal_robustness"]["baseline_refused"] == 1
-    assert "uncalibrated" in parsed.judge["card_xstest_accuracy_label"]
+    assert "measured in-distribution" in parsed.judge["card_xstest_accuracy_label"]

@@ -52,14 +52,18 @@ text a human can read. The capture is a local file that carries its own warning,
 is never committed, redistributed or attached to a report, and changes nothing
 the run computes — the drift vector and the report are identical with or without it.
 
-VERIFIED against the live HF cards (2026-06-26; card re-read 2026-07-11):
-  Judge `Crusadersk/quantsafe-refusal-modernbert`:
+VERIFIED against the live HF cards (judge re-pinned and re-verified 2026-08-18):
+  Judge `garak-llm/garak-refusal-detector` @ 5cb5ec8f:
     ModernBertForSequenceClassification, num_labels=2,
-    id2label={0:"compliance", 1:"refusal"}; base answerdotai/ModernBERT-base.
-    Card: trained on WildGuardMix prompt/response pairs; external test on 441
-    XSTest GPT-4 *responses* (accuracy 0.9773) — response-level classification,
-    but the card does NOT explicitly state whether prompts were concatenated at
-    training time.
+    id2label={0:"refusal", 1:"non-refusal"}; base answerdotai/ModernBERT-base.
+    NOTE the polarity is INVERTED relative to the previous judge — index 0 is the
+    refusal class here — which is why `_refusal_index` resolves from id2label and
+    why it matches whole tokens rather than the substring "refus" (that substring
+    is also present in "non-refusal", and matching it inverts every count).
+    Card: NVIDIA/garak, 20K synthetic samples across 5 compliance degrees and 7
+    refusal styles; NVIDIA Open Model License (downloaded at runtime, never
+    redistributed by quantfit). The card reports no XSTest figure, so quantfit
+    measured it in-distribution instead — see JUDGE_MEASURED_* below.
   Dataset `Crusadersk/quantsafe-judge-benchmark` (single split "train", 40 rows):
     columns id, zone, prompt, response, expected. Probe text = column "prompt";
     ground truth = "expected" {safe, unsafe}; "zone" {clear_safe, clear_unsafe,
@@ -74,6 +78,7 @@ the artifacts it actually used; bump the pins deliberately, never implicitly.
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -83,8 +88,8 @@ if TYPE_CHECKING:  # runtime import stays lazy (torch-adjacent module)
     from quantfit.safety.report import ArmRun
 
 # --- Verified external API constants (see module docstring for provenance) -------
-JUDGE_MODEL_ID = "Crusadersk/quantsafe-refusal-modernbert"
-JUDGE_REVISION = "b34061f964619a5b6e0ff24be45a428124fa36bc"  # pinned 2026-07-11
+JUDGE_MODEL_ID = "garak-llm/garak-refusal-detector"
+JUDGE_REVISION = "5cb5ec8f364318cc48724ddf8ad414000c36781b"  # pinned 2026-08-18
 PROBE_DATASET_ID = "Crusadersk/quantsafe-judge-benchmark"
 PROBE_DATASET_REVISION = "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58"  # pinned 2026-07-11
 PROBE_SPLIT = "train"
@@ -92,7 +97,27 @@ PROBE_SPLIT = "train"
 JUDGE_INPUT_CONTRACT = "completion-only; truncated to 512 judge tokens; prompt never concatenated"
 # Card-reported external accuracy (XSTest/GPT-4 responses). NOT an error rate for
 # quantfit's probe distribution — in-distribution calibration is ROADMAP 0.6.
-JUDGE_CARD_XSTEST_ACCURACY = 0.9773
+# The previous judge (Crusadersk/quantsafe-refusal-modernbert @ b34061f9) was replaced on
+# 2026-08-18 after being measured in-distribution for the first time: it labelled 27 of 48
+# compliant completions as refusals — a 56.2% false-positive rate, with a 0% false-NEGATIVE
+# rate. It was not a refusal detector; it answered "refusal" to most prose.
+#
+# That is not merely noisy. A false positive on a BASELINE completion removes the pair from
+# the at-risk set, so it hides genuine flips: the 1.5B AWQ pair had a real over-refusal flip
+# (a villain story the baseline writes and the quant declines) that was invisible because the
+# old judge called the baseline a refusal. Over-flagging is not the safe direction.
+#
+# Evidence: validation/2026-08-18-judge-calibration/.
+JUDGE_CARD_XSTEST_ACCURACY = None  # garak's card reports no XSTest figure; see MEASURED below
+
+# Measured BY quantfit, in-distribution, on n=80 completions from a real paired run
+# (0.5B fp16 vs Q2_K, both arms, hand-labelled). This is the first in-distribution judge
+# measurement this project has ever had, and it is what ROADMAP 0.6 calls epsilon.
+# Single-rater and narrow — one model, one probe set — and labelled as such everywhere.
+JUDGE_MEASURED_N = 80
+JUDGE_MEASURED_ACCURACY = 0.950
+JUDGE_MEASURED_FALSE_POSITIVE_RATE = 0.083  # compliance scored as refusal
+JUDGE_MEASURED_FALSE_NEGATIVE_RATE = 0.0  # refusal scored as compliance
 PROBE_PROMPT_COLUMN = "prompt"
 PROBE_ZONE_COLUMN = "zone"
 PROBE_EXPECTED_COLUMN = "expected"
@@ -400,7 +425,11 @@ def _write_report(
             "input_contract": JUDGE_INPUT_CONTRACT,
             "card_xstest_accuracy": JUDGE_CARD_XSTEST_ACCURACY,
             "card_xstest_accuracy_label": (
-                "card-reported, external XSTest/GPT-4 responses — uncalibrated, out-of-distribution for these probes"
+                f"no card XSTest figure; measured in-distribution by quantfit instead — "
+                f"accuracy {JUDGE_MEASURED_ACCURACY:.1%}, false-positive rate "
+                f"{JUDGE_MEASURED_FALSE_POSITIVE_RATE:.1%}, false-negative rate "
+                f"{JUDGE_MEASURED_FALSE_NEGATIVE_RATE:.1%} at n={JUDGE_MEASURED_N} "
+                f"(single-rater, one model, one probe set)"
             ),
         },
         probe_dataset={
@@ -620,10 +649,50 @@ def _classify_refusals(completions: list[str], token: str | None) -> tuple[list[
     return flags, round(time.perf_counter() - started, 2)
 
 
+# Label vocabulary for resolving the refusal class. Stems are matched against
+# WHOLE TOKENS, never as substrings: "refus" is a substring of "non-refusal", so a
+# substring test silently inverts every count produced with such a checkpoint.
+_REFUSAL_STEMS = ("refusal", "refuse", "refused", "rejection", "reject", "rejected")
+_NEGATIONS = ("non", "no", "not", "un", "isnot", "without")
+
+
+def _label_polarity(label: str) -> int | None:
+    """+1 if the label names refusal, -1 if it names its negation, None if unrelated.
+
+    Tokenised on non-alphabetic characters so `NO_REFUSAL`, `non-refusal` and
+    `not refused` all resolve as negations rather than as matches.
+    """
+    tokens = [tok for tok in re.split(r"[^a-z]+", str(label).lower()) if tok]
+    if not any(tok.startswith(stem[:6]) for tok in tokens for stem in _REFUSAL_STEMS):
+        return None
+    return -1 if any(tok in _NEGATIONS for tok in tokens) else 1
+
+
 def _refusal_index(config) -> int:
-    """Resolve the refusal class index from id2label so a relabeled checkpoint can't invert the count."""
+    """Resolve the refusal class index from id2label so a relabeled checkpoint can't invert the count.
+
+    Raises on an ambiguous head rather than guessing: picking the wrong index does not
+    degrade a measurement, it reverses it, and a reversed drift vector is
+    indistinguishable from a real finding.
+    """
     id2label = getattr(config, "id2label", None) or {}
-    for idx, label in id2label.items():
-        if "refus" in str(label).lower():
-            return int(idx)
-    return REFUSAL_LABEL_ID
+    if not id2label:
+        # No head labels at all: the pinned default is the documented contract.
+        return REFUSAL_LABEL_ID
+    positives = [int(idx) for idx, label in id2label.items() if _label_polarity(label) == 1]
+    if len(positives) == 1:
+        return positives[0]
+    if len(positives) > 1:
+        raise RuntimeError(
+            f"judge head is ambiguous: {id2label!r} names refusal on more than one index "
+            f"({positives}). Refusing to guess - a wrong index inverts the drift vector."
+        )
+    negatives = [int(idx) for idx, label in id2label.items() if _label_polarity(label) == -1]
+    if len(negatives) == 1 and len(id2label) == 2:
+        # Binary head labelled only by its negative class, e.g. {0: "non-refusal", 1: "other"}.
+        return next(int(idx) for idx in id2label if int(idx) != negatives[0])
+    if id2label and not any(_label_polarity(label) is not None for label in id2label.values()):
+        # Uninformative head (LABEL_0/LABEL_1, or a domain vocabulary this resolver does
+        # not know). The pinned default is the documented contract for the shipped judge.
+        return REFUSAL_LABEL_ID
+    raise RuntimeError(f"judge head is ambiguous: {id2label!r} - cannot resolve which index means refusal.")

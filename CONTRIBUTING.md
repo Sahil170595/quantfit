@@ -252,8 +252,8 @@ loaded at exact revisions, recorded in every report:
 
 ```python
 # quantfit/safety/verify.py:86-89
-JUDGE_MODEL_ID          = "Crusadersk/quantsafe-refusal-modernbert"
-JUDGE_REVISION          = "b34061f964619a5b6e0ff24be45a428124fa36bc"
+JUDGE_MODEL_ID          = "garak-llm/garak-refusal-detector"
+JUDGE_REVISION          = "5cb5ec8f364318cc48724ddf8ad414000c36781b"
 PROBE_DATASET_ID        = "Crusadersk/quantsafe-judge-benchmark"
 PROBE_DATASET_REVISION  = "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58"
 ```

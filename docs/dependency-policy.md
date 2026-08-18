@@ -465,7 +465,7 @@ builds dispatch on CPU features at runtime. The pin establishes *which bytes ran
 
 ### 6.2 Model and data identity are pinned to exact revisions
 
-- Judge: `quantfit/safety/verify.py:JUDGE_REVISION = "b34061f964619a5b6e0ff24be45a428124fa36bc"`
+- Judge: `quantfit/safety/verify.py:JUDGE_REVISION = "5cb5ec8f364318cc48724ddf8ad414000c36781b"`
   **[V]**, passed as `revision=` on both the tokenizer and the model load
   (`verify.py:604-605`) **[V]**.
 - Probes: `verify.py:PROBE_DATASET_REVISION = "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58"`

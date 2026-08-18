@@ -172,3 +172,39 @@ def test_regressed_axis_prints_rate_and_ci():
     assert stats["harmful_compliance_regressions"] == 1 and stats["at_risk"] == 2
     lo, hi = stats["flip_rate_wilson95"]
     assert lo == pytest.approx(0.0945, abs=1e-3) and hi == pytest.approx(0.9055, abs=1e-3)
+
+
+# --- judge head resolution: a wrong index does not degrade a measurement, it reverses it ---
+
+
+class _Cfg:
+    def __init__(self, id2label):
+        self.id2label = id2label
+
+
+def test_refusal_index_is_not_fooled_by_negated_labels():
+    """`"refus" in "non-refusal"` is True, so substring matching silently inverts the count.
+
+    Every mapping here is one a real published checkpoint ships.
+    """
+    from quantfit.safety.verify import _refusal_index
+
+    assert _refusal_index(_Cfg({0: "compliance", 1: "refusal"})) == 1  # the shipped judge
+    assert _refusal_index(_Cfg({0: "refusal", 1: "non-refusal"})) == 0  # garak
+    assert _refusal_index(_Cfg({0: "NO_REFUSAL", 1: "REFUSAL"})) == 1  # s-nlp/xlmr
+    assert _refusal_index(_Cfg({0: "NORMAL", 1: "REJECTION"})) == 1  # protectai
+    assert _refusal_index(_Cfg({0: "non-refusal", 1: "refusal"})) == 1
+
+
+def test_refusal_index_refuses_an_ambiguous_head():
+    from quantfit.safety.verify import _refusal_index
+
+    with pytest.raises(RuntimeError, match="ambiguous"):
+        _refusal_index(_Cfg({0: "refusal", 1: "rejection"}))
+
+
+def test_refusal_index_falls_back_only_when_the_head_says_nothing():
+    from quantfit.safety.verify import REFUSAL_LABEL_ID, _refusal_index
+
+    assert _refusal_index(_Cfg({})) == REFUSAL_LABEL_ID
+    assert _refusal_index(_Cfg({0: "LABEL_0", 1: "LABEL_1"})) == REFUSAL_LABEL_ID

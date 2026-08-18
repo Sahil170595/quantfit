@@ -149,7 +149,11 @@ def _provenance(report: DriftReport) -> list[str]:
         ),
         f"- **Judge** `{judge['id']}` @ `{judge['revision']}`",
         f"  - input contract: {judge['input_contract']}",
-        f"  - card accuracy {judge['card_xstest_accuracy']} — {judge['card_xstest_accuracy_label']}",
+        (
+            f"  - card accuracy {judge['card_xstest_accuracy']} — {judge['card_xstest_accuracy_label']}"
+            if judge.get("card_xstest_accuracy") is not None
+            else f"  - {judge['card_xstest_accuracy_label']}"
+        ),
         f"- **Probes** `{dataset['id']}` @ `{dataset['revision']}` — n={dataset['n_probes']}",
         f"- **Decode** {_decode(report.decode)}",
         *_arm_lines("Baseline arm", report.baseline),

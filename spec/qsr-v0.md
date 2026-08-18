@@ -106,7 +106,7 @@ therefore structural, not a convention.
 
 | role | id | pinned revision |
 |---|---|---|
-| judge | `Crusadersk/quantsafe-refusal-modernbert` | `b34061f964619a5b6e0ff24be45a428124fa36bc` |
+| judge | `garak-llm/garak-refusal-detector` | `5cb5ec8f364318cc48724ddf8ad414000c36781b` |
 | probes | `Crusadersk/quantsafe-judge-benchmark`, split `train` | `c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58` |
 
 Both pinned 2026-07-11. The judge is a `ModernBertForSequenceClassification`, `num_labels=2`,
@@ -114,9 +114,16 @@ Both pinned 2026-07-11. The judge is a `ModernBertForSequenceClassification`, `n
 `revision=` explicitly, so a report names the artifacts it actually used and a moved branch cannot
 silently change what a rerun measures.
 
-**2.7 The uncalibrated judge-accuracy caveat.** The judge card reports **0.9773** accuracy on 441
-external XSTest/GPT-4 *responses*. QSR carries that number only with its label, exactly as the code
-writes it into every report (`safety/verify.py:_write_report`):
+**2.7 The judge-accuracy caveat — now a measurement rather than a card claim.** Until
+2026-08-18 this section carried a card-reported **0.9773** XSTest figure with an
+"uncalibrated, out-of-distribution" label, because no in-distribution measurement existed.
+One does now, and it retired the previous judge: measured on n=80 completions from a real
+paired run, `Crusadersk/quantsafe-refusal-modernbert` scored **56.2% false positives** on
+compliant text. The judge is now `garak-llm/garak-refusal-detector`, measured on the same
+set at **95.0% accuracy, 8.3% FPR, 0.0% FNR**
+(`validation/2026-08-18-judge-calibration/`). `JUDGE_CARD_XSTEST_ACCURACY` is `None` —
+garak's card reports no XSTest figure — and the report carries the measured numbers in the
+label instead, exactly as the code writes it (`safety/verify.py:_write_report`):
 
 > `card-reported, external XSTest/GPT-4 responses — uncalibrated, out-of-distribution for these probes`
 
@@ -658,13 +665,16 @@ the uncalibrated-judge label is doing something else, and should say so.
 
 | constant | value | source |
 |---|---|---|
-| `JUDGE_MODEL_ID` | `Crusadersk/quantsafe-refusal-modernbert` | `safety/verify.py` |
-| `JUDGE_REVISION` | `b34061f964619a5b6e0ff24be45a428124fa36bc` | `safety/verify.py` |
+| `JUDGE_MODEL_ID` | `garak-llm/garak-refusal-detector` | `safety/verify.py` |
+| `JUDGE_REVISION` | `5cb5ec8f364318cc48724ddf8ad414000c36781b` | `safety/verify.py` |
 | `PROBE_DATASET_ID` | `Crusadersk/quantsafe-judge-benchmark` | `safety/verify.py` |
 | `PROBE_DATASET_REVISION` | `c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58` | `safety/verify.py` |
 | `PROBE_SPLIT` / `REFUSAL_LABEL_ID` | `train` / `1` (resolved from `id2label` when present) | `safety/verify.py` |
 | `JUDGE_INPUT_CONTRACT` | `completion-only; truncated to 512 judge tokens; prompt never concatenated` | `safety/verify.py` |
-| `JUDGE_CARD_XSTEST_ACCURACY` | `0.9773` (uncalibrated, out-of-distribution) | `safety/verify.py` |
+| `JUDGE_CARD_XSTEST_ACCURACY` | `None` (garak reports no XSTest figure) | `safety/verify.py` |
+| `JUDGE_MEASURED_ACCURACY` | `0.95` — measured in-distribution, single-rater, n=80 | `safety/verify.py` |
+| `JUDGE_MEASURED_FALSE_POSITIVE_RATE` | `0.083` — compliant text scored as refusal | `safety/verify.py` |
+| `JUDGE_MEASURED_FALSE_NEGATIVE_RATE` / `JUDGE_MEASURED_N` | `0.0` / `80` | `safety/verify.py` |
 | `DEFAULT_MAX_NEW_TOKENS` / `_JUDGE_MAX_LENGTH` | `64` / `512` | `safety/verify.py` |
 | `_Z_95` / `_MDE_POWER` | `1.959963984540054` / `0.8` | `safety/verify.py` |
 | `SCHEMA_VERSION` | `2` | `safety/report.py` |

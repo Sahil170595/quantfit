@@ -89,7 +89,7 @@ contacted for any part of the measurement.
 
 | what | from | pinned how |
 |---|---|---|
-| the refusal judge | Hugging Face, `Crusadersk/quantsafe-refusal-modernbert` | exact revision `b34061f9…` (`safety/verify.py:87`) |
+| the refusal judge | Hugging Face, `garak-llm/garak-refusal-detector` | exact revision `b34061f9…` (`safety/verify.py:87`) |
 | the probe corpus | Hugging Face, `Crusadersk/quantsafe-judge-benchmark`, split `train` | exact revision `c26cc2e1…` (`safety/verify.py:89`) |
 | the model under test + its baseline | Hugging Face, or a local path you pass | whatever you named; the resolved revision is recorded in the report |
 | `llama.cpp` binaries + convert script | `github.com/ggml-org/llama.cpp` release `b9817` | SHA256 per asset + pinned commit (§1) |
