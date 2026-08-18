@@ -1391,7 +1391,7 @@ CONSTANT_CLAIMS: tuple[ConstantClaim, ...] = (
         id="judge_revision",
         target="quantfit.safety.verify:JUDGE_REVISION",
         value_re=r"(?<![0-9a-f])[0-9a-f]{40}(?![0-9a-f])",
-        names=("JUDGE_REVISION", "quantsafe-refusal-modernbert"),
+        names=("JUDGE_REVISION", "garak-refusal-detector"),
     ),
     ConstantClaim(
         id="probe_dataset_id",
@@ -1413,12 +1413,20 @@ CONSTANT_CLAIMS: tuple[ConstantClaim, ...] = (
         patterns=(r"`(completion-only;[^`\n]*)`",),
         style="exact",
     ),
+    # JUDGE_CARD_XSTEST_ACCURACY was claimed here until 2026-08-18, when the judge was
+    # replaced with one whose card reports no XSTest figure. The constant is None and there
+    # is nothing to assert; what replaced it is a number quantfit measured itself.
     ConstantClaim(
-        id="judge_card_xstest_accuracy",
-        target="quantfit.safety.verify:JUDGE_CARD_XSTEST_ACCURACY",
+        id="judge_measured_accuracy",
+        target="quantfit.safety.verify:JUDGE_MEASURED_ACCURACY",
         value_re=r"\d\.\d{2,6}",
-        names=("JUDGE_CARD_XSTEST_ACCURACY",),
-        patterns=(r"judge card (?:reports |carries )?\*{0,2}(\d\.\d{2,6})\*{0,2}",),
+        names=("JUDGE_MEASURED_ACCURACY",),
+    ),
+    ConstantClaim(
+        id="judge_measured_false_positive_rate",
+        target="quantfit.safety.verify:JUDGE_MEASURED_FALSE_POSITIVE_RATE",
+        value_re=r"\d\.\d{2,6}",
+        names=("JUDGE_MEASURED_FALSE_POSITIVE_RATE",),
     ),
     ConstantClaim(
         id="default_max_new_tokens",

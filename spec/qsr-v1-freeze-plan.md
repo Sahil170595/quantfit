@@ -302,7 +302,7 @@ rules. Deleting the floor mode at v1 would leave conformant-but-uncalibrated
 implementations unspecified. **[I]**
 
 **A defect this plan found and v0 already fixed: `spec/qsr-v0.md` had two sections
-numbered 5.8.** `spec/qsr-v0.md:353` is *"5.8 The gate adds exit 5"* and what was a second
+numbered 5.8.** `spec/qsr-v0.md:360` is *"5.8 The gate adds exit 5"* and what was a second
 *"5.8 What a no-detection result means"* is now **§5.9** **[V]**. It was editorial and
 blocked on nothing, so it did not wait for v1: holding a known-ambiguous citation open
 across a release is how the ambiguity gets copied into things that cite it.

@@ -7,6 +7,53 @@
 
 ## Unreleased
 
+- **The judge was measured for the first time, and replaced.** ROADMAP 0.6 calls
+  this quantity ε and gates it on a 0.5 GO; the sensitivity control's failure forced
+  it early, because a null from an unmeasured detector cannot be published at all.
+
+  Measured on n=80 completions from a real paired run, hand-labelled:
+  `Crusadersk/quantsafe-refusal-modernbert` scored **56.2% false positives** on
+  compliant text — 27 of 48 — with a **0%** false-negative rate. It was not
+  measuring refusal; it answered "refusal" to most prose. Directly:
+  *"Photosynthesis is the process by which plants convert light energy…"* →
+  P(refusal) **0.979**. Truncation was tested and ruled out (0.891 cut mid-sentence
+  vs 0.871 complete).
+
+  The judge is now **`garak-llm/garak-refusal-detector`** @ `5cb5ec8f` — NVIDIA's,
+  from the garak framework — measured on the same set at **95.0% accuracy, 8.3% FPR,
+  0.0% FNR**. Three alternatives were evaluated on the same ground truth and are
+  recorded with it. `validation/2026-08-18-judge-calibration/`.
+
+  **Over-flagging is not the safe direction, and this is the reason.** A false
+  positive on a *baseline* completion removes that pair from the **at-risk set**, and
+  a pair that is not at risk cannot register a flip. So a refusal-biased judge does
+  not merely add noise — it hides genuine regressions. Demonstrated: on the 1.5B AWQ
+  pair, one baseline writes a villain story and the quantized arm replies "I'm sorry,
+  but I can't assist with that request". The old judge scored the *baseline* as a
+  refusal, so that flip was invisible. Re-judged, the AWQ pair has **2 confirmed**
+  over-refusal flips rather than 1 — the better judge raised the count by finding one
+  the old judge concealed.
+
+  `JUDGE_CARD_XSTEST_ACCURACY` is now `None`: garak's card reports no XSTest figure,
+  and quantfit no longer needs a card number because it has its own in-distribution
+  measurement. The report and model card carry the measured rates instead. Schema
+  stays v2 — the field is retained and nulled rather than renamed, so every report
+  committed under `validation/` still parses.
+
+- **`_refusal_index` could silently invert the entire measurement.** It resolved the
+  refusal class by testing `"refus" in label.lower()` — and `"refus"` is a substring
+  of `"non-refusal"`. For `{0: "NO_REFUSAL", 1: "REFUSAL"}`, shipped by
+  `s-nlp/xlmr-base-refusal-classifier`, it returned **0**: every refusal counted as a
+  compliance and every compliance as a refusal, with no error and no warning. The
+  function's own docstring claimed it existed "so a relabeled checkpoint can't invert
+  the count".
+
+  It now matches whole tokens, understands negation, and **raises** on an ambiguous
+  head rather than guessing — a wrong index does not degrade a measurement, it
+  reverses it, and a reversed drift vector is indistinguishable from a real finding.
+  This was not academic: the newly selected judge labels
+  `{0: "refusal", 1: "non-refusal"}`, the opposite polarity to the outgoing one.
+
 - **The sensitivity control ran for the first time, and FAILED.** ROADMAP 0.5's
   positive control — the one deliverable that licenses reading any null this
   instrument produces — was run on 2026-08-18 as

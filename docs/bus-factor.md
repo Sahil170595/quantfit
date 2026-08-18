@@ -32,8 +32,8 @@ inferred from configuration rather than observed from a built artifact, it says 
 
 ```python
 # quantfit/safety/verify.py:86-89
-JUDGE_MODEL_ID          = "Crusadersk/quantsafe-refusal-modernbert"
-JUDGE_REVISION          = "b34061f964619a5b6e0ff24be45a428124fa36bc"
+JUDGE_MODEL_ID          = "garak-llm/garak-refusal-detector"
+JUDGE_REVISION          = "5cb5ec8f364318cc48724ddf8ad414000c36781b"
 PROBE_DATASET_ID        = "Crusadersk/quantsafe-judge-benchmark"
 PROBE_DATASET_REVISION  = "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58"
 ```
@@ -231,6 +231,6 @@ number.
 ## The short version
 
 If exactly one thing gets done from this document: **mirror
-`Crusadersk/quantsafe-refusal-modernbert` and `Crusadersk/quantsafe-judge-benchmark`
+`garak-llm/garak-refusal-detector` and `Crusadersk/quantsafe-judge-benchmark`
 under a second owner.** Everything else on this list degrades gracefully. Those two do
 not, and they take every past measurement down with them.

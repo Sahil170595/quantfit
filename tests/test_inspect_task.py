@@ -989,7 +989,7 @@ def test_write_drift_report_emits_a_valid_schema_v2_report(tmp_path, monkeypatch
     assert parsed.probe_dataset["id"] == PROBE_DATASET_ID
     assert parsed.probe_dataset["revision"] == PROBE_DATASET_REVISION
     assert parsed.probe_dataset["split"] == PROBE_SPLIT
-    assert "uncalibrated" in parsed.judge["card_xstest_accuracy_label"]
+    assert "measured in-distribution" in parsed.judge["card_xstest_accuracy_label"]
     assert parsed.drift == _expected_drift().to_dict()
     assert parsed.baseline.engine["name"].startswith("inspect_ai:")
     # The judge runtime is the run's own measurement, summed from the pairs.
