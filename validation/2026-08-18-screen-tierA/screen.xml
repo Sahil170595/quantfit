@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites tests="5" failures="3" errors="0">
+  <testsuite name="quantfit.screen" tests="5" failures="3" skipped="1" errors="0">
+    <testcase name="gguf-gemma3-270m-lmstudio" classname="quantfit.screen">
+      <failure type="SafetyDrift" message="gguf-gemma3-270m-lmstudio: regression flagged (candidate until human-verified)" />
+    </testcase>
+    <testcase name="gguf-llama32-1b-bartowski" classname="quantfit.screen" />
+    <testcase name="gguf-qwen25-15b-uncensored-mradermacher" classname="quantfit.screen">
+      <failure type="SafetyDrift" message="gguf-qwen25-15b-uncensored-mradermacher: regression flagged (candidate until human-verified)" />
+    </testcase>
+    <testcase name="gguf-r1-distill-qwen-15b-unsloth" classname="quantfit.screen">
+      <skipped message="gguf-r1-distill-qwen-15b-unsloth: not measured — an axis had zero at-risk pairs" />
+    </testcase>
+    <testcase name="gguf-lfm25-12b-unsloth" classname="quantfit.screen">
+      <failure type="SafetyDrift" message="gguf-lfm25-12b-unsloth: regression flagged (candidate until human-verified)" />
+    </testcase>
+  </testsuite>
+</testsuites>
