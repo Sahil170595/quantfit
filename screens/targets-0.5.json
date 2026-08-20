@@ -2,7 +2,10 @@
   "schema_version": 1,
   "name": "0.5 existence-proof hunt (ROADMAP 0.5): third-party quants, GGUF + compressed-tensors strata",
   "sensitivity_control": {
-    "status": "not_run"
+    "status": "fail",
+    "report": "validation/2026-08-18-sensitivity-control/sensitivity-control.json",
+    "human_verifier": "unattributed - single-rater adjudication recorded in validation/2026-08-18-sensitivity-control/adjudication.json",
+    "date": "2026-08-18"
   },
   "targets": [
     {
@@ -24,7 +27,7 @@
       "stratum": "gguf",
       "baseline": "hf:mradermacher/Qwen2.5-1.5B-Instruct-uncensored-GGUF/Qwen2.5-1.5B-Instruct-uncensored.f16.gguf",
       "quant": "hf:mradermacher/Qwen2.5-1.5B-Instruct-uncensored-GGUF/Qwen2.5-1.5B-Instruct-uncensored.Q4_K_M.gguf",
-      "notes": "TIER A: 3rd quantizer pipeline, and the most safety-informative base — an already-de-aligned fine-tune is where a quantization-conditional refusal shift is most likely measurable. 4.68 GB. No license on the quantizer card; provenance flagged in curation file."
+      "notes": "TIER A: 3rd quantizer pipeline, and the most safety-informative base \u2014 an already-de-aligned fine-tune is where a quantization-conditional refusal shift is most likely measurable. 4.68 GB. No license on the quantizer card; provenance flagged in curation file."
     },
     {
       "name": "gguf-r1-distill-qwen-15b-unsloth",
@@ -38,7 +41,7 @@
       "stratum": "gguf",
       "baseline": "hf:unsloth/LFM2.5-1.2B-Instruct-GGUF/LFM2.5-1.2B-Instruct-BF16.gguf",
       "quant": "hf:unsloth/LFM2.5-1.2B-Instruct-GGUF/LFM2.5-1.2B-Instruct-Q4_K_M.gguf",
-      "notes": "TIER A: architectural outlier (hybrid conv/attention) exercising different llama.cpp quantization kernels. 3.07 GB. LiquidAI LFM Open License ('other') — read before redistributing completions."
+      "notes": "TIER A: architectural outlier (hybrid conv/attention) exercising different llama.cpp quantization kernels. 3.07 GB. LiquidAI LFM Open License ('other') \u2014 read before redistributing completions."
     },
     {
       "name": "gguf-llama32-3b-bartowski",
@@ -59,14 +62,14 @@
       "stratum": "gguf",
       "baseline": "hf:bartowski/HuggingFaceTB_SmolLM3-3B-GGUF/HuggingFaceTB_SmolLM3-3B-bf16.gguf",
       "quant": "hf:bartowski/HuggingFaceTB_SmolLM3-3B-GGUF/HuggingFaceTB_SmolLM3-3B-Q4_K_M.gguf",
-      "notes": "TIER B: fully-open base (weights+data+recipe) — a flip here is the most reproducible finding in the set. 8.07 GB. apache-2.0, ungated."
+      "notes": "TIER B: fully-open base (weights+data+recipe) \u2014 a flip here is the most reproducible finding in the set. 8.07 GB. apache-2.0, ungated."
     },
     {
       "name": "gguf-ministral-8b-bartowski",
       "stratum": "gguf",
       "baseline": "hf:bartowski/Ministral-8B-Instruct-2410-GGUF/Ministral-8B-Instruct-2410-f16.gguf",
       "quant": "hf:bartowski/Ministral-8B-Instruct-2410-GGUF/Ministral-8B-Instruct-2410-Q4_K_M.gguf",
-      "notes": "TIER C, prune candidate (20.96 GB pair, 7,880 30d downloads): the mistral-family slot — clean text-only MistralForCausalLM base, f16 16.05 GB just under the 16.5 GB cap. Mistral Research License ('other') — read before redistributing completions."
+      "notes": "TIER C, prune candidate (20.96 GB pair, 7,880 30d downloads): the mistral-family slot \u2014 clean text-only MistralForCausalLM base, f16 16.05 GB just under the 16.5 GB cap. Mistral Research License ('other') \u2014 read before redistributing completions."
     },
     {
       "name": "gguf-gemma2-2b-it-bartowski",
@@ -87,7 +90,7 @@
       "stratum": "gguf",
       "baseline": "hf:unsloth/Qwen3-8B-GGUF/Qwen3-8B-BF16.gguf",
       "quant": "hf:unsloth/Qwen3-8B-GGUF/Qwen3-8B-Q4_K_M.gguf",
-      "notes": "TIER C, prune first (21.42 GB, the largest line item) BUT the highest-download both-arm repo on the list (318,290 30d) and the only 8B-class entry (8.19B params — at the cap's edge; the binding cap is the 16.5 GB baseline file, which the 16.39 GB BF16 clears). apache-2.0, ungated, fully redistributable."
+      "notes": "TIER C, prune first (21.42 GB, the largest line item) BUT the highest-download both-arm repo on the list (318,290 30d) and the only 8B-class entry (8.19B params \u2014 at the cap's edge; the binding cap is the 16.5 GB baseline file, which the 16.39 GB BF16 clears). apache-2.0, ungated, fully redistributable."
     },
     {
       "name": "ct-qwen25-15b-anchor-crusadersk",
@@ -101,7 +104,7 @@
       "stratum": "compressed-tensors",
       "baseline": "Qwen/Qwen2.5-1.5B-Instruct",
       "quant": "Qwen/Qwen2.5-1.5B-Instruct-AWQ",
-      "notes": "Controlled comparison against the anchor: same baseline weights, DIFFERENT scheme (real autoawq gemm 4-bit g128, first-party, 835,675 30d downloads). Loads via transformers' AwqQuantizer, which requires gptqmodel — pip install 'quantfit[awq]'. Stratum covers transformers-loadable quants; the bound's autoawq membership is disclosed in the curation file. apache-2.0."
+      "notes": "Controlled comparison against the anchor: same baseline weights, DIFFERENT scheme (real autoawq gemm 4-bit g128, first-party, 835,675 30d downloads). Loads via transformers' AwqQuantizer, which requires gptqmodel \u2014 pip install 'quantfit[awq]'. Stratum covers transformers-loadable quants; the bound's autoawq membership is disclosed in the curation file. apache-2.0."
     },
     {
       "name": "ct-granite31-2b-redhat-w4a16",

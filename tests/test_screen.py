@@ -10,7 +10,13 @@ import json
 import pytest
 
 from quantfit.safety.verify import wilson_interval
-from quantfit.screen import CONDITIONALITY_LABEL, SUMMARY_FILENAME, ScreenError, run_screen
+from quantfit.screen import (
+    CONDITIONALITY_LABEL,
+    STATUS_ERROR,
+    SUMMARY_FILENAME,
+    ScreenError,
+    run_screen,
+)
 
 # --- drift fixtures: two probes, one per axis, so both axes are controllable ------
 
@@ -192,6 +198,9 @@ def test_operational_error_isolated_and_screen_continues(tmp_path, monkeypatch):
         "report": None,
         "status": "operational_error",
         "error": "mispaired architectures",
+        # The exception TYPE rides alongside the message: "No module named 'triton'"
+        # reads as a quantfit bug until you can see it was a ModuleNotFoundError.
+        "error_type": "RuntimeError",
     }
     gguf = summary["by_stratum"]["gguf"]
     assert (gguf["n_targets"], gguf["n_completed"], gguf["n_operational_errors"]) == (3, 2, 1)
@@ -451,3 +460,30 @@ def test_screen_error_is_a_runtime_error():
     # The CLI's exit-2 handler catches RuntimeError; a ScreenError that is not one
     # would surface as a traceback instead of a clean operational failure.
     assert issubclass(ScreenError, RuntimeError)
+
+
+def test_a_missing_optional_kernel_does_not_kill_the_screen(tmp_path, monkeypatch):
+    """Per-target isolation is the screen's contract, and the except tuple was too narrow.
+
+    A real run died at target 2 of 3 on `ModuleNotFoundError: No module named 'triton'`
+    from a third-party AWQ kernel import, losing target 3. ModuleNotFoundError is an
+    ImportError, and is neither RuntimeError nor OSError.
+    """
+    entries = [_entry("g0"), _entry("g1"), _entry("g2")]
+    _install(
+        monkeypatch,
+        {
+            "g0-quant": _clean(),
+            "g1-quant": ModuleNotFoundError("No module named 'triton'"),
+            "g2-quant": _clean(),
+        },
+    )
+
+    summary = run_screen(_manifest(tmp_path, entries), str(tmp_path / "out"))
+
+    rows = {r["name"]: r for r in summary["rows"]}
+    assert [r["name"] for r in summary["rows"]] == ["g0", "g1", "g2"], "the screen stopped early"
+    assert rows["g1"]["status"] == STATUS_ERROR
+    assert rows["g1"]["error_type"] == "ModuleNotFoundError"
+    assert rows["g0"]["status"] != STATUS_ERROR and rows["g2"]["status"] != STATUS_ERROR
+    assert summary["all_targets_attempted"] is True

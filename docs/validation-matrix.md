@@ -16,9 +16,10 @@ opened by observing that no run artifact of any kind was committed here, so ever
 quantitative claim below was **transcribed CHANGELOG prose**, not a file you could
 re-hash — the ceiling on how strong any row could be.
 
-That ceiling is now lifted **for the runs under `validation/` and no others** — four
+That ceiling is now lifted **for the runs under `validation/` and no others** — six
 sessions as of 2026-08-18: the 1.5B AWQ pair, the identical-arms determinism run, the
-first cross-hardware comparison, and the sensitivity control. They carry schema-v2
+first cross-hardware comparison, the sensitivity control, the judge calibration that
+replaced the judge, and the first partial run of the 0.5 screen. They carry schema-v2
 drift reports, gate decision artifacts, JUnit XML and hand-adjudication records. Rows
 citing those files are checkable against bytes in this repository; every other row is
 still transcribed prose and still carries the old ceiling.
@@ -33,8 +34,11 @@ appears below.
 Unchanged: `out/` and `.benchmarks/` are empty, `quantfit/refreports.py:REGISTRY` is
 `()`, and **no reference report exists** — `validation/` is deliberately a different
 class of artifact from `docs/reference-reports-v0.md`'s three-report registry, and
-nothing in it is citable as one (`validation/README.md`, "What this is NOT"). No screen
-summary is tracked, because the 0.5 screen has still never run.
+nothing in it is citable as one (`validation/README.md`, "What this is NOT").
+
+A screen summary **is** now tracked: `validation/2026-08-18-screen-tierA/` holds the
+first run of the 0.5 screen, on 5 of 15 targets. Its bounds are stamped *conditional on
+undemonstrated detection sensitivity* and are not a prevalence result — see §2.
 
 ---
 
@@ -287,10 +291,12 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 | | |
 |---|---|
-| **Validated** | **Nothing. The 0.5 screen has never run.** |
+| **Validated** | **E1, partial — the screen ran for the first time on 2026-08-18**, 5 of 15 targets (tier A, GGUF only), 5/5 completed with 0 operational errors: per-target reports, `screen-summary.json` and JUnit, with the manifest's conditionality label correctly propagated. `validation/2026-08-18-screen-tierA/`. Result: dangerous axis **0/5 targets** (95% CI 0.0–43.4%), over-refusal **3/4 measurable targets** (30.1–95.4%) — both stamped *conditional on undemonstrated detection sensitivity*, because the control failed. |
 | **Hardware** | none. |
 | **Evidence (of non-run)** | `docs/reference-reports-v0.md` front matter — "The 0.5 existence-proof screen has not run either, so no report of any pair exists to publish"; `CHANGELOG.md` §0.5.0 — "The hunt runs themselves, the control run, the replication package, outreach, and the GO/NO-GO clock are NOT in this release". `screens/targets-0.5.json` is a **curated target list, not results**. E3: `tests/test_screen.py` (20, `verify_safety` monkeypatched). |
-| **NOT validated** | Everything: aggregation over a real manifest, the per-stratum bounds, the conditionality labeling in a real run, per-target operational-failure recovery, and the wall-clock/disk budget for 15 targets. The sensitivity control that would license the bounds has also not run (`docs/sensitivity-control-v0.md`, front matter). |
+| **NOT validated** | The **compressed-tensors stratum** (0 of 3 targets run) and **10 of 15 targets** overall — the full manifest needs 132.6 GB of pairs, measured against the Hub, against 21 GB free. Per-target operational-failure recovery is still unexercised: this run had zero errors, so the recovery path never fired. |
+| **DEFECT found by running it** | **`screen` has no `--capture`.** ROADMAP 0.5 and QSR v0 both require every flagged flip to be human-verified before it counts, and the command whose protocol requires that produces nothing to verify against. The four flips this run flagged cannot be adjudicated from its own outputs; confirming them means re-running those targets through `verify-safety --capture`. |
+| **The bounds are not yet evidence** | The control FAILED (`validation/2026-08-18-sensitivity-control/`), so the dangerous-axis 0/5 is what a working detector and a blind one both produce. The over-refusal flips are judge-flagged, and the judge's measured FPR of 8.3% predicts 1–2 false positives at these denominators — the same order as the signal. |
 
 ### `quantfit emit model-card --report <drift.json>`
 

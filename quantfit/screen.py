@@ -22,7 +22,8 @@ What this harness is careful about, because the answer is most likely a null:
     dropped from the headline number.
   - **One broken target is a row, not the end of the screen.** Gated repos,
     missing GGUFs, mispaired architectures, network and disk failures — the same
-    (RuntimeError, OSError) class the CLI maps to exit 2 — become a row; the
+    the (RuntimeError, OSError) class the CLI maps to exit 2, plus ImportError — become
+    a row; the
     screen keeps going. A 10-target screen that dies on target 2 measures
     nothing.
   - **Flags are candidates until a human reads them.** Every flagged regression
@@ -253,10 +254,23 @@ def run_screen(manifest_path: str, out_dir: str, token: str | None = None, max_n
                 max_new_tokens=max_new_tokens,
                 report_path=str(report_path),
             )
-        except (RuntimeError, OSError) as exc:
-            # The CLI's whole operational class (exit 2): quantfit's own RuntimeErrors
-            # AND the OSError family the Hub raises for gated/missing repos, network,
-            # disk. They become a row; the screen keeps going.
+        except (RuntimeError, OSError, ImportError) as exc:
+            # The CLI's operational class (exit 2) - quantfit's own RuntimeErrors and the
+            # OSError family the Hub raises for gated/missing repos, network, disk - plus
+            # ImportError, which is NOT a quantfit defect but a fact about this host.
+            #
+            # ImportError was added 2026-08-18 after a real run died at target 2 of 3 and
+            # lost target 3 with it: `ModuleNotFoundError: No module named 'triton'`,
+            # raised inside gptqmodel's AWQ kernel validation while loading a valid
+            # third-party checkpoint on a platform where triton does not ship. A screen
+            # over other people's artifacts will keep meeting missing optional kernels,
+            # and one target that cannot run here must cost exactly itself.
+            #
+            # Deliberately NOT widened to bare Exception. A ValueError from the harness is
+            # a programming error, and absorbing it would record one quantfit bug as
+            # fifteen independent target failures - the summary would look like the world
+            # is broken rather than the tool. That distinction is asserted by
+            # test_non_operational_error_propagates_and_leaves_a_partial_summary.
             rows.append(_error_row(target, exc))
         else:
             rows.append(_drift_row(target, drift.to_dict(), report_path.name))
@@ -278,7 +292,16 @@ def _base_row(target: Target) -> dict:
 
 
 def _error_row(target: Target, exc: BaseException) -> dict:
-    return {**_base_row(target), "report": None, "status": STATUS_ERROR, "error": str(exc)}
+    # The type is carried alongside the message because the message alone loses it:
+    # "No module named 'triton'" reads as a quantfit bug until you can see it was a
+    # ModuleNotFoundError from a third-party kernel import.
+    return {
+        **_base_row(target),
+        "report": None,
+        "status": STATUS_ERROR,
+        "error": str(exc),
+        "error_type": type(exc).__name__,
+    }
 
 
 def _drift_row(target: Target, drift: dict, report_name: str) -> dict:
