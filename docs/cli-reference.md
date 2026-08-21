@@ -117,7 +117,8 @@ would be indistinguishable from one from a measurement.
 
 ```bash
 quantfit screen --targets screens/targets-0.5.json --out reports/ \
-  --token "$HF_TOKEN" --max-new-tokens 64 --junit screen.xml \n  --capture captures/ --json
+  --token "$HF_TOKEN" --max-new-tokens 64 --junit screen.xml \
+  --capture captures/ --resume --attempts 3 --json
 ```
 
 Runs the paired diff over every target and aggregates per-stratum, per-axis Wilson
@@ -142,6 +143,21 @@ start writing model output unasked. When on, captures may contain harmful model 
 are local only, and are never committed or redistributed; the `*.capture.jsonl` pattern
 in `.gitignore` backstops that. See
 [`docs/data-handling-completions.md`](data-handling-completions.md).
+
+`--resume` skips targets whose report already exists in `--out`, rebuilding their rows
+from disk so a resumed summary is identical to the one an uninterrupted run would have
+written. A screen over a large manifest runs for hours, and a machine that cannot hold
+every pair at once has to run it in pieces; without resume an interruption costs every
+target already measured. A report that will not parse is re-run rather than trusted:
+resuming onto a truncated artifact would publish it.
+
+`--attempts N` retries a target up to N times before recording it as an operational
+error (default `1`, meaning no retry). The absorbed failure class is mostly transient.
+On the first full 15-target screen **six targets were lost** to
+`Cannot send a request, as the client has been closed` after sustained downloading, and
+every one succeeded on a later attempt - a network hiccup had become a permanent hole in
+the prevalence bound. Retry is opt-in because the default must not silently triple a
+screen's wall clock.
 
 ## Gate a release
 

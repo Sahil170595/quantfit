@@ -514,3 +514,96 @@ def test_capture_is_off_by_default(tmp_path, monkeypatch):
     run_screen(_manifest(tmp_path, [_entry("g0")]), str(tmp_path / "out"))
 
     assert [c["capture_path"] for c in calls] == [None]
+
+
+def test_resume_skips_targets_that_already_have_a_report(tmp_path, monkeypatch):
+    """A measured target is not re-measured: the report IS the measurement."""
+    entries = [_entry("g0"), _entry("g1")]
+    out = tmp_path / "out"
+
+    calls = _install(monkeypatch, {"g0-quant": _clean(), "g1-quant": _clean()})
+    first = run_screen(_manifest(tmp_path, entries), str(out))
+    assert len(calls) == 2
+
+    # The fake never wrote the reports the real verify_safety writes via report_path, and
+    # resume keys on those files existing - so stand them up as a completed run would.
+    for name in ("g0", "g1"):
+        (out / f"{name}.json").write_text(json.dumps({"drift": _clean().to_dict()}), encoding="utf-8")
+
+    calls2 = _install(monkeypatch, {"g0-quant": _clean(), "g1-quant": _clean()})
+    second = run_screen(_manifest(tmp_path, entries), str(out), resume=True)
+
+    assert calls2 == [], "resume re-ran a target that already had a report"
+    # the resumed summary must be the one an uninterrupted run would have written
+    assert [r["name"] for r in second["rows"]] == [r["name"] for r in first["rows"]]
+    assert [r["status"] for r in second["rows"]] == [r["status"] for r in first["rows"]]
+    assert second["all_targets_attempted"] is True
+
+
+def test_resume_reruns_a_target_whose_report_is_corrupt(tmp_path, monkeypatch):
+    """Resuming onto a truncated artifact would publish it. Re-run instead of trusting."""
+    entries = [_entry("g0")]
+    out = tmp_path / "out"
+    out.mkdir()
+    (out / "g0.json").write_text("{ this is not json", encoding="utf-8")
+
+    calls = _install(monkeypatch, {"g0-quant": _clean()})
+    summary = run_screen(_manifest(tmp_path, entries), str(out), resume=True)
+
+    assert len(calls) == 1, "a corrupt report was trusted instead of re-run"
+    assert summary["rows"][0]["status"] != STATUS_ERROR
+
+
+def test_attempts_retries_a_transient_failure_then_succeeds(tmp_path, monkeypatch):
+    """Six targets were lost on the first full screen to a Hub blip that cleared."""
+    import quantfit.safety.verify as sv
+
+    entries = [_entry("g0")]
+    seen = {"n": 0}
+
+    def fake(baseline, quant, token=None, max_new_tokens=64, report_path=None, capture_path=None):
+        seen["n"] += 1
+        if seen["n"] == 1:
+            raise RuntimeError("Cannot send a request, as the client has been closed.")
+        return _clean()
+
+    monkeypatch.setattr(sv, "verify_safety", fake)
+    summary = run_screen(_manifest(tmp_path, entries), str(tmp_path / "out"), attempts=3)
+
+    assert seen["n"] == 2, "did not retry, or retried after already succeeding"
+    assert summary["rows"][0]["status"] != STATUS_ERROR
+
+
+def test_attempts_gives_up_and_records_the_last_error(tmp_path, monkeypatch):
+    """Retry is not infinite: a target that never works is still one error row."""
+    import quantfit.safety.verify as sv
+
+    entries = [_entry("g0")]
+    seen = {"n": 0}
+
+    def fake(baseline, quant, token=None, max_new_tokens=64, report_path=None, capture_path=None):
+        seen["n"] += 1
+        raise RuntimeError("no such file: model-q4.gguf")
+
+    monkeypatch.setattr(sv, "verify_safety", fake)
+    summary = run_screen(_manifest(tmp_path, entries), str(tmp_path / "out"), attempts=3)
+
+    assert seen["n"] == 3
+    assert summary["rows"][0]["status"] == STATUS_ERROR
+    assert summary["rows"][0]["error_type"] == "RuntimeError"
+
+
+def test_attempts_defaults_to_no_retry(tmp_path, monkeypatch):
+    """Retry is opt-in: the default must not silently triple a screen's wall clock."""
+    import quantfit.safety.verify as sv
+
+    seen = {"n": 0}
+
+    def fake(baseline, quant, token=None, max_new_tokens=64, report_path=None, capture_path=None):
+        seen["n"] += 1
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(sv, "verify_safety", fake)
+    run_screen(_manifest(tmp_path, [_entry("g0")]), str(tmp_path / "out"))
+
+    assert seen["n"] == 1
