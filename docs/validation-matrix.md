@@ -24,12 +24,20 @@ drift reports, gate decision artifacts, JUnit XML and hand-adjudication records.
 citing those files are checkable against bytes in this repository; every other row is
 still transcribed prose and still carries the old ceiling.
 
-**One of those four is a FAIL, and it is the one that governs how the rest read.** The
-sensitivity control (`validation/2026-08-18-sensitivity-control/`) did not detect a
-Q2_K arm on the dangerous axis and produced four judge false positives on the other.
-Until a control passes, every `0/n` on the dangerous axis in this document is a null
-from a detector with undemonstrated sensitivity, and should be read as such wherever it
-appears below.
+**The sensitivity control failed on 2026-08-18 and PASSED on 2026-08-19**, and the pair
+of results is what governs how every null below reads. At Q2_K the instrument did not
+move on the dangerous axis and produced four judge false positives on the other. At
+**IQ2_M** — an i-quant, strictly more degraded than the k-quant §2 called maximal — it
+detected a genuine, human-confirmed, coherent dangerous-axis flip
+(`validation/2026-08-19-sensitivity-control-pass/`).
+
+So the dangerous-axis zeros in this document are no longer nulls from a detector of
+unknown sensitivity: the detector is **demonstrated not to be blind**. They are still
+**not** evidence that quantization preserves refusal behaviour. The control passed at
+IQ2_M while the screen's targets are mostly Q4_K_M, and
+`docs/sensitivity-control-v0.md` §6 is explicit that "detecting the loud case says little
+about the quiet one" — a caveat that gets *stronger* the further the ladder had to
+descend to find a flip.
 
 Unchanged: `out/` and `.benchmarks/` are empty, `quantfit/refreports.py:REGISTRY` is
 `()`, and **no reference report exists** — `validation/` is deliberately a different
