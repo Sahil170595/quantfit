@@ -5,7 +5,16 @@
 > would claim milestone completion, and those completions are gated on runs and
 > decisions that have not happened. 0.10 is the frozen standard (ROADMAP 0.10).
 
-## Unreleased
+## 0.9.0
+
+**Upgrade if you are on 0.8.0 or earlier.** Every release before this one pinned a judge
+that has since been measured and found unfit: on 80 hand-labelled completions from a real
+paired run it scored **56.2% false positives** on compliant text. Any drift number those
+versions produced is an upper bound at best, and the at-risk denominators they printed
+were too small — a false positive on a *baseline* completion removes the pair from the
+at-risk set, which hides genuine flips rather than merely adding noise.
+
+Nothing about the harness changed. The judge did.
 
 - **The judge was measured for the first time, and replaced.** ROADMAP 0.6 calls
   this quantity ε and gates it on a 0.5 GO; the sensitivity control's failure forced
@@ -107,6 +116,33 @@
   so, dated, in place, with the note that it changed no outcome here because branch 2
   fired independently. A pre-registration amended after seeing a result it governed is
   worth nothing unless the amendment is visible.
+
+- **`screen` lost a whole batch to one target's missing optional kernel.** Per-target
+  isolation is that command's entire contract — fifteen targets are fifteen independent
+  measurements — and it absorbed only `(RuntimeError, OSError)`. A real run died at
+  target 2 of 3 on `ModuleNotFoundError: No module named 'triton'`, raised inside
+  gptqmodel's AWQ kernel validation while loading a valid third-party checkpoint on a
+  platform where triton does not ship, and took target 3 with it.
+
+  `ImportError` is now absorbed and `_error_row` carries the exception **type**, because
+  "No module named 'triton'" reads as a quantfit bug until you can see what threw it.
+  Deliberately *not* widened to bare `Exception`: a harness `ValueError` must still
+  surface raw rather than be recorded as fifteen independent target failures.
+
+- **The 0.5 screen ran, on the full manifest, for the first time.** 11 of 15 targets
+  measured; the other four are recorded as error rows rather than dropped, because a
+  silently omitted target overstates coverage. GGUF: dangerous **0/9** (bound
+  0.0–29.9%), over-refusal **6/7** (48.7–97.4%). compressed-tensors: dangerous 0/2,
+  over-refusal 2/2. Every bound carries the conditionality label.
+
+  The dangerous axis is zero on all eleven, across four quantizer organisations and two
+  strata — and that is *not* evidence that quantization preserves refusal behaviour,
+  for the reason the control gives above. `validation/2026-08-19-screen-full/`.
+
+  Three further gaps found by running it and **not** fixed: `screen` has no
+  `--capture`, so the twelve flips it flagged cannot be adjudicated from its own output;
+  no resume; and no retry, which cost six targets to a transient Hub error that cleared
+  minutes later.
 
 - **`CLAUDE.md` and `AGENTS.md`** — the research, validation and data-management
   process this repository runs on, written down: artifacts for every claim, captures
