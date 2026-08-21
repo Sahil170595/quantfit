@@ -21,11 +21,12 @@ What this harness is careful about, because the answer is most likely a null:
     axis enters the dangerous-axis numerator and denominator; it is never
     dropped from the headline number.
   - **One broken target is a row, not the end of the screen.** Gated repos,
-    missing GGUFs, mispaired architectures, network and disk failures — the same
-    the (RuntimeError, OSError) class the CLI maps to exit 2, plus ImportError — become
-    a row; the
-    screen keeps going. A 10-target screen that dies on target 2 measures
-    nothing.
+    missing GGUFs, mispaired architectures, network and disk failures, and a
+    missing optional kernel — the (RuntimeError, OSError) class the CLI maps to
+    exit 2, plus ImportError — become a row; the screen keeps going. A 10-target
+    screen that dies on target 2 measures nothing. `attempts` retries the
+    transient members of that class before giving up, and `resume` skips targets
+    already measured, so an interrupted screen costs the targets it had left.
   - **Flags are candidates until a human reads them.** Every flagged regression
     carries `human_verified: null` until a maintainer inspects the pair, and the
     aggregation reports `n_regressed` (flagged) and `n_regressed_human_verified`
@@ -230,6 +231,8 @@ def run_screen(
     token: str | None = None,
     max_new_tokens: int = 64,
     capture_dir: str | None = None,
+    resume: bool = False,
+    attempts: int = 1,
 ) -> dict:
     """Run every target in the manifest sequentially; aggregate per-stratum, per-axis bounds.
 
@@ -263,41 +266,73 @@ def run_screen(
     summary = _summary(manifest_name, manifest_path, targets, rows, control, created_utc, max_new_tokens)
     for target in targets:
         report_path = out / f"{target.name}.json"
-        try:
-            # Strictly sequential, never concurrent: each pair is two full model loads
-            # on the one machine, and the arms already assume sole use of it.
-            drift = verify_safety(
-                target.baseline,
-                target.quant,
-                token=token,
-                max_new_tokens=max_new_tokens,
-                report_path=str(report_path),
-                # One capture per target, named for the target, so a flagged flip can be
-                # adjudicated against the very bytes the judge scored. Without this the
-                # screen flags flips it gives a reader no way to verify - and QSR v0
-                # requires every flagged flip to be human-verified before it counts.
-                capture_path=(str(capture / f"{target.name}.capture.jsonl") if capture else None),
-            )
-        except (RuntimeError, OSError, ImportError) as exc:
-            # The CLI's operational class (exit 2) - quantfit's own RuntimeErrors and the
-            # OSError family the Hub raises for gated/missing repos, network, disk - plus
-            # ImportError, which is NOT a quantfit defect but a fact about this host.
-            #
-            # ImportError was added 2026-08-18 after a real run died at target 2 of 3 and
-            # lost target 3 with it: `ModuleNotFoundError: No module named 'triton'`,
-            # raised inside gptqmodel's AWQ kernel validation while loading a valid
-            # third-party checkpoint on a platform where triton does not ship. A screen
-            # over other people's artifacts will keep meeting missing optional kernels,
-            # and one target that cannot run here must cost exactly itself.
-            #
-            # Deliberately NOT widened to bare Exception. A ValueError from the harness is
-            # a programming error, and absorbing it would record one quantfit bug as
-            # fifteen independent target failures - the summary would look like the world
-            # is broken rather than the tool. That distinction is asserted by
-            # test_non_operational_error_propagates_and_leaves_a_partial_summary.
-            rows.append(_error_row(target, exc))
-        else:
-            rows.append(_drift_row(target, drift.to_dict(), report_path.name))
+
+        if resume and report_path.is_file():
+            # A measured target is not re-measured. Its report IS the measurement, and
+            # on a machine that cannot hold the whole manifest at once re-running it also
+            # re-downloads the pair. The row is rebuilt from the report on disk, so a
+            # resumed summary is identical to the one an uninterrupted run would write.
+            try:
+                prior = json.loads(report_path.read_text(encoding="utf-8"))
+                rows.append(_drift_row(target, prior["drift"], report_path.name))
+                summary = _summary(manifest_name, manifest_path, targets, rows, control, created_utc, max_new_tokens)
+                _write_summary(out / SUMMARY_FILENAME, summary)
+                print(f"resume: {target.name} already measured")
+                continue
+            except (OSError, KeyError, json.JSONDecodeError) as exc:
+                # A truncated or foreign file is not a measurement. Re-run rather than
+                # trust it: resuming onto a corrupt artifact would publish it silently.
+                print(f"resume: {target.name} report unreadable ({type(exc).__name__}), re-running")
+
+        for attempt in range(1, max(1, attempts) + 1):
+            try:
+                # Strictly sequential, never concurrent: each pair is two full model loads
+                # on the one machine, and the arms already assume sole use of it.
+                drift = verify_safety(
+                    target.baseline,
+                    target.quant,
+                    token=token,
+                    max_new_tokens=max_new_tokens,
+                    report_path=str(report_path),
+                    # One capture per target, named for the target, so a flagged flip can
+                    # be adjudicated against the very bytes the judge scored. Without this
+                    # the screen flags flips it gives a reader no way to verify - and QSR
+                    # v0 requires every flagged flip to be human-verified before it counts.
+                    capture_path=(str(capture / f"{target.name}.capture.jsonl") if capture else None),
+                )
+            except (RuntimeError, OSError, ImportError) as exc:
+                # The CLI's operational class (exit 2) - quantfit's own RuntimeErrors and
+                # the OSError family the Hub raises for gated/missing repos, network, disk
+                # - plus ImportError, which is NOT a quantfit defect but a fact about this
+                # host.
+                #
+                # ImportError was added 2026-08-18 after a real run died at target 2 of 3
+                # and lost target 3 with it: `ModuleNotFoundError: No module named
+                # 'triton'`, raised inside gptqmodel's AWQ kernel validation while loading
+                # a valid third-party checkpoint on a platform where triton does not ship.
+                # A screen over other people's artifacts will keep meeting missing optional
+                # kernels, and one target that cannot run here must cost exactly itself.
+                #
+                # Deliberately NOT widened to bare Exception. A ValueError from the harness
+                # is a programming error, and absorbing it would record one quantfit bug as
+                # fifteen independent target failures - the summary would look like the
+                # world is broken rather than the tool. That distinction is asserted by
+                # test_non_operational_error_propagates_and_leaves_a_partial_summary.
+                if attempt < max(1, attempts):
+                    # Retried, because the class above is mostly transient: on the first
+                    # full screen run six targets were lost to
+                    # `Cannot send a request, as the client has been closed` after
+                    # sustained downloading, and every one of them succeeded on a later
+                    # attempt. A screen that gives up on the first blip turns a network
+                    # hiccup into a permanent hole in the prevalence bound.
+                    print(f"{target.name}: attempt {attempt}/{attempts} failed ({type(exc).__name__}), retrying")
+                    continue
+                rows.append(_error_row(target, exc))
+                break
+            else:
+                rows.append(_drift_row(target, drift.to_dict(), report_path.name))
+                break
+
         summary = _summary(manifest_name, manifest_path, targets, rows, control, created_utc, max_new_tokens)
         # Rewritten after every target: a screen killed at target 8 of 10 leaves the 8
         # that ran, marked all_targets_attempted=false, instead of nothing.

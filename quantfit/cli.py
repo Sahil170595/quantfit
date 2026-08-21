@@ -198,6 +198,22 @@ def _build_parser() -> argparse.ArgumentParser:
         help="completion length generated per probe and judged for refusal (default 64)",
     )
     ps.add_argument(
+        "--resume",
+        action="store_true",
+        help="skip targets whose report already exists in --out, rebuilding their rows from disk. "
+        "A screen over a big manifest is hours long and a machine that cannot hold every pair at "
+        "once must run it in pieces; without this, an interruption costs every completed target",
+    )
+    ps.add_argument(
+        "--attempts",
+        type=int,
+        default=1,
+        metavar="N",
+        help="retry a target up to N times before recording it as an operational error (default 1, "
+        "i.e. no retry). The absorbed failure class is mostly transient - a Hub blip or a closed "
+        "connection - and without a retry one becomes a permanent hole in the prevalence bound",
+    )
+    ps.add_argument(
         "--capture",
         default=None,
         metavar="DIR",
@@ -576,6 +592,8 @@ def _dispatch(args: argparse.Namespace) -> int:
             token=args.token,
             max_new_tokens=args.max_new_tokens,
             capture_dir=args.capture,
+            resume=args.resume,
+            attempts=args.attempts,
         )
 
         if args.junit:
