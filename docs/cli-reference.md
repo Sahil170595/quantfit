@@ -117,7 +117,7 @@ would be indistinguishable from one from a measurement.
 
 ```bash
 quantfit screen --targets screens/targets-0.5.json --out reports/ \
-  --token "$HF_TOKEN" --max-new-tokens 64 --junit screen.xml --json
+  --token "$HF_TOKEN" --max-new-tokens 64 --junit screen.xml \n  --capture captures/ --json
 ```
 
 Runs the paired diff over every target and aggregates per-stratum, per-axis Wilson
@@ -127,6 +127,21 @@ prevalence bounds. Exits `4` if an axis went unmeasured anywhere, which is not a
 cases rather than one aggregate saying "something regressed somewhere". A target that
 failed to run is an `error`, not a `failure` — it produced no verdict, and calling that a
 failed test would report a missing measurement as a detected regression.
+
+`--capture DIR` writes **one `DIR/<target>.capture.jsonl` per target**, and it exists
+because the screen's own protocol demands it. QSR v0 and ROADMAP 0.5 both require every
+flagged flip to be **human-verified** before it counts as a positive existence claim,
+and until this flag existed the command that flags them produced nothing to verify
+against. The first full screen run flagged twelve over-refusal flips and could
+adjudicate none of them (`validation/2026-08-19-screen-full/`).
+
+A capture is the bytes the judge actually scored, written by the same call that scored
+them, so adjudication needs no re-run and no provenance argument
+(`docs/sensitivity-control-v0.md` 5.2). It is **off by default**: a screen must not
+start writing model output unasked. When on, captures may contain harmful model output,
+are local only, and are never committed or redistributed; the `*.capture.jsonl` pattern
+in `.gitignore` backstops that. See
+[`docs/data-handling-completions.md`](data-handling-completions.md).
 
 ## Gate a release
 

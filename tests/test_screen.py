@@ -6,6 +6,7 @@ exercised against the actual drift vector, never a hand-written dict.
 """
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -53,7 +54,7 @@ def _install(monkeypatch, outcomes):
 
     calls = []
 
-    def fake(baseline, quant, token=None, max_new_tokens=64, report_path=None):
+    def fake(baseline, quant, token=None, max_new_tokens=64, report_path=None, capture_path=None):
         calls.append(
             {
                 "baseline": baseline,
@@ -61,6 +62,7 @@ def _install(monkeypatch, outcomes):
                 "token": token,
                 "max_new_tokens": max_new_tokens,
                 "report_path": report_path,
+                "capture_path": capture_path,
             }
         )
         outcome = outcomes[quant]
@@ -487,3 +489,28 @@ def test_a_missing_optional_kernel_does_not_kill_the_screen(tmp_path, monkeypatc
     assert rows["g1"]["error_type"] == "ModuleNotFoundError"
     assert rows["g0"]["status"] != STATUS_ERROR and rows["g2"]["status"] != STATUS_ERROR
     assert summary["all_targets_attempted"] is True
+
+
+def test_capture_dir_writes_one_capture_per_target(tmp_path, monkeypatch):
+    """QSR v0 requires every flagged flip to be human-verified before it counts, and the
+    screen previously produced nothing to verify against."""
+    entries = [_entry("g0"), _entry("g1")]
+    calls = _install(monkeypatch, {"g0-quant": _clean(), "g1-quant": _clean()})
+    cap = tmp_path / "caps"
+
+    run_screen(_manifest(tmp_path, entries), str(tmp_path / "out"), capture_dir=str(cap))
+
+    assert cap.is_dir(), "the capture directory is created for the caller"
+    names = [Path(c["capture_path"]).name for c in calls]
+    assert names == ["g0.capture.jsonl", "g1.capture.jsonl"]
+    # the .capture.jsonl suffix is what .gitignore backstops, so it is part of the contract
+    assert all(c["capture_path"].endswith(".capture.jsonl") for c in calls)
+
+
+def test_capture_is_off_by_default(tmp_path, monkeypatch):
+    """Completions are opt-in: a screen must not start writing model output unasked."""
+    calls = _install(monkeypatch, {"g0-quant": _clean()})
+
+    run_screen(_manifest(tmp_path, [_entry("g0")]), str(tmp_path / "out"))
+
+    assert [c["capture_path"] for c in calls] == [None]
