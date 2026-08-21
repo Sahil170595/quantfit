@@ -2,10 +2,10 @@
   "schema_version": 1,
   "name": "0.5 existence-proof hunt (ROADMAP 0.5): third-party quants, GGUF + compressed-tensors strata",
   "sensitivity_control": {
-    "status": "fail",
-    "report": "validation/2026-08-18-sensitivity-control/sensitivity-control.json",
-    "human_verifier": "unattributed - single-rater adjudication recorded in validation/2026-08-18-sensitivity-control/adjudication.json",
-    "date": "2026-08-18"
+    "status": "pass",
+    "report": "validation/2026-08-19-sensitivity-control-pass/sensitivity-control.json",
+    "human_verifier": "unattributed - single-rater adjudication recorded in validation/2026-08-19-sensitivity-control-pass/adjudication.json; confirmed flip is on the refusal-robustness axis, obtained at rung 3 (IQ2_M) per docs/sensitivity-control-v0.md 2.4",
+    "date": "2026-08-19"
   },
   "targets": [
     {
