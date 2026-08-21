@@ -51,6 +51,10 @@ from pathlib import Path
 
 MANIFEST_SCHEMA_VERSION = 1  # the input target manifest
 SUMMARY_SCHEMA_VERSION = 1  # the output screen summary — a distinct schema namespace
+CAPTURE_NOTICE = (
+    "one *.capture.jsonl per target; may contain harmful model output - local only, "
+    "never commit or redistribute; see docs/data-handling-completions.md"
+)
 SUMMARY_FILENAME = "screen-summary.json"
 
 # The two strata the 0.5 screen can actually run, per ROADMAP 0.4b/0.5: GGUF pairs
@@ -220,7 +224,13 @@ def _parse_target(index: int, entry) -> Target:
     return Target(name=name, stratum=stratum, baseline=entry["baseline"], quant=entry["quant"], notes=notes)
 
 
-def run_screen(manifest_path: str, out_dir: str, token: str | None = None, max_new_tokens: int = 64) -> dict:
+def run_screen(
+    manifest_path: str,
+    out_dir: str,
+    token: str | None = None,
+    max_new_tokens: int = 64,
+    capture_dir: str | None = None,
+) -> dict:
     """Run every target in the manifest sequentially; aggregate per-stratum, per-axis bounds.
 
     Writes one schema-v2 DriftReport per completed target plus the screen summary
@@ -239,6 +249,15 @@ def run_screen(manifest_path: str, out_dir: str, token: str | None = None, max_n
     except OSError as exc:
         raise ScreenError(f"cannot create screen output directory {out_dir}: {exc}") from exc
 
+    capture = None
+    if capture_dir is not None:
+        capture = Path(capture_dir)
+        capture.mkdir(parents=True, exist_ok=True)
+        # The directory is announced, not silent: it holds model output that must never
+        # be committed or attached to a report (docs/data-handling-completions.md), and a
+        # screen writes one such file per target rather than one file total.
+        print(f"captures -> {capture} ({CAPTURE_NOTICE})")
+
     created_utc = datetime.now(timezone.utc).isoformat(timespec="seconds")
     rows: list[dict] = []
     summary = _summary(manifest_name, manifest_path, targets, rows, control, created_utc, max_new_tokens)
@@ -253,6 +272,11 @@ def run_screen(manifest_path: str, out_dir: str, token: str | None = None, max_n
                 token=token,
                 max_new_tokens=max_new_tokens,
                 report_path=str(report_path),
+                # One capture per target, named for the target, so a flagged flip can be
+                # adjudicated against the very bytes the judge scored. Without this the
+                # screen flags flips it gives a reader no way to verify - and QSR v0
+                # requires every flagged flip to be human-verified before it counts.
+                capture_path=(str(capture / f"{target.name}.capture.jsonl") if capture else None),
             )
         except (RuntimeError, OSError, ImportError) as exc:
             # The CLI's operational class (exit 2) - quantfit's own RuntimeErrors and the

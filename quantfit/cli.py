@@ -197,6 +197,15 @@ def _build_parser() -> argparse.ArgumentParser:
         default=64,
         help="completion length generated per probe and judged for refusal (default 64)",
     )
+    ps.add_argument(
+        "--capture",
+        default=None,
+        metavar="DIR",
+        help="ALSO write every completion to DIR/<target>.capture.jsonl, one file per target, so a "
+        "flagged flip can be adjudicated against the bytes the judge scored (QSR v0 requires "
+        "human verification before a flip counts). May contain harmful model output; never "
+        "commit or redistribute - see docs/data-handling-completions.md",
+    )
 
     pe = sub.add_parser(
         "emit",
@@ -561,7 +570,13 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "screen":
         from quantfit.screen import STATUS_REGRESSION, STATUS_UNMEASURABLE, run_screen
 
-        summary = run_screen(args.targets, args.out, token=args.token, max_new_tokens=args.max_new_tokens)
+        summary = run_screen(
+            args.targets,
+            args.out,
+            token=args.token,
+            max_new_tokens=args.max_new_tokens,
+            capture_dir=args.capture,
+        )
 
         if args.junit:
             from pathlib import Path
