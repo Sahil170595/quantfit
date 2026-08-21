@@ -145,8 +145,12 @@ and the conditional this section has carried since it was written is discharged:
   `--tier smoke` row no longer rests on the local run alone.
 - `--max-new-tokens 32` runs there, so §3's row covers two values on two machines.
 
-The `canary.yml:28` runtime budget is still marked "ESTIMATED" and should now be
-replaced with this run's real numbers — that edit is owed and is not made here.
+The `canary.yml:28` runtime budget was still marked "ESTIMATED" and has now been
+replaced with measured numbers from the three green runs (2026-08-21). The estimates were
+**3-7x too high**: the determinism canary was budgeted at "~10-20 min" and takes ~3, and
+quickstart-install was budgeted at "~6-10 min per OS" and takes ~1.6. Both are recorded
+alongside what they replaced, because a budget nobody measured is a guess, and this one
+was a guess that would have justified a far more expensive schedule.
 
 The run also produced something nobody planned: **the first cross-hardware report pair
 this project has ever had**, and pointing `reproduce` at it breached T3. See the

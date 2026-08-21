@@ -25,16 +25,27 @@ name: canary
 # spurious flips, not that the pipeline can detect real ones. Do not let a green canary
 # stand in for the sensitivity control.
 #
-# SIZE / RUNTIME BUDGET (ESTIMATED — not yet measured on a runner; the first scheduled
-# run replaces these numbers):
-#   determinism-canary: CPU torch wheel ~200 MB (vs ~2.5 GB of nvidia-* wheels on the
-#     default index) + judge 149.6M params F32 ~0.6 GB + SmolLM2-135M bf16 ~0.27 GB +
-#     a 40-row probe set. Under ~2 GB of the runner's ~14 GB free disk. Generation is
-#     40 probes x 2 arms x 32 new tokens on 4 vCPU, so ~10-20 min wall clock; the job
-#     is capped at 45.
-#   quickstart-install: the full-dependency wheel install (CUDA torch, ~2.5 GB) is the
-#     dominant cost at ~6-10 min per OS. That cost is deliberate — it is the path a
-#     reader of the README actually runs, and a lean install would not test it.
+# SIZE / RUNTIME BUDGET — MEASURED 2026-08-21 from the three green runs, replacing the
+# estimates this block carried until then. The estimates were 3-7x too high, which is
+# recorded rather than quietly overwritten: a budget nobody has measured is a guess, and
+# this one was a guess that would have justified a much more expensive schedule.
+#
+#   determinism-canary   2m45s, 2m45s, 3m06s   (runs 31855507815, 32005799211, 32265920448)
+#     Estimated at "~10-20 min wall clock". Actual is ~3 min, so the 45-minute
+#     timeout-minutes cap stands at ~15x the observed time - deliberately left alone:
+#     the cap exists to catch a hang, not to track the mean.
+#     Downloads: CPU torch wheel ~200 MB (vs ~2.5 GB of nvidia-* wheels on the default
+#     index) + judge ~0.6 GB + SmolLM2-135M bf16 ~0.27 GB + a 40-row probe set, under
+#     ~2 GB of the runner's free disk. Generation is 40 probes x 2 arms x 32 new tokens
+#     on 4 vCPU.
+#     The 3m06s run is the first under garak-llm/garak-refusal-detector (quantfit 0.9.0);
+#     the judge swap cost roughly 20 seconds and changed no other budget line.
+#   quickstart-install   ubuntu 1m50s/1m34s/1m35s, windows 1m48s/1m44s/1m55s
+#     Estimated at "~6-10 min per OS" on the assumption that a full-dependency wheel
+#     install (CUDA torch, ~2.5 GB) would dominate. It does not, by a factor of four.
+#     The cost is still deliberate - it is the path a reader of the README actually
+#     runs, and a lean install would not test it - but it is not the expensive job this
+#     block assumed.
 #
 # No model here exceeds 0.6 GB. Nothing in this workflow downloads a 15 GB arm; the
 # over-VRAM and 7-8B GGUF paths are hardware-gated and run locally, not in CI.
