@@ -3,7 +3,53 @@
 > Note on versions: tool versions do not track ROADMAP milestone numbers. 0.5.1
 > shipped 0.6's machinery, 0.5.2 ships 0.7's; a milestone number in a version
 > would claim milestone completion, and those completions are gated on runs and
-> decisions that have not happened. 0.10 is the frozen standard (ROADMAP 0.10).
+> decisions that have not happened. ROADMAP 0.10 is the frozen standard.
+>
+> **This note now has to work harder, because the tool version has caught up with a
+> milestone number.** quantfit **0.10.0** is a tool version and says nothing whatever
+> about ROADMAP 0.10, which requires every advertised command hardware-validated, a
+> frozen spec and schema, and a third-party reproduction — none of which is true. The
+> collision is unfortunate and the alternative was worse: shipping three new flags as a
+> patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
+> live answer to "is 0.10 met", and it still says NOT MET.
+
+## 0.10.0
+
+Three flags on `quantfit screen`, all of them gaps that a real 15-target run exposed
+rather than features anyone designed up front. The screen had never actually been run
+end to end until 2026-08-19; it was run four times in two days, and each run found the
+next thing missing.
+
+- **`--capture DIR`** — one `<target>.capture.jsonl` per target. The screen's own
+  protocol requires every flagged flip to be **human-verified** before it counts as a
+  positive existence claim (QSR v0, ROADMAP 0.5), and the command that flags them
+  produced nothing to verify against. The first full run flagged 11 flips and could
+  adjudicate none.
+
+  With it, the 11 were adjudicated: **6 confirmed, 5 judge errors**, and the confirmed
+  bounds are roughly **half** the flagged ones — gguf over-refusal 6/7 → 3/7,
+  compressed-tensors 2/2 → 1/2 (`validation/2026-08-19-screen-adjudication/`).
+  Publishing the flagged number would have been a substantial overclaim.
+
+- **`--resume`** — skips targets whose report already exists, rebuilding their rows from
+  disk so a resumed summary is identical to an uninterrupted one. A report that will not
+  parse is re-run rather than trusted, because resuming onto a truncated artifact would
+  publish it.
+
+- **`--attempts N`** (default 1, no retry) — retries a target before recording an
+  operational error. On the first full screen **six targets were lost** to
+  `Cannot send a request, as the client has been closed` after sustained downloading, and
+  every one succeeded on a later attempt. Without retry a network hiccup becomes a
+  permanent hole in a prevalence bound; without resume, the only recovery was re-running
+  everything.
+
+Not a code change, but the reason this release exists at all: **the sensitivity control
+now PASSES** (`validation/2026-08-19-sensitivity-control-pass/`). Every bound quantfit
+prints on the dangerous axis was, until 2026-08-19, a null from a detector of
+undemonstrated sensitivity. It is now a null from an instrument shown to detect a real,
+human-confirmed dangerous-axis flip — at IQ2_M, which is blunter than the targets being
+measured, so `docs/sensitivity-control-v0.md` §6's "detecting the loud case says little
+about the quiet one" governs how far that reaches.
 
 ## 0.9.0
 
