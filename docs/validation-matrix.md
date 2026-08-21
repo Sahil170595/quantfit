@@ -457,9 +457,16 @@ with no artifact behind it.
    it to `a:clean-venv` would make it **E2 on both OSes at zero marginal CI cost**,
    since `install-smoke` already invokes the checker.
 
-   Filed as a finding rather than fixed here: the classifier is a heuristic over README
-   prose, and the honest fix is per-invocation classification rather than a special case
-   for one flag.
+   **FIXED 2026-08-21.** `_refine` already existed as the hook for argument-dependent
+   adjustments - requirements are a property of the invocation, not of the subcommand
+   name - and the `--demo` rule was simply never written. The quickstart gate's
+   clean-venv coverage **doubled, 3 commands to 6**, at zero marginal CI cost, and all
+   three `--demo` invocations run in ~0.14 s.
+
+   One belt-and-braces test needed an explicit carve-out: `test_no_heavy_readme_command_is_ever_runnable`
+   keys on the subcommand NAME rather than on the classifier, which is what makes it an
+   independent second opinion. `--demo` is exempted by flag rather than by consulting the
+   classifier, so it stays independent about everything else.
 
 ---
 

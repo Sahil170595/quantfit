@@ -796,9 +796,24 @@ def test_every_category_a_command_is_a_real_cli_command(real_commands, real_surf
 
 
 def test_no_heavy_readme_command_is_ever_runnable(real_commands):
-    """The other half of the same guarantee: CI must never download or quantize here."""
+    """The other half of the same guarantee: CI must never download or quantize here.
+
+    This check keys on the SUBCOMMAND NAME rather than on the classifier's output, and
+    that coarseness is the point: it is an independent second opinion, so a classifier
+    that wrongly marks something runnable is caught by something that does not share its
+    logic.
+
+    `verify-safety --demo` is the one carve-out, added 2026-08-21. It is exempt because
+    it genuinely is not heavy - bundled fixtures, no model, no network, no weights - and
+    verified as such by running it under HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+    CUDA_VISIBLE_DEVICES=-1, where it exits 0 in under a second. The exemption is written
+    as an explicit flag test rather than by consulting the classifier, so this stays an
+    independent opinion about everything else.
+    """
     heavy = {"quantize", "probe", "verify", "verify-safety", "gate", "screen", "check"}
     for item in (qs.classify(command) for command in real_commands):
+        if "--demo" in item.command.argv:
+            continue
         if qs.subcommand_of(item.command.argv) in heavy:
             assert not item.runnable, item.command.text
 
@@ -809,3 +824,25 @@ def test_the_readme_quickstart_block_is_still_the_quickstart(real_commands):
     assert first_block, "README.md's first fenced bash block is gone"
     assert first_block[0].argv[:2] == ("pip", "install")
     assert {qs.subcommand_of(c.argv) for c in first_block if c.is_quantfit}
+
+
+def test_verify_safety_demo_is_clean_venv_not_gpu():
+    """Requirements are a property of the invocation, not of the subcommand name.
+
+    `verify-safety --demo` runs the real tabulation over bundled fixtures: no model, no
+    network, no weights. It was filed under c:gpu on the strength of its subcommand's
+    name, which meant the README's second command was the one command in that opening
+    the quickstart gate declined to run.
+    """
+    item = _classify("quantfit verify-safety --demo")
+    assert item.category == qs.CAT_CLEAN_VENV
+    assert item.requirements == ()
+    assert item.runnable
+
+
+def test_verify_safety_without_demo_still_needs_a_gpu():
+    """The refinement must not leak: only --demo is exempt."""
+    item = _classify("quantfit verify-safety --baseline m --quant q")
+    assert item.category == qs.CAT_GPU
+    assert qs.REQ_GPU in item.requirements
+    assert not item.runnable
