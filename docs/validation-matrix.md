@@ -498,10 +498,23 @@ failure a CI consumer most needs to distinguish from a verdict.
 Observed in [run 31368745628](https://github.com/Sahil170595/quantfit/actions/runs/31368745628)
 (2026-08-10): `verify-safety` exited **1** with a traceback when `accelerate` was
 absent, and `canary.yml`'s own triage classified that under "operational error (exit
-$code) — the canary could not run", i.e. the workflow already treats it as operational
-while the CLI does not. Recorded here as an open decision, not a fix: narrowing the
-handler to catch import-shaped `ValueError` would trade one clean contract for a
-heuristic, and that trade should be made deliberately or not at all.
+$code) — the canary could not run", i.e. the workflow already treated it as operational
+while the CLI did not.
+
+**RESOLVED 2026-08-21, in two parts rather than by the heuristic this row warned
+against.** The row said catching import-shaped `ValueError` would trade a clean contract
+for a guess; it would have, and that is not what was done.
+
+1. **`ImportError` joins the handler's tuple** — matching the widening `screen.py` made
+   for the same reason. A missing optional kernel (gptqmodel imports triton, absent on
+   Windows) is a fact about the host, not a quantfit defect, and now exits 2 with a
+   message. `ValueError` from the torch stack still surfaces raw, so a real bug is not
+   reported to the user as their environment's fault.
+2. **A deterministic preflight for `accelerate`**, which is the case `ImportError` cannot
+   catch: transformers raises `ValueError` for it, from its own stack. quantfit knows it
+   passes `device_map=`, so it checks `find_spec("accelerate")` before the load and
+   raises its own `RuntimeError` with an actionable message. No pattern-matching on
+   exception text anywhere.
 
 ---
 
