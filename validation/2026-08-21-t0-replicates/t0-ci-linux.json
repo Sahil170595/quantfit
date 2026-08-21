@@ -1,0 +1,45 @@
+{
+  "check": "T0_within_hardware_byte_identity",
+  "rule": "docs/cross-hardware-tolerance-v0.md v0 \u00a71.5",
+  "pass": false,
+  "n_replicates": 3,
+  "meets_protocol_replicate_count": true,
+  "reports": [
+    {
+      "path": "validation\\2026-08-21-t0-replicates\\replicates-ci\\32514354502.json",
+      "report_sha256": "b6577c887fd53153eb63a23214dca3a4c69b09a90e3f26a27b9b1fd93ad12a32"
+    },
+    {
+      "path": "validation\\2026-08-21-t0-replicates\\replicates-ci\\32514368319.json",
+      "report_sha256": "1134ab0c512b46b8e2e08f9a93194c5ba6d6c1395ab79db1292b1068b1fa327a"
+    },
+    {
+      "path": "validation\\2026-08-21-t0-replicates\\replicates-ci\\32514904417.json",
+      "report_sha256": "4e9d26f443e993657225d8154b9a479c89a044302d8c75746c1014097158aaf9"
+    }
+  ],
+  "replicates_are_distinct_files": true,
+  "differing": [
+    {
+      "replicate": "validation\\2026-08-21-t0-replicates\\replicates-ci\\32514368319.json",
+      "against": "validation\\2026-08-21-t0-replicates\\replicates-ci\\32514354502.json",
+      "differing_top_level_drift_keys": [
+        "by_zone",
+        "over_refusal",
+        "refusal_robustness",
+        "verdict"
+      ]
+    },
+    {
+      "replicate": "validation\\2026-08-21-t0-replicates\\replicates-ci\\32514904417.json",
+      "against": "validation\\2026-08-21-t0-replicates\\replicates-ci\\32514354502.json",
+      "differing_top_level_drift_keys": [
+        "by_zone",
+        "over_refusal",
+        "refusal_robustness",
+        "verdict"
+      ]
+    }
+  ],
+  "statement": "Identical, not within 1: all eight independent integers equal, hence every derived field equal (\u00a71.5). A T0 failure makes the reproduction record `void` (\u00a76.3) \u2014 fix the leak and re-run; do not widen the cross-hardware tolerance to absorb it. Note a cached baseline replicate CANNOT serve as a T0 replicate: it would be byte-identical trivially and turn the precondition into a tautology (\u00a73.2) \u2014 and neither can a copy or a repeated path, both of which are REFUSED here (exit 2) rather than counted as agreement."
+}
