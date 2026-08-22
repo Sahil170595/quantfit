@@ -58,6 +58,8 @@ most common way to misread the output.
 Every command takes `--json` and prints exactly one document on stdout, with diagnostics on
 stderr:
 
+<!-- Sample output. `version` is not bumped on release - nothing checks it. -->
+
 ```json
 { "schema_version": 1, "tool": { "name": "quantfit", "version": "0.11.0" },
   "command": "verify-safety", "exit_code": 3,
