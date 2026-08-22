@@ -185,7 +185,7 @@ quantfit check --model Qwen/Qwen2.5-7B-Instruct --json
 ```json
 {
   "schema_version": 1,
-  "tool": { "name": "quantfit", "version": "0.10.0" },
+  "tool": { "name": "quantfit", "version": "0.11.0" },
   "command": "verify-safety",
   "exit_code": 3,
   "result": { "regression_detected": true, "unmeasurable_axes": [], "...": "..." }

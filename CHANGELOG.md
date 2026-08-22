@@ -13,6 +13,71 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.11.0
+
+One behaviour change to shipped surface, and two findings that came out of running the
+instrument rather than writing it.
+
+- **A missing dependency now exits 2, not 1.** The documented CI contract says
+  operational failures exit 2 with a clean message; a missing optional dependency exited
+  1 with a traceback ending in somebody else's module, and a caller distinguishing "the
+  tool broke" from "the measurement says no" cannot do it on a traceback.
+
+  Fixed in two parts, deliberately *not* by the heuristic `validation-matrix.md` §5
+  warned against — it said catching import-shaped `ValueError` would trade a clean
+  contract for a guess, and it would. `ImportError` joins `cli.main`'s handler, covering
+  the case where gptqmodel's AWQ kernel imports triton on a platform where triton does
+  not ship. And `accelerate` — which transformers reports as a `ValueError` from inside
+  its own stack, so `ImportError` cannot catch it — gets a **deterministic preflight**:
+  quantfit knows it passes `device_map=`, so it checks `find_spec` before the load. No
+  pattern-matching on exception text anywhere, and a genuine `ValueError` from the torch
+  stack still surfaces raw, so a real bug is never reported to a user as their machine's
+  fault.
+
+  This is the failure that killed the first scheduled canary run, closed properly.
+
+- **The quickstart gate was refusing to run the README's second command.**
+  `verify-safety --demo` was classified as a GPU-and-network command on the strength of
+  its *subcommand's name*. Every clause of that reason is false for the invocation:
+  `--demo` runs the real tabulation over bundled fixtures, with no model, no network and
+  no weights, and exits 0 in under a second with the GPU masked and the Hub offline.
+
+  A command filed as unrunnable is never run, so the gate silently stopped covering it —
+  and this is the command 0.6.1 added so a reader's first action costs a second rather
+  than a multi-gigabyte download. Requirements are a property of the invocation, not of
+  the subcommand name; the `_refine` hook already existed for exactly this and the rule
+  was simply never written. **Clean-venv coverage doubles, 3 commands to 6**, at zero
+  marginal CI cost.
+
+- **The canary's runtime budget is measured rather than estimated.** It had said
+  "ESTIMATED — not yet measured on a runner" since the file was written. Three green
+  runs exist now: the determinism job takes ~3 minutes against an estimate of 10–20, and
+  quickstart-install ~1.6 minutes per OS against an estimate of 6–10. The estimates were
+  3–7x too high, and both are recorded alongside what they replaced.
+
+**Not code, and the reason this release matters more than its diff.** Two evidence
+results landed with it:
+
+**The 0.5 screen is complete** — 14 of 15 targets measured, `all_targets_attempted:
+true`, and for the first time **no bound carries a conditionality label**, because the
+sensitivity control passed. The dangerous axis is **0/12** on GGUF (bound 0.0–24.2%) and
+0/2 on compressed-tensors: fourteen third-party artifacts, five quantizer organisations,
+and not one probe where the baseline refused and the quantized model complied.
+
+**The CI runner is not deterministic, and that voids a published claim.** T0 — three
+replicates per hardware — was collected on both machines. Machine L passes 3/3
+byte-identical. CI-linux **fails**: three canary runs on one commit, one environment and
+one decode setting disagree with each other, moving a probe between zones and taking the
+at-risk denominators and printed MDE with it. So the cross-hardware T3 "breach" announced
+in 0.8.0 is **`void`, not a breach** — the deltas were real, the attribution to hardware
+never was. `reproduce` withheld the reserved name at the time and was right to; the
+overclaim was in the prose around it.
+
+It also explains why the canary never caught it: the determinism job asserts zero flips
+*between arms within one run*, which is guaranteed by construction and stays green
+through exactly this defect, because both arms see the same nondeterminism at once. A
+green canary was never evidence of a reproducible measurement.
+
 ## 0.10.0
 
 Three flags on `quantfit screen`, all of them gaps that a real 15-target run exposed
