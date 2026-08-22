@@ -165,6 +165,60 @@ jobs:
                  exit "$code" ;;
           esac
 
+      - name: T0 — does this runner agree with ITSELF across runs?
+        run: |
+          set -euo pipefail
+          # The step above asserts zero flips BETWEEN ARMS WITHIN one run. That is
+          # guaranteed by construction under greedy decoding with identical weights, and
+          # it stays green through the one defect this job most needs to catch: if
+          # generation is not reproducible ACROSS runs, both arms move together, so
+          # baseline_refused == quant_refused and no flip appears.
+          #
+          # That blind spot was not theoretical. On 2026-08-21 three canary runs on ONE
+          # commit, one environment and one decode setting disagreed with each other -
+          # a probe moved between zones, taking the at-risk denominators and the printed
+          # MDE with it - and every one of those runs was green
+          # (validation/2026-08-21-t0-replicates/). The cross-hardware "breach" published
+          # in 0.8.0 was void because of it.
+          #
+          # So the canary now measures TWICE and checks T0 (§1.5 of
+          # docs/cross-hardware-tolerance-v0.md): byte-identity of the `drift` block
+          # across this runner's own replicates. Two replicates is below §3.1's three, so
+          # `meets_protocol_replicate_count` is false and this is a smoke check, not a
+          # protocol-grade T0 record - but a within-run-only canary could not see this
+          # class of defect at all, and two is enough to catch a leak that flips one
+          # probe in three runs.
+          set +e
+          quantfit verify-safety --baseline "$MODEL" --quant "$MODEL"             --max-new-tokens "$MAX_NEW_TOKENS" --report canary/drift-replicate.json
+          code=$?
+          set -e
+          if [ "$code" != "0" ] && [ "$code" != "4" ]; then
+            echo "::error::T0 replicate could not run (exit $code)"; exit "$code"
+          fi
+          python - <<'PY'
+          import json, os, sys
+
+          a = json.load(open(os.environ["REPORT"], encoding="utf-8"))["drift"]
+          b = json.load(open("canary/drift-replicate.json", encoding="utf-8"))["drift"]
+          if json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True):
+              print("T0 smoke: the two replicates' drift blocks are byte-identical")
+              sys.exit(0)
+
+          print("::error::T0 FAILED: this runner does not agree with itself across runs.")
+          print("::error::Two runs of the SAME model, same decode, same environment produced")
+          print("::error::different drift blocks. Greedy decoding cannot do that unless")
+          print("::error::generation is nondeterministic here. Per docs/cross-hardware-tolerance-v0.md")
+          print("::error::5.2 the response is to FIX the leak, not to widen a tolerance around it -")
+          print("::error::and until it is fixed, every cross-hardware claim involving this runner")
+          print("::error::is `void`, not a breach and not a reproduction.")
+          for key in sorted(set(a) | set(b)):
+              if json.dumps(a.get(key), sort_keys=True) != json.dumps(b.get(key), sort_keys=True):
+                  print(f"::error::  differs: {key}")
+                  print(f"    run 1: {json.dumps(a.get(key))[:300]}")
+                  print(f"    run 2: {json.dumps(b.get(key))[:300]}")
+          sys.exit(1)
+          PY
+
       - name: Assert the canary report is flip-free
         run: |
           set -euo pipefail
