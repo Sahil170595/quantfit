@@ -46,6 +46,76 @@ No maintained tool ships the paired fp16-vs-quant refusal diff with pinned prove
 
 **Slip rule (stated up front):** a 0.4b slip narrows 0.5, it does not stall it. If GGUF judging is late, the 0.5 screen runs on compressed-tensors artifacts only (≤3B in-GPU, cap stated), the prevalence bound is reported for that narrower stratum, and the spec v0, replication package, model-card emit, and outreach proceed on schedule. If the 8B onload run slips, only the README offload wording waits.
 
+## 0.5 RESULTS — recorded 2026-08-21, before the sections that predicted them
+
+Four of the five 0.5 deliverables have shipped and been measured. This section is placed
+above them deliberately: the plan below is kept verbatim as a pre-registration, and a
+reader must not have to reconstruct which of its predictions survived.
+
+**The sensitivity control PASSED — on the third rung of a ladder the plan did not have.**
+§0.5's control is described as "one Egashira-style injected quantization-conditional
+regression." That was not built, and `docs/injected-control-design.md` §0 explains why: it
+needs a constrained-training runner that is 0.6 tooling. The surrogate ran instead, and
+**failed at Q2_K** — the 0.5B model refused all twelve `clear_unsafe` probes on both arms,
+so no flip existed to detect. It **passed at IQ2_M**, an i-quant strictly more degraded
+than the k-quant the protocol called maximal, with a human-confirmed, coherent
+dangerous-axis flip (`validation/2026-08-19-sensitivity-control-pass/`).
+
+**The screen ran: 14 of 15 targets, and the dangerous axis is zero on every one.** GGUF
+0/12 (Wilson 95% upper 24.2%), compressed-tensors 0/2. Because the control passed, no
+bound carries the conditionality label — the first time that has been true
+(`validation/2026-08-21-screen-complete/`).
+
+**The over-refusal axis is where the signal is**: 6/9 GGUF targets flagged, **3/9
+confirmed** after hand adjudication of all 11 flagged flips (6 confirmed, 5 judge errors).
+Adjudication roughly halved the flagged prevalence, which is exactly what the
+human-verification rule exists to catch.
+
+### Three things the plan got wrong, stated as such
+
+1. **"0/10 clean means 95% upper bound ~26%."** The arithmetic is right and the framing
+   is now the weaker half of the claim. The binding limit is not n — it is that the
+   control passed at **IQ2_M** while the screened artifacts are mostly **Q4_K_M**.
+   `sensitivity-control-v0.md` §6 says detecting the loud case says little about the quiet
+   one, and that gap is unquantified. A tighter bound from more targets would not close it.
+
+2. **ε calibration is a prerequisite, not a 0.6 reward.** §0.6 gates in-distribution judge
+   error behind a 0.5 GO. Running it early is what revealed the shipped judge had a
+   **56.2% false-positive rate** and was not a refusal detector at all
+   (`validation/2026-08-18-judge-calibration/`). Every 0.5 number produced before that
+   swap was uninterpretable. **The ordering in §0.6 is wrong and should be inverted**: no
+   screen result means anything until the judge that produced it has been measured.
+
+3. **"The reachable community rewards refusal removal"** (Risk 1) predicted the danger
+   axis would be where findings live. Fourteen third-party artifacts produced **zero**
+   dangerous flips; every confirmed regression is on the over-refusal axis. The
+   sympathetic direction is not merely where the community's attention is — on this
+   evidence it is where the effect is.
+
+### The finding the plan did not anticipate
+
+**Refusal behaviour is robust to ordinary quantization.** Fourteen artifacts across five
+quantizer organisations and two strata, plus a Q2_K control, produced no dangerous flip.
+It took a **2-bit i-quant** to break a single refusal. That is a measured result from an
+instrument with a passing positive control — not a null from a detector nobody had
+checked — and it cuts against the premise this milestone was built to test.
+
+Whether that makes the thesis stronger (the instrument works, and the honest answer is
+"mostly fine") or weaker (there may be little to measure at deployment-relevant bit
+widths) is a judgement for the GO/NO-GO, which has not been made because **outreach has
+not happened and only outreach starts the clock**.
+
+### Still open
+
+- **Outreach** — the one deliverable untouched, and the only one that starts the 8-week
+  clock.
+- **The replication package for arXiv 2606.10154.**
+- **`ct-qwen25-15b-official-awq`** is unrunnable on this host: gptqmodel's AWQ kernel
+  imports triton, which does not ship on Windows.
+- **ROADMAP 0.8's reproduction gate cannot be met on the current CI runner**, which fails
+  T0 — it does not agree with itself across runs
+  (`validation/2026-08-21-t0-replicates/`).
+
 ## 0.5 — Demand probe with real artifacts; QSR spec v0 (GO/NO-GO)
 
 **Goal:** a demand signal from artifacts people can actually run and check, before the expensive milestones — not after.
