@@ -1150,9 +1150,17 @@ the resolution. Stated in that direction on purpose.
   template or a generation default), and `reproduce` withheld the reserved `breach`
   name because no T0 set exists on either side. Artifacts, and the two experiments
   that would separate the variables: `validation/2026-08-15-crosshw-smollm2/`.
-- **No replicate set.** T0 has been demonstrated once, at 0.5B, on one machine
-  (CHANGELOG 0.4.1's byte-identical rerun) — not three times, and not on two
-  hardwares.
+- ~~**No replicate set.**~~ **Superseded 2026-08-21, and the result is a T0 FAILURE on
+  one of the two hardwares.** Three replicates were collected on each
+  (`validation/2026-08-21-t0-replicates/`): machine **L** is byte-identical 3/3 and
+  PASSES; **CI-linux** FAILS — three canary runs on one commit, one environment and one
+  decode setting disagree with each other, moving a probe between zones and with it the
+  at-risk denominators and the printed MDE.
+
+  Consequently the 2026-08-15 cross-hardware record is **`void`**, not the breach it was
+  published as: `reproduce` with both T0 legs supplied returns
+  `void because: T0_failed_on_a_side`. Per §5.2 the response is to fix the leak, not to
+  widen the tolerance to absorb it.
 - **No measurement of `p_tok`, of cross-hardware label discordance, or of any
   quantity in §5.3.**
 - **No judge ε.** The 0.6 *machinery* has landed (`safety/mde.py`, `safety/calibrate.py`,

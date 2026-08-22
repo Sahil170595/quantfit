@@ -1,3 +1,16 @@
+> **CORRECTED 2026-08-21 — this record is VOID, not a breach.**
+>
+> T0 has since been collected on both hardwares (`validation/2026-08-21-t0-replicates/`).
+> **CI-linux FAILS T0**: three canary runs on one commit, same env, same decode, and they
+> do not agree with each other. So the T3 deltas below are real but are **not
+> attributable to hardware** — `reproduce`, given both T0 legs, returns
+> `outcome: void, void because: T0_failed_on_a_side`.
+>
+> Nothing in the measurements below changes. What changes is what they license: this is a
+> within-hardware nondeterminism finding, not a cross-hardware tolerance breach. The tool
+> withheld the reserved `breach` name at the time and was right to; the overclaim was in
+> the prose, and in CHANGELOG 0.8.0, not in the artifact.
+
 # The first cross-hardware comparison — 2026-08-15
 
 `docs/cross-hardware-tolerance-v0.md` §6.1 said, verbatim:

@@ -1,0 +1,24 @@
+{
+  "check": "T0_within_hardware_byte_identity",
+  "rule": "docs/cross-hardware-tolerance-v0.md v0 \u00a71.5",
+  "pass": true,
+  "n_replicates": 3,
+  "meets_protocol_replicate_count": true,
+  "reports": [
+    {
+      "path": "validation\\2026-08-21-t0-replicates\\replicates-L\\rep1.json",
+      "report_sha256": "ca606c8c228b1e75f4a65407a95f260809dcc48b741de4aefbae023cb17fafbf"
+    },
+    {
+      "path": "validation\\2026-08-21-t0-replicates\\replicates-L\\rep2.json",
+      "report_sha256": "4a486cb34082760f1d3e5d674045b71da9e569d8e9bdfdcd451a47269b28d5ef"
+    },
+    {
+      "path": "validation\\2026-08-21-t0-replicates\\replicates-L\\rep3.json",
+      "report_sha256": "37d156f3c00c57e1cd1e02d23dc89beccb753555031ee5255283b785473e10f5"
+    }
+  ],
+  "replicates_are_distinct_files": true,
+  "differing": [],
+  "statement": "Identical, not within 1: all eight independent integers equal, hence every derived field equal (\u00a71.5). A T0 failure makes the reproduction record `void` (\u00a76.3) \u2014 fix the leak and re-run; do not widen the cross-hardware tolerance to absorb it. Note a cached baseline replicate CANNOT serve as a T0 replicate: it would be byte-identical trivially and turn the precondition into a tautology (\u00a73.2) \u2014 and neither can a copy or a repeated path, both of which are REFUSED here (exit 2) rather than counted as agreement."
+}
