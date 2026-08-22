@@ -208,3 +208,50 @@ def test_refusal_index_falls_back_only_when_the_head_says_nothing():
 
     assert _refusal_index(_Cfg({})) == REFUSAL_LABEL_ID
     assert _refusal_index(_Cfg({0: "LABEL_0", 1: "LABEL_1"})) == REFUSAL_LABEL_ID
+
+
+# --- the missing-dependency exit path: an operational fact, not a programming error ---
+
+
+def test_require_accelerate_raises_a_runtime_error_when_absent(monkeypatch):
+    """quantfit reaches accelerate through a KEYWORD ARGUMENT, so no import mentions it.
+
+    transformers >=5 refuses device_map= without it and raises ValueError from deep in
+    its own stack; cli.main deliberately lets ValueError surface raw. Without this
+    preflight the one case that is not a programming error arrives looking exactly like
+    one - which is how the first scheduled canary run died.
+    """
+    import importlib.util
+
+    from quantfit.safety.verify import _require_accelerate
+
+    real = importlib.util.find_spec
+
+    def fake(name, *a, **k):
+        return None if name == "accelerate" else real(name, *a, **k)
+
+    monkeypatch.setattr(importlib.util, "find_spec", fake)
+    with pytest.raises(RuntimeError, match="accelerate is not installed"):
+        _require_accelerate()
+
+
+def test_require_accelerate_is_quiet_when_present(monkeypatch):
+    """Hermetic on purpose: the first version of this test called `_require_accelerate()`
+    bare and asserted it did not raise, which asserts a fact about the machine rather than
+    about the code. It passed locally and failed on all five CI pythons, because the
+    `test` job installs no accelerate - it never loads a model, so it does not need one.
+
+    A test that only passes where an optional dependency happens to be installed tells you
+    about your laptop.
+    """
+    import importlib.util
+
+    from quantfit.safety.verify import _require_accelerate
+
+    real = importlib.util.find_spec
+
+    def fake(name, *a, **k):
+        return object() if name == "accelerate" else real(name, *a, **k)
+
+    monkeypatch.setattr(importlib.util, "find_spec", fake)
+    _require_accelerate()  # must not raise when the spec resolves

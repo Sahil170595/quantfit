@@ -393,3 +393,33 @@ def test_calibrate_subcommands_dispatch_and_refuse_operationally(monkeypatch, ca
 
     monkeypatch.setattr(cal, "ingest_labels", _refuse)
     assert main(["calibrate", "ingest", "--sheet", "s", "--key", "k", "--out", "o.json"]) == 2
+
+
+def test_import_error_exits_2_not_1(monkeypatch, capsys):
+    """A missing optional dependency is a fact about the host, not a defect in quantfit.
+
+    gptqmodel's AWQ kernel imports triton, which does not ship on Windows. Exiting 1 with
+    a traceback breaks the documented CI contract - operational failures exit 2 - and a
+    caller distinguishing "the tool broke" from "the measurement says no" cannot do it on
+    a traceback.
+    """
+    from quantfit import cli
+
+    def boom(args):
+        raise ModuleNotFoundError("No module named 'triton'")
+
+    monkeypatch.setattr(cli, "_dispatch", boom)
+    assert cli.main(["list"]) == 2
+
+
+def test_value_error_still_surfaces_raw(monkeypatch):
+    """The widening must not swallow programming errors: a ValueError from the torch
+    stack is a bug, and reporting it as the user's environment problem would hide it."""
+    from quantfit import cli
+
+    def boom(args):
+        raise ValueError("bug in the harness")
+
+    monkeypatch.setattr(cli, "_dispatch", boom)
+    with pytest.raises(ValueError, match="bug in the harness"):
+        cli.main(["list"])

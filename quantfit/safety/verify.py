@@ -554,6 +554,38 @@ def _load_probes(token: str | None) -> list[Probe]:
     ]
 
 
+def _require_accelerate() -> None:
+    """Fail early and legibly when `accelerate` is absent.
+
+    quantfit never imports accelerate. It reaches it through a KEYWORD ARGUMENT:
+    `from_pretrained(..., device_map=...)`, which transformers >=5 refuses outright
+    without it. The refusal is a `ValueError` raised from deep inside transformers, and
+    `cli.main` deliberately lets ValueError surface raw because a ValueError from the
+    torch stack is a programming error. So the one case that is NOT a programming error
+    arrives looking exactly like one: a traceback ending in somebody else's module,
+    exit 1, against a documented contract that says operational failures exit 2.
+
+    This is not hypothetical. It is precisely how the first scheduled canary run died
+    (2026-08-10, run 31368745628) - a `--no-deps` install that omitted a dependency no
+    import statement mentions.
+
+    Checking here rather than widening the handler keeps the distinction intact: a
+    genuine ValueError from the stack still surfaces raw, and this one becomes a
+    RuntimeError with an actionable message and exit 2. The check costs one import
+    lookup per arm.
+    """
+    import importlib.util
+
+    if importlib.util.find_spec("accelerate") is None:
+        raise RuntimeError(
+            "accelerate is not installed, and the transformers arm needs it: quantfit passes "
+            "device_map= to from_pretrained, which transformers >=5 refuses without accelerate. "
+            "quantfit does not import accelerate anywhere, so a --no-deps or hand-picked install "
+            "will miss it. Install it: pip install 'accelerate>=1.0' (a normal `pip install "
+            "quantfit` resolves it from pyproject and is unaffected)."
+        )
+
+
 def _generate_completions(
     model_id: str,
     prompts: list[str],
@@ -573,6 +605,8 @@ def _generate_completions(
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     from quantfit.safety.report import ArmRun
+
+    _require_accelerate()
 
     device = pick_device()
     started = time.perf_counter()

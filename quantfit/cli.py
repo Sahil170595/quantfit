@@ -829,11 +829,24 @@ def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     try:
         return _dispatch(args)
-    except (RuntimeError, OSError) as exc:
+    except (RuntimeError, OSError, ImportError) as exc:
         # Operational failures (no GPU, gated/missing model, network, disk, short
         # calibration/probe datasets — quantfit raises its own as RuntimeError) ->
         # a clean message + exit 2, not a traceback. Programming errors, including
         # ValueError from anywhere in the torch/transformers stack, surface raw.
+        #
+        # ImportError joined the tuple on 2026-08-21, matching the same widening
+        # `quantfit/screen.py` made for the same reason. A missing optional dependency
+        # is a fact about the host, not a defect in quantfit: gptqmodel's AWQ kernel
+        # imports triton, which does not ship on Windows, and a user meeting that
+        # deserves "exit 2, here is what is missing" rather than a traceback ending in
+        # somebody else's module. Exit 1 also breaks the documented CI contract, which
+        # says operational failures exit 2 — a caller distinguishing "the tool broke"
+        # from "the measurement says no" cannot do it on a traceback.
+        #
+        # Still NOT widened to bare Exception: a ValueError from the torch stack is a
+        # programming error and must keep surfacing raw, or a real bug would be
+        # reported to the user as an operational problem with their machine.
         return _emit_error(args, str(exc), type(exc).__name__)
 
 
