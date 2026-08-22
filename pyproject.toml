@@ -71,6 +71,12 @@ include = ["quantfit*"]
 [tool.pytest.ini_options]
 # Make `pytest tests/` import the package without an editable install (keeps CI light).
 pythonpath = ["."]
+markers = [
+    "judge: characterises the SHIPPED judge on inputs whose correct label is not in dispute. Downloads a ~0.6 GB model from the Hub, so it is DESELECTED BY DEFAULT and the test suite stays hermetic. Run it deliberately: pytest -m judge",
+]
+# The default run must not reach the network. `-m 'not judge'` is the whole reason the
+# marker exists; removing it would put a model download in every CI test job.
+addopts = "-m 'not judge'"
 
 [tool.ruff]
 target-version = "py310"

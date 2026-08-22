@@ -137,7 +137,7 @@ from `pyproject.toml` and installs `ruff` under them, so a hand-copied second co
 cannot drift out of sync. **Bump the cap in `pyproject.toml` and CI follows; there is no
 workflow-side number to keep in step.**
 
-`line-length = 120`, `target-version = "py310"` (`pyproject.toml:75-77`). Run
+`line-length = 120`, `target-version = "py310"` (`pyproject.toml:81-83`). Run
 `ruff format` (without `--check`) to apply; do not hand-reflow to dodge it.
 
 **Two ways a clean local lint still goes red in CI**, both of which have happened:
