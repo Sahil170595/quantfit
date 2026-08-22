@@ -1,0 +1,80 @@
+{
+  "analysis_schema": 1,
+  "computed_utc": "2026-08-22T03:58:44+00:00",
+  "question": "What is quantfit's effective MDE once its OWN measured judge error is used, rather than the perfect-judge floor it prints?",
+  "source_calibration": "validation/2026-08-18-judge-calibration/calibration.json",
+  "judge": "garak-llm/garak-refusal-detector @ 5cb5ec8f",
+  "confusion": {
+    "fp": 4,
+    "tn": 44,
+    "fn": 0,
+    "tp": 32
+  },
+  "eps_per_arm_upper": 0.1955,
+  "eps_definition": "quantfit.safety.mde.EPS_DEFINITION - per-arm UPPER bound on BOTH directional rates",
+  "false_flip_bound": 0.3911,
+  "bound_formula": "false_flip_rate_bound(eps_b, eps_q) = eps_b + eps_q",
+  "by_n": [
+    {
+      "n_at_risk": 8,
+      "perfect_judge_mde": 0.1822,
+      "measured_eps_mde": 1.0,
+      "point_estimate_mde": 0.6998
+    },
+    {
+      "n_at_risk": 10,
+      "perfect_judge_mde": 0.1487,
+      "measured_eps_mde": 1.0,
+      "point_estimate_mde": 0.6965
+    },
+    {
+      "n_at_risk": 11,
+      "perfect_judge_mde": 0.1361,
+      "measured_eps_mde": 1.0,
+      "point_estimate_mde": 0.6423
+    },
+    {
+      "n_at_risk": 12,
+      "perfect_judge_mde": 0.1255,
+      "measured_eps_mde": 1.0,
+      "point_estimate_mde": 0.5957
+    },
+    {
+      "n_at_risk": 19,
+      "perfect_judge_mde": 0.0812,
+      "measured_eps_mde": 1.0,
+      "point_estimate_mde": 0.5256
+    },
+    {
+      "n_at_risk": 20,
+      "perfect_judge_mde": 0.0773,
+      "measured_eps_mde": 1.0,
+      "point_estimate_mde": 0.5017
+    },
+    {
+      "n_at_risk": 22,
+      "perfect_judge_mde": 0.0705,
+      "measured_eps_mde": 1.0,
+      "point_estimate_mde": 0.5158
+    },
+    {
+      "n_at_risk": 23,
+      "perfect_judge_mde": 0.0676,
+      "measured_eps_mde": 1.0,
+      "point_estimate_mde": 0.4952
+    },
+    {
+      "n_at_risk": 24,
+      "perfect_judge_mde": 0.0649,
+      "measured_eps_mde": 1.0,
+      "point_estimate_mde": 0.4761
+    },
+    {
+      "n_at_risk": 40,
+      "perfect_judge_mde": 0.0394,
+      "measured_eps_mde": 0.9893,
+      "point_estimate_mde": 0.4214
+    }
+  ],
+  "computed_with": "quantfit.safety.mde.effective_mde and quantfit.safety.verify.detectable_flip_rate - the project's own primitives, no hand arithmetic"
+}
