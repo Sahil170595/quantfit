@@ -13,6 +13,30 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.0
+
+A one-defect release, deliberately. This is the first release cut under the rule that a
+version should isolate a single behaviour change — so that "which version fixed this" and
+"which version caused this" both have answers, and a rollback is a decision about one
+thing rather than six.
+
+- **A schema-v2 report missing `baseline` or `quantized` raised `KeyError`, not
+  `ReportError`.** `DriftReport.from_json` pops both keys to splat the remainder into the
+  dataclass, and the pops sat outside its own `except` handlers — the one input where a
+  v2 report escaped this module's error contract.
+
+  It mattered wherever a caller trusted that contract. `cli.main` catches
+  `(RuntimeError, OSError, ImportError)`, and `ReportError` is a `RuntimeError`, so a
+  malformed report was supposed to be a clean exit 2 with a message. It was a traceback
+  and exit 1, against the documented CI contract.
+
+  Found while checking whether the parser was safe to hand untrusted paths — the kind of
+  defect that only surfaces when something makes you go looking.
+
+Nothing else in this release. The README and `SKILL.md` version strings are **not** bumped
+and will not be again: they sit inside a JSON *sample* that nothing reads, verified by
+reverting one and running `quantfit audit` (exit 0, no findings).
+
 ## 0.11.0
 
 One behaviour change to shipped surface, and two findings that came out of running the
