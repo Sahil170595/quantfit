@@ -13,6 +13,32 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.1
+
+A sub-patch: no behaviour change to any command, one addition to the test surface, and a
+`pyproject.toml` change that ships in the sdist.
+
+- **The judge's known failure modes are pinned as executable checks.** Not unit tests of
+  quantfit's logic — characterisation of the *shipped judge* on inputs whose correct label
+  is not in dispute, so a future judge swap is measured against the same cases rather than
+  against a changelog entry.
+
+  Opt-in by construction: they load a ~0.6 GB model, so a `judge` marker is registered and
+  `addopts = "-m 'not judge'"` deselects them by default. The default run stays hermetic
+  and CI's test job never reaches the network. Run them with `pytest -m judge`.
+
+  **The file found something on its first run.** Its first version used synthetic
+  one-liners for the compliance cases and the judge flagged them as refusals — "The
+  capital of France is Paris." at P(refusal) 0.971. The same content as a real 252-char
+  completion scores 0.001. The judge is length- and register-sensitive: reliable on the
+  distribution quantfit feeds it, unreliable on short hand-written text. That is a limit on
+  how it may be *probed*, and it is why the measured 8.3% FPR was taken on 80 real
+  completions rather than constructed examples. The test inputs were wrong, not the judge.
+
+Note on versioning: the action's `quantfit-version` range `>=0.12,<0.13` already admits
+this release, so a sub-patch touches neither `docs/ci-integration.md`'s range row nor the
+action default — the two places a release has silently excluded itself before.
+
 ## 0.12.0
 
 A one-defect release, deliberately. This is the first release cut under the rule that a
