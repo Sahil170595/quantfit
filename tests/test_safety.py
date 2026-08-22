@@ -235,7 +235,23 @@ def test_require_accelerate_raises_a_runtime_error_when_absent(monkeypatch):
         _require_accelerate()
 
 
-def test_require_accelerate_is_quiet_when_present():
+def test_require_accelerate_is_quiet_when_present(monkeypatch):
+    """Hermetic on purpose: the first version of this test called `_require_accelerate()`
+    bare and asserted it did not raise, which asserts a fact about the machine rather than
+    about the code. It passed locally and failed on all five CI pythons, because the
+    `test` job installs no accelerate - it never loads a model, so it does not need one.
+
+    A test that only passes where an optional dependency happens to be installed tells you
+    about your laptop.
+    """
+    import importlib.util
+
     from quantfit.safety.verify import _require_accelerate
 
-    _require_accelerate()  # must not raise in an environment that has it
+    real = importlib.util.find_spec
+
+    def fake(name, *a, **k):
+        return object() if name == "accelerate" else real(name, *a, **k)
+
+    monkeypatch.setattr(importlib.util, "find_spec", fake)
+    _require_accelerate()  # must not raise when the spec resolves
