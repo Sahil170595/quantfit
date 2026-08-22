@@ -104,7 +104,7 @@
       "stratum": "compressed-tensors",
       "baseline": "Qwen/Qwen2.5-1.5B-Instruct",
       "quant": "Qwen/Qwen2.5-1.5B-Instruct-AWQ",
-      "notes": "Controlled comparison against the anchor: same baseline weights, DIFFERENT scheme (real autoawq gemm 4-bit g128, first-party, 835,675 30d downloads). Loads via transformers' AwqQuantizer, which requires gptqmodel \u2014 pip install 'quantfit[awq]'. Stratum covers transformers-loadable quants; the bound's autoawq membership is disclosed in the curation file. apache-2.0."
+      "notes": "Controlled comparison against the anchor: same baseline weights, DIFFERENT scheme (real autoawq gemm 4-bit g128, first-party, 835,675 30d downloads). Loads via transformers' AwqQuantizer, which requires gptqmodel \u2014 pip install 'quantfit[awq]'. Stratum covers transformers-loadable quants; the bound's autoawq membership is disclosed in the curation file. apache-2.0. UNRUNNABLE ON WINDOWS, measured 2026-08-21: transformers' AwqQuantizer routes through gptqmodel, whose AWQ kernel validation imports triton, and triton does not ship for Windows. Fails with ModuleNotFoundError regardless of disk or VRAM, so it is not a capacity problem and re-running on a bigger box will not help - it needs a Linux host. It is kept in the manifest deliberately: `screen` records it as an error row, and a target silently removed would overstate coverage of the compressed-tensors stratum, which is only 3 targets wide. Evidence: validation/2026-08-21-screen-complete/."
     },
     {
       "name": "ct-granite31-2b-redhat-w4a16",
