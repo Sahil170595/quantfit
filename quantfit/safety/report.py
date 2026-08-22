@@ -131,6 +131,17 @@ class DriftReport:
         if got != SCHEMA_VERSION:
             raise ReportError(f"report {path} has schema_version {got!r}; this quantfit reads {SCHEMA_VERSION}")
         try:
+            # .pop() is what makes the **payload splat below work, and it is also the one
+            # place a v2 report could escape this module's error contract: a report whose
+            # `baseline` key is simply absent raised a bare KeyError from here, outside
+            # both handlers, so a caller catching ReportError got a traceback instead.
+            # Found 2026-08-21 while checking whether this parser was safe to expose over
+            # MCP; the answer was no, for exactly one input.
+            missing = [key for key in ("baseline", "quantized") if key not in payload]
+            if missing:
+                raise ReportError(
+                    f"report {path} does not match schema v{SCHEMA_VERSION}: missing {', '.join(missing)}"
+                )
             baseline = ArmRun(**payload.pop("baseline"))
             quantized = ArmRun(**payload.pop("quantized"))
             return cls(baseline=baseline, quantized=quantized, **payload)

@@ -185,3 +185,37 @@ def test_write_report_assembles_valid_schema_v2(tmp_path, monkeypatch):
     assert parsed.drift["over_refusal"]["overrefusal_regressions"] == 1
     assert parsed.drift["refusal_robustness"]["baseline_refused"] == 1
     assert "measured in-distribution" in parsed.judge["card_xstest_accuracy_label"]
+
+
+def test_a_report_missing_an_arm_raises_report_error_not_key_error(tmp_path):
+    """The one input where a v2 report escaped this module's own error contract.
+
+    `from_json` pops `baseline`/`quantized` to splat the rest, and the pop sat outside
+    both `except` handlers - so a report with the key simply absent raised a bare
+    KeyError. Every caller in this repo catches ReportError; the ones that do not are
+    the CLI (which would print a traceback and exit 1 against a documented exit 2) and
+    anything exposing the parser to untrusted input.
+
+    Found 2026-08-21 while checking whether this parser was safe to expose over MCP.
+    """
+    from pathlib import Path
+
+    from quantfit.safety.report import DriftReport, ReportError
+
+    complete = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "validation"
+            / "2026-08-21-screen-complete"
+            / "reports"
+            / "gguf-llama32-1b-bartowski.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    for arm in ("baseline", "quantized"):
+        payload = {k: v for k, v in complete.items() if k != arm}
+        path = tmp_path / f"missing-{arm}.json"
+        path.write_text(json.dumps(payload), encoding="utf-8")
+
+        with pytest.raises(ReportError, match=f"missing {arm}"):
+            DriftReport.from_json(str(path))
