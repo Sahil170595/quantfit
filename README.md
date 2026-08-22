@@ -182,6 +182,11 @@ quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --jso
 quantfit check --model Qwen/Qwen2.5-7B-Instruct --json
 ```
 
+<!-- Sample output, not a version pin. The `version` below is whatever produced this
+     capture and is deliberately NOT bumped on release: nothing checks it, and churning
+     the README on every tag makes real changes hard to see in the diff. `schema_version`
+     IS load-bearing and is checked by the auditor. -->
+
 ```json
 {
   "schema_version": 1,

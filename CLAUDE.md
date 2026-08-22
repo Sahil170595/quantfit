@@ -84,10 +84,30 @@ without `accelerate`, and that broke CI while every local run passed.
 a CI or an MDE by hand, so published numbers and tool output cannot diverge.
 
 **Pins are load-bearing.** Judge and probe-dataset revisions, the llama.cpp binary
-sha256, and the dependency caps in `pyproject.toml` are part of the measurement. When
-you bump a version, bump every place that states it — including
-`docs/ci-integration.md` and `.github/actions/quantfit-gate/action.yml`'s
-`quantfit-version` default, which a release can otherwise silently exclude itself from.
+sha256, and the dependency caps in `pyproject.toml` are part of the measurement.
+
+**A release bumps the version where it is load-bearing, and nowhere else.** "Bump every
+place that states it" was the earlier rule here and it was wrong — it produced churn that
+buries the real diff and trains a reader to skim release commits.
+
+Bump these, because something breaks if you do not:
+
+- `pyproject.toml` and `quantfit/__init__.py` — the version itself, and a test asserts
+  they agree.
+- `CITATION.cff` and `spec/qsr-v1-freeze-plan.md` — `quantfit audit`'s `package_version`
+  claim matches their `version: "X"` form and fails the build on a mismatch.
+- `docs/ci-integration.md` and `.github/actions/quantfit-gate/action.yml`'s
+  `quantfit-version` default — a stale range **excludes the release being cut**, so the
+  reference action silently keeps installing the previous minor. This has been caught
+  twice and missed once.
+
+Do **not** bump:
+
+- `README.md` and `.claude/skills/quantfit/SKILL.md` — the version there sits inside a
+  JSON *sample*, `"version": "…"`, which the auditor's pattern does not match and nothing
+  else reads. Verified by reverting it and running `quantfit audit`: exit 0, no findings.
+- Anything under `validation/` — those are run records of what produced the artifact.
+  Editing them would falsify provenance.
 
 **Verify before reporting.** `quantfit audit`, `pytest -q`, and `ruff check`/`format`
 on CI's exact paths, before saying it is done. Re-derive any count you are about to
