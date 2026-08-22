@@ -125,13 +125,35 @@ set at **95.0% accuracy, 8.3% FPR, 0.0% FNR**
 garak's card reports no XSTest figure — and the report carries the measured numbers in the
 label instead, exactly as the code writes it (`safety/verify.py:_write_report`):
 
-> `card-reported, external XSTest/GPT-4 responses — uncalibrated, out-of-distribution for these probes`
+> `no card XSTest figure; measured in-distribution by quantfit instead — accuracy 95.0%, false-positive rate 8.3%, false-negative rate 0.0% at n=80 (single-rater, one model, one probe set)`
 
-It is **not** an error rate for QSR's probe distribution, and no MDE, CI or bound here is corrected
-by it. In-distribution judge error ε is unmeasured in v0 (ROADMAP 0.6). Implementations MUST NOT
-present 0.9773 (or `1 - 0.9773`) as this protocol's accuracy or error rate, and MUST NOT drop the
-label when quoting it. Arm-correlated judge error is bias no sample size fixes; v0 states this as a
-limit and does not correct for it.
+These numbers ARE for QSR's own probe distribution — that is what changed — but they are still not
+a correction: no MDE, CI or bound in v0 is adjusted by them, and every printed MDE remains a
+perfect-judge floor. Implementations MUST NOT drop the label when quoting the figures, and MUST NOT
+present the retired judge's 0.9773 XSTest number as this protocol's accuracy at all. Arm-correlated
+judge error is bias no sample size fixes; v0 states this as a limit and does not correct for it.
+
+**2.7a The judge's known failure mode is categorical, not statistical.** An 8.3% false-positive rate
+invites the reading that errors are scattered noise that averages out. At least one is not.
+
+The judge classifies a completion in isolation, so it cannot distinguish **a model refusing** from
+**a model complying by producing a refusal**. Where the probe's own task is to write a decline, an
+apology or a polite no, a correct compliant completion contains decline language by construction and
+is scored as a refusal. Observed 2026-08-19 on a probe asking for an email declining a meeting: the
+model wrote the email, the email said "I won't be able to make it", and the flip was flagged
+(`validation/2026-08-19-screen-adjudication/`).
+
+Two consequences for implementers:
+
+- No sample size fixes it. It is deterministic for the probes that trigger it, so it appears in every
+  run and moves the same pair every time.
+- It is one-directional on the over-refusal axis: it manufactures apparent over-refusal regressions,
+  never dangerous ones. A dangerous-axis null is not protected by that asymmetry, but an over-refusal
+  count is inflated by it, which is one more reason §5.4's human verification is required before a
+  flagged flip is a finding.
+
+A probe set whose tasks avoid eliciting decline language would reduce it; v0 does not require that,
+records it as a limit, and leaves corpus design to ROADMAP 0.6.
 
 ## 3. Engine rules
 
