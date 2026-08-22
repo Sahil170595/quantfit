@@ -555,8 +555,29 @@ def _arm_values(argv: Sequence[str]) -> list[str]:
 
 
 def _refine(subcommand: str, argv: Sequence[str], reqs: set[str]) -> list[str]:
-    """Argument-dependent adjustments. Returns extra human-readable reasons."""
+    """Argument-dependent adjustments. Returns extra human-readable reasons.
+
+    This hook exists because requirements are a property of the INVOCATION, not of the
+    subcommand name. Classifying `verify-safety` as GPU-and-network is right for almost
+    every way it is called and wrong for at least one, and the wrong answer is not
+    harmless: a command filed as unrunnable is never run, so the gate silently stops
+    covering it.
+    """
     extra: list[str] = []
+
+    if subcommand == "verify-safety" and "--demo" in argv:
+        # `--demo` runs the real tabulation over bundled FIXTURES: no model, no network,
+        # no weights, nothing measured (quantfit/cli.py, the --demo help text). It was
+        # filed under c:gpu on the strength of its subcommand's name until 2026-08-21,
+        # which meant the README's SECOND command - the one 0.6.1 added so a reader's
+        # first action costs a second rather than a multi-gigabyte download - was the one
+        # command in that opening the gate declined to run.
+        #
+        # Verified rather than argued: run under HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+        # CUDA_VISIBLE_DEVICES=-1 it exits 0 in under a second.
+        reqs.clear()
+        return ["--demo: bundled fixtures only, no model, no network, no weights"]
+
     if subcommand in ("verify-safety", "gate"):
         arms = _arm_values(argv)
         if arms and all(_gguf_ref(a) for a in arms):
