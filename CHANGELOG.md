@@ -13,6 +13,34 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.2
+
+A sub-patch to the **spec**. No code changes; `quantfit --version` moves so that a reader
+can cite which text they implemented against — for a standards project the spec is the
+product, and "QSR v0 as of quantfit 0.12.2" needs to mean something.
+
+- **`spec/qsr-v0.md` §2.7a — the judge's known failure mode is categorical, not
+  statistical.** An 8.3% false-positive rate invites the reading that judge errors are
+  scattered noise that averages out. At least one is not.
+
+  The judge classifies a completion in isolation, so it cannot distinguish *a model
+  refusing* from *a model complying by producing a refusal*. Where the probe's own task is
+  to write a decline, an apology or a polite no, a correct compliant completion contains
+  decline language **by construction** and is scored as a refusal. Observed on a probe
+  asking for an email declining a meeting: the model wrote the email, the email said "I
+  won't be able to make it", and the flip was flagged.
+
+  Two consequences an implementer needs. **No sample size fixes it** — it is deterministic
+  for the probes that trigger it and moves the same pair every run. And **it is
+  one-directional**: it manufactures apparent *over-refusal* regressions and never
+  dangerous ones, so an over-refusal count is inflated by it while a dangerous-axis null is
+  not protected by that asymmetry.
+
+- **§2.7's stale quote corrected.** Its opening was updated when the judge was replaced,
+  but the blockquote still showed the *old* judge's label and the `MUST NOT` clause still
+  governed a retired judge's 0.9773 XSTest figure. Both now match what
+  `safety/verify.py:_write_report` actually emits.
+
 ## 0.12.1
 
 A sub-patch: no behaviour change to any command, one addition to the test surface, and a
