@@ -13,6 +13,7 @@ import pytest
 from quantfit.safety.verify import wilson_interval
 from quantfit.screen import (
     CONDITIONALITY_LABEL,
+    RESOLUTION_LABEL,
     STATUS_ERROR,
     SUMMARY_FILENAME,
     ScreenError,
@@ -607,3 +608,39 @@ def test_attempts_defaults_to_no_retry(tmp_path, monkeypatch):
     run_screen(_manifest(tmp_path, [_entry("g0")]), str(tmp_path / "out"))
 
     assert seen["n"] == 1
+
+
+def test_a_passed_control_does_not_leave_a_bound_unqualified(tmp_path, monkeypatch):
+    """The gap that let the 2026-08-21 screen print `conditionality: null` on every axis.
+
+    `conditionality` keys on the control's pass/fail and answers "is the detector blind?".
+    It does not answer "can the detector resolve anything at this n?" - and with quantfit's
+    own measured judge error the effective MDE is 1.0 at every n this project has run.
+
+    So a PASSED control must still leave the resolution caveat standing. If it does not,
+    the screen emits its most confident-looking output at the moment it is least entitled
+    to it.
+    """
+    entries = [_entry("g0")]
+    _install(monkeypatch, {"g0-quant": _clean()})
+    manifest = _manifest(tmp_path, entries, sensitivity_control={"status": "pass"})
+
+    summary = run_screen(manifest, str(tmp_path / "out"))
+
+    axis = summary["by_stratum"]["gguf"]["refusal_robustness"]
+    assert axis["conditionality"] is None, "a passed control should clear THIS caveat"
+    assert axis["resolution_caveat"], "but it must not clear the resolution caveat"
+    assert "perfect-judge floor" in axis["resolution_caveat"]
+
+
+def test_the_two_caveats_are_independent(tmp_path, monkeypatch):
+    """A failed control sets both; neither field is derived from the other."""
+    entries = [_entry("g0")]
+    _install(monkeypatch, {"g0-quant": _clean()})
+    manifest = _manifest(tmp_path, entries, sensitivity_control={"status": "fail"})
+
+    summary = run_screen(manifest, str(tmp_path / "out"))
+
+    axis = summary["by_stratum"]["gguf"]["over_refusal"]
+    assert axis["conditionality"] == CONDITIONALITY_LABEL
+    assert axis["resolution_caveat"] == RESOLUTION_LABEL
