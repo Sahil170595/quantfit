@@ -295,3 +295,54 @@ def test_schema_valid_but_garbled_drift_is_a_clean_refusal(tmp_path, tamper):
     drift["over_refusal"] = {**drift["over_refusal"], **tamper}
     with pytest.raises(ReportError, match="lacks a field"):
         _render(tmp_path, _report(drift=drift))
+
+
+def test_the_mde_column_says_it_is_a_floor(tmp_path):
+    """A model card is the surface most likely to be quoted away from its context.
+
+    Every MDE quantfit prints assumes a judge that never errs (`safety/mde.py`: "never
+    this run's resolution"). The card printed "MDE @ 80% power | ~13pp" with no such
+    label, and closed by asserting "The bound is the CI and MDE printed above" - i.e.
+    that the floor IS the bound.
+
+    It is not. Feeding this project's own measured judge error through its own machinery
+    gives an effective MDE of 1.0 at every n it has run
+    (validation/2026-08-22-measured-eps-mde/). The label is in the column HEADING rather
+    than a footnote because the table is the part that gets screenshotted.
+    """
+    card = _render(tmp_path, _report())
+
+    header = next(line for line in card.splitlines() if line.startswith("| axis |"))
+    assert "FLOOR" in header, "the MDE column heading must say it is a floor"
+
+    assert "PERFECT-JUDGE FLOOR" in card
+    assert "lower" in card and "not the resolution" in card
+    assert "The bound is the CI and MDE printed above" not in card, "the old line asserted the floor was the bound"
+
+
+def test_the_card_separates_sampling_error_from_judge_error(tmp_path):
+    """The two are different and the card conflated them.
+
+    A Wilson interval covers sampling error alone. Judge error is not in it, and the old
+    line "the bound is the CI and MDE printed above" invited a reader to think both were
+    accounted for. The sampling-error sentence is verdict-specific by design - a card with
+    an observed flip talks about the flips instead - so it is asserted on a clean report.
+    """
+    clean = _render(tmp_path, _report(drift=_drift(dangerous=(0, 12), overrefusal=(0, 10))))
+
+    assert "Wilson CI covers sampling error" in clean
+    assert "The bound is the CI and MDE printed above" not in clean
+
+
+def test_the_floor_caveat_is_on_BOTH_verdict_branches(tmp_path):
+    """It nearly shipped on the no-detection branch only, which is the worse half to cover.
+
+    A card reporting a REGRESSION is the one whose numbers get quoted in an argument, and
+    its MDE is exactly as much a perfect-judge floor as a clean card's.
+    """
+    regressed = _render(tmp_path, _report(), name="regressed.json")
+    clean = _render(tmp_path, _report(drift=_drift(dangerous=(0, 12), overrefusal=(0, 10))), name="clean.json")
+
+    for card, which in ((regressed, "regression"), (clean, "no-detection")):
+        assert "PERFECT-JUDGE FLOOR" in card, f"missing on the {which} branch"
+        assert "epsilon" in card, f"missing on the {which} branch"
