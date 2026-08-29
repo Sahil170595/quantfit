@@ -55,10 +55,10 @@ authors:
   - family-names: "Kadadekar"
     given-names: "Sahil"
 
-# pyproject.toml `version = "0.12.4"`, and quantfit/__init__.py `__version__ = "0.12.4"`.
+# pyproject.toml `version = "0.12.5"`, and quantfit/__init__.py `__version__ = "0.12.5"`.
 # tests/test_meta.py already pins those two to each other; tests/test_refreports.py
 # pins this line to both, so the citation cannot drift from what the tool ships.
-version: "0.12.4"
+version: "0.12.5"
 
 # pyproject.toml `license = "Apache-2.0"` (PEP 639 SPDX expression); LICENSE is Apache 2.0.
 license: "Apache-2.0"
