@@ -710,7 +710,7 @@ def test_unmeasurable_ungated_axis_does_not_change_the_verdict(monkeypatch):
 # --- the floor labeling ------------------------------------------------------------
 
 
-def test_floor_labeling_is_present_when_epsilon_is_unmeasured(monkeypatch):
+def test_floor_labeling_is_present_when_no_epsilon_is_supplied(monkeypatch):
     decision, _ = _gate(monkeypatch, eps_upper=None)
 
     assert decision["resolution_is_a_floor"] is True  # prominent: top level, not only nested
@@ -724,14 +724,18 @@ def test_floor_labeling_is_present_when_epsilon_is_unmeasured(monkeypatch):
         "statement": decision["eps"]["statement"],
     }
     assert "PERFECT-JUDGE FLOOR" in decision["eps"]["source"]
-    assert "gated on the 0.5 GO" in decision["eps"]["source"]
+    # The source names what is actually true: no epsilon was supplied for THIS RUN. It
+    # must NOT claim none exists -- one was measured 2026-08-18 (verify.JUDGE_MEASURED_*).
+    assert "no epsilon was supplied" in decision["eps"]["source"]
+    assert "HAS been measured" in decision["eps"]["source"]
+    assert "not measured" not in decision["eps"]["source"]
     # The floor is never called a resolved threshold — only "not refused".
     assert decision["resolution"]["verdict"] == RESOLUTION_UNPROVEN
     assert decision["resolution"]["printed_mde_is_a_floor"] is True
     assert decision["exit_code"] == EXIT_PASS
     headline = decision["headline"]
     assert "RESOLUTION IS A LOWER BOUND" in headline
-    assert "perfect-judge floor, judge error UNMEASURED" in headline
+    assert "perfect-judge floor, no epsilon supplied for this run" in headline
     assert "12.6pp" in headline  # the floor itself, printed as the run's number-to-beat
     # The eps = 0 corner is exactly the number the tool already prints.
     from quantfit.safety.verify import detectable_flip_rate

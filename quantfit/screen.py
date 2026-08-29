@@ -95,10 +95,14 @@ CONDITIONALITY_LABEL = "conditional on undemonstrated detection sensitivity"
 # So on 2026-08-21 the screen emitted `conditionality: null` on all four axis blocks -
 # reading as an unqualified bound - at the exact moment the bound was unusable. A passed
 # control had switched the only caveat off. This label is the missing half, and it is
-# keyed on epsilon rather than on the control, so one cannot silence the other.
+# UNCONDITIONAL rather than keyed on the control, so a pass cannot silence it. It is not
+# "keyed on epsilon": nothing here reads one. It clears only when a code path folds a
+# measured epsilon into the bound, and none exists yet.
 RESOLUTION_LABEL = (
-    "printed MDE is a perfect-judge floor; no epsilon has been measured into this bound, "
-    "so the true resolution is coarser by an unknown amount"
+    "printed MDE is a perfect-judge floor; no epsilon has been measured INTO this bound, and the amount "
+    "it is off by is not unknown - at this instrument's measured judge error (per-arm 0.196, false-flip "
+    "bound 0.391) the effective MDE is 1.0 for every n <= 34, i.e. no effect size is detectable at any "
+    "at-risk n this project has run (max 24)"
 )
 
 CONTROL_STATUSES = ("pass", "fail", "unmeasurable", "not_run")
@@ -140,10 +144,12 @@ NOTES = (
     (
         "A PASSED control switches `conditionality` off and does NOT make a bound unqualified. It answers "
         "'is the detector blind?', not 'can it resolve anything at this n?'. Every MDE here is a "
-        "perfect-judge floor, so each axis also carries `resolution_caveat`, keyed on epsilon rather than on "
-        "the control so one cannot silence the other. With quantfit's own measured judge error the effective "
-        "MDE is 1.0 at every n this project has run - no effect size detectable "
-        "(validation/2026-08-22-measured-eps-mde/)."
+        "perfect-judge floor, so each axis also carries `resolution_caveat`. That one is UNCONDITIONAL, not "
+        "keyed on the control and not keyed on epsilon - nothing here reads an epsilon - so a passed control "
+        "cannot silence it. It clears only when some code path folds a measured epsilon into the bound, and "
+        "none exists. With quantfit's own measured judge error (per-arm 0.196, false-flip bound 0.391) the "
+        "effective MDE is 1.0 for every n <= 34, so at every at-risk n this project has run (max 24) no "
+        "effect size is detectable (validation/2026-08-22-measured-eps-mde/)."
     ),
     (
         "A passed control is also qualified by the DEGRADATION LEVEL it passed at. The 2026-08-19 control "

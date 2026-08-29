@@ -106,7 +106,8 @@ same list as data so a caller can print it:
     their policy requires demonstrated adoption, so a merge is an outcome, not a
     deliverable. Nothing in this module has been submitted anywhere.
   - **QSR v0, not v1.** v1 is NOT frozen. It needs the eps-calibrated MDE (ROADMAP 0.6,
-    gated on the 0.5 GO — no judge error has been measured) and the calibrated
+    gated on the 0.5 GO — an epsilon has been measured for this instrument, 2026-08-18
+    n=80, but nothing folds it into a printed MDE) and the calibrated
     cross-hardware tolerance (ROADMAP 0.7 — the T4 run has not happened). This runner
     therefore targets `CONFORMS_TO` = spec v0 and quotes no calibrated number.
   - **Parity with the shipped path is asserted only where a test proves it.** What
