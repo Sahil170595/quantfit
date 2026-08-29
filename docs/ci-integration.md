@@ -73,12 +73,12 @@ jobs:
       - uses: actions/checkout@v7
 
       - id: gate
-        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.12.3
+        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.12.4
         with:
           baseline: Qwen/Qwen2.5-1.5B-Instruct
           quant: ./out/qwen2.5-1.5b-awq
           tier: smoke                    # 30pp — gates >=30pp only, and says so
-          quantfit-version: "==0.12.3"    # the instrument version is part of the measurement
+          quantfit-version: "==0.12.4"    # the instrument version is part of the measurement
           hf-token: ${{ secrets.HF_TOKEN }}
 
       # Runs only on exit 0 — the action fails the job on 2/3/4/5.
@@ -119,7 +119,7 @@ checkout to happen first, and takes no `@ref`:
           quantfit-path: "."     # install the checked-out source instead of PyPI
 ```
 
-Two independent pins, and you want both: `@v0.12.3` pins the *action*, `quantfit-version`
+Two independent pins, and you want both: `@v0.12.4` pins the *action*, `quantfit-version`
 pins the *instrument*. A floating action ref with a pinned instrument is a supply-chain
 hole; a pinned action ref with a floating instrument silently changes what your gate
 measures between releases.

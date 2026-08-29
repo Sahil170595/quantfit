@@ -13,6 +13,40 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.4
+
+A sub-patch to the **model card** — the one surface whose output gets pasted into a public
+Hugging Face card and quoted back. No behaviour changes elsewhere.
+
+- **The card claimed its MDE *was* the bound.** It printed `MDE @ 80% power | ~13pp` with
+  nothing marking it as a floor, and closed with *"The bound is the CI and MDE printed
+  above at this probe set's n"*. That asserts the MDE **is** the bound. It is not. Every
+  MDE this project prints assumes a judge that never errs (`quantfit/safety/mde.py`:
+  "never this run's resolution"), so it is a **lower** bound on the resolution. Feeding
+  quantfit's own measured judge error back through its own machinery gives an effective
+  MDE of 1.0 at every n it has run (`validation/2026-08-22-measured-eps-mde/`).
+
+  `quantfit/gate.py` has carried the correct language since it was written (`gate.py:41`,
+  `:273`, `:349`). The card did not, and the card is the copy that travels.
+
+- **"perfect-judge FLOOR" goes in the table column heading, not a footnote.** The table is
+  the part of a card that gets screenshotted and quoted; a reader who takes only the header
+  row must still not read `~13pp` as this run's resolution.
+
+- **The footer separates sampling error from judge error.** A Wilson interval covers
+  sampling error alone, and the old wording invited a reader to think both were accounted
+  for.
+
+- **The floor caveat is unconditional — it is on both verdict branches.** It nearly shipped
+  on the no-detection branch only, which is the worse half to leave uncovered: a card
+  reporting a **regression** is the one whose numbers get quoted in an argument, and its
+  MDE is exactly as much a floor as a clean card's.
+  `test_the_floor_caveat_is_on_BOTH_verdict_branches` pins this.
+
+  Not in scope, and deliberately so: `quantfit/safety/verify.py:249` builds the verdict
+  *string* the card prints verbatim, which carries the same unlabelled MDE. It is a field
+  comparison records diff, so it earns its own patch.
+
 ## 0.12.3
 
 A sub-patch. One field added to the screen's axis blocks; no behaviour changes elsewhere.
