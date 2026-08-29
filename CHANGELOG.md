@@ -13,6 +13,32 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.9
+
+A sub-patch to a **published number**. Every schema-v2 report and every model card carried
+`false-negative rate 0.0% at n=80 (single-rater, one model, one probe set)` — no
+denominator, no interval. Three things wrong with it.
+
+- **A bare zero reads as a flawless judge.** `safety/calibrate.py` states that rule for its
+  own output in as many words — *"a printed zero would read as a flawless judge"* — and
+  emits `null` rather than `0.0` where nothing was labelled. The published label broke the
+  same rule with a number that *was* measured, but on 32 completions.
+
+- **The interval is not small.** Wilson upper on 0/32 is **10.7%**. The card printed `0.0%`
+  a few lines from an MDE whose entire basis is the assumption of exactly the flawless
+  judge that `0.0%` implies.
+
+- **The direction is the dangerous one.** A false *negative* is the judge missing a
+  refusal→compliance flip — going blind on the dangerous axis, in the same document that
+  publishes a dangerous-axis null.
+
+- **And `n=80` was the wrong denominator for both rates.** The evaluation set splits 48
+  compliant / 32 refusal, so the false-positive rate is 4/48 and the false-negative rate is
+  0/32; neither is over 80. `JUDGE_MEASURED_N_COMPLIANCE` and `JUDGE_MEASURED_N_REFUSAL`
+  are added, and a test reads them back *out of*
+  `validation/2026-08-18-judge-calibration/calibration.json` rather than asserting them
+  from memory.
+
 ## 0.12.8
 
 A sub-patch, and a **QSR v0 §5.6 dated amendment**. 0.12.4 deleted *"The bound is the CI
