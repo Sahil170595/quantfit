@@ -129,3 +129,43 @@ def test_no_doc_asserts_the_instrument_has_no_measured_epsilon():
                 offenders.append(f"{path.relative_to(_ROOT)}:{i + 1}: {claim!r}")
     joined = chr(10).join(offenders)
     assert not offenders, f"docs asserting no epsilon exists; one was measured 2026-08-18:{chr(10)}{joined}"
+
+
+# --- the judge's own error, as published ------------------------------------------
+
+
+def test_the_published_judge_label_never_shows_a_bare_zero():
+    """`calibrate.py` refuses to print 0.0 for an unmeasured rate because "a printed zero
+    would read as a flawless judge". The label on every report and model card printed
+    exactly that for eight releases: "false-negative rate 0.0% at n=80", no denominator
+    and no interval.
+
+    Wilson upper on 0/32 is 10.7%, and a false negative is the judge MISSING a
+    refusal->compliance flip -- going blind on the dangerous axis, in the same document
+    that publishes a dangerous-axis null.
+    """
+    from quantfit.safety.verify import _measured_judge_label
+
+    label = _measured_judge_label()
+
+    assert "0.0% on 32 refusals" in label, "the false-negative rate needs its denominator"
+    assert "95% CI upper 10.7%" in label, "a measured zero needs its interval"
+    assert "not a flawless judge" in label
+    # The two rates have DIFFERENT denominators; neither is n=80.
+    assert "8.3% on 48 compliant completions" in label
+    assert "0.0% at n=80" not in label, "the pre-2026-08-28 wording"
+
+
+def test_the_label_denominators_match_the_calibration_artifact():
+    """The denominators are re-checkable against the run record, not asserted from memory."""
+    import json
+
+    from quantfit.safety.verify import JUDGE_MEASURED_N_COMPLIANCE, JUDGE_MEASURED_N_REFUSAL
+
+    record = json.loads(
+        (_ROOT / "validation" / "2026-08-18-judge-calibration" / "calibration.json").read_text(encoding="utf-8")
+    )["evaluation_set"]
+
+    assert JUDGE_MEASURED_N_COMPLIANCE == record["n_compliance"]
+    assert JUDGE_MEASURED_N_REFUSAL == record["n_refusal"]
+    assert JUDGE_MEASURED_N_COMPLIANCE + JUDGE_MEASURED_N_REFUSAL == record["n_completions"]

@@ -298,7 +298,7 @@ The invariants a PR must not quietly move:
   **and** a supersession of that document — two gates, not one (§5.4).
 - **Capture is opt-in, off by default, and cannot change a run.** It is written after
   the drift and after the report, from values the run already computed
-  (`quantfit/safety/verify.py:427-481`, *"Nothing above this call sees `path`"*). A
+  (`quantfit/safety/verify.py:474-528`, *"Nothing above this call sees `path`"*). A
   data-handling choice must never become a measurement variable.
 - **Every capture file carries its warning in the file**, not only in the docs
   (`verify.CAPTURE_WARNING`, `verify.py:110`), so a file copied away from the command
