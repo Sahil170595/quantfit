@@ -13,6 +13,31 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.10
+
+A sub-patch to the **spec**, closing a parity gap that let a published field ship
+undocumented for three releases.
+
+- **`resolution_caveat` was in every `screen-summary.json` from 0.12.3 and in no spec
+  section.** `quantfit audit`'s `schema_field_parity` walks *doc* tokens and checks each
+  one is emitted; it never walks the emitted set to check each one is documented, so a
+  field added to a published artifact with no spec entry passes silently.
+
+- **`spec/qsr-v0.md` §6 now describes it**, with the rule that matters stated normatively:
+  the two caveat fields are **independent** and neither may be derived from the other.
+  `conditionality` answers *"is the detector blind?"* and keys on the control;
+  `resolution_caveat` answers *"can the detector resolve anything at this n?"* and keys on
+  ε. A passed control clears the first and MUST NOT clear the second — what went wrong on
+  2026-08-21 — and an implementation MUST carry both to any human-readable rendering —
+  what went wrong again in `cli.py` until 0.12.5.
+
+- **The general fix was tried and rejected on evidence.** A reverse direction in
+  `schema_field_parity` reporting emitted-but-undocumented produced **533 warnings**,
+  because `_emitted_keys` returns every dict literal in a module and most are internal.
+  Shipping that would be worse than the gap it closes. This is the scoped version: a test
+  pinning the one table that actually broke, in both directions. A general check needs a
+  real notion of "artifact surface" and is not this patch.
+
 ## 0.12.9
 
 A sub-patch to a **published number**. Every schema-v2 report and every model card carried
