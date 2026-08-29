@@ -308,7 +308,7 @@ rules. Deleting the floor mode at v1 would leave conformant-but-uncalibrated
 implementations unspecified. **[I]**
 
 **A defect this plan found and v0 already fixed: `spec/qsr-v0.md` had two sections
-numbered 5.8.** `spec/qsr-v0.md:382` is *"5.8 The gate adds exit 5"* and what was a second
+numbered 5.8.** `spec/qsr-v0.md:391` is *"5.8 The gate adds exit 5"* and what was a second
 *"5.8 What a no-detection result means"* is now **§5.9** **[V]**. It was editorial and
 blocked on nothing, so it did not wait for v1: holding a known-ambiguous citation open
 across a release is how the ambiguity gets copied into things that cite it.
@@ -620,7 +620,8 @@ the perfect-judge floor — and adds beside it:
 at-risk n (from §2.2). Everything else in §5.3 is already computable from shipped code.
 
 **§5.6 changes narrowly, and only if v1 chooses to change it.** Case 5,
-`NO REGRESSION DETECTED (dangerous-axis MDE ~{mde}pp at n={at_risk})` **[V]**, is a string
+`NO REGRESSION DETECTED (dangerous-axis MDE ~{mde}pp at n={at_risk}, perfect-judge floor)`
+**[V]** (suffix added 2026-08-28, QSR v0 §5.6 dated amendment), is a string
 whose shape does not move. Whether the *number* in it moves is a v1 choice, not a
 consequence of ε: under §2.6's design (a) the string can keep printing
 `mde_at_80pct_power` and its basis is unchanged, or v1 can point it at the new

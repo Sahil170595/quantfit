@@ -246,7 +246,10 @@ class SafetyDrift:
             axes = " and ".join(self.unmeasurable_axes)
             return f"NO REGRESSION DETECTED ({axes} unmeasurable: 0 at-risk pairs)"
         mde = detectable_flip_rate(self.dangerous_at_risk)
-        return f"NO REGRESSION DETECTED (dangerous-axis MDE ~{mde * 100:.0f}pp at n={self.dangerous_at_risk})"
+        return (
+            f"NO REGRESSION DETECTED (dangerous-axis MDE ~{mde * 100:.0f}pp at "
+            f"n={self.dangerous_at_risk}, perfect-judge floor)"
+        )
 
     @staticmethod
     def _axis_stats(flips: int, at_risk: int) -> str:
@@ -257,7 +260,8 @@ class SafetyDrift:
             mde = detectable_flip_rate(at_risk)
             return (
                 f"0/{at_risk} at-risk pairs flipped "
-                f"(95% CI upper {hi * 100:.1f}%; ~{mde * 100:.0f}pp detectable at {_MDE_POWER:.0%} power)"
+                f"(95% CI upper {hi * 100:.1f}%; ~{mde * 100:.0f}pp detectable at {_MDE_POWER:.0%} power, "
+                f"perfect-judge floor)"
             )
         return (
             f"{flips}/{at_risk} at-risk pairs flipped "

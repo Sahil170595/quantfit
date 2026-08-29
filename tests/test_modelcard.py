@@ -10,7 +10,7 @@ from quantfit.safety.verify import detectable_flip_rate, wilson_interval
 
 _TF_ENGINE = {"name": "transformers", "version": "5.10.1", "device": "cpu"}
 _LCPP_ENGINE = {"name": "llama.cpp", "binary_sha256": "b" * 64, "source": "pinned", "threads": 8, "device": "cpu"}
-_VERDICT = "NO REGRESSION DETECTED (dangerous-axis MDE ~13pp at n=12)"
+_VERDICT = "NO REGRESSION DETECTED (dangerous-axis MDE ~13pp at n=12, perfect-judge floor)"
 
 
 def _axis(flips, at_risk, flip_key):
@@ -213,10 +213,15 @@ def test_provenance_carries_pins_and_the_uncalibrated_label(tmp_path):
     assert "none (local artifact, no Hub commit)" in md  # the quantized arm has no revision
 
 
-def test_footer_states_the_bound_on_a_no_detection_report(tmp_path):
+def test_footer_refuses_to_certify_on_a_no_detection_report(tmp_path):
+    """Renamed 2026-08-28. It was `..._states_the_bound_...` and asserted the card said
+    a no-detection result "bounds the drift" -- which is the claim the card no longer
+    makes, because nothing on it was doing that bounding."""
     clean = _drift(overrefusal=(0, 10))  # nothing flipped on either axis
     md = _render(tmp_path, _report(drift=clean))
-    assert "Measured over 40 curated probes; a no-detection result bounds the drift, it does not certify safety." in md
+    assert "Measured over 40 curated probes." in md
+    assert "does not certify safety" in md
+    assert "a weaker bound than it looks" in md
 
 
 def test_footer_on_a_detection_never_uses_no_detection_language(tmp_path):
@@ -330,7 +335,7 @@ def test_the_card_separates_sampling_error_from_judge_error(tmp_path):
     """
     clean = _render(tmp_path, _report(drift=_drift(dangerous=(0, 12), overrefusal=(0, 10))))
 
-    assert "Wilson CI covers sampling error" in clean
+    assert "the Wilson CI covers SAMPLING error only" in clean
     assert "The bound is the CI and MDE printed above" not in clean
 
 
@@ -346,3 +351,31 @@ def test_the_floor_caveat_is_on_BOTH_verdict_branches(tmp_path):
     for card, which in ((regressed, "regression"), (clean, "no-detection")):
         assert "PERFECT-JUDGE FLOOR" in card, f"missing on the {which} branch"
         assert "epsilon" in card, f"missing on the {which} branch"
+
+
+def test_the_clean_branch_names_what_actually_does_the_bounding(tmp_path):
+    """It used to assert "a no-detection result bounds the drift" and name nothing.
+
+    After the floor caveat landed, the card said in one breath that the CI covers
+    sampling error alone and the MDE is a floor -- and in the next that the result
+    "bounds the drift". Nothing on the card was doing that bounding.
+    """
+    clean = _render(tmp_path, _report(drift=_drift(dangerous=(0, 12), overrefusal=(0, 10))))
+
+    assert "a no-detection result bounds the drift" not in clean
+    assert "SAMPLING error only" in clean
+    assert "Nothing here accounts for judge error" in clean
+
+
+def test_a_regression_card_carries_the_DETECTION_leg_of_the_floor(tmp_path):
+    """The floor points opposite ways on the two legs, and a card reporting a flip
+    was given only the leg that reads as extra conservatism.
+
+    `gate.py`'s FLOOR_CAVEAT_DETECTION is the load-bearing half here: at eps = 0 the
+    rejection threshold is the smallest it can be, so the floor makes declaring a flip
+    EASIEST, and the alpha is a lower bound on the true type-I risk.
+    """
+    regressed = _render(tmp_path, _report())  # default fixture has a flip
+
+    assert "WRONG WAY on detection" in regressed
+    assert "lower bound on the true type-I risk" in regressed
