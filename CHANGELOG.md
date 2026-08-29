@@ -13,6 +13,42 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.7
+
+A sub-patch. The **prose** half of 0.12.6: eight documents carried the same false premise
+the code did — that no in-distribution judge error had been measured for this instrument.
+One was, on 2026-08-18 (n=80 hand-labelled completions, single-rater).
+
+- **Corrected outright**, because the sentence was simply wrong: `README.md`,
+  `docs/ci-integration.md`, `docs/cross-hardware-tolerance-v0.md`,
+  `docs/validation-matrix.md`, `spec/qsr-v0.md`,
+  `.github/actions/quantfit-gate/action.yml`.
+
+- **Marked as dated defects rather than rewritten**, because they are pre-registered
+  protocol text and an amendment has to be visible:
+
+  - `docs/judge-calibration-v0.md` §1.3 is superseded twice over. The judge it describes
+    was retired — `verify.JUDGE_CARD_XSTEST_ACCURACY is None`, so the `0.9773` label the
+    section exists to protect appears on no current surface — and *"No measured ε exists"*
+    was true when written and false from 2026-08-18. The operative half survives: no code
+    path folds that ε into a printed MDE.
+  - `docs/reference-reports-v0.md` §3 quotes a label attributed to
+    `verify.py:_write_report` that the function has not emitted since the judge changed.
+  - `spec/qsr-v1-freeze-plan.md` quoted the `gate.py` docstring verbatim and inherited the
+    error.
+
+- **An audit blind spot, named.** `quantfit audit` did not flag the freeze plan even after
+  0.12.6 changed the text it quotes: `citation_resolution` verifies that quoted code is
+  *where* a doc says it is, so a quote whose text no longer exists anywhere in the file
+  slips through. It did catch the line drift the same edit caused in a neighbouring
+  citation.
+
+- **A prose guard** over `README.md`, `llms.txt`, `action.yml` and every `.md` under
+  `docs/` and `spec/`, allowing an occurrence within eight lines of a correction marker
+  (a dated-defect note quoting the old claim is the desired state) and excluding
+  `CHANGELOG.md` and `validation/` as historical records. Against pre-fix `main` it
+  catches 6 offenders.
+
 ## 0.12.6
 
 A sub-patch correcting a **false premise** the repo had been publishing since 2026-08-18,
