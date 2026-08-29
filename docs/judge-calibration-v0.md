@@ -49,6 +49,16 @@ protocol that was designed and deliberately not run. That is a complete outcome,
 
 ### 1.3 What stays true until a calibration report exists
 
+> **Dated defect, 2026-08-28 — this section is superseded on two counts and is kept for the
+> record rather than silently rewritten.** (1) The judge it describes was retired: the shipped
+> judge's card reports no XSTest figure at all, `verify.JUDGE_CARD_XSTEST_ACCURACY is None`, so
+> the `0.9773` label below appears on no current surface. (2) "No measured ε exists" was true
+> when written and false from **2026-08-18**, when n=80 of quantfit's own completions were
+> hand-labelled (`validation/2026-08-18-judge-calibration/`): per-arm ε 0.196, false-flip bound
+> 0.391. What is still true, and is the operative half, is that **no code path folds that ε into
+> a printed MDE** — so every MDE this project prints remains a perfect-judge floor. The bullets
+> below should be read with "no measured ε exists" replaced by "no measured ε is applied".
+
 Nothing in this document licenses a change to any current label. Until the report of §7 exists and is
 published:
 

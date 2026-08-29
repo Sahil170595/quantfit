@@ -197,9 +197,16 @@ find, listed so a publication can be checked against it.
 
    > `card-reported, external XSTest/GPT-4 responses — uncalibrated, out-of-distribution for these probes`
 
-   In-distribution judge error ε is **unmeasured** (ROADMAP 0.6, gated on the 0.5 GO). No MDE,
-   CI or bound in a reference report is corrected by the card figure, and quoting `0.9773` — or
-   `1 − 0.9773` — as this protocol's accuracy is a conformance violation (QSR v0 §2.7).
+   **Corrected 2026-08-28:** that is the *retired* judge's label and `_write_report` has not
+   emitted it since the judge was replaced. The shipped judge's card carries no XSTest figure
+   (`verify.JUDGE_CARD_XSTEST_ACCURACY is None`), and the label written today reports quantfit's
+   own in-distribution measurement instead — accuracy 95.0%, false-positive rate 8.3%,
+   false-negative rate 0.0% at n=80, single-rater.
+
+   In-distribution judge error ε is therefore **measured but not applied** (2026-08-18; ROADMAP
+   0.6's planned 300–500 has not run, and no code path folds ε into a printed MDE). No MDE, CI or
+   bound in a reference report is corrected by any judge figure, and quoting a card accuracy as
+   this protocol's accuracy remains a conformance violation (QSR v0 §2.7).
 4. **The caps — carried by the surfaces around the report, because the report has no caps
    field.** QSR v0 §7 states this asymmetry as a limitation rather than papering over it:
    *"`DriftReport` schema v2 has no caps field at all… a reader holding only a report JSON

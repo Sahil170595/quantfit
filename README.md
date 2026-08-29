@@ -255,8 +255,9 @@ rejection, so the gate prints the flip count *and* the detection threshold and
 leaves the arithmetic auditable. Exit 0 pass, 3 fail, 4 the gated axis measured
 nothing, 5 unresolvable, 2 operational — **4 and 5 are not passes**.
 
-Because no in-distribution judge error has been measured yet (that is ROADMAP
-0.6, gated on the 0.5 GO), the printed MDE is labeled a perfect-judge **floor** —
+An in-distribution judge error **has** been measured for this instrument (2026-08-18,
+n=80, single-rater — narrower than ROADMAP 0.6's planned 300–500, so 0.6 is not done),
+but nothing folds it into a printed MDE. So the printed MDE is labeled a perfect-judge **floor** —
 a lower bound on the true resolution, never the resolution — unless you supply
 `--eps-upper` with an `--eps-source`. The floor cuts both ways and the gate says
 both: optimistic about resolution, and permissive about detection (at ε=0 the

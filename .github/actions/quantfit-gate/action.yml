@@ -304,7 +304,7 @@ runs:
         # the boundary a third party edits, and an epsilon that arrives without a source
         # label is indistinguishable from a measured one once it is in the artifact.
         if [ -n "$EPS_UPPER" ] && [ -z "$EPS_SOURCE" ]; then
-          echo "::error::eps-upper requires eps-source. No judge error has been measured (ROADMAP 0.6),"
+          echo "::error::eps-upper requires eps-source. This action folds in no epsilon of its own,"
           echo "::error::so the source label is the only thing separating an operator assumption from a measurement."
           exit 2
         fi

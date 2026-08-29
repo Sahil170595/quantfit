@@ -138,10 +138,16 @@ declines to invent — both omissions written into the file as comments **[V]**.
 - `quantfit/gate.py` already runs both modes and labels which one it is in
   (`EPS_MODE_OPERATOR` / `EPS_MODE_FLOOR`, `gate.py:260-261`) **[V]**.
 
-**What is missing: ε.** Stated by the code itself, not paraphrased —
-`gate.py:26-29`: *"**No judge error has been measured for this instrument.**
-In-distribution epsilon is ROADMAP 0.6's hand-labeling of 300-500 completions, gated on
-the 0.5 GO, which has not run"* **[V]**. `safety/report.py:27` says the same
+**What is missing: ε *applied*.** Corrected 2026-08-28 — until then this section said ε
+was missing outright, quoting a `gate.py` docstring that had itself been wrong since
+2026-08-18. An ε **has** been measured for this instrument (2026-08-18, n=80
+hand-labelled completions, single-rater: per-arm 0.196, false-flip bound 0.391, at which
+`effective_mde` is 1.0 for every n ≤ 34). It is narrower than ROADMAP 0.6's planned
+300-500, so 0.6 is not done, and **no code path folds it into a printed MDE** — which is
+the thing v1 actually needs. Stated by the code itself, not paraphrased —
+`gate.py:27-28`: *"An in-distribution judge error HAS been measured for this
+instrument"*, and *"What remains unmeasured is not the judge's error rate; it is this
+run's resolution under it"* **[V]**. `safety/report.py:27` says the same
 ("calibration is ROADMAP 0.6, gated on the 0.5 GO") **[V]**, and
 `docs/judge-calibration-v0.md:3-5` opens with *"Status: machinery, **not started**. …
 No completion has been labeled, no ε has been measured"* **[V]**.
@@ -723,7 +729,7 @@ the interval method** makes reports **not** comparable **[V]**.
 
 | trigger | does v1's ε-calibrated MDE touch it? | evidence |
 |---|---|---|
-| judge | **No.** Calibration *measures* the pinned judge; it does not replace it. The pin `b34061f9…` is unchanged | `calibrate.py:60-63` scopes a report to its own judge revision **[V]**; `judge-calibration-v0.md:52-53` "Nothing in this document licenses a change to any current label" **[V]** |
+| judge | **No.** Calibration *measures* the pinned judge; it does not replace it. The pin `b34061f9…` is unchanged | `calibrate.py:60-63` scopes a report to its own judge revision **[V]**; `judge-calibration-v0.md:62-63` "Nothing in this document licenses a change to any current label" **[V]** |
 | probe set | **Not by ε — but yes by the milestone that supplies ε** | ROADMAP 0.6 bundles calibration with corpus v2, `clear_unsafe` 12 → 60+ (`ROADMAP.md:65,70`) **[V]** |
 | judge input contract | **No.** ε is measured on the identical contract | §2.3 above **[V]** |
 | at-risk definitions | **No.** `mde.py` builds on the same definition `verify.py` uses | `mde.py:53-56` **[V]** |
