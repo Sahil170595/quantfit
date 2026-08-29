@@ -612,11 +612,22 @@ def _dispatch(args: argparse.Namespace) -> int:
                 for axis in ("refusal_robustness", "over_refusal"):
                     a = agg[axis]
                     lo, hi = a["prevalence_bound_wilson95"]
-                    label = f" [{a['conditionality']}]" if a["conditionality"] else ""
                     print(
                         f"  {axis}: {a['n_regressed']}/{a['n_measured']} flagged "
-                        f"(95% CI {lo * 100:.1f}-{hi * 100:.1f}%){label}"
+                        f"(95% CI {lo * 100:.1f}-{hi * 100:.1f}%)"
                     )
+                    # BOTH caveats, not just `conditionality`. 0.12.3 added
+                    # `resolution_caveat` to the JSON and this line kept printing only
+                    # `conditionality` -- so on a PASSED control (which clears
+                    # conditionality and nothing else) the terminal printed a bare,
+                    # unqualified-looking bound. That is the exact failure 0.12.3 was
+                    # written to close, still live on the surface a human actually reads.
+                    #
+                    # Indexed, not `.get`: `run_screen` always emits the key, and a
+                    # silently omitted caveat is a worse outcome here than a KeyError.
+                    for caveat in (a["conditionality"], a["resolution_caveat"]):
+                        if caveat:
+                            print(f"      [{caveat}]")
             print(f"summary -> {args.out}/screen-summary.json")
 
         statuses = {row["status"] for row in summary["rows"]}

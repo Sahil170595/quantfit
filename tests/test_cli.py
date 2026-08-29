@@ -194,12 +194,15 @@ def test_verify_exit_code_for_failed_smoke(monkeypatch):
 
 
 def _screen_summary(status, n_measured=1, n_regressed=0):
+    import quantfit.screen as sc_mod
+
     axis = {
         "n_measured": n_measured,
         "n_regressed": n_regressed,
         "n_regressed_human_verified": 0,
         "prevalence_bound_wilson95": [0.0, 1.0],
         "conditionality": None,
+        "resolution_caveat": sc_mod.RESOLUTION_LABEL,
     }
     return {
         "rows": [{"status": status}],
@@ -423,3 +426,37 @@ def test_value_error_still_surfaces_raw(monkeypatch):
     monkeypatch.setattr(cli, "_dispatch", boom)
     with pytest.raises(ValueError, match="bug in the harness"):
         cli.main(["list"])
+
+
+def test_screen_stdout_carries_the_resolution_caveat_when_the_control_PASSED(monkeypatch, capsys):
+    """A passed control clears `conditionality` and nothing else, so before 0.12.5 the
+    terminal printed a bare bound at exactly the moment the bound was unusable.
+
+    This is the human-readable half of the 0.12.3 fix, which landed in the JSON only.
+    """
+    import quantfit.screen as sc
+
+    summary = _screen_summary("no_regression")  # conditionality None == control PASSED
+    monkeypatch.setattr(sc, "run_screen", lambda *a, **k: summary)
+    main(["screen", "--targets", "t.json", "--out", "d"])
+
+    out = capsys.readouterr().out
+    assert "perfect-judge floor" in out
+    assert sc.RESOLUTION_LABEL in out
+    # The bound itself is still printed; the caveat is added, not substituted.
+    assert "95% CI" in out
+
+
+def test_screen_stdout_prints_BOTH_caveats_when_the_control_FAILED(monkeypatch, capsys):
+    """Neither caveat may swallow the other: they answer different questions."""
+    import quantfit.screen as sc
+
+    summary = _screen_summary("no_regression")
+    for axis in ("refusal_robustness", "over_refusal"):
+        summary["by_stratum"]["gguf"][axis]["conditionality"] = sc.CONDITIONALITY_LABEL
+    monkeypatch.setattr(sc, "run_screen", lambda *a, **k: summary)
+    main(["screen", "--targets", "t.json", "--out", "d"])
+
+    out = capsys.readouterr().out
+    assert sc.CONDITIONALITY_LABEL in out, "control caveat missing"
+    assert sc.RESOLUTION_LABEL in out, "resolution caveat missing"
