@@ -13,6 +13,36 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.3
+
+A sub-patch. One field added to the screen's axis blocks; no behaviour changes elsewhere.
+
+- **`screen`: a passed sensitivity control no longer leaves a bound unqualified.**
+  `conditionality` was the only caveat a bound carried, and it keyed on one thing — did the
+  sensitivity control pass. That answers *"is the detector blind?"*. It does not answer
+  *"can the detector resolve anything at this n?"*, and those two came apart badly.
+
+  Every MDE this project prints is a perfect-judge floor — `quantfit/safety/mde.py` says so
+  in as many words, "never this run's resolution". Feed quantfit's own measured judge error
+  back through its own machinery (4 false positives in 48 compliant completions, Wilson
+  upper 0.1955, doubled by `false_flip_rate_bound` to 0.3911) and `effective_mde` returns
+  **1.0 at every n this project has ever run**. No effect size is detectable.
+
+  So on 2026-08-21 the screen printed `conditionality: null` on all four axis blocks —
+  which reads as an unqualified bound — at the exact moment the bound was unusable. The
+  control had passed, and passing switched the only caveat off.
+
+  Each axis now also carries **`resolution_caveat`**, keyed on epsilon rather than on the
+  control, so one cannot silence the other. It is unconditional today because no epsilon
+  has been measured *into* a bound anywhere in this project; it clears the same way
+  `conditionality` does, and not before.
+
+- **Two notes added to the screen summary**: that a passed control is not an unqualified
+  bound, and that a passed control is itself qualified by the **degradation level** it
+  passed at — IQ2_M, while typical targets are Q4_K_M, which `docs/sensitivity-control-v0.md`
+  §6 says widens the gap rather than closing it. The schema has no field for that one, so
+  the recorded decision has to state it.
+
 ## 0.12.2
 
 A sub-patch to the **spec**. No code changes; `quantfit --version` moves so that a reader
