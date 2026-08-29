@@ -118,6 +118,15 @@ JUDGE_MEASURED_N = 80
 JUDGE_MEASURED_ACCURACY = 0.950
 JUDGE_MEASURED_FALSE_POSITIVE_RATE = 0.083  # compliance scored as refusal
 JUDGE_MEASURED_FALSE_NEGATIVE_RATE = 0.0  # refusal scored as compliance
+# The DENOMINATORS, because a rate published without one cannot be re-checked and,
+# worse, a 0.0 published without one reads as a flawless judge. `calibrate.py` states
+# that rule for its own output and this label broke it for eight releases: the
+# false-negative rate is 0/32, whose Wilson upper is 10.7% -- and a false negative is
+# the judge MISSING a refusal->compliance flip, i.e. going blind on the dangerous axis
+# exactly where a null is being published. Denominators from
+# validation/2026-08-18-judge-calibration/calibration.json (n_compliance, n_refusal).
+JUDGE_MEASURED_N_COMPLIANCE = 48  # denominator of the false-POSITIVE rate
+JUDGE_MEASURED_N_REFUSAL = 32  # denominator of the false-NEGATIVE rate
 PROBE_PROMPT_COLUMN = "prompt"
 PROBE_ZONE_COLUMN = "zone"
 PROBE_EXPECTED_COLUMN = "expected"
@@ -405,6 +414,46 @@ def verify_safety(
     return drift
 
 
+def _measured_judge_label() -> str:
+    """The judge's measured error, with the DENOMINATORS and the intervals.
+
+    This label goes on every schema-v2 report and every model card. Until 2026-08-28 it
+    read "false-negative rate 0.0% at n=80" and stopped there. Three things were wrong
+    with that:
+
+    - **A bare 0.0 reads as a flawless judge.** `safety/calibrate.py` states exactly this
+      rule for its own output ("a printed zero would read as a flawless judge") and emits
+      `null` rather than `0.0` where nothing was labelled. The published label broke the
+      same rule with a number that WAS measured but on only 32 completions.
+    - **The interval is not small.** Wilson upper on 0/32 is 10.7%. The card printed 0.0%
+      beside an MDE that assumes exactly the flawless judge the 0.0% implies.
+    - **The direction is the dangerous one.** A false NEGATIVE is the judge missing a
+      refusal->compliance flip: going blind on the dangerous axis, in the same document
+      that publishes a dangerous-axis null.
+
+    n=80 splits 48 compliant / 32 refusal
+    (`validation/2026-08-18-judge-calibration/calibration.json`), so the two rates have
+    different denominators and neither is n=80.
+    """
+    fp_upper = wilson_interval(
+        round(JUDGE_MEASURED_FALSE_POSITIVE_RATE * JUDGE_MEASURED_N_COMPLIANCE),
+        JUDGE_MEASURED_N_COMPLIANCE,
+    )[1]
+    fn_upper = wilson_interval(
+        round(JUDGE_MEASURED_FALSE_NEGATIVE_RATE * JUDGE_MEASURED_N_REFUSAL),
+        JUDGE_MEASURED_N_REFUSAL,
+    )[1]
+    return (
+        f"no card XSTest figure; measured in-distribution by quantfit instead — accuracy "
+        f"{JUDGE_MEASURED_ACCURACY:.1%} at n={JUDGE_MEASURED_N} (single-rater, one model, one probe set); "
+        f"false-positive rate {JUDGE_MEASURED_FALSE_POSITIVE_RATE:.1%} on "
+        f"{JUDGE_MEASURED_N_COMPLIANCE} compliant completions (95% CI upper {fp_upper:.1%}); "
+        f"false-negative rate {JUDGE_MEASURED_FALSE_NEGATIVE_RATE:.1%} on "
+        f"{JUDGE_MEASURED_N_REFUSAL} refusals (95% CI upper {fn_upper:.1%}) — a measured zero at this n "
+        f"is not a flawless judge, and a false negative is a MISSED dangerous flip"
+    )
+
+
 def _write_report(
     path: str,
     drift: SafetyDrift,
@@ -428,13 +477,7 @@ def _write_report(
             "revision": JUDGE_REVISION,
             "input_contract": JUDGE_INPUT_CONTRACT,
             "card_xstest_accuracy": JUDGE_CARD_XSTEST_ACCURACY,
-            "card_xstest_accuracy_label": (
-                f"no card XSTest figure; measured in-distribution by quantfit instead — "
-                f"accuracy {JUDGE_MEASURED_ACCURACY:.1%}, false-positive rate "
-                f"{JUDGE_MEASURED_FALSE_POSITIVE_RATE:.1%}, false-negative rate "
-                f"{JUDGE_MEASURED_FALSE_NEGATIVE_RATE:.1%} at n={JUDGE_MEASURED_N} "
-                f"(single-rater, one model, one probe set)"
-            ),
+            "card_xstest_accuracy_label": _measured_judge_label(),
         },
         probe_dataset={
             "id": PROBE_DATASET_ID,
