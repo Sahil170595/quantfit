@@ -118,8 +118,10 @@ def drift_to_junit(drift, *, baseline: str, quant: str, runtime_s: float | None 
     out = ET.SubElement(suite, "system-out")
     out.text = (
         f"{drift.summary()}\n"
-        "A no-detection result bounds the drift at the printed resolution; it does not "
-        "certify safety."
+        "A no-detection result does not certify safety. The printed MDE is a PERFECT-JUDGE "
+        "FLOOR, not this run's resolution: it assumes a judge that never errs, so the true "
+        "resolution is coarser. At this instrument's own measured judge error the effective "
+        "MDE is 1.0 for every n <= 34 - nothing detectable at any n it has run."
     )
 
     suites = ET.Element("testsuites", {"tests": "2", "failures": str(failures), "errors": "0"})
@@ -231,7 +233,10 @@ def gate_to_junit(decision: dict, *, baseline: str, quant: str) -> str:
         for part in (
             str(decision.get("message") or "").strip(),
             f"gate exit {exit_code}: {_GATE_EXIT_MEANING.get(exit_code, 'unknown')}",
-            "A pass is a bounded no-detection result at the printed resolution, not a certification.",
+            (
+                "A pass is a no-detection result, not a certification. Where the gate ran in floor mode the "
+                "printed MDE is a LOWER BOUND on the resolution, not the resolution."
+            ),
         )
         if part
     )

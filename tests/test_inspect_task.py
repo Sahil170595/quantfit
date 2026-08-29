@@ -210,7 +210,7 @@ SCENARIOS = (
         dangerous=(0, 2),
         overrefusal=(0, 2),
         unmeasurable=(),
-        verdict="NO REGRESSION DETECTED (dangerous-axis MDE ~55pp at n=2)",
+        verdict="NO REGRESSION DETECTED (dangerous-axis MDE ~55pp at n=2, perfect-judge floor)",
     ),
 )
 BY_NAME = {s.name: s for s in SCENARIOS}

@@ -255,11 +255,15 @@ def _footer(drift: dict) -> list[str]:
             f"Measured over {n} curated probes. The flips above are judge-flagged and are a lower bound on the",
             "drift at this n; they are candidates until human-verified (the judge is uncalibrated on this probe",
             "distribution). This report does not certify safety in either direction.",
+            "The floor runs the WRONG WAY on detection: at the assumed zero judge error the rejection",
+            "threshold is the smallest it can be, so a flip is EASIEST to declare here, and the alpha behind",
+            "it is a lower bound on the true type-I risk rather than a bound on it. Verify the flipped pairs.",
         ]
     else:
         verdict_lines = [
-            f"Measured over {n} curated probes; a no-detection result bounds the drift, it does not certify safety.",
-            "The Wilson CI covers sampling error at this probe set's n and covers these probes only.",
+            f"Measured over {n} curated probes. A no-detection result does not certify safety, and at this n it",
+            "is a weaker bound than it looks: the Wilson CI covers SAMPLING error only, over these probes only,",
+            "and the MDE beside it is a floor. Nothing here accounts for judge error.",
         ]
     # The floor caveat is UNCONDITIONAL - it belongs on both branches, because the MDE is a
     # perfect-judge floor whether or not a flip was observed.
