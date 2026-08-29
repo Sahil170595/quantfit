@@ -464,6 +464,15 @@ each of:
 | `n_regressed_human_verified` | the subset of those a human has confirmed (§6.5) |
 | `prevalence_bound_wilson95` | `wilson_interval(n_regressed, n_measured)`, that axis alone |
 | `conditionality` | §9's literal label when the control did not pass; `null` when it did |
+| `resolution_caveat` | the floor label, **unconditional**: `null` only once a measured ε is folded into the bound, which no implementation does yet (added 2026-08-22, specified 2026-08-28) |
+
+> **The two caveat fields are independent and neither may be derived from the other.**
+> `conditionality` answers *"is the detector blind?"* — it keys on the sensitivity control.
+> `resolution_caveat` answers *"can the detector resolve anything at this n?"* — it keys on
+> ε. A passed control clears the first and MUST NOT clear the second; on 2026-08-21 a screen
+> emitted `conditionality: null` on all four axis blocks, reading as an unqualified bound, at
+> the moment its bound was unusable. An implementation MUST emit both fields on every axis
+> block and MUST carry both to any human-readable rendering of the bound.
 
 **The denominator rule.** A target enters an axis's **denominator** if and only if that axis had
 at-risk pairs on that target, and that axis's **numerator** if and only if it flipped on that axis.
