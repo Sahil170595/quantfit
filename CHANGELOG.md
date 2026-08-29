@@ -13,6 +13,46 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.8
+
+A sub-patch, and a **QSR v0 §5.6 dated amendment**. 0.12.4 deleted *"The bound is the CI
+and MDE printed above"* from the model card; three surfaces kept saying it, two of them
+louder.
+
+- **The verdict string.** `verify.py` built `NO REGRESSION DETECTED (dangerous-axis MDE
+  ~13pp at n=12)` — copied verbatim into `drift.verdict`, screen `rows[].verdict`, JUnit,
+  and the bolded `**Verdict:**` line of the model card, where it sat *two lines above* a
+  column already headed "perfect-judge FLOOR". The most-quoted sentence this tool produces
+  was the one contradicting the fix. It now carries `, perfect-judge floor`, as does
+  `_axis_stats`' `~13pp detectable at 80% power`.
+
+  This was called out of scope in 0.12.4 on the grounds that comparison records diff the
+  field. They do not — `reproduce.py`'s T2 compares verdict **class** from fields and never
+  the string, by design. The caution was unfounded.
+
+- **`spec/qsr-v0.md` §5.6 amended, dated.** Case 5 is normative and now carries the suffix.
+  The sentence introducing the list called that number *"their own resolution"* — the
+  overclaim was in the normative text — and now says *"their own MDE"*. Reports written
+  before 2026-08-28 stay conformant; new ones MUST carry the suffix.
+
+- **JUnit.** *"A no-detection result bounds the drift at the printed resolution"* — the
+  identical assertion, in the artifact a **green CI run** publishes, which is the most
+  likely place for a pass to be mistaken for a certificate. Both suites fixed.
+
+- **The card's clean branch** still said *"a no-detection result bounds the drift"* while
+  the lines beneath it said the CI covers sampling error only and the MDE is a floor: it
+  asserted a bound and named nothing that produced one.
+
+- **The card's regression branch** carried only the *resolution* leg of the floor, which
+  reads as extra conservatism. On the **detection** leg the floor runs the other way — at
+  ε = 0 the rejection threshold is the smallest it can be, so a flip is *easiest* to
+  declare and the alpha is a lower bound on the true type-I risk, not a bound on it. On a
+  card reporting a regression that is the load-bearing half, and it was missing.
+
+- One test was **renamed**: `test_footer_states_the_bound_on_a_no_detection_report`
+  asserted that the card said a no-detection result "bounds the drift" — a test pinning
+  the defect in place.
+
 ## 0.12.7
 
 A sub-patch. The **prose** half of 0.12.6: eight documents carried the same false premise
