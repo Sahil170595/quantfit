@@ -644,3 +644,33 @@ def test_the_two_caveats_are_independent(tmp_path, monkeypatch):
     axis = summary["by_stratum"]["gguf"]["over_refusal"]
     assert axis["conditionality"] == CONDITIONALITY_LABEL
     assert axis["resolution_caveat"] == RESOLUTION_LABEL
+
+
+def test_the_axis_block_and_the_spec_field_table_agree_in_BOTH_directions():
+    """`resolution_caveat` shipped in three releases with no spec entry.
+
+    `quantfit audit`'s schema_field_parity walks DOC tokens and checks each is emitted; it
+    never walks the emitted set to check each is documented, so a field added to a
+    published artifact with no spec entry passes silently. A general reverse check was
+    tried and produced 533 warnings -- `_emitted_keys` returns every dict literal in the
+    module, most of them internal -- so this is the scoped version: the one table that
+    actually broke, pinned exactly.
+    """
+    import inspect
+    import pathlib
+    import re
+
+    import quantfit.screen as sc
+
+    emitted = set(re.findall(r'"([a-z_0-9]+)":', inspect.getsource(sc._axis_aggregate)))
+
+    spec = (pathlib.Path(__file__).resolve().parent.parent / "spec" / "qsr-v0.md").read_text(encoding="utf-8")
+    table = spec[spec.index("| `n_measured` |") :]
+    table = table[: table.index("\n\n")]
+    documented = set(re.findall(r"^\| `([a-z_0-9]+)` \|", table, flags=re.MULTILINE))
+
+    assert emitted == documented, (
+        f"spec §6 and _axis_aggregate disagree — "
+        f"emitted but undocumented: {sorted(emitted - documented)}; "
+        f"documented but not emitted: {sorted(documented - emitted)}"
+    )
