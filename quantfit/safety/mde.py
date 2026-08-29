@@ -11,14 +11,20 @@ false-flip bound derived from the judge's error, an exact-binomial rejection
 threshold built on that bound, and the minimum detectable effect the threshold
 actually buys.
 
-**Nothing here measures epsilon, and nothing here starts the work that would.**
-In-distribution judge error is ROADMAP 0.6's hand-labeling of 300-500 of quantfit's
-own completions, which is gated on the 0.5 GO decision and has not run. No epsilon
-has been measured for this instrument; the judge card's XSTest figure is
-out-of-distribution and is explicitly not one (`spec/qsr-v0.md` §2.7). Every epsilon
-this module consumes is a caller-supplied INPUT — which is why `mde_block` requires
-an `eps_source` string: an MDE computed from a hypothetical epsilon must say on its
-face that that is what it is.
+**Nothing here measures epsilon** — but one HAS been measured for this instrument, and
+this docstring denied it from 2026-08-18 to 2026-08-28. See
+`validation/2026-08-18-judge-calibration/` and the `JUDGE_MEASURED_*` constants in
+`verify.py`: n = 80 hand-labelled completions from a real paired run, single-rater,
+per-arm epsilon 0.196, false-flip bound 0.391. Fed back through `effective_mde` below
+that bound gives **1.0 for every n <= 34** — no effect size detectable at any at-risk n
+this project has run (max 24, `validation/2026-08-22-measured-eps-mde/`).
+
+It is narrower than ROADMAP 0.6's planned 300-500 completions, so 0.6 is not done, and
+nothing in this repo folds it into a printed MDE automatically. Every epsilon this
+module consumes is still a caller-supplied INPUT — which is why `mde_block` requires an
+`eps_source` string: an MDE computed from a hypothetical epsilon must say on its face
+that that is what it is. The judge card's XSTest figure remains out-of-distribution and
+is explicitly not an epsilon (`spec/qsr-v0.md` §2.7).
 
 --------------------------------------------------------------------------------
 ## The model, derived

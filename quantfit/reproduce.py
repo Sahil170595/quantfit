@@ -13,8 +13,9 @@ named with **both sides' numbers** so a breach is auditable from the artifact al
 ## that look adjacent and are not true yet
 
   - **It does not freeze QSR v1, and nothing here is calibrated.** v1 needs an
-    epsilon-calibrated MDE (ROADMAP 0.6, gated on the 0.5 GO — no judge error has been
-    measured) and a *calibrated* cross-hardware tolerance. The tolerance this module
+    epsilon-calibrated MDE (ROADMAP 0.6, gated on the 0.5 GO — an epsilon HAS been
+    measured for this instrument, 2026-08-18 n=80, but no code path folds it into a
+    printed MDE) and a *calibrated* cross-hardware tolerance. The tolerance this module
     implements is **v0 protocol**: `docs/cross-hardware-tolerance-v0.md` states in its
     own front matter that **nothing in it has been run**. No T4 reproduction exists, no
     cross-hardware pair of reports exists, and no cross-hardware discordance rate has
@@ -592,8 +593,11 @@ NOTES = (
         "A REPRODUCTION IS AN AGREEMENT CLAIM, NEVER A CORRECTNESS CLAIM (§5.6, §6.4). The tolerance is a "
         "statement about two runs of one instrument and is epsilon-free by construction — T1 pins the judge to "
         "one revision on both sides, so whatever the judge's error rate is, it is that rate identically on both. "
-        "In-distribution judge error is UNMEASURED (QSR v0 §2.7; ROADMAP 0.6, gated on the 0.5 GO), so every MDE "
-        "in either report is the perfect-judge floor: a LOWER bound on the true resolution, not the resolution."
+        "No epsilon is folded into either report, so every MDE "
+        "in either report is the perfect-judge floor: a LOWER bound on the true resolution, not the resolution. "
+        "One HAS been measured for this instrument (2026-08-18, n=80, single-rater: per-arm 0.196, false-flip "
+        "bound 0.391), and at it the effective MDE is 1.0 for every n <= 34 - so at the n these reports run, "
+        "agreement between them is agreement between two numbers neither of which resolves anything."
     ),
     (
         "NET-COUNT BASIS (§1.4). Schema v2 carries no per-probe rows, so T1-T5 are computed on net stratified "

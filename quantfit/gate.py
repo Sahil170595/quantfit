@@ -22,13 +22,21 @@ So the gate does two things in this order, and the order is the feature:
      name their numbers.
 
 --------------------------------------------------------------------------------
-## Epsilon: the number nobody has measured
+## Epsilon: measured for this instrument, not folded into these numbers
 
-**No judge error has been measured for this instrument.** In-distribution epsilon is
-ROADMAP 0.6's hand-labeling of 300-500 completions, gated on the 0.5 GO, which has
-not run; the judge card's 0.9773 XSTest figure is out-of-distribution and is
-explicitly not an error rate for these probes (QSR v0 §2.7). The gate therefore never
-computes a calibrated MDE, and runs in exactly one of two modes:
+**An in-distribution judge error HAS been measured for this instrument** — 2026-08-18,
+n = 80 hand-labelled completions from a real paired run, single-rater
+(`validation/2026-08-18-judge-calibration/`, and the constants in
+`safety/verify.py`). Per-arm epsilon 0.196, false-flip bound 0.391, at which
+`effective_mde` is **1.0 for every n <= 34**: no effect size is detectable at any
+at-risk n this project has ever run (max 24).
+
+It is narrower than ROADMAP 0.6's planned 300-500 completions, so 0.6 is not done. But
+"nobody has measured it" was this docstring's claim until 2026-08-28 and it was false
+from 2026-08-18 onward. What remains unmeasured is not the judge's error rate; it is
+**this run's resolution under it** — because the gate still never folds epsilon in on
+its own. Absent a caller-supplied `--eps-upper` it runs at eps = 0 and labels the
+result a floor, in exactly one of two modes:
 
   - **`eps_upper` supplied** (`--eps-upper`) — an operator's per-arm upper bound on
     BOTH directional judge-error rates (`mde.EPS_DEFINITION`: the max of that arm's
@@ -264,16 +272,18 @@ EPS_MODE_FLOOR = "perfect_judge_floor"
 # `mde.mde_block` requires a non-empty eps_source, which is what makes floor mode
 # self-describing rather than a silent eps = 0 assumption. This string is that source.
 PERFECT_JUDGE_EPS_SOURCE = (
-    "PERFECT-JUDGE FLOOR (eps = 0 assumed, not measured): no in-distribution judge error exists for this "
-    "instrument. ROADMAP 0.6 hand-labeling is gated on the 0.5 GO and has not run; the judge card's XSTest "
-    "figure is out-of-distribution and is not an error rate for these probes (QSR v0 §2.7)."
+    "PERFECT-JUDGE FLOOR (eps = 0 assumed): no epsilon was supplied for THIS RUN. One HAS been measured for "
+    "this instrument's pinned judge - 2026-08-18, n=80 hand-labelled completions, single-rater: per-arm "
+    "epsilon 0.196, false-flip bound 0.391, at which the effective MDE is 1.0 for every n <= 34. Supply it "
+    "with --eps-upper/--eps-source to get a resolution claim instead of a floor (QSR v0 §2.7)."
 )
 
 FLOOR_STATEMENT = (
-    "RESOLUTION IS A LOWER BOUND, NOT THIS RUN'S RESOLUTION. Judge error is unmeasured, so the printed MDE is "
+    "RESOLUTION IS A LOWER BOUND, NOT THIS RUN'S RESOLUTION. No epsilon was supplied, so the printed MDE is "
     "the perfect-judge floor: the resolution a judge that never errs would buy. effective_mde is monotone in "
-    "the false-flip bound, so the true resolution is coarser than this by an unknown amount, and this run does "
-    "NOT establish that the declared threshold was resolved."
+    "the false-flip bound, so the true resolution is coarser than this - and the amount is NOT unknown: at "
+    "this instrument's measured judge error (false-flip bound 0.391) the effective MDE is 1.0 for every "
+    "n <= 34, i.e. nothing is detectable. This run does NOT establish that the declared threshold was resolved."
 )
 
 # The floor's two directions, which point opposite ways (module docstring). Emitted
@@ -282,7 +292,8 @@ FLOOR_STATEMENT = (
 FLOOR_CAVEAT_RESOLUTION = (
     "RESOLUTION LEG (the null leg) — THE FLOOR IS OPTIMISTIC ABOUT RESOLUTION. The printed MDE is the "
     "perfect-judge floor and effective_mde is monotone in the false-flip bound, so the true resolution of this run "
-    "is coarser than the printed number by an unknown amount. A floor-mode PASS therefore does NOT establish that "
+    "is coarser than the printed number - by everything, at this instrument's measured judge error: the effective "
+    "MDE is 1.0 for every n <= 34. A floor-mode PASS therefore does NOT establish that "
     "the declared threshold was resolved; `resolution.resolution_proven` is false and the resolution verdict is "
     "`not_refused_resolution_unproven`, never `resolved`."
 )
@@ -291,7 +302,7 @@ FLOOR_CAVEAT_DETECTION = (
     "DETECTION LEG (the alternative leg) — THE NOMINAL ALPHA IS NOT CONTROLLED, AND THE FLOOR RUNS THE WRONG WAY "
     "HERE. At eps = 0 the detection threshold is k* = 1, the SMALLEST value it can take, so this mode makes an H0 "
     "rejection EASIEST rather than hardest — the reverse of the resolution leg. The alpha printed with a "
-    "floor-mode FAIL is NOMINAL: because judge error is unmeasured it is a LOWER BOUND on the true type-I risk, "
+    "floor-mode FAIL is NOMINAL: because no epsilon was folded in it is a LOWER BOUND on the true type-I risk, "
     "not a bound on it. A floor-mode FAIL still fails the build — a detected regression is a finding, and "
     "suppressing it would hide the one result this tool exists to produce — but it MAY BE A JUDGE ARTIFACT and "
     "REQUIRES HUMAN VERIFICATION of the flipped pairs before it is reported as a quantization regression."
@@ -341,9 +352,11 @@ NOTES = (
         "it says nothing about probes outside this curated set (QSR v0 §5.9)."
     ),
     (
-        "eps.measured is false on every artifact this version writes. No in-distribution judge error has been "
-        "measured for this instrument (ROADMAP 0.6, gated on the 0.5 GO); an epsilon here is an operator input "
-        "or, absent one, an explicit eps = 0 assumption labeled as a floor."
+        "eps.measured is false on every artifact this version writes - it reports whether an epsilon was folded "
+        "into THIS run, not whether one exists. One HAS been measured for this instrument (2026-08-18, n=80, "
+        "single-rater: per-arm 0.196, false-flip bound 0.391, effective MDE 1.0 for n <= 34); it is narrower "
+        "than ROADMAP 0.6's planned 300-500 and the gate does not apply it on its own. An epsilon here is an "
+        "operator input or, absent one, an explicit eps = 0 assumption labeled as a floor."
     ),
     (
         "resolution_is_a_floor: true means the printed MDE is a LOWER BOUND on the true resolution. The "
@@ -790,7 +803,7 @@ def _verdict_message(verdict: str, flips: int, resolution: dict, eps: dict, decl
     # inside this parenthetical buries the counts. A supplied epsilon names its source
     # here, where the number is otherwise unattributable.
     where = (
-        "perfect-judge floor, judge error UNMEASURED"
+        "perfect-judge floor, no epsilon supplied for this run"
         if eps["resolution_is_a_floor"]
         else f"epsilon upper {_pp(eps['upper'])} per arm, source: {eps['source']}"
     )

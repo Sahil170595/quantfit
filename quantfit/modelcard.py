@@ -276,5 +276,8 @@ def _footer(drift: dict) -> list[str]:
     return verdict_lines + [
         "The MDE is a PERFECT-JUDGE FLOOR: it assumes a judge that never errs, so it is a lower",
         "bound on this run's resolution, not the resolution. No measured judge error (epsilon) has",
-        "been folded into it, and the true resolution is coarser by an unknown amount.",
+        "been folded into it — and the amount it is off by is NOT unknown. quantfit's own judge was",
+        "measured in-distribution (n=80, single-rater): per-arm epsilon 0.196, false-flip bound 0.391,",
+        "at which the effective MDE is 1.0 for every n <= 34. At the n above, no effect size is",
+        "detectable. Treat the number in that column as a floor over a resolution that is not yet shown.",
     ]

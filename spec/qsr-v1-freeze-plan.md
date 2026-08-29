@@ -133,8 +133,8 @@ declines to invent — both omissions written into the file as comments **[V]**.
   "per-arm upper bound on BOTH directional judge-error rates", and `mde.py:43-52`
   states that an arm's *marginal* error rate "is NOT that number and must not be passed
   here" **[V]**. The test is `TEST_DESCRIPTION = "one-sided exact binomial upper tail on
-  observed flips among at-risk pairs"` (`mde.py:241`) **[V]**, with
-  `PRE_REGISTERED_EFFECT_SIZES = (0.05, 0.10, 0.15, 0.30)` (`mde.py:237`) **[V]**.
+  observed flips among at-risk pairs"` (`mde.py:247`) **[V]**, with
+  `PRE_REGISTERED_EFFECT_SIZES = (0.05, 0.10, 0.15, 0.30)` (`mde.py:243`) **[V]**.
 - `quantfit/gate.py` already runs both modes and labels which one it is in
   (`EPS_MODE_OPERATOR` / `EPS_MODE_FLOOR`, `gate.py:260-261`) **[V]**.
 
@@ -706,7 +706,7 @@ statement of what it *did* add.
 All already in code; the appendix is transcription. `mde.PRE_REGISTERED_EFFECT_SIZES` =
 `(0.05, 0.10, 0.15, 0.30)`, `mde.TEST_DESCRIPTION`, `mde.EPS_DEFINITION`
 (`mde.py:237,241,246`) **[V]**; `gate.EXIT_UNRESOLVABLE = 5` and its four siblings
-(`gate.py:216-224`) **[V]**; `gate.GATE_SCHEMA_VERSION = 1` (`gate.py:212`) **[V]**;
+(`gate.py:216-224`) **[V]**; `gate.GATE_SCHEMA_VERSION = 1` (`gate.py:221`) **[V]**;
 `gate.SMOKE_THRESHOLD = 0.30` / `FULL_THRESHOLD = 0.15` **iff** §1.5's tier decision makes
 them normative (`gate.py:407-408`) **[V]**; `screen.CONDITIONALITY_LABEL` **[V]**. Plus,
 from measurement: per-arm ε_upper, and the corpus-v2 pin and counts.
@@ -755,7 +755,7 @@ quantity computed the same way from the same input, and **on that key they are
 comparable**. What v1 adds is a *second*, differently-named, ε-conditioned field carrying
 `effective_mde(n, ε_upper)` — strictly larger than the floor, because `effective_mde` is
 monotone in the false-flip bound and "any real epsilon can only make it worse"
-(`gate.py:43-44`) **[V]**. That field has **no v0 counterpart**: v0 reports simply lack
+(`gate.py:51-52`) **[V]**. That field has **no v0 counterpart**: v0 reports simply lack
 it, visibly, and a mixed table shows it as its own column with the v0 rows empty. Nothing
 is rebased under an existing key, and no reader has to know which spec version produced a
 row in order to read either column correctly. **[I]**

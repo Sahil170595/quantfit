@@ -141,7 +141,8 @@ CURRENT_SPEC_VERSION = "v0"
 # "v1" is deliberately ABSENT. QSR v0 §10.3: "v0 is explicitly not frozen: QSR v1
 # (ROADMAP 0.8) is the frozen citable standard, adding eps-calibrated MDE, per-format
 # runtime/baseline policy, calibrated cross-hardware tolerance and the decision rules a
-# gate needs." None of those inputs exists: judge error eps is unmeasured (ROADMAP 0.6,
+# gate needs." Those inputs do not exist AS CALIBRATED INPUTS: an epsilon has been measured
+# for this instrument (2026-08-18, n=80) but nothing folds it into a printed MDE (ROADMAP 0.6,
 # gated on the 0.5 GO) and the cross-hardware tolerance is uncalibrated (no T4 run —
 # docs/cross-hardware-tolerance-v0.md §6.1). Adding "v1" here is a reviewed edit that
 # lands WITH the frozen spec file, never before it; `tests/test_refreports.py` pins its
@@ -287,7 +288,9 @@ class ReferenceReport:
             f"has not published (known: {'/'.join(KNOWN_SPEC_VERSIONS)}). A report bound to an unknown spec version "
             "cannot be dated, so its validity is undefined rather than valid. Note in particular that 'v1' is NOT a "
             "known version: QSR v0 §10.3 records v0 as explicitly not frozen, and QSR v1 (ROADMAP 0.8) needs the "
-            "eps-calibrated MDE and the calibrated cross-hardware tolerance, neither of which has been measured.",
+            "eps-calibrated MDE and the calibrated cross-hardware tolerance, neither of which is emitted. An "
+            "epsilon HAS been measured for this instrument (2026-08-18, n=80); no code path folds it into a "
+            "printed MDE, and the tolerance is uncalibrated outright.",
         )
         _require(
             isinstance(self.report_sha256, str) and bool(_SHA256_HEX.fullmatch(self.report_sha256)),
