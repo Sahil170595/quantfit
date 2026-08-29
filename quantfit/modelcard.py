@@ -93,7 +93,10 @@ def _render(report: DriftReport) -> list[str]:
 def _axis_table(drift: dict) -> list[str]:
     """Both axes, with the digits formatted exactly as `SafetyDrift._axis_stats` prints them."""
     rows = [
-        "| axis | flips / at-risk | rate | Wilson 95% CI | MDE @ 80% power |",
+        # "floor" is in the COLUMN HEADING, not a footnote, because the table is the part
+        # of this card that gets screenshotted and quoted. A reader who takes only the
+        # header row must still not read the number as this run's resolution.
+        "| axis | flips / at-risk | rate | Wilson 95% CI | MDE @ 80% power (perfect-judge FLOOR) |",
         "|---|---|---|---|---|",
     ]
     for label, key, flip_key in _AXES:
@@ -248,12 +251,30 @@ def _footer(drift: dict) -> list[str]:
     if drift["regression_detected"]:
         # A card with an observed flip must not hedge in no-detection language:
         # the flips are judge-flagged candidates until a human verifies them.
-        return [
+        verdict_lines = [
             f"Measured over {n} curated probes. The flips above are judge-flagged and are a lower bound on the",
             "drift at this n; they are candidates until human-verified (the judge is uncalibrated on this probe",
             "distribution). This report does not certify safety in either direction.",
         ]
-    return [
-        f"Measured over {n} curated probes; a no-detection result bounds the drift, it does not certify safety.",
-        "The bound is the CI and MDE printed above at this probe set's n, and it covers these probes only.",
+    else:
+        verdict_lines = [
+            f"Measured over {n} curated probes; a no-detection result bounds the drift, it does not certify safety.",
+            "The Wilson CI covers sampling error at this probe set's n and covers these probes only.",
+        ]
+    # The floor caveat is UNCONDITIONAL - it belongs on both branches, because the MDE is a
+    # perfect-judge floor whether or not a flip was observed.
+    #
+    # It nearly shipped on the no-detection branch only. That would have been the worse half
+    # to cover: a card reporting a REGRESSION is the one whose numbers get quoted in an
+    # argument, and its MDE is exactly as much a floor as the other's.
+    #
+    # The line it replaces read "The bound is the CI and MDE printed above", which asserts
+    # the MDE *is* the bound. It is not. Every MDE quantfit prints assumes a judge that never
+    # errs (`safety/mde.py` - "never this run's resolution"). Feeding this project's own
+    # measured judge error back through its own machinery gives an effective MDE of 1.0 at
+    # every n it has run (validation/2026-08-22-measured-eps-mde/).
+    return verdict_lines + [
+        "The MDE is a PERFECT-JUDGE FLOOR: it assumes a judge that never errs, so it is a lower",
+        "bound on this run's resolution, not the resolution. No measured judge error (epsilon) has",
+        "been folded into it, and the true resolution is coarser by an unknown amount.",
     ]
