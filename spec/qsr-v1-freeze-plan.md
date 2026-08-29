@@ -109,7 +109,7 @@ a verified fact. The true state: `CITATION.cff` is on disk on `release/0.8`, CFF
 and `tests/test_refreports.py` parses it, checks CFF 1.2.0's four required keys, and pins
 its `version` to `pyproject.toml` and `quantfit/__init__.py` **[V]**.
 
-**Its only version field is a *software* version — `version: "0.12.10"`, tracking
+**Its only version field is a *software* version — `version: "0.12.11"`, tracking
 `pyproject.toml` release by release — and it names no spec version at all** **[V]**. The
 durable claim is the pin, not the digits: the test re-reads all three on every run, so the
 value here is a snapshot and the pin is the invariant. That is what makes the file exempt
@@ -924,7 +924,7 @@ it.** The rule is scoped to artifacts that name a **spec** version, and it is am
 say so explicitly: *an artifact naming only a software version is outside step 9 and may
 land at any time; an artifact naming a spec version may not precede step 8.* `CITATION.cff`
 landed in this PR, ahead of steps 1–8 **[V]**, and is exempt on exactly that ground — its
-sole version field is `version: "0.12.10"`, the tool version, pinned to `pyproject.toml` and
+sole version field is `version: "0.12.11"`, the tool version, pinned to `pyproject.toml` and
 `quantfit/__init__.py` by `tests/test_refreports.py` **[V]**, and it names no spec version
 anywhere **[V]**. This is an amendment, not a deviation: a citation file that cites the
 *software* has nothing to wait for, while one that cites a frozen spec version before that

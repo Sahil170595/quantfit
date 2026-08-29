@@ -13,6 +13,28 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.11
+
+A sub-patch to the **public record**. No code changes.
+
+- **The two documents that publish the 2026-08-21 screen still led with the reading
+  0.12.3–0.12.10 disproved.** `validation/2026-08-21-screen-complete/README.md` opened
+  with *"no bound carries a conditionality label — the sensitivity control passed"*, and
+  `docs/validation-matrix.md` printed the same as the result. Neither mentioned the
+  2026-08-22 finding at all. `CLAUDE.md` §1 requires a public copy to be corrected the same
+  day; this was seven days late.
+
+- Both now carry a dated correction stating what the run does **not** establish: at
+  quantfit's own measured judge error the effective MDE is 1.0 for every n ≤ 34 and the
+  largest at-risk n in this run is 12, so no effect size was detectable on any axis.
+  `0/12` with a bound of `0.0–24.2%` is *the detector did not fire*, not *nothing is
+  there* — and at this n it could not have fired at any prevalence.
+
+- **The JSON under `validation/` is deliberately untouched.** It is the run record of what
+  the tool emitted on 2026-08-21, and editing it would falsify provenance. Its axis blocks
+  carry no `resolution_caveat` because the field did not exist yet; the README now says to
+  read them against the correction.
+
 ## 0.12.10
 
 A sub-patch to the **spec**, closing a parity gap that let a published field ship
