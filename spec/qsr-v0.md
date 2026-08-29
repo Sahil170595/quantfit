@@ -669,7 +669,7 @@ runtime/baseline policy, calibrated cross-hardware tolerance and the decision ru
 unmodified including the verbatim judge input contract; enforces the §3 engine mandates as refusals;
 emits schema-v2 reports carrying every §4 field; computes §5 statistics with Wilson intervals and the
 stated MDE; honors the §5.7 exit codes, and — if it ships a threshold gate — §5.8's exit 5 and its
-resolution-refusal duty, including the floor disclosure while judge error is unmeasured; aggregates
+resolution-refusal duty, including the floor disclosure while no epsilon is folded in; aggregates
 screens per axis and per stratum as §6 defines; and applies §7's cap disclosure to everything it
 publishes and §9's conditionality labeling to every screen bound.
 

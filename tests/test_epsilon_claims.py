@@ -86,3 +86,46 @@ def pytest_approx(value, rel=1e-9):
     from pytest import approx
 
     return approx(value, rel=rel)
+
+
+# --- prose ------------------------------------------------------------------------
+#
+# The same claim lived in eight docs, and none of the checks in this repo look at prose.
+# `quantfit audit` reads doc *citations* -- it verifies that quoted code is where a doc
+# says it is -- so it happily passed a doc asserting the opposite of a constant.
+#
+# Occurrences are allowed where the doc is CORRECTING itself: the repo's rule is that an
+# amendment must be visible, so a dated-defect note that quotes the old false claim is the
+# desired state, not a violation. `CHANGELOG.md` and `validation/` are excluded outright --
+# they are historical records, and editing them would falsify provenance.
+
+_ROOT = _SRC.parent
+_PROSE = ("README.md", "llms.txt", ".github/actions/quantfit-gate/action.yml")
+_PROSE_DIRS = ("docs", "spec")
+_CORRECTION_MARKERS = ("corrected 2026-", "dated defect", "was true when written", "and it was false")
+
+
+def _prose_files():
+    for name in _PROSE:
+        path = _ROOT / name
+        if path.exists():
+            yield path
+    for directory in _PROSE_DIRS:
+        yield from sorted((_ROOT / directory).rglob("*.md"))
+
+
+def test_no_doc_asserts_the_instrument_has_no_measured_epsilon():
+    offenders = []
+    for path in _prose_files():
+        lines = path.read_text(encoding="utf-8").splitlines()
+        lowered = [line.lower() for line in lines]
+        for i, line in enumerate(lowered):
+            for claim in _FALSE_CLAIMS:
+                if claim not in line:
+                    continue
+                window = " ".join(lowered[max(0, i - 8) : i + 9])
+                if any(marker in window for marker in _CORRECTION_MARKERS):
+                    continue  # the doc is correcting itself, which is the point
+                offenders.append(f"{path.relative_to(_ROOT)}:{i + 1}: {claim!r}")
+    joined = chr(10).join(offenders)
+    assert not offenders, f"docs asserting no epsilon exists; one was measured 2026-08-18:{chr(10)}{joined}"

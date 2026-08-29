@@ -17,9 +17,12 @@ does, your build fails.** Everything below follows from that.
 
 ## 1. Read this before you wire anything up
 
-**No judge error has been measured yet.** In-distribution judge error ε is ROADMAP 0.6
-(hand-labeling 300–500 completions), gated on the 0.5 GO/NO-GO, which has not run.
-Consequences you inherit:
+**An epsilon has been measured for this instrument, and nothing applies it for you.**
+On 2026-08-18 quantfit hand-labelled n=80 of its own completions from a real paired run
+(single-rater): per-arm ε **0.196**, false-flip bound **0.391**. At that bound
+`effective_mde` is **1.0 for every n ≤ 34** — no effect size detectable at any at-risk n
+this project has run. It is narrower than ROADMAP 0.6's planned 300–500, so 0.6 is not
+done, and **no code path folds it into a printed MDE**. Consequences you inherit:
 
 - Unless you supply an epsilon upper bound yourself, the gate runs in **perfect-judge
   floor** mode: the printed MDE is `effective_mde(n, 0.0)` — a **lower bound** on the true

@@ -1317,7 +1317,7 @@ consumer reads instead of prose, plus the evidence that produced it.
     "dtype pin: <Option A code change landed at <ref> | Option B, GGUF stratum: ROADMAP 0.7's 'dtype pinned fp16 on all arms' is NOT MET and is unreachable on this stratum (the quantized arm's resolved_dtype is its quant file type); substituted per-arm cross-report resolved_dtype + artifact_sha256 equality (T1). Recorded as a deviation, not a satisfaction (§3.3)>"
   ],
   "labels": {
-    "judge_calibration": "in-distribution judge error unmeasured (QSR v0 §2.7); every MDE quoted is the perfect-judge floor, a LOWER bound on the true MDE",
+    "judge_calibration": "in-distribution judge error measured 2026-08-18 (n=80, single-rater, per-arm 0.196) but folded into nothing; every MDE quoted is the perfect-judge floor, a LOWER bound on the true MDE",
     "scope": "this record reproduces ONE report at ONE stratum cap; no extrapolation past that cap (QSR v0 §6.6)"
   }
 }
