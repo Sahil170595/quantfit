@@ -13,6 +13,29 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.5
+
+A sub-patch. The `screen`'s **terminal** output now carries the caveat 0.12.3 added to its
+JSON. Found by a blind adversarial review of the published surfaces.
+
+- **0.12.3 fixed the artifact and not the screen.** It gave each axis block a
+  `resolution_caveat` so that a passed sensitivity control could no longer switch off the
+  only qualifier a bound carried. `quantfit/cli.py:615` still read
+
+  ```python
+  label = f" [{a['conditionality']}]" if a["conditionality"] else ""
+  ```
+
+  so on a **passed** control — which clears `conditionality` and nothing else — the
+  terminal printed `refusal_robustness: 0/12 flagged (95% CI 0.0-24.2%)` with no qualifier
+  at all. That is the exact failure 0.12.3 was written to close, still live on the surface
+  a human actually reads, and it is the same `0/12` the 2026-08-21 screen published.
+
+  The 0.12.3 tests asserted on the JSON, so they stayed green while the human-readable
+  output was wrong. Both caveats now print, one per line, neither able to swallow the
+  other. Indexed rather than `.get`: `run_screen` always emits the key, and a silently
+  omitted caveat is a worse outcome here than a `KeyError`.
+
 ## 0.12.4
 
 A sub-patch to the **model card** — the one surface whose output gets pasted into a public
