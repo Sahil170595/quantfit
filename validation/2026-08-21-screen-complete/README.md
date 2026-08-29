@@ -1,8 +1,37 @@
 # The 0.5 screen, complete — 14 of 15 measured — 2026-08-21
 
+> ## Correction, 2026-08-28 — read this before the bounds below
+>
+> **The headline below is wrong in the way that matters, and it stayed public for seven
+> days.** It reports that no bound carries a conditionality label as though that made the
+> bounds unqualified. It did not. `conditionality` keys on one thing — did the sensitivity
+> control pass — which answers *"is the detector blind?"* and not *"can the detector
+> resolve anything at this n?"*.
+>
+> On **2026-08-22** those two came apart (`validation/2026-08-22-measured-eps-mde/`).
+> quantfit's own judge error, measured in-distribution on 2026-08-18, gives a per-arm ε of
+> 0.196 and a false-flip bound of 0.391. At that bound `effective_mde` is **1.0 for every
+> n ≤ 34**, and the largest at-risk n anywhere in this run is 12. **No effect size was
+> detectable on any axis here.**
+>
+> So `0/12` on the dangerous axis with a bound of `0.0–24.2%` is *the detector did not
+> fire*, not *nothing is there* — and at this n it could not have fired at any prevalence.
+> The control passing is what switched the only caveat off, at exactly the moment the
+> bound became unusable.
+>
+> The tooling was corrected across 0.12.3–0.12.10: each axis block now carries an
+> unconditional `resolution_caveat` (0.12.3), the terminal prints it (0.12.5), and
+> `spec/qsr-v0.md` §6 specifies that a passed control MUST NOT clear it (0.12.10).
+>
+> **The JSON in this directory is deliberately unchanged.** It is the run record of what
+> the tool emitted on 2026-08-21, and editing it would falsify provenance. Its axis blocks
+> show `resolution_caveat: null` because the field did not exist yet. Read them against
+> this note.
+
 Every target in `screens/targets-0.5.json` has now been measured except one that cannot
 run on this host at all. `all_targets_attempted: true`, and **no bound carries a
-conditionality label** — the sensitivity control passed on 2026-08-19.
+conditionality label** — the sensitivity control passed on 2026-08-19. (Superseded by the
+correction above: that is not the same as an unqualified bound.)
 
 ## The bounds
 
