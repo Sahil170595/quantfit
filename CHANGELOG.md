@@ -13,6 +13,47 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.6
+
+A sub-patch correcting a **false premise** the repo had been publishing since 2026-08-18,
+and a **softened negative result** shipped in 0.12.3 and 0.12.4. Both found by a blind
+adversarial review of the code. Same fact, so they ship together. Code only; the docs
+carry the same premise and are the next sub-patch.
+
+- **Eleven places asserted "no judge error has been measured for this instrument".** One
+  had been: `validation/2026-08-18-judge-calibration/` recorded n=80 hand-labelled
+  completions from a real paired run, and `safety/verify.py` has carried the constants
+  ever since — its own comment calls it *"the first in-distribution judge measurement this
+  project has ever had"*. Several of those strings are serialized verbatim into gate
+  artifacts and comparison records, so two machine-readable artifacts a consumer could
+  hold side by side stated opposite facts about the same instrument.
+
+  The *conclusion* was right — every printed MDE **is** a perfect-judge floor — but the
+  premise was wrong. What is unmeasured is not the judge's error rate; it is this run's
+  **resolution** under it, because nothing folds epsilon into a printed MDE. Corrected in
+  `gate.py` (docstring, `PERFECT_JUDGE_EPS_SOURCE`, `FLOOR_STATEMENT`, both floor caveats,
+  `notes[]`, headline), `mde.py`, `reproduce.py`, `refreports.py`, `inspect_task.py`.
+
+- **"the true resolution is coarser by an unknown amount" — the amount is not unknown.**
+  Shipped in 0.12.3 and 0.12.4, in `RESOLUTION_LABEL` and on the public model card.
+  Re-derived with the project's own primitives: per-arm epsilon `0.1955`, false-flip bound
+  `0.3911`, at which `effective_mde` is **1.0 for every n <= 34**, and the largest
+  `at_risk` anywhere in `validation/` is **24**. At every at-risk n this project has ever
+  run, nothing is detectable at any effect size. "Coarser by an unknown amount" invites
+  "somewhat worse than 13pp"; the answer on file is 100pp.
+
+- **`resolution_caveat` was never "keyed on epsilon".** `screen.py`'s published `NOTES`
+  said so while `_aggregate` assigned a module constant and read no epsilon at all — the
+  same diff said "Unconditional today" in a comment three lines above. The string every
+  `screen-summary.json` carries was the false one.
+
+- **`tests/test_epsilon_claims.py`** is the guard, scanning `quantfit/*.py` with whitespace
+  collapsed (a literal scan missed `mde.py`, whose claim wrapped across a newline) and
+  failing on any of six phrasings that assert no epsilon exists. Against pre-fix `main` it
+  catches 8 offenders in 4 modules. It also re-derives the `1.0`-for-`n <= 34` figure the
+  new strings print, so number and prose cannot drift apart. `quantfit audit` had caught
+  none of this: nothing pinned the prose against the constant refuting it.
+
 ## 0.12.5
 
 A sub-patch. The `screen`'s **terminal** output now carries the caveat 0.12.3 added to its
