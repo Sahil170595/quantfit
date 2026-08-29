@@ -667,7 +667,7 @@ def test_the_axis_block_and_the_spec_field_table_agree_in_BOTH_directions():
     spec = (pathlib.Path(__file__).resolve().parent.parent / "spec" / "qsr-v0.md").read_text(encoding="utf-8")
     table = spec[spec.index("| `n_measured` |") :]
     table = table[: table.index("\n\n")]
-    documented = set(re.findall(r"^\| `([a-z_0-9]+)` \|", table, flags=re.M))
+    documented = set(re.findall(r"^\| `([a-z_0-9]+)` \|", table, flags=re.MULTILINE))
 
     assert emitted == documented, (
         f"spec §6 and _axis_aggregate disagree — "
