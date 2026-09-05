@@ -13,6 +13,45 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.16
+
+Evidence, plus one docs correction folded in. No code changes.
+
+- **The external-signal baseline, taken before the clock starts.**
+  `validation/2026-09-05-external-signals/`. ROADMAP 0.5's NO-GO rule counts *"fewer than 3
+  independent external signals"* within 8 weeks of outreach landing, and without a *before*
+  that count has nothing to be measured against. Every figure was produced by the command
+  recorded beside it: **1 star — and the stargazer list is `["Sahil170595"]`, so 0
+  excluding the owner** — 0 forks, 0 watchers, 0 issues, **79 pull requests all by the
+  owner**, **0** citations of arXiv 2606.10154 (OpenAlex `W7164209198`), **0** hits across
+  llama.cpp / vLLM / llm-compressor / unsloth, **0** Hacker News stories. Repository age at
+  capture: 71 days.
+
+- **Two things are recorded as NOT results**, because a number that means nothing is more
+  dangerous than a zero. The HN query for "quantfit" returns 2,623 stories and is
+  **uninterpretable** — Algolia prefix-matches, so those are *quantitative* hits. And PyPI
+  downloads were **not obtained**: pypistats returned 429 twice, which does not weaken the
+  baseline because 0.5 already treats raw counts as mirror noise unless decomposed.
+
+- **The four zeros are load-bearing only because a control query works.**
+  `gh search issues --repo ggml-org/llama.cpp "quantization"` returns hits up to the limit,
+  so they are a property of the query rather than of a broken tool — the same rule this
+  project applies to its own detector.
+
+- **What the record does not establish is stated at length**, and the first item is the one
+  that matters: **this is not evidence that demand is absent.** quantfit has never been
+  announced, so zero signals after zero outreach is no evidence either way. Reading it as a
+  null would be the same error as reading `0/12` as a bound.
+
+- **Folded in as docs:** ROADMAP asserted the R1-1776 8-bit incident twice with no source.
+  Primary source added — **arXiv 2505.17441 §4.4**, in which a Perplexity engineer confirms
+  the production API served a quantized model with *"substantially stronger censorship than
+  the non-quantized version evaluated during development"*, fixed 2025-04-08. The direction
+  is recorded with it: quantization **re-introduced** refusals, so the one documented vendor
+  incident is on the **over-refusal** axis, not the dangerous one. A third mention was
+  reported in `docs/reference-reports-v0.md` and does not exist — line 146 is the
+  `gguf-r1-distill-qwen-15b-unsloth` screen target, an unrelated model.
+
 ## 0.12.15
 
 A patch to the **spec**, writing into it the one thing a reader of a QSR report most needs
