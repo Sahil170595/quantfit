@@ -13,6 +13,43 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.14
+
+A patch to the **pre-registration**, and the last thing that can land before outreach
+starts the 8-week clock. An amended pre-registration is worthless unless the amendment
+precedes the window it governs.
+
+- **The NO-GO rule is conjunctive, and one of its three legs named no axis.** It read
+  *"no design partner, **no hand-verified regression found**, and fewer than 3 independent
+  external signals."* The screen has since produced six hand-verified regressions
+  (`validation/2026-08-19-screen-adjudication/`: 11 flagged, 6 confirmed, 5 judge error —
+  **all eleven on the over-refusal axis**), so the two readings diverge and the divergence
+  decides the milestone:
+
+  - **unqualified** — any confirmed regression satisfies the leg, it fails, and being
+    conjunctive the whole NO-GO **can never fire**;
+  - **dangerous-axis only** — 0 flagged and nothing to adjudicate there, so the leg holds
+    and the rule works as designed.
+
+- **The first reading is the one that flatters the outcome, and it is not the one taken.**
+  The text intends the second, on the evidence of the sentence immediately following it:
+  that sentence conditions this leg's evidentiary weight on the sensitivity control
+  passing, and the control is a dangerous-axis instrument — its confirmed flip is recorded
+  as *"on the refusal-robustness axis"* (`screens/targets-0.5.json`). Tying an any-axis leg
+  to a dangerous-axis control would be incoherent. The qualifier says what was meant; it
+  does not change it.
+
+- **Recorded as a dated defect rather than edited quietly**, with both readings, the one
+  intended, and the timing: found after the screen ran and **before** outreach. A test pins
+  the qualifier so it cannot be dropped later and silently re-open the ambiguity.
+
+This discards nothing. The confirmed over-refusal regressions remain evidence — §0.5's own
+rule is that positive existence claims need no validated judge — they simply do not
+discharge a leg written about the other axis.
+
+Three line-number citations in `spec/qsr-v1-freeze-plan.md` shifted with the inserted note;
+`quantfit audit` caught the first.
+
 ## 0.12.13
 
 Five sub-patches to the **public record and the spec**, and a pattern worth naming: three
