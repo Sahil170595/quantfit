@@ -674,3 +674,70 @@ def test_the_axis_block_and_the_spec_field_table_agree_in_BOTH_directions():
         f"emitted but undocumented: {sorted(emitted - documented)}; "
         f"documented but not emitted: {sorted(documented - emitted)}"
     )
+
+
+_ROOT = Path(__file__).resolve().parent.parent
+_CONTROL_STATUSES = ("pass", "fail", "unmeasurable", "not_run")
+_PLAN_CORRECTION_MARKERS = ("corrected 2026-", "dated amendment", "dated defect", "and it was false")
+
+
+def test_the_freeze_plan_records_the_control_status_the_manifest_ACTUALLY_carries():
+    """The freeze plan said the control was `not_run`; the manifest says `pass`.
+
+    Both places that stated it were marked **[V]**, which is exactly why neither was
+    re-read after the control passed at IQ2_M on 2026-08-19: a claim carrying a
+    verified-from mark is the one a reader trusts without checking. Checklist step 1 was
+    therefore recorded as blocking for sixteen days after it was discharged, in the one
+    list whose step 0 can terminate the whole freeze.
+
+    The pin walks every mention of the manifest in the plan and refuses any status token
+    from the vocabulary other than the one on disk, unless the surrounding lines are
+    visibly correcting themselves -- the repo's amendment rule, so a dated note quoting
+    the old value stays legal.
+    """
+    manifest = json.loads((_ROOT / "screens" / "targets-0.5.json").read_text(encoding="utf-8"))
+    actual = manifest["sensitivity_control"]["status"]
+    assert actual in _CONTROL_STATUSES, f"manifest status {actual!r} is outside v0 section 9's vocabulary"
+
+    plan_path = _ROOT / "spec" / "qsr-v1-freeze-plan.md"
+    lines = plan_path.read_text(encoding="utf-8").splitlines()
+    stale = []
+    mentions = 0
+    for i, line in enumerate(lines):
+        if "screens/targets-0.5.json" not in line:
+            continue
+        mentions += 1
+        window = " ".join(lines[max(0, i - 4) : i + 5]).lower()
+        if any(marker in window for marker in _PLAN_CORRECTION_MARKERS):
+            continue
+        for other in (s for s in _CONTROL_STATUSES if s != actual):
+            if f'"{other}"' in window or f"`{other}`" in window:
+                stale.append(f"spec/qsr-v1-freeze-plan.md:{i + 1}: claims {other!r}, manifest says {actual!r}")
+
+    assert mentions, "the plan stopped citing the manifest; this pin has nothing to check"
+    joined = chr(10).join(stale)
+    assert not stale, f"the freeze plan and the manifest disagree about the control:{chr(10)}{joined}"
+
+
+def test_the_screen_that_consumed_the_passing_manifest_cleared_conditionality_only():
+    """A passed control clears `conditionality` and MUST NOT clear `resolution_caveat`
+    (spec section 6.1, normative since 0.12.10). The 2026-08-21 run is the artifact that
+    has to be read against that rule, and the correction to the freeze plan must not be
+    read as discharging the resolution leg too.
+
+    The run record is deliberately not edited -- editing it would falsify provenance --
+    so its axis blocks carry no `resolution_caveat` at all: the field did not exist when
+    they were written. That absence is the point, and it is asserted rather than assumed.
+    """
+    summary = json.loads(
+        (_ROOT / "validation" / "2026-08-21-screen-complete" / "screen-summary.json").read_text(encoding="utf-8")
+    )
+    assert summary["sensitivity_control"]["status"] == "pass"
+
+    axes = [axis for stratum in summary["by_stratum"].values() for axis in stratum.values() if isinstance(axis, dict)]
+    assert axes, "no axis blocks parsed out of the 2026-08-21 summary"
+    assert all(axis.get("conditionality") is None for axis in axes), "a passed control clears conditionality"
+    assert all("resolution_caveat" not in axis for axis in axes), (
+        "the 2026-08-21 run predates the field; its absence is what the dated correction in "
+        "that run's README explains, and the JSON is not to be edited"
+    )
