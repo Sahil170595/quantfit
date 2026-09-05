@@ -120,16 +120,34 @@ silently change what a rerun measures.
 One does now, and it retired the previous judge: measured on n=80 completions from a real
 paired run, `Crusadersk/quantsafe-refusal-modernbert` scored **56.2% false positives** on
 compliant text. The judge is now `garak-llm/garak-refusal-detector`, measured on the same
-set at **95.0% accuracy, 8.3% FPR, 0.0% FNR**
-(`validation/2026-08-18-judge-calibration/`). `JUDGE_CARD_XSTEST_ACCURACY` is `None` —
-garak's card reports no XSTest figure — and the report carries the measured numbers in the
-label instead, exactly as the code writes it (`safety/verify.py:_write_report`):
+set at **95.0% accuracy**, with **4 false positives in 48 compliant completions** (95%
+Wilson upper **19.6%**) and **0 false negatives in 32 refusals** (95% Wilson upper
+**10.7%**) (`validation/2026-08-18-judge-calibration/calibration.json`).
+`JUDGE_CARD_XSTEST_ACCURACY` is `None` — garak's card reports no XSTest figure — and the
+report carries the measured numbers in the label instead, exactly as the code writes it
+(`safety/verify.py:_measured_judge_label`):
 
-> `no card XSTest figure; measured in-distribution by quantfit instead — accuracy 95.0%, false-positive rate 8.3%, false-negative rate 0.0% at n=80 (single-rater, one model, one probe set)`
+> `no card XSTest figure; measured in-distribution by quantfit instead — accuracy 95.0% at n=80 (single-rater, one model, one probe set); false-positive rate 8.3% on 48 compliant completions (95% CI upper 19.6%); false-negative rate 0.0% on 32 refusals (95% CI upper 10.7%) — a measured zero at this n is not a flawless judge, and a false negative is a MISSED dangerous flip`
+
+> **Dated amendment, 2026-09-04.** Both the quote above and the sentence introducing it
+> were stale, and stale in the direction 0.12.9 had already corrected everywhere else.
+> They read **`false-negative rate 0.0% at n=80`** and **`8.3% FPR, 0.0% FNR`** — the two
+> rates over a denominator that is neither of theirs (n=80 splits 48 compliant / 32
+> refusal), with no interval on either, and a bare zero where the false-**negative** rate
+> is the judge going blind on the dangerous axis. `safety/calibrate.py` refuses to print
+> that zero for its own output on exactly this ground; `_measured_judge_label` was
+> rewritten at 0.12.9 to stop printing it here. The spec kept printing it for three more
+> releases **while asserting it was what the code writes**, which is the one claim a
+> reader has no reason to re-check. The quote is now pinned to the function by
+> `tests/test_epsilon_claims.py`, so it cannot drift again silently. Reports written
+> before 2026-08-28 carry the old label and stay conformant; the normative duty below is
+> unchanged in kind and now names the denominators and intervals it was always about.
 
 These numbers ARE for QSR's own probe distribution — that is what changed — but they are still not
 a correction: no MDE, CI or bound in v0 is adjusted by them, and every printed MDE remains a
-perfect-judge floor. Implementations MUST NOT drop the label when quoting the figures, and MUST NOT
+perfect-judge floor. Implementations MUST NOT drop the label when quoting the figures — including
+its denominators and its two Wilson uppers, which are what make `0.0%` readable as *0 of 32* rather
+than as a flawless judge — and MUST NOT
 present the retired judge's 0.9773 XSTest number as this protocol's accuracy at all. Arm-correlated
 judge error is bias no sample size fixes; v0 states this as a limit and does not correct for it.
 
