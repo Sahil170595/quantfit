@@ -102,7 +102,17 @@ def pytest_approx(value, rel=1e-9):
 _ROOT = _SRC.parent
 _PROSE = ("README.md", "llms.txt", ".github/actions/quantfit-gate/action.yml")
 _PROSE_DIRS = ("docs", "spec")
-_CORRECTION_MARKERS = ("corrected 2026-", "dated defect", "was true when written", "and it was false")
+_CORRECTION_MARKERS = (
+    "corrected 2026-",
+    "corrected again 2026-",
+    # `spec/qsr-v0.md` uses "Dated amendment, <date>." as its own visible-amendment form
+    # (§5.6, §2.7). The repo's rule is that an amendment must be VISIBLE, not that it must
+    # be phrased one way, so the spec's form counts as one.
+    "dated amendment",
+    "dated defect",
+    "was true when written",
+    "and it was false",
+)
 
 
 def _prose_files():
@@ -169,3 +179,57 @@ def test_the_label_denominators_match_the_calibration_artifact():
     assert JUDGE_MEASURED_N_COMPLIANCE == record["n_compliance"]
     assert JUDGE_MEASURED_N_REFUSAL == record["n_refusal"]
     assert JUDGE_MEASURED_N_COMPLIANCE + JUDGE_MEASURED_N_REFUSAL == record["n_completions"]
+
+
+def test_the_spec_quotes_the_label_the_code_ACTUALLY_writes():
+    """`spec/qsr-v0.md` §2.7 block-quotes the judge label and says, in as many words,
+    "exactly as the code writes it". For three releases it was not.
+
+    0.12.9 rewrote `_measured_judge_label` to stop printing `false-negative rate 0.0% at
+    n=80` — no denominator, no interval, and a bare zero on the direction where a judge
+    error is a MISSED dangerous flip. The test above pinned the function. Nothing pinned
+    the spec's copy of the function's output, so the spec went on printing the retired
+    string while asserting it was what the code emits: the one claim a reader has no
+    reason to re-check, because the document has already told them it was checked.
+
+    The quote is the *durable* artifact here — the spec outlives any release — so it is
+    pinned verbatim rather than by keyword.
+    """
+    from quantfit.safety.verify import _measured_judge_label
+
+    spec = (_ROOT / "spec" / "qsr-v0.md").read_text(encoding="utf-8")
+    quoted = [line[2:].strip() for line in spec.splitlines() if line.startswith("> `") and line.endswith("`")]
+    label = _measured_judge_label()
+
+    assert f"`{label}`" in quoted, (
+        "spec §2.7's block quote is not the string `_measured_judge_label()` returns. "
+        f"code writes: {label!r}; spec quotes: {quoted!r}"
+    )
+
+
+def test_no_doc_reprints_the_retired_judge_label():
+    """The same stale wording reached a second doc, inside a note correcting the FIRST
+    stale wording (`docs/reference-reports-v0.md` §"Corrected 2026-08-28").
+
+    Paraphrasing the label is how both drifts happened, so the paraphrase is what is
+    banned. A doc visibly correcting itself may quote the old form — that is the repo's
+    amendment rule, and the correction window below is the same one the prose guard uses.
+    """
+    retired = ("0.0% at n=80", "0.0% fnr", "false-negative rate 0.0%,")
+    offenders = []
+    for path in _prose_files():
+        lines = path.read_text(encoding="utf-8").splitlines()
+        lowered = [line.lower() for line in lines]
+        for i, line in enumerate(lowered):
+            for claim in retired:
+                if claim not in line:
+                    continue
+                window = " ".join(lowered[max(0, i - 8) : i + 9])
+                if any(marker in window for marker in _CORRECTION_MARKERS):
+                    continue
+                offenders.append(f"{path.relative_to(_ROOT)}:{i + 1}: {claim!r}")
+    joined = chr(10).join(offenders)
+    assert not offenders, (
+        "the pre-0.12.9 judge label is reprinted here; the rates are 4/48 and 0/32, "
+        f"neither over n=80:{chr(10)}{joined}"
+    )
