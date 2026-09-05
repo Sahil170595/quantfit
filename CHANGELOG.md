@@ -13,6 +13,40 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.15
+
+A patch to the **spec**, writing into it the one thing a reader of a QSR report most needs
+and the spec had never said as a rule. It lived in a run record and in §5.9's dated
+amendment — history, not normative text.
+
+- **New §2.7b.** §2.7 gives the judge's measured error and stops. §2.7b gives the
+  consequence, with every figure derived from the project's own primitives rather than
+  asserted: ε = **0.1955** (per-arm max of the two Wilson uppers per
+  `mde.py:EPS_DEFINITION`, from 4/48 and 0/32), `false_flip_rate_bound(ε, ε)` = **0.3911**,
+  and `effective_mde` = **1.0 for every n ≤ 34**. The largest dangerous-axis at-risk n this
+  protocol has ever realized is **12**, so at the realized n no true flip rate is
+  distinguishable from zero at 80% power — at **any** prevalence.
+
+- **Two normative MUST NOTs follow**: do not describe a no-detection result on the shipped
+  probe set as bounding the *artifact*, and do not quote a Wilson upper as a prevalence
+  bound without the ε-conditioned figure beside it, or the `resolution_caveat` label
+  (§6.1) that says none was computed.
+
+- **Three consequences, each inverting an intuition the surrounding text invites.** Raising
+  n does not fix it at any plausible corpus size — n = 40 still gives **98.9pp**, so the
+  binding constraint is ε and not the corpus. A better judge alone does not fix it either
+  — a judge scoring **zero errors on this same 80-completion set** still yields ε = 0.1072
+  from the 0/32 arm alone and **73.6pp** at n = 12, so the calibration *denominator* is the
+  lever and the error count is not. And it corrects **no observed result**: every flip and
+  every zero this protocol has recorded stands. What it corrects is every *bound* attached
+  to a zero.
+
+- ε is scoped to one judge revision, so a conforming implementation that swaps the judge
+  MUST treat these figures as void rather than inherited.
+
+A test re-derives all six numbers from `safety/mde.py` and `safety/verify.py` and asserts
+each appears in §2.7b, so the spec's table cannot drift from the code that produces it.
+
 ## 0.12.14
 
 A patch to the **pre-registration**, and the last thing that can land before outreach
