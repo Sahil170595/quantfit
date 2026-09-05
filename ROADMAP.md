@@ -128,7 +128,38 @@ not happened and only outreach starts the clock**.
 - **Replication package for arXiv 2606.10154** including RTSI — the one asset no better-resourced competitor can contest, and a runnable artifact for the probe.
 - `--emit model-card` fragment: drift vector, CIs, provenance, and the exact `vllm serve` line for compressed-tensors artifacts.
 - Outreach: GGUF publishers (their format is now runnable), vendor deployment teams (the R1-1776 8-bit incident shows vendors miss this in-house), and safety researchers; announce on r/LocalLLaMA and HF forums — after 0.3's stats fix, never before. Raw pypistats counts are treated as mirror/bot noise unless decomposed.
-- **Decision rule (NO-GO stated):** the 8-week clock starts when outreach lands, and only outreach starts it — slips in the other deliverables do not move the clock. NO-GO fires if, within those 8 weeks, there is no design partner, no hand-verified regression found, and fewer than 3 independent external signals (substantive issue, citation, dataset reuse, replication). The "no hand-verified regression found" leg carries evidentiary weight **only if the sensitivity control passed**; if it did not, that leg is recorded as "uninformative — instrument sensitivity undemonstrated," the decision rests on the other two legs alone, and the recorded decision says so explicitly. On NO-GO, 0.6+ shrinks to maintenance mode: spec + paper + replication package stay published — with the screen result carrying its conditionality label permanently if the control never passed — and corpus/judge/gate work does not start.
+- **Decision rule (NO-GO stated):** the 8-week clock starts when outreach lands, and only outreach starts it — slips in the other deliverables do not move the clock. NO-GO fires if, within those 8 weeks, there is no design partner, no hand-verified **dangerous-axis** regression found, and fewer than 3 independent external signals (substantive issue, citation, dataset reuse, replication). The "no hand-verified regression found" leg carries evidentiary weight **only if the sensitivity control passed**; if it did not, that leg is recorded as "uninformative — instrument sensitivity undemonstrated," the decision rests on the other two legs alone, and the recorded decision says so explicitly.
+
+  > **Dated defect, 2026-09-05 — recorded before the clock starts, and stated at length
+  > because the flattering reading was available.** This leg read *"no hand-verified
+  > regression found"*, with no axis named, and the screen has since produced six
+  > hand-verified regressions (`validation/2026-08-19-screen-adjudication/`: 11 flagged, 6
+  > confirmed, 5 judge error — **all eleven on the over-refusal axis**). The two readings
+  > differ materially here, which is the uncommon case `CLAUDE.md` §1 asks to be surfaced
+  > rather than resolved quietly:
+  >
+  > - **Unqualified** — any confirmed regression satisfies it, so the leg fails, and being
+  >   conjunctive the whole NO-GO **can never fire**. This is the reading that flatters the
+  >   outcome, and it is not the one taken.
+  > - **Dangerous-axis only** — 0 flagged and nothing to adjudicate on that axis, so the
+  >   leg holds and the rule works as designed.
+  >
+  > **The text intends the second**, and the evidence is the sentence immediately
+  > following: it conditions this leg's evidentiary weight on the sensitivity control
+  > passing, and that control is a dangerous-axis instrument — its confirmed flip is
+  > recorded as *"on the refusal-robustness axis"* (`screens/targets-0.5.json`). Tying an
+  > any-axis leg to a dangerous-axis control would be incoherent. The qualifier is added to
+  > say what was meant, not to change it.
+  >
+  > The ambiguity was found after the screen ran and **before outreach**, so the amendment
+  > precedes the decision window it governs rather than being written into it. It is
+  > recorded here rather than fixed silently because an amended pre-registration is
+  > worthless unless the amendment is visible, and it is dated so a reader can check that
+  > order for themselves. The confirmed over-refusal regressions are not discarded by this:
+  > they are evidence, and §0.5's own rule is that positive existence claims need no
+  > validated judge. They simply do not discharge a leg written about the other axis.
+
+ On NO-GO, 0.6+ shrinks to maintenance mode: spec + paper + replication package stay published — with the screen result carrying its conditionality label permanently if the control never passed — and corpus/judge/gate work does not start.
 
 **Gate:** per-deliverable, not all-or-nothing — the screen gate is ≥10 quants with human-checked flips plus a recorded pass/fail on the sensitivity control; spec v0, replication package, model-card emit, and outreach each gate on their own shipping. The milestone closes when the GO/NO-GO decision is recorded with its evidence, either way.
 

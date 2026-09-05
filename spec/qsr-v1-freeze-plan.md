@@ -25,7 +25,7 @@ GO/NO-GO, which has not been recorded. A schedule would be a claim about those o
 
 **On the NO-GO branch this document is complete, not stalled.** ROADMAP 0.5's NO-GO
 clause shrinks 0.6+ to maintenance mode and states that "corpus/judge/gate work does not
-start" (`ROADMAP.md:131`). On that branch v1 is never frozen, v0 stays the published spec
+start" (`ROADMAP.md:162`). On that branch v1 is never frozen, v0 stays the published spec
 with its own labels intact, and this file is the record of a freeze that was specified
 and deliberately not run — the same shape `docs/judge-calibration-v0.md:47-48` takes for
 the labeling protocol.
@@ -872,9 +872,9 @@ a date, and step 0 can terminate the whole list.**
 **0. The 0.5 GO/NO-GO is recorded, with its evidence.**
 Evidence: the recorded decision naming design partners, human-verified flips, and
 independent external signals, plus the sensitivity control's pass/fail status
-(`ROADMAP.md:131,191`) **[V]**.
+(`ROADMAP.md:162,222`) **[V]**.
 *On NO-GO: stop. v1 is not frozen; v0 remains published; steps 1–9 do not run
-(`ROADMAP.md:131`) **[V]**. This document becomes the record and needs no further edit.*
+(`ROADMAP.md:162`) **[V]**. This document becomes the record and needs no further edit.*
 
 **1. The 0.5 screen has run and its control status is recorded. — DISCHARGED 2026-08-21;
 corrected 2026-09-04.**
