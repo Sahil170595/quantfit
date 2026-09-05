@@ -233,3 +233,64 @@ def test_no_doc_reprints_the_retired_judge_label():
         "the pre-0.12.9 judge label is reprinted here; the rates are 4/48 and 0/32, "
         f"neither over n=80:{chr(10)}{joined}"
     )
+
+
+# --- what a no-detection result is allowed to claim ---------------------------------
+
+
+_BOUNDS_REALITY = (
+    "bounds the true harmful flip rate",
+    "bounds the true harmful-flip rate",
+    "the run's resolution was the printed mde",
+)
+
+
+def test_no_surface_says_a_no_detection_result_bounds_reality():
+    """QSR v0 §5.9 -- the section that DEFINES what a no-detection result means -- said
+    the printed MDE was "the run's resolution" and that 0/12 "bounds the true harmful
+    flip rate below ~24pp".
+
+    Both claims contradict §5.8 of the same document: the printed MDE "is a lower bound
+    on the true resolution, never the resolution, and every surface that prints it MUST
+    say so". §5.9 was a surface that printed it. And the Wilson interval carries
+    SAMPLING error only, so it is not a bound on reality either -- at the epsilon
+    measured 2026-08-18 the effective MDE is 1.0 for every n <= 34, and the largest
+    dangerous-axis n ever run here is 12.
+
+    Four surfaces carried the claim: the spec section, `safety/verify.py`'s module
+    docstring, `gate.py`'s, and `docs/reference-reports-v0.md`. Code is scanned as well
+    as prose because two of the four were docstrings.
+    """
+    offenders = []
+    scanned = list(_prose_files()) + sorted(_SRC.rglob("*.py"))
+    for path in scanned:
+        lines = path.read_text(encoding="utf-8").splitlines()
+        lowered = [line.lower() for line in lines]
+        for i, line in enumerate(lowered):
+            for claim in _BOUNDS_REALITY:
+                if claim not in line:
+                    continue
+                window = " ".join(lowered[max(0, i - 8) : i + 9])
+                if any(marker in window for marker in _CORRECTION_MARKERS):
+                    continue
+                offenders.append(f"{path.relative_to(_ROOT)}:{i + 1}: {claim!r}")
+    joined = chr(10).join(offenders)
+    assert not offenders, (
+        "a no-detection result bounds the INSTRUMENT, not the artifact "
+        f"(QSR v0 §5.9, amended 2026-09-04):{chr(10)}{joined}"
+    )
+
+
+def test_the_spec_section_that_defines_no_detection_states_the_floor():
+    """The positive half of the guard above: banning the old wording does not make the
+    new wording appear. §5.9 must actively carry the floor rule, since it is the section
+    every other surface cites when it says what a PASS means.
+    """
+    spec = (_ROOT / "spec" / "qsr-v0.md").read_text(encoding="utf-8")
+    start = spec.index("**5.9 What a no-detection result means.**")
+    section = spec[start : spec.index("## 6. Screen aggregation", start)].lower()
+
+    assert "lower bound" in section, "§5.9 must say the printed MDE is a lower bound"
+    assert "neither number is a bound on reality" in section
+    assert "sampling error alone" in section, "the Wilson leg needs its own disclaimer"
+    assert "perfect-judge floor" in section, "the MDE leg needs the floor label"

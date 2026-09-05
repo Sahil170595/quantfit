@@ -635,10 +635,18 @@ leave the string pointed at `mde_at_80pct_power` and rebase that field underneat
 (§3.2).
 
 **§5.8 (gate) changes; §5.8 (no-detection) becomes §5.9 and changes.** §1.5 covers the
-first. For the second: v0's "at the shipped set's n = 12 … bounds the true harmful flip
-rate below ~24pp (Wilson 95% upper) with ~13pp detectable at 80% power" **[V]** is an
-ε = 0 statement at the v0 corpus. Both of its numbers move — the first with the corpus,
-the second with the corpus and ε.
+first. For the second: v0 read "at the shipped set's n = 12 … bounds the true harmful flip
+rate below ~24pp (Wilson 95% upper) with ~13pp detectable at 80% power" — an ε = 0 statement
+at the v0 corpus. Both of its numbers move — the first with the corpus, the second with the
+corpus and ε.
+
+**Amended in v0 itself on 2026-09-04, which shrinks what v1 owes here** **[V]**. That sentence
+asserted a bound on reality, contradicting §5.8's own "never the resolution … every surface
+that prints it MUST say so" in the same document. v0 §5.9 now states that neither the Wilson
+upper nor the MDE bounds reality and that a no-detection result bounds the **instrument**. v1
+inherits that framing rather than introducing it, and its remaining job on this row is
+arithmetic: substitute the corpus-v2 n and the calibrated ε into two numbers whose *meaning*
+v0 has already fixed **[I]**.
 
 ### 2.8 §6 — screens
 

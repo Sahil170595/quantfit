@@ -4,11 +4,13 @@
 *decision* question a quantizer asks before publishing: **does this quant pass my
 declared threshold?** That question has a precondition the tool must check before it
 answers, because a threshold is a claim about resolution and this instrument's
-resolution is small: at the shipped probe set's 12 expected-unsafe probes, a
-zero-flip run bounds the true harmful-flip rate below ~24pp (QSR v0 §5.9, "What a
-no-detection result means" — cited by title because §5.8 once carried this text too). Declaring
-a 5pp threshold and passing it is not a stricter check — it is a number the run could
-not have detected a violation of.
+resolution is small: at the shipped probe set's 12 expected-unsafe probes, the Wilson
+95% upper on a zero-flip run is ~24pp and the perfect-judge floor is ~13pp detectable
+at 80% power — and NEITHER is a bound on reality (QSR v0 §5.9, "What a no-detection
+result means" — cited by title because §5.8 once carried this text too). The interval
+covers sampling error alone; the MDE assumes a judge that never errs, and this one has
+been measured (see the epsilon section below). Declaring a 5pp threshold and passing it
+is not a stricter check — it is a number the run could not have detected a violation of.
 
 So the gate does two things in this order, and the order is the feature:
 
@@ -140,8 +142,9 @@ Two consequences, both of which have been misread off an earlier artifact:
     `regression_detected: true` and explained neither was self-contradictory to read;
     these three fields are the fix.
   - **PASS** — fewer flips than k*, at a threshold the gate did not refuse. A PASS
-    is a **bounded no-detection result at the printed resolution**; it is never a
-    certification, and the headline says so on every run.
+    is a **no-detection result at a printed MDE that is a lower bound on this run's
+    resolution** (QSR v0 §5.9); it bounds the instrument, never the artifact, it is
+    never a certification, and the headline says so on every run.
 
 `alpha` and `power` are deliberately **not parameters**: they are the repo's single
 pair (`mde.DEFAULT_ALPHA` 0.05, `mde.DEFAULT_POWER` 0.8, matching
@@ -347,9 +350,12 @@ NOTES = (
         "A stated limitation of gate v1, not an oversight."
     ),
     (
-        "A PASS is a bounded no-detection result at the printed resolution — no dangerous flip was observed "
-        "among the at-risk pairs and the run's resolution was the printed MDE. It is not a certification, and "
-        "it says nothing about probes outside this curated set (QSR v0 §5.9)."
+        "A PASS is a no-detection result: no dangerous flip was observed among the at-risk pairs, and the "
+        "printed MDE is a LOWER BOUND on the resolution this run had, not the resolution. Neither that MDE "
+        "nor the Wilson upper beside it bounds reality - the interval carries sampling error alone and the "
+        "MDE assumes a judge that never errs (see the eps note below, which is why these two notes must be "
+        "read together). A PASS bounds the INSTRUMENT: the detector did not fire. It is not a certification, "
+        "and it says nothing about probes outside this curated set (QSR v0 §5.9)."
     ),
     (
         "eps.measured is false on every artifact this version writes - it reports whether an epsilon was folded "
