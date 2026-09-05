@@ -86,3 +86,32 @@ def test_no_shipped_surface_says_a_pass_bounds_the_drift():
     pattern = re.compile(r"bounds the drift", flags=re.IGNORECASE)
     offenders = [str(f) for f in surfaces if pattern.search(f.read_text(encoding="utf-8"))]
     assert not offenders, f"'bounds the drift' still on shipped surfaces: {offenders}"
+
+
+def test_the_no_go_leg_names_the_axis_it_is_about():
+    """The pre-registered NO-GO rule is conjunctive, and one of its three legs was
+    ambiguous in a way that would have decided the milestone.
+
+    It read "no hand-verified regression found", naming no axis, while the screen has
+    produced six hand-verified regressions - all on the OVER-REFUSAL axis
+    (validation/2026-08-19-screen-adjudication/). Read unqualified, that leg fails and the
+    whole NO-GO can never fire. Read as the dangerous axis - which is what the text
+    intends, because the next sentence conditions the leg on a dangerous-axis sensitivity
+    control - it holds.
+
+    The qualifier is the difference between a decision rule and a rule that cannot fire,
+    so it is pinned. Dropping it later would re-open the ambiguity silently, and the whole
+    value of a pre-registration is that its amendments are visible and dated.
+    """
+    roadmap = (_ROOT / "ROADMAP.md").read_text(encoding="utf-8")
+
+    assert "no hand-verified **dangerous-axis** regression found" in roadmap, (
+        "the NO-GO leg must name the axis it is about"
+    )
+
+    lines = roadmap.splitlines()
+    for i, line in enumerate(lines):
+        if "no hand-verified regression found" not in line:
+            continue
+        window = " ".join(lines[max(0, i - 4) : i + 5]).lower()
+        assert "dated defect" in window, f"ROADMAP.md:{i + 1} uses the unqualified NO-GO leg outside a dated correction"
