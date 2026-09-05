@@ -699,11 +699,29 @@ paragraphs after it alone. Concretely, the machine-enforced half does not change
 but `pass` stamps `screen.py:CONDITIONALITY_LABEL` — the literal string "conditional on
 undemonstrated detection sensitivity" — into every axis bound **[V]**.
 
-**The current recorded value is `not_run`.** `screens/targets-0.5.json` carries
-`sensitivity_control: {"status": "not_run"}` **[V]**, and v0 §9 states that `not_run` and
-`unmeasurable` are separate values because "never attempted" is not a fact about the
-instrument at all **[V]**. So as things stand, every bound a 0.5 screen produces would
-carry the conditionality label. What v1 says here depends on a run.
+**The recorded value is `pass`, and this paragraph said `not_run` for as long as it has
+existed** — marked **[V]**, which is what made it survive. Corrected 2026-09-04:
+`screens/targets-0.5.json` carries `sensitivity_control: {"status": "pass"}` with a report
+path, a dated human-verifier note, and the rung the flip was obtained at **[V]**, recorded
+when the control passed at IQ2_M on 2026-08-19
+(`validation/2026-08-19-sensitivity-control-pass/`) **[V]**. So the run this paragraph said
+v1 was waiting on **has happened**, and the screen that consumed the manifest emitted
+`conditionality: null` on all four axis blocks
+(`validation/2026-08-21-screen-complete/screen-summary.json`) **[V]** — not the
+conditionality label the old text predicted.
+
+v0 §9's `not_run`-vs-`unmeasurable` distinction is unaffected and still normative: they are
+separate values because "never attempted" is not a fact about the instrument at all **[V]**.
+What changes is only which of them this project is in.
+
+**And a `pass` clears exactly one of the two caveats.** §6.1's independence rule is
+normative and is the thing this correction must not be read as relaxing: `conditionality`
+keys on the control and `resolution_caveat` keys on ε, neither may be derived from the
+other, and **a passed control MUST NOT clear the second**. The 2026-08-21 axis blocks carry
+no `resolution_caveat` because the field did not exist when they were written, and the run
+record is deliberately not edited (`validation/2026-08-21-screen-complete/README.md`'s
+dated correction) **[V]**. At the measured ε the effective MDE is 1.0 at every n in that
+run, so v1 inherits a discharged control leg and an entirely undischarged resolution leg.
 
 ### 2.10 §10 — versioning
 
@@ -858,11 +876,26 @@ independent external signals, plus the sensitivity control's pass/fail status
 *On NO-GO: stop. v1 is not frozen; v0 remains published; steps 1–9 do not run
 (`ROADMAP.md:131`) **[V]**. This document becomes the record and needs no further edit.*
 
-**1. The 0.5 screen has run and its control status is recorded.**
+**1. The 0.5 screen has run and its control status is recorded. — DISCHARGED 2026-08-21;
+corrected 2026-09-04.**
 Evidence: `screen-summary.json` with per-axis `conditionality` fields, and the manifest's
-`sensitivity_control` block. Current recorded value: `not_run`
-(`screens/targets-0.5.json`) **[V]** — under which every bound carries the conditionality
-label (`screen.py:CONDITIONALITY_LABEL`) **[V]**.
+`sensitivity_control` block. Both exist:
+`validation/2026-08-21-screen-complete/screen-summary.json` carries
+`sensitivity_control.status: "pass"` and `conditionality: null` on all four axis blocks
+**[V]**, and `screens/targets-0.5.json` carries the matching `pass` block with its report
+path and verifier note **[V]**.
+
+This step read *"Current recorded value: `not_run` (`screens/targets-0.5.json`) **[V]** —
+under which every bound carries the conditionality label"* until today, **and it was false**
+on both counts from 2026-08-19 onward. The **[V]** is why nobody re-read the file. The
+step is the first in a list whose step 0 can terminate the whole thing, so a stale
+"blocked" here made the checklist look further from runnable than it is: of steps 1–7,
+**step 1 is now discharged** and the rest stand as written.
+
+**What it does not discharge:** §6.1's independence rule — a passed control clears
+`conditionality` and MUST NOT clear `resolution_caveat`, which keys on ε and is
+undischarged at every n this project has run (`validation/2026-08-22-measured-eps-mde/`)
+**[V]**. Step 2 is where that leg lives, and it has not moved.
 
 **2. Judge calibration has run at the decided size.**
 Evidence: a calibration report from `calibrate.py:ingest_labels` with **non-null
