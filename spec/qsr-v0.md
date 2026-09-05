@@ -444,9 +444,40 @@ detection threshold is the *smallest* possible, so a floor-mode FAIL runs at an 
 is a candidate requiring human verification rather than a confirmed regression.
 
 **5.9 What a no-detection result means.** Exactly this: *no flip was observed among the at-risk
-pairs, and the run's resolution was the printed MDE*. At the shipped set's n = 12 dangerous-axis
-at-risk pairs, that bounds the true harmful flip rate below ~24pp (Wilson 95% upper) with ~13pp
-detectable at 80% power. It does not certify safety, and the tool's own output says so on every run.
+pairs, and the printed MDE is a **lower bound** on the resolution that run had*. At the shipped
+set's n = 12 dangerous-axis at-risk pairs, the Wilson 95% upper on 0/12 is ~24pp and the
+perfect-judge floor is ~13pp detectable at 80% power. **Neither number is a bound on reality**, and
+an implementation MUST NOT present either as one:
+
+- the Wilson interval covers **sampling error alone**. It says what a run of 12 pairs could have
+  observed, not what a judge with a measured error rate could have *seen*;
+- the MDE is the resolution a judge that never errs would buy (§5.8). The true resolution is
+  coarser by however much the judge errs, and §6.1's `resolution_caveat` carries that label
+  **unconditionally**, on every axis, until an implementation folds a measured ε into the printed
+  number — which none does.
+
+A no-detection result therefore bounds **the instrument**, not the artifact: it says the detector
+did not fire, and it does not say nothing is there. It does not certify safety, and the tool's own
+output says so on every run.
+
+> **Dated amendment, 2026-09-04.** This section previously read *"the run's resolution was the
+> printed MDE"* and *"that bounds the true harmful flip rate below ~24pp"*. Both were wrong, and
+> wrong against this same document: §5.8 says the printed MDE "is a lower bound on the true
+> resolution, **never** the resolution, and every surface that prints it MUST say so" — and §5.9
+> is a surface that prints it. The section defining what a no-detection result means was the one
+> place the floor rule was not applied.
+>
+> The correction is not academic. ε was measured for this instrument on 2026-08-18 (4 false
+> positives in 48 compliant completions, per-arm Wilson upper **0.1955**), and
+> `validation/2026-08-22-measured-eps-mde/` puts it through `safety/mde.py:effective_mde`: at that
+> ε the effective MDE is **1.0 for every n ≤ 34**. The largest dangerous-axis n this project has
+> ever run is 12. So the ~24pp bound this section published was not merely optimistic — at the
+> realized n, **no effect size was detectable at any prevalence**, and `0/12` bounds nothing about
+> the world. 0.12.8 put `, perfect-judge floor` on §5.6's case-5 verdict string and 0.12.11
+> corrected the published screen record; §5.9 was missed by both.
+>
+> Reports and gate artifacts written before 2026-09-04 stay conformant — no field changes and no
+> number moves. What changes is what a conforming implementation may **say** the artifact means.
 
 ## 6. Screen aggregation
 

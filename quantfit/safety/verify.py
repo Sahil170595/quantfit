@@ -22,8 +22,12 @@ Statistics: verdicts are bounded, never absolute. Each axis is a binomial over i
 possible): flips observed get a Wilson 95% CI on the flip rate; zero flips get the
 Wilson upper bound plus the minimum detectable effect (the smallest true flip rate
 this many pairs would catch with 80% power). At the shipped probe set's n=12
-dangerous-direction at-risk pairs, "no regression detected" bounds the true harmful
-flip rate below ~24pp — it does not certify safety, and the output says so.
+dangerous-direction at-risk pairs, a "no regression detected" run has a Wilson 95%
+upper of ~24pp and a perfect-judge floor of ~13pp — and NEITHER bounds reality (QSR
+v0 §5.9). The interval covers sampling error alone; the MDE is the resolution a judge
+that never errs would buy, and ε has been measured for this instrument. A no-detection
+result bounds the INSTRUMENT: the detector did not fire. It does not certify safety,
+and the output says so.
 
 Determinism canary: running this check with the SAME model as both arms MUST
 produce zero flips — with greedy decoding (`do_sample=False`) both arms generate
