@@ -387,12 +387,25 @@ differently:
   `reproduced_with_denominator_drift` → 3, `void` (where a T1 failure lands) → 4,
   operational `ReproduceError` → 2 (`reproduce.py:OUTCOME_EXIT_CODES`) **[V]** — which is exactly the
   shape §5.7 documents for `screen` and §5.8 documents for the gate, and no spec section
-  documents for `reproduce` **[V]**.
+  documented for `reproduce`.
 
-**[?]** Which reading ROADMAP means, and whether the §5.7 row lands before `reproduce` is
-CLI-wired — it is not wired today; `quantfit/cli.py` references none of `reproduce.py`,
-`refreports.py` or `inspect_task.py` **[V]**. Resolved by a maintainer decision, not a run.
-The safe answer is to do both, since neither costs a measurement.
+**Discharged 2026-09-04 — and the blocker text was stale in the direction that kept the row
+open.** This paragraph read: *"whether the §5.7 row lands before `reproduce` is CLI-wired — it
+is not wired today; `quantfit/cli.py` references none of `reproduce.py`, `refreports.py` or
+`inspect_task.py`"*, marked **[V]**. That is false for `reproduce` and has been for some time:
+`quantfit/cli.py:292` builds the subparser and `:754` dispatches it **[V]**, with the mapping
+printed in the subcommand's own help string — *"exit 0 = reproduced, 3 = breach or not-met, 4 =
+nothing was compared, 2 = operational error"* **[V]** — which is the only place it was written
+down. `docs/validation-matrix.md` §0.1 already recorded the wiring **[V]**; the two documents
+disagreed and the one holding the row open was the wrong one. It stays true of `refreports` and
+`inspect_task`, which remain library-only **[V]**.
+
+So the deferred condition had already fired, and the safe answer stated below — do both, since
+neither costs a measurement — is taken. The interval leg needs nothing from v1 but restatement.
+The continuous-integration leg is discharged **in v0** by the new §5.10, which documents
+`reproduce`'s outcome→code mapping, its three divergences from §5.7, and the absence of exit 5;
+v1 transcribes it. **[?]** on the row is now only *which sense of "CI" ROADMAP meant*, which
+changes nothing about the content either reading obliges.
 
 ---
 
