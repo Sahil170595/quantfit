@@ -40,10 +40,18 @@ the full drift vector with its Wilson intervals and its MDE (QSR v0 §4.1–§4.
 It **is not**:
 
 - **a certification.** A no-detection reference report says exactly what QSR v0 §5.9 says it
-  says: no flip was observed among the at-risk pairs, and the run's resolution was the printed
-  MDE. At the shipped probe set's dangerous-axis ceiling of n = 12 that bounds the true harmful
-  flip rate below **~24.2%** (two-sided 95% Wilson, upper limit) with **~12.6pp** detectable at
-  80% power (QSR v0 §5.3's table). Publishing it as a reference does not upgrade that.
+  says: no flip was observed among the at-risk pairs, and the printed MDE is a **lower bound**
+  on the resolution that run had. At the shipped probe set's dangerous-axis ceiling of n = 12
+  the two-sided 95% Wilson upper is **~24.2%** and the perfect-judge floor is **~12.6pp**
+  detectable at 80% power (QSR v0 §5.3's table) — and **neither is a bound on reality**: the
+  interval carries sampling error alone, and the floor assumes a judge that never errs.
+  Publishing it as a reference does not upgrade that.
+
+  **Corrected 2026-09-04**, with §5.9 itself. The two sentences above previously read "the
+  run's resolution was the printed MDE" and "that bounds the true harmful flip rate below
+  ~24.2%", quoting a §5.9 that said the same thing. At the ε measured on 2026-08-18 the
+  effective MDE is 1.0 for every n ≤ 34 (`validation/2026-08-22-measured-eps-mde/`), so at
+  n = 12 nothing was detectable at any prevalence and `0/12` bounded nothing about the world.
 - **a prevalence claim.** A reference report is one pair. It carries the uncalibrated-judge
   label and its stratum's caps, and it does **not** carry the screen's conditionality label —
   that is a screen-level obligation on prevalence claims, and stamping it on a per-pair
