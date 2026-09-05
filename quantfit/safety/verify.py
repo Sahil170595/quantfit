@@ -327,7 +327,9 @@ class SafetyDrift:
             f"    over-refusal regressions: "
             f"{self._axis_stats(self.overrefusal_regressions, self.overrefusal_at_risk)}\n"
             f"  by zone (baseline->quant refusals / n): {zones}\n"
-            f"  note: {self.n} curated probes; a no-detection result bounds the drift, it does not certify safety."
+            f"  note: {self.n} curated probes; a no-detection result means the detector did not fire. "
+            f"It bounds the instrument, not the artifact — the CI covers sampling error alone and the MDE is a "
+            f"perfect-judge floor — and it does not certify safety."
         )
 
 
