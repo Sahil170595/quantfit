@@ -13,6 +13,67 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.12
+
+A patch to keep the tripwire honest. CI went red on every Python version between
+2026-08-31's green run and 2026-09-05, and nothing in this repository changed to cause it.
+
+<!-- audit: historical -->
+- **`inspect_ai` 0.3.263 added `stream_idle_timeout` to `GenerateConfig`**, and
+  `test_every_generate_config_field_is_classified` refused to admit a field nobody had
+  classified. That is ROADMAP Risk 7 — upstream churn — caught by the guard written for
+  it, and it asks for a decision rather than a silencing.
+
+- **The decision came from upstream's design note, not the field's name.**
+  `design/stream-idle-timeout.md` says it kills a *stalled streaming call* when no chunk
+  has arrived for N seconds, so a wedged connection is abandoned on a ~15s scale instead of
+  burning the whole `timeout` budget. That is connection liveness, not generation: an
+  expired attempt is abandoned and retried per `max_retries` — already refused on QSR v0
+  §2.1 grounds — rather than returned as text. So it joins `timeout`, `attempt_timeout`,
+  `max_connections` and `adaptive_connections` as `_CFG_PLUMBING`.
+
+- **The one-line fix then failed the test the other way, and that is the real defect.**
+  Pinning the entry produced *"the classification names GenerateConfig fields that no
+  longer exist"* on a 0.3.252 box. Both assertions were right; the table's premise was
+  wrong. It described **one release** while the pin admits a **range**
+  (`inspect-ai>=0.3.252,<0.4`), so no single table could satisfy both ends — green CI and
+  green local were mutually exclusive.
+
+- **`GENERATE_CONFIG_FIELDS_ADDED_AFTER_FLOOR`** records the version that introduced each
+  such field, and the test now compares against the **running** `inspect_ai`. Both original
+  directions still bite, plus two more: the map may not name a field the classification
+  lacks, nor a field the running version actually has (which would mean its recorded
+  version is wrong).
+
+- Safety never depended on the table being complete — `check_generate_config` reads the
+  config object's own attributes, so an unclassified field is refused at runtime either
+  way. The table buys a named diagnosis, now across the whole pinned range instead of one
+  point in it.
+
+The suite was run against both ends of the pin rather than reasoned about, installing each
+in turn: the newer release carries 39 `GenerateConfig` fields with `stream_idle_timeout`
+present, the floor carries 38 with it absent, and the suite is green on each.
+
+**`VERIFIED_INSPECT_AI_VERSION` is deliberately NOT moved**, and the distinction is the
+point of this note. That constant records the release whose API claims — the `hf`
+provider collecting `do_sample` as a model arg, `str(Model)` deriving from the spec alone,
+the epoch-reduction behaviour — were checked by **reading the provider source and running
+an eval**. This patch introspected one new field and ran the test suite. That is enough to
+classify the field and not enough to re-stake those claims, so the constant stays at the
+floor and says what it has always said. `quantfit audit`'s `constant_parity` caught an
+earlier draft of this entry asserting otherwise.
+
+The action's `quantfit-version` default `>=0.12,<0.13` already admits this release and is
+unchanged.
+
+One `<!-- audit: historical -->` marker is spent above the first bullet, recorded here
+rather than left to be found: `constant_parity`'s rule reads any version within 40
+characters of "inspect_ai" as a claim about `VERIFIED_INSPECT_AI_VERSION`, so a changelog
+entry that *describes an upstream release* trips it by construction. The marker says this
+line reports what upstream did; it does not restate the constant.
+
+
+
 ## 0.12.11
 
 A sub-patch to the **public record**. No code changes.
