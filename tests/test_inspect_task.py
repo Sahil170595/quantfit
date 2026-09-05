@@ -68,6 +68,7 @@ from quantfit.inspect_task import (
     EVAL_PASSTHROUGH,
     EVAL_REFUSALS,
     GENERATE_CONFIG_ALLOWED,
+    GENERATE_CONFIG_FIELDS_ADDED_AFTER_FLOOR,
     GENERATE_CONFIG_REFUSALS,
     GREEDY_PROVIDER_ARGS,
     JUDGE_RUNTIME_KEY,
@@ -692,7 +693,27 @@ def test_every_generate_config_field_is_classified():
         "inspect_ai's GenerateConfig has grown fields this runner has not classified; decide about each one "
         "(allow it, or refuse it with a reason) in GENERATE_CONFIG_ALLOWED / GENERATE_CONFIG_REFUSALS"
     )
-    assert classified - installed == set(), "the classification names GenerateConfig fields that no longer exist"
+    # The pin is a RANGE, so "classified but not installed" is only a defect when the field
+    # is not one the table records as newer than the pin's floor. 0.3.263 added
+    # `stream_idle_timeout`; refusing it is correct, and so is its absence on a 0.3.252 box.
+    import inspect_ai
+
+    running = tuple(int(part) for part in inspect_ai.__version__.split(".") if part.isdigit())
+    not_yet_released = {
+        field
+        for field, added in GENERATE_CONFIG_FIELDS_ADDED_AFTER_FLOOR.items()
+        if running < tuple(int(part) for part in added.split(".") if part.isdigit())
+    }
+    assert (classified - installed) - not_yet_released == set(), (
+        "the classification names GenerateConfig fields that no longer exist"
+    )
+    assert not_yet_released <= classified, (
+        "GENERATE_CONFIG_FIELDS_ADDED_AFTER_FLOOR names a field the classification does not carry"
+    )
+    assert not (not_yet_released & installed), (
+        "a field recorded as newer than the running inspect_ai is present in it; "
+        "GENERATE_CONFIG_FIELDS_ADDED_AFTER_FLOOR has the wrong version for it"
+    )
     assert not (GENERATE_CONFIG_ALLOWED & set(GENERATE_CONFIG_REFUSALS))
     # The sampling knobs stay refusable by their own name; they are a subset of the rule,
     # not the rule.
