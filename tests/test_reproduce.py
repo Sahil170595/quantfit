@@ -1711,3 +1711,55 @@ def test_t0_two_replicates_are_recorded_as_below_protocol(tmp_path):
 def test_t0_needs_at_least_two_reports(tmp_path):
     with pytest.raises(ReproduceError, match="at least 2 replicate reports"):
         within_hardware_identical([_write(tmp_path, "a.json")])
+
+
+# --- the spec table, both directions ------------------------------------------------
+
+
+def test_spec_5_10_and_OUTCOME_EXIT_CODES_agree_in_BOTH_directions():
+    """`reproduce` reuses §5.7's exit-code space and no spec section documented it.
+
+    §5.7 covers `verify-safety` and `screen`, §5.8 the gate. `reproduce` was the fourth
+    consumer, wired to the CLI with its codes in the `--help` string and nowhere else, so
+    an implementation reading the spec had to infer the mapping from argparse.
+
+    `quantfit audit`'s `exit_code_parity` read `reproduce`'s constants throughout and
+    passed clean: it checks that the NUMBERS agree across modules, which is not the same
+    as checking that a surface is documented. Same shape as `resolution_caveat` at
+    0.12.10 -- a check that walks one direction cannot see what is missing from the
+    other -- so this pin walks both.
+    """
+    import re
+
+    from quantfit.reproduce import OUTCOME_EXIT_CODES
+
+    spec = (Path(__file__).resolve().parent.parent / "spec" / "qsr-v0.md").read_text(encoding="utf-8")
+    start = spec.index("**5.10 `reproduce` is the fourth consumer")
+    table = spec[start : spec.index("Three divergences from", start)]
+
+    documented = {
+        m.group(1): int(m.group(2))
+        for m in re.finditer(r"^\|\s*`([a-z_0-9]+)`\s*\|\s*\*\*(\d)\*\*\s*\|", table, flags=re.MULTILINE)
+    }
+
+    assert documented, "§5.10's table did not parse; the pin is only as good as its parser"
+    assert documented == OUTCOME_EXIT_CODES, (
+        "§5.10 and reproduce.OUTCOME_EXIT_CODES disagree. "
+        f"spec: {sorted(documented.items())}; code: {sorted(OUTCOME_EXIT_CODES.items())}"
+    )
+
+
+def test_spec_5_10_states_that_reproduce_has_no_exit_5():
+    """The gate's exit 5 is §5.8's alone. A reader who learns that `reproduce` reuses the
+    space and is told nothing further has no way to know 5 is not in it, and 5 is the one
+    code whose absence is a design statement rather than an omission.
+    """
+    from quantfit import reproduce
+
+    spec = (Path(__file__).resolve().parent.parent / "spec" / "qsr-v0.md").read_text(encoding="utf-8")
+    start = spec.index("**5.10 `reproduce` is the fourth consumer")
+    section = spec[start : spec.index("## 6. Screen aggregation", start)]
+
+    assert "There is no 5." in section
+    assert 5 not in set(reproduce.OUTCOME_EXIT_CODES.values())
+    assert not hasattr(reproduce, "EXIT_UNRESOLVABLE")

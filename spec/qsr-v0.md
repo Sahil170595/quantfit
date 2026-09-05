@@ -479,6 +479,48 @@ output says so on every run.
 > Reports and gate artifacts written before 2026-09-04 stay conformant — no field changes and no
 > number moves. What changes is what a conforming implementation may **say** the artifact means.
 
+**5.10 `reproduce` is the fourth consumer of the code space, and §5.7 did not cover it.**
+`quantfit reproduce` compares two schema-v2 reports under the T1–T5 cross-hardware rule and
+returns a code from the same space — `reproduce.py:OUTCOME_EXIT_CODES`, whose own comment says it
+reuses "§5.7's space". §5.7 documents `verify-safety` and `screen`; §5.8 documents the gate. For
+three releases nothing documented this one, so an implementation reading the spec would have had
+to infer the mapping from a `--help` string. The outcome vocabulary is closed
+(`reproduce.py:OUTCOMES`) and maps as:
+
+| outcome | exit | meaning |
+|---|---|---|
+| `reproduced` | **0** | T0 held on **both** sides, then T1–T5 all passed. The only value that meets ROADMAP 0.8's gate |
+| `reproduced_t0_unverified` | **3** | T1–T5 passed, but T0 evidence was absent for a side or did not meet §3.1's three replicates. **Not** a pass |
+| `reproduced_with_denominator_drift` | **3** | T1, T2, T4, T5 passed and T3 did not: the resolution moved while the published verdict and exit code did not. A recordable near-miss, **not** a pass |
+| `breach` | **3** | the tolerance was evaluated and a clause failed |
+| `void` | **4** | nothing was compared: a T1 difference (not one measurement), a T0 failure on a side, an unmeasurable gated axis, or two identical input files |
+
+Three divergences from §5.7 that an implementation MUST state rather than assume:
+
+- **3 does not mean "a flip was observed."** Here it means *the gate was not met*, and three
+  outcomes reach it, two of which have the word `reproduced` in their name. The distinction lives
+  in `outcome`, never in the code, so a CI consumer that reads only the code learns "not met" and
+  MUST read the field to learn why (`docs/cross-hardware-tolerance-v0.md` §6.3).
+- **4 is a verdict, not a refusal.** §5.7's 4 fires when an axis had zero at-risk pairs. A
+  `void` is reached with both reports parsed and the comparison run — the answer is "these are not
+  one measurement" — and it is still **not a pass**, exactly as §5.5 requires. `void_reasons`
+  carries which of the four cases fired; a consumer that wants the distinction reads the field.
+- **There is no 5.** Exit 5 is the gate's alone (§5.8). `reproduce` answers no
+  threshold-relative question, so it has no unresolvable outcome to express.
+
+And one rule that is not a divergence but is the whole point of the command: **omitting T0
+evidence does not buy a pass, and neither does thinning it.** `reproduced` requires T0 on both
+sides at §3.1's replicate count; absent that the best reachable outcome is
+`reproduced_t0_unverified` at exit 3. An exit 0 without it would certify a leg of the gate the
+process never saw.
+
+> **Added 2026-09-04**, as a dated gap rather than a silent backfill. `quantfit audit`'s
+> `exit_code_parity` already reads `reproduce`'s constants — it checks that the *numbers* agree
+> across modules — and passed clean throughout, because agreeing on a number is not the same as
+> documenting a surface. This is the same shape as `resolution_caveat` at 0.12.10: a check that
+> walks one direction cannot see what is missing from the other. `tests/test_reproduce.py` now
+> pins the table above against `OUTCOME_EXIT_CODES` in **both** directions.
+
 ## 6. Screen aggregation
 
 §5 governs one pair. This section governs aggregating many pairs into a prevalence screen — the form
