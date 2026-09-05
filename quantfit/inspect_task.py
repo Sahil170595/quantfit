@@ -454,7 +454,7 @@ _CFG_CACHE = (
 )
 
 #: Every `GenerateConfig` field that is NOT allowed, with the reason. Enumerated from the
-#: installed `GenerateConfig.model_fields` (38 on 0.3.252), not guessed — and
+#: installed `GenerateConfig.model_fields` (38 on 0.3.252, 39 on 0.3.263), not guessed — and
 #: `tests/test_inspect_task.py::test_every_generate_config_field_is_classified` fails if a
 #: future inspect_ai adds a field this table has not classified, so the next release
 #: cannot quietly re-open the hole. At runtime the check does not depend on this table
@@ -463,6 +463,14 @@ GENERATE_CONFIG_REFUSALS: dict[str, str] = {
     "max_retries": "retries a failed generation; QSR v0 §2.1 allows no retry — a retried probe is a second draw.",
     "timeout": _CFG_PLUMBING,
     "attempt_timeout": _CFG_PLUMBING,
+    # Added in inspect_ai 0.3.263. Classified from upstream's own design note
+    # (`design/stream-idle-timeout.md`): it kills a STALLED STREAMING call when no chunk
+    # has arrived for N seconds, so a wedged connection is abandoned on a ~15s scale
+    # instead of burning the whole `timeout` budget. That is connection liveness, not
+    # generation: it cannot truncate a healthy completion into the judge's input, because
+    # an expired attempt is abandoned and retried per `max_retries` -- which this table
+    # already refuses on QSR v0 2.1 grounds -- rather than returned as text.
+    "stream_idle_timeout": _CFG_PLUMBING,
     "max_connections": _CFG_PLUMBING,
     "adaptive_connections": _CFG_PLUMBING,
     "system_message": "puts a system prompt in front of the probe; QSR v0 §2.4 sends the probe UNCHANGED, with no "
@@ -509,6 +517,26 @@ GENERATE_CONFIG_REFUSALS: dict[str, str] = {
     "modalities": "changes the output modality; the judge's input contract is the completion TEXT (QSR v0 §2.5).",
     "batch": "batches generations, which changes the padding a greedy decode runs under; it is not provably inert "
     "on the generation path and this runner will not assume it is.",
+}
+
+#: The pin is a RANGE (`inspect-ai>=0.3.252,<0.4`, pyproject `[project.optional-dependencies]`),
+#: so the classification above describes the range and not one release. A field introduced
+#: partway through it is legitimately ABSENT from an older-but-admitted `GenerateConfig`
+#: without the table being stale, and legitimately present in a newer one without the table
+#: being incomplete. Recording the version that introduced each such field is what lets the
+#: test assert both directions without the two ends of the pin contradicting each other --
+#: which is exactly what happened on 2026-09-05: 0.3.263 added `stream_idle_timeout`, CI
+#: installed it and failed "has grown fields", and pinning the entry then failed "names
+#: fields that no longer exist" on a 0.3.252 box. Both assertions were right; the table's
+#: single-version premise was wrong.
+#:
+#: Safety never depended on this table being complete. `check_generate_config` reads the
+#: CONFIG OBJECT's own attributes, so an unclassified field is refused at runtime whether or
+#: not anyone has updated this file (see `test_an_unclassified_config_field_is_refused_rather_than_dropped`).
+#: The table buys a named diagnosis instead of "not classified", and this map keeps it
+#: honest across the whole range rather than at one point in it.
+GENERATE_CONFIG_FIELDS_ADDED_AFTER_FLOOR: dict[str, str] = {
+    "stream_idle_timeout": "0.3.263",
 }
 
 # Keys the solver writes into TaskState.metadata and the scorer reads back. Named
