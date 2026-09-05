@@ -13,6 +13,60 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.13
+
+Five sub-patches to the **public record and the spec**, and a pattern worth naming: three
+of the five were claims marked **[V]** — verified-from — which is precisely why they
+survived. A verified mark is the one a reader does not re-check.
+
+- **The spec quoted a judge label the code stopped writing.** `spec/qsr-v0.md` §2.7
+  block-quotes the label and says, in as many words, *"exactly as the code writes it"*. It
+  had not been for three releases: 0.12.9 rewrote `_measured_judge_label` to stop printing
+  `false-negative rate 0.0% at n=80` — no denominator, no interval, a bare zero on the
+  direction where a judge error is a **missed dangerous flip**. n=80 is the denominator of
+  neither rate; the set splits 48 compliant / 32 refusal, so they are 4/48 (Wilson upper
+  19.6%) and 0/32 (upper 10.7%). 0.12.9 pinned the *function*; nothing pinned the spec's
+  copy of its output. `docs/reference-reports-v0.md` carried the identical paraphrase
+  **inside a note headed "Corrected 2026-08-28"** whose job was retiring the previous
+  stale label.
+
+- **§5.9 said "resolution" where §5.8 says it must say "floor".** The section that
+  *defines* what a no-detection result means read *"the run's resolution was the printed
+  MDE"* and *"bounds the true harmful flip rate below ~24pp"* — both contradicting §5.8 of
+  the same document ("a lower bound on the true resolution, **never** the resolution, and
+  every surface that prints it MUST say so"). At the ε measured 2026-08-18 the effective
+  MDE is 1.0 for every n ≤ 34 and the largest dangerous-axis n ever run is 12, so `0/12`
+  bounded nothing about the world. Six surfaces carried it downstream. The worst was
+  `gate.py`'s `NOTES`, serialized into every gate artifact **two entries above** a note
+  stating "effective MDE 1.0 for n <= 34" — one machine-readable artifact, two adjacent
+  notes, contradicting each other. It was found by the new guard test, not by reading.
+
+- **`reproduce`'s exit codes were documented nowhere.** It returns from §5.7's space — its
+  own constants say so — while §5.7 covers `verify-safety` and `screen` and §5.8 the gate.
+  The mapping's only written form was an argparse help string. New §5.10 gives the closed
+  vocabulary and three divergences: **3** means *the gate was not met* and three outcomes
+  reach it (two with `reproduced` in their name); **4** is a verdict, not a refusal; and
+  there is no **5**. `exit_code_parity` read those constants throughout and passed clean,
+  because agreeing on a number is not the same as documenting a surface — the same shape
+  as `resolution_caveat` at 0.12.10.
+
+- **The terminal still asserted the bound 0.12.8 removed everywhere else.** Every
+  `verify-safety` run ended with *"a no-detection result bounds the drift, it does not
+  certify safety"* — the exact sentence 0.12.8 deleted from JUnit and the model card,
+  surviving on the surface a user reads **first**, `--demo` included. The README's sample
+  block was stale to match, because it is transcribed output; it is now regenerated from
+  `SafetyDrift.summary()` by a test, since transcription was the defect.
+
+- **The freeze plan recorded a control status the manifest contradicts.** Two places said
+  `sensitivity_control: {"status": "not_run"}`; the file says `"pass"`, and has since the
+  control passed at IQ2_M on 2026-08-19. Checklist step 1 — first in a list whose step 0
+  can terminate the whole freeze — was recorded as blocking for sixteen days after its
+  evidence was committed. A `pass` clears `conditionality` and, per §6.1's independence
+  rule, **MUST NOT** clear `resolution_caveat`; that leg is undischarged at every n run.
+
+Ten tests, each mutation-checked against the defect it pins. No measured number moves and
+no field changes: what changes is what an implementation may **say** these artifacts mean.
+
 ## 0.12.12
 
 A patch to keep the tripwire honest. CI went red on every Python version between
