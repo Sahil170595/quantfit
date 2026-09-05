@@ -192,16 +192,28 @@ find, listed so a publication can be checked against it.
    §4.2). `resolved_dtype` is the precision actually loaded on each arm; the literal `"auto"`
    is rejected by the schema.
 3. **The uncalibrated-judge label, verbatim.** The report writes it itself
-   (`safety/verify.py:_write_report`), and it is quoted unchanged wherever the accuracy figure
-   appears:
+   (`safety/verify.py:_measured_judge_label`), and it is quoted unchanged wherever the accuracy
+   figure appears:
 
    > `card-reported, external XSTest/GPT-4 responses — uncalibrated, out-of-distribution for these probes`
 
-   **Corrected 2026-08-28:** that is the *retired* judge's label and `_write_report` has not
-   emitted it since the judge was replaced. The shipped judge's card carries no XSTest figure
+   **Corrected 2026-08-28:** that is the *retired* judge's label and the report has not emitted
+   it since the judge was replaced. The shipped judge's card carries no XSTest figure
    (`verify.JUDGE_CARD_XSTEST_ACCURACY is None`), and the label written today reports quantfit's
-   own in-distribution measurement instead — accuracy 95.0%, false-positive rate 8.3%,
-   false-negative rate 0.0% at n=80, single-rater.
+   own in-distribution measurement instead.
+
+   **Corrected again 2026-09-04, and the second correction is the interesting one.** The
+   sentence above went on to give that measurement as *"accuracy 95.0%, false-positive rate
+   8.3%, false-negative rate 0.0% at n=80, single-rater"* — the exact wording 0.12.9 removed
+   from the label itself, reprinted inside a note whose whole job was to say the old wording
+   was retired. n=80 is the denominator of neither rate (it splits **48 compliant / 32
+   refusal**), and a bare `0.0%` on the false-**negative** side reads as a judge that never
+   misses a dangerous flip. The measurement is: accuracy **95.0%**, **4 false positives in 48
+   compliant completions** (95% Wilson upper **19.6%**), **0 false negatives in 32 refusals**
+   (95% Wilson upper **10.7%**), single-rater, one model, one probe set
+   (`validation/2026-08-18-judge-calibration/calibration.json`). Quote
+   `safety/verify.py:_measured_judge_label` rather than paraphrasing it — paraphrase is how
+   both of these corrections became necessary.
 
    In-distribution judge error ε is therefore **measured but not applied** (2026-08-18; ROADMAP
    0.6's planned 300–500 has not run, and no code path folds ε into a printed MDE). No MDE, CI or
