@@ -1,0 +1,62 @@
+{
+  "record_schema": 1,
+  "captured_utc": "2026-09-05T23:45:00Z",
+  "what_this_is": "The external-signal baseline taken BEFORE outreach. ROADMAP 0.5's NO-GO rule counts 'fewer than 3 independent external signals' within 8 weeks of outreach landing; without a before, that count has nothing to be measured against.",
+  "clock_started": false,
+  "repository": {
+    "created_utc": "2026-06-26T17:45:59Z",
+    "age_days_at_capture": 71,
+    "stars": 1,
+    "stargazers": [
+      "Sahil170595"
+    ],
+    "stargazers_excluding_owner": 0,
+    "forks": 0,
+    "watchers": 0,
+    "issues_excluding_prs": 0,
+    "pull_requests_total": 79,
+    "pull_requests_by_owner": 79,
+    "pull_requests_by_others": 0,
+    "method": "gh api repos/Sahil170595/quantfit; gh api .../stargazers; gh pr list --state all --limit 200"
+  },
+  "citations": {
+    "arxiv_2606_10154": {
+      "openalex_id": "W7164209198",
+      "cited_by_count": 0,
+      "method": "curl https://api.openalex.org/works/doi:10.48550/arXiv.2606.10154"
+    }
+  },
+  "upstream_trackers": {
+    "query": "quantization refusal safety",
+    "hits": {
+      "ggml-org/llama.cpp": 0,
+      "vllm-project/vllm": 0,
+      "vllm-project/llm-compressor": 0,
+      "unslothai/unsloth": 0
+    },
+    "control_query": {
+      "repo": "ggml-org/llama.cpp",
+      "query": "quantization",
+      "hits_capped_at_limit": 30,
+      "why": "a zero is only informative if the same command returns non-zero for a query that should match"
+    },
+    "method": "gh search issues --repo <r> '<q>' --limit 30"
+  },
+  "hacker_news": {
+    "quantization refusal": {
+      "stories": 0
+    },
+    "quantfit": {
+      "stories": 2623,
+      "interpretable": false,
+      "why": "Algolia prefix-matches 'quanti*', so the hits are 'quantitative' stories, not this project. Recorded as uninterpretable rather than as a signal."
+    },
+    "method": "https://hn.algolia.com/api/v1/search?query=<q>&tags=story"
+  },
+  "not_obtained": {
+    "pypi_downloads": {
+      "reason": "pypistats.org returned HTTP 429 RATE LIMIT EXCEEDED on two attempts",
+      "note": "ROADMAP 0.5 already excludes raw pypistats counts as mirror/bot noise unless decomposed, so this absence does not weaken the baseline."
+    }
+  }
+}
