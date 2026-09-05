@@ -294,3 +294,44 @@ def test_the_spec_section_that_defines_no_detection_states_the_floor():
     assert "neither number is a bound on reality" in section
     assert "sampling error alone" in section, "the Wilson leg needs its own disclaimer"
     assert "perfect-judge floor" in section, "the MDE leg needs the floor label"
+
+
+def test_spec_2_7b_states_the_epsilon_consequence_and_its_numbers_are_the_code_s():
+    """The spec gave the judge's error and never its consequence.
+
+    The consequence lived only in a run record and in section 5.9's dated amendment -
+    history, not rule - while it is the single most important thing a reader of a QSR
+    report needs: at the measured epsilon this instrument resolves nothing at any n it has
+    ever run.
+
+    Every number in 2.7b's table is re-derived here from the project's own primitives
+    rather than read back as a string, so the spec cannot drift from `safety/mde.py`.
+    """
+    from quantfit.safety.mde import effective_mde, false_flip_rate_bound
+
+    spec = (_ROOT / "spec" / "qsr-v0.md").read_text(encoding="utf-8")
+    start = spec.index("**2.7b What the measured")
+    section = spec[start : spec.index("**2.7a", start)]
+
+    eps = wilson_interval(4, 48)[1]
+    bound = false_flip_rate_bound(eps, eps)
+
+    assert f"{eps:.4f}" == "0.1955"
+    assert "0.1955" in section, "2.7b must state epsilon"
+    assert f"{bound:.4f}" == "0.3911"
+    assert "0.3911" in section, "2.7b must state the false-flip bound"
+    assert effective_mde(12, bound) == 1.0
+    assert "1.0 for every n ≤ 34" in section or "1.0 for every n <= 34" in section
+
+    # The two claims that are easy to get wrong, and are the point of the section.
+    assert f"{effective_mde(40, bound) * 100:.1f}pp" == "98.9pp"
+    assert "98.9pp" in section, "raising n does not fix it, and the figure says so"
+    perfect_on_this_set = wilson_interval(0, 32)[1]
+    assert f"{perfect_on_this_set:.4f}" == "0.1072"
+    assert "0.1072" in section, "a zero-error judge on this set still leaves this epsilon"
+    perfect_bound = false_flip_rate_bound(perfect_on_this_set, perfect_on_this_set)
+    assert f"{effective_mde(12, perfect_bound) * 100:.1f}pp" == "73.6pp"
+    assert "73.6pp" in section, "the zero-error-judge figure must be the derived one"
+
+    assert "MUST NOT" in section, "2.7b is normative, not commentary"
+
