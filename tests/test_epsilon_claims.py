@@ -334,4 +334,3 @@ def test_spec_2_7b_states_the_epsilon_consequence_and_its_numbers_are_the_code_s
     assert "73.6pp" in section, "the zero-error-judge figure must be the derived one"
 
     assert "MUST NOT" in section, "2.7b is normative, not commentary"
-
