@@ -99,6 +99,9 @@ PROBE_DATASET_REVISION = "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58"  # pinned 20
 PROBE_SPLIT = "train"
 # quantfit's pinned judge protocol — a stated choice, recorded in every report.
 JUDGE_INPUT_CONTRACT = "completion-only; truncated to 512 judge tokens; prompt never concatenated"
+# The generation-side policy, recorded as the report's `decode.chat_template` AND digested
+# into a baseline cache key — one constant, so the two can never describe different policies.
+DECODE_CHAT_TEMPLATE_POLICY = "model-default when present, raw prompt otherwise"
 # Card-reported external accuracy (XSTest/GPT-4 responses). NOT an error rate for
 # quantfit's probe distribution — in-distribution calibration is ROADMAP 0.6.
 # The previous judge (Crusadersk/quantsafe-refusal-modernbert @ b34061f9) was replaced on
@@ -340,6 +343,7 @@ def verify_safety(
     max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
     report_path: str | None = None,
     capture_path: str | None = None,
+    baseline_cache_dir: str | None = None,
 ) -> SafetyDrift:
     """Compare refusal behavior of the unquantized baseline vs a quantized artifact.
 
@@ -359,6 +363,13 @@ def verify_safety(
     and off by default; see the module docstring for why completions are absent
     from the report and what the capture may not be used for. A capture that
     cannot be written warns and is skipped: it never costs the run its result.
+
+    With `baseline_cache_dir` (GGUF pairs only), the baseline arm's completions are served
+    from `safety/cache.py` when an entry for this exact arm, environment, probe set and decode
+    exists, and stored after generation when it does not. The key is derived from the arm's
+    identity BEFORE any server starts (`gguf_arm.arm_identity`), so a hit skips the baseline
+    generation entirely. A hit changes wall-clock time and nothing else; budgets assume zero
+    hits (`cache.BUDGET_RULE`). Entries hold completion text and are local-only.
     """
     from quantfit.safety.gguf_arm import is_gguf_ref
 
@@ -371,6 +382,17 @@ def verify_safety(
             "is never pooled with a quantization diff. Pair the quant with an unquantized GGUF under the "
             "same binary instead, e.g. --baseline hf:<org>/<repo>/<model>-f16.gguf"
         )
+    if baseline_cache_dir and not baseline_gguf:
+        # Refused before any load, rather than accepted and silently ignored. A transformers
+        # arm's identity includes the dtype it RESOLVED to and the commit it RESOLVED at, and
+        # both are known only once the model is loaded — so a key cannot be derived before the
+        # expensive half runs. Caching it would need a load-then-look-up split this path does
+        # not have; pretending to cache would be a flag that does nothing.
+        raise RuntimeError(
+            "the baseline cache supports GGUF pairs only: a transformers arm's identity (resolved dtype, "
+            "resolved commit) is known only after the model loads, so no cache key can be derived before "
+            "generation. Drop --baseline-cache for this pair."
+        )
 
     probes = _load_probes(token)
     prompts = [p.prompt for p in probes]
@@ -381,7 +403,36 @@ def verify_safety(
         # Both files resolved + mandates enforced (unquantized baseline, same
         # architecture) BEFORE any server starts or generation time is spent.
         baseline_res, quant_res = gguf_arm.resolve_pair(baseline_model_id, quant_path, token)
-        baseline_completions, baseline_arm = gguf_arm.generate_completions(baseline_res, prompts, max_new_tokens)
+        cached = None
+        if baseline_cache_dir:
+            from quantfit.safety import cache
+            from quantfit.safety.report import ArmRun
+
+            identity = gguf_arm.arm_identity(baseline_res)
+            key_facts = {
+                "probe_dataset_id": PROBE_DATASET_ID,
+                "probe_dataset_revision": PROBE_DATASET_REVISION,
+                "probe_split": PROBE_SPLIT,
+                "prompts": prompts,
+                "max_new_tokens": max_new_tokens,
+                "do_sample": False,
+                "chat_template_policy": DECODE_CHAT_TEMPLATE_POLICY,
+                "env": cache.environment_identity(),
+            }
+            cache_inputs = cache.fingerprint_inputs(identity, **key_facts)
+            fingerprint = cache.baseline_fingerprint(identity, **key_facts)
+            cached = cache.load(baseline_cache_dir, fingerprint)  # CacheError on a tampered entry
+        if cached is not None:
+            baseline_completions, stored_arm = cached
+            baseline_arm = ArmRun(**stored_arm)
+            print(f"baseline served from cache {fingerprint[:12]} (generation skipped; budgets assume no hit)")
+        else:
+            baseline_completions, baseline_arm = gguf_arm.generate_completions(baseline_res, prompts, max_new_tokens)
+            if baseline_cache_dir:
+                # store() re-derives the key and cross-checks the arm it is handed against
+                # the identity the key was built from — the pre-generation identity must equal
+                # the post-generation provenance, or nothing is written.
+                cache.store(baseline_cache_dir, cache_inputs, baseline_completions, baseline_arm)
         quant_completions, quant_arm = gguf_arm.generate_completions(quant_res, prompts, max_new_tokens)
     else:
         # One causal LM resident at a time; freed before the next loads.
@@ -496,7 +547,7 @@ def _write_report(
         decode={
             "max_new_tokens": max_new_tokens,
             "do_sample": False,
-            "chat_template": "model-default when present, raw prompt otherwise",
+            "chat_template": DECODE_CHAT_TEMPLATE_POLICY,
         },
         env=environment_fingerprint(),
         baseline=baseline,
