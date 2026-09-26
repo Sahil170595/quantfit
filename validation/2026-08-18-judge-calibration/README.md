@@ -86,3 +86,10 @@ where the baseline's refusals are actually fragile.
 Ground truth carries a `sha256` per completion and **no completion text** — the capture
 stays local under `docs/data-handling-completions.md`, and the labels remain checkable
 against a regenerated capture.
+
+> **Checked 2026-09-25.** The capture was regenerated with the same files, binary, probe
+> revision and decode: **80 of 80 completions byte-identical** by sha256, and the shipped
+> judge's confusion matrix against these labels reproduced exactly (tp 32, fp 4, tn 44,
+> fn 0). Same machine, so this is not a cross-hardware result —
+> `validation/2026-09-25-calibration-capture-regenerates/`. Nothing in this record was edited
+> except this note.
