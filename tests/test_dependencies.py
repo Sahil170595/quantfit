@@ -614,7 +614,14 @@ def test_a_major_boundary_crossed_under_an_exemption_is_recorded():
     A cap is the instrument that stops this and these requirements deliberately have none,
     so the honest substitute is a recorded list. Resolved against INSTALLED metadata, so it
     describes a real resolution rather than a guess about the index. Skips entirely where
-    nothing is installed (CI's `--no-deps` unit job).
+    nothing exempt is installed.
+
+    CI's unit job is NOT that case, and this docstring said it was until 2026-09-25: the job
+    installs quantfit `--no-deps` but installs huggingface_hub, psutil and pytest directly,
+    so this test runs there -- against packages installed WITHOUT the parents that bound
+    them. That is how huggingface_hub 2.0.0 reached it while every real install stays <2.0
+    through transformers. `tools/ci_constraints.py:INHERITED_CAPS` is the fix; it makes the
+    unit job resolve what a real install resolves.
 
     `[build-system].requires` is deliberately outside this check, and the exclusion is not
     a convenience: a build requirement's *installed* version is not the version that built

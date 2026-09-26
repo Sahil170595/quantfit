@@ -454,7 +454,7 @@ _CFG_CACHE = (
 )
 
 #: Every `GenerateConfig` field that is NOT allowed, with the reason. Enumerated from the
-#: installed `GenerateConfig.model_fields` (38 on 0.3.252, 39 on 0.3.263), not guessed — and
+#: installed `GenerateConfig.model_fields` (38 on 0.3.252, 39 from 0.3.262, 40 from 0.3.264), not guessed — and
 #: `tests/test_inspect_task.py::test_every_generate_config_field_is_classified` fails if a
 #: future inspect_ai adds a field this table has not classified, so the next release
 #: cannot quietly re-open the hole. At runtime the check does not depend on this table
@@ -463,7 +463,7 @@ GENERATE_CONFIG_REFUSALS: dict[str, str] = {
     "max_retries": "retries a failed generation; QSR v0 §2.1 allows no retry — a retried probe is a second draw.",
     "timeout": _CFG_PLUMBING,
     "attempt_timeout": _CFG_PLUMBING,
-    # Added in inspect_ai 0.3.263. Classified from upstream's own design note
+    # Added in inspect_ai 0.3.262. Classified from upstream's own design note
     # (`design/stream-idle-timeout.md`): it kills a STALLED STREAMING call when no chunk
     # has arrived for N seconds, so a wedged connection is abandoned on a ~15s scale
     # instead of burning the whole `timeout` budget. That is connection liveness, not
@@ -471,6 +471,15 @@ GENERATE_CONFIG_REFUSALS: dict[str, str] = {
     # an expired attempt is abandoned and retried per `max_retries` -- which this table
     # already refuses on QSR v0 2.1 grounds -- rather than returned as text.
     "stream_idle_timeout": _CFG_PLUMBING,
+    # Added in inspect_ai 0.3.264. NOT plumbing, and the reason is the whole instrument:
+    # upstream's docstring says it raises `ModelRefusalError`, failing the sample, when a
+    # provider returns stop_reason="content_filter". A refusal would then never reach the
+    # judge as a completion -- the pair drops out, and it drops out ON the behaviour QSR
+    # measures, so the at-risk denominators (QSR v0 5.1) shrink exactly where a flip
+    # could have been observed. Here a refusal is a result, never an error.
+    "fail_on_refusal": "turns a provider refusal (stop_reason='content_filter') into a failed sample, so the "
+    "refusal never reaches the judge as a completion and the pair silently leaves the at-risk set on exactly "
+    "the behaviour QSR measures (QSR v0 §5.1). A refusal is a result here, never an error.",
     "max_connections": _CFG_PLUMBING,
     "adaptive_connections": _CFG_PLUMBING,
     "system_message": "puts a system prompt in front of the probe; QSR v0 §2.4 sends the probe UNCHANGED, with no "
@@ -525,10 +534,16 @@ GENERATE_CONFIG_REFUSALS: dict[str, str] = {
 #: without the table being stale, and legitimately present in a newer one without the table
 #: being incomplete. Recording the version that introduced each such field is what lets the
 #: test assert both directions without the two ends of the pin contradicting each other --
-#: which is exactly what happened on 2026-09-05: 0.3.263 added `stream_idle_timeout`, CI
-#: installed it and failed "has grown fields", and pinning the entry then failed "names
-#: fields that no longer exist" on a 0.3.252 box. Both assertions were right; the table's
-#: single-version premise was wrong.
+#: which is exactly what happened on 2026-09-05: CI installed 0.3.263, failed "has grown
+#: fields" on `stream_idle_timeout`, and pinning the entry then failed "names fields that no
+#: longer exist" on a 0.3.252 box. Both assertions were right; the table's single-version
+#: premise was wrong.
+#:
+#: Each version below is where the field first appears in the published wheel's
+#: `inspect_ai/model/_generate_config.py`, checked against the neighbouring releases -- not
+#: the version CI happened to install. The first entry was originally recorded as 0.3.263
+#: for exactly that reason; the wheels show it at 0.3.262, and a box on 0.3.262 would have
+#: failed this map's own "present in the running version" assertion (corrected 2026-09-25).
 #:
 #: Safety never depended on this table being complete. `check_generate_config` reads the
 #: CONFIG OBJECT's own attributes, so an unclassified field is refused at runtime whether or
@@ -536,7 +551,8 @@ GENERATE_CONFIG_REFUSALS: dict[str, str] = {
 #: The table buys a named diagnosis instead of "not classified", and this map keeps it
 #: honest across the whole range rather than at one point in it.
 GENERATE_CONFIG_FIELDS_ADDED_AFTER_FLOOR: dict[str, str] = {
-    "stream_idle_timeout": "0.3.263",
+    "stream_idle_timeout": "0.3.262",  # absent in 0.3.261's wheel, present in 0.3.262's
+    "fail_on_refusal": "0.3.264",  # absent in 0.3.263's wheel, present in 0.3.264's
 }
 
 # Keys the solver writes into TaskState.metadata and the scorer reads back. Named

@@ -51,6 +51,28 @@ except ModuleNotFoundError:  # pragma: no cover — 3.10 only
 EXIT_OK = 0
 EXIT_OPERATIONAL = 2
 
+# Caps a dependency INHERITS through a parent that CI's unit job does not install.
+#
+# "Emit what pyproject declares" is not sufficient for a PARENT_BOUNDED dependency
+# (tests/test_dependencies.py `_EXEMPTIONS`): pyproject deliberately declares no cap on it,
+# because a parent caps it in every real install. The unit job installs such a package
+# standalone, WITHOUT the parent, so nothing caps it there and pip takes the newest release
+# -- a version no `pip install quantfit` can resolve. That is exactly the "combination the
+# package forbids" this script exists to prevent; the forbidding just happens one link down.
+#
+# Found 2026-09-25: huggingface_hub 2.0.0 was released, CI's unit job installed it, and
+# test_a_major_boundary_crossed_under_an_exemption_is_recorded failed on a major no user can
+# reach. The chain, read from PyPI metadata that day: pyproject caps llmcompressor<0.13;
+# llmcompressor 0.12.0 requires transformers>=5.9.0,<=5.10.1; transformers 5.9.0, 5.10.0 and
+# 5.10.1 each require huggingface-hub>=1.5.0,<2.0 (as does 5.17.0, the latest).
+#
+# Hand-recorded, which is what this script otherwise refuses to do -- so it is pinned: when
+# the parent IS installed, tests/test_ci_constraints.py checks the parent's own
+# Requires-Dist still carries this cap, and fails if the chain moved.
+INHERITED_CAPS: dict[str, tuple[str, str]] = {
+    "huggingface-hub": ("<2.0", "transformers"),  # (cap, the installed parent that imposes it)
+}
+
 # PEP 508 name at the head of a requirement string, up to the first version
 # specifier / extra / marker / whitespace.
 _NAME_RE = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)")
@@ -98,7 +120,11 @@ def collect(pyproject: dict) -> dict[str, str]:
                 )
             seen[name] = (spec, section)
 
-    return {name: spec for name, (spec, _) in sorted(seen.items())}
+    constraints = {name: spec for name, (spec, _) in sorted(seen.items())}
+    for name, (cap, _parent) in INHERITED_CAPS.items():
+        if name in constraints:  # one constraint per name: fold the inherited cap into the declared spec
+            constraints[name] = f"{constraints[name]},{cap}"
+    return constraints
 
 
 def render(constraints: dict[str, str], pyproject_path: Path) -> str:
