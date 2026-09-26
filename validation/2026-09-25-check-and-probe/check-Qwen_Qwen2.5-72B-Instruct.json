@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.12.16"
+  },
+  "command": "check",
+  "exit_code": 3,
+  "result": {
+    "model_id": "Qwen/Qwen2.5-72B-Instruct",
+    "fits": false,
+    "mode": "refuse",
+    "limit": "disk",
+    "bytes": {
+      "fp16": 145412519312,
+      "gpu_free": 11600396288,
+      "ram_available": 12585545728,
+      "disk_free": 13521166336,
+      "disk_need": 232660030899
+    },
+    "reason": "CAN'T QUANTIZE: Qwen/Qwen2.5-72B-Instruct needs ~216.7 GB free disk (download + output) but only 12.6 GB is free."
+  }
+}

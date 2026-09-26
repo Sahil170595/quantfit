@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.12.16"
+  },
+  "command": "check",
+  "exit_code": 3,
+  "result": {
+    "model_id": "Qwen/Qwen2.5-7B-Instruct",
+    "fits": false,
+    "mode": "refuse",
+    "limit": "disk",
+    "bytes": {
+      "fp16": 15231271888,
+      "gpu_free": 11600396288,
+      "ram_available": 12479479808,
+      "disk_free": 13521375232,
+      "disk_need": 24370035020
+    },
+    "reason": "CAN'T QUANTIZE: Qwen/Qwen2.5-7B-Instruct needs ~22.7 GB free disk (download + output) but only 12.6 GB is free."
+  }
+}
