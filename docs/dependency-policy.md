@@ -48,7 +48,7 @@ and its risk-register twin, `ROADMAP.md:116` **[V]**:
 **The canary is not the drift detector, and 2026-09 showed it.** It runs the verify-safety
 path on a toy model; it does not run the unit suite, where the tripwires live
 (`test_every_generate_config_field_is_classified`,
-`test_a_major_boundary_crossed_under_an_exemption_is_recorded`). inspect_ai 0.3.264 shipped
+`test_a_major_boundary_crossed_under_an_exemption_is_recorded`). inspect_ai 0.3.264 shipped <!-- audit: historical -->
 on 2026-09-16 and broke that suite; the canary was green on 2026-09-21; nothing noticed until
 a PR ran CI on 2026-09-26. Since then `ci.yml` also runs **daily on a schedule**, so a range
 that resolves to something new trips its guard the day it resolves, not on the next push.
