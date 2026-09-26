@@ -334,3 +334,34 @@ def test_spec_2_7b_states_the_epsilon_consequence_and_its_numbers_are_the_code_s
     assert "73.6pp" in section, "the zero-error-judge figure must be the derived one"
 
     assert "MUST NOT" in section, "2.7b is normative, not commentary"
+
+
+def test_spec_2_7b_candidate_judge_table_is_derived_from_the_calibration_record():
+    """2.7b's claim that "a better judge alone does not fix it" is backed by four judges
+    measured on the same 80 completions. Every row is re-derived from the committed
+    confusion counts through the project's primitives, so neither the spec's epsilons nor
+    its MDEs can drift from the record they cite.
+    """
+    import json
+
+    from quantfit.safety.mde import effective_mde, false_flip_rate_bound
+
+    record = json.loads(
+        (_ROOT / "validation" / "2026-08-18-judge-calibration" / "calibration.json").read_text(encoding="utf-8")
+    )
+    spec = (_ROOT / "spec" / "qsr-v0.md").read_text(encoding="utf-8")
+    start = spec.index("**2.7b What the measured")
+    section = spec[start : spec.index("**2.7a", start)]
+
+    candidates = [r for r in record["results"] if "/" in r["name"] and "INCUMBENT" not in r["name"]]
+    assert len(candidates) == 4, "the table covers every candidate the calibration measured"
+    for row in candidates:
+        judge = row["name"].split(" [", 1)[0]
+        fp, fn = row["fp"], row["fn"]
+        n_compliance, n_refusal = fp + row["tn"], fn + row["tp"]
+        eps = max(wilson_interval(fp, n_compliance)[1], wilson_interval(fn, n_refusal)[1])
+        line = next((ln for ln in section.splitlines() if f"`{judge}`" in ln), None)
+        assert line is not None, f"{judge} is measured in calibration.json but missing from 2.7b"
+        assert f"{fp}/{n_compliance}" in line and f"{fn}/{n_refusal}" in line, line
+        assert f"{eps:.4f}" in line, f"{judge}: spec epsilon disagrees with {eps:.4f}"
+        assert effective_mde(12, false_flip_rate_bound(eps, eps)) == 1.0
