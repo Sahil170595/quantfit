@@ -115,3 +115,37 @@ def test_the_no_go_leg_names_the_axis_it_is_about():
             continue
         window = " ".join(lines[max(0, i - 4) : i + 5]).lower()
         assert "dated defect" in window, f"ROADMAP.md:{i + 1} uses the unqualified NO-GO leg outside a dated correction"
+
+
+def test_every_cli_flag_has_a_row_in_the_validation_matrix():
+    """docs/validation-matrix.md section 3 stakes itself on flag-level completeness
+    ("enumerated from _build_parser()"), and three flags shipped without rows: --resume and
+    --attempts in 0.10.0, --baseline-cache in 0.13.0. Nothing noticed, because the
+    enumeration was done by hand once and never again. Now it is done on every run.
+
+    A flag counts as covered if it appears in the FIRST cell of any section-3 row, so
+    `--tier smoke` / `--tier full` cover --tier and `--version` / `-V` covers --version.
+    """
+    import argparse
+
+    from quantfit.cli import _build_parser
+
+    flags: set[str] = set()
+
+    def walk(parser):
+        for action in parser._actions:
+            if isinstance(action, argparse._SubParsersAction):
+                for sub in action.choices.values():
+                    walk(sub)
+            else:
+                flags.update(o for o in action.option_strings if o.startswith("--") and o != "--help")
+
+    walk(_build_parser())
+
+    doc = (_ROOT / "docs" / "validation-matrix.md").read_text(encoding="utf-8")
+    section = doc[doc.index("## 3. Major flags") : doc.index("## 4.")]
+    first_cells = [line.split("|")[1] for line in section.splitlines() if line.startswith("| `")]
+    covered = {flag for cell in first_cells for flag in re.findall(r"--[a-z0-9][a-z0-9-]*", cell)}
+
+    missing = sorted(flags - covered)
+    assert not missing, f"CLI flags with no row in validation-matrix section 3: {missing}"

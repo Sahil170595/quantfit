@@ -412,6 +412,14 @@ only required argument that command has.
 | `--json` | all 14 leaf commands | **E1 on `audit` only** (run locally 2026-08-14, 0 errors / 0 warnings across five checks). E0 on the other thirteen — the envelope that `CHANGELOG.md` §0.6.0 describes as the point of a machine-readable surface has never been consumed by a caller | `tests/` per-command envelope assertions are E3 |
 | `--version` / `-V` | top level | **E2.** Executed by `tools/quickstart_check.py` as a clean-venv command on ubuntu **and** windows in `install-smoke`, green on run 31772386477 | `tools/quickstart_check.py` (`[PASS] L19 quantfit --version`) |
 | `--demo` | verify-safety | **E1‑weak, and misclassified by the gate that should cover it.** Run locally 2026-08-14 under `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 CUDA_VISIBLE_DEVICES=-1`: exit 0, sub-second, fixture verdict printed with its own "No model was loaded and nothing was judged" disclaimer. It is **not** run by `install-smoke`, because `quickstart_check.py` files it under `c:gpu` — see §4 finding 6 | §4 finding 6 |
+| `--resume` | screen | **E1.** Used on 2026-08-21 to finish the 0.5 screen: it skipped the eleven targets already measured and ran the three that disk had blocked, and the summary it rebuilt is the one published | `validation/2026-08-21-screen-complete/README.md` ("`--resume` … skipped the eleven already measured"); `tests/test_screen.py` (2, E3) |
+| `--attempts` | screen | **E3 only.** No run record states that the flag was passed. The 2026-08-19 record's "Three attempts" for `gguf-olmo2-7b-bartowski` ended in a disk-space error that a retry cannot fix, and does not say whether it was this flag or three manual runs — so it is not counted | `tests/test_screen.py` (3, E3); `validation/2026-08-19-screen-full/README.md` for the ambiguous line |
+| `--baseline-cache` | verify-safety, gate | **E3 only.** Added in 0.13.0. Seven hermetic end-to-end tests (crafted GGUFs, fake binary): a hit skips baseline generation and changes nothing reported, an edited entry is refused, a decode change is a new key, a transformers pair and `--demo` are refused. **No real-hardware run**, so no measured speedup and no real entry on disk has ever been served | `tests/test_baseline_cache_wiring.py` (7); `docs/cli-reference.md` |
+
+> **Rows added 2026-09-25.** §0.1 stakes this table on flag-level completeness, and a diff of
+> `_build_parser()` against it found these three missing: `--resume` and `--attempts` shipped
+> in 0.10.0 without rows, and `--baseline-cache` in 0.13.0. `--tier` looked missing to the
+> same diff but is covered by its `--tier smoke` / `--tier full` rows.
 
 ---
 
