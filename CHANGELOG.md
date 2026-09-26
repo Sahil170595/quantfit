@@ -13,6 +13,33 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.13.0
+
+A **minor** release: `verify-safety` and `gate` gain a flag. (#86)
+
+- **`--baseline-cache DIR` — the baseline cache finally has a caller.**
+  `quantfit/safety/cache.py` shipped with 53 tests and nothing calling it, while both
+  committed gate runs regenerated a baseline arm that is bit-identical across runs by
+  construction. On a GGUF pair the baseline's completions are now served from `DIR` when
+  that exact arm, environment, probe set and decode were generated before, and stored when
+  not. Budgets still assume zero hits.
+
+- **The obstacle was ordering.** The cache keys on the arm's identity, and the only code that
+  produced it was the `ArmRun` built *after* generation. For GGUF arms every identity field is
+  a fact about the file and the binary, so `gguf_arm.arm_identity()` computes it before any
+  server starts — and `generate_completions()` records its `ArmRun` from the same function,
+  so the key and the report cannot describe different arms.
+
+- **Refused rather than accepted-and-ignored:** a transformers pair (its resolved dtype and
+  commit are known only after load, so no key exists before generation) and `--demo`.
+
+- Seven hermetic end-to-end tests: pre-generation identity equals the real generator's; a hit
+  skips baseline generation and changes nothing reported; an edited entry raises
+  `CacheError` before either arm runs; a decode change is a new key. Mutation-checked.
+
+**The gate action's default `quantfit-version` range moves to `>=0.13,<0.14`**, or the
+reference action would keep installing 0.12.x.
+
 ## 0.12.18
 
 A patch to the **spec**, with two documentation corrections folded in. No code changes.
