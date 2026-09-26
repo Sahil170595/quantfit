@@ -429,6 +429,46 @@ def test_citation_stale_quote_names_the_current_line(tmp_path, monkeypatch):
     assert coverage["quoted_line_citations"] == 1
 
 
+@pytest.mark.parametrize("verb", ["now says", "still reads", "already states", "says"])
+def test_a_moved_range_citation_is_flagged_even_when_the_verb_carries_an_adverb(tmp_path, monkeypatch, verb):
+    """`README.md:197-201` now says "…" passed this check for weeks while its text sat 147
+    lines further down: the forward gap admitted a bare verb only, so "now" ended it, no
+    quote was found, and an in-range citation with nothing quoted is a silent pass. The
+    adverb is exactly the word a CORRECTED citation reaches for."""
+    root = _repo(
+        tmp_path,
+        **{"quantfit__mod.py": _CITED_MODULE, "spec__s.md": f"`quantfit/mod.py:1-3` {verb} `def helper():` today.\n"},
+    )
+    monkeypatch.setattr(A, "CITATION_DOC_GLOBS", ("spec/*.md",))
+    findings, coverage = A._check_citations(root)
+    assert _kinds(findings) == ["stale_line_citation"], f"{verb!r}: the moved text went unflagged"
+    assert findings[0].actual == "quoted text is at quantfit/mod.py:9"
+    assert coverage["quoted_line_citations"] == 1
+
+
+def test_the_citations_own_closing_backtick_is_never_handed_back_as_a_quote(tmp_path, monkeypatch):
+    """The hand-back once read `'s "~46pp" and ` as a quote and reported a stale citation
+    that was not stale (found against this repo's freeze plan): the gap there was only the
+    citation's own closing backtick."""
+    line = 'matching `quantfit/mod.py:1-3`\'s "~46pp" and `quantfit/mod.py:2` too.\n'
+    root = _repo(tmp_path, **{"quantfit__mod.py": _CITED_MODULE, "spec__s.md": line})
+    monkeypatch.setattr(A, "CITATION_DOC_GLOBS", ("spec/*.md",))
+    findings, _ = A._check_citations(root)
+    assert findings == [], [f.actual for f in findings]
+
+
+def test_an_adverb_without_a_verb_still_ends_the_gap(tmp_path, monkeypatch):
+    """The widening is an adverb IN FRONT OF a verb, not a looser gap: "now" alone, or other
+    words, must not reach across to a quote that belongs to someone else's sentence."""
+    root = _repo(
+        tmp_path,
+        **{"quantfit__mod.py": _CITED_MODULE, "spec__s.md": "`quantfit/mod.py:1-3` now `def helper():` today.\n"},
+    )
+    monkeypatch.setattr(A, "CITATION_DOC_GLOBS", ("spec/*.md",))
+    _, coverage = A._check_citations(root)
+    assert coverage["quoted_line_citations"] == 0
+
+
 def test_citation_quote_that_matches_is_silent(tmp_path, monkeypatch):
     root = _repo(
         tmp_path,
