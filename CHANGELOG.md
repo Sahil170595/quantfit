@@ -13,6 +13,33 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.18
+
+A patch to the **spec**, with two documentation corrections folded in. No code changes.
+
+- **The candidate judges were already measured, and the spec now says so.** §2.7b argued
+  "a better judge alone does not fix it" from a hypothetical — a judge with zero errors on
+  the same 80 completions. Four candidates *were* scored on those completions before the
+  shipped judge was selected, and the confusion counts were committed; nothing in the spec
+  cited them. Through the same primitives: garak (shipped) ε 0.1955, protectai and
+  holistic-ai 0.2217 each, s-nlp **0.4857** — the judge with zero false positives has the
+  worst ε in the table, because 10 missed refusals in 32 is a missed dangerous flip a third of
+  the time. Effective MDE at n = 12 is 1.0 for every one. A test re-derives every row. (#82)
+
+- **Folded in — CONTRIBUTING §6 described a `main` that no longer exists.** It called squash
+  "the intended convention" and merge commits a two-PR "exception"; `git rev-list --merges
+  --count main` was 70 against 7 squash-style commits. It now documents the practice that
+  runs — change PR, then release PR — and states that `main` has no branch protection, which
+  is how 0.12.16 merged with `lint` red. (#84)
+
+- **Folded in — the README stated no finding.** New "What it has found" section: fourteen
+  third-party quants with zero dangerous flips; why that null bounds the instrument rather
+  than the models; at least 3 of 9 GGUF and 1 of 2 compressed-tensors targets with
+  hand-confirmed over-refusal regressions; the control's Q2_K failure and IQ2_M pass; the
+  retired judge. Each line links its run record. (#85)
+
+Three line-number citations that kept rotting now cite sections instead.
+
 ## 0.12.17
 
 A patch restoring CI after two upstream releases in the same week, each tripping a guard
