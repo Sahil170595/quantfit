@@ -4,6 +4,16 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Upstream drift used to surface only when someone happened to push. inspect_ai 0.3.264
+  # (released 2026-09-16) broke the unit suite, and nothing ran it until a PR on 2026-09-26:
+  # the weekly canary stayed green throughout because it runs the verify-safety path, not
+  # these tests. Several dependencies here are ranges on purpose (docs/dependency-policy.md),
+  # so a green main on Monday says nothing about Thursday's resolution. A daily run of the
+  # same jobs makes the tripwires fire on the day upstream moves, not on the next push.
+  # Off the hour on purpose: top-of-hour crons are the most delayed and most often dropped.
+  schedule:
+    - cron: "37 7 * * *"
+  workflow_dispatch:
 
 jobs:
   test:
