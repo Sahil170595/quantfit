@@ -211,6 +211,14 @@ Filter used for that count: the 14 leaf paths of §0.1; a path counts as "run" o
 some artifact in this repo asserts an execution of *that path*. 6 + 3 + 5 = 14. The
 previous revision recorded 3 / 2 / 9 against the same filter.
 
+> **Recounted 2026-09-25 from the §2 rows, not adjusted by hand: 9 E1 · 3 E2 · 2 none.**
+> `check` and `probe` got their first recorded runs today
+> (`validation/2026-09-25-check-and-probe/`). `screen` had been E1 in its own §2 row since
+> 2026-08-18 while this headline still listed it as never run — the headline was stale, not
+> the row. What remains at nothing is `calibrate sheet` and `calibrate ingest`, both GO-gated.
+> The milestone is still **NOT MET**: most E1 rows are partial, and the two clauses below are
+> untouched. The text above is kept as the 2026-08-14 reading it was.
+
 **What did not change, and is the reason the milestone is still NOT MET.** The four
 commands that moved were the cheap ones — three of them needed no hardware, only an
 input that did not exist. The five that remain are the ones that need either a real
@@ -253,19 +261,19 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 | | |
 |---|---|
-| **Validated** | **Nothing.** E0‑implied only: 0.4.0 fixed "a weightless/gated repo in `check` now exits 2 cleanly (was a raw ValueError traceback)", which implies someone ran it once; no hardware, no numbers, no artifact. |
-| **Hardware** | none recorded. |
-| **Evidence** | `CHANGELOG.md` §0.4.0 (the fix); `tests/test_fit.py` (6 tests, E3 — the capacity arithmetic against synthetic sizes). |
-| **NOT validated** | The 3‑tier verdict against a real Hub model on any machine; the disk/RAM/VRAM thresholds against a real OOM; the exit‑3 "won't fit" path; `--token` on a gated repo. The README leads with this command. |
+| **Validated** | **E1, partial — first recorded run 2026-09-25.** Three real Hub models on **L**: `Qwen2.5-1.5B-Instruct` → exit 0, `gpu`; `Qwen2.5-7B-Instruct` and `Qwen2.5-72B-Instruct` → exit 3, `refuse`, limit `disk` (13.52 GB free against 24.37 and 232.66 GB needed). Every verdict correct for the machine. Previously E0‑implied only (0.4.0's fix to a gated-repo traceback). |
+| **Hardware** | L (RTX 4080 Laptop, 12 GB). |
+| **Evidence** | `validation/2026-09-25-check-and-probe/` (three `--json` envelopes); `tests/test_fit.py` (E3). |
+| **NOT validated** | The `offload` tier and the VRAM- and RAM-limited refusals — unreachable on L while its disk is 99% full, since every model large enough to need offload is refused on disk first; `--token` on a gated repo; a machine with no GPU. Running it found §5 defect 3 (the `reason` string's GB/GiB label). |
 
 ### `quantfit probe --model <id> --bits ...`
 
 | | |
 |---|---|
-| **Validated** | **Nothing.** E0‑implied: 0.2.0's audit pass fixed "per-token KL normalization in the probe", implying a run; nothing recorded. |
-| **Hardware** | none recorded. |
-| **Evidence** | `CHANGELOG.md` §0.2.0; `tests/test_probe.py` (3 tests, E3). |
-| **NOT validated** | Any KL number this command has ever printed. No probe output is recorded anywhere in this repo, so the "RTN‑KL is a conservative upper bound" framing has no measured example behind it, on any model, at any bit-width. |
+| **Validated** | **E1 — first recorded run 2026-09-25.** `Qwen2.5-1.5B-Instruct --bits 4 8`: mean per-token RTN-KL **0.5716** at 4-bit and **0.0030** at 8-bit, 8 samples each, 124 s; a second run agreed to the last float digit. Previously E0‑implied only. |
+| **Hardware** | L (RTX 4080 Laptop, 12 GB). |
+| **Evidence** | `validation/2026-09-25-check-and-probe/` (`probe-*.json`, `probe-rerun.json`); `tests/test_probe.py` (E3). |
+| **NOT validated** | Any model but one, any bit-width but 4 and 8, a spread or interval (the command reports a mean over 8 samples and nothing else), and any relationship between RTN-KL and refusal drift — which ROADMAP 0.3 and arXiv 2606.10154 say not to assume. |
 
 ### `quantfit quantize --model <id> --method <m> [--scheme ...] --out <dir>`
 
@@ -528,6 +536,15 @@ for a guess; it would have, and that is not what was done.
    passes `device_map=`, so it checks `find_spec("accelerate")` before the load and
    raises its own `RuntimeError` with an actionable message. No pattern-matching on
    exception text anywhere.
+
+**Defect 3 — `check`'s `reason` string says "GB" and prints GiB.** Found 2026-09-25 by the
+first recorded `check` run (`validation/2026-09-25-check-and-probe/`). `FitResult.reason`'s
+formatter divides by `_GIB` and the string says "GB" (`quantfit/fit.py:67-68`), so the 1.5B
+reads *"~2.9 GB"* against `bytes.fp16` = 3,087,467,144 (3.09 GB), and *"only 12.6 GB is
+free"* against `bytes.disk_free` = 13,522,411,520 (13.52 GB; `df` agrees). Every verdict is
+computed in bytes, so no fit decision is wrong — but the printed amount of disk to free is
+understated by 7.4% in the unit it names. **Open.** The fix is a label (`GiB`) or a divisor
+(`1e9`), and either changes a printed string a test may pin.
 
 ---
 

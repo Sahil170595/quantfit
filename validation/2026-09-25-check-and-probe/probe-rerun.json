@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.12.16"
+  },
+  "command": "probe",
+  "exit_code": 0,
+  "result": {
+    "model": "Qwen/Qwen2.5-1.5B-Instruct",
+    "metric": "mean per-token RTN-KL(fp16 || quant)",
+    "interpretation": "RTN is the worst case \u2014 LOW KL = safe bit-width; HIGH KL can over-escalate (calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict.",
+    "by_bits": [
+      {
+        "bits": 4,
+        "mean_kl": 0.571582242846489,
+        "n_samples": 8
+      },
+      {
+        "bits": 8,
+        "mean_kl": 0.00297176162712276,
+        "n_samples": 8
+      }
+    ]
+  }
+}

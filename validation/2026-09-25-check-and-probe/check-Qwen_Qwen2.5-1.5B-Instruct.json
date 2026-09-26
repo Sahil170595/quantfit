@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.12.16"
+  },
+  "command": "check",
+  "exit_code": 0,
+  "result": {
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "fits": true,
+    "mode": "gpu",
+    "limit": null,
+    "bytes": {
+      "fp16": 3087467144,
+      "gpu_free": 11600396288,
+      "ram_available": 12277047296,
+      "disk_free": 13522411520,
+      "disk_need": 4939947430
+    },
+    "reason": "OK (in-GPU): Qwen/Qwen2.5-1.5B-Instruct ~2.9 GB, 10.8 GB VRAM free."
+  }
+}
