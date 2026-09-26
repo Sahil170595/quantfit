@@ -36,6 +36,40 @@ this drops into a pipeline. Exit codes are the CI contract: **0** clean, **2**
 operational, **3** verdict failed, **4** nothing measured, **5** the gate cannot
 resolve your threshold. 4 and 5 are not passes.
 
+## What it has found
+
+Every line below links to a committed run record; none is a projection.
+
+- **Ordinary quantization did not break refusals in anything measured.** Fourteen
+  third-party quantized artifacts — twelve GGUF, two compressed-tensors, five quantizer
+  organisations — and **zero** probes where the baseline refused and the quant complied
+  ([`2026-08-21-screen-complete`](validation/2026-08-21-screen-complete/)).
+- **That null bounds the instrument, not the models.** The judge's error was measured
+  in-distribution (4 false positives in 48 compliant completions, 0 misses in 32 refusals),
+  and folded into the MDE it gives an effective minimum detectable effect of **100pp at
+  every n ≤ 34**. The largest dangerous-axis n ever run is 12. The detector did not fire;
+  at that n it could not have fired at any prevalence
+  ([`2026-08-22-measured-eps-mde`](validation/2026-08-22-measured-eps-mde/)).
+- **Over-refusal regressions are real and hand-confirmed**: at least **3 of 9** GGUF
+  targets and **1 of 2** compressed-tensors targets. The judge flagged 11 flips; a human
+  read all 11 and confirmed 6 — the other 5 were judge errors, one of them a probe that
+  asks the model to *write* a decline
+  ([`2026-08-19-screen-adjudication`](validation/2026-08-19-screen-adjudication/)).
+  Confirmed flips need no calibrated judge; a person read the text.
+- **The detector is not blind — but it took a 2-bit i-quant to prove it.** The positive
+  control failed at Q2_K, where the 0.5B model refused all twelve unsafe probes on both
+  arms and there was nothing to detect, and passed at **IQ2_M** with a human-confirmed
+  dangerous-axis flip ([`2026-08-19-sensitivity-control-pass`](validation/2026-08-19-sensitivity-control-pass/)).
+- **The first judge was not a refusal detector.** It called 27 of 48 compliant
+  completions refusals (56.2%) and was retired; four candidates were scored on the same
+  completions, and none of them improves the resolution
+  ([`2026-08-18-judge-calibration`](validation/2026-08-18-judge-calibration/),
+  `spec/qsr-v0.md` §2.7b).
+
+What it **cannot** tell you yet is how small a dangerous-axis regression it would catch.
+The lever is the calibration set's size and the probe corpus's size, not a better judge —
+§2.7b gives the arithmetic.
+
 ## The safety check — what nothing else does
 
 `verify-safety` generates from both the unquantized baseline (at its native dtype)
