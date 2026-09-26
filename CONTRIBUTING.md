@@ -324,40 +324,35 @@ and never attach one to an issue or a PR.
 
 ## 6. Merging, versioning, changelog
 
-**Squash merge is the intended convention — and the history has an exception in it.
-Both halves are stated because the second is the part a contributor would otherwise
-discover by contradiction.**
+**The convention is "Create a merge commit", and a fix and its release are two PRs.**
+This section used to say the opposite — squash was "intended" and merge commits were an
+"exception" of two PRs (#8, #10) — and then say *"prefer squash for the next one."* It
+was not followed once after #14: `git rev-list --merges --count main` is **70** and
+single-parent commits ending `(#N)` number **7**, the last of them #14 on 2026-08-08. A
+convention that has been contradicted seventy times is a description of something that
+does not happen, so it is replaced with the one that does (corrected 2026-09-25).
 
-*Intended:* a merged milestone lands as **one** commit whose title ends in the PR
-number, and branch WIP commits do not survive the merge. That is what the history
-shows through PR #6 — `feat: routing layer (0.2) … (#1)`, `fix(audit): … (#2)`,
-`feat(0.3): … (#3)`, `0.4a — drift report schema v1, revision pins,
-scipy-cross-checked stats (#4)`, `0.4b — … (#5)`, `0.5 — QSR spec v0, screen harness,
-model-card emit, verified target list (#6)` — six consecutive single-parent commits,
-the shape GitHub's squash button produces.
+What the practice actually is, and why it is kept rather than reversed:
 
-*The exception, on the record:* **the last two merges into `main` are two-parent merge
-commits, not squashes.** PR #8 landed as `Merge pull request #8 from
-Sahil170595/release/0.6` (parents: the `0.5` squash and the branch tip
-`feat(0.6-prep): judge-calibration machinery with GO-gated activation`), and PR #10
-landed as `Merge pull request #10 from Sahil170595/fix/calibrate-shuffle-flake`
-(parents: the #8 merge and `fix(tests): de-flake the calibration shuffle test, assert
-the mechanism instead`). That merge is the current tip of `origin/main`. GitHub's
-"Create a merge commit" button was used instead of "Squash and merge".
+- **A change lands in one PR, and the release that ships it in a second.** The fix PR
+  carries the code, spec or evidence and no version bump; the `release/X.Y.Z` PR carries
+  the version bump at the load-bearing sites (`CLAUDE.md` §3) and the `CHANGELOG.md`
+  entry, and nothing else. 22 of the 70 merges are release branches.
+- **Tags point at the release PR's merge commit** — `v0.12.12` through `v0.12.16` each
+  dereference to a `Merge pull request #N from …/release/0.12.N` commit. A squash would
+  put the tag on a commit that also carries whatever else the squash collapsed.
+- **Branch commits are reachable from `main`.** `main` is not one commit per PR, and a
+  script that assumes it is will miscount. Count PRs with `git log --merges`, not with
+  `git log --oneline | wc -l`.
 
-Two consequences worth knowing before you write a PR:
-
-- **Branch commits from #8 and #10 are reachable from `main`.** "Branch work stays as
-  unsquashed WIP until it merges" is the *goal*, not a description of this history —
-  those commits are permanently in it. Do not assume `main` is a linear sequence of
-  milestone commits; it is not, and a script that assumes one commit per PR will
-  miscount.
-- **Tag `v0.5.1` points at the #8 merge commit**, so a release tag here does not
-  necessarily dereference to a squashed milestone commit.
-
-Prefer squash for the next one. If you use a merge commit anyway, that is a choice to
-make deliberately and say in the PR — not a default to fall into because the button is
-first.
+**What a PR must pass before it merges**: all nine CI jobs — `lint`, `audit`,
+`test (3.10)` through `test (3.14)`, `install-smoke (ubuntu-latest)` and
+`install-smoke (windows-latest)` — not just the test matrix. **None of these is a
+required check at the GitHub level**: `main` has no branch protection, so GitHub will
+merge a PR with a red job. That happened on 2026-09-05: the 0.12.16 release merged with
+`lint` failing on a trailing blank line, and `main` stayed red until a direct fix on
+2026-09-10 (`c8c6480`). The merger had read only the test jobs. Until protection is
+configured, reading every job is on whoever merges.
 
 **Versions do not track ROADMAP milestone numbers**, and `CHANGELOG.md` opens by
 saying why: 0.5.1 shipped 0.6's machinery, 0.5.2 shipped 0.7's. A milestone number in
