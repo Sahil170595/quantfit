@@ -237,7 +237,7 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Hardware** | CI (no GPU needed — the catalog is a constant table in `quantfit/registry.py`). |
 | **Evidence** | `.github/workflows/ci.yml` (`install-smoke` → "CLI smoke"); `.github/workflows/canary.yml` (`quickstart-install` → "CLI smoke"); `tests/test_registry.py` (8 tests), `tests/test_cli.py::test_list_runs_and_prints_methods`. |
 | **NOT validated** | That the catalog it prints matches what `quantize` can actually produce — every non-default scheme in the table is emitted but never load-tested (§3, `--scheme`). |
-| **Advertised in README?** | **Yes**, in prose (`README.md:148`, "`quantfit list` prints the supported method × scheme matrix"). It was not, when §4 finding 2 was first written; it is now, and `tools/quickstart_check.py` executes it as the second category‑(a) command. |
+| **Advertised in README?** | **Yes**, in prose (`README.md`, "The safety check" section, "`quantfit list` prints the supported method × scheme matrix"). It was not, when §4 finding 2 was first written; it is now, and `tools/quickstart_check.py` executes it as the second category‑(a) command. |
 
 ### `quantfit plan --model <id> [--prefer ...]`
 
@@ -417,7 +417,7 @@ with no artifact behind it.
    in this repository**: `CHANGELOG.md` §0.1.0's validated list names qwen2.5‑1.5b only,
    and every other Llama‑1B string in the repo is a *screen target*
    (`screens/targets-0.5.json`) — a curated candidate, and the screen has not run.
-   `README.md:197-201` now says "validated on Qwen2.5-1.5B (`CHANGELOG.md` 0.1.0)" and
+   `README.md`'s "What it is — and isn't" section now says "validated on Qwen2.5-1.5B (`CHANGELOG.md` 0.1.0)" and
    states outright that "Llama-3.2-1B appears in the 0.5 screen target list, which is a
    list of things to run, not a record of runs" **[V]**. Recorded as closed rather than
    deleted: the finding is what the fix has to keep being true against.
@@ -425,7 +425,7 @@ with no artifact behind it.
    with no advertised entry point. Machine-checked — `tools/quickstart_check.py` reports
    it under "CLI subcommands the README never shows", and `verify` is now the only name
    on that list. `quantfit list` and `quantfit calibrate` were on it when this finding
-   was written and are now advertised (`README.md:148-149`); the finding is narrowed
+   was written and are now advertised (`README.md`, "The rest of the surface" paragraph); the finding is narrowed
    rather than deleted, because the reverse-drift check is what keeps it narrow.
 3. **The README quickstart contains exactly two commands a clean venv can run**
    (`plan`, `list`). ROADMAP 0.10's gate clause — "scripted README-only quickstart passes
