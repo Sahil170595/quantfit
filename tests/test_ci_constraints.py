@@ -104,7 +104,10 @@ def _capped_packages() -> set[str]:
 
 def test_generated_constraints_cover_every_declared_requirement():
     emitted = cc.collect(_pyproject())
-    assert emitted == _declared_requirements(), (
+    expected = dict(_declared_requirements())
+    for name, (cap, _parent) in cc.INHERITED_CAPS.items():
+        expected[name] = f"{expected[name]},{cap}"
+    assert emitted == expected, (
         "the constraints file must carry every requirement pyproject declares — a package "
         "omitted here is a package CI can install at any version. Diff: "
         f"missing={sorted(set(_declared_requirements()) - set(emitted))}, "
@@ -122,6 +125,58 @@ def test_the_caps_that_motivated_this_tool_are_actually_emitted():
             "tool was written; if the cap was removed on purpose, say so in pyproject and in "
             "tests/test_dependencies.py:_EXEMPTIONS rather than only here."
         )
+
+
+def test_an_inherited_cap_is_emitted_for_a_dependency_pyproject_bounds_only_through_a_parent():
+    """huggingface_hub 2.0.0 reached CI's unit job on 2026-09-25 because that job installs
+    it WITHOUT transformers, the parent that caps it at <2.0 in every real install."""
+    emitted = cc.collect(_pyproject())
+    assert emitted["huggingface-hub"].endswith(",<2.0"), emitted["huggingface-hub"]
+
+
+def test_every_inherited_cap_names_a_parent_bounded_exemption():
+    """An inherited cap is only legitimate for a dependency pyproject deliberately leaves
+    uncapped BECAUSE a parent caps it. Anything else belongs in pyproject itself."""
+    spec = importlib.util.spec_from_file_location(
+        "quantfit_test_dependencies", _ROOT / "tests" / "test_dependencies.py"
+    )
+    assert spec and spec.loader
+    deps = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(deps)
+    _EXEMPTIONS = deps._EXEMPTIONS
+
+    for name, (_cap, parent) in cc.INHERITED_CAPS.items():
+        exemption = _EXEMPTIONS.get(name)
+        assert exemption is not None and exemption.kind == "PARENT_BOUNDED", (
+            f"{name} carries an inherited CI cap but is not a PARENT_BOUNDED exemption"
+        )
+        assert parent in exemption.chain or parent == exemption.chain[-1], (
+            f"{name}'s inherited cap cites {parent!r}, which is not in its exemption chain {exemption.chain}"
+        )
+
+
+def test_the_inherited_cap_is_still_what_the_installed_parent_declares():
+    """The one hand-recorded value in this tool, checked against the parent's own metadata
+    wherever the parent is installed. If transformers ever lifts its huggingface-hub cap,
+    this fails rather than letting CI keep testing a ceiling nothing imposes any more."""
+    import importlib.metadata as md
+
+    checked = 0
+    for name, (cap, parent) in cc.INHERITED_CAPS.items():
+        try:
+            requires = md.requires(parent) or []
+        except md.PackageNotFoundError:
+            continue
+        checked += 1
+        declared = [r for r in requires if cc.requirement_name(r.split(";")[0]) == name]
+        assert declared, f"{parent} no longer declares {name} at all"
+        assert any(cap.replace(" ", "") in r.replace(" ", "") for r in declared), (
+            f"{parent} declares {declared} for {name}; the recorded inherited cap is {cap!r}"
+        )
+    if not checked:
+        import pytest
+
+        pytest.skip("no parent that imposes an inherited cap is installed here (CI's unit job)")
 
 
 def test_rendered_file_is_one_requirement_per_line_and_pip_readable():
