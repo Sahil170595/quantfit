@@ -13,6 +13,130 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.13.2
+
+Evidence, and one defect recorded rather than fixed. No code changes. (#88)
+
+- **`check` and `probe` had never been run.** Both sat at "Validated: Nothing" in
+  `docs/validation-matrix.md`. First recorded runs: `check` on three real Hub models — the
+  1.5B fits (`gpu`), the 7B and 72B are refused on **disk** (13.52 GB free against 24.37 and
+  232.66 GB needed), all correct for the machine; `probe` on the 1.5B gives mean per-token
+  RTN-KL **0.5716** at 4-bit and **0.0030** at 8-bit, identical across two runs.
+
+- **Defect found by running it, and left open:** `check`'s human-readable `reason` divides by
+  GiB and says "GB" (`quantfit/fit.py:67-68`), so "only 12.6 GB is free" is 13.52 GB. No
+  verdict is wrong — they are computed in bytes. `docs/validation-matrix.md` §5 defect 3.
+
+- The matrix's §1 headline, recounted from its own §2 rows: 9 E1 · 3 E2 · 2 none. `screen` had
+  been E1 in its row since 2026-08-18 while the headline still said it had never run.
+  ROADMAP 0.10 is still **NOT MET**.
+
+**On how 0.12.17–0.13.2 were cut:** all seven changes had merged before any was released, so
+these five versions were built as a chain from the commits where each change landed, and each
+tag points at a release commit whose tree holds exactly what its version names. CONTRIBUTING
+§6 records the exception.
+
+## 0.13.1
+
+Evidence. No code changes. (#87)
+
+- **The judge-error measurement reproduces byte-for-byte.** The 2026-08-18 calibration that
+  ε = 0.1955 rests on was hand-labelled from a capture that is deliberately not committed;
+  what is committed is a sha256 per completion, and that record said the labels "remain
+  checkable against a regenerated capture". Nobody had checked. Regenerated with the same
+  GGUF files, llama.cpp binary, probe revision and decode on quantfit 0.12.16 — twenty
+  releases later — **80 of 80 completions are identical by sha256**, re-derived a second way
+  with raw `hashlib`. And the shipped judge's confusion matrix against the human labels
+  reproduces exactly: tp 32, fp 4, tn 44, fn 0.
+
+- **Not a cross-hardware result.** Same machine, identical `env` block; the human labels are
+  shown to attach to the same text, not re-verified; ε does not move. Recorded in
+  `validation/2026-09-25-calibration-capture-regenerates/` with no completion text committed.
+
+## 0.13.0
+
+A **minor** release: `verify-safety` and `gate` gain a flag. (#86)
+
+- **`--baseline-cache DIR` — the baseline cache finally has a caller.**
+  `quantfit/safety/cache.py` shipped with 53 tests and nothing calling it, while both
+  committed gate runs regenerated a baseline arm that is bit-identical across runs by
+  construction. On a GGUF pair the baseline's completions are now served from `DIR` when
+  that exact arm, environment, probe set and decode were generated before, and stored when
+  not. Budgets still assume zero hits.
+
+- **The obstacle was ordering.** The cache keys on the arm's identity, and the only code that
+  produced it was the `ArmRun` built *after* generation. For GGUF arms every identity field is
+  a fact about the file and the binary, so `gguf_arm.arm_identity()` computes it before any
+  server starts — and `generate_completions()` records its `ArmRun` from the same function,
+  so the key and the report cannot describe different arms.
+
+- **Refused rather than accepted-and-ignored:** a transformers pair (its resolved dtype and
+  commit are known only after load, so no key exists before generation) and `--demo`.
+
+- Seven hermetic end-to-end tests: pre-generation identity equals the real generator's; a hit
+  skips baseline generation and changes nothing reported; an edited entry raises
+  `CacheError` before either arm runs; a decode change is a new key. Mutation-checked.
+
+**The gate action's default `quantfit-version` range moves to `>=0.13,<0.14`**, or the
+reference action would keep installing 0.12.x.
+
+## 0.12.18
+
+A patch to the **spec**, with two documentation corrections folded in. No code changes.
+
+- **The candidate judges were already measured, and the spec now says so.** §2.7b argued
+  "a better judge alone does not fix it" from a hypothetical — a judge with zero errors on
+  the same 80 completions. Four candidates *were* scored on those completions before the
+  shipped judge was selected, and the confusion counts were committed; nothing in the spec
+  cited them. Through the same primitives: garak (shipped) ε 0.1955, protectai and
+  holistic-ai 0.2217 each, s-nlp **0.4857** — the judge with zero false positives has the
+  worst ε in the table, because 10 missed refusals in 32 is a missed dangerous flip a third of
+  the time. Effective MDE at n = 12 is 1.0 for every one. A test re-derives every row. (#82)
+
+- **Folded in — CONTRIBUTING §6 described a `main` that no longer exists.** It called squash
+  "the intended convention" and merge commits a two-PR "exception"; `git rev-list --merges
+  --count main` was 70 against 7 squash-style commits. It now documents the practice that
+  runs — change PR, then release PR — and states that `main` has no branch protection, which
+  is how 0.12.16 merged with `lint` red. (#84)
+
+- **Folded in — the README stated no finding.** New "What it has found" section: fourteen
+  third-party quants with zero dangerous flips; why that null bounds the instrument rather
+  than the models; at least 3 of 9 GGUF and 1 of 2 compressed-tensors targets with
+  hand-confirmed over-refusal regressions; the control's Q2_K failure and IQ2_M pass; the
+  retired judge. Each line links its run record. (#85)
+
+Three line-number citations that kept rotting now cite sections instead.
+
+## 0.12.17
+
+A patch restoring CI after two upstream releases in the same week, each tripping a guard
+written for exactly this. Nothing in this repository caused either. (#83)
+
+<!-- audit: historical -->
+- **`inspect_ai` 0.3.264 added `fail_on_refusal`, and it is refused.** Upstream's docstring:
+  it raises `ModelRefusalError`, failing the sample, when a provider returns
+  `stop_reason="content_filter"`. For this instrument that is not plumbing — a refusal would
+  never reach the judge as a completion, and the pair would leave the at-risk set on exactly
+  the behaviour QSR measures (QSR v0 §5.1). A refusal is a result here, never an error.
+
+- **A version this project shipped was wrong, and is corrected.** 0.12.12 recorded
+  `stream_idle_timeout` as introduced in 0.3.263 — the version CI happened to install.
+  The published wheels show it absent at 0.3.261 and present at 0.3.262; on an 0.3.262 box
+  the old record failed its own "present in the running version" assertion (mutation-checked).
+  Each floor version is now read from the wheel against its neighbours.
+
+- **CI tested a `huggingface_hub` no real install can resolve.** 2.0.0 was released and CI's
+  unit job installed it, failing *"crossed a FURTHER major"*. But `huggingface-hub` is bounded
+  through a parent: `llmcompressor<0.13` → `transformers<=5.10.1` → `huggingface-hub<2.0`, per
+  PyPI metadata for every transformers in that range. The unit job installs it without
+  transformers, so nothing capped it there. `tools/ci_constraints.py` now emits the cap a
+  parent-bounded dependency inherits (`INHERITED_CAPS`); a pip dry-run of CI's install line
+  resolves 1.33.0 with it and 2.0.0 without. Three tests pin the hand-recorded cap, including
+  one that checks it against the parent's own `Requires-Dist` wherever the parent is installed.
+
+`VERIFIED_INSPECT_AI_VERSION` stays at 0.3.252: a field was classified, the provider claims
+were not re-staked.
+
 ## 0.12.16
 
 Evidence, plus one docs correction folded in. No code changes.
