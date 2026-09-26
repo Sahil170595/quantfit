@@ -47,6 +47,45 @@ def test_probe_parses_multiple_bits():
     assert ns.bits == [4, 8]
 
 
+def _fake_probe(monkeypatch, per_sample):
+    import quantfit.policy.probe as pp
+
+    def fake(model_id, bits, token=None):
+        kls = per_sample[bits]
+        return pp.ProbeResult(bits, 128, sum(kls) / len(kls), len(kls), tuple(kls))
+
+    monkeypatch.setattr(pp, "probe_sensitivity", fake)
+
+
+def test_probe_reports_its_spread_not_only_a_mean(monkeypatch, capsys):
+    """The first recorded probe run (validation/2026-09-25-check-and-probe/) printed a mean
+    over 8 samples and nothing else, so whether one row carried it was unknowable. The
+    per-sample values and their min / max / SD now travel with the mean."""
+    kls = {4: [0.40, 0.50, 0.60, 0.78], 8: [0.002, 0.003, 0.003, 0.004]}
+    _fake_probe(monkeypatch, kls)
+    assert main(["probe", "--model", "m", "--bits", "4", "8", "--json"]) == 0
+    rows = json.loads(capsys.readouterr().out)["result"]["by_bits"]
+    four = rows[0]
+    assert four["per_sample_kl"] == kls[4]
+    assert (four["kl_min"], four["kl_max"]) == (0.40, 0.78)
+    import statistics
+
+    sd = statistics.stdev(kls[4])  # SAMPLE SD - derived here, never hand-computed
+    assert four["kl_sd"] == pytest.approx(sd)
+    assert four["mean_kl"] == pytest.approx(0.57)
+
+    assert main(["probe", "--model", "m", "--bits", "4"]) == 0
+    assert f"range 0.400-0.780, sd {sd:.3f}" in capsys.readouterr().out
+
+
+def test_a_single_sample_has_no_spread_rather_than_zero_spread(monkeypatch, capsys):
+    """SD of one number is undefined; printing 0.0 would read as a perfectly stable probe."""
+    _fake_probe(monkeypatch, {4: [0.5]})
+    assert main(["probe", "--model", "m", "--bits", "4", "--json"]) == 0
+    row = json.loads(capsys.readouterr().out)["result"]["by_bits"][0]
+    assert row["kl_sd"] is None and row["kl_min"] == row["kl_max"] == 0.5
+
+
 def test_token_flag_on_hub_commands():
     ns = _build_parser().parse_args(["check", "--model", "m", "--token", "xyz"])
     assert ns.token == "xyz"
