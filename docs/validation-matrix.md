@@ -273,7 +273,7 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Validated** | **E1 — first recorded run 2026-09-25.** `Qwen2.5-1.5B-Instruct --bits 4 8`: mean per-token RTN-KL **0.5716** at 4-bit and **0.0030** at 8-bit, 8 samples each, 124 s; a second run agreed to the last float digit. Previously E0‑implied only. |
 | **Hardware** | L (RTX 4080 Laptop, 12 GB). |
 | **Evidence** | `validation/2026-09-25-check-and-probe/` (`probe-*.json`, `probe-rerun.json`); `tests/test_probe.py` (E3). |
-| **NOT validated** | Any model but one, any bit-width but 4 and 8, a spread or interval (the command reports a mean over 8 samples and nothing else), and any relationship between RTN-KL and refusal drift — which ROADMAP 0.3 and arXiv 2606.10154 say not to assume. |
+| **NOT validated** | Any model but one, any bit-width but 4 and 8, and any relationship between RTN-KL and refusal drift — which ROADMAP 0.3 and arXiv 2606.10154 say not to assume. **Spread, added after the first run:** the command reported only a mean until 0.13.x. It now reports every per-sample KL plus min / max / sample SD, and re-run on the same model the 4-bit samples are 0.179–1.614 with SD 0.611 — six of eight between 0.18 and 0.39, two near 1.5 — so the mean (0.572) is more than double the median (0.244). The 8-bit reading is tight (0.001–0.009). Descriptive only; no interval is claimed at n = 8. |
 
 ### `quantfit quantize --model <id> --method <m> [--scheme ...] --out <dir>`
 

@@ -64,6 +64,13 @@ Forward-only RTN-KL per bit-width. It is a **conservative upper bound**: a low v
 the bit-width is safe, a high one can over-escalate, because calibrated AWQ/GPTQ may still
 be fine where RTN is not. Read it as sensitivity, not as a verdict.
 
+Each bit-width reports the mean **and** its spread: every per-sample KL (`per_sample_kl`)
+plus `kl_min`, `kl_max` and the sample SD `kl_sd` (null for a single sample — one number
+has no spread, and 0.0 would read as a perfectly stable probe). Read the spread before the
+mean. On Qwen2.5-1.5B at 4-bit the mean is 0.572 while the median of the eight samples is
+0.244, because two rows sit near 1.5 — a mean alone would have hidden that the reading rests
+on them. No interval is reported: eight skewed samples do not support one.
+
 ## Verify the artifact loads
 
 ```bash

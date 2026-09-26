@@ -463,7 +463,13 @@ def _dispatch(args: argparse.Namespace) -> int:
         def _human_probe() -> None:
             print("sensitivity — mean per-token RTN-KL(fp16 || quant); higher = more degradation:")
             for bits, r in zip(args.bits, rows, strict=True):
-                print(f"  {bits}-bit: KL {r.mean_kl:.3f}  (n={r.n_samples})")
+                s = r.spread
+                spread = (
+                    f", range {s['kl_min']:.3f}-{s['kl_max']:.3f}, sd {s['kl_sd']:.3f}"
+                    if s["kl_sd"] is not None
+                    else ""
+                )
+                print(f"  {bits}-bit: KL {r.mean_kl:.3f}  (n={r.n_samples}{spread})")
             print("note: RTN is the worst case — LOW KL = safe bit-width; HIGH KL can over-escalate")
             print("      (calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict.")
 
@@ -482,7 +488,13 @@ def _dispatch(args: argparse.Namespace) -> int:
                     "(calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict."
                 ),
                 "by_bits": [
-                    {"bits": bits, "mean_kl": r.mean_kl, "n_samples": r.n_samples}
+                    {
+                        "bits": bits,
+                        "mean_kl": r.mean_kl,
+                        "n_samples": r.n_samples,
+                        **r.spread,
+                        "per_sample_kl": list(r.per_sample_kl),
+                    }
                     for bits, r in zip(args.bits, rows, strict=True)
                 ],
             },
