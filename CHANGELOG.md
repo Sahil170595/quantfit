@@ -13,6 +13,23 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.13.1
+
+Evidence. No code changes. (#87)
+
+- **The judge-error measurement reproduces byte-for-byte.** The 2026-08-18 calibration that
+  ε = 0.1955 rests on was hand-labelled from a capture that is deliberately not committed;
+  what is committed is a sha256 per completion, and that record said the labels "remain
+  checkable against a regenerated capture". Nobody had checked. Regenerated with the same
+  GGUF files, llama.cpp binary, probe revision and decode on quantfit 0.12.16 — twenty
+  releases later — **80 of 80 completions are identical by sha256**, re-derived a second way
+  with raw `hashlib`. And the shipped judge's confusion matrix against the human labels
+  reproduces exactly: tp 32, fp 4, tn 44, fn 0.
+
+- **Not a cross-hardware result.** Same machine, identical `env` block; the human labels are
+  shown to attach to the same text, not re-verified; ε does not move. Recorded in
+  `validation/2026-09-25-calibration-capture-regenerates/` with no completion text committed.
+
 ## 0.13.0
 
 A **minor** release: `verify-safety` and `gate` gain a flag. (#86)
