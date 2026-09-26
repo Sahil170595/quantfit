@@ -13,6 +13,36 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.12.17
+
+A patch restoring CI after two upstream releases in the same week, each tripping a guard
+written for exactly this. Nothing in this repository caused either. (#83)
+
+<!-- audit: historical -->
+- **`inspect_ai` 0.3.264 added `fail_on_refusal`, and it is refused.** Upstream's docstring:
+  it raises `ModelRefusalError`, failing the sample, when a provider returns
+  `stop_reason="content_filter"`. For this instrument that is not plumbing — a refusal would
+  never reach the judge as a completion, and the pair would leave the at-risk set on exactly
+  the behaviour QSR measures (QSR v0 §5.1). A refusal is a result here, never an error.
+
+- **A version this project shipped was wrong, and is corrected.** 0.12.12 recorded
+  `stream_idle_timeout` as introduced in 0.3.263 — the version CI happened to install.
+  The published wheels show it absent at 0.3.261 and present at 0.3.262; on an 0.3.262 box
+  the old record failed its own "present in the running version" assertion (mutation-checked).
+  Each floor version is now read from the wheel against its neighbours.
+
+- **CI tested a `huggingface_hub` no real install can resolve.** 2.0.0 was released and CI's
+  unit job installed it, failing *"crossed a FURTHER major"*. But `huggingface-hub` is bounded
+  through a parent: `llmcompressor<0.13` → `transformers<=5.10.1` → `huggingface-hub<2.0`, per
+  PyPI metadata for every transformers in that range. The unit job installs it without
+  transformers, so nothing capped it there. `tools/ci_constraints.py` now emits the cap a
+  parent-bounded dependency inherits (`INHERITED_CAPS`); a pip dry-run of CI's install line
+  resolves 1.33.0 with it and 2.0.0 without. Three tests pin the hand-recorded cap, including
+  one that checks it against the parent's own `Requires-Dist` wherever the parent is installed.
+
+`VERIFIED_INSPECT_AI_VERSION` stays at 0.3.252: a field was classified, the provider claims
+were not re-staked.
+
 ## 0.12.16
 
 Evidence, plus one docs correction folded in. No code changes.
