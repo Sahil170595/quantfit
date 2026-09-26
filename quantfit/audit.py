@@ -816,7 +816,17 @@ _CITATION = re.compile(
 # `spec/qsr-v0.md:353` is *"5.8 The gate adds exit 5"*. Both are checked; anything
 # further away than the gap patterns allow is somebody else's sentence.
 _QUOTE_FORWARD = re.compile(r"[*_]{0,2}[\"“]([^\"”\n]{6,240})[\"”]|`([^`\n]{6,240})`")
-_FORWARD_GAP = re.compile(r"[\s`*_—–:,\-]*(?:is|are|says?|reads?|states?|quoted as|verbatim)?[\s`*_—–:,\-]*")
+# The verb may carry ONE adverb in front of it, and only in front of a verb. Until
+# 2026-09-25 it could not, so `README.md:197-201` now says "…" found no quote, fell through
+# to "in range, nothing quoted", and passed silently for weeks while its text sat 147 lines
+# further down. "now", "still", "already" are exactly the words a CORRECTED citation reaches
+# for, so the citations most likely to have been re-checked once were the ones this check
+# had stopped re-checking. An adverb with no verb after it still ends the gap.
+_FORWARD_GAP = re.compile(
+    r"[\s`*_—–:,\-]*"
+    r"(?:(?:(?:now|still|already|also|currently|then)\s+)?(?:is|are|says?|reads?|states?|quoted as|verbatim))?"
+    r"[\s`*_—–:,\-]*"
+)
 _BACKWARD_GAP_CHARS = frozenset(" \t\n([`*_—–")
 _BACKWARD_GAP_MAX = 8
 _QUOTE_CLOSERS = {"`": "`", '"': '"', "”": "“"}
@@ -1084,6 +1094,17 @@ def _quote_after(text: str, offset: int) -> str | None:
     gap = _FORWARD_GAP.match(text, offset)
     start = gap.end() if gap else offset
     quote = _QUOTE_FORWARD.match(text, start)
+    # The gap admits backticks (it has to: the citation itself closes with one), so in
+    # `path:3` says `code` it also swallowed the QUOTE's opening backtick and the quote match
+    # began inside the code - no quote, and an in-range citation with none is a silent pass.
+    # Found 2026-09-25 while writing the adverb test. Hand one trailing backtick back and retry
+    # - but never when the gap IS that backtick. Then it is the CITATION's own closer
+    # (`CHANGELOG.md:107-109`'s "~46pp"), and the retry would read everything up to the next
+    # code span as a quote: a false stale finding, caught on the first run against this
+    # repository. A handed-back span that is itself a citation or a bare pointer is still
+    # rejected downstream by `_cited_quote`.
+    if quote is None and start - 1 > offset and text[start - 1] == "`":
+        quote = _QUOTE_FORWARD.match(text, start - 1)
     if quote is None:
         return None
     return quote.group(1) or quote.group(2)
