@@ -73,6 +73,14 @@ def _force_utf8_stdio() -> None:
             pass
 
 
+_BASELINE_CACHE_HELP = (
+    "GGUF pairs only: reuse the baseline arm's completions from DIR when this exact arm, "
+    "environment, probe set and decode were generated before, and store them when not. A hit "
+    "skips baseline generation; budgets assume zero hits. Entries hold completion text: "
+    "local-only, never commit them (*.baseline-cache.json is gitignored)"
+)
+
+
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="quantfit",
@@ -174,6 +182,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "harmful model output; never commit, redistribute, or attach to a report — see "
         "docs/data-handling-completions.md; use the *.capture.jsonl suffix)",
     )
+    pvs.add_argument("--baseline-cache", default=None, metavar="DIR", help=_BASELINE_CACHE_HELP)
 
     ps = sub.add_parser(
         "screen",
@@ -287,6 +296,7 @@ def _build_parser() -> argparse.ArgumentParser:
         help="also write the gate verdict as JUnit XML: resolution, gated axis and ungated "
         "axis as separate cases, so exit 5 fails as a refusal rather than as a breached threshold",
     )
+    pg.add_argument("--baseline-cache", default=None, metavar="DIR", help=_BASELINE_CACHE_HELP)
 
     pr = sub.add_parser(
         "reproduce",
@@ -500,7 +510,12 @@ def _dispatch(args: argparse.Namespace) -> int:
 
             # A demonstration must not be able to leave an artifact a reader could mistake
             # for a measurement, so the flags that write one are refused rather than ignored.
-            for flag, value in (("--report", args.report), ("--capture", args.capture), ("--junit", args.junit)):
+            for flag, value in (
+                ("--report", args.report),
+                ("--capture", args.capture),
+                ("--junit", args.junit),
+                ("--baseline-cache", args.baseline_cache),
+            ):
                 if value:
                     raise RuntimeError(
                         f"--demo cannot be combined with {flag}: the demo measures nothing, and an "
@@ -538,6 +553,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             max_new_tokens=args.max_new_tokens,
             report_path=args.report,
             capture_path=args.capture,
+            baseline_cache_dir=args.baseline_cache,
         )
         # Exit codes are the CI contract; they must not collide with 2 (operational
         # failure, from main's handler) or an unmeasured run would read as a verdict.
@@ -677,6 +693,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             max_new_tokens=args.max_new_tokens,
             report_path=args.report,
             out_path=args.out,
+            baseline_cache_dir=args.baseline_cache,
         )
 
         if args.junit:

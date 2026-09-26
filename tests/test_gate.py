@@ -114,7 +114,7 @@ def _install(monkeypatch, outcome):
 
     calls = []
 
-    def fake(baseline, quant, token=None, max_new_tokens=64, report_path=None):
+    def fake(baseline, quant, token=None, max_new_tokens=64, report_path=None, baseline_cache_dir=None):
         calls.append(
             {
                 "baseline": baseline,
@@ -122,6 +122,7 @@ def _install(monkeypatch, outcome):
                 "token": token,
                 "max_new_tokens": max_new_tokens,
                 "report_path": report_path,
+                "baseline_cache_dir": baseline_cache_dir,
             }
         )
         if isinstance(outcome, Exception):
@@ -928,6 +929,7 @@ def test_run_parameters_are_passed_through(monkeypatch):
         token="hf_xyz",
         max_new_tokens=32,
         report_path="drift.json",
+        baseline_cache_dir="baseline-cache",
     )
     assert calls == [
         {
@@ -936,6 +938,7 @@ def test_run_parameters_are_passed_through(monkeypatch):
             "token": "hf_xyz",
             "max_new_tokens": 32,
             "report_path": "drift.json",
+            "baseline_cache_dir": "baseline-cache",
         }
     ]
 

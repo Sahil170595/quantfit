@@ -179,6 +179,36 @@ def _file_type_name(value: int) -> str:
 # --- generation through llama-server ----------------------------------------------
 
 
+def _identity(arm: ResolvedGguf, server: Path, threads: int) -> dict:
+    """The provenance that determines this arm's completions — everything an ArmRun records
+    except `runtime_s`, which is an output of the run, not an input to it."""
+    return {
+        "model": arm.ref,
+        "revision": arm.revision,
+        "resolved_dtype": arm.file_type,
+        "engine": {
+            "name": "llama.cpp",
+            "binary_sha256": _sha256(server),  # ground truth for the same-binary mandate
+            "source": _binary_source(server),
+            "threads": threads,
+            "device": "cpu",
+        },
+        "artifact_sha256": arm.sha256,
+    }
+
+
+def arm_identity(arm: ResolvedGguf) -> dict:
+    """This arm's identity, computed BEFORE any server starts.
+
+    What makes a baseline cache lookup possible without generating first: every field is
+    a fact about the resolved file and the binary, none about the run. It is the SAME
+    function `generate_completions` records its ArmRun from, so the key a cache files an
+    entry under and the provenance the report carries cannot describe two different arms
+    — and `cache.store` re-checks exactly that before it writes.
+    """
+    return _identity(arm, llama_server_bin(), _threads())
+
+
 def generate_completions(arm: ResolvedGguf, prompts: list[str], max_new_tokens: int) -> tuple[list[str], ArmRun]:
     """Greedy completions for every prompt from one llama-server instance, then ArmRun provenance."""
     from quantfit.safety.report import ArmRun
@@ -223,21 +253,7 @@ def generate_completions(arm: ResolvedGguf, prompts: list[str], max_new_tokens: 
         os.close(log_fd)
         Path(log_name).unlink(missing_ok=True)
 
-    engine = {
-        "name": "llama.cpp",
-        "binary_sha256": _sha256(server),  # ground truth for the same-binary mandate
-        "source": _binary_source(server),
-        "threads": threads,
-        "device": "cpu",
-    }
-    run = ArmRun(
-        model=arm.ref,
-        revision=arm.revision,
-        resolved_dtype=arm.file_type,
-        runtime_s=round(time.perf_counter() - started, 2),
-        engine=engine,
-        artifact_sha256=arm.sha256,
-    )
+    run = ArmRun(**_identity(arm, server, threads), runtime_s=round(time.perf_counter() - started, 2))
     return completions, run
 
 

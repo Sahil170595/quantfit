@@ -110,8 +110,36 @@ local JSONL for judge calibration — **it may contain harmful model output**; n
 it, redistribute it, or attach it to a report. See
 [`docs/data-handling-completions.md`](data-handling-completions.md).
 
-`--demo` refuses `--report`, `--junit` and `--capture`: an artifact from a demonstration
-would be indistinguishable from one from a measurement.
+`--demo` refuses `--report`, `--junit`, `--capture` and `--baseline-cache`: an artifact
+from a demonstration would be indistinguishable from one from a measurement, and a flag
+the demo would silently ignore is refused for the same reason.
+
+**Reusing the baseline arm across runs.** Gating several quants of one base model
+regenerates the identical baseline every time — greedy decode, one pinned probe set, one
+binary — and it is the expensive half of the pair. `--baseline-cache DIR` (also on
+`quantfit gate`) serves it from `DIR` when that exact arm was generated before, and stores
+it when not:
+
+```bash
+quantfit verify-safety --baseline hf:org/repo/model-f16.gguf --quant model.Q4_K_M.gguf \
+  --baseline-cache ~/.cache/quantfit-baselines/
+quantfit gate --baseline hf:org/repo/model-f16.gguf --quant model.Q4_K_M.gguf \
+  --tier smoke --baseline-cache ~/.cache/quantfit-baselines/
+```
+
+The key is a sha256 over the arm's identity — the GGUF file's sha256, the llama.cpp
+binary's sha256, the file type, the probe set's revision and exact prompt text, the decode
+settings and the execution environment — derived **before** any server starts, so a hit
+skips baseline generation entirely. Every entry re-derives its own key on load and is
+refused if it disagrees, so an edited or misfiled entry is never served
+(`quantfit/safety/cache.py`).
+
+It is **GGUF pairs only**. A transformers arm's identity includes the dtype it resolved to
+and the commit it resolved at, both known only after the model loads, so no key exists
+before the expensive part runs; the flag is refused for a transformers pair rather than
+accepted and ignored. Budgets assume zero hits — a hit is wall-clock time and nothing else.
+Entries hold **completion text**: local-only, never committed (`*.baseline-cache.json` is
+gitignored), and see [`docs/data-handling-completions.md`](data-handling-completions.md).
 
 ## Screen a whole manifest
 
