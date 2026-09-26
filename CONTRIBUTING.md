@@ -341,6 +341,13 @@ What the practice actually is, and why it is kept rather than reversed:
 - **Tags point at the release PR's merge commit** — `v0.12.12` through `v0.12.16` each
   dereference to a `Merge pull request #N from …/release/0.12.N` commit. A squash would
   put the tag on a commit that also carries whatever else the squash collapsed.
+  **The exception, on the record:** `v0.12.17` through `v0.13.2` were cut *after* all seven
+  of their changes had already merged, so a release-PR merge commit would have carried every
+  later change too. They were built as a chain instead — each release branched from the
+  `main` commit where its own change landed, the next merged forward from it — and each tag
+  points at its **release commit** on that chain, whose tree holds exactly the changes that
+  version names. The chain lands on `main` in one PR. Prefer the normal order: release each
+  change before merging the next.
 - **Branch commits are reachable from `main`.** `main` is not one commit per PR, and a
   script that assumes it is will miscount. Count PRs with `git log --merges`, not with
   `git log --oneline | wc -l`.

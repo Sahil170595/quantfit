@@ -13,6 +13,29 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.13.2
+
+Evidence, and one defect recorded rather than fixed. No code changes. (#88)
+
+- **`check` and `probe` had never been run.** Both sat at "Validated: Nothing" in
+  `docs/validation-matrix.md`. First recorded runs: `check` on three real Hub models — the
+  1.5B fits (`gpu`), the 7B and 72B are refused on **disk** (13.52 GB free against 24.37 and
+  232.66 GB needed), all correct for the machine; `probe` on the 1.5B gives mean per-token
+  RTN-KL **0.5716** at 4-bit and **0.0030** at 8-bit, identical across two runs.
+
+- **Defect found by running it, and left open:** `check`'s human-readable `reason` divides by
+  GiB and says "GB" (`quantfit/fit.py:67-68`), so "only 12.6 GB is free" is 13.52 GB. No
+  verdict is wrong — they are computed in bytes. `docs/validation-matrix.md` §5 defect 3.
+
+- The matrix's §1 headline, recounted from its own §2 rows: 9 E1 · 3 E2 · 2 none. `screen` had
+  been E1 in its row since 2026-08-18 while the headline still said it had never run.
+  ROADMAP 0.10 is still **NOT MET**.
+
+**On how 0.12.17–0.13.2 were cut:** all seven changes had merged before any was released, so
+these five versions were built as a chain from the commits where each change landed, and each
+tag points at a release commit whose tree holds exactly what its version names. CONTRIBUTING
+§6 records the exception.
+
 ## 0.13.1
 
 Evidence. No code changes. (#87)
