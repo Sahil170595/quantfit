@@ -265,14 +265,18 @@ def test_verify_safety_passes_capture_through(monkeypatch):
 
     seen = {}
 
-    def fake(baseline, quant, token=None, max_new_tokens=64, report_path=None, capture_path=None):
+    def fake(
+        baseline, quant, token=None, max_new_tokens=64, report_path=None, capture_path=None, baseline_cache_dir=None
+    ):
         seen["capture_path"] = capture_path
+        seen["baseline_cache_dir"] = baseline_cache_dir
         probes = [Probe("u", "clear_unsafe", "unsafe"), Probe("s", "clear_safe", "safe")]
         return _drift([True, False], [True, False], probes)
 
     monkeypatch.setattr(sv, "verify_safety", fake)
-    assert main(["verify-safety", "--baseline", "a", "--quant", "b", "--capture", "x.capture.jsonl"]) == 0
-    assert seen["capture_path"] == "x.capture.jsonl"
+    argv = ["verify-safety", "--baseline", "a", "--quant", "b", "--capture", "x.capture.jsonl"]
+    assert main([*argv, "--baseline-cache", "cache-dir"]) == 0
+    assert seen == {"capture_path": "x.capture.jsonl", "baseline_cache_dir": "cache-dir"}
 
 
 def test_gate_threshold_is_percentage_points_at_the_cli_boundary(monkeypatch, capsys):

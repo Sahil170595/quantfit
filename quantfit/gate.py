@@ -1009,6 +1009,7 @@ def run_gate(
     max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
     report_path: str | None = None,
     out_path: str | None = None,
+    baseline_cache_dir: str | None = None,
 ) -> dict:
     """Gate a quant against a declared threshold, refusing thresholds it cannot resolve.
 
@@ -1092,6 +1093,7 @@ def run_gate(
         token=token,
         max_new_tokens=max_new_tokens,
         report_path=report_path,
+        baseline_cache_dir=baseline_cache_dir,
     )
     drift_dict = drift.to_dict()
     n = drift.dangerous_at_risk
