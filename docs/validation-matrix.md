@@ -539,12 +539,19 @@ for a guess; it would have, and that is not what was done.
 
 **Defect 3 — `check`'s `reason` string says "GB" and prints GiB.** Found 2026-09-25 by the
 first recorded `check` run (`validation/2026-09-25-check-and-probe/`). `FitResult.reason`'s
-formatter divides by `_GIB` and the string says "GB" (`quantfit/fit.py:67-68`), so the 1.5B
+formatter divides by `_GIB` and the string says "GB" (`quantfit/fit.py`, `FitResult.reason`), so the 1.5B
 reads *"~2.9 GB"* against `bytes.fp16` = 3,087,467,144 (3.09 GB), and *"only 12.6 GB is
-free"* against `bytes.disk_free` = 13,522,411,520 (13.52 GB; `df` agrees). Every verdict is
+free"* against `bytes.disk_free` = 13,522,411,520 (13.52 GB). Every verdict is
 computed in bytes, so no fit decision is wrong — but the printed amount of disk to free is
-understated by 7.4% in the unit it names. **Open.** The fix is a label (`GiB`) or a divisor
-(`1e9`), and either changes a printed string a test may pin.
+understated by 7.4% in the unit it names.
+
+**CLOSED 2026-09-25 — the label changed, not the divisor.** The strings now say `GiB`: that
+is the unit Windows and `df -h` display, so the figure a user compares against their own
+tools stays the same number, and the exact bytes remain in `--json`. Pinned by
+`tests/test_fit.py::test_the_printed_amount_carries_the_unit_it_was_computed_in`, using the
+bytes from this finding. (An earlier version of this entry said "`df` agrees" with 13.52 GB.
+It cannot discriminate: `df -h` is 1024-based and rounds up, so its "13G" fits 12.59 GiB just
+as well.)
 
 ---
 

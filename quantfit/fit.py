@@ -64,27 +64,33 @@ class CapacityPlan:
         return self.mode != MODE_REFUSE
 
     def reason(self) -> str:
+        # GiB, and SAID to be GiB. Until 0.13.x this divided by 1024**3 and printed "GB", so
+        # "only 12.6 GB is free" meant 13.52e9 bytes - understated by 7.4% in the unit it
+        # named (docs/validation-matrix.md section 5, defect 3). The label is what changed,
+        # not the divisor: GiB is what Windows and `df -h` display, so the figure a user
+        # compares against their own tools stays the same number. The exact bytes are in
+        # `check --json`'s `bytes` block, which was always right.
         def g(b: int) -> str:
-            return f"{b / _GIB:.1f}"
+            return f"{b / _GIB:.1f} GiB"
 
         if self.mode == MODE_GPU:
-            return f"OK (in-GPU): {self.model_id} ~{g(self.fp16_bytes)} GB, {g(self.gpu_free)} GB VRAM free."
+            return f"OK (in-GPU): {self.model_id} ~{g(self.fp16_bytes)}, {g(self.gpu_free)} VRAM free."
         if self.mode == MODE_OFFLOAD:
             return (
-                f"OK (offload): {self.model_id} ~{g(self.fp16_bytes)} GB won't fit "
-                f"{g(self.gpu_free)} GB VRAM — quantizing via CPU "
-                f"({g(self.ram_available)} GB RAM). Slower."
+                f"OK (offload): {self.model_id} ~{g(self.fp16_bytes)} won't fit "
+                f"{g(self.gpu_free)} VRAM — quantizing via CPU "
+                f"({g(self.ram_available)} RAM). Slower."
             )
         if self.limit == LIMIT_DISK:
             return (
-                f"CAN'T QUANTIZE: {self.model_id} needs ~{g(self.disk_need)} GB free "
-                f"disk (download + output) but only {g(self.disk_free)} GB is free."
+                f"CAN'T QUANTIZE: {self.model_id} needs ~{g(self.disk_need)} free "
+                f"disk (download + output) but only {g(self.disk_free)} is free."
             )
         ram_need = int(self.fp16_bytes * OFFLOAD_RAM_FACTOR) + HEADROOM_BYTES
         return (
-            f"CAN'T QUANTIZE: {self.model_id} ~{g(self.fp16_bytes)} GB must load into "
-            f"CPU RAM first (~{g(ram_need)} GB with overhead) but only "
-            f"{g(self.ram_available)} GB is available. Use a machine with more RAM."
+            f"CAN'T QUANTIZE: {self.model_id} ~{g(self.fp16_bytes)} must load into "
+            f"CPU RAM first (~{g(ram_need)} with overhead) but only "
+            f"{g(self.ram_available)} is available. Use a machine with more RAM."
         )
 
 
