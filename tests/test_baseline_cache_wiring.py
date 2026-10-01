@@ -142,7 +142,77 @@ def test_a_hit_skips_baseline_generation_and_changes_nothing_reported(pair):
     generated.clear()
     warm = sv.verify_safety(base, quant, baseline_cache_dir=str(cache_dir))
     assert generated == ["Q4_K_M"], "a hit must skip baseline generation; the quant always runs"
-    assert warm == cold, "a hit is wall-clock time and nothing else"
+    assert warm == cold, "a hit changes no measured number"
+
+
+def _leaves(obj, path=""):
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            yield from _leaves(value, f"{path}.{key}")
+    else:
+        yield path, obj
+
+
+def test_a_served_baseline_says_so_in_the_report(pair, tmp_path, monkeypatch):
+    """On real hardware (validation/2026-10-01-baseline-cache-real-hardware/) a hit rebuilt the
+    arm from the stored record alone. The report gave the stored runtime as this run's and said
+    nothing about the cache, so a served baseline could not be told from a generated one. The
+    test above compares the returned drift, never the report, which is why it never saw this."""
+    from quantfit.safety import report
+
+    monkeypatch.setattr(report, "environment_fingerprint", lambda: dict(_ENV))
+    base, quant, generated, cache_dir = pair
+    cold_path, warm_path = tmp_path / "cold.json", tmp_path / "warm.json"
+    sv.verify_safety(base, quant, report_path=str(cold_path), baseline_cache_dir=str(cache_dir))
+    (entry,) = cache_dir.glob(cache.CACHE_ENTRY_GLOB)
+    before = entry.read_bytes()
+    sv.verify_safety(base, quant, report_path=str(warm_path), baseline_cache_dir=str(cache_dir))
+
+    cold = json.loads(cold_path.read_text(encoding="utf-8"))
+    warm = json.loads(warm_path.read_text(encoding="utf-8"))
+    assert cache.SERVED_ENGINE_KEY not in cold["baseline"]["engine"], "a generated arm carries no mark"
+    assert cache.SERVED_ENGINE_KEY not in warm["quantized"]["engine"], "the quant is always generated"
+
+    served = warm["baseline"]["engine"][cache.SERVED_ENGINE_KEY]
+    header = cache.read_header(cache_dir, entry.name.removesuffix(cache.CACHE_ENTRY_SUFFIX))
+    assert served["served"] is True
+    assert served["fingerprint"] == header["fingerprint"] == entry.name.removesuffix(cache.CACHE_ENTRY_SUFFIX)
+    assert served["generated_utc"] == header["created_utc"]
+    assert served["generated_by_quantfit"] == header["quantfit_version"]
+    assert warm["baseline"]["runtime_s"] == cold["baseline"]["runtime_s"], "the stored generation's time"
+
+    # The mark is the ONLY addition: everything else the cold report said, the warm one says.
+    cold_leaves, warm_leaves = dict(_leaves(cold)), dict(_leaves(warm))
+    added = {k for k in warm_leaves if k not in cold_leaves}
+    assert all(k.startswith(f".baseline.engine.{cache.SERVED_ENGINE_KEY}.") for k in added), added
+    assert set(cold_leaves) <= set(warm_leaves)
+    changed = {k for k in cold_leaves if cold_leaves[k] != warm_leaves[k]}
+    assert changed <= {".created_utc"}, changed
+
+    assert entry.read_bytes() == before, "serving an entry never rewrites it"
+    # And the next run still hits: the mark is on the report's copy, not in the key.
+    generated.clear()
+    sv.verify_safety(base, quant, baseline_cache_dir=str(cache_dir))
+    assert generated == ["Q4_K_M"]
+
+
+def test_the_mark_does_not_change_what_reproduce_decides(tmp_path):
+    """`engine` is compared by reproduce's T1 (`engine.name`, `engine.binary_sha256`), so a new
+    key inside it must not read as a different measurement. Checked against the real 2026-10-01
+    reports: the marked and unmarked warm report reach the same outcome against the cold one."""
+    from pathlib import Path
+
+    from quantfit.reproduce import compare
+
+    record = Path(__file__).resolve().parents[1] / "validation" / "2026-10-01-baseline-cache-real-hardware"
+    warm = json.loads((record / "warm.report.json").read_text(encoding="utf-8"))
+    warm["baseline"]["engine"][cache.SERVED_ENGINE_KEY] = {"served": True, "fingerprint": "8572de5ec13a"}
+    marked = tmp_path / "warm-marked.json"
+    marked.write_text(json.dumps(warm), encoding="utf-8")
+
+    plain = compare(str(record / "cold.report.json"), str(record / "warm.report.json"))
+    served = compare(str(record / "cold.report.json"), str(marked))
+    assert served["outcome"] == plain["outcome"] == "reproduced_t0_unverified"
 
 
 def test_without_a_cache_dir_nothing_is_written_and_both_arms_run(pair):

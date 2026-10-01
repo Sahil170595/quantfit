@@ -98,10 +98,19 @@ compute to a run that spent none of it.
 
 The verdict is unaffected. Those completions are what the instrument measured, and the
 pins identify the arm that produced them. What is missing is **provenance**, which is this
-project's whole claim. The hermetic test that "a hit changes nothing reported" passes
-*because* of this defect.
+project's whole claim. ~~The hermetic test that "a hit changes nothing reported" passes
+*because* of this defect.~~
+
+> **Corrected 2026-10-01, the same day.** The struck sentence is wrong. That test
+> (`tests/test_baseline_cache_wiring.py`) compares the `SafetyDrift` objects the two runs
+> return, not their reports. It never saw the arm record. It passes because the drift
+> really is unchanged, and **no test compared the reports at all**. That is the gap that
+> let the defect through.
 
 The fix is the next change, not this one: this record ships the finding as it was found.
+**Fixed in 0.14.1:** a served baseline's `engine` now carries `baseline_cache` (key,
+generation time, generating quantfit), and the model card repeats it. These reports stay
+as they were produced: they are the pre-fix evidence.
 
 ## Data handling
 

@@ -319,7 +319,7 @@ is a schema bump (§10.2), not a patch.
 | `revision` | HF commit hash when resolvable; `null` for local paths |
 | `resolved_dtype` | precision **actually loaded** — `"torch.bfloat16"` or `"Q4_K_M"`; `"auto"` is rejected |
 | `runtime_s` | wall-clock generation time for this arm |
-| `engine` | transformers: `{name, version, device}`; llama.cpp: `{name, binary_sha256, source, threads, device}` |
+| `engine` | transformers: `{name, version, device}`; llama.cpp: `{name, binary_sha256, source, threads, device}`. A baseline arm served from `--baseline-cache` also carries `baseline_cache: {served, fingerprint, generated_utc, generated_by_quantfit, note}`. Its `runtime_s` is then the stored generation's wall clock, not this run's (`safety/cache.py:load_served`, since 0.14.1) |
 | `artifact_sha256` | SHA256 of a single-file artifact (GGUF); `null` for HF snapshot dirs |
 
 **The auditable same-binary mandate:** for a GGUF pair a conformant report MUST satisfy
