@@ -13,6 +13,35 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.14.0
+
+A minor: `probe` takes a new flag, and the baseline cache's first real-hardware record ships
+with it. (#101, #100)
+
+- **`quantfit probe --samples N`** sets how many calibration rows each bit-width averages
+  over. The default stays at 8 (`DEFAULT_PROBE_SAMPLES`). Values below 1 are refused at
+  parse time; `--samples 0` would otherwise have been reported as the calibration dataset
+  having no usable rows. If the dataset delivers fewer usable rows than asked, the output
+  says `n=X of N requested`, and the JSON carries `requested_samples`. Host RAM grows with N:
+  `docs/cli-reference.md` gives the cost, about 0.6 MB per token at Qwen2.5's vocabulary.
+  Until now the 4-bit bimodality recorded on 2026-09-25 (two of eight rows near 1.5) could
+  not be re-measured at a larger n.
+
+- **`--baseline-cache` was served on real hardware for the first time**
+  (`validation/2026-10-01-baseline-cache-real-hardware/`). Qwen2.5-0.5B fp16 vs Q2_K: a cold
+  `verify-safety` run took 135.4 s and stored one entry. A warm `verify-safety` run (78.1 s)
+  and a `gate --tier smoke` run were both served from that entry under the same key. Their
+  reports differ from the cold one only in the timestamp and the quant and judge runtimes.
+  Edited copies of the real entry are refused. The validation-matrix row moves from E3 to E1
+  on one pair.
+
+- **That run found a defect, unfixed in this release:** a cache hit replays the stored
+  `baseline.runtime_s` (47.51 s for a run that generated nothing), and no report field
+  records that the baseline was served from cache. The verdict is unaffected; the provenance
+  is incomplete. `spec/qsr-v1-freeze-plan.md` §1.4 had listed "how does a report disclose
+  that its baseline arm was served from cache" as an open question. The answer was: it does
+  not.
+
 ## 0.13.8
 
 A patch re-staking the Inspect runner's verification. No behaviour change. (#98)
