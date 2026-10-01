@@ -13,6 +13,23 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.13.5
+
+A patch: `probe` reports its spread, not only a mean. (#92)
+
+- **`probe` printed one number per bit-width** — a mean per-token RTN-KL over 8 samples —
+  with nothing to say whether one row carried it. It now reports every per-sample KL with
+  min, max and sample SD, in `--json` (`per_sample_kl`, `kl_min`, `kl_max`, `kl_sd`) and in
+  the human line. Descriptive, not an interval: eight skewed samples do not support one. SD is
+  `null` for a single sample rather than a `0.0` that would read as a perfectly stable probe.
+
+- **It immediately said something the mean hid.** Qwen2.5-1.5B-Instruct at 4-bit, sorted:
+  `0.179 0.196 0.211 0.242 0.247 0.390 1.494 1.614` — mean 0.572, **median 0.244**, SD 0.611,
+  larger than the mean. Two rows near 1.5 more than double the typical reading.
+
+- Additive only: every field `probe --json` emitted before is still there, unchanged, which
+  is why this is a patch rather than a minor.
+
 ## 0.13.4
 
 A patch to `quantfit audit`: two ways a moved line citation passed silently. (#91)
