@@ -13,6 +13,25 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.13.8
+
+A patch re-staking the Inspect runner's verification. No behaviour change. (#98)
+
+- **`VERIFIED_INSPECT_AI_VERSION` is now 0.3.269** (it was 0.3.252), the version CI resolves —
+  seventeen releases after the first check. Re-verified, not assumed: every import and
+  parameter the module docstring lists resolves on 0.3.269; the greedy-pin claim was re-read
+  in the installed wheel (`do_sample` is still a model arg defaulting to `True`, so
+  `temperature=0` alone still samples); all thirteen `hf` constructor args are classified;
+  metric coercion is still `float(value)`; and the execution claims pass in the mockllm evals,
+  including a real `eval(task, epochs=3)`.
+
+- **One thing had moved:** `score()` gained `metrics`, `epochs_reducer`, `model`,
+  `model_roles` and `action` ahead of `display`/`copy`. quantfit's call takes both shapes.
+
+- **The pin floor stays at 0.3.252** — both ends of the range are now verified. The constant
+  is only interpolated into messages, never compared, so moving it refuses nobody. Under the
+  audit rule 0.13.7 replaced, moving it would have failed four correct pin-floor statements.
+
 ## 0.13.7
 
 A patch to `quantfit audit`. (#96)
