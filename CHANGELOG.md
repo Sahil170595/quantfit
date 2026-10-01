@@ -13,6 +13,76 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.13.6
+
+CI and documentation. No package code changes.
+
+- **CI runs daily, so upstream drift trips its guard the day it resolves.** inspect_ai
+  0.3.264 shipped on 2026-09-16 and broke the unit suite; nothing ran that suite until a PR
+  on 2026-09-26, while the weekly canary stayed green — it runs the verify-safety path, not
+  the tests where every dependency tripwire lives. `ci.yml` now also runs on a daily schedule
+  and on `workflow_dispatch`. It has since fired on six consecutive days, 2026-09-26 through
+  2026-10-01, green each time. (#93)
+
+- **Folded in — the validation matrix's flags table did not know three flags.** `--resume`
+  (E1, used by the 2026-08-21 screen), `--attempts` (E3 only — no run record says it was
+  passed) and `--baseline-cache` (E3 only). A test now walks `_build_parser()` and requires
+  every flag to have a row. (#94)
+
+**How 0.13.3–0.13.6 were cut:** as with 0.12.17–0.13.2, all their changes had merged before
+any was released, so they were built as a chain from the commit where each landed.
+
+## 0.13.5
+
+A patch: `probe` reports its spread, not only a mean. (#92)
+
+- **`probe` printed one number per bit-width** — a mean per-token RTN-KL over 8 samples —
+  with nothing to say whether one row carried it. It now reports every per-sample KL with
+  min, max and sample SD, in `--json` (`per_sample_kl`, `kl_min`, `kl_max`, `kl_sd`) and in
+  the human line. Descriptive, not an interval: eight skewed samples do not support one. SD is
+  `null` for a single sample rather than a `0.0` that would read as a perfectly stable probe.
+
+- **It immediately said something the mean hid.** Qwen2.5-1.5B-Instruct at 4-bit, sorted:
+  `0.179 0.196 0.211 0.242 0.247 0.390 1.494 1.614` — mean 0.572, **median 0.244**, SD 0.611,
+  larger than the mean. Two rows near 1.5 more than double the typical reading.
+
+- Additive only: every field `probe --json` emitted before is still there, unchanged, which
+  is why this is a patch rather than a minor.
+
+## 0.13.4
+
+A patch to `quantfit audit`: two ways a moved line citation passed silently. (#91)
+
+- **A citation's forward quote is found through a "gap" that admitted a bare verb only.**
+  *`README.md:197-201` now says "…"* — "now" ended the gap, no quote was found, and the
+  checker's fall-through for an in-range citation with nothing quoted is a pass. It sat stale
+  for weeks, 147 lines from its text. Adverbs are exactly what a *corrected* citation reaches
+  for, so the citations most likely to have been re-checked once were the ones this check had
+  stopped re-checking. The verb may now carry one adverb directly in front of it.
+
+- **The gap also swallowed the quote's opening backtick**, so `` `path:3` says `code` `` never
+  found its quote either. It now hands one trailing backtick back and retries — never when the
+  gap *is* the citation's own closer, which a first version did and which produced a false
+  finding against this repository.
+
+- **Run against the whole repository, the fixed check found one real stale citation**:
+  `spec/qsr-v1-freeze-plan.md` cited `gate.py:407` for `SMOKE_THRESHOLD`, which is at 427. It
+  now cites the symbol.
+
+## 0.13.3
+
+A patch to a printed unit. (#90)
+
+- **`check` printed GiB and called it GB.** `FitResult.reason` divided by 1024³ and labelled
+  the result "GB", so a disk with 13,522,411,520 bytes free read *"only 12.6 GB is free"* —
+  7.4% short of 13.52 GB in the unit it named. Found by the first recorded `check` run
+  (`docs/validation-matrix.md` §5, defect 3, now closed). No verdict was ever wrong: every
+  comparison is done in bytes, and `check --json`'s `bytes` block was always right.
+
+- **The label changed, not the divisor.** GiB is what Windows and `df -h` display, so the
+  number a user compares against their own tools stays the same number. A test pins it with
+  the exact bytes from the finding, on every branch of the message.
+
 ## 0.13.2
 
 Evidence, and one defect recorded rather than fixed. No code changes. (#88)
