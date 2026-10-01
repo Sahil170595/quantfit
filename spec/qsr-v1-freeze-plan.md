@@ -282,6 +282,12 @@ established and what is not.
    fingerprint cover; and how does a report disclose that its baseline arm was served
    from cache. **[?]** All three are decisions, not measurements — nothing gates them but
    the maintainer, and wiring the cache into a command first is the honest order **[I]**.
+   **Update 2026-10-01:** the cache was wired in 0.13.0 (`--baseline-cache` on
+   `verify-safety` and `gate`). It was first served on real hardware on 2026-10-01
+   (`validation/2026-10-01-baseline-cache-real-hardware/`) **[V]**. That run answers the
+   third question as it currently stands: the report **does not** disclose a served
+   baseline. It also replays the stored arm's `runtime_s` as if that generation had happened
+   in the run **[V]**. The first two questions remain open.
 
 ### 1.5 D — decision rules: §5.6–§5.9 exist. Two change, and the numbering defect is fixed.
 
