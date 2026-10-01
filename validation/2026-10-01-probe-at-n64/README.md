@@ -113,3 +113,22 @@ or headings excluded, changes a published number and is a decision of its own.
 - **A pinned measurement.** The model and the calibration dataset are both loaded at `main`.
   The revisions above are what this run resolved, not what quantfit pins. A Hub change to
   either would change these numbers silently.
+
+## After the pin (0.14.2)
+
+The calibration dataset is now pinned to `b08601e…` (`quantfit/spec.py:calib_revision`).
+The quantize path and `probe` both pass it to `load_dataset`. The fix's code was re-run at
+the default n = 8, uncommitted on top of `3c53cd2`:
+
+```bash
+quantfit probe --model Qwen/Qwen2.5-1.5B-Instruct --bits 4 8 --json > probe-pinned-n8.json
+```
+
+Exit 0, 35.5 s. `mean_kl` is `0.571582242846489` at 4 bits and `0.00297176162712276` at
+8 bits. Both are bit-for-bit equal to the 2026-09-25 run, so pinning moved no number, as
+expected when the pin is the commit `main` already resolved to. The envelope now records
+the calibration rows itself, under `result.calibration`: dataset, config, split, revision
+and seed.
+
+**Still unpinned:** the model. `probe --model` takes an id from the caller and loads it at
+`main`, and the envelope records no model revision.

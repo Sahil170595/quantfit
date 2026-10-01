@@ -11,6 +11,7 @@ from quantfit import __version__  # plain module-level string; the heavy surface
 from quantfit.gate import TIERS as GATE_TIERS  # tier NAMES only — no torch, no heavy import
 from quantfit.policy.probe import DEFAULT_PROBE_SAMPLES  # constants only; torch loads inside the probe
 from quantfit.registry import METHODS
+from quantfit.spec import DEFAULT_SPEC  # a frozen dataclass of constants
 
 # The envelope every `--json` run prints. Versioned from the start: the whole point of a
 # machine-readable surface is that a consumer can tell when its assumptions expired, and a
@@ -504,6 +505,15 @@ def _dispatch(args: argparse.Namespace) -> int:
                 "model": args.model,
                 "metric": "mean per-token RTN-KL(fp16 || quant)",
                 "requested_samples": args.samples,
+                # Which rows the KL was averaged over is a measurement input; the record that
+                # found the tail is short rows had to reconstruct this by hand.
+                "calibration": {
+                    "dataset": DEFAULT_SPEC.calib_dataset,
+                    "config": DEFAULT_SPEC.calib_config,
+                    "split": DEFAULT_SPEC.calib_split,
+                    "revision": DEFAULT_SPEC.calib_revision,
+                    "shuffle_seed": DEFAULT_SPEC.seed,
+                },
                 # The caveat travels WITH the numbers. A consumer that reads only the JSON
                 # would otherwise get the measurement without the sentence that says a high
                 # value is an upper bound, not a verdict.

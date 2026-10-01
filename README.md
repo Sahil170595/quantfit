@@ -335,8 +335,9 @@ Blackwell to *serve* (quantfit can still produce them anywhere).
 Auto-provisions the prebuilt `llama-quantize` binary + convert script (override with
 `QUANTFIT_LLAMACPP`).
 
-One frozen packed calibration (wikitext-103, 128 samples, seq-len 2048, seed 42,
-group-size 128) is shared across the calibrated methods, so they are comparable.
+One frozen packed calibration (wikitext-103 at a pinned dataset commit, 128 samples,
+seq-len 2048, seed 42, group-size 128) is shared across the calibrated methods, so they
+are comparable.
 
 ## What it is — and isn't
 
