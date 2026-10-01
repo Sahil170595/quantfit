@@ -183,7 +183,7 @@ moves only n, or holds n fixed and moves only ε, and says which **[V]**.
 
 The point survives either way: a measured ε at the *current* corpus produces a v1 whose
 honest headline resolution is coarser than the smoke tier's own 30pp threshold
-(`gate.py:407`, `SMOKE_THRESHOLD = 0.30`) **[V]** — 45.817pp at ε = 5%, and still
+(`gate.py:SMOKE_THRESHOLD`, `SMOKE_THRESHOLD = 0.30`) **[V]** — 45.817pp at ε = 5%, and still
 33.435pp at the far friendlier ε = 1.58pp per arm that a clean N = 480 labeling would give
 (`effective_mde(12, false_flip_rate_bound(0.0158, 0.0158) = 0.0316)`, computed here;
 this number appears in no shipped artifact) **[V]**. That is precisely why ROADMAP 0.6
