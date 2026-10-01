@@ -13,6 +13,20 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.13.3
+
+A patch to a printed unit. (#90)
+
+- **`check` printed GiB and called it GB.** `FitResult.reason` divided by 1024³ and labelled
+  the result "GB", so a disk with 13,522,411,520 bytes free read *"only 12.6 GB is free"* —
+  7.4% short of 13.52 GB in the unit it named. Found by the first recorded `check` run
+  (`docs/validation-matrix.md` §5, defect 3, now closed). No verdict was ever wrong: every
+  comparison is done in bytes, and `check --json`'s `bytes` block was always right.
+
+- **The label changed, not the divisor.** GiB is what Windows and `df -h` display, so the
+  number a user compares against their own tools stays the same number. A test pins it with
+  the exact bytes from the finding, on every branch of the message.
+
 ## 0.13.2
 
 Evidence, and one defect recorded rather than fixed. No code changes. (#88)
