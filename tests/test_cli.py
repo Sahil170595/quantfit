@@ -47,16 +47,39 @@ def test_probe_parses_multiple_bits():
     assert ns.bits == [4, 8]
 
 
-def _fake_probe(monkeypatch, per_sample, asked=None):
+def _fake_probe(monkeypatch, per_sample, asked=None, revisions=None):
     import quantfit.policy.probe as pp
 
     def fake(model_id, bits, n_samples=pp.DEFAULT_PROBE_SAMPLES, token=None):
         if asked is not None:
             asked.append(n_samples)
         kls = per_sample[bits]
-        return pp.ProbeResult(bits, 128, sum(kls) / len(kls), len(kls), tuple(kls))
+        revision = (revisions or {}).get(bits)
+        return pp.ProbeResult(bits, 128, sum(kls) / len(kls), len(kls), tuple(kls), revision)
 
     monkeypatch.setattr(pp, "probe_sensitivity", fake)
+
+
+def test_probe_records_the_model_commit_each_row_was_measured_on(monkeypatch, capsys):
+    """The probe loads the caller's id at `main`; until 0.14.3 nothing said which weights a
+    number came from (validation/2026-10-01-probe-at-n64/ had to infer it from the cache)."""
+    sha = "989aa7980e4cf806f80c7fef2b1adb7bc71aa306"
+    kls = {4: [0.5, 0.6], 8: [0.01, 0.02]}
+    _fake_probe(monkeypatch, kls, revisions={4: sha, 8: sha})
+    assert main(["probe", "--model", "m", "--bits", "4", "8", "--json"]) == 0
+    rows = json.loads(capsys.readouterr().out)["result"]["by_bits"]
+    assert [row["model_revision"] for row in rows] == [sha, sha]
+
+    assert main(["probe", "--model", "m", "--bits", "4", "8"]) == 0
+    assert f"model revision: {sha}" in capsys.readouterr().out
+
+    _fake_probe(monkeypatch, kls, revisions={4: sha, 8: "f" * 40})  # `main` moved between loads
+    assert main(["probe", "--model", "m", "--bits", "4", "8"]) == 0
+    assert "model revision DIFFERS between bit-widths" in capsys.readouterr().out
+
+    _fake_probe(monkeypatch, kls)  # a local path: no Hub commit
+    assert main(["probe", "--model", "m", "--bits", "4", "8"]) == 0
+    assert "not resolved (a local path has no Hub commit)" in capsys.readouterr().out
 
 
 def test_probe_samples_reaches_the_probe_and_defaults_to_its_constant(monkeypatch, capsys):

@@ -49,6 +49,10 @@ class ProbeResult:
     # because a per-token KL over 8 rows is neither many nor symmetric and a CI would claim
     # more than the numbers carry.
     per_sample_kl: tuple[float, ...] = ()
+    # The model commit the load resolved to (`config._commit_hash`, as verify-safety records
+    # it), or None for a local path. The probe loads the caller's id at `main`, so until 0.14.3
+    # nothing said which weights a number came from (validation/2026-10-01-probe-at-n64/).
+    model_revision: str | None = None
 
     @property
     def spread(self) -> dict:
@@ -115,6 +119,7 @@ def probe_sensitivity(
             ref_flat = ref.reshape(-1, ref.size(-1))
             kls.append(float(F.kl_div(q_flat, ref_flat, log_target=True, reduction="batchmean")))
 
+    model_revision = getattr(model.config, "_commit_hash", None)
     del model, tokenizer
     free_gpu(device)
     return ProbeResult(
@@ -123,6 +128,7 @@ def probe_sensitivity(
         mean_kl=sum(kls) / len(kls),
         n_samples=len(batch),
         per_sample_kl=tuple(kls),
+        model_revision=model_revision,
     )
 
 
