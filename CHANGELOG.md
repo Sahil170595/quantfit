@@ -13,6 +13,49 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.14.1
+
+A patch: a cache hit now shows in the report, plus the probe's first run at a larger n.
+(#103, #104)
+
+- **A baseline served from `--baseline-cache` says so in the report.** 0.14.0 shipped this
+  defect knowingly. A hit rebuilt the baseline arm from the stored record alone, so the
+  report gave the stored `runtime_s` as this run's generation time and recorded nothing
+  about the cache.
+  - A served arm's `engine` now carries `baseline_cache`: the key, `generated_utc`,
+    `generated_by_quantfit`, and a note that this run generated no baseline.
+  - `runtime_s` keeps the stored value, because that is how long those completions took.
+  - `emit model-card` repeats the disclosure on the baseline arm.
+  - Not a schema bump: `engine` is the arm-level object QSR v0 leaves unvalidated, and the
+    key is documented as a §4.2 convention. `reproduce` reaches the same outcome on a
+    marked report.
+  - Run on real hardware against the same entry
+    (`validation/2026-10-01-baseline-cache-real-hardware/`, "After the fix").
+  - No test had compared the cold and warm reports. One does now.
+
+- **Corrected: the 0.14.0 record overclaimed twice.**
+  - Its "42% less" wall-clock saving is withdrawn. Two later warm runs took 148.5 s and
+    97.2 s on a laptop running at 61–64% CPU from other processes, so wall time there is
+    not evidence. The robust fact is that a hit skips the 47.5 s baseline generation.
+  - Its claim that the hermetic hit test passed "because of" the defect was wrong. That
+    test compares `SafetyDrift` objects, never reports.
+  - Both are struck through or amended in place, with dates.
+
+- **`probe --samples 64`: the 4-bit "bimodality" is short rows**
+  (`validation/2026-10-01-probe-at-n64/`). On Qwen2.5-1.5B-Instruct:
+  - Every row of 22 tokens or fewer has a 4-bit KL ≥ 0.569, and every longer row ≤ 0.471.
+  - Ten of those 13 short rows are wikitext section headings, including both 2026-09-25
+    outliers.
+  - `mean_kl` weighs rows equally, so it moves with the headings a sample draws: 0.572 at
+    n = 8, 0.419 at n = 64, and 0.262 over the longer rows.
+  - The first eight samples reproduce the n = 8 means bit for bit, and the 4-bit-to-8-bit
+    ordering holds.
+  - The probe metric is unchanged here; changing it would change a published number.
+
+- **Found, not fixed:** `probe` loads its model and the calibration dataset at `main`, and
+  the quantize path loads that dataset the same way. Neither is pinned to a revision. The
+  revisions this run resolved are in the record.
+
 ## 0.14.0
 
 A minor: `probe` takes a new flag, and the baseline cache's first real-hardware record ships
