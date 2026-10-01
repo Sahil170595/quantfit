@@ -25,7 +25,7 @@ A patch to `quantfit audit`. (#96)
   floor equals the verified version and would all have failed, as correct statements, the
   day the constant moved.
 
-- **And it missed the one real claim**, *"`VERIFIED_INSPECT_AI_VERSION` stays at 0.3.252"*,
+- **And it missed the one real claim**, *"`VERIFIED_INSPECT_AI_VERSION` stays at 0.3.252"*, <!-- audit: historical -->
   because "stays at" is words and `names` needs separators. The pattern is now anchored on
   the constant's name and matches exactly that line.
 
@@ -220,7 +220,7 @@ written for exactly this. Nothing in this repository caused either. (#83)
   resolves 1.33.0 with it and 2.0.0 without. Three tests pin the hand-recorded cap, including
   one that checks it against the parent's own `Requires-Dist` wherever the parent is installed.
 
-`VERIFIED_INSPECT_AI_VERSION` stays at 0.3.252: a field was classified, the provider claims
+`VERIFIED_INSPECT_AI_VERSION` stays at 0.3.252: a field was classified, the provider claims <!-- audit: historical -->
 were not re-staked.
 
 ## 0.12.16

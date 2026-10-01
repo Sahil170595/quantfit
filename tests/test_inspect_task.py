@@ -507,7 +507,7 @@ def test_identical_arms_are_not_refused():
 
 
 def test_hf_arms_carry_the_verified_greedy_model_arg():
-    # VERIFIED in inspect_ai 0.3.252 `model/_providers/hf.py`: do_sample is a MODEL ARG
+    # VERIFIED in inspect_ai 0.3.252 and re-read in 0.3.269 `model/_providers/hf.py`: do_sample is a MODEL ARG
     # defaulting to True, and generation kwargs start as dict(do_sample=self.do_sample) —
     # so temperature=0 alone still samples. The pin is what closes that.
     assert GREEDY_PROVIDER_ARGS["hf"] == {"do_sample": False}
