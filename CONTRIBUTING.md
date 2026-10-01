@@ -347,7 +347,9 @@ What the practice actually is, and why it is kept rather than reversed:
   `main` commit where its own change landed, the next merged forward from it — and each tag
   points at its **release commit** on that chain, whose tree holds exactly the changes that
   version names. The chain lands on `main` in one PR. Prefer the normal order: release each
-  change before merging the next.
+  change before merging the next. `v0.13.3` through `v0.13.6` were cut the same way, for the
+  same reason — the advice in the previous sentence was written and then not followed, which
+  is recorded here rather than left for a reader to notice.
 - **Branch commits are reachable from `main`.** `main` is not one commit per PR, and a
   script that assumes it is will miscount. Count PRs with `git log --merges`, not with
   `git log --oneline | wc -l`.

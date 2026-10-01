@@ -13,6 +13,25 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.13.6
+
+CI and documentation. No package code changes.
+
+- **CI runs daily, so upstream drift trips its guard the day it resolves.** inspect_ai
+  0.3.264 shipped on 2026-09-16 and broke the unit suite; nothing ran that suite until a PR
+  on 2026-09-26, while the weekly canary stayed green — it runs the verify-safety path, not
+  the tests where every dependency tripwire lives. `ci.yml` now also runs on a daily schedule
+  and on `workflow_dispatch`. It has since fired on six consecutive days, 2026-09-26 through
+  2026-10-01, green each time. (#93)
+
+- **Folded in — the validation matrix's flags table did not know three flags.** `--resume`
+  (E1, used by the 2026-08-21 screen), `--attempts` (E3 only — no run record says it was
+  passed) and `--baseline-cache` (E3 only). A test now walks `_build_parser()` and requires
+  every flag to have a row. (#94)
+
+**How 0.13.3–0.13.6 were cut:** as with 0.12.17–0.13.2, all their changes had merged before
+any was released, so they were built as a chain from the commit where each landed.
+
 ## 0.13.5
 
 A patch: `probe` reports its spread, not only a mean. (#92)
