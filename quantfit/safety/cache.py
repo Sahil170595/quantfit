@@ -165,6 +165,12 @@ BUDGET_RULE = (
     "cache hits is not affordable."
 )
 
+#: The key a report's baseline `engine` carries when the arm was served from this cache
+#: (`load_served`). `engine` is the arm-level object QSR v0 leaves unvalidated (§4.1, "What
+#: required covers"), so this is a documented convention and not a schema bump. It is the
+#: same route `inspect_task` takes for `engine.model_args`.
+SERVED_ENGINE_KEY = "baseline_cache"
+
 # --- the fingerprint input list, as data so a test can catch doc drift ------------
 
 _ARM_IDENTITY_FIELDS = ("model", "revision", "resolved_dtype", "engine", "artifact_sha256")
@@ -836,6 +842,37 @@ def read_header(cache_dir: str | os.PathLike, fingerprint: str) -> dict | None:
     """
     entry = _validated_entry(entry_path(cache_dir, fingerprint), fingerprint)
     return None if entry is None else dict(entry["header"])
+
+
+def load_served(cache_dir: str | os.PathLike, fingerprint: str) -> tuple[list[str], dict] | None:
+    """`load`, with the arm record marked as served, for a report to carry.
+
+    Without the mark, a hit rebuilt the arm from the stored record alone. The report then gave
+    the stored `runtime_s` as this run's generation time, and said nothing about the cache.
+    A reader holding only the report could not tell a served baseline from a generated one
+    (validation/2026-10-01-baseline-cache-real-hardware/).
+
+    `runtime_s` keeps the stored value, because that is how long these completions took to
+    generate. Reporting 0.0 would be false about the arm. `engine[SERVED_ENGINE_KEY]` records
+    the rest: under which key, when, by which quantfit, and that this run generated none of it.
+    Same refusal semantics as `load`. The entry on disk is not touched.
+    """
+    entry = _validated_entry(entry_path(cache_dir, fingerprint), fingerprint)
+    if entry is None:
+        return None
+    header, payload = entry["header"], entry["payload"]
+    arm = dict(payload["arm"])
+    arm["engine"] = {
+        **arm["engine"],
+        SERVED_ENGINE_KEY: {
+            "served": True,
+            "fingerprint": header["fingerprint"],
+            "generated_utc": header["created_utc"],
+            "generated_by_quantfit": header["quantfit_version"],
+            "note": "completions and runtime_s are the stored generation's; this run generated no baseline",
+        },
+    }
+    return list(payload["completions"]), arm
 
 
 # --- retention -------------------------------------------------------------------

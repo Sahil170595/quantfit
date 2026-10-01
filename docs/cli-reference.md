@@ -150,6 +150,12 @@ skips baseline generation entirely. Every entry re-derives its own key on load a
 refused if it disagrees, so an edited or misfiled entry is never served
 (`quantfit/safety/cache.py`).
 
+A served baseline says so in the report. `baseline.engine.baseline_cache` records the
+entry's key, when it was generated and by which quantfit. The arm's `runtime_s` is that
+generation's wall clock, not this run's. The model card from `emit model-card` repeats it.
+Until 0.14.1 a hit replayed the stored arm silently, so a report could not tell a served
+baseline from a generated one (`validation/2026-10-01-baseline-cache-real-hardware/`).
+
 It is **GGUF pairs only**. A transformers arm's identity includes the dtype it resolved to
 and the commit it resolved at, both known only after the model loads, so no key exists
 before the expensive part runs; the flag is refused for a transformers pair rather than

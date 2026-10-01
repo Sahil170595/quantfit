@@ -287,7 +287,11 @@ established and what is not.
    (`validation/2026-10-01-baseline-cache-real-hardware/`) **[V]**. That run answers the
    third question as it currently stands: the report **does not** disclose a served
    baseline. It also replays the stored arm's `runtime_s` as if that generation had happened
-   in the run **[V]**. The first two questions remain open.
+   in the run **[V]**. **Fixed in 0.14.1:** a served arm's `engine.baseline_cache` records the
+   key, the generation time and the generating quantfit, and the model card repeats it
+   (`safety/cache.py:load_served`) **[V]**. That is the reference implementation's answer,
+   recorded as a QSR v0 §4.2 convention. Whether v1 should make it normative is part of
+   the first question. The first two questions remain open.
 
 ### 1.5 D — decision rules: §5.6–§5.9 exist. Two change, and the numbering defect is fixed.
 
