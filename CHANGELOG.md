@@ -13,6 +13,26 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.13.4
+
+A patch to `quantfit audit`: two ways a moved line citation passed silently. (#91)
+
+- **A citation's forward quote is found through a "gap" that admitted a bare verb only.**
+  *`README.md:197-201` now says "…"* — "now" ended the gap, no quote was found, and the
+  checker's fall-through for an in-range citation with nothing quoted is a pass. It sat stale
+  for weeks, 147 lines from its text. Adverbs are exactly what a *corrected* citation reaches
+  for, so the citations most likely to have been re-checked once were the ones this check had
+  stopped re-checking. The verb may now carry one adverb directly in front of it.
+
+- **The gap also swallowed the quote's opening backtick**, so `` `path:3` says `code` `` never
+  found its quote either. It now hands one trailing backtick back and retries — never when the
+  gap *is* the citation's own closer, which a first version did and which produced a false
+  finding against this repository.
+
+- **Run against the whole repository, the fixed check found one real stale citation**:
+  `spec/qsr-v1-freeze-plan.md` cited `gate.py:407` for `SMOKE_THRESHOLD`, which is at 427. It
+  now cites the symbol.
+
 ## 0.13.3
 
 A patch to a printed unit. (#90)
