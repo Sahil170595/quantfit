@@ -13,6 +13,22 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.13.7
+
+A patch to `quantfit audit`. (#96)
+
+- **`constant_parity` read every inspect_ai version in prose as the verified one.** Its claim
+  for `VERIFIED_INSPECT_AI_VERSION` matched any `inspect_ai … X.Y.Z`. Measured across the
+  docs it scans: 7 matches, none a claim about the constant — 3 upstream release notes, each
+  of which failed the audit when written and cost an `audit: historical` marker, and 4
+  statements of the **pin floor** (`inspect-ai>=0.3.252,<0.4`) that passed only because the
+  floor equals the verified version and would all have failed, as correct statements, the
+  day the constant moved.
+
+- **And it missed the one real claim**, *"`VERIFIED_INSPECT_AI_VERSION` stays at 0.3.252"*,
+  because "stays at" is words and `names` needs separators. The pattern is now anchored on
+  the constant's name and matches exactly that line.
+
 ## 0.13.6
 
 CI and documentation. No package code changes.
