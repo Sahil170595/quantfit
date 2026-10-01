@@ -42,6 +42,32 @@ class ProbeResult:
     group_size: int
     mean_kl: float  # mean KL(fp16 || RTN-quant) over the probe batch; higher = more degradation
     n_samples: int
+    # Every per-sample KL the mean was taken over. Until 0.13.x the probe reported the mean
+    # alone, over 8 samples, with nothing to say whether one outlier row carried it - the
+    # first recorded run (validation/2026-09-25-check-and-probe/) could not be judged for
+    # stability at all. The spread is DESCRIPTIVE: min, max and sample SD, not an interval,
+    # because a per-token KL over 8 rows is neither many nor symmetric and a CI would claim
+    # more than the numbers carry.
+    per_sample_kl: tuple[float, ...] = ()
+
+    @property
+    def spread(self) -> dict:
+        return kl_spread(self.per_sample_kl)
+
+
+def kl_spread(kls) -> dict:
+    """min / max / sample SD of per-sample KLs. SD is None below two samples - one number
+    has no spread, and 0.0 would read as a perfectly stable probe."""
+    import statistics
+
+    values = list(kls)
+    if not values:
+        return {"kl_min": None, "kl_max": None, "kl_sd": None}
+    return {
+        "kl_min": min(values),
+        "kl_max": max(values),
+        "kl_sd": statistics.stdev(values) if len(values) >= 2 else None,
+    }
 
 
 def probe_sensitivity(
@@ -91,7 +117,13 @@ def probe_sensitivity(
 
     del model, tokenizer
     free_gpu(device)
-    return ProbeResult(bits=bits, group_size=group_size, mean_kl=sum(kls) / len(kls), n_samples=len(batch))
+    return ProbeResult(
+        bits=bits,
+        group_size=group_size,
+        mean_kl=sum(kls) / len(kls),
+        n_samples=len(batch),
+        per_sample_kl=tuple(kls),
+    )
 
 
 def _probe_batch(tokenizer, n_samples: int, seqlen: int, device: str, token: str | None):
