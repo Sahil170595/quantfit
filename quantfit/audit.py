@@ -1538,7 +1538,16 @@ CONSTANT_CLAIMS: tuple[ConstantClaim, ...] = (
         target="quantfit.inspect_task:VERIFIED_INSPECT_AI_VERSION",
         value_re=r"\d+\.\d+\.\d+",
         names=("VERIFIED_INSPECT_AI_VERSION",),
-        patterns=(r"inspect[_ -]ai[^\n]{0,40}?\b(\d+\.\d+\.\d+)\b",),
+        # Anchored on the CONSTANT'S NAME, not on the package's. The previous pattern,
+        # `inspect[_ -]ai ... X.Y.Z`, read every inspect_ai version in prose as a claim about
+        # this constant. Measured 2026-10-01 across CONSTANT_DOC_GLOBS: 7 matches, 0 of them
+        # claims about it - 3 upstream release mentions that each cost an `audit: historical`
+        # marker, and 4 statements of the PIN FLOOR (`inspect-ai>=0.3.252,<0.4`) that passed
+        # only because the floor happened to equal the verified version, and would all have
+        # failed the day the constant moved. It also MISSED the one real claim in the docs,
+        # "`VERIFIED_INSPECT_AI_VERSION` stays at 0.3.252", because `names` needs the value to
+        # follow across separators alone and "stays at" is words.
+        patterns=(r"VERIFIED_INSPECT_AI_VERSION`?[^\n`]{0,30}?\b(\d+\.\d+\.\d+)\b",),
         style="exact",
     ),
     ConstantClaim(

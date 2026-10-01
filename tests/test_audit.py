@@ -811,6 +811,31 @@ def test_constant_named_without_a_value_is_not_a_claim(tmp_path, monkeypatch):
     assert coverage["drift_code"]["named_without_value"] == 1
 
 
+def test_the_verified_inspect_version_claim_is_the_constant_not_the_package(tmp_path, monkeypatch):
+    """The shipped claim read every `inspect_ai X.Y.Z` in prose as a claim about
+    VERIFIED_INSPECT_AI_VERSION: 7 matches across the real docs, none about the constant,
+    3 of them needing `audit: historical` markers. Upstream release notes and pin floors
+    are not this constant; a sentence naming the constant with a version is."""
+    claim = next(c for c in A.CONSTANT_CLAIMS if c.id == "verified_inspect_ai_version")
+    root = _repo(
+        tmp_path,
+        **{
+            "docs__c.md": (
+                "intro\n\n"
+                "- **`inspect_ai` 0.3.999 added `some_field`, and it is refused.**\n"
+                "| `inspect` | `inspect-ai>=0.3.111,<0.4`, for the runner |\n"
+                "`VERIFIED_INSPECT_AI_VERSION` stays at 9.9.9: a field was classified.\n"
+            )
+        },
+    )
+    monkeypatch.setattr(A, "CONSTANT_DOC_GLOBS", ("docs/*.md",))
+    monkeypatch.setattr(A, "CONSTANT_CLAIMS", (claim,))
+    findings, _ = A._check_constants(root)
+    mismatches = [f for f in findings if f.kind == "constant_mismatch"]
+    assert [f.line for f in mismatches] == [5], [f.as_dict() for f in findings]
+    assert mismatches[0].claim.endswith("9.9.9")
+
+
 # --- anti-vacuity: a claim that matched nothing checked nothing --------------------
 
 
