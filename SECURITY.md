@@ -126,7 +126,7 @@ Hub client.
   Inspect runner refuses it explicitly as a forwardable model argument, with the reason
   recorded in source: *"it lets the checkpoint ship the code that defines the model and
   its generation; that is a different thing generating, and it is also arbitrary code
-  execution on the operator's box"* (`quantfit/inspect_task.py:413-414`). That refusal
+  execution on the operator's box"* (`quantfit/inspect_task.py:MODEL_ARG_REFUSALS`). That refusal
   sits inside an **allowlist**, not a denylist — `MODEL_ARG_ALLOWLIST`
   (`inspect_task.py:349-360`) — so a new upstream argument is refused by default rather
   than forwarded by accident.

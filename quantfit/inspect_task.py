@@ -196,7 +196,10 @@ reference docs, 2026-08-06:
   `eval(tasks, *, model_roles=..., epochs=..., limit=..., solver=..., score: bool = True,
    **GenerateConfigArgs) -> list[EvalLog]` — every one of those is an override the task
    itself cannot see, which is why `qsr_eval` owns the call;
-  `score(log, scorers, *, display=..., copy=...) -> EvalLog` — re-scores a finished log
+  `score(log, scorers, metrics=..., epochs_reducer=..., model=..., model_roles=..., action=...,
+   display=..., copy=...) -> EvalLog` (0.3.269's signature; 0.3.252 had `display` and `copy`
+   only, and quantfit passes `log` and the scorer positionally and `display` by keyword, so
+   both shapes take the same call) — re-scores a finished log
    and, VERIFIED by execution, the reconstructed `TaskState.metadata` still carries what
    the solver wrote, which is what makes judge-once-then-score possible;
   `from inspect_ai.dataset import Sample, MemoryDataset` — `Sample(input, target, id, metadata, ...)`;
@@ -206,9 +209,17 @@ reference docs, 2026-08-06:
     — `@scorer(metrics=[...])`, `async def score(state, target) -> Score`,
       `Score(value, answer, explanation, metadata)`, `MetricProtocol.__call__(scores: list[SampleScore]) -> Value`;
   `from inspect_ai.model import get_model, GenerateConfig` — `get_model(spec, role=..., **model_args)`,
-   `GenerateConfig.model_fields` (38 fields on this version, which is what
+   `GenerateConfig.model_fields` (38 fields on 0.3.252, 40 on 0.3.269, which is what
    `GENERATE_CONFIG_ALLOWED` + `GENERATE_CONFIG_REFUSALS` is enumerated from and what
    `tests/test_inspect_task.py` re-checks against the installed package).
+
+RE-VERIFIED against inspect_ai 0.3.269, 2026-10-01 — the version CI resolves, seventeen
+releases after the first check. Every import above resolves with every parameter named
+above (introspected); the two claims that rest on reading provider source were re-read in
+the installed wheel (`model/_providers/hf.py:117-118` and `:231` for the greedy pin;
+`_eval/task/results.py:scorer_for_metrics` for metric coercion); and the claims that rest
+on execution are exercised by `tests/test_inspect_task.py`'s mockllm evals, which pass on
+0.3.269. The one thing that had moved is `score()`'s signature, recorded above.
 An `ImportError` from any of those symbols is NOT reported as an absent package: a
 version whose API moved is diagnosed as an incompatibility against
 `VERIFIED_INSPECT_AI_VERSION`, because telling an operator to reinstall a package they
@@ -329,7 +340,8 @@ PINNED_TEMPERATURE = 0.0
 SAMPLING_FIELDS = ("top_p", "top_k", "best_of", "frequency_penalty", "presence_penalty")
 
 #: Providers whose greedy contract has been READ, and the model args that force it.
-#: VERIFIED in inspect_ai 0.3.252 `model/_providers/hf.py`: `do_sample` is collected as a
+#: VERIFIED in inspect_ai 0.3.252 `model/_providers/hf.py`, and RE-READ in 0.3.269 at
+#: `hf.py:117-118` and `:231`: `do_sample` is collected as a
 #: MODEL ARG (`self.do_sample = do_sample if do_sample is not None else True`) and the
 #: generation kwargs start as `dict(do_sample=self.do_sample)` — so `temperature=0` alone
 #: leaves sampling ON. `mockllm` returns fixed caller-supplied outputs and is deterministic
@@ -345,11 +357,16 @@ GREEDY_PROVIDER_ARGS: dict[str, dict[str, Any]] = {
 #: introspection AND by running an eval. Named so a failed import can say "incompatible
 #: with what this was verified against" instead of "not installed" (see `_import_refusal`),
 #: and so the version an operator has is compared against something, not against memory.
-VERIFIED_INSPECT_AI_VERSION = "0.3.252"
+#: Moved from 0.3.252 on 2026-10-01 after the re-verification recorded in the module
+#: docstring. The pin FLOOR stays at 0.3.252: both ends of the range are now verified, and
+#: the suite also passed installed at 0.3.262 and 0.3.263 (#83).
+VERIFIED_INSPECT_AI_VERSION = "0.3.269"
 
 #: Model args a caller may pass to an arm, PER PROVIDER. An allowlist, and a short one:
 #: `get_model(spec, **model_args)` forwards to the provider constructor, and on `hf`
-#: (VERIFIED by reading `model/_providers/hf.py` in 0.3.252) the constructor collects
+#: (VERIFIED by reading `model/_providers/hf.py` in 0.3.252, and in 0.3.269: thirteen
+#: `collect_model_arg` names, every one of them in `MODEL_ARG_REFUSALS` but `do_sample`, which
+#: is the pin itself) the constructor collects
 #: `model_path`, `tokenizer`, `tokenizer_path`, `chat_template`, `use_chat_template`,
 #: `device`, `auto_model_class`, `trust_remote_code`, … and forwards EVERYTHING ELSE to
 #: `from_pretrained`. Any of those changes which checkpoint, tokenizer or template
@@ -1121,7 +1138,9 @@ def _check_epoch(metadata: dict[str, Any], value: Any) -> int:
     """Refuse a repeated probe, from BOTH places the epoch is recorded (§2.1).
 
     Two places because Inspect reduces epochs before a metric ever sees the scores.
-    VERIFIED by execution on inspect_ai 0.3.252: `eval(task, epochs=3)` collapses each
+    VERIFIED by execution on inspect_ai 0.3.252, and re-exercised on 0.3.269 by
+    `test_direct_eval_with_epochs_is_contained_before_any_drift_exists` (a real
+    `eval(task, epochs=3)` against mockllm arms): `eval(task, epochs=3)` collapses each
     sample's three `Score`s into one whose METADATA is the first epoch's — so a metadata
     check alone reads `epoch=1` and the eval reports success with a drift metric
     computed over epoch-reduced values. The epoch is therefore ALSO a numeric entry in
@@ -1488,7 +1507,7 @@ def _registry() -> dict[str, Any]:
             dangerous = drift["refusal_robustness"]
             overrefusal = drift["over_refusal"]
             # Every metric entry is coerced with `float(value)` (VERIFIED in inspect_ai
-            # 0.3.252, `_eval/task/results.py:scorer_for_metrics`), so a metric mapping is
+            # 0.3.252 and re-read in 0.3.269, `_eval/task/results.py:scorer_for_metrics`), so a metric mapping is
             # NUMBERS ONLY: the verdict STRING cannot live here. That is not a loss — the
             # verdict belongs to the schema-v2 report, which is the artifact a claim cites,
             # and `unmeasurable_axes` is carried as a count with each axis's at_risk beside
