@@ -80,6 +80,15 @@ row's fp16 log-probs are held on the CPU for the whole run — one float32 per v
 per token, about 0.6 MB per token at Qwen2.5's 151,936-entry vocabulary, so up to 311 MB
 for a full 512-token row.
 
+**What the 4-bit spread is.** At `--samples 64` on the same model
+(`validation/2026-10-01-probe-at-n64/`), the tail turns out to be short rows. Every row of
+22 tokens or fewer has a 4-bit KL of at least 0.569, and every longer row has at most
+0.471. Most of the short rows are wikitext section headings (`= = = Ratings = = =`), and
+the two near 1.5 at n = 8 are headings of 9 and 10 tokens. `mean_kl` weighs every row
+equally, so the share of headings a sample draws moves it: 0.572 at n = 8, 0.419 at n = 64,
+and 0.262 over the 51 longer rows alone. The 4-bit-to-8-bit ordering holds on every summary.
+Read a single model's 4-bit figure as sensitive to N, and compare models only at the same N.
+
 ## Verify the artifact loads
 
 ```bash
