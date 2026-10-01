@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.14.0"
+  },
+  "command": "probe",
+  "exit_code": 0,
+  "result": {
+    "model": "Qwen/Qwen2.5-1.5B-Instruct",
+    "metric": "mean per-token RTN-KL(fp16 || quant)",
+    "requested_samples": 8,
+    "calibration": {
+      "dataset": "Salesforce/wikitext",
+      "config": "wikitext-103-raw-v1",
+      "split": "train",
+      "revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+      "shuffle_seed": 42
+    },
+    "interpretation": "RTN is the worst case \u2014 LOW KL = safe bit-width; HIGH KL can over-escalate (calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict.",
+    "by_bits": [
+      {
+        "bits": 4,
+        "mean_kl": 0.571582242846489,
+        "n_samples": 8,
+        "kl_min": 0.17861515283584595,
+        "kl_max": 1.6139129400253296,
+        "kl_sd": 0.6106839704719569,
+        "per_sample_kl": [
+          0.2416851818561554,
+          0.19594955444335938,
+          0.39007508754730225,
+          1.494336724281311,
+          0.17861515283584595,
+          0.2470303177833557,
+          0.21105298399925232,
+          1.6139129400253296
+        ]
+      },
+      {
+        "bits": 8,
+        "mean_kl": 0.00297176162712276,
+        "n_samples": 8,
+        "kl_min": 0.0007474565645679832,
+        "kl_max": 0.00882124062627554,
+        "kl_sd": 0.003326309600139289,
+        "per_sample_kl": [
+          0.0012082615867257118,
+          0.0010939092608168721,
+          0.002147474093362689,
+          0.007778321858495474,
+          0.0007474565645679832,
+          0.0010256367968395352,
+          0.0009517922298982739,
+          0.00882124062627554
+        ]
+      }
+    ]
+  }
+}

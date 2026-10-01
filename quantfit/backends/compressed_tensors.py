@@ -47,7 +47,9 @@ def calib_dataset(spec: QuantSpec, tokenizer, token: str | None = None):
     """
     from datasets import Dataset, load_dataset
 
-    ds = load_dataset(spec.calib_dataset, spec.calib_config, split=spec.calib_split, token=token)
+    ds = load_dataset(
+        spec.calib_dataset, spec.calib_config, split=spec.calib_split, revision=spec.calib_revision, token=token
+    )
     ds = ds.filter(lambda ex: ex["text"] is not None and ex["text"].strip() != "")
     ds = ds.shuffle(seed=spec.seed)
 

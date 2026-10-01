@@ -94,7 +94,7 @@ tags: [quantized, {method}, {scheme.lower()}, compressed-tensors, quantfit]
 
 ## Provenance
 - method: {method}, scheme: {scheme}, group_size {spec.group_size}
-- calibration: {spec.calib_dataset}/{spec.calib_config} [{spec.calib_split}], \
+- calibration: {spec.calib_dataset}/{spec.calib_config}@`{spec.calib_revision}` [{spec.calib_split}], \
 {spec.calib_samples} samples, seq-len {spec.calib_seqlen}, seed {spec.seed}
 - spec fingerprint: `{spec.fingerprint()}`
 

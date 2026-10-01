@@ -130,7 +130,10 @@ def _probe_batch(tokenizer, n_samples: int, seqlen: int, device: str, token: str
     """A few tokenized calibration rows for the forward pass."""
     from datasets import load_dataset
 
-    ds = load_dataset(DEFAULT_SPEC.calib_dataset, DEFAULT_SPEC.calib_config, split="train", token=token)
+    spec = DEFAULT_SPEC
+    ds = load_dataset(
+        spec.calib_dataset, spec.calib_config, split=spec.calib_split, revision=spec.calib_revision, token=token
+    )
     ds = ds.filter(lambda ex: ex["text"] is not None and ex["text"].strip() != "")
     ds = ds.shuffle(seed=DEFAULT_SPEC.seed).select(range(min(n_samples * 4, len(ds))))
 

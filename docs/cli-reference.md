@@ -73,7 +73,8 @@ on them. No interval is reported: eight skewed samples do not support one.
 
 `--samples N` sets how many calibration rows each bit-width averages over (default 8, at
 least 1). The rows are the first N usable ones from the frozen spec's calibration set,
-shuffled by its seed, so a larger N extends the default eight rather than replacing them. If the set
+loaded at its pinned commit (`quantfit/spec.py:calib_revision`, recorded in the JSON as
+`calibration`) and shuffled by its seed, so a larger N extends the default eight rather than replacing them. If the set
 yields fewer usable rows than N, the output says `n=X of N requested`, and the JSON carries
 `requested_samples` next to each bit-width's `n_samples`. Host RAM grows with N: every
 row's fp16 log-probs are held on the CPU for the whole run — one float32 per vocabulary entry
