@@ -9,6 +9,7 @@ from collections.abc import Callable
 
 from quantfit import __version__  # plain module-level string; the heavy surface stays lazy
 from quantfit.gate import TIERS as GATE_TIERS  # tier NAMES only — no torch, no heavy import
+from quantfit.policy.probe import DEFAULT_PROBE_SAMPLES  # constants only; torch loads inside the probe
 from quantfit.registry import METHODS
 
 # The envelope every `--json` run prints. Versioned from the start: the whole point of a
@@ -81,6 +82,15 @@ _BASELINE_CACHE_HELP = (
 )
 
 
+def _positive_int(text: str) -> int:
+    # `--samples 0` would reach the probe as an empty batch and fail as "calibration dataset
+    # returned no usable rows" - blaming the dataset for the caller's argument.
+    value = int(text)
+    if value < 1:
+        raise argparse.ArgumentTypeError(f"must be at least 1, got {value}")
+    return value
+
+
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="quantfit",
@@ -115,6 +125,14 @@ def _build_parser() -> argparse.ArgumentParser:
     ppr = sub.add_parser("probe", parents=[tok], help="measure how much a model degrades at each bit-width (RTN-KL)")
     ppr.add_argument("--model", required=True, help="HF model id")
     ppr.add_argument("--bits", type=int, nargs="+", default=[4, 8], help="bit-widths to probe")
+    ppr.add_argument(
+        "--samples",
+        type=_positive_int,
+        default=DEFAULT_PROBE_SAMPLES,
+        metavar="N",
+        help=f"calibration rows the KL is averaged over, per bit-width (default {DEFAULT_PROBE_SAMPLES}). "
+        "Host RAM grows with N: each row's fp16 log-probs are held on the CPU for the whole run",
+    )
 
     pv = sub.add_parser(
         "verify",
@@ -458,7 +476,9 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "probe":
         from quantfit.policy.probe import probe_sensitivity
 
-        rows = [probe_sensitivity(args.model, bits=bits, token=args.token) for bits in args.bits]
+        rows = [
+            probe_sensitivity(args.model, bits=bits, n_samples=args.samples, token=args.token) for bits in args.bits
+        ]
 
         def _human_probe() -> None:
             print("sensitivity — mean per-token RTN-KL(fp16 || quant); higher = more degradation:")
@@ -469,7 +489,10 @@ def _dispatch(args: argparse.Namespace) -> int:
                     if s["kl_sd"] is not None
                     else ""
                 )
-                print(f"  {bits}-bit: KL {r.mean_kl:.3f}  (n={r.n_samples}{spread})")
+                # The dataset can run out of usable rows before N; the mean is then over fewer,
+                # and saying "n=40" alone would let a reader assume 40 is what was asked for.
+                short = f" of {args.samples} requested" if r.n_samples < args.samples else ""
+                print(f"  {bits}-bit: KL {r.mean_kl:.3f}  (n={r.n_samples}{short}{spread})")
             print("note: RTN is the worst case — LOW KL = safe bit-width; HIGH KL can over-escalate")
             print("      (calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict.")
 
@@ -480,6 +503,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             {
                 "model": args.model,
                 "metric": "mean per-token RTN-KL(fp16 || quant)",
+                "requested_samples": args.samples,
                 # The caveat travels WITH the numbers. A consumer that reads only the JSON
                 # would otherwise get the measurement without the sentence that says a high
                 # value is an upper bound, not a verdict.

@@ -47,14 +47,54 @@ def test_probe_parses_multiple_bits():
     assert ns.bits == [4, 8]
 
 
-def _fake_probe(monkeypatch, per_sample):
+def _fake_probe(monkeypatch, per_sample, asked=None):
     import quantfit.policy.probe as pp
 
-    def fake(model_id, bits, token=None):
+    def fake(model_id, bits, n_samples=pp.DEFAULT_PROBE_SAMPLES, token=None):
+        if asked is not None:
+            asked.append(n_samples)
         kls = per_sample[bits]
         return pp.ProbeResult(bits, 128, sum(kls) / len(kls), len(kls), tuple(kls))
 
     monkeypatch.setattr(pp, "probe_sensitivity", fake)
+
+
+def test_probe_samples_reaches_the_probe_and_defaults_to_its_constant(monkeypatch, capsys):
+    """Until 0.14.0 the sample count was fixed at 8, so the 4-bit bimodality on Qwen2.5-1.5B
+    (validation/2026-09-25-check-and-probe/) could not be re-measured at any larger n."""
+    from quantfit.policy.probe import DEFAULT_PROBE_SAMPLES
+
+    asked: list[int] = []
+    _fake_probe(monkeypatch, {4: [0.5, 0.6], 8: [0.01, 0.02]}, asked)
+    assert main(["probe", "--model", "m", "--bits", "4", "8", "--samples", "2", "--json"]) == 0
+    assert asked == [2, 2]  # every bit-width, not only the first
+    assert json.loads(capsys.readouterr().out)["result"]["requested_samples"] == 2
+
+    asked.clear()
+    assert main(["probe", "--model", "m", "--bits", "4", "--json"]) == 0
+    assert asked == [DEFAULT_PROBE_SAMPLES]
+
+
+@pytest.mark.parametrize("bad", ["0", "-3"])
+def test_probe_refuses_a_sample_count_below_one(bad, capsys):
+    """0 would reach the probe as an empty batch and be reported as the DATASET having no
+    usable rows - the caller's argument blamed on the data."""
+    with pytest.raises(SystemExit) as exc:
+        _build_parser().parse_args(["probe", "--model", "m", "--samples", bad])
+    assert exc.value.code == 2
+    assert "must be at least 1" in capsys.readouterr().err
+
+
+def test_a_probe_that_ran_short_says_so(monkeypatch, capsys):
+    """The dataset can yield fewer usable rows than asked; the mean is then over fewer, and
+    'n=3' alone would read as the n that was requested."""
+    _fake_probe(monkeypatch, {4: [0.1, 0.2, 0.3]})
+    assert main(["probe", "--model", "m", "--bits", "4", "--samples", "5"]) == 0
+    assert "(n=3 of 5 requested," in capsys.readouterr().out
+
+    _fake_probe(monkeypatch, {4: [0.1, 0.2, 0.3]})
+    assert main(["probe", "--model", "m", "--bits", "4", "--samples", "3"]) == 0
+    assert "requested" not in capsys.readouterr().out
 
 
 def test_probe_reports_its_spread_not_only_a_mean(monkeypatch, capsys):
