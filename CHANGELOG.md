@@ -13,6 +13,33 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.15.0
+
+A minor, because the meaning of a published number changes: `probe` now measures the
+quantize path's packed blocks, not rows. (#110)
+
+- **`probe` measures packed 512-token blocks.** It used to tokenize rows one at a time and
+  average a per-row KL, so a 9-token wikitext heading weighed as much as a 437-token
+  paragraph. The 4-bit "spread" on Qwen2.5-1.5B was that weighting
+  (`validation/2026-10-01-probe-at-n64/`).
+  - `quantfit/calibset.py:packed_blocks` is now the one packing for both the quantize path
+    and the probe. The probe's blocks are the head of the exact stream the quantizer
+    calibrates on, and every block is the same length.
+  - On Qwen2.5-1.5B the 4-bit mean is **0.2372 at n = 8 and 0.2306 at n = 64**, with mean
+    ≈ median and SD 0.02–0.03. Row-based it was 0.572 and 0.419. 8 bits moves from 0.0030
+    to 0.0009, and the ordering holds (`validation/2026-10-01-probe-packed-blocks/`).
+
+- **Pre-0.15.0 probe numbers are a different metric**, row-weighted and over different
+  tokens. They are not comparable with these. The JSON `metric` string now says "over
+  packed 512-token blocks", and `result.calibration` gains `packing` and `block_tokens`.
+
+- **Checked, not assumed:**
+  - The quantize path's calibration blocks are byte-identical across the refactor: 128 ×
+    2048, sha256 `a34d09da…`.
+  - The probe's 64 × 512 blocks are the quantize path's first 16 × 2048, token for token.
+  - Reference logits are now held in the model's dtype, halving host RAM at fp16. KL is
+    bit-identical on real blocks.
+
 ## 0.14.3
 
 A patch: `probe` now records which model weights each number came from. (#108)
