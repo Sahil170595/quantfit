@@ -132,3 +132,10 @@ and seed.
 
 **Still unpinned:** the model. `probe --model` takes an id from the caller and loads it at
 `main`, and the envelope records no model revision.
+
+**Recorded since 0.14.3.** Each row now carries `model_revision`, from the load's
+`config._commit_hash`, which is how `verify-safety` records a transformers arm. The fix's
+code was re-run uncommitted on top of `725e7d8`:
+`probe --model Qwen/Qwen2.5-1.5B-Instruct --bits 4 8`. It printed `model revision:
+989aa7980e4cf806f80c7fef2b1adb7bc71aa306` with the same 0.572 / 0.003 means. That is the
+snapshot the Setup section above *inferred* from the cache; it is now observed.

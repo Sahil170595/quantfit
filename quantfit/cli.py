@@ -494,6 +494,14 @@ def _dispatch(args: argparse.Namespace) -> int:
                 # and saying "n=40" alone would let a reader assume 40 is what was asked for.
                 short = f" of {args.samples} requested" if r.n_samples < args.samples else ""
                 print(f"  {bits}-bit: KL {r.mean_kl:.3f}  (n={r.n_samples}{short}{spread})")
+            revisions = {r.model_revision for r in rows}
+            if len(revisions) > 1:
+                # Each bit-width loads the model afresh; a `main` that moved mid-run means the
+                # rows are over different weights and must not be compared.
+                print("model revision DIFFERS between bit-widths: " + ", ".join(sorted(map(str, revisions))))
+            else:
+                (revision,) = revisions
+                print(f"model revision: {revision or 'not resolved (a local path has no Hub commit)'}")
             print("note: RTN is the worst case — LOW KL = safe bit-width; HIGH KL can over-escalate")
             print("      (calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict.")
 
@@ -528,6 +536,8 @@ def _dispatch(args: argparse.Namespace) -> int:
                         "n_samples": r.n_samples,
                         **r.spread,
                         "per_sample_kl": list(r.per_sample_kl),
+                        # Per row: each bit-width is its own load, and `main` can move between.
+                        "model_revision": r.model_revision,
                     }
                     for bits, r in zip(args.bits, rows, strict=True)
                 ],
