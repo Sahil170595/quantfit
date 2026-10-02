@@ -64,6 +64,11 @@ Forward-only RTN-KL per bit-width. It is a **conservative upper bound**: a low v
 the bit-width is safe, a high one can over-escalate, because calibrated AWQ/GPTQ may still
 be fine where RTN is not. Read it as sensitivity, not as a verdict.
 
+`--model` is loaded at the Hub's `main`. Each bit-width loads it afresh and records the
+commit it resolved to as `model_revision`, and the human output prints it. If `main` moves
+between two loads in one run, the output says the revision differs between bit-widths, and
+those rows must not be compared.
+
 Each bit-width reports the mean **and** its spread: every per-sample KL (`per_sample_kl`)
 plus `kl_min`, `kl_max` and the sample SD `kl_sd` (null for a single sample — one number
 has no spread, and 0.0 would read as a perfectly stable probe). Read the spread before the
