@@ -13,6 +13,22 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.14.2
+
+A patch pinning the calibration set. (#106)
+
+- **The calibration set is loaded at a pinned commit.** Two paths read it, the quantize
+  path (`backends/compressed_tensors.py`) and `probe`, and both called `load_dataset` with
+  no revision. A push to `Salesforce/wikitext`'s `main` would have moved every calibrated
+  quant and every probe number silently. `verify-safety` has pinned its own probe set and
+  judge all along.
+  - `QuantSpec.calib_revision` pins `b08601e04326c79dfdd32d625aee71d232d685c3`, the commit
+    `main` already resolved to.
+  - A pinned `probe` re-run reproduces the 2026-09-25 means bit for bit, so no number moves.
+  - `probe --json` records the rows it averaged over (`result.calibration`), and the
+    quantize model card records the revision.
+  - `QuantSpec.fingerprint()` is unchanged, so no manifest key is renamed.
+
 ## 0.14.1
 
 A patch: a cache hit now shows in the report, plus the probe's first run at a larger n.
