@@ -43,31 +43,21 @@ def calib_dataset(spec: QuantSpec, tokenizer, token: str | None = None):
 
     Uniform-length sequences are required by AutoRound (it stacks samples and
     rejects ragged lengths) and are the standard GPTQ/AWQ calibration form, so one
-    packed dataset serves every calibrated method. Deterministic under the spec.
+    packed dataset serves every calibrated method. Deterministic under the spec. The
+    packing is `calibset.packed_blocks`, shared with `probe`, so the probe measures the
+    first tokens of exactly this stream.
     """
-    from datasets import Dataset, load_dataset
+    from datasets import Dataset
 
-    ds = load_dataset(
-        spec.calib_dataset, spec.calib_config, split=spec.calib_split, revision=spec.calib_revision, token=token
-    )
-    ds = ds.filter(lambda ex: ex["text"] is not None and ex["text"].strip() != "")
-    ds = ds.shuffle(seed=spec.seed)
+    from quantfit.calibset import packed_blocks
 
-    needed = spec.calib_samples * spec.calib_seqlen
-    buf: list[int] = []
-    for ex in ds:
-        buf.extend(tokenizer(ex["text"]).input_ids)
-        if len(buf) >= needed:
-            break
-    # Only chunk over tokens actually collected; a short dataset must error, not
-    # silently emit empty blocks (range(0, needed, ...) would slice past len(buf)).
-    usable = (len(buf) // spec.calib_seqlen) * spec.calib_seqlen
-    blocks = [buf[i : i + spec.calib_seqlen] for i in range(0, min(needed, usable), spec.calib_seqlen)]
+    blocks = packed_blocks(spec, tokenizer, spec.calib_samples, spec.calib_seqlen, token=token)
     if len(blocks) < spec.calib_samples:
-        # RuntimeError: operational (dataset too short), so the CLI exits cleanly.
+        # RuntimeError: operational (dataset too short), so the CLI exits cleanly. A short set
+        # must error here, not silently calibrate on fewer sequences.
         raise RuntimeError(
-            f"calibration set yielded {len(blocks)} of {spec.calib_samples} requested sequences "
-            f"({len(buf)} tokens, need {needed}); use a larger calib set or fewer/shorter samples"
+            f"calibration set yielded {len(blocks)} of {spec.calib_samples} requested sequences of "
+            f"{spec.calib_seqlen} tokens; use a larger calib set or fewer/shorter samples"
         )
     return Dataset.from_dict({"input_ids": blocks, "attention_mask": [[1] * len(b) for b in blocks]})
 
