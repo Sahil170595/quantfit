@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.14.3"
+  },
+  "command": "probe",
+  "exit_code": 0,
+  "result": {
+    "model": "Qwen/Qwen2.5-1.5B-Instruct",
+    "metric": "mean per-token RTN-KL(fp16 || quant) over packed 512-token blocks",
+    "requested_samples": 8,
+    "calibration": {
+      "dataset": "Salesforce/wikitext",
+      "config": "wikitext-103-raw-v1",
+      "split": "train",
+      "revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+      "shuffle_seed": 42,
+      "packing": "the quantize path's: rows concatenated, chunked into fixed-length blocks",
+      "block_tokens": 512
+    },
+    "interpretation": "RTN is the worst case \u2014 LOW KL = safe bit-width; HIGH KL can over-escalate (calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict.",
+    "by_bits": [
+      {
+        "bits": 4,
+        "mean_kl": 0.2372122760862112,
+        "n_samples": 8,
+        "kl_min": 0.20567180216312408,
+        "kl_max": 0.2707969546318054,
+        "kl_sd": 0.02328212028832848,
+        "per_sample_kl": [
+          0.21847352385520935,
+          0.2477981299161911,
+          0.2146705836057663,
+          0.2299157977104187,
+          0.2707969546318054,
+          0.2558968961238861,
+          0.20567180216312408,
+          0.2544745206832886
+        ],
+        "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306"
+      },
+      {
+        "bits": 8,
+        "mean_kl": 0.0008580603534937836,
+        "n_samples": 8,
+        "kl_min": 0.0006584336515516043,
+        "kl_max": 0.0010684430599212646,
+        "kl_sd": 0.00014940866121834602,
+        "per_sample_kl": [
+          0.0008674119599163532,
+          0.0006584336515516043,
+          0.0010422616032883525,
+          0.0008717126911506057,
+          0.0008627853239886463,
+          0.0008277361048385501,
+          0.0006656984332948923,
+          0.0010684430599212646
+        ],
+        "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306"
+      }
+    ]
+  }
+}

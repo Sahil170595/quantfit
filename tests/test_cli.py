@@ -101,18 +101,23 @@ def test_probe_samples_reaches_the_probe_and_defaults_to_its_constant(monkeypatc
 def test_probe_json_names_the_calibration_rows_it_averaged_over(monkeypatch, capsys):
     """Which rows the KL is over is a measurement input; the record that found the 4-bit tail
     is short rows (validation/2026-10-01-probe-at-n64/) had to reconstruct it by hand."""
+    from quantfit.policy.probe import DEFAULT_PROBE_SEQLEN
     from quantfit.spec import DEFAULT_SPEC
 
     _fake_probe(monkeypatch, {4: [0.5, 0.6]})
     assert main(["probe", "--model", "m", "--bits", "4", "--json"]) == 0
-    calibration = json.loads(capsys.readouterr().out)["result"]["calibration"]
-    assert calibration == {
+    result = json.loads(capsys.readouterr().out)["result"]
+    assert result["calibration"] == {
         "dataset": DEFAULT_SPEC.calib_dataset,
         "config": DEFAULT_SPEC.calib_config,
         "split": DEFAULT_SPEC.calib_split,
         "revision": DEFAULT_SPEC.calib_revision,
         "shuffle_seed": DEFAULT_SPEC.seed,
+        "packing": "the quantize path's: rows concatenated, chunked into fixed-length blocks",
+        "block_tokens": DEFAULT_PROBE_SEQLEN,
     }
+    # 0.15.0 changed what the number means; the metric string has to say which one it is.
+    assert result["metric"].endswith(f"over packed {DEFAULT_PROBE_SEQLEN}-token blocks")
 
 
 @pytest.mark.parametrize("bad", ["0", "-3"])

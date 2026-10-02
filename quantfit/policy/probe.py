@@ -33,14 +33,16 @@ DEFAULT_PROBE_SEQLEN = 512
 # Calibration facts come from the frozen spec — the probe must measure sensitivity
 # on the same distribution the quantize path calibrates on, never a stale copy.
 DEFAULT_GROUP_SIZE = DEFAULT_SPEC.group_size
-_MIN_PROBE_TOKENS = 8  # skip near-empty rows
 
 
 @dataclass(frozen=True)
 class ProbeResult:
     bits: int
     group_size: int
-    mean_kl: float  # mean KL(fp16 || RTN-quant) over the probe batch; higher = more degradation
+    # Mean per-token KL(fp16 || RTN-quant) over the packed blocks; higher = more degradation.
+    # Since 0.15.0 the blocks are fixed-length (calibset.packed_blocks); earlier releases
+    # averaged per-row means over variable-length rows, and those numbers are not comparable.
+    mean_kl: float
     n_samples: int
     # Every per-sample KL the mean was taken over. Until 0.13.x the probe reported the mean
     # alone, over 8 samples, with nothing to say whether one outlier row carried it - the
@@ -98,23 +100,25 @@ def probe_sensitivity(
         # RuntimeError: operational (unusable dataset), so the CLI exits cleanly.
         raise RuntimeError("probe batch is empty; calibration dataset returned no usable rows")
 
-    # fp16 reference log-probs, kept on CPU so the GPU isn't holding 8 x (T x vocab).
-    fp16_logprobs = []
+    # The reference logits, kept on CPU so the GPU isn't holding N x (T x vocab). They are
+    # held in the model's own dtype and turned into log-probs only when used. At fp16 that is
+    # half the host RAM of float32 log-probs, and the same numbers: log_softmax(logits.float())
+    # runs on the same input on the same device either way.
+    ref_logits = []
     with torch.no_grad():
         for inputs in batch:
-            lp = F.log_softmax(model(**inputs).logits.float(), dim=-1)
-            fp16_logprobs.append(lp.cpu())
+            ref_logits.append(model(**inputs).logits.cpu())
 
     _rtn_quantize_linears_(model, bits, group_size)
 
     kls: list[float] = []
     with torch.no_grad():
-        for inputs, ref_cpu in zip(batch, fp16_logprobs):
+        for inputs, ref_cpu in zip(batch, ref_logits):
             q_lp = F.log_softmax(model(**inputs).logits.float(), dim=-1)
-            ref = ref_cpu.to(q_lp.device)
+            ref = F.log_softmax(ref_cpu.to(q_lp.device).float(), dim=-1)
             # mean per-token KL(fp16 || quant): flatten (1,T,V)->(T,V) so batchmean
-            # divides by token count, not the batch dim (=1) — makes variable-length
-            # rows comparable instead of summing KL over all T positions.
+            # divides by token count, not the batch dim (=1). Every block is the same
+            # length, so the mean over blocks is also the mean over tokens.
             q_flat = q_lp.reshape(-1, q_lp.size(-1))
             ref_flat = ref.reshape(-1, ref.size(-1))
             kls.append(float(F.kl_div(q_flat, ref_flat, log_target=True, reduction="batchmean")))
@@ -133,24 +137,24 @@ def probe_sensitivity(
 
 
 def _probe_batch(tokenizer, n_samples: int, seqlen: int, device: str, token: str | None):
-    """A few tokenized calibration rows for the forward pass."""
-    from datasets import load_dataset
+    """`n_samples` packed blocks of exactly `seqlen` tokens, the head of the quantize path's stream.
 
-    spec = DEFAULT_SPEC
-    ds = load_dataset(
-        spec.calib_dataset, spec.calib_config, split=spec.calib_split, revision=spec.calib_revision, token=token
-    )
-    ds = ds.filter(lambda ex: ex["text"] is not None and ex["text"].strip() != "")
-    ds = ds.shuffle(seed=DEFAULT_SPEC.seed).select(range(min(n_samples * 4, len(ds))))
+    Rows used to be tokenized one by one, so a 9-token heading counted as much as a
+    437-token paragraph. `calibset.packed_blocks` is the quantize path's own packing; every
+    block here is the same length and carries its surrounding text.
+    """
+    from quantfit.calibset import packed_blocks
 
-    batch = []
-    for row in ds:
-        enc = tokenizer(row["text"], return_tensors="pt", truncation=True, max_length=seqlen)
-        if enc["input_ids"].shape[1] >= _MIN_PROBE_TOKENS:
-            batch.append({k: v.to(device) for k, v in enc.items()})
-        if len(batch) >= n_samples:
-            break
-    return batch
+    blocks = packed_blocks(DEFAULT_SPEC, tokenizer, n_samples, seqlen, token=token)
+    import torch  # after the load: the torch-free tests stop at the dataset call above
+
+    return [
+        {
+            "input_ids": torch.tensor([block], device=device),
+            "attention_mask": torch.ones((1, len(block)), dtype=torch.long, device=device),
+        }
+        for block in blocks
+    ]
 
 
 def _rtn_quantize_linears_(model, bits: int, group_size: int) -> None:

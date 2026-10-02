@@ -9,7 +9,7 @@ from collections.abc import Callable
 
 from quantfit import __version__  # plain module-level string; the heavy surface stays lazy
 from quantfit.gate import TIERS as GATE_TIERS  # tier NAMES only — no torch, no heavy import
-from quantfit.policy.probe import DEFAULT_PROBE_SAMPLES  # constants only; torch loads inside the probe
+from quantfit.policy.probe import DEFAULT_PROBE_SAMPLES, DEFAULT_PROBE_SEQLEN  # constants; torch loads in the probe
 from quantfit.registry import METHODS
 from quantfit.spec import DEFAULT_SPEC  # a frozen dataclass of constants
 
@@ -131,8 +131,9 @@ def _build_parser() -> argparse.ArgumentParser:
         type=_positive_int,
         default=DEFAULT_PROBE_SAMPLES,
         metavar="N",
-        help=f"calibration rows the KL is averaged over, per bit-width (default {DEFAULT_PROBE_SAMPLES}). "
-        "Host RAM grows with N: each row's fp16 log-probs are held on the CPU for the whole run",
+        help=f"packed {DEFAULT_PROBE_SEQLEN}-token calibration blocks the KL is averaged over, per bit-width "
+        f"(default {DEFAULT_PROBE_SAMPLES}). Host RAM grows with N: each block's reference logits are held "
+        "on the CPU for the whole run",
     )
 
     pv = sub.add_parser(
@@ -482,7 +483,10 @@ def _dispatch(args: argparse.Namespace) -> int:
         ]
 
         def _human_probe() -> None:
-            print("sensitivity — mean per-token RTN-KL(fp16 || quant); higher = more degradation:")
+            print(
+                f"sensitivity — mean per-token RTN-KL(fp16 || quant) over packed {DEFAULT_PROBE_SEQLEN}-token "
+                "blocks; higher = more degradation:"
+            )
             for bits, r in zip(args.bits, rows, strict=True):
                 s = r.spread
                 spread = (
@@ -511,16 +515,20 @@ def _dispatch(args: argparse.Namespace) -> int:
             0,
             {
                 "model": args.model,
-                "metric": "mean per-token RTN-KL(fp16 || quant)",
+                # Named for what it is since 0.15.0: before, the mean was over variable-length
+                # rows, and those numbers are a different metric, not a noisier copy of this one.
+                "metric": f"mean per-token RTN-KL(fp16 || quant) over packed {DEFAULT_PROBE_SEQLEN}-token blocks",
                 "requested_samples": args.samples,
-                # Which rows the KL was averaged over is a measurement input; the record that
-                # found the tail is short rows had to reconstruct this by hand.
+                # Which tokens the KL was averaged over is a measurement input; the record that
+                # found the old tail was short rows had to reconstruct this by hand.
                 "calibration": {
                     "dataset": DEFAULT_SPEC.calib_dataset,
                     "config": DEFAULT_SPEC.calib_config,
                     "split": DEFAULT_SPEC.calib_split,
                     "revision": DEFAULT_SPEC.calib_revision,
                     "shuffle_seed": DEFAULT_SPEC.seed,
+                    "packing": "the quantize path's: rows concatenated, chunked into fixed-length blocks",
+                    "block_tokens": DEFAULT_PROBE_SEQLEN,
                 },
                 # The caveat travels WITH the numbers. A consumer that reads only the JSON
                 # would otherwise get the measurement without the sentence that says a high

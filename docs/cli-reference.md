@@ -69,31 +69,37 @@ commit it resolved to as `model_revision`, and the human output prints it. If `m
 between two loads in one run, the output says the revision differs between bit-widths, and
 those rows must not be compared.
 
-Each bit-width reports the mean **and** its spread: every per-sample KL (`per_sample_kl`)
-plus `kl_min`, `kl_max` and the sample SD `kl_sd` (null for a single sample — one number
-has no spread, and 0.0 would read as a perfectly stable probe). Read the spread before the
-mean. On Qwen2.5-1.5B at 4-bit the mean is 0.572 while the median of the eight samples is
-0.244, because two rows sit near 1.5 — a mean alone would have hidden that the reading rests
-on them. No interval is reported: eight skewed samples do not support one.
+**What it averages over.** The KL is measured on packed 512-token blocks of the calibration
+set: rows are concatenated and chunked by the quantize path's own function
+(`quantfit/calibset.py:packed_blocks`). The probe's blocks are therefore exactly the first
+tokens of the stream the quantizer calibrates on. The set is loaded at its pinned commit
+(`quantfit/spec.py:calib_revision`), and the JSON records all of this under `calibration`.
+Every block is the same length, so the mean over blocks is also the mean over tokens.
 
-`--samples N` sets how many calibration rows each bit-width averages over (default 8, at
-least 1). The rows are the first N usable ones from the frozen spec's calibration set,
-loaded at its pinned commit (`quantfit/spec.py:calib_revision`, recorded in the JSON as
-`calibration`) and shuffled by its seed, so a larger N extends the default eight rather than replacing them. If the set
-yields fewer usable rows than N, the output says `n=X of N requested`, and the JSON carries
-`requested_samples` next to each bit-width's `n_samples`. Host RAM grows with N: every
-row's fp16 log-probs are held on the CPU for the whole run — one float32 per vocabulary entry
-per token, about 0.6 MB per token at Qwen2.5's 151,936-entry vocabulary, so up to 311 MB
-for a full 512-token row.
+Each bit-width reports the mean **and** its spread: every per-block KL (`per_sample_kl`)
+plus `kl_min`, `kl_max` and the sample SD `kl_sd` (null for a single block — one number
+has no spread, and 0.0 would read as a perfectly stable probe). No interval is reported.
+Tokens within a block are correlated, so the block is the unit, and eight are not many.
 
-**What the 4-bit spread is.** At `--samples 64` on the same model
-(`validation/2026-10-01-probe-at-n64/`), the tail turns out to be short rows. Every row of
-22 tokens or fewer has a 4-bit KL of at least 0.569, and every longer row has at most
-0.471. Most of the short rows are wikitext section headings (`= = = Ratings = = =`), and
-the two near 1.5 at n = 8 are headings of 9 and 10 tokens. `mean_kl` weighs every row
-equally, so the share of headings a sample draws moves it: 0.572 at n = 8, 0.419 at n = 64,
-and 0.262 over the 51 longer rows alone. The 4-bit-to-8-bit ordering holds on every summary.
-Read a single model's 4-bit figure as sensitive to N, and compare models only at the same N.
+**Before 0.15.0 the probe measured a different quantity.** It tokenized rows one at a
+time and averaged a per-row mean, so a 9-token wikitext heading weighed as much as a
+437-token paragraph. On Qwen2.5-1.5B at 4 bits that gave 0.572 at n = 8 and 0.419 at
+n = 64: the heading rows formed a tail that moved the mean with N
+(`validation/2026-10-01-probe-at-n64/`). Packed, the same model reads **0.237 at n = 8
+and 0.231 at n = 64**, with mean ≈ median and SD 0.02–0.03
+(`validation/2026-10-01-probe-packed-blocks/`). Numbers from before 0.15.0 are not
+comparable with these. The metric string in the JSON says which one a number is.
+
+`--samples N` sets how many blocks each bit-width averages over (default 8, at least 1).
+A larger N extends the default eight rather than replacing them: the first eight blocks
+at N = 64 are the same blocks, with bit-identical KLs. If the set runs out of tokens
+before N blocks, the output says `n=X of N requested`, and the JSON carries
+`requested_samples` next to each bit-width's `n_samples`.
+
+Host RAM grows with N: each block's reference logits are held on the CPU for the whole
+run, in the model's dtype. At fp16 on a GPU that is 512 tokens × vocabulary × 2 bytes.
+At Qwen2.5's 151,936 entries that is 156 MB per block: 1.2 GB at the default 8 and
+10 GB at 64. On a CPU-only machine the model runs in float32, so double it.
 
 ## Verify the artifact loads
 
