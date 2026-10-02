@@ -13,6 +13,20 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.14.3
+
+A patch: `probe` now records which model weights each number came from. (#108)
+
+- **`probe` records the model commit each row was measured on.** It loads the caller's
+  model id at `main`, and until now nothing said which weights a number came from. The
+  2026-10-01 n = 64 record had to infer the snapshot from the local cache.
+  - Each `by_bits` row carries `model_revision`, from the load's `config._commit_hash`, as
+    `verify-safety` records a transformers arm. It is `null` for a local path.
+  - The human output prints the revision. If `main` moved between two loads in one run, it
+    says the revision differs between bit-widths, and those rows are not comparable.
+  - A real run printed `989aa79…`, the snapshot the record had inferred.
+  - The model is not pinned: it is the caller's id, and this release records what resolved.
+
 ## 0.14.2
 
 A patch pinning the calibration set. (#106)
