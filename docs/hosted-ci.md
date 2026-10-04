@@ -1,0 +1,55 @@
+# Hosted CI acceptance
+
+The required merge check is `CI required`. The reusable candidate workflow checks
+all prerequisite conclusions; failure, cancellation, and unexpected skips fail it.
+All jobs use GitHub-hosted Linux or Windows CPU runners. No credentials, paid models,
+GPU, or self-hosted machines are prerequisites.
+
+Every PR checks the declared Python versions, required CPU Torch numerical tests,
+deterministic generated properties against SciPy, selected mutation failures, branch
+coverage floors, Ruff, strict typing on the spec/engine data contract, docs parity,
+workflow linting, and the installed dependency graph for known vulnerabilities.
+`tools/ci-pins.txt` fixes critical acceptance versions within the package's bounds;
+transitive requirements still resolve, and the scheduled drift lane deliberately
+resolves the supported graph afresh. These pins are not an exhaustive lockfile.
+
+The candidate wheel and sdist are built once. Linux and Windows independently install
+each candidate with full dependencies and run CLI/report/gate/JUnit/statistical behavior
+from a temporary directory. The import check refuses source shadowing. Source-tree unit
+tests continue separately. The composite consumer action runs on the candidate wheel
+with the checkout package moved aside, and checks actual action outcomes and CLI/JUnit
+outputs for exit codes 0, 2, 3, 4, and 5. Its refusal labels are explicitly fixtures:
+this proves propagation and fail-closed integration, not detector sensitivity.
+
+Daily candidate qualification and manual qualification run real public pinned models:
+compressed-tensors RTN W4A16 on Qwen2.5-0.5B-Instruct and GGUF Q4_K_M on SmolLM2-135M.
+They require packed/integer tensors, read the emitted format metadata, reload the
+artifact, and generate. Outputs contain metadata, versions, durations, and hashes;
+weights and generated text are temporary and never uploaded. The CT path checks backend
+serialization and CPU decompression/inference; the product's router still requires CUDA
+for compressed-tensors deployment. It does not qualify AWQ/GPTQ/FP8, GPU kernels,
+cross-hardware tolerances, large-model offload, quality, or safety sensitivity.
+
+The same qualification lane explicitly runs the adjudication-backed judge cases,
+including the known written-decline and short-completion limitations. The existing weekly
+same-model determinism canary remains independent. Neither set is a new calibration
+study or a passing sensitivity control; a null remains "the detector did not fire".
+
+Publishing requires an existing version tag on both release-event and manual paths.
+The tag's exact commit enters candidate validation with backend and judge qualification
+enabled. Publication consumes the exact distributions accepted in that same run rather
+than rebuilding them. PyPI Trusted Publishing remains the existing final step; this CI
+change does not publish a release. Candidate artifacts retain three days, fixture action
+evidence one day. Logs and job summaries carry routine checks and dependency findings.
+
+Reproduce numerical checks locally with the compatible CPU runtime and test dependencies:
+
+```sh
+python -m pytest tests -q --cov=quantfit --cov-branch --cov-report=json:coverage.json
+python tools/ci_coverage.py coverage.json
+python tools/ci_mutation.py
+```
+
+Coverage enforcement uses actual branch percentages for the MDE, gate, and report modules,
+plus whole-package combined and branch floors. The Windows baseline and its limitations
+are in `validation/2026-10-04-hosted-ci/`; hosted receipts should be read separately.

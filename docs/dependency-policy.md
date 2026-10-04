@@ -200,8 +200,8 @@ decorative: the first draft of the exemption table claimed `llmcompressor` bound
 **The limitation, stated because it is real.** This argument holds on the *full-dependency*
 install path. Two paths in this repo bypass it:
 
-- `.github/workflows/ci.yml:40` installs `pytest huggingface_hub psutil scipy gguf
-  inspect-ai` (now under `-c ci-constraints.txt`, §2) and `.github/workflows/ci.yml:43`
+- `.github/workflows/validate.yml` installs `pytest huggingface_hub psutil scipy gguf
+  inspect-ai` (now under `-c ci-constraints.txt`, §2) and `.github/workflows/validate.yml`
   then runs `pip install -e . --no-deps` **[V]** — llmcompressor is never resolved, so
   nothing bounds transformers or huggingface_hub in that job. The constraints file does
   not change this: a constraint bounds a package that IS installed; it does not install
@@ -310,7 +310,7 @@ The argument has two halves and only the second is load-bearing:
   and it is checked rather than assumed:
   `test_build_backend_exemptions_rest_on_a_wheel_build_in_ci` reads both workflows and fails
   if either stops running `python -m build` **[V]**. Both do today —
-  `.github/workflows/ci.yml:63-66` on every push, on ubuntu **and** windows, and
+  `.github/workflows/validate.yml` on every push, on ubuntu **and** windows, and
   `.github/workflows/canary.yml:333-338` weekly against a re-resolved index **[V]**.
 
 `setuptools>=77` is a real floor claim (PEP 639 license expressions, which
@@ -489,10 +489,10 @@ mistaken for tidiness.
 
 ### 6.3 Packaging metadata is exercised, not just written
 
-`.github/workflows/ci.yml:43` installs the package itself (`pip install -e . --no-deps`) so
+`.github/workflows/validate.yml` installs the package itself (`pip install -e . --no-deps`) so
 that the entry point and PEP 621/639 metadata are exercised rather than assumed **[V]**,
 and the `install-smoke` job builds a wheel and installs it with **full** dependency
-resolution on both ubuntu and windows (`ci.yml:48-86`) **[V]**. Real resolution failures
+resolution on both ubuntu and windows (`.github/workflows/validate.yml`) **[V]**. Real resolution failures
 show up there, not in the mocked unit job.
 
 ---

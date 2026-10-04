@@ -1,0 +1,22 @@
+# Deterministic hosted acceptance; deliberate fresh resolution lives in drift.yml.
+# llmcompressor's published Requires-Dist bounds the compatible runtime quartet.
+torch==2.11.0
+transformers==5.10.1
+llmcompressor==0.12.0
+compressed-tensors==0.17.1
+accelerate==1.13.0
+datasets==5.0.0
+huggingface-hub==1.31.0
+inspect-ai==0.3.269
+gguf==0.19.0
+pytest==9.0.3
+pytest-cov==7.1.0
+coverage==7.14.0
+hypothesis==6.152.5
+ruff==0.16.2
+scipy==1.15.3; python_version < '3.14'
+scipy==1.17.1; python_version >= '3.14'
+build==1.6.1
+twine==7.0.0
+pip-audit==2.10.1
+mypy==1.20.2

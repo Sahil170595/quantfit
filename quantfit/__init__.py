@@ -1,5 +1,7 @@
 """quantfit — quantize an LLM if it fits your GPU, and check it still refuses what it should."""
 
+from typing import Any
+
 from quantfit.spec import DEFAULT_SPEC, QuantSpec
 
 __version__ = "0.15.0"
@@ -29,7 +31,7 @@ _LAZY = {
 __all__ = ["DEFAULT_SPEC", "QuantSpec", "__version__", *sorted(_LAZY)]  # noqa: PLE0604 — _LAZY keys are str literals
 
 
-def __getattr__(name: str):
+def __getattr__(name: str) -> Any:
     if name in _LAZY:
         import importlib
 
