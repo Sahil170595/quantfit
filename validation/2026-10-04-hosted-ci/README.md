@@ -26,6 +26,9 @@ weights and the published group-128 W8A16 scheme rejects non-divisible dimension
 No bypass or weakened recipe was introduced. The final CT qualification model is pinned
 Qwen2.5-0.5B-Instruct, whose 896 columns support the published RTN W4A16 recipe. This
 change of acceptance model is explicit; SmolLM2 remains the GGUF qualification model.
+The Qwen recipe then initialized successfully on local CPU but upstream
+compressed-tensors 0.17.1 called `os.sysconf`, unavailable on Windows. CPU backend
+qualification therefore runs on hosted Linux; no Windows platform shim was added.
 
 What this local record does not establish: hosted Linux/Windows acceptance, release
 publication, a safety sensitivity control, judge calibration, GPU/backend kernel

@@ -73,7 +73,7 @@ except ImportError:  # pragma: no cover
 
 _ROOT = Path(__file__).resolve().parent.parent
 _PYPROJECT = _ROOT / "pyproject.toml"
-_CI = _ROOT / ".github" / "workflows" / "ci.yml"
+_CI = _ROOT / ".github" / "workflows" / "validate.yml"
 _CANARY = _ROOT / ".github" / "workflows" / "canary.yml"
 _PKG = _ROOT / "quantfit"
 
@@ -770,7 +770,7 @@ def test_build_backend_exemptions_rest_on_a_wheel_build_in_ci():
     The class argues "it never reaches a user's runtime environment, and a break fails the
     wheel build first". The second half is the load-bearing one and it is false the moment
     nothing builds a wheel, so it is read out of the workflows rather than assumed. Both
-    surfaces are asserted because they fail at different times: `ci.yml`'s `install-smoke`
+    surfaces are asserted because they fail at different times: `validate.yml`'s distribution job
     is per-push, `canary.yml`'s `quickstart-install` is weekly against a re-resolved index.
     """
     if not [n for n, ex in _EXEMPTIONS.items() if ex.kind == "BUILD_BACKEND"]:
