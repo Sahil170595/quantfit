@@ -13,7 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## Unreleased
+## 0.15.1
+
+A patch releasing the hosted CI and security compatibility changes in #112. The
+measurement definitions, model/corpus revision pins, and CLI exit-code contract
+are unchanged.
 
 - Required hosted CI tests built wheel/sdist outside the checkout on Linux/Windows,
   CPU numerical/property/mutation checks and branch coverage, consumer action exit
@@ -22,6 +26,15 @@
   The compressor cap permits 0.14 for patched Torch/Accelerate/Pillow under the dated
   CPU-scoped security exception in `docs/dependency-policy.md` §5. Validation and its
   limits are in `validation/2026-10-04-hosted-ci/`; GPU AWQ/GPTQ remains unqualified.
+- The reference consumer action defaults to `>=0.15.1,<0.16`; its documentation
+  pins the action and instrument at 0.15.1.
+
+**Not delivered:** no GPU AWQ/GPTQ/FP8 qualification, safety sensitivity control,
+judge calibration study, cross-hardware tolerance result, QSR v1 freeze, or
+third-party reproduction is claimed. CPU backend lifecycle checks establish
+serialization, reload, and inference for the pinned small models only. The
+qualification scope is in `docs/hosted-ci.md` and the dated dependency exception
+in `docs/dependency-policy.md` §5.
 
 ## 0.15.0
 
