@@ -27,10 +27,14 @@ jobs:
       - id: identity
         env:
           TAG: ${{ github.event.release.tag_name || inputs.release-tag }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([a-zA-Z0-9.-]+)?$ ]] || { echo '::error::a version tag is required on every publishing path'; exit 1; }
+          [ "$REF_TYPE" = tag ] && [ "$REF_NAME" = "$TAG" ] || { echo '::error::dispatch this workflow from the same release tag, not a branch'; exit 1; }
           sha=$(git rev-parse "refs/tags/$TAG^{commit}")
+          git merge-base --is-ancestor "$sha" origin/main || { echo '::error::release candidate must already be merged into main'; exit 1; }
           git checkout --detach "$sha"
           python - "$TAG" <<'PY'
           import pathlib, sys, tomllib
@@ -55,11 +59,17 @@ jobs:
       name: pypi
       url: https://pypi.org/project/quantfit/
     permissions:
+      contents: read
+      attestations: write
       id-token: write
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: candidate-dist
           path: dist
+      - name: Attest the exact validated distribution bytes
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+        with:
+          subject-path: dist/*
       - name: Publish the exact tested candidate files using Trusted Publishing
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1

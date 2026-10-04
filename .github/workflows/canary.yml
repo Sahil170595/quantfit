@@ -14,9 +14,9 @@ name: canary
 #                         means the harness or the judge is broken — not that a model
 #                         regressed. It is a HARNESS test, never a noise floor, and a
 #                         zero result says nothing about judge accuracy.
-#   quickstart-install  — does `pip install` of the built wheel still resolve and run,
-#                         on a clean venv, on both supported OSes? This is the job that
-#                         catches upstream churn in a week with no commits.
+#   quickstart-install  — does the built wheel run in a clean locked full-runtime
+#                         venv on both supported OSes? Fresh dependency resolution
+#                         belongs to the independent daily drift workflow.
 #
 # WHAT THIS JOB IS NOT: ROADMAP 0.7's gate criterion "an injected catastrophic
 # regression is caught on the scheduled CPU job" needs a deliberately doctored model
@@ -102,39 +102,30 @@ jobs:
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
 
-      - name: Install quantfit (CPU, verify-safety path only)
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.23"
+          enable-cache: false
+      - name: Install the locked CPU runtime
         run: |
           set -euo pipefail
-          python -m pip install --upgrade pip
-          # CPU-only torch: the default PyPI wheel drags ~2.5 GB of nvidia-* wheels onto
-          # a runner with no GPU. Deliberately UNPINNED within pyproject's >=2.4 floor —
-          # catching upstream churn is this job's entire purpose.
-          pip install torch --index-url https://download.pytorch.org/whl/cpu
-          # --no-deps + the five runtime deps the verify-safety path actually needs. The
-          # quantize side (llmcompressor) is never touched by this job; the full
-          # dependency resolution is the quickstart-install job's problem, and testing it
-          # twice would double the weekly cost for no extra signal.
-          #
-          # accelerate is the fifth, and its absence is what broke the first scheduled
-          # run (2026-08-10, run 31368745628). It is not imported by quantfit at all —
-          # `_generate_completions` passes `device_map=` to `from_pretrained`, and
-          # transformers >=5 refuses that outright without accelerate installed. A dep
-          # reached only through a keyword argument is exactly the kind --no-deps drops
-          # silently, so the floor here tracks pyproject's `accelerate>=1.0` rather than
-          # being chosen independently.
-          pip install -e . --no-deps
-          pip install "transformers>=4.56" "huggingface_hub>=0.25" "datasets>=3.0" "psutil>=5.9" "accelerate>=1.0"
-          python -c "import torch, transformers; print('torch', torch.__version__, 'transformers', transformers.__version__)"
+          uv sync --directory tools/ci --locked --no-default-groups --group runtime --group tooling --python python
+          echo "$GITHUB_WORKSPACE/tools/ci/.venv/bin" >> "$GITHUB_PATH"
+      - name: Install candidate and record runtime
+        run: |
+          python -m pip install -e . --no-deps --no-build-isolation
+          python -m pip check
+          python -c "import torch, transformers, datasets, llmcompressor; print('torch', torch.__version__, 'transformers', transformers.__version__, 'datasets', datasets.__version__, 'llmcompressor', llmcompressor.__version__)"
           python -c "import quantfit; print('quantfit', quantfit.__version__)"
-          # No HF cache restore, on purpose: the canary must exercise a COLD download of
-          # the pinned judge revision and pinned probe revision. A warm cache would hide
-          # exactly the failure this job exists to catch (a moved or deleted pin).
+          # No HF cache restore: cold downloads exercise pinned judge/probe availability.
 
       - name: Determinism canary — same model on both arms
         run: |
@@ -378,7 +369,7 @@ jobs:
             canary/gate-drift.json
             canary/gate.json
             !canary/*.baseline-cache.json
-          retention-days: 30
+          retention-days: 3
           if-no-files-found: warn
 
   quickstart-install:
@@ -395,30 +386,40 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
-          # No pip cache here: a cached wheel set defeats the point of a weekly install
-          # canary, which is to re-resolve dependencies against the current index.
 
-      - name: Build wheel
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.23"
+          enable-cache: false
+      - name: Install locked build tooling
         shell: bash
         run: |
-          set -euo pipefail
-          pip install build
-          python -m build --wheel
-
-      - name: Install the wheel into a clean venv (full dependency resolution)
+          uv sync --directory tools/ci --locked --no-default-groups --group tooling --python python
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path('tools/ci/.venv').resolve()
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
+      - name: Build wheel with locked tooling
         shell: bash
+        run: python -m build --wheel --no-isolation
+      - name: Install wheel into a clean locked full-runtime venv
+        shell: bash
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.canary-venv
         run: |
           set -euo pipefail
-          python -m venv .canary-venv
-          # Real resolution, no --no-deps, no editable install: this is the README's
-          # `pip install quantfit` path with the local wheel standing in for PyPI.
-          ./.canary-venv/${{ matrix.venv_bin }}/python -m pip install --upgrade pip
-          ./.canary-venv/${{ matrix.venv_bin }}/pip install dist/*.whl
+          uv sync --directory tools/ci --locked --no-default-groups --group runtime --group tooling --python python
+          ./.canary-venv/${{ matrix.venv_bin }}/python -m pip install --no-deps --no-build-isolation dist/*.whl
+          ./.canary-venv/${{ matrix.venv_bin }}/python -m pip check
 
       - name: CLI smoke
         shell: bash

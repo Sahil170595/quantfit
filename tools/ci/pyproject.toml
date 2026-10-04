@@ -1,0 +1,36 @@
+[project]
+name = "quantfit-hosted-validation"
+version = "0.0.0"
+requires-python = ">=3.10,<3.15"
+
+[dependency-groups]
+unit = [
+  "pytest==9.0.3", "hypothesis==6.152.5", "gguf==0.19.0", "inspect-ai==0.3.269",
+  "huggingface-hub==1.31.0", "psutil==7.2.2", "tomli==2.4.0",
+  "scipy==1.15.3; python_version < '3.14'", "scipy==1.17.1; python_version >= '3.14'",
+]
+numerical = [{ include-group = "unit" }, "torch==2.13.0", "pytest-cov==7.1.0", "coverage==7.14.0"]
+runtime = [
+  "torch==2.13.0", "transformers==5.14.1", "llmcompressor==0.13.0",
+  "compressed-tensors==0.18.0", "accelerate==1.14.0", "datasets==5.0.1",
+  "huggingface-hub==1.31.0", "psutil==7.2.2", "gguf==0.19.0", "sentencepiece==0.2.1",
+]
+tooling = [
+  "ruff==0.16.2", "mypy==1.20.2", "build==1.6.1", "twine==7.0.0", "pip-audit==2.10.1",
+  "setuptools==84.0.0", "wheel==0.48.0",
+  "pip==26.2.1",
+]
+
+[tool.uv]
+package = false
+required-version = "==0.12.23"
+default-groups = []
+environments = ["sys_platform == 'linux'", "sys_platform == 'win32'"]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

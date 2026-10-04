@@ -164,7 +164,7 @@ inputs:
     required: false
     default: ""
   python-version:
-    description: Python for the gate run. Pinned to the same version quantfit's own CI uses.
+    description: Python for the gate run. Empty reuses the caller's configured Python environment.
     required: false
     default: "3.12"
   quantfit-version:
@@ -207,7 +207,7 @@ inputs:
     default: "90"
   hf-token:
     description: >-
-      HF token for a gated/private baseline. Pass `${{ secrets.HF_TOKEN }}` — never a
+      HF token for a gated/private baseline. Pass the caller's HF_TOKEN secret — never a
       literal. It is forwarded as the HF_TOKEN environment variable only, never as an
       argv element (argv is visible in `ps` and in some runner logs).
     required: false
@@ -368,6 +368,7 @@ runs:
         fi
 
     - name: Set up Python ${{ inputs.python-version }}
+      if: inputs.python-version != ''
       # Pinned to the same major quantfit's own CI uses (.github/workflows/ci.yml).
       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
       with:
@@ -380,7 +381,6 @@ runs:
         QF_PATH: ${{ inputs.quantfit-path }}
       run: |
         set -euo pipefail
-        python -m pip install --upgrade pip
         if [ -n "$QF_PATH" ]; then
           echo "installing quantfit from local path: $QF_PATH"
           pip install "$QF_PATH"

@@ -34,3 +34,12 @@ What this local record does not establish: hosted Linux/Windows acceptance, rele
 publication, a safety sensitivity control, judge calibration, GPU/backend kernel
 qualification, large-model scaling or cross-hardware tolerances. Hosted results are
 separate receipts; no completion text, model weights or baseline caches are committed.
+
+The first hosted qualification of compressor 0.12.0 on Linux succeeded, but the new
+dependency audit exposed GHSA-rrmf-rvhw-rf47 (PyPI advisory metadata and GitHub advisory:
+Torch through 2.12.1 affected, fixed in 2.13.0). Compressor 0.12.0 caps Torch at 2.12.0.
+The final baseline therefore uses compressor 0.13.0 / compressed-tensors 0.18.0 / Torch
+2.13.0. The proposed <0.14 cap must pass the hosted CPU backend and preserved canary
+qualification before merge. The complete
+transitive graph and build tooling are locked in tools/ci/uv.lock; source unit tests
+remain separate from installed-artifact and backend acceptance.

@@ -30,4 +30,4 @@ jobs:
           python -m pytest tests -q
       - name: Audit the resolved installed dependency graph
         if: always()
-        run: python -m pip_audit --strict --progress-spinner off
+        run: python tools/ci_dependency_audit.py

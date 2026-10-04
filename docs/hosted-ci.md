@@ -9,9 +9,18 @@ Every PR checks the declared Python versions, required CPU Torch numerical tests
 deterministic generated properties against SciPy, selected mutation failures, branch
 coverage floors, Ruff, strict typing on the spec/engine data contract, docs parity,
 workflow linting, and the installed dependency graph for known vulnerabilities.
-`tools/ci-pins.txt` fixes critical acceptance versions within the package's bounds;
-transitive requirements still resolve, and the scheduled drift lane deliberately
-resolves the supported graph afresh. These pins are not an exhaustive lockfile.
+`tools/ci/uv.lock` fixes the complete validation dependency graph and artifact hashes
+for Python 3.10-3.14 on hosted Linux/Windows. `uv sync --locked` selects unit, numerical,
+runtime, and tooling groups; package builds use the locked build tooling without
+PEP 517 isolation. Artifact installs use `--no-deps --no-build-isolation` into that
+graph, followed by `pip check`. The scheduled drift lane deliberately resolves the
+supported package graph afresh. The validation manifest does not alter PyPI metadata.
+
+The compatible locked runtime uses Torch 2.13.0 and llmcompressor 0.13.0. PyPI's
+GHSA-rrmf-rvhw-rf47 advisory marks Torch through 2.12.1 affected and 2.13.0 patched;
+the previous compressor cap prevented selecting that patch. The compressor cap is
+moved to the next validated minor. CPU Torch's local `+cpu` suffix is normalized to
+its public release version for advisory lookup; Torch is included in the audit.
 
 The candidate wheel and sdist are built once. Linux and Windows independently install
 each candidate with full dependencies and run CLI/report/gate/JUnit/statistical behavior
@@ -36,9 +45,11 @@ same-model determinism canary remains independent. Neither set is a new calibrat
 study or a passing sensitivity control; a null remains "the detector did not fire".
 
 Publishing requires an existing version tag on both release-event and manual paths.
-The tag's exact commit enters candidate validation with backend and judge qualification
+The caller must run from that same tag, already an ancestor of main. Its exact commit
+enters candidate validation with backend and judge qualification
 enabled. Publication consumes the exact distributions accepted in that same run rather
-than rebuilding them. PyPI Trusted Publishing remains the existing final step; this CI
+than rebuilding them. GitHub provenance attests those same bytes before PyPI Trusted
+Publishing, whose PyPI attestations remain enabled. This CI
 change does not publish a release. Candidate artifacts retain three days, fixture action
 evidence one day. Logs and job summaries carry routine checks and dependency findings.
 
