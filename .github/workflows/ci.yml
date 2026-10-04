@@ -7,11 +7,6 @@ on:
   schedule:
     - cron: '37 7 * * *'
   workflow_dispatch:
-    inputs:
-      qualify:
-        description: Run pinned public-model CPU backend and judge qualification
-        type: boolean
-        default: true
 permissions:
   contents: read
 concurrency:
@@ -21,9 +16,9 @@ jobs:
   validation:
     uses: ./.github/workflows/validate.yml
     with:
-      qualify: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.qualify) }}
+      qualify: true
   drift:
-    if: github.event_name == 'workflow_dispatch' && inputs.qualify
+    if: github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/drift.yml
   required:
     name: CI required
@@ -35,7 +30,7 @@ jobs:
       - env:
           RESULT: ${{ needs.validation.result }}
           DRIFT: ${{ needs.drift.result }}
-          EXPECT_DRIFT: ${{ github.event_name == 'workflow_dispatch' && inputs.qualify }}
+          EXPECT_DRIFT: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           test "$RESULT" = success
           if [ "$EXPECT_DRIFT" = true ]; then test "$DRIFT" = success; else test "$DRIFT" = skipped; fi

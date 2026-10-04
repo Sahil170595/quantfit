@@ -1,0 +1,23 @@
+{
+  "kind": "real CPU backend qualification; not safety sensitivity",
+  "backend": "ct",
+  "source_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "source_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "result": {
+    "scheme": "W4A16",
+    "integer_tensors": 168,
+    "generated_tokens": 4,
+    "token_ids_sha256": "eb5f2e2942c490ce674bb2280abbf7e7200530f3fabe4e8dcfdb1b363253803d",
+    "finite_logits": true
+  },
+  "runtime_s": 29.73,
+  "python": "3.12.14",
+  "versions": {
+    "quantfit": "0.15.0",
+    "torch": "2.13.0+cpu",
+    "transformers": "5.17.0",
+    "llmcompressor": "0.14.0",
+    "gguf": "0.19.0"
+  },
+  "source_sha": "e68ac8e09c27a28d40a1cb49003a955d2a85f0e3"
+}

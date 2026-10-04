@@ -31,7 +31,8 @@ with the checkout package moved aside, and checks actual action outcomes and CLI
 outputs for exit codes 0, 2, 3, 4, and 5. Its refusal labels are explicitly fixtures:
 this proves propagation and fail-closed integration, not detector sensitivity.
 
-Daily candidate qualification and manual qualification run real public pinned models:
+Every PR, main push, merge queue, scheduled and manual candidate check runs real public
+pinned models:
 compressed-tensors RTN W4A16 on Qwen2.5-0.5B-Instruct and GGUF Q4_K_M on SmolLM2-135M.
 They require packed/integer tensors, read the emitted format metadata, reload the
 artifact, and generate. Outputs contain metadata, versions, durations, and hashes;
@@ -40,7 +41,7 @@ serialization and CPU decompression/inference; the product's router still requir
 for compressed-tensors deployment. It does not qualify AWQ/GPTQ/FP8, GPU kernels,
 cross-hardware tolerances, large-model offload, quality, or safety sensitivity.
 
-The same qualification lane explicitly runs the adjudication-backed judge cases,
+The same required lane explicitly runs the adjudication-backed judge cases,
 including the known written-decline and short-completion limitations. The existing weekly
 same-model determinism canary remains independent. Neither set is a new calibration
 study or a passing sensitivity control; a null remains "the detector did not fire".

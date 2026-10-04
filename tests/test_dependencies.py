@@ -236,13 +236,13 @@ _EXEMPTIONS: dict[str, _Exemption] = {
     "transformers": _Exemption(
         kind="PARENT_BOUNDED",
         reason=(
-            "llmcompressor is a hard dependency and is capped (<0.14), and it constrains transformers tightly "
+            "llmcompressor is a hard dependency and is capped (<0.15), and it constrains transformers tightly "
             "at BOTH ends from its own metadata. An independent quantfit cap would not add safety; it would "
             "risk being unsatisfiable against llmcompressor's own upper pin, which is the harder failure to "
             "diagnose. quantfit's transformers surface is the Auto* from_pretrained classes plus __version__. "
             "The churn that has bitten this project (torch_dtype -> dtype at 4.56) is recorded as the FLOOR in "
             "pyproject — but that floor is INERT wherever this exemption's own argument applies: llmcompressor "
-            "requires transformers>=5.9.0, so on any default install the parent's floor is the binding one and "
+            "requires transformers>=5.15.0, so on any default install the parent's floor is the binding one and "
             "quantfit's >=4.56 can never be reached. It binds only on the two --no-deps paths where llmcompressor "
             "is absent (ci.yml's unit job, canary.yml's determinism job, which restates it by hand). Stated here "
             "rather than implied, and pinned by test_floors_that_cannot_bind_are_recorded_not_discovered."
@@ -317,7 +317,7 @@ _EXEMPTIONS: dict[str, _Exemption] = {
             "environment and it is never installed alongside quantfit at runtime, so a break cannot reach a "
             "user who already has a wheel. It also cannot rot unnoticed, which is the actual premise: this "
             "repo builds a wheel from the same pyproject on every push and on the weekly canary, on both ubuntu "
-            "and windows, so a setuptools release that breaks the build fails install-smoke and "
+            "and windows, so a setuptools release that breaks the build fails distribution acceptance and "
             "quickstart-install first — asserted by test_build_backend_exemptions_rest_on_a_wheel_build_in_ci. "
             "The >=77 floor is a real claim (PEP 639 license expressions, which this project's metadata uses); "
             "the open upper end says only that no known setuptools release breaks this build."
@@ -484,7 +484,7 @@ def test_parent_bounded_premises_hold_against_installed_metadata():
     Runs over every entry that names a chain (see the sibling root test for why that is
     wider than PARENT_BOUNDED). Skips where the parent is not installed — CI's unit-test job
     installs the package with `--no-deps` (`.github/workflows/ci.yml`), so llmcompressor is
-    absent there. This runs on any full-dependency environment (a dev box, the install-smoke
+    absent there. This runs on any full-dependency environment (a dev box, the installed-artifact
     image) and is what would catch a future llmcompressor minor that drops its
     transformers/torch caps.
     """
@@ -529,7 +529,7 @@ def test_parent_bounded_premises_hold_against_installed_metadata():
 # to be deleted on purpose. That is the intended way out.
 _INERT_FLOORS: dict[str, str] = {
     "torch": ">=2.4",  # llmcompressor requires torch>=2.10.0
-    "transformers": ">=4.56",  # llmcompressor requires transformers>=5.9.0
+    "transformers": ">=4.56",  # llmcompressor requires transformers>=5.15.0
     "datasets": ">=3.0",  # llmcompressor requires datasets>=4.8.4
     "accelerate": ">=1.0",  # llmcompressor requires accelerate>=1.6.0
     "huggingface-hub": ">=0.25",  # transformers requires huggingface-hub>=1.5.0

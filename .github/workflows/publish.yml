@@ -39,6 +39,7 @@ jobs:
             echo '::error::dispatch this workflow from the same release tag, not a branch'; exit 1
           fi
           sha=$(git rev-parse "refs/tags/$TAG^{commit}")
+          [ "$sha" = "$GITHUB_SHA" ] || { echo '::error::caller SHA differs from the release candidate'; exit 1; }
           git merge-base --is-ancestor "$sha" origin/main || { echo '::error::release candidate must already be merged into main'; exit 1; }
           git checkout --detach "$sha"
           python - "$TAG" <<'PY'
@@ -53,7 +54,6 @@ jobs:
     needs: identity
     uses: ./.github/workflows/validate.yml
     with:
-      ref: ${{ needs.identity.outputs.sha }}
       qualify: true
   publish:
     name: Publish validated distributions to PyPI

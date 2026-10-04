@@ -150,7 +150,7 @@ now carries the resolution chain `llmcompressor → torch`, and both premise tes
 (`test_parent_bounded_exemptions_root_in_a_dependency_quantfit_itself_caps` and
 `test_parent_bounded_premises_hold_against_installed_metadata`) run over **every** entry that
 names a chain, not only the `PARENT_BOUNDED` ones **[V]**. The sub-claim is scoped: it holds
-only where `llmcompressor` is resolved, which the two `--no-deps` paths in §3.2 are not.
+where `llmcompressor` is installed; the lighter source roles in §3.2 omit it.
 
 The surface quantfit actually uses is narrow and long-stable: `.to(device)`, dtype
 introspection, and `torch.cuda` queries **[V]**. Unlike psutil's (§3.3), that surface claim
@@ -274,8 +274,9 @@ and must not be imported by any module under `quantfit/`.
 because it was **missing**: two unbounded requirements that no test read, that no section
 of this document mentioned, and that the §3 count did not include. "It is only the build"
 is a reason for a different exemption *class*, not a reason to sit outside the policy —
-`[build-system].requires` is resolved against a live index by the PEP 517 frontend on every
-sdist install and every `python -m build`.
+`[build-system].requires` is normally resolved by the PEP 517 frontend on an sdist
+install or build. Hosted baseline validation disables isolation and uses the locked
+build requirements; user installs and the deliberate drift lane still resolve live.
 
 The argument has two halves and only the second is load-bearing:
 

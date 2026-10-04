@@ -20,9 +20,13 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.12'
+      - name: Isolate live resolution from runner image packages
+        run: |
+          python -m venv "$RUNNER_TEMP/quantfit-drift"
+          echo "$RUNNER_TEMP/quantfit-drift/bin" >> "$GITHUB_PATH"
       - name: Deliberately resolve supported dependencies afresh
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools wheel
           python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
           python -m pip install '.[dev,inspect]' pytest-cov hypothesis 'pip-audit==2.10.1'
           python -m pip check

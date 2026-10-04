@@ -42,8 +42,33 @@ Compressor 0.13.0 then passed hosted RTN/GGUF CPU lifecycle and the preserved ca
 (run 37196951699, including datasets 5.0.1), but its audit exposed affected Accelerate
 1.14.0 and Pillow 12.2.0. Compressor 0.13 caps Accelerate at 1.14.0. The final proposed
 baseline therefore uses compressor 0.14.0 / compressed-tensors 0.19.0 / Torch 2.13.0,
-Accelerate 1.15.0 and Pillow 12.3.0. The <0.15 cap must pass the hosted CPU backend and
-preserved canary qualification before merge; the dated security exception is explicit
+Accelerate 1.15.0 and Pillow 12.3.0. The <0.15 cap passed the hosted CPU backend and
+preserved canary qualification on candidate e68ac8e09c27a28d40a1cb49003a955d2a85f0e3; the dated security exception is explicit
 in docs/dependency-policy.md §5. The complete
 transitive graph and build tooling are locked in tools/ci/uv.lock; source unit tests
 remain separate from installed-artifact and backend acceptance.
+
+Hosted patched-runtime receipts: `hosted/ct.json`, `hosted/gguf.json`, and
+`hosted/canary/{drift,gate}.json`. CI run
+https://github.com/Sahil170595/quantfit/actions/runs/37197264106 passed every reusable
+candidate prerequisite, including all five action outcomes, all four installed artifacts,
+judge cases and all declared Python versions. Required numerical tests passed:
+1,404 passed / 5 skipped / 6 judge-deselected; branches 89.15%, combined 90.81%,
+MDE 100%, gate 93.48%, report 91.67%; all three selected mutations killed. The exact
+runtime + tooling graph had zero known vulnerability findings. This run's outer
+aggregate correctly failed when live drift found vulnerable ambient runner setuptools
+78.1.0; the final drift workflow uses a clean external venv and upgrades its live tooling.
+
+Canary run https://github.com/Sahil170595/quantfit/actions/runs/37197266074 passed
+both OS wheel installs, cold pinned judge/probe/model downloads with datasets 5.0.1,
+40 probes on identical arms, zero flips, byte-identical drift blocks across two replicates,
+and pre-run resolution refusal. These two replicates do not meet the three-replicate
+protocol count and are a smoke check. Counts are independently checked from the schema-v2
+report and job log; model and corpus pins match the acceptance script and QSR pins.
+No raw completion/prompt text, caches, model weights or package binaries are committed.
+
+Final workflow review removed generic caller-supplied checkout refs: the reusable
+workflow inherits the immutable caller commit. Publishing requires tag identity,
+main ancestry and resolved tag SHA equal to the caller SHA. Ordinary PR/main/merge-queue
+checks now require both real CPU backends and judge tests, alongside the fast parallel
+source checks. Final candidate run URLs remain distinct from these dated receipts.
