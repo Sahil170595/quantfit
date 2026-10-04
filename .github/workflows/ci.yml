@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
   schedule:
     - cron: '37 7 * * *'
   workflow_dispatch:
@@ -21,13 +22,20 @@ jobs:
     uses: ./.github/workflows/validate.yml
     with:
       qualify: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.qualify) }}
+  drift:
+    if: github.event_name == 'workflow_dispatch' && inputs.qualify
+    uses: ./.github/workflows/drift.yml
   required:
     name: CI required
     if: always()
-    needs: validation
+    needs: [validation, drift]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - env:
           RESULT: ${{ needs.validation.result }}
-        run: test "$RESULT" = success
+          DRIFT: ${{ needs.drift.result }}
+          EXPECT_DRIFT: ${{ github.event_name == 'workflow_dispatch' && inputs.qualify }}
+        run: |
+          test "$RESULT" = success
+          if [ "$EXPECT_DRIFT" = true ]; then test "$DRIFT" = success; else test "$DRIFT" = skipped; fi

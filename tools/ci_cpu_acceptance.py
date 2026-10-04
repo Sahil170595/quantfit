@@ -12,6 +12,7 @@ import importlib.metadata
 import json
 import os
 import platform
+import subprocess
 import tempfile
 import time
 from pathlib import Path
@@ -110,7 +111,13 @@ def main() -> None:
         "versions": {
             p: importlib.metadata.version(p) for p in ("quantfit", "torch", "transformers", "llmcompressor", "gguf")
         },
-        "source_sha": os.environ.get("GITHUB_SHA"),
+        "source_sha": subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parents[1],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip(),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
