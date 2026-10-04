@@ -4,7 +4,7 @@ from typing import Any
 
 from quantfit.spec import DEFAULT_SPEC, QuantSpec
 
-__version__ = "0.15.0"
+__version__ = "0.15.1"
 
 # Heavy surfaces are re-exported lazily (PEP 562) so `import quantfit` stays
 # dependency-light: nothing here drags torch, transformers, or huggingface_hub
