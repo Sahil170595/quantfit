@@ -18,6 +18,13 @@ venv/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.coverage*
+coverage.json
+.hypothesis/
+.ci-backend-cache/
+ci-constraints.txt
+qualification/
+cases/
 
 # Artifacts that carry completion text (docs/data-handling-completions.md: local-only,
 # never committed). Backstops the doc-mandated filename conventions.

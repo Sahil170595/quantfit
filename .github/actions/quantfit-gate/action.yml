@@ -164,7 +164,7 @@ inputs:
     required: false
     default: ""
   python-version:
-    description: Python for the gate run. Pinned to the same version quantfit's own CI uses.
+    description: Python for the gate run. Empty reuses the caller's configured Python environment.
     required: false
     default: "3.12"
   quantfit-version:
@@ -184,6 +184,10 @@ inputs:
     description: Where to write the schema-v2 drift report (JSON).
     required: false
     default: quantfit-gate/drift.json
+  junit:
+    description: Where to write aggregate-only JUnit output, including no-answer states.
+    required: false
+    default: quantfit-gate/junit.xml
   gate-out:
     description: >-
       Where to write the gate decision artifact (JSON, `schema_version` 1) — passed as
@@ -203,7 +207,7 @@ inputs:
     default: "90"
   hf-token:
     description: >-
-      HF token for a gated/private baseline. Pass `${{ secrets.HF_TOKEN }}` — never a
+      HF token for a gated/private baseline. Pass the caller's HF_TOKEN secret — never a
       literal. It is forwarded as the HF_TOKEN environment variable only, never as an
       argv element (argv is visible in `ps` and in some runner logs).
     required: false
@@ -364,8 +368,9 @@ runs:
         fi
 
     - name: Set up Python ${{ inputs.python-version }}
+      if: inputs.python-version != ''
       # Pinned to the same major quantfit's own CI uses (.github/workflows/ci.yml).
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
       with:
         python-version: ${{ inputs.python-version }}
 
@@ -376,7 +381,6 @@ runs:
         QF_PATH: ${{ inputs.quantfit-path }}
       run: |
         set -euo pipefail
-        python -m pip install --upgrade pip
         if [ -n "$QF_PATH" ]; then
           echo "installing quantfit from local path: $QF_PATH"
           pip install "$QF_PATH"
@@ -407,7 +411,7 @@ runs:
         # skew between this action and the installed CLI. Bash regex, not a pipe into
         # grep -q: under pipefail the SIGPIPE from grep's early exit reads as a failure.
         missing=()
-        for flag in --baseline --quant --tier --threshold --eps-upper --eps-source --report --out --max-new-tokens; do
+        for flag in --baseline --quant --tier --threshold --eps-upper --eps-source --report --out --max-new-tokens --junit; do
           if [[ ! "$gate_help" =~ (^|[^-])"$flag"([^a-z-]|$) ]]; then missing+=("$flag"); fi
         done
         if [ ${#missing[@]} -gt 0 ]; then
@@ -431,15 +435,16 @@ runs:
         MAX_NEW_TOKENS: ${{ inputs.max-new-tokens }}
         REPORT: ${{ inputs.report }}
         GATE_OUT: ${{ inputs.gate-out }}
+        JUNIT: ${{ inputs.junit }}
         # Token by environment only — never in argv. quantfit reads HF_TOKEN when
         # --token is absent.
         HF_TOKEN: ${{ inputs.hf-token }}
       run: |
         set -euo pipefail
-        mkdir -p "$(dirname "$REPORT")" "$(dirname "$GATE_OUT")"
+        mkdir -p "$(dirname "$REPORT")" "$(dirname "$GATE_OUT")" "$(dirname "$JUNIT")"
         # `--out` is the gate DECISION artifact (gate.py:run_gate's out_path); `--report`
         # is the schema-v2 drift report verify_safety writes. Two files, two contracts.
-        args=(gate --baseline "$BASELINE" --quant "$QUANT" --report "$REPORT" --out "$GATE_OUT")
+        args=(gate --baseline "$BASELINE" --quant "$QUANT" --report "$REPORT" --out "$GATE_OUT" --junit "$JUNIT")
         # `if` rather than `[ x ] && args+=(...)`: under `set -e` a trailing false
         # AND-OR list is a foot-gun for whoever edits this next.
         if [ -n "$TIER" ]; then args+=(--tier "$TIER"); fi
@@ -808,12 +813,13 @@ runs:
     - name: Upload gate evidence
       id: upload
       if: always()
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
       with:
         name: ${{ inputs.artifact-name }}
         path: |
           ${{ inputs.report }}
           ${{ inputs.gate-out }}
+          ${{ inputs.junit }}
         retention-days: ${{ inputs.retention-days }}
         # An operational failure leaves one or both files missing; that must not mask the
         # real error with an upload failure on top of it.

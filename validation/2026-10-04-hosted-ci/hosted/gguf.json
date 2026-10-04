@@ -1,0 +1,29 @@
+{
+  "kind": "real CPU backend qualification; not safety sensitivity",
+  "backend": "gguf",
+  "source_model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "source_revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+  "result": {
+    "scheme": "Q4_K_M",
+    "packed_tensors": 211,
+    "artifact_sha256": "ac86b6a471310a25687c809f01fa05fe207a71db840d46e5f7aafd96ecd2ed5c",
+    "inference_sha256": "b59e3eaa28fdefab234fd09068b422ac4784ee9e0c5f21d18c19ea2bc2c847ec",
+    "engine": {
+      "name": "llama.cpp",
+      "binary_sha256": "a7ca52ff7d600e044610876f091b85f6fd272a4f5c99e7477d934c953e83cfa9",
+      "source": "provisioned from pinned release archive b9817 (archive SHA256-verified when provisioned)",
+      "threads": 2,
+      "device": "cpu"
+    }
+  },
+  "runtime_s": 29.573,
+  "python": "3.12.14",
+  "versions": {
+    "quantfit": "0.15.0",
+    "torch": "2.13.0+cpu",
+    "transformers": "5.17.0",
+    "llmcompressor": "0.14.0",
+    "gguf": "0.19.0"
+  },
+  "source_sha": "e68ac8e09c27a28d40a1cb49003a955d2a85f0e3"
+}

@@ -4,7 +4,7 @@
 `tests/test_dependencies.py`. Where the two disagree, the test is the one that runs and
 this file is the bug. The reverse also holds and is stated so it is not mistaken for
 completeness: that file contains checks this document has no section for (requires-python
-vs classifiers vs the CI matrix, extras named in prose, workflow re-declarations). It is
+vs classifiers vs the CI matrix, extras named in prose). It is
 this policy in prose, not a line-by-line mirror of the suite.
 
 The bound the repo did not satisfy when this document was first written — an uncapped
@@ -50,8 +50,8 @@ path on a toy model; it does not run the unit suite, where the tripwires live
 (`test_every_generate_config_field_is_classified`,
 `test_a_major_boundary_crossed_under_an_exemption_is_recorded`). inspect_ai 0.3.264 shipped
 on 2026-09-16 and broke that suite; the canary was green on 2026-09-21; nothing noticed until
-a PR ran CI on 2026-09-26. Since then `ci.yml` also runs **daily on a schedule**, so a range
-that resolves to something new trips its guard the day it resolves, not on the next push.
+a PR ran CI on 2026-09-26. The independent `drift.yml` now runs **daily on a schedule**, so a range that resolves
+to something new trips its guard without a push; baseline validation stays locked.
 
 Read literally that is "cap everything", which is wrong for at least one dependency
 (§3.1). The rule this project actually enforces, and the one `tests/test_dependencies.py`
@@ -85,35 +85,27 @@ Read from `pyproject.toml` **[V]**:
 
 | requirement | group | cap | why this one churns |
 |---|---|---|---|
-| `llmcompressor>=0.5,<0.13` | hard | `<0.13` | the modifier/oneshot API churns across minors; `backends/compressed_tensors.py` imports `AWQModifier`, `GPTQModifier`, `QuantizationModifier`, `SmoothQuantModifier` and `oneshot` by path **[V]** |
+| `llmcompressor>=0.5,<0.15` | hard | `<0.15` | the modifier/oneshot API churns across minors; `backends/compressed_tensors.py` imports `AWQModifier`, `GPTQModifier`, `QuantizationModifier`, `SmoothQuantModifier` and `oneshot` by path **[V]** |
 | `inspect-ai>=0.3.252,<0.4` | `inspect` | `<0.4` | `quantfit/inspect_task.py` depends on `inspect_ai` internals (`SampleScore`/`Score`/`Value`, `inspect_ai.score`, the epoch-reduction behaviour of `Score.value`) and is verified against 0.3.252 **[V]** |
 | `gguf>=0.10,<1.0` | `gguf`, `dev` | `<1.0` | pre-1.0 and tracks llama.cpp; the enums quantfit reads are append-only in practice, so `<1.0` is the honest cap **[V]** |
 | `ruff>=0.16,<0.17` | `dev` | `<0.17` | 0.16.0 shipped new default rules mid-cycle and broke a green branch **[V]** |
 | `gptqmodel>=7.1,<8` | `awq` | `<8` | held for transformers' `AwqQuantizer` internals; see §4, where the cap is closed but the floor is not **[V]** |
 
-**No workflow restates a cap by hand any more, and that is a recent change worth being
-precise about.** `.github/workflows/ci.yml` used to install `"ruff>=0.16,<0.17"` as a
-literal string — one cap, hand-copied, one place to drift. It now derives every bound from
-this file instead: the `Derive dependency caps from pyproject` steps in the `test` and
-`lint` jobs run `tools/ci_constraints.py --out ci-constraints.txt`, and the installs use
-`pip install -c ci-constraints.txt ...` **[V]**. A constraint on a package CI does not
-install is inert, so emitting all of them is maintenance-free
-(`tools/ci_constraints.py`, module docstring) **[V]**.
+**Hosted validation now uses a complete hash lock.** `tools/ci/uv.lock` fixes the
+transitive graph, including build requirements, on Linux and Windows for the advertised
+Python versions. Baseline and release builds disable PEP 517 isolation and install the
+candidate into the locked runtime with `--no-deps --no-build-isolation`; `pip check`
+checks the installed candidate metadata, rather than comparing copied YAML requirements.
+The preserved weekly canary also uses this graph. `.github/workflows/drift.yml` resolves
+fresh dependencies independently and runs the suite plus the vulnerability audit **[V]**.
+`tools/ci_constraints.py` remains a manual subset-install helper, not the baseline lock.
 
-That closes a real hole rather than a cosmetic one: `pip install gguf inspect-ai` ignores
-the `<1.0` and `<0.4` caps entirely, so CI could have green-lit a combination the package
-forbids **[V]**.
-
-**The one hand-written restatement left is not a cap at all.**
-`.github/workflows/canary.yml:113` restates four **floors** with no upper bound
-(`"transformers>=4.56" "huggingface_hub>=0.25" "datasets>=3.0" "psutil>=5.9"`) **[V]** — a
-different claim, and a weaker one; see §3.2 for why four of those floors cannot bind
-anyway. `test_requirements_re_declared_in_workflows_match_pyproject` asserts every
-restatement it can find — cap or floor — still matches `pyproject.toml`, scanning both
-`ci.yml` and `canary.yml` **[V]**. With the ruff string gone, `canary.yml:113` is the only
-thing that test currently has to check, which is worth knowing before someone deletes that
-line too. **[?]** A workflow that installs a version the package does not declare is a
-canary validating something no user gets.
+The compressor cap permits 0.14.0 so the runtime can select patched Torch 2.13.0 and
+Accelerate 1.15.0. Compressor 0.12 restricts Torch to at most 2.12; 0.13 restricts
+Accelerate to the affected 1.14 release. The dated security exception in §5 records
+why the cap changed and limits what was qualified. The hosted CPU backend and canary receipts are
+recorded in `validation/2026-10-04-hosted-ci/`. This change does not establish GPU or
+AWQ/GPTQ qualification. Complete release candidates repeat the hosted CPU checks.
 
 ---
 
@@ -138,7 +130,7 @@ tests do not take the reasons on trust — they check the premise each reason re
 ### 3.1 `BUILD_SELECTED` — a cap would fight the user's build
 
 **`torch>=2.4`.** torch wheels are selected by *index* as much as by version: the canary
-installs from `https://download.pytorch.org/whl/cpu` (`.github/workflows/canary.yml:107`)
+installs from `https://download.pytorch.org/whl/cpu` (`tools/ci/pyproject.toml`)
 **[V]**, and a user with a CUDA or ROCm box installs the wheel matching their driver. An
 upper cap in quantfit's own metadata can refuse that wheel, or silently resolve a user
 down onto a build their hardware does not want — a worse and much harder-to-diagnose
@@ -151,14 +143,14 @@ the literal reading of `ROADMAP.md:10` is wrong, and it is stated here rather th
 ignored.
 
 **The separate parent-bound fact is a sub-claim, and it is now machine-checked.** The upper
-end of a *default* install is closed by the capped `llmcompressor` (`torch<=2.12.0,>=2.10.0`
+end of a *default* install is closed by the capped `llmcompressor` (`torch<=2.14.0,>=2.10.0`
 **[V]**, §3.2). That used to be prose in the exemption's reason with nothing verifying it —
 a claim the class system could not check, sitting inside a `BUILD_SELECTED` entry. The entry
 now carries the resolution chain `llmcompressor → torch`, and both premise tests
 (`test_parent_bounded_exemptions_root_in_a_dependency_quantfit_itself_caps` and
 `test_parent_bounded_premises_hold_against_installed_metadata`) run over **every** entry that
 names a chain, not only the `PARENT_BOUNDED` ones **[V]**. The sub-claim is scoped: it holds
-only where `llmcompressor` is resolved, which the two `--no-deps` paths in §3.2 are not.
+where `llmcompressor` is installed; the lighter source roles in §3.2 omit it.
 
 The surface quantfit actually uses is narrow and long-stable: `.to(device)`, dtype
 introspection, and `torch.cuda` queries **[V]**. Unlike psutil's (§3.3), that surface claim
@@ -167,14 +159,14 @@ is **not** machine-checked, and the exemption says so. **[?]**
 ### 3.2 `PARENT_BOUNDED` — an already-capped dependency does the bounding
 
 `llmcompressor` is a **hard** dependency, so every default `pip install quantfit` resolves
-it, and quantfit caps it at `<0.13`. llmcompressor in turn constrains its own stack at
-**both** ends. Read from the metadata of the installed `llmcompressor==0.12.0` **[V]**:
+it, and quantfit caps it at `<0.15`. llmcompressor in turn constrains its own stack at
+**both** ends. Read from the published dependency metadata of `llmcompressor==0.14.0` **[V]**:
 
 ```
-torch<=2.12.0,>=2.10.0
-transformers<=5.10.1,>=5.9.0
-datasets<=5.0.0,>=4.8.4
-accelerate<=1.13.0,>=1.6.0
+torch<=2.14.0,>=2.10.0
+transformers<=5.17.0,>=5.15.0
+datasets<=5.0.1,>=4.8.4
+accelerate<=1.15.0,>=1.15.0
 ```
 
 Those are `<=` pins on exact versions — considerably tighter than anything quantfit would
@@ -187,7 +179,7 @@ unresolvable install is harder to diagnose than a caught API break.
 | `transformers>=4.56` | `llmcompressor` → `transformers` **[V]** |
 | `datasets>=3.0` | `llmcompressor` → `datasets` **[V]** |
 | `accelerate>=1.0` | `llmcompressor` → `accelerate` **[V]** |
-| `huggingface_hub>=0.25` | `llmcompressor` → `transformers` → `huggingface-hub` (`transformers==5.10.1` declares `huggingface-hub<2.0,>=1.5.0`; `datasets==4.8.5` declares `huggingface-hub<2.0,>=0.25.0`) **[V]** |
+| `huggingface_hub>=0.25` | `llmcompressor` → `transformers` → `huggingface-hub` (`transformers==5.17.0` declares `huggingface-hub<2.0,>=1.5.0`; `datasets==5.0.1` declares `huggingface-hub<2.0,>=0.25.0`) **[V]** |
 
 **The chain is checked, not asserted.** `test_parent_bounded_premises_hold_against_installed_metadata`
 walks each link and re-reads the bound from that package's own metadata. This is not
@@ -197,47 +189,31 @@ decorative: the first draft of the exemption table claimed `llmcompressor` bound
 `test_parent_bounded_exemptions_root_in_a_dependency_quantfit_itself_caps` fails the moment
 `llmcompressor` loses its own cap, because every entry in this class collapses with it.
 
-**The limitation, stated because it is real.** This argument holds on the *full-dependency*
-install path. Two paths in this repo bypass it:
-
-- `.github/workflows/ci.yml:40` installs `pytest huggingface_hub psutil scipy gguf
-  inspect-ai` (now under `-c ci-constraints.txt`, §2) and `.github/workflows/ci.yml:43`
-  then runs `pip install -e . --no-deps` **[V]** — llmcompressor is never resolved, so
-  nothing bounds transformers or huggingface_hub in that job. The constraints file does
-  not change this: a constraint bounds a package that IS installed; it does not install
-  llmcompressor, so the chain still has no root there.
-- `.github/workflows/canary.yml:112-113` does the same for the determinism canary,
-  installing `"transformers>=4.56" "huggingface_hub>=0.25" "datasets>=3.0" "psutil>=5.9"`
-  by hand **[V]**.
-
-Both are deliberate (they exist to stay light), and both mean the PARENT_BOUNDED protection
-does **not** apply there. The canary's `quickstart-install` job is the one that resolves the
-real dependency graph (`canary.yml:311-348`, wheel built then installed into a clean venv)
-**[V]**, and that is the job where a broken resolution would actually surface. **[?]**
-Whether the unit-test job should also run one leg with full dependencies is a maintainer
-decision, not a measurement.
+**Scope of the argument.** Parent bounds hold on the full-dependency install path.
+The source unit and numerical roles intentionally omit the compressor; their versions are
+fixed by the complete CI lock instead. Installed-artifact, consumer-action, dependency
+audit, backend qualification and canary roles use the full locked runtime. `pip check`
+validates that the candidate's published dependency metadata accepts that runtime **[V]**.
+Fresh resolution is exercised independently by the daily drift workflow.
 
 **The floors named above cannot bind, and that is the sharpest limitation in this section.**
 The transformers entry used to argue that the `>=4.56` floor in `pyproject.toml` was "the
 correct instrument" for the `torch_dtype → dtype` break, i.e. the substitute for the cap it
 does not have. It is not an instrument at all on the path this exemption is about:
-`llmcompressor` requires `transformers>=5.9.0`, so on any default install the parent's floor
+`llmcompressor` requires `transformers>=5.15.0`, so on any default install the parent's floor
 is the binding one and quantfit's `>=4.56` is unreachable. The same is true of every floor in
 this class, read from installed metadata **[V]**:
 
 | quantfit declares | the chain already requires | so quantfit's floor is |
 |---|---|---|
 | `torch>=2.4` | `llmcompressor` → `torch>=2.10.0` | inert on a default install |
-| `transformers>=4.56` | `llmcompressor` → `transformers>=5.9.0` | inert |
+| `transformers>=4.56` | `llmcompressor` → `transformers>=5.15.0` | inert |
 | `datasets>=3.0` | `llmcompressor` → `datasets>=4.8.4` | inert |
-| `accelerate>=1.0` | `llmcompressor` → `accelerate>=1.6.0` | inert |
+| `accelerate>=1.0` | `llmcompressor` → `accelerate>=1.15.0` | inert |
 | `huggingface_hub>=0.25` | `llmcompressor` → `transformers` → `huggingface-hub>=1.5.0` | inert |
 
-Where they *do* bind is the two `--no-deps` paths above, where `llmcompressor` is absent —
-and `canary.yml:113` restates four of them by hand for exactly that reason **[V]**. So the
-floors are not useless; they are scoped to the opposite path from the one the
-PARENT_BOUNDED argument covers, and the two must not be quoted as if they reinforced each
-other.
+The lighter source roles do not claim full-runtime acceptance; that proof comes from
+the installed wheel/sdist and backend jobs. Their complete graph is still locked.
 
 `test_floors_that_cannot_bind_are_recorded_not_discovered` computes this table from
 installed metadata and pins it **[V]**. It deliberately does **not** fail on the five above:
@@ -298,8 +274,9 @@ and must not be imported by any module under `quantfit/`.
 because it was **missing**: two unbounded requirements that no test read, that no section
 of this document mentioned, and that the §3 count did not include. "It is only the build"
 is a reason for a different exemption *class*, not a reason to sit outside the policy —
-`[build-system].requires` is resolved against a live index by the PEP 517 frontend on every
-sdist install and every `python -m build`.
+`[build-system].requires` is normally resolved by the PEP 517 frontend on an sdist
+install or build. Hosted baseline validation disables isolation and uses the locked
+build requirements; user installs and the deliberate drift lane still resolve live.
 
 The argument has two halves and only the second is load-bearing:
 
@@ -310,8 +287,8 @@ The argument has two halves and only the second is load-bearing:
   and it is checked rather than assumed:
   `test_build_backend_exemptions_rest_on_a_wheel_build_in_ci` reads both workflows and fails
   if either stops running `python -m build` **[V]**. Both do today —
-  `.github/workflows/ci.yml:63-66` on every push, on ubuntu **and** windows, and
-  `.github/workflows/canary.yml:333-338` weekly against a re-resolved index **[V]**.
+  `.github/workflows/validate.yml` builds on Linux and installs wheel/sdist on Linux
+  **and** Windows. `.github/workflows/canary.yml` builds weekly with locked tooling **[V]**.
 
 `setuptools>=77` is a real floor claim (PEP 639 license expressions, which
 `pyproject.toml:11` uses) **[V]**. `wheel` carries **no specifier of any kind** and
@@ -330,25 +307,23 @@ on a default install.
 
 **Major version boundaries crossed with nothing stopping them.** A cap is the only
 instrument that prevents a major change; these requirements deliberately have none, so what
-actually resolves today is recorded. Read from installed metadata in a full-dependency
-environment **[V]**:
+is recorded. The previous metadata snapshot recorded transformers 5.10.1 and datasets
+4.8.5; the current hosted lock records the following graph **[V]**:
 
 | requirement | declared floor | resolves to | crossed |
 |---|---|---|---|
-| `transformers` | `>=4.56` | 5.10.1 | **4 → 5**, hard dependency |
-| `datasets` | `>=3.0` | 4.8.5 | **3 → 4**, hard dependency |
-| `huggingface_hub` | `>=0.25` | 1.19.0 | **0 → 1**, hard dependency — the largest relative jump here |
+| `transformers` | `>=4.56` | 5.17.0 | **4 → 5**, hard dependency |
+| `datasets` | `>=3.0` | 5.0.1 | **3 → 5**, hard dependency |
+| `huggingface_hub` | `>=0.25` | 1.31.0 | **0 → 1**, hard dependency — the largest relative jump here |
 | `psutil` | `>=5.9` | 7.2.2 | 5 → 7, but the single call site is premise-tested (§3.3) |
 | `pytest` | `>=8.0` | 9.0.3 | 8 → 9, and this one **is** recorded — the absorbed bump is §3.5's evidence |
 
-For the top three: **no cap stopped the crossing, no floor moved, and no validated run on
-the new major is recorded anywhere in this repo.** The PARENT_BOUNDED argument is still
-sound — `llmcompressor` does bound them at both ends — but "bounded" and "validated" are
-different claims, and only the first is true here.
-`test_a_major_boundary_crossed_under_an_exemption_is_recorded` pins this list, so a *new*
-crossing, or a further major under an already-listed name, fails until it is argued **[V]**.
-**[?]** Raising those three floors to the versions that actually resolve is a §5 decision
-that needs a run behind it.
+No direct cap stopped these crossings. The parent bounds still hold; validation is a
+separate claim. The narrow datasets-5 registry update is tied to the pinned probe-corpus
+canary in `validation/2026-10-04-hosted-ci/`, not general datasets compatibility.
+`test_a_major_boundary_crossed_under_an_exemption_is_recorded` pins the observed major
+list; a further crossing fails until its scope is recorded **[V]**. Public floors were
+not raised, and this does not validate every API of those dependencies.
 
 ---
 
@@ -406,9 +381,22 @@ class:
 | `llmcompressor` | one `quantfit quantize` on the compressed-tensors path (AWQ or GPTQ) that completes and produces a loadable artifact, **plus** a `verify-safety` pair over that artifact whose report validates against the schema | anyone with a GPU that fits a ~1.5B pair |
 | `gguf` | the GGUF arm tests, which craft and read real GGUF files (`tests/test_gguf_arm.py`), **plus** one real quantize+verify pair, since the enums are read from file metadata and never from filenames (spec §3.2) **[V]** | CPU-only is sufficient |
 | `inspect-ai` | `tests/test_inspect_task.py:test_inspect_run_reproduces_tabulate` green on the new minor — the runner depends on `inspect_ai` internals, so that parity against `verify._tabulate` is the whole claim (`pyproject.toml:53-59`) **[V]** | CPU-only; CI installs it for exactly this reason |
-| `ruff` | `ruff check quantfit tests tools` and `ruff format --check quantfit tests` green on the new minor, locally, before the cap moves in `pyproject.toml`. **Only there now**: `ci.yml`'s `lint` job installs `ruff` under `-c ci-constraints.txt`, derived from this file (§2), so there is no second copy to move **[V]** | anyone |
+| `ruff` | `ruff check quantfit tests tools` and `ruff format --check quantfit tests` green on the new minor, locally, before the cap moves in `pyproject.toml`. **The hosted tooling role locks it**: update `tools/ci/pyproject.toml` and regenerate `tools/ci/uv.lock` with the cap **[V]** | anyone |
 | `gptqmodel` | one load of a first-party AWQ checkpoint through the transformers path, i.e. the `quantfit[awq]` install actually doing its job. **This is the run the §4 floor is still waiting on** | GPU |
-| `setuptools` (§3.6) | nothing extra: the wheel build in `ci.yml` `install-smoke` and `canary.yml` `quickstart-install` IS the validation, which is why the exemption exists **[V]** | CI |
+| `setuptools` (§3.6) | nothing extra: the wheel/sdist build in `validate.yml` `distribution`, installed-artifact jobs and `canary.yml` `quickstart-install` ARE the validation, which is why the exemption exists **[V]** | CI |
+
+**Dated security exception — 2026-10-04.** The user authorized complete hosted-runner
+CI improvements. Its real installed-graph audit exposed Torch <=2.12.1
+(GHSA-rrmf-rvhw-rf47), Accelerate <=1.14.0 (GHSA-4j2p-28q2-5m79), and Pillow 12.2.0
+advisories. Compressor 0.12 prevents patched Torch and 0.13 prevents patched Accelerate.
+Keeping those caps would retain the affected baseline. The cap therefore permits 0.14
+with a hash-locked Torch 2.13.0 / Accelerate 1.15.0 / Pillow 12.3.0 runtime, conditional
+on the hosted numerical, metadata, audit, real RTN packed-artifact/reload/inference and
+cold corpus/determinism checks. Receipts live in `validation/2026-10-04-hosted-ci/`.
+This exception establishes only the hosted CPU scope; the GPU AWQ/GPTQ + verify-safety
+pair in the normal row remains unverified and is required before claiming that scope.
+No advisory is ignored and no parent constraint is overridden. It does not amend the
+scientific sensitivity-control protocol or claim a safety result.
 
 **Raising a FLOOR needs a run too, and this is the half that is easy to forget.** Every row
 above is written for a cap, but a floor is the same kind of claim pointed the other way: it
@@ -489,11 +477,12 @@ mistaken for tidiness.
 
 ### 6.3 Packaging metadata is exercised, not just written
 
-`.github/workflows/ci.yml:43` installs the package itself (`pip install -e . --no-deps`) so
+`.github/workflows/validate.yml` installs the package itself (`pip install -e . --no-deps`) so
 that the entry point and PEP 621/639 metadata are exercised rather than assumed **[V]**,
-and the `install-smoke` job builds a wheel and installs it with **full** dependency
-resolution on both ubuntu and windows (`ci.yml:48-86`) **[V]**. Real resolution failures
-show up there, not in the mocked unit job.
+and the `distribution` job builds wheel/sdist with locked tooling. The `installed`
+jobs install both artifacts into the complete locked runtime on Linux and Windows, check
+metadata with `pip check`, and run behavioral tests outside the checkout **[V]**. Fresh
+resolution failures surface in the independent daily drift workflow.
 
 ---
 
@@ -509,10 +498,9 @@ two halves the standing rule names:
    harness is not *adding* spurious flips. It also asserts that a gate asked for a threshold
    finer than its own resolution exits **5** (`canary.yml:205`) **[V]**.
 2. **`quickstart-install`** (`canary.yml:311`) **[V]** — builds the wheel and installs it
-   into a clean venv with full dependency resolution (`canary.yml:333-348`) **[V]**, which
-   is the job that would catch a dependency graph that stopped resolving. It deliberately
-   does not cache pip: a cached wheel set defeats the point (`docs/ci-integration.md:628`)
-   **[V]**.
+   into a clean venv with the full locked runtime **[V]**. The daily drift workflow
+   resolves fresh dependencies; the canary checks cold public model/probe downloads
+   and deterministic measurement behavior independently.
 
 **What the canary is not**, stated because it is the claim most likely to be over-read —
 and `docs/ci-integration.md:631-633` says it directly **[V]**: it is **not** a noise floor,
@@ -526,12 +514,9 @@ sensitivity control. `screens/targets-0.5.json` still records
 
 Named so the gaps are visible rather than implied by omission.
 
-- **It is not a lockfile.** `ROADMAP.md:10` says "clean-venv quickstart install from the
-  lockfile" **[V]**; this repo ships **no lockfile** **[V]**. `quickstart-install` installs
-  from the built wheel and resolves live, which tests a *stronger* property (today's index
-  still resolves) but a *different* one (it is not reproducible). **[?]** Whether to add a
-  lockfile for the reference-report path is an open decision; a reproduction claim that
-  depends on resolution drift is weaker than one that does not.
+- **The CI lock is scoped to hosted validation.** `tools/ci/uv.lock` reproduces that
+  dependency graph, including build tooling. It does not select a user's CUDA/ROCm build
+  or certify GPU reference-report environments.
 - **It says nothing about the spec.** QSR v1 is not frozen and cannot be frozen here;
   `spec/qsr-v1-freeze-plan.md` is the blocking ledger **[V]**.
 - **It says nothing about hardware validation.** "Every advertised command
@@ -541,10 +526,9 @@ Named so the gaps are visible rather than implied by omission.
   of which say "the 0.5 screen has not run" in as many words) **[V]**. Nothing in this
   document should be read as evidence for any of them. `docs/validation-matrix.md` is the
   per-command ledger of what has and has not run.
-- **It does not audit transitive dependencies.** The caps here are on direct requirements.
-  A transitive package with a compromised release is not addressed by any mechanism in §6
-  except the llama.cpp binary pin, which is not a Python package at all. **[?]** Hash-pinned
-  installs (`pip install --require-hashes`) would address this and are not shipped.
+- **Advisory and hash checks have limits.** Hosted validation installs hash-locked
+  transitives and audits the actual installed graph. Known-release advisories cannot
+  establish that a vendor binary is uncompromised or detect undisclosed vulnerabilities.
 - **No third-party reproduction, citation or gate adoption exists**, so ROADMAP 0.10's own
   gate is not met and this document does not claim otherwise.
 
@@ -553,9 +537,8 @@ Named so the gaps are visible rather than implied by omission.
 ## 9. Changing a cap, or adding an exemption
 
 **To move a cap:** run the validation named in §5 for that dependency, then change
-`pyproject.toml` — and, if the dependency is restated in a workflow, change that in the
-same commit. `test_requirements_re_declared_in_workflows_match_pyproject` fails if they
-diverge. Record the run in `CHANGELOG.md`; a cap whose move is not recorded is a cap that
+`pyproject.toml` and regenerate the hosted lock in the same commit. Record the run in
+`validation/` and `CHANGELOG.md`; a cap whose move is not recorded is a cap that
 was raised because it was annoying.
 
 **To add an exemption:** add an entry to `tests/test_dependencies.py:_EXEMPTIONS` with a

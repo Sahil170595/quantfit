@@ -1,0 +1,412 @@
+name: Candidate validation
+
+on:
+  workflow_call:
+    inputs:
+      qualify:
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.23'
+          enable-cache: false
+      - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
+        run: |
+          uv sync --directory tools/ci --locked --no-default-groups --group unit --group tooling --python python
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
+      - run: |
+          python -m pip install -e . --no-deps --no-build-isolation
+          python -m pytest tests -q --ignore=tests/test_numerical_properties.py
+
+  numerical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.23'
+          enable-cache: false
+      - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
+        run: |
+          uv sync --directory tools/ci --locked --no-default-groups --group numerical --group tooling --python python
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
+      - run: |
+          python -m pip install -e . --no-deps --no-build-isolation
+          python -c 'import torch; assert not torch.cuda.is_available()'
+          python -m pytest tests -q --cov=quantfit --cov-branch --cov-report=term-missing --cov-report=json:coverage.json
+          python tools/ci_coverage.py coverage.json
+          python tools/ci_mutation.py
+      - name: Coverage summary
+        if: always()
+        run: |
+          if [ -f coverage.json ]; then python tools/ci_coverage.py coverage.json >> "$GITHUB_STEP_SUMMARY"; fi
+
+  distribution:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.23'
+          enable-cache: false
+      - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
+        run: |
+          uv sync --directory tools/ci --locked --no-default-groups --group tooling --python python
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
+      - run: |
+          python -m build --no-isolation
+          python -m twine check dist/*
+          sha256sum dist/*
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: candidate-dist
+          path: dist/*
+          retention-days: 3
+          if-no-files-found: error
+
+  installed:
+    needs: distribution
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        artifact: [wheel, sdist]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.23'
+          enable-cache: false
+      - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
+        run: |
+          uv sync --directory tools/ci --locked --no-default-groups --group runtime --group numerical --group tooling --python python
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: candidate-dist
+          path: dist
+      - run: |
+          if [ "$ARTIFACT" = wheel ]; then python -m pip install --no-deps --no-build-isolation dist/*.whl; else python -m pip install --no-deps --no-build-isolation dist/*.tar.gz; fi
+          python -m pip check
+          python tools/ci_installed.py --checkout "$GITHUB_WORKSPACE"
+          python tools/quickstart_check.py --min-commands 20
+          python -m pip freeze
+        env:
+          ARTIFACT: ${{ matrix.artifact }}
+
+  consumer-action:
+    needs: distribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        code: [0, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.23'
+          enable-cache: false
+      - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
+        run: |
+          uv sync --directory tools/ci --locked --no-default-groups --group runtime --group tooling --python python
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: candidate-dist
+          path: dist
+      - run: |
+          python -m pip install --no-deps --no-build-isolation dist/*.whl
+          echo "WHEEL=$(realpath dist/*.whl)" >> "$GITHUB_ENV"
+          mv quantfit "$RUNNER_TEMP/quantfit-source"
+      - id: gate
+        uses: ./.github/actions/quantfit-gate
+        continue-on-error: true
+        env:
+          PIP_NO_INDEX: '1' # the installed locked graph must satisfy the candidate
+          QUANTFIT_CI_CASE: ${{ matrix.code }}
+          PYTHONPATH: ${{ github.workspace }}/tools/ci_gate_fixture
+        with:
+          baseline: CI_LABEL_FIXTURE
+          quant: CI_LABEL_FIXTURE
+          quantfit-path: ${{ env.WHEEL }}
+          python-version: ''
+          tier: ''
+          threshold-pp: ${{ matrix.code == 5 && '0.01' || '30' }}
+          report: cases/${{ matrix.code }}/drift.json
+          gate-out: cases/${{ matrix.code }}/gate.json
+          junit: cases/${{ matrix.code }}/junit.xml
+          artifact-name: consumer-control-${{ matrix.code }}
+          retention-days: '1'
+      - name: Verify action outcome, real decision and JUnit
+        if: always()
+        run: python tools/ci_gate_check.py
+        env:
+          EXPECTED_CODE: ${{ matrix.code }}
+          ACTION_OUTCOME: ${{ steps.gate.outcome }}
+          ACTION_CODE: ${{ steps.gate.outputs.exit-code }}
+          ACTION_VERDICT: ${{ steps.gate.outputs.verdict }}
+          CASE_DIR: cases/${{ matrix.code }}
+
+  lint-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.23'
+          enable-cache: false
+      - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
+        run: |
+          uv sync --directory tools/ci --locked --no-default-groups --group tooling --python python
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
+      - run: |
+          python -m pip install -e . --no-deps --no-build-isolation
+          ruff check quantfit tests tools
+          ruff format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture
+          mypy --strict quantfit/spec.py quantfit/engines/base.py
+          quantfit audit
+      - name: Verify and run actionlint
+        run: |
+          curl --fail --location --silent --show-error https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz -o "$RUNNER_TEMP/actionlint.tar.gz"
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -color
+
+  dependencies:
+    needs: distribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.23'
+          enable-cache: false
+      - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
+        run: |
+          uv sync --directory tools/ci --locked --no-default-groups --group runtime --group numerical --group tooling --python python
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: candidate-dist
+          path: dist
+      - run: |
+          python -m pip install --no-deps --no-build-isolation dist/*.whl
+          python -m pip check
+          python tools/ci_dependency_audit.py
+
+  cpu-backend:
+    if: inputs.qualify
+    needs: distribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [ct, gguf]
+    env:
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: '1'
+      QUANTFIT_CACHE: ${{ github.workspace }}/.ci-backend-cache
+      OMP_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.23'
+          enable-cache: false
+      - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
+        run: |
+          uv sync --directory tools/ci --locked --no-default-groups --group runtime --group tooling --python python
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: candidate-dist
+          path: dist
+      - run: |
+          python -m pip install --no-deps --no-build-isolation dist/*.whl
+          cd "$RUNNER_TEMP"
+          python "$GITHUB_WORKSPACE/tools/ci_cpu_acceptance.py" --backend "$BACKEND" --out "$GITHUB_WORKSPACE/qualification/$BACKEND.json"
+        env:
+          BACKEND: ${{ matrix.backend }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: cpu-${{ matrix.backend }}-qualification
+          path: qualification/*.json
+          retention-days: 3
+          if-no-files-found: error
+
+  judge:
+    if: inputs.qualify
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: '1'
+      OMP_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.23'
+          enable-cache: false
+      - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
+        run: |
+          uv sync --directory tools/ci --locked --no-default-groups --group runtime --group unit --group tooling --python python
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
+      - run: |
+          python -m pytest -m judge tests/test_judge_known_failure_modes.py -q
+
+  required:
+    if: always()
+    needs: [test, numerical, distribution, installed, consumer-action, lint-audit, dependencies, cpu-backend, judge]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail closed on failed, cancelled or unexpectedly skipped prerequisites
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+          QUALIFY: ${{ inputs.qualify }}
+        run: |
+          python - <<'PY'
+          import json, os
+          results = json.loads(os.environ['RESULTS'])
+          qualify = os.environ['QUALIFY'] == 'true'
+          for name, job in results.items():
+              expected = 'skipped' if name in ('cpu-backend', 'judge') and not qualify else 'success'
+              assert job['result'] == expected, f"{name}: {job['result']}, required {expected}"
+          print('all expected candidate validations succeeded')
+          PY

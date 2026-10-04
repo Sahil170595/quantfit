@@ -13,6 +13,16 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## Unreleased
+
+- Required hosted CI tests built wheel/sdist outside the checkout on Linux/Windows,
+  CPU numerical/property/mutation checks and branch coverage, consumer action exit
+  propagation, full-graph dependency audit and exact-SHA release candidate acceptance.
+  Baseline and build tools use the complete hash lock; daily live drift is independent.
+  The compressor cap permits 0.14 for patched Torch/Accelerate/Pillow under the dated
+  CPU-scoped security exception in `docs/dependency-policy.md` §5. Validation and its
+  limits are in `validation/2026-10-04-hosted-ci/`; GPU AWQ/GPTQ remains unqualified.
+
 ## 0.15.0
 
 A minor, because the meaning of a published number changes: `probe` now measures the

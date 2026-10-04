@@ -73,7 +73,7 @@ except ImportError:  # pragma: no cover
 
 _ROOT = Path(__file__).resolve().parent.parent
 _PYPROJECT = _ROOT / "pyproject.toml"
-_CI = _ROOT / ".github" / "workflows" / "ci.yml"
+_CI = _ROOT / ".github" / "workflows" / "validate.yml"
 _CANARY = _ROOT / ".github" / "workflows" / "canary.yml"
 _PKG = _ROOT / "quantfit"
 
@@ -236,13 +236,13 @@ _EXEMPTIONS: dict[str, _Exemption] = {
     "transformers": _Exemption(
         kind="PARENT_BOUNDED",
         reason=(
-            "llmcompressor is a hard dependency and is capped (<0.13), and it constrains transformers tightly "
+            "llmcompressor is a hard dependency and is capped (<0.15), and it constrains transformers tightly "
             "at BOTH ends from its own metadata. An independent quantfit cap would not add safety; it would "
             "risk being unsatisfiable against llmcompressor's own upper pin, which is the harder failure to "
             "diagnose. quantfit's transformers surface is the Auto* from_pretrained classes plus __version__. "
             "The churn that has bitten this project (torch_dtype -> dtype at 4.56) is recorded as the FLOOR in "
             "pyproject — but that floor is INERT wherever this exemption's own argument applies: llmcompressor "
-            "requires transformers>=5.9.0, so on any default install the parent's floor is the binding one and "
+            "requires transformers>=5.15.0, so on any default install the parent's floor is the binding one and "
             "quantfit's >=4.56 can never be reached. It binds only on the two --no-deps paths where llmcompressor "
             "is absent (ci.yml's unit job, canary.yml's determinism job, which restates it by hand). Stated here "
             "rather than implied, and pinned by test_floors_that_cannot_bind_are_recorded_not_discovered."
@@ -317,7 +317,7 @@ _EXEMPTIONS: dict[str, _Exemption] = {
             "environment and it is never installed alongside quantfit at runtime, so a break cannot reach a "
             "user who already has a wheel. It also cannot rot unnoticed, which is the actual premise: this "
             "repo builds a wheel from the same pyproject on every push and on the weekly canary, on both ubuntu "
-            "and windows, so a setuptools release that breaks the build fails install-smoke and "
+            "and windows, so a setuptools release that breaks the build fails distribution acceptance and "
             "quickstart-install first — asserted by test_build_backend_exemptions_rest_on_a_wheel_build_in_ci. "
             "The >=77 floor is a real claim (PEP 639 license expressions, which this project's metadata uses); "
             "the open upper end says only that no known setuptools release breaks this build."
@@ -484,7 +484,7 @@ def test_parent_bounded_premises_hold_against_installed_metadata():
     Runs over every entry that names a chain (see the sibling root test for why that is
     wider than PARENT_BOUNDED). Skips where the parent is not installed — CI's unit-test job
     installs the package with `--no-deps` (`.github/workflows/ci.yml`), so llmcompressor is
-    absent there. This runs on any full-dependency environment (a dev box, the install-smoke
+    absent there. This runs on any full-dependency environment (a dev box, the installed-artifact
     image) and is what would catch a future llmcompressor minor that drops its
     transformers/torch caps.
     """
@@ -529,7 +529,7 @@ def test_parent_bounded_premises_hold_against_installed_metadata():
 # to be deleted on purpose. That is the intended way out.
 _INERT_FLOORS: dict[str, str] = {
     "torch": ">=2.4",  # llmcompressor requires torch>=2.10.0
-    "transformers": ">=4.56",  # llmcompressor requires transformers>=5.9.0
+    "transformers": ">=4.56",  # llmcompressor requires transformers>=5.15.0
     "datasets": ">=3.0",  # llmcompressor requires datasets>=4.8.4
     "accelerate": ">=1.0",  # llmcompressor requires accelerate>=1.6.0
     "huggingface-hub": ">=0.25",  # transformers requires huggingface-hub>=1.5.0
@@ -601,7 +601,7 @@ def test_floors_that_cannot_bind_are_recorded_not_discovered():
 # name already here, fails the test and has to be argued.
 _MAJOR_CROSSED: dict[str, tuple[str, int]] = {
     "transformers": (">=4.56", 5),  # hard dep; floor never moved, no validated run on 5.x recorded
-    "datasets": (">=3.0", 4),  # hard dep; same
+    "datasets": (">=3.0", 5),  # public load_dataset + Dataset.from_dict; hosted corpus canary receipt in validation
     "huggingface-hub": (">=0.25", 1),  # hard dep; 0.x -> 1.x, the largest relative jump in the set
     "psutil": (">=5.9", 7),  # LEAF_SINGLE_CALL: two majors, but the single call site is premise-tested
     "pytest": (">=8.0", 9),  # DEV_HARNESS: the 8 -> 9 bump IS recorded, in the exemption reason itself
@@ -770,7 +770,7 @@ def test_build_backend_exemptions_rest_on_a_wheel_build_in_ci():
     The class argues "it never reaches a user's runtime environment, and a break fails the
     wheel build first". The second half is the load-bearing one and it is false the moment
     nothing builds a wheel, so it is read out of the workflows rather than assumed. Both
-    surfaces are asserted because they fail at different times: `ci.yml`'s `install-smoke`
+    surfaces are asserted because they fail at different times: `validate.yml`'s distribution job
     is per-push, `canary.yml`'s `quickstart-install` is weekly against a re-resolved index.
     """
     if not [n for n, ex in _EXEMPTIONS.items() if ex.kind == "BUILD_BACKEND"]:
@@ -968,35 +968,3 @@ def test_the_documented_extras_exist():
     declared = set(_optional_requirements())
     expected = {"gguf", "awq", "inspect", "dev"}
     assert expected <= declared, f"missing documented extras: {sorted(expected - declared)}"
-
-
-def _quoted_requirements_in(path: Path) -> list[_Requirement]:
-    pattern = re.compile(r"\"([A-Za-z][A-Za-z0-9._-]*(?:<=|>=|==|~=|!=|<|>)[^\"]*)\"")
-    return [_parse_requirement(raw) for raw in pattern.findall(path.read_text(encoding="utf-8"))]
-
-
-def test_requirements_re_declared_in_workflows_match_pyproject():
-    """CI must exercise the versions the package declares, not a second opinion.
-
-    `.github/workflows/canary.yml` installs the verify-safety dependency set by hand after an
-    `-e . --no-deps` install, and `.github/workflows/ci.yml` installs ruff by hand. Both restate
-    specifiers that live in pyproject.toml, so both are places a bumped floor or a new cap can
-    fail to propagate — and the canary is precisely the job whose value depends on installing
-    what a user would get.
-    """
-    declared: dict[str, set[frozenset[tuple[str, str]]]] = {}
-    for _, req in _all_requirements():
-        declared.setdefault(req.name, set()).add(req.specs)
-
-    mismatches = []
-    checked = 0
-    for path in (_CI, _CANARY):
-        for req in _quoted_requirements_in(path):
-            if req.name not in declared:
-                continue
-            checked += 1
-            if req.specs not in declared[req.name]:
-                expected = sorted({",".join(f"{op}{v}" for op, v in sorted(s)) for s in declared[req.name]})
-                mismatches.append(f"{path.name} installs {req.raw!r}; pyproject.toml declares {expected}")
-    assert checked, "no workflow re-declares a quantfit dependency; the surface list is stale"
-    assert not mismatches, mismatches

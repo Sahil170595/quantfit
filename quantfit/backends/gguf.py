@@ -217,7 +217,9 @@ def convert_script() -> Path:
     return repo / name
 
 
-def quantize_gguf(model_id: str, qtype: str, out_dir: str, token: str | None = None) -> Path:
+def quantize_gguf(
+    model_id: str, qtype: str, out_dir: str, token: str | None = None, *, revision: str | None = None
+) -> Path:
     """HF model -> GGUF f16 -> quantized GGUF (CPU-only)."""
     from huggingface_hub import snapshot_download
 
@@ -226,7 +228,7 @@ def quantize_gguf(model_id: str, qtype: str, out_dir: str, token: str | None = N
 
     quant_bin = llama_quantize_bin()
     convert = convert_script()
-    model_dir = snapshot_download(model_id, token=token)
+    model_dir = snapshot_download(model_id, token=token, revision=revision)
 
     f16 = out / "model.f16.gguf"
     final = out / f"model.{qtype}.gguf"
