@@ -85,7 +85,7 @@ Read from `pyproject.toml` **[V]**:
 
 | requirement | group | cap | why this one churns |
 |---|---|---|---|
-| `llmcompressor>=0.5,<0.14` | hard | `<0.14` | the modifier/oneshot API churns across minors; `backends/compressed_tensors.py` imports `AWQModifier`, `GPTQModifier`, `QuantizationModifier`, `SmoothQuantModifier` and `oneshot` by path **[V]** |
+| `llmcompressor>=0.5,<0.15` | hard | `<0.15` | the modifier/oneshot API churns across minors; `backends/compressed_tensors.py` imports `AWQModifier`, `GPTQModifier`, `QuantizationModifier`, `SmoothQuantModifier` and `oneshot` by path **[V]** |
 | `inspect-ai>=0.3.252,<0.4` | `inspect` | `<0.4` | `quantfit/inspect_task.py` depends on `inspect_ai` internals (`SampleScore`/`Score`/`Value`, `inspect_ai.score`, the epoch-reduction behaviour of `Score.value`) and is verified against 0.3.252 **[V]** |
 | `gguf>=0.10,<1.0` | `gguf`, `dev` | `<1.0` | pre-1.0 and tracks llama.cpp; the enums quantfit reads are append-only in practice, so `<1.0` is the honest cap **[V]** |
 | `ruff>=0.16,<0.17` | `dev` | `<0.17` | 0.16.0 shipped new default rules mid-cycle and broke a green branch **[V]** |
@@ -100,8 +100,10 @@ The preserved weekly canary also uses this graph. `.github/workflows/drift.yml` 
 fresh dependencies independently and runs the suite plus the vulnerability audit **[V]**.
 `tools/ci_constraints.py` remains a manual subset-install helper, not the baseline lock.
 
-The compressor cap permits 0.13.0 so the runtime can select the patched Torch 2.13.0;
-0.12 restricts Torch to at most 2.12. The hosted CPU backend and canary receipts are
+The compressor cap permits 0.14.0 so the runtime can select patched Torch 2.13.0 and
+Accelerate 1.15.0. Compressor 0.12 restricts Torch to at most 2.12; 0.13 restricts
+Accelerate to the affected 1.14 release. The dated security exception in §5 records
+why the cap changed and limits what was qualified. The hosted CPU backend and canary receipts are
 recorded in `validation/2026-10-04-hosted-ci/`. This change does not establish GPU or
 AWQ/GPTQ qualification. Complete release candidates repeat the hosted CPU checks.
 
@@ -141,7 +143,7 @@ the literal reading of `ROADMAP.md:10` is wrong, and it is stated here rather th
 ignored.
 
 **The separate parent-bound fact is a sub-claim, and it is now machine-checked.** The upper
-end of a *default* install is closed by the capped `llmcompressor` (`torch<=2.13.0,>=2.10.0`
+end of a *default* install is closed by the capped `llmcompressor` (`torch<=2.14.0,>=2.10.0`
 **[V]**, §3.2). That used to be prose in the exemption's reason with nothing verifying it —
 a claim the class system could not check, sitting inside a `BUILD_SELECTED` entry. The entry
 now carries the resolution chain `llmcompressor → torch`, and both premise tests
@@ -157,14 +159,14 @@ is **not** machine-checked, and the exemption says so. **[?]**
 ### 3.2 `PARENT_BOUNDED` — an already-capped dependency does the bounding
 
 `llmcompressor` is a **hard** dependency, so every default `pip install quantfit` resolves
-it, and quantfit caps it at `<0.14`. llmcompressor in turn constrains its own stack at
-**both** ends. Read from the published dependency metadata of `llmcompressor==0.13.0` **[V]**:
+it, and quantfit caps it at `<0.15`. llmcompressor in turn constrains its own stack at
+**both** ends. Read from the published dependency metadata of `llmcompressor==0.14.0` **[V]**:
 
 ```
-torch<=2.13.0,>=2.10.0
-transformers<=5.14.1,>=5.9.0
+torch<=2.14.0,>=2.10.0
+transformers<=5.17.0,>=5.15.0
 datasets<=5.0.1,>=4.8.4
-accelerate<=1.14.0,>=1.6.0
+accelerate<=1.15.0,>=1.15.0
 ```
 
 Those are `<=` pins on exact versions — considerably tighter than anything quantfit would
@@ -177,7 +179,7 @@ unresolvable install is harder to diagnose than a caught API break.
 | `transformers>=4.56` | `llmcompressor` → `transformers` **[V]** |
 | `datasets>=3.0` | `llmcompressor` → `datasets` **[V]** |
 | `accelerate>=1.0` | `llmcompressor` → `accelerate` **[V]** |
-| `huggingface_hub>=0.25` | `llmcompressor` → `transformers` → `huggingface-hub` (`transformers==5.14.1` declares `huggingface-hub<2.0,>=1.5.0`; `datasets==5.0.1` declares `huggingface-hub<2.0,>=0.25.0`) **[V]** |
+| `huggingface_hub>=0.25` | `llmcompressor` → `transformers` → `huggingface-hub` (`transformers==5.17.0` declares `huggingface-hub<2.0,>=1.5.0`; `datasets==5.0.1` declares `huggingface-hub<2.0,>=0.25.0`) **[V]** |
 
 **The chain is checked, not asserted.** `test_parent_bounded_premises_hold_against_installed_metadata`
 walks each link and re-reads the bound from that package's own metadata. This is not
@@ -198,16 +200,16 @@ Fresh resolution is exercised independently by the daily drift workflow.
 The transformers entry used to argue that the `>=4.56` floor in `pyproject.toml` was "the
 correct instrument" for the `torch_dtype → dtype` break, i.e. the substitute for the cap it
 does not have. It is not an instrument at all on the path this exemption is about:
-`llmcompressor` requires `transformers>=5.9.0`, so on any default install the parent's floor
+`llmcompressor` requires `transformers>=5.15.0`, so on any default install the parent's floor
 is the binding one and quantfit's `>=4.56` is unreachable. The same is true of every floor in
 this class, read from installed metadata **[V]**:
 
 | quantfit declares | the chain already requires | so quantfit's floor is |
 |---|---|---|
 | `torch>=2.4` | `llmcompressor` → `torch>=2.10.0` | inert on a default install |
-| `transformers>=4.56` | `llmcompressor` → `transformers>=5.9.0` | inert |
+| `transformers>=4.56` | `llmcompressor` → `transformers>=5.15.0` | inert |
 | `datasets>=3.0` | `llmcompressor` → `datasets>=4.8.4` | inert |
-| `accelerate>=1.0` | `llmcompressor` → `accelerate>=1.6.0` | inert |
+| `accelerate>=1.0` | `llmcompressor` → `accelerate>=1.15.0` | inert |
 | `huggingface_hub>=0.25` | `llmcompressor` → `transformers` → `huggingface-hub>=1.5.0` | inert |
 
 The lighter source roles do not claim full-runtime acceptance; that proof comes from
@@ -309,7 +311,7 @@ is recorded. The previous metadata snapshot recorded transformers 5.10.1 and dat
 
 | requirement | declared floor | resolves to | crossed |
 |---|---|---|---|
-| `transformers` | `>=4.56` | 5.14.1 | **4 → 5**, hard dependency |
+| `transformers` | `>=4.56` | 5.17.0 | **4 → 5**, hard dependency |
 | `datasets` | `>=3.0` | 5.0.1 | **3 → 5**, hard dependency |
 | `huggingface_hub` | `>=0.25` | 1.31.0 | **0 → 1**, hard dependency — the largest relative jump here |
 | `psutil` | `>=5.9` | 7.2.2 | 5 → 7, but the single call site is premise-tested (§3.3) |
@@ -378,9 +380,22 @@ class:
 | `llmcompressor` | one `quantfit quantize` on the compressed-tensors path (AWQ or GPTQ) that completes and produces a loadable artifact, **plus** a `verify-safety` pair over that artifact whose report validates against the schema | anyone with a GPU that fits a ~1.5B pair |
 | `gguf` | the GGUF arm tests, which craft and read real GGUF files (`tests/test_gguf_arm.py`), **plus** one real quantize+verify pair, since the enums are read from file metadata and never from filenames (spec §3.2) **[V]** | CPU-only is sufficient |
 | `inspect-ai` | `tests/test_inspect_task.py:test_inspect_run_reproduces_tabulate` green on the new minor — the runner depends on `inspect_ai` internals, so that parity against `verify._tabulate` is the whole claim (`pyproject.toml:53-59`) **[V]** | CPU-only; CI installs it for exactly this reason |
-| `ruff` | `ruff check quantfit tests tools` and `ruff format --check quantfit tests` green on the new minor, locally, before the cap moves in `pyproject.toml`. **Only there now**: `ci.yml`'s `lint` job installs `ruff` under `-c ci-constraints.txt`, derived from this file (§2), so there is no second copy to move **[V]** | anyone |
+| `ruff` | `ruff check quantfit tests tools` and `ruff format --check quantfit tests` green on the new minor, locally, before the cap moves in `pyproject.toml`. **The hosted tooling role locks it**: update `tools/ci/pyproject.toml` and regenerate `tools/ci/uv.lock` with the cap **[V]** | anyone |
 | `gptqmodel` | one load of a first-party AWQ checkpoint through the transformers path, i.e. the `quantfit[awq]` install actually doing its job. **This is the run the §4 floor is still waiting on** | GPU |
-| `setuptools` (§3.6) | nothing extra: the wheel build in `ci.yml` `install-smoke` and `canary.yml` `quickstart-install` IS the validation, which is why the exemption exists **[V]** | CI |
+| `setuptools` (§3.6) | nothing extra: the wheel/sdist build in `validate.yml` `distribution`, installed-artifact jobs and `canary.yml` `quickstart-install` ARE the validation, which is why the exemption exists **[V]** | CI |
+
+**Dated security exception — 2026-10-04.** The user authorized complete hosted-runner
+CI improvements. Its real installed-graph audit exposed Torch <=2.12.1
+(GHSA-rrmf-rvhw-rf47), Accelerate <=1.14.0 (GHSA-4j2p-28q2-5m79), and Pillow 12.2.0
+advisories. Compressor 0.12 prevents patched Torch and 0.13 prevents patched Accelerate.
+Keeping those caps would retain the affected baseline. The cap therefore permits 0.14
+with a hash-locked Torch 2.13.0 / Accelerate 1.15.0 / Pillow 12.3.0 runtime, conditional
+on the hosted numerical, metadata, audit, real RTN packed-artifact/reload/inference and
+cold corpus/determinism checks. Receipts live in `validation/2026-10-04-hosted-ci/`.
+This exception establishes only the hosted CPU scope; the GPU AWQ/GPTQ + verify-safety
+pair in the normal row remains unverified and is required before claiming that scope.
+No advisory is ignored and no parent constraint is overridden. It does not amend the
+scientific sensitivity-control protocol or claim a safety result.
 
 **Raising a FLOOR needs a run too, and this is the half that is easy to forget.** Every row
 above is written for a cap, but a floor is the same kind of claim pointed the other way: it

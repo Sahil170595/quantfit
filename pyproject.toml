@@ -31,7 +31,7 @@ dependencies = [
   "accelerate>=1.0",
   # Upper-bounded: llm-compressor's modifier/oneshot API churns across minors; the
   # cap moves only after a validated run on the new minor (ROADMAP standing rule).
-  "llmcompressor>=0.5,<0.14",
+  "llmcompressor>=0.5,<0.15",
   "psutil>=5.9",
 ]
 

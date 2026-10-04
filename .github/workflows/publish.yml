@@ -24,6 +24,9 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
       - id: identity
         env:
           TAG: ${{ github.event.release.tag_name || inputs.release-tag }}
@@ -32,7 +35,9 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([a-zA-Z0-9.-]+)?$ ]] || { echo '::error::a version tag is required on every publishing path'; exit 1; }
-          [ "$REF_TYPE" = tag ] && [ "$REF_NAME" = "$TAG" ] || { echo '::error::dispatch this workflow from the same release tag, not a branch'; exit 1; }
+          if [ "$REF_TYPE" != tag ] || [ "$REF_NAME" != "$TAG" ]; then
+            echo '::error::dispatch this workflow from the same release tag, not a branch'; exit 1
+          fi
           sha=$(git rev-parse "refs/tags/$TAG^{commit}")
           git merge-base --is-ancestor "$sha" origin/main || { echo '::error::release candidate must already be merged into main'; exit 1; }
           git checkout --detach "$sha"

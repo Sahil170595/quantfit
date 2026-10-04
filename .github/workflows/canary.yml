@@ -115,10 +115,12 @@ jobs:
           version: "0.12.23"
           enable-cache: false
       - name: Install the locked CPU runtime
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
         run: |
           set -euo pipefail
           uv sync --directory tools/ci --locked --no-default-groups --group runtime --group tooling --python python
-          echo "$GITHUB_WORKSPACE/tools/ci/.venv/bin" >> "$GITHUB_PATH"
+          echo "$UV_PROJECT_ENVIRONMENT/bin" >> "$GITHUB_PATH"
       - name: Install candidate and record runtime
         run: |
           python -m pip install -e . --no-deps --no-build-isolation
@@ -400,11 +402,13 @@ jobs:
           enable-cache: false
       - name: Install locked build tooling
         shell: bash
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-build
         run: |
           uv sync --directory tools/ci --locked --no-default-groups --group tooling --python python
           python - <<'PY'
           import os, pathlib
-          env = pathlib.Path('tools/ci/.venv').resolve()
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
           with open(os.environ['GITHUB_PATH'], 'a') as out:
               out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
           PY
@@ -414,32 +418,46 @@ jobs:
       - name: Install wheel into a clean locked full-runtime venv
         shell: bash
         env:
-          UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.canary-venv
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-canary
         run: |
           set -euo pipefail
           uv sync --directory tools/ci --locked --no-default-groups --group runtime --group tooling --python python
-          ./.canary-venv/${{ matrix.venv_bin }}/python -m pip install --no-deps --no-build-isolation dist/*.whl
-          ./.canary-venv/${{ matrix.venv_bin }}/python -m pip check
+          python - <<'PY'
+          import os, pathlib, subprocess
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          bin = env / ('Scripts' if os.name == 'nt' else 'bin')
+          exe = bin / 'python'
+          subprocess.run([str(exe), '-m', 'pip', 'install', '--no-deps', '--no-build-isolation', *map(str, pathlib.Path('dist').glob('*.whl'))], check=True)
+          subprocess.run([str(exe), '-m', 'pip', 'check'], check=True)
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(bin) + '\n')
+          PY
 
       - name: CLI smoke
         shell: bash
         run: |
           set -euo pipefail
-          BIN=./.canary-venv/${{ matrix.venv_bin }}
-          $BIN/quantfit --help
-          $BIN/quantfit list
-          $BIN/python -c "import quantfit; print('quantfit', quantfit.__version__)"
+          cd "$RUNNER_TEMP"
+          quantfit --help
+          quantfit list
+          python -I - <<'PY'
+          import os, pathlib, quantfit, importlib.metadata as m
+          origin = pathlib.Path(quantfit.__file__).resolve()
+          assert not origin.is_relative_to(pathlib.Path(os.environ['GITHUB_WORKSPACE']).resolve()), origin
+          assert quantfit.__version__ == m.version('quantfit')
+          print('installed wheel:', origin)
+          PY
           # Docs=code parity for the 0.7 surface, at zero runtime cost: the gate must
           # exist in the built wheel, and the smoke tier must state its own >=30pp bound
           # on its help surface (ROADMAP 0.7: "Smoke tier gates >=30pp only and says
           # so"). A tier that stops saying so is a silent resolution overclaim.
-          $BIN/quantfit gate --help
+          quantfit gate --help
           # Docs=code parity for the 0.7 resolution promise, at zero runtime cost and with
           # no model: the smoke tier's threshold AND its does-not-cover disclosure are read
           # off the shipped constant, not off prose. ROADMAP 0.7 requires the smoke tier to
           # gate ">=30pp only and say so"; a tier that stops saying so is a silent
           # resolution overclaim, and this is the assertion that catches it.
-          $BIN/python - <<'PY'
+          python -I - <<'PY'
           import sys
 
           from quantfit.gate import TIERS

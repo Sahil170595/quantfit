@@ -16,11 +16,12 @@ PEP 517 isolation. Artifact installs use `--no-deps --no-build-isolation` into t
 graph, followed by `pip check`. The scheduled drift lane deliberately resolves the
 supported package graph afresh. The validation manifest does not alter PyPI metadata.
 
-The compatible locked runtime uses Torch 2.13.0 and llmcompressor 0.13.0. PyPI's
-GHSA-rrmf-rvhw-rf47 advisory marks Torch through 2.12.1 affected and 2.13.0 patched;
-the previous compressor cap prevented selecting that patch. The compressor cap is
-moved to the next validated minor. CPU Torch's local `+cpu` suffix is normalized to
-its public release version for advisory lookup; Torch is included in the audit.
+The locked runtime uses Torch 2.13.0, llmcompressor 0.14.0, Accelerate 1.15.0 and
+Pillow 12.3.0. The dependency audit exposed affected Torch/Accelerate/Pillow versions;
+the previous compressor caps prevented selecting their patches. The dated security
+exception in `docs/dependency-policy.md` §5 limits the cap move to hosted CPU evidence
+and keeps GPU AWQ/GPTQ qualification open. CPU Torch's local `+cpu` suffix is normalized
+to its public release version for advisory lookup; Torch remains included in the audit.
 
 The candidate wheel and sdist are built once. Linux and Windows independently install
 each candidate with full dependencies and run CLI/report/gate/JUnit/statistical behavior

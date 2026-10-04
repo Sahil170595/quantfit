@@ -38,9 +38,16 @@ jobs:
           version: '0.12.23'
           enable-cache: false
       - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
         run: |
           uv sync --directory tools/ci --locked --no-default-groups --group unit --group tooling --python python
-          if [ "$RUNNER_OS" = Windows ]; then echo "$GITHUB_WORKSPACE/tools/ci/.venv/Scripts" >> "$GITHUB_PATH"; else echo "$GITHUB_WORKSPACE/tools/ci/.venv/bin" >> "$GITHUB_PATH"; fi
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
       - run: |
           python -m pip install -e . --no-deps --no-build-isolation
           python -m pytest tests -q --ignore=tests/test_numerical_properties.py
@@ -61,9 +68,16 @@ jobs:
           version: '0.12.23'
           enable-cache: false
       - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
         run: |
           uv sync --directory tools/ci --locked --no-default-groups --group numerical --group tooling --python python
-          if [ "$RUNNER_OS" = Windows ]; then echo "$GITHUB_WORKSPACE/tools/ci/.venv/Scripts" >> "$GITHUB_PATH"; else echo "$GITHUB_WORKSPACE/tools/ci/.venv/bin" >> "$GITHUB_PATH"; fi
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
       - run: |
           python -m pip install -e . --no-deps --no-build-isolation
           python -c 'import torch; assert not torch.cuda.is_available()'
@@ -91,9 +105,16 @@ jobs:
           version: '0.12.23'
           enable-cache: false
       - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
         run: |
           uv sync --directory tools/ci --locked --no-default-groups --group tooling --python python
-          if [ "$RUNNER_OS" = Windows ]; then echo "$GITHUB_WORKSPACE/tools/ci/.venv/Scripts" >> "$GITHUB_PATH"; else echo "$GITHUB_WORKSPACE/tools/ci/.venv/bin" >> "$GITHUB_PATH"; fi
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
       - run: |
           python -m build --no-isolation
           python -m twine check dist/*
@@ -127,9 +148,16 @@ jobs:
           version: '0.12.23'
           enable-cache: false
       - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
         run: |
           uv sync --directory tools/ci --locked --no-default-groups --group runtime --group numerical --group tooling --python python
-          if [ "$RUNNER_OS" = Windows ]; then echo "$GITHUB_WORKSPACE/tools/ci/.venv/Scripts" >> "$GITHUB_PATH"; else echo "$GITHUB_WORKSPACE/tools/ci/.venv/bin" >> "$GITHUB_PATH"; fi
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: candidate-dist
@@ -164,9 +192,16 @@ jobs:
           version: '0.12.23'
           enable-cache: false
       - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
         run: |
           uv sync --directory tools/ci --locked --no-default-groups --group runtime --group tooling --python python
-          if [ "$RUNNER_OS" = Windows ]; then echo "$GITHUB_WORKSPACE/tools/ci/.venv/Scripts" >> "$GITHUB_PATH"; else echo "$GITHUB_WORKSPACE/tools/ci/.venv/bin" >> "$GITHUB_PATH"; fi
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: candidate-dist
@@ -179,6 +214,7 @@ jobs:
         uses: ./.github/actions/quantfit-gate
         continue-on-error: true
         env:
+          PIP_NO_INDEX: '1' # the installed locked graph must satisfy the candidate
           QUANTFIT_CI_CASE: ${{ matrix.code }}
           PYTHONPATH: ${{ github.workspace }}/tools/ci_gate_fixture
         with:
@@ -219,9 +255,16 @@ jobs:
           version: '0.12.23'
           enable-cache: false
       - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
         run: |
           uv sync --directory tools/ci --locked --no-default-groups --group tooling --python python
-          if [ "$RUNNER_OS" = Windows ]; then echo "$GITHUB_WORKSPACE/tools/ci/.venv/Scripts" >> "$GITHUB_PATH"; else echo "$GITHUB_WORKSPACE/tools/ci/.venv/bin" >> "$GITHUB_PATH"; fi
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
       - run: |
           python -m pip install -e . --no-deps --no-build-isolation
           ruff check quantfit tests tools
@@ -252,9 +295,16 @@ jobs:
           version: '0.12.23'
           enable-cache: false
       - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
         run: |
           uv sync --directory tools/ci --locked --no-default-groups --group runtime --group tooling --python python
-          if [ "$RUNNER_OS" = Windows ]; then echo "$GITHUB_WORKSPACE/tools/ci/.venv/Scripts" >> "$GITHUB_PATH"; else echo "$GITHUB_WORKSPACE/tools/ci/.venv/bin" >> "$GITHUB_PATH"; fi
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: candidate-dist
@@ -291,9 +341,16 @@ jobs:
           version: '0.12.23'
           enable-cache: false
       - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
         run: |
           uv sync --directory tools/ci --locked --no-default-groups --group runtime --group tooling --python python
-          if [ "$RUNNER_OS" = Windows ]; then echo "$GITHUB_WORKSPACE/tools/ci/.venv/Scripts" >> "$GITHUB_PATH"; else echo "$GITHUB_WORKSPACE/tools/ci/.venv/bin" >> "$GITHUB_PATH"; fi
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: candidate-dist
@@ -332,9 +389,16 @@ jobs:
           version: '0.12.23'
           enable-cache: false
       - name: Install the locked validation graph
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
         run: |
           uv sync --directory tools/ci --locked --no-default-groups --group runtime --group unit --group tooling --python python
-          if [ "$RUNNER_OS" = Windows ]; then echo "$GITHUB_WORKSPACE/tools/ci/.venv/Scripts" >> "$GITHUB_PATH"; else echo "$GITHUB_WORKSPACE/tools/ci/.venv/bin" >> "$GITHUB_PATH"; fi
+          python - <<'PY'
+          import os, pathlib
+          env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
+          with open(os.environ['GITHUB_PATH'], 'a') as out:
+              out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
+          PY
       - run: |
           python -m pytest -m judge tests/test_judge_known_failure_modes.py -q
 

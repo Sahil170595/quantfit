@@ -626,11 +626,11 @@ on a hosted CPU runner, and is worth copying into your own repo:
 - **smoke tier disclosure** — asserted against `gate.TIERS` (threshold 0.30, and the `30pp`
   string in both `gates` and `does_not_cover`), not against prose. A tier that stops disclosing
   its own resolution is a silent overclaim.
-- **quickstart install** — build the wheel, install it into a clean venv with full dependency
-  resolution, on Linux and Windows, and smoke the CLI. This is the job that catches upstream
-  churn in a week with no commits (the ROADMAP standing rule pairs upper-bound pins with
-  exactly this canary), and it deliberately does not cache pip: a cached wheel set defeats the
-  point of re-resolving.
+- **quickstart install** — build the wheel with locked tooling, install it into a clean
+  venv with the complete hash-locked runtime on Linux and Windows, and smoke the CLI.
+  The independent daily dependency-drift workflow resolves fresh versions and runs the
+  suite plus its advisory audit. The canary preserves cold model/judge/probe downloads
+  and same-model determinism checks. See `docs/hosted-ci.md` for their proof scopes.
 
 What the canary is **not**: it is not a noise floor (it says nothing about judge accuracy —
 QSR v0 §8), and it is not ROADMAP 0.7's injected-catastrophe criterion, which needs a doctored

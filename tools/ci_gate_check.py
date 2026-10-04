@@ -20,8 +20,13 @@ else:
     junit = ET.parse(root / "junit.xml").getroot()
     if code == 3:
         assert junit.findall(".//failure")
-    if code in (4, 5):
-        assert junit.findall(".//skipped"), "no-answer outcome must carry no-verdict JUnit state"
+    if code == 4:
+        assert junit.findall(".//skipped"), "unmeasured axis must carry no-verdict JUnit state"
+    if code == 5:
+        failures = junit.findall(".//failure")
+        assert any(f.get("type") == "ThresholdUnresolvable" for f in failures)
+        assert decision["resolution"]["stage"] == "pre_run"
+        assert decision["drift"] is None
     if code == 0:
         assert not junit.findall(".//failure")
     if code != 5:

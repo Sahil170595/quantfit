@@ -38,8 +38,12 @@ separate receipts; no completion text, model weights or baseline caches are comm
 The first hosted qualification of compressor 0.12.0 on Linux succeeded, but the new
 dependency audit exposed GHSA-rrmf-rvhw-rf47 (PyPI advisory metadata and GitHub advisory:
 Torch through 2.12.1 affected, fixed in 2.13.0). Compressor 0.12.0 caps Torch at 2.12.0.
-The final baseline therefore uses compressor 0.13.0 / compressed-tensors 0.18.0 / Torch
-2.13.0. The proposed <0.14 cap must pass the hosted CPU backend and preserved canary
-qualification before merge. The complete
+Compressor 0.13.0 then passed hosted RTN/GGUF CPU lifecycle and the preserved canary
+(run 37196951699, including datasets 5.0.1), but its audit exposed affected Accelerate
+1.14.0 and Pillow 12.2.0. Compressor 0.13 caps Accelerate at 1.14.0. The final proposed
+baseline therefore uses compressor 0.14.0 / compressed-tensors 0.19.0 / Torch 2.13.0,
+Accelerate 1.15.0 and Pillow 12.3.0. The <0.15 cap must pass the hosted CPU backend and
+preserved canary qualification before merge; the dated security exception is explicit
+in docs/dependency-policy.md §5. The complete
 transitive graph and build tooling are locked in tools/ci/uv.lock; source unit tests
 remain separate from installed-artifact and backend acceptance.
