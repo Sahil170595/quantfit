@@ -57,6 +57,17 @@ def main() -> None:
         assert artifact["inputs"]["report_sha256"] == hashlib.sha256((fixture / "drift.json").read_bytes()).hexdigest()
         assert artifact["human_confirmation_verified"] is False
         fixture = checkout / "validation/2026-10-05-reference-cli"
+        # Git text checkout can change LF/CRLF. Declare the actual sandbox bytes
+        # for this synthetic CI case; committed historical receipts stay intact.
+        reference_bytes = (fixture / "synthetic-bytes.json").read_bytes()
+        reference_path = sandbox / "reference.json"
+        reference_path.write_bytes(reference_bytes)
+        changed_path = sandbox / "reference-changed.json"
+        changed_path.write_bytes((fixture / "synthetic-changed-bytes.json").read_bytes())
+        registry = json.loads((fixture / "synthetic-registry.json").read_text(encoding="utf-8"))
+        registry["reports"][0]["report_sha256"] = hashlib.sha256(reference_bytes).hexdigest()
+        registry_path = sandbox / "reference-registry.json"
+        registry_path.write_text(json.dumps(registry), encoding="utf-8")
         for command, expected in (
             (["references", "list", "--json"], 0),
             (
@@ -64,11 +75,11 @@ def main() -> None:
                     "references",
                     "verify",
                     "--registry",
-                    str(fixture / "synthetic-registry.json"),
+                    str(registry_path),
                     "--slug",
                     "fixture",
                     "--report",
-                    str(fixture / "synthetic-bytes.json"),
+                    str(reference_path),
                     "--json",
                 ],
                 0,
@@ -78,11 +89,11 @@ def main() -> None:
                     "references",
                     "verify",
                     "--registry",
-                    str(fixture / "synthetic-registry.json"),
+                    str(registry_path),
                     "--slug",
                     "fixture",
                     "--report",
-                    str(fixture / "synthetic-changed-bytes.json"),
+                    str(changed_path),
                     "--json",
                 ],
                 3,
@@ -100,6 +111,10 @@ def main() -> None:
             document = json.loads(completed.stdout)
             assert document["exit_code"] == expected
             assert document["result"]["publication_verified"] is False
+            if command[1] == "verify":
+                result = document["result"]
+                assert result["expected_sha256"] == hashlib.sha256(reference_bytes).hexdigest()
+                assert result["actual_sha256"] == hashlib.sha256(Path(command[-2]).read_bytes()).hexdigest()
         # Explicit config prevents pyproject's pythonpath=['.'] injecting the source.
         config = sandbox / "pytest.ini"
         config.write_text("[pytest]\n", encoding="utf-8")

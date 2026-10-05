@@ -75,3 +75,37 @@ fresh runner installations. Production Inspect provider files were unchanged
 by integration; the prior actual CPU record is preserved, not rerun or promoted
 to GPU or sensitivity evidence here. Hosted checks must qualify the published
 heads before this stack is declared ready for review.
+
+## Hosted exact-byte fixture correction
+
+The Linux installed-wheel job
+[111782812735](https://github.com/Sahil170595/quantfit/actions/runs/37315947731/job/111782812735)
+correctly refused the synthetic match case: the recorded local fixture digest
+was for CRLF bytes, while Git checked out LF bytes. This does not license newline
+normalization in the verifier. The installed acceptance harness now copies the
+runner's exact bytes into its temporary sandbox and declares their digest in a
+fresh synthetic registry. Historical envelopes and their local-run digests above
+remain unchanged; they are local observations, not portable fixture declarations.
+
+`newline-cases.json` records four actual installed CLI cases: LF and CRLF each
+match their own declared digest, and each refuses the other byte representation
+with exit 3. `installed-byte-fixture.json` records subsequent installed-wheel
+acceptance from outside the checkout with the locked numerical/tooling graph.
+This check runs no model workload and does not authenticate any publication.
+Hosted Linux/Windows wheel and rebuilt-sdist jobs still qualify the final head.
+
+```powershell
+uvx --from uv==0.12.23 uv sync --directory tools/ci --locked --no-default-groups --group numerical --group tooling --python 3.12 --reinstall
+tools/ci/.venv/Scripts/python.exe -m build --no-isolation --outdir build/candidate-dist
+uvx --from uv==0.12.23 uv pip install --python C:/tmp/quantfit-resolution-installed-env-20261005/Scripts/python.exe --no-deps --no-build-isolation --reinstall build/candidate-dist/quantfit-0.15.1-py3-none-any.whl
+C:/tmp/quantfit-resolution-installed-env-20261005/Scripts/python.exe tools/ci_installed.py --checkout C:/tmp/quantfit-reference-bytes-ci-20261005
+tools/ci/.venv/Scripts/python.exe validation/2026-10-05-reference-cli/reproduce_newlines.py C:/tmp/quantfit-resolution-installed-env-20261005/Scripts/python.exe
+```
+
+The isolated installed environment borrows dependencies from this worktree's
+locked environment through a `.pth`; it contains its own candidate package.
+The newline comparison cases run from a temporary directory outside the checkout
+using the same installed interpreter, the fixture registry metadata and raw
+`write_bytes` inputs. Each case independently hashes the input bytes and compares
+both digest fields returned by the CLI. The raw synthetic JSON is not a model
+completion or a published reference report.
