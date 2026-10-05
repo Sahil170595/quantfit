@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-05",
+  "source_head": "5168105c858d871a42acd0a14e0a2dc37f8091b3",
+  "prerequisite_head": "46b69b4ff46b9966097462a76da064ed76f4bdf9",
+  "suite": {
+    "passed": 1536,
+    "skipped": 1,
+    "failed": 0,
+    "errors": 0,
+    "deselected": 6,
+    "junit": "inspect-coverage.junit.xml",
+    "junit_sha256": "69adde60d496536862d3d341df7555ccc2fc8221abb862d04a1a941ffa96e54f"
+  },
+  "coverage": {
+    "totals": {
+      "covered_lines": 4545,
+      "num_statements": 4951,
+      "percent_covered": 91.3438921122785,
+      "percent_covered_display": "91",
+      "missing_lines": 406,
+      "excluded_lines": 27,
+      "percent_statements_covered": 91.79963643708342,
+      "percent_statements_covered_display": "92",
+      "num_branches": 1426,
+      "num_partial_branches": 80,
+      "covered_branches": 1280,
+      "missing_branches": 146,
+      "percent_branches_covered": 89.76157082748948,
+      "percent_branches_covered_display": "90"
+    },
+    "modules": {
+      "quantfit/safety/mde.py": {
+        "covered_lines": 90,
+        "num_statements": 90,
+        "percent_covered": 100.0,
+        "percent_covered_display": "100",
+        "missing_lines": 0,
+        "excluded_lines": 0,
+        "percent_statements_covered": 100.0,
+        "percent_statements_covered_display": "100",
+        "num_branches": 26,
+        "num_partial_branches": 0,
+        "covered_branches": 26,
+        "missing_branches": 0,
+        "percent_branches_covered": 100.0,
+        "percent_branches_covered_display": "100"
+      },
+      "quantfit/gate.py": {
+        "covered_lines": 213,
+        "num_statements": 216,
+        "percent_covered": 97.77777777777777,
+        "percent_covered_display": "98",
+        "missing_lines": 3,
+        "excluded_lines": 0,
+        "percent_statements_covered": 98.61111111111111,
+        "percent_statements_covered_display": "99",
+        "num_branches": 54,
+        "num_partial_branches": 3,
+        "covered_branches": 51,
+        "missing_branches": 3,
+        "percent_branches_covered": 94.44444444444444,
+        "percent_branches_covered_display": "94"
+      },
+      "quantfit/safety/report.py": {
+        "covered_lines": 83,
+        "num_statements": 84,
+        "percent_covered": 97.91666666666667,
+        "percent_covered_display": "98",
+        "missing_lines": 1,
+        "excluded_lines": 0,
+        "percent_statements_covered": 98.80952380952381,
+        "percent_statements_covered_display": "99",
+        "num_branches": 12,
+        "num_partial_branches": 1,
+        "covered_branches": 11,
+        "missing_branches": 1,
+        "percent_branches_covered": 91.66666666666667,
+        "percent_branches_covered_display": "92"
+      }
+    },
+    "gate_exit": 0,
+    "raw_sha256": "0ee7badda542a33c4921370e39002625efd40c31cec607f9a4ec54f459e6f2c9"
+  },
+  "scope": "Source checkout, synthetic offline functional validation, not hosted or inference qualification."
+}

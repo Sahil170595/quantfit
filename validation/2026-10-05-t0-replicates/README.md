@@ -95,6 +95,41 @@ a resolved-path alias and a hardlink alias. They initially returned exit 0 and
 destroyed a cited report. The T0-only output guard now returns exit 2 and preserves
 every input byte in all three cases.
 
+## Final source qualification
+
+The final source is `1b2fdc7c3d3dcaee0af5cd2febd90c33b0b4f0d5`, stacked on
+PR1 prerequisite `9713b5ac17cfebb7491efb991fe37228a83ab329`. With the same CPU and
+borrowed environment recorded above, the unchanged implementation passed
+**1,544 tests, 1 skipped, 6 deselected**, exit 0. The declared JUnit totals and an
+independent count of its 1,545 test cases agree. `final-checks.json` records exact
+source hashes, current installed versions, the lock hash and the JUnit hash.
+
+```powershell
+& $py -m pytest -q -p no:cacheprovider --basetemp=C:/tmp/quantfit-t0-final-pytest-20261005 --cov=quantfit --cov-branch --cov-report=json:C:/tmp/quantfit-t0-coverage-20261005.json --junitxml=validation/2026-10-05-t0-replicates/final-coverage.junit.xml
+& $py tools/ci_coverage.py C:/tmp/quantfit-t0-coverage-20261005.json
+& $py validation/2026-10-05-t0-replicates/final_checks.py --coverage C:/tmp/quantfit-t0-coverage-20261005.json --inspect-report C:/tmp/quantfit-inspect-20261005/validation/2026-10-05-inspect-cli/inspect-drift.json
+```
+
+The recorder reruns the gate, audit and both exact CI Ruff scopes shown above.
+The gate passed: total coverage **91.37%** (floor 88%), branch coverage **89.88%**
+(floor 85%); `mde.py` branches **100%**, `gate.py` **94.44%**, and `report.py`
+**91.67%**, each exceeding its own floor. Audit returned no findings, errors or
+warnings; Ruff check and format passed (90 files already formatted).
+`final-audit-stdout.json` preserves the actual audit envelope. The suite emitted
+the existing SWIG deprecation warnings.
+
+The same recorder accepted and canonicalized the existing actual Inspect report
+`validation/2026-10-05-inspect-cli/inspect-drift.json`, SHA256
+`8b090f3124bd1edf6c76fad3f704bfb55e819c251dd2f5f9b95640c3f7064ae0`.
+Its causal identity is retained in `final-checks.json`. This only checks report
+compatibility; it adds no execution or independently run replicates. The Inspect
+artifact is owned by PR4 and joins this branch during coordinator integration.
+
+The earlier shared-helper qualification (source `5168105c858d871a42acd0a14e0a2dc37f8091b3`,
+1,536 passed, 1 skipped, total 91.34%, branches 89.76%) is preserved separately as
+`inspect-coverage.junit.xml` and `inspect-coverage-checks.json`; its historical
+source and counts were not rewritten after the later prerequisite/output fix.
+
 ## What this does not establish
 
 This is not an independently executed three-replicate measurement campaign. Distinct
