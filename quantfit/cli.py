@@ -306,6 +306,13 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="STR",
         help="where --eps-upper came from (required with it: an unsourced epsilon is not evidence)",
     )
+    pg.add_argument(
+        "--calibration-report",
+        default=None,
+        metavar="PATH",
+        help="bound schema-2 calibration report; mutually exclusive with --eps-upper/--eps-source. "
+        "Scope matching does not verify human labels or sensitivity",
+    )
     pg.add_argument("--max-new-tokens", type=int, default=64, help="completion length per probe (default 64)")
     pg.add_argument("--report", default=None, metavar="PATH", help="also write the schema-v2 drift report")
     pg.add_argument("--out", default=None, metavar="PATH", help="write the gate decision artifact JSON")
@@ -753,6 +760,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             tier=args.tier,
             eps_upper=args.eps_upper,
             eps_source=args.eps_source,
+            calibration_report=args.calibration_report,
             token=args.token,
             max_new_tokens=args.max_new_tokens,
             report_path=args.report,

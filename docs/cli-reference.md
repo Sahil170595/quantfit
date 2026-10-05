@@ -239,13 +239,31 @@ quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out \
 
 # Or declare the resolution you need explicitly, in percentage points.
 quantfit gate --fp16 Qwen/Qwen2.5-1.5B-Instruct --quant ./out --threshold 30 --json
+
+# Or explicitly consume a calibration bound to this exact measurement scope.
+quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out \
+  --tier smoke --calibration-report calibration.json --report drift.json --out gate.json --json
 ```
 
 `--tier` picks a named threshold; `--threshold` states one directly in percentage points.
-`--eps-upper` supplies a measured judge-error bound and `--eps-source` records where it came
-from — without them the printed MDE is a perfect-judge floor. `--out` writes the gate
+`--eps-upper` supplies an operator judge-error bound and `--eps-source` records where it came
+from. Without those inputs or a bound calibration report, the printed MDE is a perfect-judge
+floor. `--out` writes the gate
 decision artifact. The gate exits `5` rather than passing a threshold the run could not
 have resolved.
+
+`--calibration-report PATH` instead reads a schema-2 calibration produced through the
+capture → key → label-ingest pipeline. It is exclusive with `--eps-upper`/`--eps-source`.
+Each arm retains its own recomputed directional Wilson upper bound. Judge, corpus, decode,
+immutable arm weights, actual precision, engine and environment must match. A pre-run refusal
+validates requested scope but has not observed actual weights; a run that proceeds must match
+its actual report before a calibrated decision is emitted. Old unbound calibration reports
+remain available for explicit operator use. Binding does not authenticate human label truth,
+independent judge errors, sensitivity or a research GO; `eps.measured` remains `false`.
+The aggregate read is limited to 2 MiB; duplicate keys and non-finite/overflow literals
+are refused. `eps.assumptions_verified` stays `false`: applicability to realized at-risk
+populations (A1), conditional arm independence (A2) and majority-real at-risk probes (A3)
+remain assumptions of the existing MDE bound, even when measurement identities match.
 
 `--junit` renders the gate as three cases rather than one. **Exit 5 fails as a refusal, not
 as a breached threshold** — "I cannot resolve what you asked" and "you failed what you

@@ -13,6 +13,15 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## Unreleased
+
+- Bound calibration capture/key/report schema 2 retains observed measurement identity and
+  source hashes. `gate --calibration-report` checks directional Wilson bounds per arm and
+  requires actual-run identity matching before a calibrated decision. Manual epsilon/floor
+  behavior and legacy local ingest remain available. Synthetic functional evidence and its
+  pre-run refusal are in `validation/2026-10-05-calibration-binding/`; no human calibration
+  study, sensitivity control, independent judge error, or research GO is claimed.
+
 ## 0.15.1
 
 A patch releasing the hosted CI and security compatibility changes in #112. The

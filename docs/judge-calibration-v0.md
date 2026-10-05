@@ -77,6 +77,28 @@ published:
 - every flagged flip is human-verified before it backs a positive claim (QSR v0 §6.5). Calibration
   does not retire that rule — §5.4 explains why it makes it permanent.
 
+### 1.4 Dated machinery clarification, 2026-10-05
+
+The superseded text in §1.3 records the earlier implementation state. Current calibration
+machinery can explicitly consume a **bound schema-2** report with `gate --calibration-report`.
+This is distinct from automatically adopting the historical 2026-08-18 calibration, which
+has no full measurement binding. A schema-2 capture carries its observed judge/corpus/decode,
+immutable arm weights, precision, engine and environment through the key into calibration;
+the consumer recomputes directional Wilson uppers separately per arm and matches actual run
+identity before a calibrated decision. Legacy captures/keys remain locally ingestible but
+cannot acquire missing pins from today's constants.
+
+This clarification changes no sampling budget, decision rule or pre-registered GO requirement.
+The functional fixture in `validation/2026-10-05-calibration-binding/` manufactures labels to
+test plumbing; it is not a study, human adjudication or sensitivity control. Binding authenticates
+scope consistency and file linkage, never label truth or independent judge error. Captured text,
+sheets and keys remain local-only. QSR v0 and DriftReport schema 2 are unchanged.
+
+Binding does not establish that all-completion directional rates apply to the realized
+at-risk slice (A1), conditional error independence across arms (A2), or a majority-real
+at-risk set (A3). The gate keeps all three explicit and `assumptions_verified: false`;
+scope consistency alone does not discharge any of them.
+
 ## 2. Sampling design
 
 ### 2.1 The frame: quantfit's own completions, both arms
@@ -786,12 +808,14 @@ filename. The naming convention — `*.capture.jsonl`, `*.labels.csv`, `*.labelk
 it: a capture written to a name outside the convention is a capture the backstop does not cover.
 
 Precisely which of those is version-checked, since "three schemas" invites the assumption that all
-three are: `_read_capture` refuses a capture whose `capture_schema` does not match, and `_read_key`
-refuses a key whose `key_schema` does not — refused rather than coerced, the same discipline as
+three are: `_read_capture` and `_read_key` accept versions 1 and 2 and refuse unknown versions.
+Version 1 stays unbound; version 2 explicitly declares binding or null, rather than silently
+filling unknown historical facts. This retains the structural discipline of
 `report.py:DriftReport.from_json`. The **sheet** is validated by its exact column header rather than
 by a version, and read as `utf-8-sig`, so a byte-order mark left by a spreadsheet does not disguise
-the `id` column as a header mismatch. The **calibration report** is written and never read back, so it
-carries its version for downstream consumers rather than for a parser that enforces it. All refusals
+the `id` column as a header mismatch. The **calibration report** is read by the optional bound
+consumer, which validates schema, full identity, counts, finite statistics and directional Wilson
+bounds. Legacy local evidence remains ingestible without automatic binding. All refusals
 raise `CalibrationError`, a `RuntimeError` subclass, so the CLI's `except (RuntimeError, OSError)`
 maps them to a clean exit 2.
 
@@ -818,7 +842,9 @@ A fifth — the all-unusable calibration — is §4.1's.
 
 `ingest_labels` writes: `calibration_schema`, `quantfit_version`, `created_utc`, `n_labeled`,
 `n_unusable`, `unmeasured_arms`, a `baseline` and a `quantized` block, `arm_epsilon_delta`, and
-`label`. Each arm block carries:
+`label`, `binding` and `source`. Current `calibration_schema` is **2**. `binding` is either the
+canonical observed measurement identity plus fingerprint or `null` when provenance is insufficient;
+`source` carries capture/key/sheet SHA256 linkage. Each arm block carries:
 
 | field | what it is |
 |---|---|
@@ -852,8 +878,8 @@ information lives:
 
 | the protocol needs | where it is at v1 |
 |---|---|
-| judge revision, probe-dataset revision, decode settings | in the run's schema-v2 `DriftReport`, **not** in the calibration report or the key. Publish the calibration report *with* the report of the run it came from, or the pins are unstated. |
-| which capture the labels came from | the key's `capture` block records `created_utc`, `baseline`, `quant`, `n_pairs`; the calibration report itself does not reference the key. Keep the trio together. |
+| judge revision, probe-dataset revision, decode settings | bound schema-2 captures, keys and calibration carry the canonical observed identity; legacy records remain unbound. Publish with the originating aggregate report; no missing pin is inferred. |
+| which capture the labels came from | schema-2 keys record capture SHA256 and calibration records capture/key/sheet SHA256. These links do not authenticate human labels or independent execution; raw files remain local-only. |
 | per-zone ε | not carried; `zone` is withheld from sheet and key by design (§2.4). Recompute from the capture rows. |
 | the at-risk-conditional ε that `mde.py`'s **A1** assumes | not carried. The measured rates — marginal and directional alike — run over **every** labeled row, all three zones, which is what §2.3 requires and what makes them *not* at-risk-conditional. Recompute from capture rows joined to the key when there is reason to think the at-risk slice is the harder one (§7.4). |
 | an interval or test on the arm delta | `arm_epsilon_delta` is a point value with a note, by design (§5.3). |

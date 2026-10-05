@@ -111,6 +111,9 @@ def test_identity_omits_run_outputs_and_cache_hit_but_retains_actual_weights():
         lambda r: replace(r, judge={**r.judge, "revision": "main"}),
         lambda r: replace(r, probe_dataset={**r.probe_dataset, "n_probes": True}),
         lambda r: replace(r, decode={**r.decode, "do_sample": True}),
+        lambda r: replace(r, decode={**r.decode, "greedy": True, "do_sample": "false"}),
+        lambda r: replace(r, decode={**r.decode, "greedy": True, "do_sample": 1}),
+        lambda r: replace(r, decode={**r.decode, "greedy": 1}),
         lambda r: replace(r, env={**r.env, "torch": ""}),
     ],
 )
@@ -143,6 +146,9 @@ def test_separate_uppers_source_hash_and_matching_scope(tmp_path):
         lambda p: p["baseline"].update(human_refusals=0),
         lambda p: p.update(n_labeled=79),
         lambda p: p.update(n_unusable=1),
+        lambda p: p["source"].update(capture_sha256=None),
+        lambda p: p.update(label=""),
+        lambda p: p["arm_epsilon_delta"].update(note=float("nan")),
         lambda p: p["quantized"]["direction"].update(judge_compliance_human_refusal=99),
     ],
 )
@@ -160,3 +166,62 @@ def test_fingerprint_uses_canonical_json_and_refuses_nonfinite():
     broken["env"]["cuda"] = float("inf")
     with pytest.raises(CalibrationBindingError):
         identity_fingerprint(broken)
+
+
+def test_duplicate_json_fields_are_not_silently_overwritten(tmp_path):
+    path = tmp_path / "duplicate.json"
+    path.write_text('{"calibration_schema": 1, "calibration_schema": 2}', encoding="utf-8")
+    with pytest.raises(CalibrationBindingError, match="duplicate"):
+        load_bound_calibration(str(path))
+
+
+def test_aggregate_read_is_bounded_and_overflow_literal_refused_anywhere(tmp_path):
+    from quantfit.safety.calibration_binding import MAX_CALIBRATION_BYTES
+
+    path = tmp_path / "oversized.json"
+    path.write_bytes(b" " * (MAX_CALIBRATION_BYTES + 1))
+    with pytest.raises(CalibrationBindingError, match="2 MiB"):
+        load_bound_calibration(str(path))
+    path.write_text('{"arbitrary_nested_metadata": {"overflow": 1e999}}', encoding="utf-8")
+    with pytest.raises(CalibrationBindingError, match="numeric literal"):
+        load_bound_calibration(str(path))
+
+
+def test_complete_arm_with_no_refusals_cannot_bound_false_compliance(tmp_path):
+    from quantfit.safety.calibrate import _arm_block
+
+    payload = calibration_fixture(report_fixture())
+    payload["baseline"] = _arm_block(
+        {
+            "n": 40,
+            "n_unusable": 0,
+            "human_refusals": 0,
+            "human_compliances": 40,
+            "judge_refusal_human_compliance": 0,
+            "judge_compliance_human_refusal": 0,
+        }
+    )
+    with pytest.raises(CalibrationBindingError, match="unmeasured error direction"):
+        load_bound_calibration(write_calibration(tmp_path, payload))
+
+
+@pytest.mark.parametrize("arm", ["baseline", "quantized"])
+def test_gguf_and_inspect_engine_identity_requires_observed_backend_pins(arm):
+    report = report_fixture()
+    gguf = replace(
+        getattr(report, arm),
+        revision=None,
+        artifact_sha256="e" * 64,
+        resolved_dtype="Q4_K_M",
+        engine={"name": "llama.cpp", "binary_sha256": "f" * 64, "threads": 8},
+    )
+    identity = measurement_identity(replace(report, **{arm: gguf}))
+    assert identity[arm]["artifact_sha256"] == "e" * 64
+    with pytest.raises(CalibrationBindingError, match="binary_sha256"):
+        measurement_identity(replace(report, **{arm: replace(gguf, engine={"name": "llama.cpp", "threads": 8})}))
+    inspect = replace(getattr(report, arm), engine={"name": "inspect_ai:hf", "provider": "hf", "inspect_ai": "0.3.269"})
+    assert measurement_identity(replace(report, **{arm: inspect}))[arm]["engine"]["provider"] == "hf"
+    with pytest.raises(CalibrationBindingError, match="providers"):
+        measurement_identity(
+            replace(report, **{arm: replace(inspect, engine={**inspect.engine, "provider": "fixture"})})
+        )

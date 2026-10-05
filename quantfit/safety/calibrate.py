@@ -68,14 +68,15 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import re
 import secrets
 from datetime import datetime, timezone
 from pathlib import Path
 
 from quantfit.safety.verify import ARM_BASELINE, ARM_QUANTIZED, CAPTURE_SCHEMA, wilson_interval
 
-CALIBRATION_SCHEMA = 1  # the output calibration report — its own namespace
-KEY_SCHEMA = 1  # the unblinding key written alongside a sheet
+CALIBRATION_SCHEMA = 2  # bound or explicitly unbound aggregate evidence, own namespace
+KEY_SCHEMA = 2  # v1 local keys remain ingestible without inferred provenance
 
 ARMS = (ARM_BASELINE, ARM_QUANTIZED)
 
@@ -172,7 +173,7 @@ def _read_capture(path: str) -> tuple[dict, list[dict]]:
     _require(isinstance(header, dict), f"capture {path} line 1 is not a JSON object (expected the capture header)")
     got = header.get("capture_schema")
     _require(
-        got == CAPTURE_SCHEMA,
+        type(got) is int and got in (1, CAPTURE_SCHEMA),
         f"capture {path} has capture_schema {got!r}; this quantfit reads {CAPTURE_SCHEMA}",
     )
     n_pairs = header.get("n_pairs")
@@ -180,6 +181,19 @@ def _read_capture(path: str) -> tuple[dict, list[dict]]:
         isinstance(n_pairs, int) and not isinstance(n_pairs, bool) and n_pairs > 0,
         f"capture {path} header has n_pairs {n_pairs!r}; expected a positive integer",
     )
+    if got == CAPTURE_SCHEMA:
+        _require("binding" in header, f"capture {path} must explicitly declare binding or null")
+        if header["binding"] is not None:
+            from quantfit.safety.calibration_binding import validate_binding
+
+            binding = validate_binding(header["binding"])
+            identity = binding["identity"]
+            _require(identity["probe_dataset"]["n_probes"] == n_pairs, "capture binding pair count mismatch")
+            _require(
+                identity["baseline"]["model"] == header.get("baseline")
+                and identity["quantized"]["model"] == header.get("quant"),
+                "capture binding arm mismatch",
+            )
 
     rows: list[dict] = []
     seen: set[tuple[int, str]] = set()
@@ -375,6 +389,8 @@ def build_labeling_sheet(capture_path: str, sheet_path: str, key_path: str) -> t
         "capture": {field: header.get(field) for field in ("created_utc", "baseline", "quant", "n_pairs")},
         "salt": salt,
         "ids": {row_id: entries[row_id] for row_id in order},
+        "binding": header.get("binding") if header["capture_schema"] == CAPTURE_SCHEMA else None,
+        "capture_sha256": hashlib.sha256(Path(capture_path).read_bytes()).hexdigest(),
     }
     try:
         Path(key_path).write_text(json.dumps(key, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -394,7 +410,21 @@ def _read_key(path: str) -> dict:
         raise CalibrationError(f"unreadable labeling key {path}: {exc}") from exc
     _require(isinstance(payload, dict), f"labeling key {path} is not a JSON object")
     got = payload.get("key_schema")
-    _require(got == KEY_SCHEMA, f"labeling key {path} has key_schema {got!r}; this quantfit reads {KEY_SCHEMA}")
+    _require(
+        type(got) is int and got in (1, KEY_SCHEMA),
+        f"labeling key {path} has key_schema {got!r}; this quantfit reads 1/{KEY_SCHEMA}",
+    )
+    if got == KEY_SCHEMA:
+        _require("binding" in payload, f"labeling key {path} must explicitly declare binding or null")
+        if payload["binding"] is not None:
+            from quantfit.safety.calibration_binding import validate_binding
+
+            validate_binding(payload["binding"])
+        digest = payload.get("capture_sha256")
+        _require(
+            isinstance(digest, str) and re.fullmatch(r"[0-9a-f]{64}", digest) is not None,
+            f"labeling key {path} needs capture_sha256",
+        )
     salt = payload.get("salt")
     _require(
         isinstance(salt, str) and bool(salt),
@@ -428,6 +458,23 @@ def _read_key(path: str) -> dict:
             expected == row_id,
             f"{where} does not hash to its own (pair {entry['pair']}, arm {entry['arm']!r}) under the recorded "
             f"salt — the key was edited after the sheet was built, so it cannot be trusted to unblind it",
+        )
+    if got == KEY_SCHEMA and payload["binding"] is not None:
+        identity = payload["binding"]["identity"]
+        n_pairs = identity["probe_dataset"]["n_probes"]
+        pairs = {(entry["pair"], entry["arm"]) for entry in ids.values()}
+        _require(
+            len(ids) == 2 * n_pairs and pairs == {(pair, arm) for pair in range(n_pairs) for arm in ARMS},
+            f"labeling key {path} does not cover both complete bound arms",
+        )
+        captured = payload.get("capture", {})
+        _require(
+            isinstance(captured, dict)
+            and type(captured.get("n_pairs")) is int
+            and captured.get("n_pairs") == n_pairs
+            and captured.get("baseline") == identity["baseline"]["model"]
+            and captured.get("quant") == identity["quantized"]["model"],
+            f"labeling key {path} capture scope mismatch",
         )
     return payload
 
@@ -622,6 +669,12 @@ def ingest_labels(sheet_path: str, key_path: str, out_path: str) -> dict:
             "note": _DELTA_NOTE,
         },
         "label": CALIBRATION_LABEL if not unmeasured_arms else _qualified_label(unmeasured_arms),
+        "binding": key.get("binding") if key["key_schema"] == KEY_SCHEMA else None,
+        "source": {
+            "capture_sha256": key.get("capture_sha256") if key["key_schema"] == KEY_SCHEMA else None,
+            "key_sha256": hashlib.sha256(Path(key_path).read_bytes()).hexdigest(),
+            "sheet_sha256": hashlib.sha256(Path(sheet_path).read_bytes()).hexdigest(),
+        },
     }
     try:
         Path(out_path).write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")

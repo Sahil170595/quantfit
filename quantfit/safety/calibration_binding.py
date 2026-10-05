@@ -18,6 +18,7 @@ from quantfit.safety.report import ArmRun, DriftReport
 
 IDENTITY_SCHEMA = 1
 BOUND_SCHEMA = 2
+MAX_CALIBRATION_BYTES = 2 * 1024 * 1024
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 _REVISION = re.compile(r"[0-9a-f]{40}")
 
@@ -67,7 +68,7 @@ def _arm_identity(arm: ArmRun) -> dict:
         arm.revision is not None or arm.artifact_sha256 is not None, "arm weights have insufficient immutable identity"
     )
     dtype = _text(arm.resolved_dtype, "arm.resolved_dtype")
-    _require(dtype.lower() != "auto", "arm precision must be observed, not auto")
+    _require(dtype.strip().lower() != "auto", "arm precision must be observed, not auto")
     engine = {key: value for key, value in arm.engine.items() if key not in {"baseline_cache", "runtime_s"}}
     name = _text(engine.get("name"), "engine.name")
     if name == "llama.cpp":
@@ -96,6 +97,10 @@ def _arm_identity(arm: ArmRun) -> dict:
 def measurement_identity(report: DriftReport) -> dict:
     """Extract causal scope; timestamps, runtimes and cache-hit metadata are outputs."""
     _require(isinstance(report, DriftReport), "measurement_identity requires a DriftReport")
+    _require(
+        type(report.schema_version) is int and report.schema_version == 2,
+        "measurement identity requires report schema 2",
+    )
     judge = {key: report.judge.get(key) for key in ("id", "revision", "input_contract")}
     for key, value in judge.items():
         _text(value, f"judge.{key}")
@@ -108,17 +113,20 @@ def measurement_identity(report: DriftReport) -> dict:
     decode = dict(report.decode)
     _require(_count(decode.get("max_new_tokens"), "decode.max_new_tokens") > 0, "token budget must be positive")
     _require(decode.get("do_sample") is False or decode.get("greedy") is True, "decode must declare greedy generation")
-    _require(
-        decode.get("do_sample") is not True and decode.get("greedy") is not False, "conflicting greedy decode facts"
-    )
+    _require("do_sample" not in decode or decode["do_sample"] is False, "conflicting or invalid do_sample fact")
+    _require("greedy" not in decode or decode["greedy"] is True, "conflicting or invalid greedy fact")
     _text(decode.get("chat_template"), "decode.chat_template")
     decode.pop("do_sample", None)
     decode["greedy"] = True
     env = dict(report.env)
+    _require(
+        set(env) == {"python", "torch", "transformers", "cuda", "device"}, "unsupported environment identity fields"
+    )
     for key in ("python", "torch", "transformers", "device"):
         _text(env.get(key), f"env.{key}")
     _require(
-        "cuda" in env and (env["cuda"] is None or isinstance(env["cuda"], str)), "env.cuda must be a version or null"
+        env["cuda"] is None or isinstance(env["cuda"], str) and bool(env["cuda"].strip()),
+        "env.cuda must be a non-empty version or null",
     )
     identity = {
         "identity_schema": IDENTITY_SCHEMA,
@@ -252,11 +260,23 @@ def _pairs(pairs):
     return result
 
 
+def _nonfinite(value):
+    raise CalibrationBindingError(f"non-finite calibration JSON value {value!r}")
+
+
+def _finite_float(value):
+    result = float(value)
+    _require(math.isfinite(result), f"non-finite calibration numeric literal {value!r}")
+    return result
+
+
 def load_bound_calibration(path: str, *, report: DriftReport | None = None) -> BoundCalibration:
     """Read counts, recompute Wilson bounds and authenticate scope, never label truth."""
     try:
-        data = Path(path).read_bytes()
-        payload = json.loads(data, object_pairs_hook=_pairs)
+        with Path(path).open("rb") as handle:
+            data = handle.read(MAX_CALIBRATION_BYTES + 1)
+        _require(len(data) <= MAX_CALIBRATION_BYTES, "calibration report exceeds the 2 MiB aggregate limit")
+        payload = json.loads(data, object_pairs_hook=_pairs, parse_constant=_nonfinite, parse_float=_finite_float)
     except (OSError, UnicodeError, ValueError) as exc:
         raise CalibrationBindingError(f"unreadable calibration report {path}: {exc}") from exc
     _require(
@@ -301,7 +321,8 @@ def load_bound_calibration(path: str, *, report: DriftReport | None = None) -> B
     _require(_count(payload.get("n_unusable"), "n_unusable") == unusable, "unusable total mismatch")
     _require(payload.get("unmeasured_arms") == [], "unmeasured arms cannot bind a paired decision")
     delta = payload.get("arm_epsilon_delta")
-    _require(isinstance(delta, dict), "arm_epsilon_delta must be an object")
+    _require(isinstance(delta, dict) and set(delta) == {"delta", "note"}, "arm_epsilon_delta has unsupported fields")
+    _text(delta["note"], "arm_epsilon_delta.note")
     _same_numbers(
         delta.get("delta"), payload["quantized"]["epsilon"] - payload["baseline"]["epsilon"], "arm_epsilon_delta.delta"
     )

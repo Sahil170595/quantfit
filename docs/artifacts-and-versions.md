@@ -17,9 +17,9 @@ them drifts, the build fails rather than the table quietly going stale.
 | Gate decision | `gate --out` | `gate:GATE_SCHEMA_VERSION` | `1` |
 | Screen summary | `screen --out` | `screen:SUMMARY_SCHEMA_VERSION` | `1` |
 | Target manifest *(input)* | you author it | `screen:MANIFEST_SCHEMA_VERSION` | `1` |
-| Completion capture | `verify-safety --capture` | `safety.verify:CAPTURE_SCHEMA` | `1` |
-| Calibration report | `calibrate ingest --out` | `safety.calibrate:CALIBRATION_SCHEMA` | `1` |
-| Unblinding key | `calibrate sheet --key` | `safety.calibrate:KEY_SCHEMA` | `1` |
+| Completion capture | `verify-safety --capture` | `safety.verify:CAPTURE_SCHEMA` | `2` |
+| Calibration report | `calibrate ingest --out` | `safety.calibrate:CALIBRATION_SCHEMA` | `2` |
+| Unblinding key | `calibrate sheet --key` | `safety.calibrate:KEY_SCHEMA` | `2` |
 | Reproduction record | `reproduce --out` | `reproduce:REPRODUCTION_SCHEMA_VERSION` | `1` |
 | Reference report | the registry | `refreports:REFREPORT_SCHEMA_VERSION` | `1` |
 | Baseline cache entry | `safety.cache` | — (suffix below) | — |
@@ -29,6 +29,11 @@ The drift report is at **schema v2** and v1 is refused on parse rather than upgr
 carried no per-arm engine provenance, so a v1 file cannot answer the question the
 same-binary mandate exists to ask, and silently accepting one would let an unanswerable
 report look like an answered one.
+
+Capture/key/calibration schema 2 carries observed measurement binding and source hashes.
+Version-1 captures and keys remain readable for local labeling; they never acquire inferred
+historical pins and cannot enter automatic bound consumption. A current raw capture whose
+arm identity is insufficient records `binding: null` and remains available for local use.
 
 ## Fixed filenames
 

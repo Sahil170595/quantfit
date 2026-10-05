@@ -1052,7 +1052,7 @@ def test_report_decode_records_what_the_inspect_path_did(tmp_path, monkeypatch):
         inspect_decode("openai", DEFAULT_MAX_NEW_TOKENS)
 
 
-def test_decode_states_greedy_as_a_machine_comparable_fact():
+def test_decode_states_greedy_as_a_machine_comparable_fact(tmp_path, monkeypatch):
     """Dropping `do_sample` was right; dropping GREEDINESS with it broke comparability.
 
     `quantfit.reproduce`'s T1 compares decode fields as VALUES, so an Inspect report that
@@ -1078,11 +1078,15 @@ def test_decode_states_greedy_as_a_machine_comparable_fact():
     # The shipped path's own decode block still spells greediness the transformers way,
     # which is what the two-spellings contract exists to bridge. Read from verify rather
     # than restated here, so this test fails if that side ever changes.
-    import inspect as _inspect
-
     import quantfit.safety.verify as sv
+    from quantfit.safety.report import DriftReport
 
-    assert '"do_sample": False' in _inspect.getsource(sv._write_report)
+    _stub_env(monkeypatch)
+    path = tmp_path / "native-drift.json"
+    sv._write_report(str(path), _expected_drift(), _arm(), _arm(QUANTIZED_SPEC), 0.5, DEFAULT_MAX_NEW_TOKENS)
+    native = DriftReport.from_json(str(path))
+    assert native.decode["do_sample"] is False
+    assert native.decode["max_new_tokens"] == DEFAULT_MAX_NEW_TOKENS
 
 
 def test_report_refuses_arms_the_run_did_not_measure(tmp_path, monkeypatch):

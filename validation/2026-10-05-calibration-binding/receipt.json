@@ -1,0 +1,54 @@
+{
+  "actual_runtime": {
+    "machine": "AMD64",
+    "packages": {
+      "datasets": "5.0.1",
+      "pytest": "9.0.3",
+      "ruff": "0.16.2",
+      "torch": "2.13.0+cpu",
+      "transformers": "5.17.0"
+    },
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.12.13",
+    "quantfit_source_version": "0.15.1"
+  },
+  "command": "tools/ci/.venv/Scripts/python.exe validation/2026-10-05-calibration-binding/reproduce.py",
+  "created_utc": "2026-10-05T12:20:43+00:00",
+  "fixture_scope_is_observed_runtime": false,
+  "kind": "synthetic functional evidence, no human adjudication",
+  "limits": [
+    "All generation, judge outputs and labels are manufactured test data; no real models ran.",
+    "Placeholder immutable arm revisions and fixture versions are synthetic, not checked upstream assets.",
+    "The widened corpus is monkeypatched in this script only; shipped corpus and QSR v0 do not change.",
+    "Matching scope and hashes cannot authenticate label truth, independence or sensitivity.",
+    "No calibration study, GPU qualification, sensitivity control or research GO is established.",
+    "Raw capture, labeling sheet and key exist only in an automatically removed temporary directory."
+  ],
+  "post_run_fixture": {
+    "actual_run_matched": true,
+    "changed_weights_refusal": "calibration scope does not match the actual run report",
+    "expected_unsafe": 1500,
+    "gate_exit": 0,
+    "n_probes": 2000
+  },
+  "roundtrip": {
+    "binding_status": "scope_validated_actual_run_unobserved",
+    "cli_process_exit": 5,
+    "eps_baseline_upper": 0.16112515805281938,
+    "eps_quant_upper": 0.2775327998628892,
+    "fingerprint": "f0612bfade2a9c35bc0146a171985e7ce99369ff0ca57b9d32b195bd39eb8313",
+    "gate_exit": 5,
+    "n_labeled": 80
+  },
+  "source_sha256": {
+    "quantfit/cli.py": "e61565715fb984aba29734183665ba90bd819b7e8b8f9c49d5c5f182822b3cae",
+    "quantfit/gate.py": "8a57d72df593b8d105cb52d20fc67152e5824743aecdecb41c5c482800de0da0",
+    "quantfit/safety/calibrate.py": "cbc290ac1f9574fe3b558e3d00315accfc83aefed7a27da851679e23f0a90e67",
+    "quantfit/safety/calibrated_gate.py": "65438e0afa86ccd62471021e44a27560d18b1e41e859be1c16ad3683fdeaadeb",
+    "quantfit/safety/calibration_binding.py": "145f922daf9c7766a14d8a6897587fbf4a3270bf07cb86dd3fee40be1b120388",
+    "quantfit/safety/verify.py": "caddba45efd1422bc3a695710e9c5c64ca2ffbdeb6b9d857799eb2233ac39b88",
+    "tests/test_bound_calibration_pipeline.py": "decadc5aff434c16b05da781953ad079c748a2a879b761acad7bd3b4acc1198c",
+    "tests/test_calibration_binding.py": "e2e21e497b4dd5ded628fd8637b634678af45680c26e2d6ea12f68325a97a294",
+    "validation/2026-10-05-calibration-binding/reproduce.py": "2c671c24aee1c0ebdad76e7575cbe9fbe5c14cf04b51ce4466b1cc053daa6179"
+  }
+}
