@@ -374,6 +374,16 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+**Offline resolution machinery (2026-10-05):** aggregate-only synthetic fixtures
+exercise the actual CLI and exact-byte scope matching. Evidence is
+`validation/2026-10-05-calibrated-resolution/`; this is functional evidence, not a
+human calibration study, hardware campaign or research GO.
+
+| flag | command(s) | validation | evidence / gap |
+|---|---|---|---|
+| `--calibration-report` | resolution | Synthetic bound-scope input; per-arm bounds remain separate; changed revision refused | `validation/2026-10-05-calibrated-resolution/` |
+| `--report` / `--out` / `--json` | resolution | Actual offline invocation, separate artifact and unchanged inputs | as above; no new safety verdict |
+
 Enumerated from `_build_parser()`, not from memory, on 2026‑08‑07 at 22:25. §0.1 stakes
 this table on flag-level completeness, so the flags that had **no row at all** are named
 here rather than quietly added: `--threshold` (the gate's *primary* resolution

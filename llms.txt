@@ -25,6 +25,7 @@ To see real output in about a second, with no model, no network and no weights:
 - [calibrate](https://github.com/Sahil170595/quantfit/blob/main/docs/judge-calibration-v0.md): `quantfit calibrate sheet --capture c.capture.jsonl --sheet s.labels.csv --key k.labelkey.json` then `quantfit calibrate ingest --sheet s.labels.csv --key k.labelkey.json --out cal.json` — blinded judge-error measurement.
 - [reproduce](https://github.com/Sahil170595/quantfit/blob/main/docs/cross-hardware-tolerance-v0.md): `quantfit reproduce --reference ref.json --candidate cand.json` — does this report reproduce that one, under the cross-hardware tolerance?
 - [audit](https://github.com/Sahil170595/quantfit/blob/main/README.md): `quantfit audit` — docs=code parity for this repository itself.
+- [resolution](https://github.com/Sahil170595/quantfit/blob/main/docs/cli-reference.md): `quantfit resolution --report drift.json --calibration-report calibration.json --out resolution.json` — offline conditional resolution using separate directional bounds per arm; no safety verdict or authentication of human labels.
 
 - [Full CLI reference](https://github.com/Sahil170595/quantfit/blob/main/docs/cli-reference.md): every command and every flag, with a worked invocation for each. Checked against the real parser by `quantfit audit`.
 

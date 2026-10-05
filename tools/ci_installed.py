@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.metadata
+import json
 import os
 import subprocess
 import sys
@@ -28,6 +30,32 @@ def main() -> None:
         subprocess.run([sys.executable, "-c", code], cwd=sandbox, env=env, check=True)
         for command in (["--help"], ["list"], ["verify-safety", "--demo", "--json"]):
             subprocess.run([sys.executable, "-m", "quantfit.cli", *command], cwd=sandbox, env=env, check=True)
+        fixture = checkout / "validation/2026-10-05-calibrated-resolution"
+        output = sandbox / "resolution.json"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "resolution",
+                "--report",
+                str(fixture / "drift.json"),
+                "--calibration-report",
+                str(fixture / "calibration.json"),
+                "--out",
+                str(output),
+                "--json",
+            ],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        artifact = json.loads(completed.stdout)["result"]
+        assert artifact == json.loads(output.read_text(encoding="utf-8"))
+        assert artifact["inputs"]["report_sha256"] == hashlib.sha256((fixture / "drift.json").read_bytes()).hexdigest()
+        assert artifact["human_confirmation_verified"] is False
         # Explicit config prevents pyproject's pythonpath=['.'] injecting the source.
         config = sandbox / "pytest.ini"
         config.write_text("[pytest]\n", encoding="utf-8")

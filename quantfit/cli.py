@@ -325,6 +325,21 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     pg.add_argument("--baseline-cache", default=None, metavar="DIR", help=_BASELINE_CACHE_HELP)
 
+    pres = sub.add_parser(
+        "resolution",
+        help="offline conditional resolution from a drift report and bound calibration (exit 0 = analysis completed, 2 = operational error)",
+    )
+    pres.add_argument("--report", required=True, metavar="PATH", help="existing schema-v2 drift report")
+    pres.add_argument(
+        "--calibration-report",
+        required=True,
+        metavar="PATH",
+        help="bound calibration report matching the actual measurement scope",
+    )
+    pres.add_argument(
+        "--out", required=True, metavar="PATH", help="separate resolution artifact; must not overwrite either input"
+    )
+
     pr = sub.add_parser(
         "reproduce",
         help="is this report a reproduction of that one? applies the QSR v0 cross-hardware tolerance "
@@ -792,6 +807,20 @@ def _dispatch(args: argparse.Namespace) -> int:
             {**decision, "decision_path": args.out, "report_path": args.report, "junit_path": args.junit},
             _human_gate,
         )
+
+    if args.cmd == "resolution":
+        from quantfit.resolution import analyze_resolution
+
+        result = analyze_resolution(args.report, args.calibration_report, args.out)
+
+        def human_resolution():
+            for name, axis in result["axes"].items():
+                print(f"{name}: {axis['flagged_flips']}/{axis['n_at_risk']} flagged flips")
+                print(f"  {axis['resolution']['headline']}")
+            print("Conditional analysis; calibration label truth and statistical assumptions are not verified.")
+            print(f"resolution artifact -> {args.out}")
+
+        return _emit(args, "resolution", 0, result, human_resolution)
 
     if args.cmd == "calibrate":
         if args.calibrate_cmd == "sheet":

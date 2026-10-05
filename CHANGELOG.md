@@ -21,6 +21,11 @@
   behavior and legacy local ingest remain available. Synthetic functional evidence and its
   pre-run refusal are in `validation/2026-10-05-calibration-binding/`; no human calibration
   study, sensitivity control, independent judge error, or research GO is claimed.
+- Add offline `resolution` analysis with bound calibration scope, validated paired
+  counts, separate per-arm directional bounds and a separate aggregate artifact.
+  Input bytes and QSR v0 verdicts are preserved; the analysis makes no safety gate
+  decision and does not authenticate human labels or statistical assumptions.
+  Functional evidence: `validation/2026-10-05-calibrated-resolution/` (synthetic).
 
 ## 0.15.1
 

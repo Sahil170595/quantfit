@@ -25,6 +25,13 @@ like. It refuses `--report` and always exits 0, because nothing was measured.
 
 ## The command that matters
 
+For an existing report and bound calibration aggregate, use
+`quantfit resolution --report drift.json --calibration-report calibration.json --out resolution.json --json`.
+This is offline conditional resolution, with flagged counts and explicit unmeasurable
+axes. Exit 0 means analysis completed; it does not certify safety or human label truth.
+
+## Measure refusal behavior
+
 ```bash
 quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --report drift.json
 ```

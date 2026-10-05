@@ -209,6 +209,7 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     # Pure local JSON comparison — of TWO drift reports that must already exist
     # (quantfit/reproduce.py: --reference and --candidate are both read from disk).
     "reproduce": (REQ_ARTIFACT,),
+    "resolution": (REQ_ARTIFACT,),
     # Pure local, no network, no GPU — but it audits a SOURCE CHECKOUT: `--root`
     # defaults to "the one containing quantfit" (quantfit/cli.py), which in a clean
     # venv is site-packages, where the README, docs/ and spec/ it reads do not exist.

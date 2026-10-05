@@ -289,6 +289,31 @@ quantfit calibrate ingest --sheet labels.labels.csv \
 `sheet` builds a blinded labeling sheet; the key file is what unblinds it and the labeler
 never receives it. `ingest` folds the filled labels into a per-arm judge-error report.
 
+## Analyze an existing run's resolution
+
+```bash
+quantfit resolution --report drift.json --calibration-report calibration.json \
+  --out resolution.json --json
+```
+
+This offline command consumes an existing schema-v2 report and a bound schema-2
+calibration aggregate with exactly matching observed measurement scope. It checks
+the paired count arithmetic and recomputes the calibration bounds, retaining each
+arm's directional upper bound separately. The separate `resolution_schema: 1`
+artifact includes both input SHA256 hashes, the binding fingerprint, flagged flip
+counts, realized at-risk denominators, exact-binomial thresholds, effective MDEs
+and power at pre-registered effect sizes. Input bytes and QSR v0 verdicts are preserved.
+
+`--out` is required and cannot overwrite either input, including through a hard
+link. Input reports are limited to 8 MiB and 4096 probes to bound the existing
+exact-binomial calculator's work. Malformed counts, unbound legacy calibration or
+scope mismatches exit 2 before output; exit 0 means the analysis ran, including
+an unmeasurable axis. It is not a safety gate. Counts remain judge-flagged, not
+human-confirmed. Matching metadata cannot authenticate human labels or establish
+that directional bounds apply to the at-risk subpopulation, that the at-risk set
+is majority-real, or that judge errors are arm-independent; the artifact carries
+these assumptions explicitly. No sample size fixes correlated judge error.
+
 ## Reproduction and reporting
 
 ```bash

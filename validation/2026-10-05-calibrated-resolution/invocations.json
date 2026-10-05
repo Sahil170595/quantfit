@@ -1,0 +1,34 @@
+[
+  {
+    "command": [
+      "python",
+      "-m",
+      "quantfit.cli",
+      "resolution",
+      "--report",
+      "validation/2026-10-05-calibrated-resolution/drift.json",
+      "--calibration-report",
+      "validation/2026-10-05-calibrated-resolution/calibration.json",
+      "--out",
+      "validation/2026-10-05-calibrated-resolution/resolution.json",
+      "--json"
+    ],
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "python",
+      "-m",
+      "quantfit.cli",
+      "resolution",
+      "--report",
+      "validation/2026-10-05-calibrated-resolution/changed-scope.json",
+      "--calibration-report",
+      "validation/2026-10-05-calibrated-resolution/calibration.json",
+      "--out",
+      "validation/2026-10-05-calibrated-resolution/must-not-exist.json",
+      "--json"
+    ],
+    "exit_code": 2
+  }
+]

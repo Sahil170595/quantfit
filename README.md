@@ -362,6 +362,16 @@ are comparable.
 [`Dockerfile`](https://github.com/Sahil170595/quantfit/blob/main/Dockerfile) builds an isolated CUDA image. For GGUF in Docker, the official
 `ghcr.io/ggml-org/llama.cpp:full` image carries the convert + quantize tooling.
 
+## Analyze an existing run offline
+
+`quantfit resolution --report drift.json --calibration-report calibration.json --out resolution.json --json`
+matches immutable measurement scope, validates paired counts and reports
+conditional per-axis resolution using each arm's directional error bound in a
+separate artifact. It preserves the inputs and their QSR v0 verdict; matching
+metadata does not authenticate human labels or verify the statistical assumptions.
+See [CLI reference](docs/cli-reference.md) and
+[synthetic functional evidence](validation/2026-10-05-calibrated-resolution/README.md).
+
 ## License
 
 Apache-2.0.
