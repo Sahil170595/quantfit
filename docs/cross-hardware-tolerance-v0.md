@@ -387,6 +387,15 @@ count (booleans are refused), and the source's pinned release tag or explicit
 of agreement. The user-build path is permitted by QSR v0 §3.2 and remains explicitly
 unverified as pinned-release provenance; matching metadata never verifies an archive
 or executable's origin. No current tag is inferred for a historical report.
+Observed Inspect HF reports use the shared strict causal engine contract in
+`quantfit/safety/calibration_binding.py`: actual backend/dependency versions,
+repo/revision, device, dtype, snapshot, tokenizer, quantization and greedy model
+arguments are identity. Complete observed call counts and finite timing/prose
+metadata are validated, then outputs are excluded from identity; different valid
+wall times do not make repeated measurements different instruments. Operator-only
+Inspect metadata, unknown fields and contradictory arm/revision facts are refused.
+This corrects the earlier generic `engine.version` reading, which rejected actual
+Inspect reports while comparing measured wall times as causal settings.
 The CLI requires at least three reports; the library still records a two-report
 partial set with `meets_protocol_replicate_count: false` and `protocol_pass: false`.
 Exit 0 means protocol-count agreement, 3 means disagreement, and 2 means invalid or

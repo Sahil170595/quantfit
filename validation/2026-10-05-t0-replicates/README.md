@@ -84,6 +84,12 @@ the previous loader emitted original byte hashes with the changed files' identit
 The loader now constructs schema-v2 reports from that same byte buffer, and refuses
 duplicate keys and nonfinite JSON numbers. The report schema and operational exit-2
 contract are preserved.
+The observed-HF regression initially failed with `baseline.engine.version is
+required` on the complete actual-shaped Inspect engine. T0 now consumes the shared
+PR1 causal engine contract and validates actual ArmRun provenance, observed call
+counts and output metadata while excluding timers/prose from identity. Synthetic
+fixtures cover malformed observations, operator-only metadata and actual causal
+differences; this is compatibility evidence, not a new inference campaign.
 
 ## What this does not establish
 

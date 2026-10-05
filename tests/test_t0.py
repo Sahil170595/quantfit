@@ -40,6 +40,108 @@ def _gguf_reports(tmp_path, engine):
     ]
 
 
+def _inspect_reports(tmp_path):
+    """Synthetic observed-HF aggregate facts; these are not independently run models."""
+    paths = _reports(tmp_path)
+    for index, path in enumerate(paths):
+        payload = json.loads(Path(path).read_text())
+        for name in ("baseline", "quantized"):
+            arm = payload[name]
+            repo = arm["model"]
+            arm["model"] = f"hf/{repo}"
+            arm["runtime_s"] = float(index + 1)
+            arm["engine"] = {
+                "name": "inspect_ai:hf",
+                "inspect_ai_version": "0.3.269",
+                "torch_version": "2.13.0+cpu",
+                "transformers_version": "5.17.0",
+                "device": "cpu",
+                "source_repo": repo,
+                "config_commit_hash": arm["revision"],
+                "snapshot_manifest_sha256": "1" * 64,
+                "tokenizer_revision": arm["revision"],
+                "tokenizer_template_sha256": "2" * 64,
+                "quantization_config_sha256": None,
+                "quantization_method": None,
+                "max_samples": 1,
+                "do_sample": False,
+                "model_args": {"do_sample": False},
+                "generate_calls": 40,
+                "weight_generate_host_wall_s": float(index),
+                "runtime_scope": f"observed call wall {index}",
+                "weight_runtime_scope": f"observed weight wall {index}",
+                "revision_observation": f"observed pinned snapshot {index}",
+            }
+        Path(path).write_text(json.dumps(payload), encoding="utf-8")
+    return paths
+
+
+def test_t0_observed_inspect_identity_excludes_validated_runtime_outputs(tmp_path):
+    paths = _inspect_reports(tmp_path)
+    result = within_hardware_identical(paths)
+    assert result["protocol_pass"] is True
+    engine = result["measurement_identity"]["arms"]["baseline"]["engine"]
+    assert engine["inspect_ai_version"] == "0.3.269"
+    assert set(engine).isdisjoint(
+        {
+            "generate_calls",
+            "weight_generate_host_wall_s",
+            "runtime_scope",
+            "weight_runtime_scope",
+            "revision_observation",
+        }
+    )
+    assert result["independent_execution_verified"] is False
+    consumed = compare(paths[0], paths[0], t0_reference=result, t0_candidate=result)
+    assert consumed["preconditions"]["T0_within_hardware_byte_identity"]["reference"]["pass"] is True
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("generate_calls", 39),
+        ("generate_calls", True),
+        ("weight_generate_host_wall_s", -1.0),
+        ("weight_generate_host_wall_s", True),
+        ("runtime_scope", ""),
+        ("inspect_ai", "0.3.269"),
+        ("max_samples", True),
+        ("do_sample", 0),
+        ("model_args", {"do_sample": 0}),
+        ("tokenizer_revision", "f" * 40),
+        ("source_repo", "org/other"),
+    ],
+)
+def test_t0_refuses_invalid_observed_inspect_facts_even_when_all_replicates_match(tmp_path, field, value):
+    paths = _inspect_reports(tmp_path)
+    for path in paths:
+        payload = json.loads(Path(path).read_text())
+        payload["baseline"]["engine"][field] = value
+        Path(path).write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ReproduceError):
+        within_hardware_identical(paths)
+
+
+def test_t0_refuses_inspect_operator_identity_without_observed_generation(tmp_path):
+    paths = _inspect_reports(tmp_path)
+    for path in paths:
+        payload = json.loads(Path(path).read_text())
+        del payload["baseline"]["engine"]["generate_calls"]
+        Path(path).write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ReproduceError):
+        within_hardware_identical(paths)
+
+
+@pytest.mark.parametrize("field, value", [("torch_version", "different"), ("snapshot_manifest_sha256", "3" * 64)])
+def test_t0_observed_inspect_causal_differences_remain_measurement_mismatches(tmp_path, field, value):
+    paths = _inspect_reports(tmp_path)
+    payload = json.loads(Path(paths[-1]).read_text())
+    payload["baseline"]["engine"][field] = value
+    Path(paths[-1]).write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ReproduceError, match="identity"):
+        within_hardware_identical(paths)
+
+
 @pytest.mark.parametrize("threads", [None, True, False, 0, -1, "16", 16.0])
 def test_gguf_t0_requires_positive_exact_integer_thread_provenance(tmp_path, threads):
     engine = {

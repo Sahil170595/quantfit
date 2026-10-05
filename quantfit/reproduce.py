@@ -743,6 +743,7 @@ class _View:
     path: str
     sha256: str
     raw: dict
+    report: DriftReport
 
 
 def _load(path: str, side: str) -> _View:
@@ -810,7 +811,7 @@ def _load(path: str, side: str) -> _View:
             "artifact_sha256": arm.artifact_sha256,
             "engine": arm.engine,
         }
-    view = _View(side=side, path=str(path), sha256=hashlib.sha256(data).hexdigest(), raw=raw)
+    view = _View(side=side, path=str(path), sha256=hashlib.sha256(data).hexdigest(), raw=raw, report=report)
     _validate_drift(view)
     return view
 
@@ -2293,6 +2294,11 @@ def compare(
 def _t0_identity(view: _View) -> tuple[dict, dict, str]:
     """Strict reported instrument/environment identity; no claim about physical hosts."""
     from quantfit.safety.cache import SERVED_ENGINE_KEY, CacheError, _arm_identity, _env_identity, _is_hex_digest
+    from quantfit.safety.calibration_binding import (
+        CalibrationBindingError,
+        engine_causal_identity,
+        measurement_identity,
+    )
 
     raw = view.raw
 
@@ -2329,6 +2335,13 @@ def _t0_identity(view: _View) -> tuple[dict, dict, str]:
     )
     arms = {}
     try:
+        # The shared observed-report contract checks Inspect's arm/repo/revision and
+        # dtype facts against real ArmRuns; no missing runtime observation is invented.
+        inspect_scope = (
+            measurement_identity(view.report)
+            if any(raw[name]["engine"].get("name") == "inspect_ai:hf" for name in _T1_ARMS)
+            else None
+        )
         environment = _env_identity(raw["env"], "T0 environment")
         for key in ("python", "torch", "transformers"):
             require(
@@ -2348,6 +2361,9 @@ def _t0_identity(view: _View) -> tuple[dict, dict, str]:
             )
             arms[name] = _arm_identity(record)
             engine = record["engine"]
+            arms[name]["engine"] = engine_causal_identity(engine, n_probes=n)
+            if engine["name"] == "inspect_ai:hf":
+                arms[name] = inspect_scope[name]
             if engine["name"] == "llama.cpp":
                 require(
                     _is_hex_digest(engine.get("binary_sha256"), 64),
@@ -2363,12 +2379,12 @@ def _t0_identity(view: _View) -> tuple[dict, dict, str]:
                     and (source == _T0_USER_LLAMACPP_SOURCE or bool(_T0_PINNED_LLAMACPP_SOURCE.fullmatch(source))),
                     f"{name}.engine.source must identify its pinned release tag or explicitly unverified user build",
                 )
-            else:
+            elif engine["name"] != "inspect_ai:hf":
                 require(
                     isinstance(engine.get("version"), str) and bool(engine["version"].strip()),
                     f"{name}.engine.version is required",
                 )
-    except CacheError as exc:
+    except (CacheError, CalibrationBindingError) as exc:
         raise ReproduceError(f"T0 {view.side} has insufficient identity: {exc}") from exc
     identity = {
         "schema_version": raw["schema_version"],
