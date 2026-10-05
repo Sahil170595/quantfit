@@ -425,3 +425,48 @@ def test_reproduce_cli_legacy_positive_artifact_is_accepted_as_unverified(tmp_pa
         == 3
     )
     assert json.loads(capsys.readouterr().out)["result"]["outcome"] == "reproduced_t0_unverified"
+
+
+def test_standalone_t0_can_be_consumed_from_another_directory(tmp_path, monkeypatch, capsys):
+    left, right = _reports(tmp_path, "left"), _reports(tmp_path, "right", env=_ENV_F)
+    monkeypatch.chdir(tmp_path)
+    for name, paths in (("left", left), ("right", right)):
+        assert main(["t0", "--reports", *[Path(p).name for p in paths], "--out", f"{name}-t0.json", "--json"]) == 0
+        capsys.readouterr()
+    consumer = tmp_path / "consumer"
+    consumer.mkdir()
+    (consumer / "left0.json").write_text("wrong working-directory namesake", encoding="utf-8")
+    monkeypatch.chdir(consumer)
+    assert (
+        main(
+            [
+                "reproduce",
+                "--reference",
+                left[0],
+                "--candidate",
+                right[0],
+                "--t0-reference",
+                str(tmp_path / "left-t0.json"),
+                "--t0-candidate",
+                str(tmp_path / "right-t0.json"),
+                "--json",
+            ]
+        )
+        == 0
+    )
+    result = json.loads(capsys.readouterr().out)["result"]
+    assert result["outcome"] == "reproduced"
+    t0 = result["preconditions"]["T0_within_hardware_byte_identity"]
+    assert t0["reference"]["bound_to_comparison_report"] is True
+    assert all(Path(source["path"]).is_absolute() for source in t0["reference"]["evidence"]["reports"])
+
+
+def test_existing_relative_t0_source_paths_still_recheck_in_the_producer_directory(tmp_path, monkeypatch):
+    left, right = _reports(tmp_path, "left"), _reports(tmp_path, "right", env=_ENV_F)
+    left_t0, right_t0 = within_hardware_identical(left), within_hardware_identical(right)
+    for evidence in (left_t0, right_t0):
+        for source in evidence["reports"]:
+            source["path"] = Path(source["path"]).name
+    monkeypatch.chdir(tmp_path)
+    result = compare(left[0], right[0], t0_reference=left_t0, t0_candidate=right_t0)
+    assert result["outcome"] == "reproduced"

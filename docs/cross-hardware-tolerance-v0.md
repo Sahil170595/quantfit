@@ -405,8 +405,11 @@ Positive T0 consumption by `compare` also rereads the cited source reports, chec
 their hashes and scope, and requires that side's comparison report bytes to be a
 member of the replicate set. CLI `--t0-reference` and `--t0-candidate` accept either a
 single standalone T0 artifact or their existing list of replicate report paths.
-Relative source paths in an artifact are resolved from the invocation's working
-directory. Bare positive booleans and legacy positive dicts with
+**2026-10-05 path-handling correction:** newly produced artifacts record canonical
+absolute source paths, so consuming them from a different working directory reads
+the same cited files. Existing relative-path artifacts remain recheckable from
+their producer's directory; regenerate them before consuming them elsewhere.
+Bare positive booleans and legacy positive dicts with
 no bound identity remain ingestible as **unverified**, and cannot license
 `reproduced`; negative assertions still conservatively void the comparison.
 The source SHA256 and parsed report facts must come from the same read buffer;

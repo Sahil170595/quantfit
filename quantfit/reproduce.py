@@ -2031,7 +2031,8 @@ def _t0_side(value, side: str, target: _View) -> tuple[bool | None, dict]:
                 not isinstance(source, dict) or not isinstance(source.get("path"), str) for source in sources
             ):
                 raise ReproduceError(f"t0_{side} has malformed source report evidence")
-            actual = within_hardware_identical([source["path"] for source in sources])
+            expected_sources = [{**source, "path": _absolute_report_path(source["path"])} for source in sources]
+            actual = within_hardware_identical([source["path"] for source in expected_sources])
             for key in (
                 "reports",
                 "measurement_identity",
@@ -2042,7 +2043,8 @@ def _t0_side(value, side: str, target: _View) -> tuple[bool | None, dict]:
                 "meets_protocol_replicate_count",
                 "protocol_pass",
             ):
-                if actual[key] != value.get(key):
+                expected = expected_sources if key == "reports" else value.get(key)
+                if actual[key] != expected:
                     raise ReproduceError(f"t0_{side} source evidence changed or contradicts its {key}")
             identity, environment, fingerprint = _t0_identity(target)
             member = any(source["report_sha256"] == target.sha256 for source in actual["reports"])
@@ -2406,6 +2408,13 @@ def _t0_identity(view: _View) -> tuple[dict, dict, str]:
     return identity, environment, hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def _absolute_report_path(path: str) -> str:
+    try:
+        return str(Path(path).resolve())
+    except (OSError, RuntimeError) as exc:
+        raise ReproduceError(f"cannot resolve report path {path}: {exc}") from exc
+
+
 def within_hardware_identical(report_paths, *, out_path: str | None = None) -> dict:
     """T0 (§1.5) — the within-hardware precondition, over ONE hardware's replicate set.
 
@@ -2433,7 +2442,7 @@ def within_hardware_identical(report_paths, *, out_path: str | None = None) -> d
     nondeterminism. All reports must first identify the same pinned instrument and
     reported environment, and neither arm may carry a served-baseline cache marker.
     """
-    paths = [str(p) for p in report_paths]
+    paths = [_absolute_report_path(str(p)) for p in report_paths]
     if len(paths) < 2:
         raise ReproduceError(f"T0 needs at least 2 replicate reports to compare; got {len(paths)}")
 

@@ -337,8 +337,10 @@ in `docs/cross-hardware-tolerance-v0.md` and the synthetic functional record at
 `validation/2026-10-05-t0-replicates/`.
 
 `--t0-reference` and `--t0-candidate` each accept one standalone artifact, or the existing
-list of replicate report paths. Source paths in an artifact are read relative to the
-invocation's working directory when they are not absolute. Positive
+list of replicate report paths. New T0 artifacts record canonical absolute source
+paths and can be consumed from another working directory. Older relative-path
+artifacts remain readable from the producer's directory; regenerate them before
+consuming them elsewhere. Positive
 evidence is reread and checked against its hashes; each compared report must belong to
 its side's source set by exact bytes and identity. Bare `true` and legacy identity-less
 positive results are accepted as unverified assertions, so they cannot produce the
