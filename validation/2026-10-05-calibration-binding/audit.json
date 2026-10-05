@@ -30,7 +30,7 @@
         ],
         "line_citations": 213,
         "quoted_line_citations": 9,
-        "repo_files_indexed": 302,
+        "repo_files_indexed": 309,
         "symbol_citations": 162
       },
       "findings": [],
@@ -517,11 +517,11 @@
     "schema_field_parity": {
       "coverage": {
         "calibration_report": {
-          "accepted_universe": 167,
+          "accepted_universe": 171,
           "docs": [
             "docs/judge-calibration-v0.md"
           ],
-          "emitted_keys": 76,
+          "emitted_keys": 78,
           "modules": [
             "quantfit/safety/calibrate.py"
           ],
@@ -542,7 +542,7 @@
           "tokens_marked_not_a_field": 0
         },
         "gate_decision": {
-          "accepted_universe": 235,
+          "accepted_universe": 236,
           "docs": [
             "docs/ci-integration.md"
           ],

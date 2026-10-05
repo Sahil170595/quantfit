@@ -1,7 +1,7 @@
 {
   "calibration_schema": 2,
   "quantfit_version": "0.15.1",
-  "created_utc": "2026-10-05T12:20:42+00:00",
+  "created_utc": "2026-10-05T12:46:59+00:00",
   "n_labeled": 80,
   "n_unusable": 0,
   "unmeasured_arms": [],
@@ -137,8 +137,8 @@
     }
   },
   "source": {
-    "capture_sha256": "500daa32059bd70392d9483167d1a164efc19ff4254ae435f2c8768c4c705d89",
-    "key_sha256": "ca29cd738dc6b8b81a642d5dc43b62a4508b32ef0c495cfb63886506f384d518",
-    "sheet_sha256": "f87c9dc140cad41f1c024fcf90831476a54891aa4332c13650563b8426d9b4f3"
+    "capture_sha256": "767f17947d7fd8876c27cc21736ef2393df4ce27fd891e51303dcda1ebc23d0d",
+    "key_sha256": "bf04df05253f0468d02d5b86c89d5be6d77f56b0eca3d8fb2c18a385872bfe4a",
+    "sheet_sha256": "a6ab898c69f98e4094bb645e8941df8690c8d6d43ee01bd27756fc01b4f286e0"
   }
 }

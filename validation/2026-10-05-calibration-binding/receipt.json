@@ -13,7 +13,7 @@
     "quantfit_source_version": "0.15.1"
   },
   "command": "tools/ci/.venv/Scripts/python.exe validation/2026-10-05-calibration-binding/reproduce.py",
-  "created_utc": "2026-10-05T12:20:43+00:00",
+  "created_utc": "2026-10-05T12:47:00+00:00",
   "fixture_scope_is_observed_runtime": false,
   "kind": "synthetic functional evidence, no human adjudication",
   "limits": [
@@ -42,13 +42,13 @@
   },
   "source_sha256": {
     "quantfit/cli.py": "e61565715fb984aba29734183665ba90bd819b7e8b8f9c49d5c5f182822b3cae",
-    "quantfit/gate.py": "8a57d72df593b8d105cb52d20fc67152e5824743aecdecb41c5c482800de0da0",
-    "quantfit/safety/calibrate.py": "cbc290ac1f9574fe3b558e3d00315accfc83aefed7a27da851679e23f0a90e67",
-    "quantfit/safety/calibrated_gate.py": "65438e0afa86ccd62471021e44a27560d18b1e41e859be1c16ad3683fdeaadeb",
-    "quantfit/safety/calibration_binding.py": "145f922daf9c7766a14d8a6897587fbf4a3270bf07cb86dd3fee40be1b120388",
+    "quantfit/gate.py": "f4d8c28d7b277ebbdc429048d067c6fe2ad982b8ae1c39e14b22cef3edf5be1f",
+    "quantfit/safety/calibrate.py": "c9cfaa336ce2682d02f2db46a3601a91bf557e297ef4ecfa4ff2e0f28c25f4e9",
+    "quantfit/safety/calibrated_gate.py": "2b85e88a3075823473ed59c3a01539996fec3a538447af9a34039f0b3f4d4be8",
+    "quantfit/safety/calibration_binding.py": "792604d4da831a500f49282ef004e1dc4d0ed7e8b4bc8b309cdad89070c4e376",
     "quantfit/safety/verify.py": "caddba45efd1422bc3a695710e9c5c64ca2ffbdeb6b9d857799eb2233ac39b88",
-    "tests/test_bound_calibration_pipeline.py": "decadc5aff434c16b05da781953ad079c748a2a879b761acad7bd3b4acc1198c",
-    "tests/test_calibration_binding.py": "e2e21e497b4dd5ded628fd8637b634678af45680c26e2d6ea12f68325a97a294",
+    "tests/test_bound_calibration_pipeline.py": "d8c008db7463807f1203c626b64a4c79feabbd761932d5c6f36eab38ff03518d",
+    "tests/test_calibration_binding.py": "b7c8749a34120a2059ca532df886ad85ad7f5d87bd499d47bd183cc331459dc9",
     "validation/2026-10-05-calibration-binding/reproduce.py": "2c671c24aee1c0ebdad76e7575cbe9fbe5c14cf04b51ce4466b1cc053daa6179"
   }
 }

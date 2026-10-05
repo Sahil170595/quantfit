@@ -18,6 +18,7 @@ From the repository root in PowerShell:
 tools\ci\.venv\Scripts\python.exe validation/2026-10-05-calibration-binding/reproduce.py
 tools\ci\.venv\Scripts\python.exe -m pytest tests -q --cov=quantfit --cov-branch --cov-report=json:coverage.json --junitxml=validation/2026-10-05-calibration-binding/pytest.xml
 tools\ci\.venv\Scripts\python.exe tools/ci_coverage.py coverage.json
+tools\ci\.venv\Scripts\python.exe tools/ci_mutation.py
 tools\ci\.venv\Scripts\python.exe -m ruff check quantfit tests tools
 tools\ci\.venv\Scripts\python.exe -m ruff format --check quantfit tests
 tools\ci\.venv\Scripts\python.exe -m quantfit.cli audit --json
@@ -33,6 +34,14 @@ does not claim observed weights matched. `eps.measured` stays false.
 The decision also names A1/A2/A3 and keeps `eps.assumptions_verified` false; matching
 scope does not prove that the labeled rates apply to the at-risk subpopulation or that
 the majority-real and conditional independence assumptions hold.
+Regression checks substitute capture/key/sheet files after parsing and verify that
+source hashes still describe the parsed snapshots. Synthetic observed-HF metadata checks
+also retain causal precision/revision/tokenizer/backend facts while excluding timing;
+missing/contradictory observations and operator aliases are refused.
+The public-report substitution regression presents the same counts with matching metadata
+while the actual private report has different weights; it is refused. Matching private
+reports are published only after verification. Calibration/output aliases are refused,
+including hardlinks, without modifying input bytes.
 
 `widened-fixture-*.json` exercise the proceeding-run path on a deliberately widened
 2000-probe synthetic corpus, 1500 expected-unsafe. The existing decision primitives
@@ -46,3 +55,11 @@ removed by the reproduction script. JUnit records regression checks. This record
 establishes no human error rate, truthful labels, independent judge error, real backend
 precision/revision correctness, GPU qualification, sensitivity result or research GO.
 Hosted checks and installed-package acceptance are separate evidence.
+
+Final local checks passed: **1474 tests**, one skipped and six deselected; exact CI Ruff
+scopes; documentation audit with zero findings; all three selected CI decision mutants
+killed. `checks.json` records the JUnit-derived count and coverage floors. The actual CLI
+process also returned exit 5; its aggregate JSON envelope is `cli-envelope.json`.
+The standalone binding test module is now included in hosted installed-wheel and rebuilt
+sdist qualification outside the checkout; that hosted proof remains pending publication
+of this branch.

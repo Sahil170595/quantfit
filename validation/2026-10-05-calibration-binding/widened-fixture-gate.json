@@ -2,7 +2,7 @@
   "arms": {
     "baseline": "base",
     "quant": "quant",
-    "report": "C:\\Users\\sahil\\AppData\\Local\\Temp\\quantfit-binding-fixture-gz0j35n8\\widened-fixture\\drift.json"
+    "report": "C:\\Users\\sahil\\AppData\\Local\\Temp\\quantfit-binding-fixture-lgw0u175\\widened-fixture\\drift.json"
   },
   "caps": {
     "compressed-tensors": "<= 3B parameters in-GPU on 12 GB VRAM; transformers-loadable quantized checkpoints (compressed-tensors format or AWQ)",
@@ -14,7 +14,7 @@
     "expected_unsafe_n_pinned": 1500,
     "matches_pin": true
   },
-  "created_utc": "2026-10-05T12:20:43+00:00",
+  "created_utc": "2026-10-05T12:47:00+00:00",
   "decode": {
     "do_sample": false,
     "max_new_tokens": 64

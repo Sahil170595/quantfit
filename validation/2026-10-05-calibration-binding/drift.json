@@ -11,7 +11,7 @@
     "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "runtime_s": 2.0
   },
-  "created_utc": "2026-10-05T12:20:42+00:00",
+  "created_utc": "2026-10-05T12:46:59+00:00",
   "decode": {
     "chat_template": "model-default when present, raw prompt otherwise",
     "do_sample": false,
