@@ -100,3 +100,35 @@ The short token cap and unmeasurable axis make this unsuitable as a safety
 finding or reference report. The hosted `cpu-inspect` job is configured to test
 the installed candidate wheel independently; this local run does not claim a
 hosted result. Logs, package copies and build outputs are disposable, not evidence.
+
+## Hosted unit fixture correction
+
+The lightweight hosted graph exposed a fixture defect in
+[Python 3.11 job 111778719068](https://github.com/Sahil170595/quantfit/actions/runs/37314801785/job/111778719068):
+fake loaded weights still consulted real Transformers package metadata. That
+graph deliberately installs neither Torch nor Transformers. The numerical job
+also reproduced the missing Transformers metadata failure. This was a test
+dependency leak; production adapter code and real-provider acceptance remain
+unchanged.
+
+`unit-fixture.json` and `unit-fixture-tests.xml` record the subsequent locked
+unit/tooling qualification on this Windows host using Python 3.11.9. A fresh
+environment with both runtime packages absent reproduced five boundary-test
+failures before correction; all 34 boundary tests passed after correction.
+The fake-weight fixture now supplies explicitly named fixture versions and
+asserts their inclusion in the aggregate. Real-provider CPU acceptance still
+obtains installed runtime versions from the unmodified adapter.
+
+```powershell
+uvx --from uv==0.12.23 uv sync --directory tools/ci --locked --no-default-groups --group unit --group tooling --python 3.11
+tools/ci/.venv/Scripts/python.exe -m pytest tests/test_inspect_hf.py -q
+tools/ci/.venv/Scripts/python.exe -m pytest tests -q --ignore=tests/test_numerical_properties.py --junitxml=C:/tmp/quantfit-inspect-fixture-green-20261005.xml
+tools/ci/.venv/Scripts/ruff.exe check quantfit tests tools
+tools/ci/.venv/Scripts/ruff.exe format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture
+tools/ci/.venv/Scripts/python.exe -m mypy --strict quantfit/spec.py quantfit/engines/base.py
+tools/ci/.venv/Scripts/python.exe -m quantfit.cli audit
+```
+
+This fixture-only qualification does not run models, measure quantization,
+establish human labels or verify GPU behavior. The earlier actual CPU record
+above remains a separate observation.

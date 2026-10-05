@@ -48,6 +48,12 @@ def factory(monkeypatch, tmp_path):
     monkeypatch.setattr(hf, "_inspect_version", lambda: "0.3.269")
     monkeypatch.setattr(hf, "_snapshot", lambda repo, revision, token: path)
     monkeypatch.setattr(hf, "_provider_type", lambda: types.SimpleNamespace)
+    # Fake weights have fixture versions; unit jobs need neither runtime package.
+    real_version = hf.importlib.metadata.version
+    versions = {"transformers": "fixture-transformers", "torch": "fixture-torch"}
+    monkeypatch.setattr(
+        hf.importlib.metadata, "version", lambda name: versions[name] if name in versions else real_version(name)
+    )
     return path
 
 
@@ -104,6 +110,8 @@ def test_containment_and_per_arm_calls(factory):
     arms = run.finish(2)
     assert all(a.revision == SHA and a.resolved_dtype == "torch.float32" and a.runtime_s > 0 for a in arms)
     assert all(a.engine["generate_calls"] == 2 for a in arms)
+    assert all(a.engine["transformers_version"] == "fixture-transformers" for a in arms)
+    assert all(a.engine["torch_version"] == "fixture-torch" for a in arms)
     assert all(a.engine["tokenizer_revision"] == SHA for a in arms)
     assert arms[0].engine["snapshot_manifest_sha256"] == arms[1].engine["snapshot_manifest_sha256"]
     assert str(factory) not in json.dumps([a.engine for a in arms])

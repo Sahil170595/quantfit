@@ -1,0 +1,45 @@
+{
+  "prior_source_head": "684ce99e8d6e1ea3dcab36eaefebf1584eafe4ba",
+  "hardware": "same Windows CPU host as original qualification; no model workload",
+  "python": "3.11.9",
+  "locked_groups": [
+    "unit",
+    "tooling"
+  ],
+  "versions": {
+    "inspect-ai": "0.3.269",
+    "pytest": "9.0.3",
+    "ruff": "0.16.2",
+    "scipy": "1.15.3"
+  },
+  "runtime_packages_installed": {
+    "torch": false,
+    "transformers": false
+  },
+  "source_sha256": "f8461f9da3c165f5182fe928a91937103ba688998b73412a6eee0c3aef7ee030",
+  "lock_sha256": "8b7814b7e12f065217cf4c0330022cf134a1d4f66804e3cbf179970e5e0cc017",
+  "before_fix": {
+    "failed": 5,
+    "passed": 29,
+    "reason": "fake weights leaked dependency on real runtime package metadata",
+    "hosted_job": "https://github.com/Sahil170595/quantfit/actions/runs/37314801785/job/111778719068"
+  },
+  "after_fix_boundary": {
+    "passed": 34
+  },
+  "after_fix_unit_suite": {
+    "passed": 1602,
+    "skipped": 8,
+    "pass_count_confirmed_from_junit": true
+  },
+  "ruff_check": "passed",
+  "ruff_format": "passed",
+  "strict_mypy": "passed",
+  "audit_errors": 0,
+  "audit_warnings": 0,
+  "production_provider_source_changed": false,
+  "limits": [
+    "Hermetic fixture qualification, no model or judge workload.",
+    "Real installed CPU provider remains independently required on hosted runners."
+  ]
+}
