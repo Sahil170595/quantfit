@@ -1,6 +1,7 @@
 """Producer/consumer and fail-closed tests on synthetic completions and scope only."""
 
 import csv
+import hashlib
 import json
 from dataclasses import replace
 
@@ -230,3 +231,51 @@ def test_unidentified_local_capture_stays_usable_without_inventing_revision(tmp_
     key = tmp_path / "unbound.labelkey.json"
     build_labeling_sheet(str(capture), str(tmp_path / "unbound.labels.csv"), str(key))
     assert json.loads(key.read_text(encoding="utf-8"))["binding"] is None
+
+
+def test_capture_hash_describes_the_buffer_parsed_even_if_file_changes(tmp_path, monkeypatch):
+    from quantfit.safety import calibrate
+
+    _, _, _, capture, _, _ = synthetic_roundtrip(tmp_path, monkeypatch)
+    parsed_bytes = capture.read_bytes()
+    read_capture = calibrate._read_capture
+
+    def swap_after_parse(path, **kwargs):
+        parsed = read_capture(path, **kwargs)
+        capture.write_text('{"substituted": true}\n', encoding="utf-8")
+        return parsed
+
+    monkeypatch.setattr(calibrate, "_read_capture", swap_after_parse)
+    key = tmp_path / "snapshot.labelkey.json"
+    build_labeling_sheet(str(capture), str(tmp_path / "snapshot.labels.csv"), str(key))
+    assert json.loads(key.read_text(encoding="utf-8"))["capture_sha256"] == hashlib.sha256(parsed_bytes).hexdigest()
+    assert capture.read_bytes() != parsed_bytes
+
+
+@pytest.mark.parametrize("changed", ["sheet", "key"])
+def test_ingest_hashes_the_exact_parsed_buffers_not_later_disk_bytes(tmp_path, monkeypatch, changed):
+    from quantfit.safety import calibrate
+
+    _, _, _, _, sheet, key = synthetic_roundtrip(tmp_path, monkeypatch)
+    parsed_sheet, parsed_key = sheet.read_bytes(), key.read_bytes()
+    join = calibrate._join
+
+    def swap_after_parse(*args, **kwargs):
+        parsed = join(*args, **kwargs)
+        if changed == "sheet":
+            rows = list(csv.DictReader(parsed_sheet.decode("utf-8").splitlines()))
+            with sheet.open("w", encoding="utf-8", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=("id", "completion", "human_label"))
+                writer.writeheader()
+                writer.writerows({**row, "human_label": "unusable"} for row in rows)
+        else:
+            key.write_text('{"substituted": true}\n', encoding="utf-8")
+        return parsed
+
+    monkeypatch.setattr(calibrate, "_join", swap_after_parse)
+    payload = ingest_labels(str(sheet), str(key), str(tmp_path / "snapshot.json"))
+    assert payload["baseline"]["n"] == payload["quantized"]["n"] == 40
+    assert payload["n_unusable"] == 0
+    assert payload["source"]["sheet_sha256"] == hashlib.sha256(parsed_sheet).hexdigest()
+    assert payload["source"]["key_sha256"] == hashlib.sha256(parsed_key).hexdigest()
+    assert (sheet if changed == "sheet" else key).read_bytes() != (parsed_sheet if changed == "sheet" else parsed_key)

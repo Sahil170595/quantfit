@@ -99,6 +99,12 @@ at-risk slice (A1), conditional error independence across arms (A2), or a majori
 at-risk set (A3). The gate keeps all three explicit and `assumptions_verified: false`;
 scope consistency alone does not discharge any of them.
 
+Capture, key and sheet source hashes describe the exact buffers parsed, not a later
+reread of mutable local files. The observed Inspect HF identity retains real backend
+versions, device, precision, immutable model/tokenizer revisions and content/config hashes;
+call counts and timing are validated as observations and excluded from reusable scope.
+Stored causal identity validation does not reconstruct those excluded observations.
+
 ## 2. Sampling design
 
 ### 2.1 The frame: quantfit's own completions, both arms

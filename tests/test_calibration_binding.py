@@ -8,6 +8,7 @@ import pytest
 
 from quantfit.safety.calibration_binding import (
     CalibrationBindingError,
+    engine_causal_identity,
     identity_fingerprint,
     load_bound_calibration,
     measurement_identity,
@@ -206,7 +207,7 @@ def test_complete_arm_with_no_refusals_cannot_bound_false_compliance(tmp_path):
 
 
 @pytest.mark.parametrize("arm", ["baseline", "quantized"])
-def test_gguf_and_inspect_engine_identity_requires_observed_backend_pins(arm):
+def test_gguf_engine_identity_requires_observed_backend_pins(arm):
     report = report_fixture()
     gguf = replace(
         getattr(report, arm),
@@ -219,9 +220,89 @@ def test_gguf_and_inspect_engine_identity_requires_observed_backend_pins(arm):
     assert identity[arm]["artifact_sha256"] == "e" * 64
     with pytest.raises(CalibrationBindingError, match="binary_sha256"):
         measurement_identity(replace(report, **{arm: replace(gguf, engine={"name": "llama.cpp", "threads": 8})}))
-    inspect = replace(getattr(report, arm), engine={"name": "inspect_ai:hf", "provider": "hf", "inspect_ai": "0.3.269"})
-    assert measurement_identity(replace(report, **{arm: inspect}))[arm]["engine"]["provider"] == "hf"
-    with pytest.raises(CalibrationBindingError, match="providers"):
-        measurement_identity(
-            replace(report, **{arm: replace(inspect, engine={**inspect.engine, "provider": "fixture"})})
-        )
+
+
+def inspect_engine(repo="org/model", revision="a" * 40, n=40):
+    """Synthetic fields follow the observed Inspect HF contract, not operator aliases."""
+    return {
+        "name": "inspect_ai:hf",
+        "inspect_ai_version": "0.3.269",
+        "torch_version": "2.13.0+cpu",
+        "transformers_version": "5.17.0",
+        "device": "cpu",
+        "source_repo": repo,
+        "config_commit_hash": revision,
+        "snapshot_manifest_sha256": "c" * 64,
+        "tokenizer_revision": revision,
+        "tokenizer_template_sha256": "d" * 64,
+        "quantization_config_sha256": None,
+        "quantization_method": None,
+        "max_samples": 1,
+        "do_sample": False,
+        "model_args": {"do_sample": False},
+        "generate_calls": n,
+        "weight_generate_host_wall_s": 1.0,
+        "runtime_scope": "synthetic observed call wall time",
+        "weight_runtime_scope": "synthetic weight generate wall time",
+        "revision_observation": "synthetic immutable snapshot observation",
+    }
+
+
+def inspect_report_fixture():
+    report = report_fixture()
+    return replace(
+        report,
+        baseline=replace(report.baseline, model="hf/org/base", engine=inspect_engine("org/base")),
+        quantized=replace(report.quantized, model="hf/org/quant", engine=inspect_engine("org/quant", "b" * 40)),
+    )
+
+
+def test_observed_inspect_identity_omits_outputs_and_round_trips_stored_scope(tmp_path):
+    report = inspect_report_fixture()
+    changed = replace(
+        report,
+        baseline=replace(
+            report.baseline,
+            runtime_s=10.0,
+            engine={**report.baseline.engine, "weight_generate_host_wall_s": 9.0, "runtime_scope": "later timing note"},
+        ),
+    )
+    assert measurement_identity(report) == measurement_identity(changed)
+    engine = measurement_identity(report)["baseline"]["engine"]
+    assert "generate_calls" not in engine and "weight_generate_host_wall_s" not in engine
+    assert engine_causal_identity(engine, observed=False) == engine
+    load_bound_calibration(write_calibration(tmp_path, calibration_fixture(report)), report=changed)
+    causal_change = replace(
+        report,
+        baseline=replace(report.baseline, engine={**report.baseline.engine, "tokenizer_template_sha256": "e" * 64}),
+    )
+    assert measurement_identity(causal_change) != measurement_identity(report)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda e: e.update(generate_calls=39),
+        lambda e: e.update(generate_calls=True),
+        lambda e: e.pop("weight_generate_host_wall_s"),
+        lambda e: e.update(weight_generate_host_wall_s=float("inf")),
+        lambda e: e.update(provider="operator-alias"),
+        lambda e: e.update(do_sample=0),
+        lambda e: e.update(model_args={"do_sample": 0}),
+        lambda e: e.update(max_samples=True),
+        lambda e: e.update(tokenizer_revision="b" * 40),
+        lambda e: e.update(config_commit_hash="b" * 40),
+        lambda e: e.update(source_repo="another/model"),
+    ],
+)
+def test_observed_inspect_metadata_refuses_incomplete_or_contradictory_facts(change):
+    report = inspect_report_fixture()
+    change(report.baseline.engine)
+    with pytest.raises(CalibrationBindingError):
+        measurement_identity(report)
+
+
+def test_nullable_observed_config_commit_is_preserved_without_invention():
+    report = inspect_report_fixture()
+    report.baseline.engine["config_commit_hash"] = None
+    assert measurement_identity(report)["baseline"]["engine"]["config_commit_hash"] is None

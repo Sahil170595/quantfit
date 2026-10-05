@@ -32,6 +32,7 @@ def main() -> None:
         config = sandbox / "pytest.ini"
         config.write_text("[pytest]\n", encoding="utf-8")
         tests = [
+            "test_calibration_binding.py",
             "test_gate.py",
             "test_junit.py",
             "test_junit_gate_screen.py",

@@ -21,6 +21,32 @@ BOUND_SCHEMA = 2
 MAX_CALIBRATION_BYTES = 2 * 1024 * 1024
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 _REVISION = re.compile(r"[0-9a-f]{40}")
+_INSPECT_CAUSAL = {
+    "name",
+    "inspect_ai_version",
+    "torch_version",
+    "transformers_version",
+    "device",
+    "source_repo",
+    "config_commit_hash",
+    "snapshot_manifest_sha256",
+    "tokenizer_revision",
+    "tokenizer_template_sha256",
+    "quantization_config_sha256",
+    "quantization_method",
+    "max_samples",
+    "do_sample",
+    "model_args",
+}
+_ENGINE_OUTPUTS = {
+    "baseline_cache",
+    "runtime_s",
+    "generate_calls",
+    "weight_generate_host_wall_s",
+    "runtime_scope",
+    "weight_runtime_scope",
+    "revision_observation",
+}
 
 
 class CalibrationBindingError(RuntimeError):
@@ -58,7 +84,112 @@ def identity_fingerprint(identity: dict) -> str:
     return hashlib.sha256(_canonical(identity)).hexdigest()
 
 
-def _arm_identity(arm: ArmRun) -> dict:
+def engine_causal_identity(engine: dict, *, n_probes: int | None = None, observed: bool = True) -> dict:
+    """Canonical backend facts; observed Inspect mode requires n and complete outputs.
+
+    Known outputs are validated then omitted. observed=False is only for the exact
+    stored causal identity shape; no call/timing observation is reconstructed.
+    """
+    _require(isinstance(engine, dict), "engine must be an object")
+    name = _text(engine.get("name"), "engine.name")
+    for key in ("runtime_s", "weight_generate_host_wall_s"):
+        if key in engine:
+            value = engine[key]
+            _require(
+                type(value) in (int, float) and math.isfinite(value) and value >= 0,
+                f"engine.{key} must be finite non-negative timing",
+            )
+    for key in ("runtime_scope", "weight_runtime_scope", "revision_observation"):
+        if key in engine:
+            _text(engine[key], f"engine.{key}")
+    if "baseline_cache" in engine:
+        _require(isinstance(engine["baseline_cache"], dict), "engine.baseline_cache must be an object")
+    if name == "inspect_ai:hf":
+        _require(
+            _INSPECT_CAUSAL <= set(engine) <= _INSPECT_CAUSAL | _ENGINE_OUTPUTS,
+            "Inspect HF engine has missing or unsupported metadata",
+        )
+        if observed:
+            _require(
+                {
+                    "generate_calls",
+                    "weight_generate_host_wall_s",
+                    "runtime_scope",
+                    "weight_runtime_scope",
+                    "revision_observation",
+                }
+                <= set(engine),
+                "Inspect HF observed generation metadata is missing",
+            )
+        else:
+            _require(set(engine) == _INSPECT_CAUSAL, "stored Inspect identity must contain only causal metadata")
+        _require(engine["inspect_ai_version"] == "0.3.269", "unsupported observed Inspect version")
+        for key in ("torch_version", "transformers_version", "source_repo"):
+            _text(engine[key], f"engine.{key}")
+        _require(
+            isinstance(engine["device"], str)
+            and re.fullmatch(r"cpu|mps(?::\d+)?|cuda:\d+", engine["device"]) is not None,
+            "Inspect HF device must be observed",
+        )
+        for key in ("snapshot_manifest_sha256", "tokenizer_template_sha256"):
+            _require(
+                isinstance(engine[key], str) and bool(_SHA256.fullmatch(engine[key])),
+                f"engine.{key} must be observed SHA256",
+            )
+        for key in ("config_commit_hash", "tokenizer_revision"):
+            value = engine[key]
+            _require(
+                value is None
+                and key == "config_commit_hash"
+                or isinstance(value, str)
+                and bool(_REVISION.fullmatch(value)),
+                f"engine.{key} must be observed immutable revision (config may be null)",
+            )
+        config = engine["quantization_config_sha256"]
+        _require(
+            config is None or isinstance(config, str) and bool(_SHA256.fullmatch(config)),
+            "invalid observed quantization config hash",
+        )
+        if engine["quantization_method"] is not None:
+            _text(engine["quantization_method"], "engine.quantization_method")
+        _require(
+            type(engine["max_samples"]) is int and engine["max_samples"] == 1,
+            "Inspect HF requires sequential max_samples=1",
+        )
+        _require(
+            engine["do_sample"] is False
+            and isinstance(engine["model_args"], dict)
+            and set(engine["model_args"]) == {"do_sample"}
+            and engine["model_args"]["do_sample"] is False,
+            "Inspect HF model args must declare exact greedy booleans",
+        )
+        if "generate_calls" in engine:
+            _count(engine["generate_calls"], "engine.generate_calls")
+        if observed:
+            _require(
+                _count(n_probes, "n_probes") > 0
+                and type(engine.get("generate_calls")) is int
+                and engine["generate_calls"] == n_probes,
+                "Inspect HF observed generate_calls must equal probe count",
+            )
+        causal = {key: engine[key] for key in _INSPECT_CAUSAL}
+    elif name == "llama.cpp":
+        digest = engine.get("binary_sha256")
+        _require(
+            isinstance(digest, str) and bool(_SHA256.fullmatch(digest)),
+            "llama.cpp engine needs the actual binary_sha256",
+        )
+        _require(_count(engine.get("threads"), "engine.threads") > 0, "engine.threads must be positive")
+        causal = {key: value for key, value in engine.items() if key not in _ENGINE_OUTPUTS}
+    elif name == "transformers":
+        _text(engine.get("version"), "engine.version")
+        causal = {key: value for key, value in engine.items() if key not in _ENGINE_OUTPUTS}
+    else:
+        raise CalibrationBindingError(f"engine {name!r} has no observed calibration identity contract")
+    return json.loads(_canonical(causal))
+
+
+def _arm_identity(arm: ArmRun, *, n_probes: int | None = None, observed: bool = True) -> dict:
     _text(arm.model, "arm.model")
     if arm.revision is not None:
         _require(bool(_REVISION.fullmatch(arm.revision)), "arm revision must be an immutable 40-hex commit, not main")
@@ -69,22 +200,23 @@ def _arm_identity(arm: ArmRun) -> dict:
     )
     dtype = _text(arm.resolved_dtype, "arm.resolved_dtype")
     _require(dtype.strip().lower() != "auto", "arm precision must be observed, not auto")
-    engine = {key: value for key, value in arm.engine.items() if key not in {"baseline_cache", "runtime_s"}}
-    name = _text(engine.get("name"), "engine.name")
-    if name == "llama.cpp":
-        digest = engine.get("binary_sha256")
+    engine = engine_causal_identity(arm.engine, n_probes=n_probes, observed=observed)
+    if engine["name"] == "inspect_ai:hf":
+        _require(arm.model == f"hf/{engine['source_repo']}", "Inspect HF source repo contradicts model")
         _require(
-            isinstance(digest, str) and bool(_SHA256.fullmatch(digest)),
-            "llama.cpp engine needs the actual binary_sha256",
+            arm.revision is not None
+            and engine["tokenizer_revision"] == arm.revision
+            and engine["config_commit_hash"] in (None, arm.revision),
+            "Inspect HF observed revision facts contradict arm",
         )
-        _require(_count(engine.get("threads"), "engine.threads") > 0, "engine.threads must be positive")
-    elif name == "transformers":
-        _text(engine.get("version"), "engine.version")
-    elif name.startswith("inspect_ai:"):
-        _text(engine.get("inspect_ai"), "engine.inspect_ai")
-        _require(engine.get("provider") == "hf", "fixture or unobserved Inspect providers cannot bind calibration")
-    else:
-        raise CalibrationBindingError(f"engine {name!r} has no observed calibration identity contract")
+        _require(
+            arm.resolved_dtype in {"torch.float32", "torch.float16", "torch.bfloat16", "torch.float64"},
+            "Inspect HF floating parameter dtype must be observed, not quantization bitwidth",
+        )
+        _require(
+            type(arm.runtime_s) in (int, float) and math.isfinite(arm.runtime_s) and arm.runtime_s >= 0,
+            "Inspect HF arm runtime must be finite non-negative timing",
+        )
     return {
         "model": arm.model,
         "revision": arm.revision,
@@ -96,6 +228,10 @@ def _arm_identity(arm: ArmRun) -> dict:
 
 def measurement_identity(report: DriftReport) -> dict:
     """Extract causal scope; timestamps, runtimes and cache-hit metadata are outputs."""
+    return _measurement_identity(report, require_observation=True)
+
+
+def _measurement_identity(report: DriftReport, *, require_observation: bool) -> dict:
     _require(isinstance(report, DriftReport), "measurement_identity requires a DriftReport")
     _require(
         type(report.schema_version) is int and report.schema_version == 2,
@@ -134,8 +270,12 @@ def measurement_identity(report: DriftReport) -> dict:
         "judge": judge,
         "probe_dataset": probes,
         "decode": decode,
-        "baseline": _arm_identity(report.baseline),
-        "quantized": _arm_identity(report.quantized),
+        "baseline": _arm_identity(
+            report.baseline, n_probes=probes["n_probes"] if require_observation else None, observed=require_observation
+        ),
+        "quantized": _arm_identity(
+            report.quantized, n_probes=probes["n_probes"] if require_observation else None, observed=require_observation
+        ),
         "env": env,
     }
     # Deep copy prevents downstream mutations of the source report from changing scope.
@@ -172,7 +312,7 @@ def validate_binding(binding: dict) -> dict:
             judge_runtime_s=0.0,
             drift={},
         )
-        normalized = measurement_identity(report)
+        normalized = _measurement_identity(report, require_observation=False)
     except (TypeError, RuntimeError) as exc:
         raise CalibrationBindingError(f"invalid binding identity: {exc}") from exc
     _require(normalized == identity, "binding identity is not canonical or contains omitted scope fields")
