@@ -1,5 +1,6 @@
 """Synthetic aggregate reports exercise T0 scope; no inference or hardware campaign."""
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -191,6 +192,44 @@ def test_t0_source_evidence_is_rechecked_when_consumed(tmp_path):
     _edit(left[-1], "judge", "revision", "f" * 40)
     with pytest.raises(ReproduceError, match="identity|changed|hash"):
         compare(left[0], right[0], t0_reference=left_t0, t0_candidate=right_t0)
+
+
+def test_t0_hashes_and_parses_the_same_bytes_during_a_file_change(tmp_path, monkeypatch):
+    paths = _reports(tmp_path)
+    originals = {Path(path): Path(path).read_bytes() for path in paths}
+    read_bytes = Path.read_bytes
+
+    def change_after_read(path):
+        data = read_bytes(path)
+        if path in originals:
+            changed = json.loads(data)
+            changed["judge"]["id"] = "changed-after-read"
+            path.write_text(json.dumps(changed), encoding="utf-8")
+        return data
+
+    monkeypatch.setattr(Path, "read_bytes", change_after_read)
+    result = within_hardware_identical(paths)
+    assert result["measurement_identity"]["judge"]["id"] == "judge"
+    assert [source["report_sha256"] for source in result["reports"]] == [
+        hashlib.sha256(originals[Path(path)]).hexdigest() for path in paths
+    ]
+
+
+@pytest.mark.parametrize("invalid", ["duplicate", "nan", "overflow", "fractional_schema"])
+def test_t0_refuses_ambiguous_or_nonfinite_source_json(tmp_path, invalid):
+    paths = _reports(tmp_path)
+    raw = Path(paths[0]).read_text(encoding="utf-8")
+    if invalid == "duplicate":
+        raw = raw.replace('"schema_version": 2', '"schema_version": 2, "schema_version": 2')
+    elif invalid == "nan":
+        raw = raw.replace('"judge_runtime_s": 0.0', '"judge_runtime_s": NaN')
+    elif invalid == "overflow":
+        raw = raw.replace('"judge_runtime_s": 0.0', '"judge_runtime_s": 1e999')
+    else:
+        raw = raw.replace('"schema_version": 2', '"schema_version": 2.0')
+    Path(paths[0]).write_text(raw, encoding="utf-8")
+    with pytest.raises(ReproduceError, match="duplicate|finite|schema_version"):
+        within_hardware_identical(paths)
 
 
 def test_t0_artifact_cannot_misstate_the_number_of_rechecked_sources(tmp_path):

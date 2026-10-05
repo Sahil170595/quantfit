@@ -400,6 +400,9 @@ Relative source paths in an artifact are resolved from the invocation's working
 directory. Bare positive booleans and legacy positive dicts with
 no bound identity remain ingestible as **unverified**, and cannot license
 `reproduced`; negative assertions still conservatively void the comparison.
+The source SHA256 and parsed report facts must come from the same read buffer;
+hashing one file version and parsing a later version would break this binding.
+Duplicate keys and nonfinite JSON values are invalid evidence.
 
 Equal recorded environments are not physical-host verification: schema-v2's `cpu`
 device names no CPU model, and a GPU model name identifies no unique machine.

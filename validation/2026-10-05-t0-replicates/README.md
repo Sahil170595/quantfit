@@ -79,6 +79,11 @@ the producer's pinned-release source with its explicit tag or the explicit unver
 user-build marker permitted by QSR v0 §3.2. No release tag is inferred from current
 constants, and a matching user-built executable is not claimed as pinned-release
 provenance. Follow-up full-suite and coverage evidence is recorded separately below.
+Another controlled regression changed each file immediately after its hash read:
+the previous loader emitted original byte hashes with the changed files' identities.
+The loader now constructs schema-v2 reports from that same byte buffer, and refuses
+duplicate keys and nonfinite JSON numbers. The report schema and operational exit-2
+contract are preserved.
 
 ## What this does not establish
 

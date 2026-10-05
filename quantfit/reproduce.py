@@ -407,12 +407,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 from dataclasses import dataclass
 from pathlib import Path
 
 from quantfit.safety.report import SCHEMA_VERSION as REPORT_SCHEMA_VERSION
-from quantfit.safety.report import DriftReport, ReportError
+from quantfit.safety.report import ArmRun, DriftReport, ReportError
 
 # The comparison artifact's own schema namespace, distinct from the drift report's (2),
 # the gate decision's (1) and the screen summary's (1). QSR v0 §10.2: those numbers
@@ -757,9 +758,37 @@ def _load(path: str, side: str) -> _View:
         data = Path(path).read_bytes()
     except OSError as exc:
         raise ReproduceError(f"unreadable {side} report {path}: {exc}") from exc
+
+    def _pairs(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ReportError(f"duplicate report JSON key {key!r}")
+            result[key] = value
+        return result
+
+    def _nonfinite(value):
+        raise ReportError(f"report JSON must contain finite numbers: {value}")
+
+    def _float(value):
+        parsed = float(value)
+        if not math.isfinite(parsed):
+            raise ReportError("report JSON numbers must be finite")
+        return parsed
+
     try:
-        report = DriftReport.from_json(path)
-    except ReportError as exc:
+        # Provenance binds these exact parsed bytes, never a second read of the path.
+        payload = json.loads(
+            data.decode("utf-8"), object_pairs_hook=_pairs, parse_constant=_nonfinite, parse_float=_float
+        )
+        if not isinstance(payload, dict):
+            raise ReportError("report must be a JSON object")
+        if type(payload.get("schema_version")) is not int or payload["schema_version"] != REPORT_SCHEMA_VERSION:
+            raise ReportError(f"schema_version must be {REPORT_SCHEMA_VERSION}")
+        report = DriftReport(
+            baseline=ArmRun(**payload.pop("baseline")), quantized=ArmRun(**payload.pop("quantized")), **payload
+        )
+    except (ValueError, TypeError, KeyError, RecursionError, ReportError) as exc:
         raise ReproduceError(f"{side} report is not a readable schema-v{REPORT_SCHEMA_VERSION} report: {exc}") from exc
 
     raw = {
