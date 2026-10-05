@@ -26,6 +26,12 @@
   Input bytes and QSR v0 verdicts are preserved; the analysis makes no safety gate
   decision and does not authenticate human labels or statistical assumptions.
   Functional evidence: `validation/2026-10-05-calibrated-resolution/` (synthetic).
+- Offline `references list` and `references verify`, including explicit external
+  registries with strict schema/commit validation. Exact-byte matches do not
+  establish measurement validity or publication. Functional evidence:
+  `validation/2026-10-05-reference-cli/`.
+- Correct the registry's stale claim that the 0.5 screen never ran. Its committed
+  screen evidence remains distinct from the empty reference publication registry.
 
 ## 0.15.1
 

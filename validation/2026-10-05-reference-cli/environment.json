@@ -1,0 +1,22 @@
+{
+  "system": "Windows",
+  "release": "11",
+  "machine": "AMD64",
+  "python": "3.12.13",
+  "quantfit": "0.15.1",
+  "gpu_used": false,
+  "versions": {
+    "torch": "2.13.0+cpu",
+    "transformers": "5.17.0",
+    "inspect-ai": "0.3.269",
+    "pytest": "9.0.3",
+    "ruff": "0.16.2",
+    "huggingface-hub": "1.31.0"
+  },
+  "tool_lock_sha256": "8b7814b7e12f065217cf4c0330022cf134a1d4f66804e3cbf179970e5e0cc017",
+  "source_files_sha256": {
+    "quantfit\\reference_cli.py": "b42eaa10ee6e633dd0225e45cab2717124c5a694e29f340d902b748bd9c93570",
+    "quantfit\\cli.py": "5faac9281942291b8435e3b8b81f1ff18c3d0f376628be0b263197ef1193077f",
+    "quantfit\\refreports.py": "f12a385864d521a176cf9f6b4cec40ea9369cd1e4f15742816d46efdfaf339f2"
+  }
+}

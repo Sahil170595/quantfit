@@ -401,6 +401,14 @@ human calibration study, hardware campaign or research GO.
 |---|---|---|---|
 | `--calibration-report` | resolution | Synthetic bound-scope input; per-arm bounds remain separate; changed revision refused | `validation/2026-10-05-calibrated-resolution/` |
 | `--report` / `--out` / `--json` | resolution | Actual offline invocation, separate artifact and unchanged inputs | as above; no new safety verdict |
+The offline `references` command has aggregate functional evidence at
+`validation/2026-10-05-reference-cli/`: bundled empty-list, explicit synthetic
+external registry, exact-byte match and mismatch. It establishes command behavior
+only; no published reference or measurement claim is established.
+
+| flag | command | evidence | artifact |
+|---|---|---|---|
+| `--registry` / `--slug` | references | Local functional checks against explicitly synthetic registry and bytes; no publication proof | `validation/2026-10-05-reference-cli/` |
 
 Enumerated from `_build_parser()`, not from memory, on 2026‑08‑07 at 22:25. §0.1 stakes
 this table on flag-level completeness, so the flags that had **no row at all** are named

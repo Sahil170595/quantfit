@@ -56,6 +56,50 @@ def main() -> None:
         assert artifact == json.loads(output.read_text(encoding="utf-8"))
         assert artifact["inputs"]["report_sha256"] == hashlib.sha256((fixture / "drift.json").read_bytes()).hexdigest()
         assert artifact["human_confirmation_verified"] is False
+        fixture = checkout / "validation/2026-10-05-reference-cli"
+        for command, expected in (
+            (["references", "list", "--json"], 0),
+            (
+                [
+                    "references",
+                    "verify",
+                    "--registry",
+                    str(fixture / "synthetic-registry.json"),
+                    "--slug",
+                    "fixture",
+                    "--report",
+                    str(fixture / "synthetic-bytes.json"),
+                    "--json",
+                ],
+                0,
+            ),
+            (
+                [
+                    "references",
+                    "verify",
+                    "--registry",
+                    str(fixture / "synthetic-registry.json"),
+                    "--slug",
+                    "fixture",
+                    "--report",
+                    str(fixture / "synthetic-changed-bytes.json"),
+                    "--json",
+                ],
+                3,
+            ),
+        ):
+            completed = subprocess.run(
+                [sys.executable, "-m", "quantfit.cli", *command],
+                cwd=sandbox,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            assert completed.returncode == expected, (completed.stdout, completed.stderr)
+            document = json.loads(completed.stdout)
+            assert document["exit_code"] == expected
+            assert document["result"]["publication_verified"] is False
         # Explicit config prevents pyproject's pythonpath=['.'] injecting the source.
         config = sandbox / "pytest.ini"
         config.write_text("[pytest]\n", encoding="utf-8")
@@ -67,6 +111,7 @@ def main() -> None:
             "test_report.py",
             "test_mde.py",
             "test_probe.py",
+            "test_reference_cli.py",
         ]
         subprocess.run(
             [

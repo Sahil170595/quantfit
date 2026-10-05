@@ -1,0 +1,18 @@
+{
+  "refreport_schema_version": 1,
+  "reports": [
+    {
+      "slug": "fixture",
+      "baseline": "fixture/baseline",
+      "quant": "fixture/quant",
+      "stratum": "gguf",
+      "spec_version": "v0",
+      "quantfit_version": "fixture-only",
+      "report_sha256": "85bf631eff889db6865961be53d033f89ed3ac888f36c71f46ecf3ad3590d2c7",
+      "hf_repo_type": "dataset",
+      "hf_repo": "fixture/references",
+      "hf_path": "fixture.json",
+      "hf_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

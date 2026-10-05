@@ -23,6 +23,13 @@ quantfit verify-safety --demo
 fixtures, no model, no network, no weights. Use it to show someone what the output looks
 like. It refuses `--report` and always exits 0, because nothing was measured.
 
+## Offline reference artifacts
+
+For offline reference artifacts, use `quantfit references list --json`. The official
+registry is empty. `quantfit references verify --slug NAME --report report.json --json`
+checks bytes; optional `--registry registry.json` selects explicit external entries.
+A match does not establish publication, human adjudication or measurement validity.
+
 ## The command that matters
 
 For an existing report and bound calibration aggregate, use

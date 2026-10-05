@@ -216,6 +216,8 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     # (quantfit/reproduce.py: --reference and --candidate are both read from disk).
     "reproduce": (REQ_ARTIFACT,),
     "resolution": (REQ_ARTIFACT,),
+    # Bundled listing is pure local metadata (quantfit/reference_cli.py).
+    "references": (),
     # Pure local, no network, no GPU — but it audits a SOURCE CHECKOUT: `--root`
     # defaults to "the one containing quantfit" (quantfit/cli.py), which in a clean
     # venv is site-packages, where the README, docs/ and spec/ it reads do not exist.
@@ -571,6 +573,12 @@ def _refine(subcommand: str, argv: Sequence[str], reqs: set[str]) -> list[str]:
     covering it.
     """
     extra: list[str] = []
+
+    if subcommand == "references" and (
+        "verify" in argv or any(arg == "--registry" or arg.startswith("--registry=") for arg in argv)
+    ):
+        reqs.add(REQ_ARTIFACT)
+        extra.append("external registry or verification needs local input artifacts")
 
     if subcommand == "verify-safety" and "--demo" in argv:
         # `--demo` runs the real tabulation over bundled FIXTURES: no model, no network,

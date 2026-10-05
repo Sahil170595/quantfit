@@ -387,6 +387,17 @@ def _build_parser() -> argparse.ArgumentParser:
         help="one standalone T0 artifact, or within-hardware replicate reports for the CANDIDATE side",
     )
 
+    pref = sub.add_parser("references", help="offline reference registry and exact artifact-byte verification")
+    rsub = pref.add_subparsers(dest="references_cmd", required=True)
+    rlist = rsub.add_parser("list", help="list declared reference entries and spec validity")
+    rverify = rsub.add_parser("verify", help="verify local bytes against a declared reference digest")
+    for child in (rlist, rverify):
+        child.add_argument(
+            "--registry", default=None, metavar="PATH", help="external registry JSON; default: bundled registry"
+        )
+    rverify.add_argument("--slug", required=True, help="registered reference slug")
+    rverify.add_argument("--report", required=True, metavar="PATH", help="local artifact bytes to verify")
+
     pau = sub.add_parser(
         "audit",
         help="docs=code parity: do the docs still describe the code? "
@@ -998,6 +1009,19 @@ def _dispatch(args: argparse.Namespace) -> int:
             {**decision, "record_path": args.out},
             _human_reproduce,
         )
+
+    if args.cmd == "references":
+        from quantfit.reference_cli import list_references, verify_reference
+
+        if args.references_cmd == "list":
+            result = list_references(args.registry)
+            code = 0
+            message = result["registry_state"] or f"{result['n_registered']} declared reference reports"
+        else:
+            result = verify_reference(args.slug, args.report, args.registry)
+            code = 0 if result["matches"] else 3
+            message = result["statement"]
+        return _emit(args, f"references {args.references_cmd}", code, result, lambda: print(message))
 
     if args.cmd == "audit":
         from pathlib import Path

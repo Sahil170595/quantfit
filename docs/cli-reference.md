@@ -41,6 +41,30 @@ quantfit list --json
 fit. `--prefer` takes `quality` (default), `speed` or `size`. `list` prints the supported
 method × scheme matrix.
 
+## Offline reference artifacts
+
+```bash
+quantfit references list --json
+quantfit references list --registry references.json --json
+quantfit references verify --registry references.json --slug my-report --report report.json --json
+```
+
+`references list` shows declared entries, pinned URLs and spec validity. The bundled
+registry is empty. `--registry` selects an explicitly external registry, never adds to
+the official registry, and does not verify publication. Its object contains
+`refreport_schema_version: 1` and `reports`, an array of complete `ReferenceReport`
+entries; the existing cap, uniqueness and spec rules apply. `hf_revision` is null or an
+immutable 40-hex commit. No network request is made.
+
+`references verify` checks local bytes against the selected `--slug`: exit 0 match,
+3 mismatch, 2 unreadable/invalid input or unknown slug. A match verifies bytes, not
+measurement validity, human adjudication or reproduction. No model or judge loads.
+
+`citable` remains false because publication and citation provenance were not
+authenticated. `declared_reference_citable` preserves the library's narrower
+pin-present flag; list entries expose `declared_spec_validity` rather than a
+measurement validity verdict. Each entry carries its own publication disclaimer.
+
 ## Quantize
 
 ```bash

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.15.1"
+  },
+  "command": "references list",
+  "exit_code": 0,
+  "result": {
+    "refreport_schema_version": 1,
+    "current_spec_version": "v0",
+    "n_registered": 0,
+    "max_reference_reports": 3,
+    "n_stale": 0,
+    "registry_state": "EMPTY: zero reference reports have been registered. The 0.5 screen is recorded in validation/2026-08-21-screen-complete; it is distinct from this publication registry. The 0.8 free-T4 reproduction has not been attempted (docs/cross-hardware-tolerance-v0.md \u00a76.1), and QSR v1 is not frozen (QSR v0 \u00a710.3). Entries land only when the runs happen \u2014 see docs/reference-reports-v0.md.",
+    "reports": [],
+    "rule": "Spec-version comparison of declarations only; no authenticity or publication verification.",
+    "official_registry": true,
+    "registry_source": "bundled",
+    "registry_sha256": null,
+    "publication_verified": false,
+    "scope": "Offline declared-registry and exact-byte checks; no measurement or publication verification."
+  }
+}

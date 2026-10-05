@@ -382,3 +382,10 @@ See [CLI reference](docs/cli-reference.md) and
 ## License
 
 Apache-2.0.
+### Offline reference artifacts
+
+`quantfit references list --json` shows the bundled reference registry, currently
+empty. `quantfit references verify --slug NAME --report report.json --json` checks
+exact bytes against a declared reference. An explicit `--registry registry.json`
+selects an external registry without registering or publishing it. See
+[`docs/cli-reference.md`](docs/cli-reference.md) for the schema and exit codes.
