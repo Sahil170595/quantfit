@@ -264,6 +264,9 @@ The aggregate read is limited to 2 MiB; duplicate keys and non-finite/overflow l
 are refused. `eps.assumptions_verified` stays `false`: applicability to realized at-risk
 populations (A1), conditional arm independence (A2) and majority-real at-risk probes (A3)
 remain assumptions of the existing MDE bound, even when measurement identities match.
+Bound runs validate a private aggregate before publishing `--report`; shared output files
+are never the provenance oracle. The calibration input must differ from report/decision
+outputs, including same-file aliases.
 
 `--junit` renders the gate as three cases rather than one. **Exit 5 fails as a refusal, not
 as a breached threshold** — "I cannot resolve what you asked" and "you failed what you

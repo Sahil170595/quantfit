@@ -104,6 +104,8 @@ reread of mutable local files. The observed Inspect HF identity retains real bac
 versions, device, precision, immutable model/tokenizer revisions and content/config hashes;
 call counts and timing are validated as observations and excluded from reusable scope.
 Stored causal identity validation does not reconstruct those excluded observations.
+Bound gate runs match their owned private report before publishing an optional public
+report destination; a shared output cannot supply substitute actual-run provenance.
 
 ## 2. Sampling design
 

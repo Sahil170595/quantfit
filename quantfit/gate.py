@@ -1057,8 +1057,9 @@ def run_gate(
     ordering buys is that `verify_safety` is never *called*, so an unresolvable threshold
     costs no GPU time and no probe download. Then the threshold is checked again against
     the resolution the run actually got, because the at-risk denominator belongs to the
-    baseline. `report_path` is passed through to `verify_safety`, which writes the
-    schema-v2 drift report.
+    baseline. Operator/floor `report_path` is passed through to `verify_safety`.
+    Bound mode validates its private aggregate first, then publishes that validated
+    schema-v2 report to the requested destination.
     """
     baseline = _text(baseline, "baseline")
     quant = _text(quant, "quant")
@@ -1069,8 +1070,9 @@ def run_gate(
             eps_upper is None and eps_source is None,
             "calibration_report is mutually exclusive with operator epsilon/source",
         )
-        from quantfit.safety.calibrated_gate import prepare_calibration
+        from quantfit.safety.calibrated_gate import prepare_calibration, validate_output_paths
 
+        validate_output_paths(calibration_report, report_path, out_path)
         bound, eps = prepare_calibration(calibration_report, baseline, quant, max_new_tokens, SHIPPED_CORPUS_N)
     else:
         eps = _eps(eps_upper, eps_source)

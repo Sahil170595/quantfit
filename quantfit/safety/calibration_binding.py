@@ -91,6 +91,7 @@ def engine_causal_identity(engine: dict, *, n_probes: int | None = None, observe
     stored causal identity shape; no call/timing observation is reconstructed.
     """
     _require(isinstance(engine, dict), "engine must be an object")
+    _require(type(observed) is bool, "observed mode must be boolean")
     name = _text(engine.get("name"), "engine.name")
     for key in ("runtime_s", "weight_generate_host_wall_s"):
         if key in engine:
@@ -104,6 +105,8 @@ def engine_causal_identity(engine: dict, *, n_probes: int | None = None, observe
             _text(engine[key], f"engine.{key}")
     if "baseline_cache" in engine:
         _require(isinstance(engine["baseline_cache"], dict), "engine.baseline_cache must be an object")
+    if "generate_calls" in engine:
+        _count(engine["generate_calls"], "engine.generate_calls")
     if name == "inspect_ai:hf":
         _require(
             _INSPECT_CAUSAL <= set(engine) <= _INSPECT_CAUSAL | _ENGINE_OUTPUTS,
@@ -163,8 +166,6 @@ def engine_causal_identity(engine: dict, *, n_probes: int | None = None, observe
             and engine["model_args"]["do_sample"] is False,
             "Inspect HF model args must declare exact greedy booleans",
         )
-        if "generate_calls" in engine:
-            _count(engine["generate_calls"], "engine.generate_calls")
         if observed:
             _require(
                 _count(n_probes, "n_probes") > 0

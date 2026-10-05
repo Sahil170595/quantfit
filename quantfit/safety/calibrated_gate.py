@@ -19,6 +19,17 @@ ASSUMPTIONS_STATEMENT = (
 )
 
 
+def validate_output_paths(path, report_path, out_path):
+    """Bound calibration is an input: output aliases must never overwrite it."""
+    source = Path(path).resolve()
+    for target in (report_path, out_path):
+        if target is None:
+            continue
+        output = Path(target).resolve()
+        if source == output or source.exists() and output.exists() and source.samefile(output):
+            raise CalibrationBindingError("calibration report input must differ from gate/report output paths")
+
+
 def prepare_calibration(path, baseline, quant, max_new_tokens, n_probes):
     from quantfit.safety import verify as sv
     from quantfit.safety.mde import EPS_DEFINITION
@@ -68,7 +79,7 @@ def verify_bound_run(bound, eps, baseline, quant, *, token, max_new_tokens, repo
     # A temporary aggregate report gives the gate the SAME resolved provenance as
     # the capture producer, without loading twice or changing the public return type.
     with tempfile.TemporaryDirectory(prefix="quantfit-calibrated-run-") as temporary:
-        observed_path = report_path or str(Path(temporary) / "drift.json")
+        observed_path = str(Path(temporary) / "drift.json")
         drift = verify_safety(
             baseline,
             quant,
@@ -81,6 +92,10 @@ def verify_bound_run(bound, eps, baseline, quant, *, token, max_new_tokens, repo
         bound.match_report(observed)
         if observed.drift != drift.to_dict():
             raise CalibrationBindingError("actual report counts do not match the run being gated")
+        if report_path is not None:
+            # The shared destination is a publication target, never the provenance
+            # oracle: a concurrent writer must not substitute our observed scope.
+            observed.to_json(report_path)
     eps["binding_status"] = "actual_run_matched"
     eps["actual_run_matched"] = True
     eps["statement"] = (

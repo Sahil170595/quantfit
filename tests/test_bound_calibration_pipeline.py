@@ -4,6 +4,7 @@ import csv
 import hashlib
 import json
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 from test_calibration_binding import calibration_fixture, report_fixture, write_calibration
@@ -184,6 +185,57 @@ def test_resolved_weight_mismatch_refuses_before_decision_output(tmp_path, monke
         run_gate("base", "quant", tier="smoke", calibration_report=path, out_path=str(output))
     assert len(calls) == 1
     assert not output.exists()
+
+
+def test_shared_report_substitution_cannot_override_actual_private_weights(tmp_path, monkeypatch):
+    from quantfit.safety.report import DriftReport
+
+    calibration, calls = _large_synthetic_run(tmp_path, monkeypatch, mismatch=True)
+    output = tmp_path / "shared-drift.json"
+    # Another writer supplies a matching scope and the SAME valid counts. Trusting
+    # that public path would mask the actual changed weights in our owned run.
+    matching = report_fixture(2000)
+    read_report = DriftReport.from_json
+
+    def substituted(path):
+        observed = read_report(path)
+        return replace(matching, drift=observed.drift) if str(path) == str(output) else observed
+
+    monkeypatch.setattr(DriftReport, "from_json", substituted)
+    with pytest.raises(CalibrationBindingError, match="actual run"):
+        run_gate("base", "quant", tier="smoke", calibration_report=calibration, report_path=str(output))
+    assert calls[0]["report_path"] != str(output)
+    assert not output.exists()
+
+
+def test_validated_private_report_is_published_to_requested_destination(tmp_path, monkeypatch):
+    from quantfit.safety.report import DriftReport
+
+    calibration, calls = _large_synthetic_run(tmp_path, monkeypatch)
+    output = tmp_path / "published-drift.json"
+    decision = run_gate("base", "quant", tier="smoke", calibration_report=calibration, report_path=str(output))
+    assert calls[0]["report_path"] != str(output)
+    assert DriftReport.from_json(str(output)).drift == decision["drift"]
+    assert decision["eps"]["actual_run_matched"] is True
+
+
+@pytest.mark.parametrize("name", ["out_path", "report_path"])
+def test_bound_calibration_input_cannot_alias_output(tmp_path, name):
+    path = write_calibration(tmp_path, calibration_fixture(report_fixture()))
+    original = Path(path).read_bytes()
+    with pytest.raises(CalibrationBindingError, match="input must differ"):
+        run_gate("base", "quant", tier="smoke", calibration_report=path, **{name: path})
+    assert Path(path).read_bytes() == original
+
+
+def test_bound_calibration_input_cannot_be_overwritten_via_hardlink(tmp_path):
+    path = write_calibration(tmp_path, calibration_fixture(report_fixture()))
+    alias = tmp_path / "hardlink.json"
+    alias.hardlink_to(Path(path))
+    original = Path(path).read_bytes()
+    with pytest.raises(CalibrationBindingError, match="input must differ"):
+        run_gate("base", "quant", tier="smoke", calibration_report=path, out_path=str(alias))
+    assert Path(path).read_bytes() == original
 
 
 @pytest.mark.parametrize("operator", [{"eps_upper": 0.01}, {"eps_source": "hypothetical"}])
