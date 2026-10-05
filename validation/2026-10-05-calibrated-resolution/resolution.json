@@ -91,7 +91,7 @@
   },
   "binding_fingerprint": "f0612bfade2a9c35bc0146a171985e7ce99369ff0ca57b9d32b195bd39eb8313",
   "binding_status": "matched actual report scope; declared evidence not authenticated",
-  "created_utc": "2026-10-05T12:20:13.416936+00:00",
+  "created_utc": "2026-10-05T12:25:48.481899+00:00",
   "eps_baseline_upper": 0.16112515805281938,
   "eps_quant_upper": 0.2775327998628892,
   "human_confirmation_verified": false,
