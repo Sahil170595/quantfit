@@ -340,6 +340,14 @@ def _build_parser() -> argparse.ArgumentParser:
         "--out", required=True, metavar="PATH", help="separate resolution artifact; must not overwrite either input"
     )
 
+    pt0 = sub.add_parser(
+        "t0",
+        help="check at least three uncached same-environment replicate reports "
+        "(exit 0 = agreement, 3 = disagreement, 2 = invalid evidence)",
+    )
+    pt0.add_argument("--reports", nargs="+", required=True, metavar="REPORT", help="three or more replicate reports")
+    pt0.add_argument("--out", required=True, metavar="PATH", help="write the aggregate T0 evidence JSON")
+
     pr = sub.add_parser(
         "reproduce",
         help="is this report a reproduction of that one? applies the QSR v0 cross-hardware tolerance "
@@ -352,16 +360,16 @@ def _build_parser() -> argparse.ArgumentParser:
         "--t0-reference",
         nargs="+",
         default=None,
-        metavar="REPORT",
-        help="within-hardware replicate reports for the REFERENCE side (3 per the protocol). T0 is not "
-        "computable from two reports, so without this the outcome can never be the gate pass",
+        metavar="PATH",
+        help="one standalone T0 artifact, or within-hardware replicate reports for the REFERENCE side "
+        "(3 per the protocol). Positive evidence must bind to the compared report",
     )
     pr.add_argument(
         "--t0-candidate",
         nargs="+",
         default=None,
-        metavar="REPORT",
-        help="within-hardware replicate reports for the CANDIDATE side",
+        metavar="PATH",
+        help="one standalone T0 artifact, or within-hardware replicate reports for the CANDIDATE side",
     )
 
     pau = sub.add_parser(
@@ -869,14 +877,44 @@ def _dispatch(args: argparse.Namespace) -> int:
             _human_ingest,
         )
 
-    if args.cmd == "reproduce":
-        from quantfit.reproduce import compare, within_hardware_identical
+    if args.cmd == "t0":
+        from quantfit.reproduce import T0_REQUIRED_REPLICATES, ReproduceError, within_hardware_identical
 
-        # Replicate sets are turned into T0 results HERE rather than inside compare():
-        # T0 is a within-hardware property of three runs, and keeping the conversion at
-        # the boundary is what lets the artifact record which files supplied it.
-        t0_ref = within_hardware_identical(args.t0_reference) if args.t0_reference else None
-        t0_cand = within_hardware_identical(args.t0_candidate) if args.t0_candidate else None
+        if len(args.reports) < T0_REQUIRED_REPLICATES:
+            raise ReproduceError(
+                f"t0 requires at least {T0_REQUIRED_REPLICATES} replicate reports; got {len(args.reports)}"
+            )
+        result = within_hardware_identical(args.reports, out_path=args.out)
+
+        def _human_t0() -> None:
+            print(f"T0: {'agreement' if result['pass'] else 'DISAGREEMENT'} across {result['n_replicates']} reports")
+            print(result["statement"])
+            print(f"T0 evidence -> {args.out}")
+
+        return _emit(args, "t0", 0 if result["protocol_pass"] else 3, {**result, "record_path": args.out}, _human_t0)
+
+    if args.cmd == "reproduce":
+        from pathlib import Path
+
+        from quantfit.reproduce import ReproduceError, compare, within_hardware_identical
+
+        def _t0_input(paths):
+            if not paths:
+                return None
+            if len(paths) > 1:
+                return within_hardware_identical(paths)
+            # Keep existing report-list invocations; a single path now consumes the
+            # standalone artifact. compare rechecks positive sources and target binding.
+            try:
+                value = json.loads(Path(paths[0]).read_text(encoding="utf-8"))
+            except (OSError, ValueError, UnicodeError) as exc:
+                raise ReproduceError(f"unreadable T0 artifact {paths[0]}: {exc}") from exc
+            if isinstance(value, bool) or (isinstance(value, dict) and isinstance(value.get("pass"), bool)):
+                return value
+            raise ReproduceError("one T0 input must be a standalone artifact; otherwise supply replicate report paths")
+
+        t0_ref = _t0_input(args.t0_reference)
+        t0_cand = _t0_input(args.t0_candidate)
         decision = compare(args.reference, args.candidate, args.out, t0_reference=t0_ref, t0_candidate=t0_cand)
 
         def _human_reproduce() -> None:

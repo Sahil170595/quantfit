@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.15.1"
+  },
+  "command": "t0",
+  "exit_code": 2,
+  "result": null,
+  "error": {
+    "kind": "ReproduceError",
+    "message": "T0 replicate[2] validation/2026-10-05-t0-replicates/synthetic-reports/identical-copy.json is BYTE-IDENTICAL to replicate[0] validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json (sha256 1229ead88bef1234101256c956b7668e2bed47b4be98b9d4bb76af80be6793e4). These bytes cannot distinguish separately produced reports. Indistinguishable inputs are REFUSED: counting them as agreement would make T0 a tautology (§3.2), not a determinism check."
+  }
+}

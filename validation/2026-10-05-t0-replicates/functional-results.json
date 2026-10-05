@@ -1,0 +1,216 @@
+{
+  "cases": [
+    {
+      "case": "agreement",
+      "argv": [
+        "C:\\tmp\\quantfit-calibration-20261005\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "t0",
+        "--reports",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-2.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-3.json",
+        "--out",
+        "validation/2026-10-05-t0-replicates/agreement.json",
+        "--json"
+      ],
+      "exit_code": 0,
+      "stdout": "validation/2026-10-05-t0-replicates/agreement-stdout.json"
+    },
+    {
+      "case": "disagreement",
+      "argv": [
+        "C:\\tmp\\quantfit-calibration-20261005\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "t0",
+        "--reports",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-2.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/disagreement.json",
+        "--out",
+        "validation/2026-10-05-t0-replicates/disagreement.json",
+        "--json"
+      ],
+      "exit_code": 3,
+      "stdout": "validation/2026-10-05-t0-replicates/disagreement-stdout.json"
+    },
+    {
+      "case": "cached-refusal",
+      "argv": [
+        "C:\\tmp\\quantfit-calibration-20261005\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "t0",
+        "--reports",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-2.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/cached.json",
+        "--out",
+        "validation/2026-10-05-t0-replicates/cached-refusal.json",
+        "--json"
+      ],
+      "exit_code": 2,
+      "stdout": "validation/2026-10-05-t0-replicates/cached-refusal-stdout.json"
+    },
+    {
+      "case": "mixed-judge-refusal",
+      "argv": [
+        "C:\\tmp\\quantfit-calibration-20261005\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "t0",
+        "--reports",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-2.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/mixed-judge.json",
+        "--out",
+        "validation/2026-10-05-t0-replicates/mixed-judge-refusal.json",
+        "--json"
+      ],
+      "exit_code": 2,
+      "stdout": "validation/2026-10-05-t0-replicates/mixed-judge-refusal-stdout.json"
+    },
+    {
+      "case": "mixed-environment-refusal",
+      "argv": [
+        "C:\\tmp\\quantfit-calibration-20261005\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "t0",
+        "--reports",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-2.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/mixed-environment.json",
+        "--out",
+        "validation/2026-10-05-t0-replicates/mixed-environment-refusal.json",
+        "--json"
+      ],
+      "exit_code": 2,
+      "stdout": "validation/2026-10-05-t0-replicates/mixed-environment-refusal-stdout.json"
+    },
+    {
+      "case": "byte-copy-refusal",
+      "argv": [
+        "C:\\tmp\\quantfit-calibration-20261005\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "t0",
+        "--reports",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-2.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/identical-copy.json",
+        "--out",
+        "validation/2026-10-05-t0-replicates/byte-copy-refusal.json",
+        "--json"
+      ],
+      "exit_code": 2,
+      "stdout": "validation/2026-10-05-t0-replicates/byte-copy-refusal-stdout.json"
+    },
+    {
+      "case": "repeated-path-refusal",
+      "argv": [
+        "C:\\tmp\\quantfit-calibration-20261005\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "t0",
+        "--reports",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-2.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json",
+        "--out",
+        "validation/2026-10-05-t0-replicates/repeated-path-refusal.json",
+        "--json"
+      ],
+      "exit_code": 2,
+      "stdout": "validation/2026-10-05-t0-replicates/repeated-path-refusal-stdout.json"
+    },
+    {
+      "case": "short-set-refusal",
+      "argv": [
+        "C:\\tmp\\quantfit-calibration-20261005\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "t0",
+        "--reports",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-2.json",
+        "--out",
+        "validation/2026-10-05-t0-replicates/short-set.json",
+        "--json"
+      ],
+      "exit_code": 2,
+      "stdout": "validation/2026-10-05-t0-replicates/short-set-refusal-stdout.json"
+    },
+    {
+      "case": "bound-comparison",
+      "argv": [
+        "C:\\tmp\\quantfit-calibration-20261005\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "reproduce",
+        "--reference",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json",
+        "--candidate",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-2.json",
+        "--t0-reference",
+        "validation/2026-10-05-t0-replicates/agreement.json",
+        "--t0-candidate",
+        "validation/2026-10-05-t0-replicates/agreement.json",
+        "--out",
+        "validation/2026-10-05-t0-replicates/bound-comparison.json",
+        "--json"
+      ],
+      "exit_code": 0,
+      "stdout": "validation/2026-10-05-t0-replicates/bound-comparison-stdout.json"
+    },
+    {
+      "case": "nonmember-comparison",
+      "argv": [
+        "C:\\tmp\\quantfit-calibration-20261005\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "reproduce",
+        "--reference",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/nonmember-same-identity.json",
+        "--candidate",
+        "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-2.json",
+        "--t0-reference",
+        "validation/2026-10-05-t0-replicates/agreement.json",
+        "--t0-candidate",
+        "validation/2026-10-05-t0-replicates/agreement.json",
+        "--out",
+        "validation/2026-10-05-t0-replicates/nonmember-comparison.json",
+        "--json"
+      ],
+      "exit_code": 3,
+      "stdout": "validation/2026-10-05-t0-replicates/nonmember-comparison-stdout.json"
+    },
+    {
+      "case": "audit",
+      "argv": [
+        "C:\\tmp\\quantfit-calibration-20261005\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "audit",
+        "--json"
+      ],
+      "exit_code": 0,
+      "stdout": "validation/2026-10-05-t0-replicates/audit-stdout.json"
+    }
+  ],
+  "partial_library": {
+    "n_replicates": 2,
+    "pass": true,
+    "meets_protocol_replicate_count": false,
+    "protocol_pass": false,
+    "independent_execution_verified": false
+  },
+  "legacy_positive_assertions": {
+    "outcome": "reproduced_t0_unverified",
+    "exit_code": 3
+  },
+  "independent_execution_verified": false,
+  "physical_host_verified": false
+}

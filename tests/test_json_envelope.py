@@ -118,7 +118,7 @@ def test_the_leaf_set_is_what_we_think_it_is():
     leaves = {" ".join(p) for p in _leaf_commands()}
     expected = {
         "check", "list", "plan", "probe", "verify", "verify-safety", "screen", "emit",
-        "calibrate sheet", "calibrate ingest", "gate", "reproduce", "audit", "quantize", "resolution",
+        "calibrate sheet", "calibrate ingest", "gate", "t0", "reproduce", "audit", "quantize", "resolution",
     }  # fmt: skip
     assert leaves == expected, f"leaf command set changed: {sorted(leaves ^ expected)}"
 
@@ -155,6 +155,7 @@ _CASES = [
     ("verify-safety-missing-arms", ["verify-safety"], 2),
     ("emit-missing", ["emit", "model-card", "--report", "no-such-report-xyz.json"], 2),
     ("reproduce-missing", ["reproduce", "--reference", "no-a.json", "--candidate", "no-b.json"], 2),
+    ("t0-missing", ["t0", "--reports", "no-a.json", "no-b.json", "no-c.json", "--out", "unused-t0.json"], 2),
 ]
 
 
@@ -198,6 +199,22 @@ def test_an_operational_failure_is_still_json(tmp_path):
     assert document["result"] is None
     assert document["error"]["message"], "an error block with no message helps nobody"
     assert document["error"]["kind"], "the exception class is what a caller branches on"
+
+
+def test_t0_agreement_runs_without_model_backends_and_writes_its_artifact(tmp_path):
+    from test_t0 import _reports
+
+    paths = _reports(tmp_path)
+    out = tmp_path / "t0.json"
+    blocked = tmp_path / "blocked"
+    blocked.mkdir()
+    process = _run("t0", "--reports", *paths, "--out", str(out), "--json", block_backends=blocked)
+    document = json.loads(process.stdout.decode("utf-8"))
+    artifact = json.loads(out.read_text(encoding="utf-8"))
+    assert document["command"] == "t0" and document["exit_code"] == process.returncode == 0
+    assert artifact["protocol_pass"] is True
+    assert document["result"] == {**artifact, "record_path": str(out)}
+    assert artifact["independent_execution_verified"] is False
 
 
 def test_a_verdict_failure_is_not_reported_as_an_error(monkeypatch, capsys):

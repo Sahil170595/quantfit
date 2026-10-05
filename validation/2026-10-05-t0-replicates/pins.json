@@ -1,0 +1,31 @@
+{
+  "validation_type": "synthetic offline functional validation; no model/judge execution",
+  "quantfit_version": "0.15.1",
+  "python": "3.12.13",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": {
+    "Name": "13th Gen Intel(R) Core(TM) i9-13980HX",
+    "NumberOfCores": 24,
+    "NumberOfLogicalProcessors": 32
+  },
+  "dependencies": {
+    "pytest": "9.0.3",
+    "ruff": "0.16.2",
+    "torch": "2.13.0+cpu",
+    "transformers": "5.17.0",
+    "llmcompressor": "0.14.0",
+    "inspect-ai": "0.3.269",
+    "gguf": "0.19.0",
+    "psutil": "7.2.2"
+  },
+  "ci_lock_sha256": "8b7814b7e12f065217cf4c0330022cf134a1d4f66804e3cbf179970e5e0cc017",
+  "source_base_head_at_run": "a377f46be8d9f34f02900872a6ae1d3fa68ec9d6",
+  "source_files_sha256": {
+    "quantfit/cli.py": "196b9bc44ef1fb9508aec46b5d0454c0e45f93f1a36044cd4b7d26d12e86bbba",
+    "quantfit/reproduce.py": "9212b396658c709b094800ddd336c88fd1f824ec446b15e78497e9a88c2862c9",
+    "tests/test_t0.py": "339cc256499ca6e025ee1d2167d8e47819293398954909ba1941b0a7a0d0d5ab",
+    "tests/test_reproduce.py": "aa58c1522b03cac83417c8f48c9e3065013f66476cf4ff750f4243b302f76a71",
+    "tests/test_json_envelope.py": "047a64b9eaab507ed7e0864a23777b35e0ff701b72ca8acfbf536518acd8fd7c"
+  },
+  "fixture_scope": "Hash-shaped judge/dataset/model pins and fixture environment strings are synthetic, not verified external content or actual inference hardware."
+}

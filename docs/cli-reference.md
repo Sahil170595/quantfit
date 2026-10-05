@@ -317,15 +317,34 @@ these assumptions explicitly. No sample size fixes correlated judge error.
 ## Reproduction and reporting
 
 ```bash
+quantfit t0 --reports ref-a.json ref-b.json ref-c.json --out replicates-ref.json --json
+
 quantfit reproduce --reference ref.json --candidate t4.json --out record.json \
   --t0-reference replicates-ref.json --t0-candidate replicates-cand.json --json
 
 quantfit emit model-card --report drift.json --json
 ```
 
-`--t0-*` supply the three within-hardware replicate runs that establish determinism; without
-that evidence the outcome can never be the reserved gate pass. `emit` renders a report as a
-paste-ready model-card section.
+`t0 --reports REPORT [REPORT ...] --out PATH` checks at least three existing uncached
+schema-v2 reports on CPU, without loading models or using the network. Their pinned
+judge/corpus/arms, decode settings, engine builds and recorded environments must match
+before the `drift` blocks are compared. `--out` writes the standalone T0 artifact;
+`--json` emits the existing stdout envelope. Exit **0** means agreement under these
+reported prerequisites, **3** means disagreement, and **2** means invalid evidence,
+including fewer than three reports. Distinct paths and hashes do not establish actual
+execution independence or physical-host identity. See the dated 2026-10-05 clarification
+in `docs/cross-hardware-tolerance-v0.md` and the synthetic functional record at
+`validation/2026-10-05-t0-replicates/`.
+
+`--t0-reference` and `--t0-candidate` each accept one standalone artifact, or the existing
+list of replicate report paths. Source paths in an artifact are read relative to the
+invocation's working directory when they are not absolute. Positive
+evidence is reread and checked against its hashes; each compared report must belong to
+its side's source set by exact bytes and identity. Bare `true` and legacy identity-less
+positive results are accepted as unverified assertions, so they cannot produce the
+reserved gate pass. A reported failure remains conservative failure. The library can
+record a two-report partial set but its `protocol_pass` is false. `emit` renders a report
+as a paste-ready model-card section.
 
 ## Audit this repository
 

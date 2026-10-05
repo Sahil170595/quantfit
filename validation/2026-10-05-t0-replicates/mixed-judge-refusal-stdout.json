@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.15.1"
+  },
+  "command": "t0",
+  "exit_code": 2,
+  "result": null,
+  "error": {
+    "kind": "ReproduceError",
+    "message": "T0 replicate[2] measurement identity differs from replicate[0]"
+  }
+}
