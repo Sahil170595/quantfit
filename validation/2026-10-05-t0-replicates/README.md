@@ -90,6 +90,10 @@ PR1 causal engine contract and validates actual ArmRun provenance, observed call
 counts and output metadata while excluding timers/prose from identity. Synthetic
 fixtures cover malformed observations, operator-only metadata and actual causal
 differences; this is compatibility evidence, not a new inference campaign.
+Three CLI regressions then demonstrated source overwrite for an exact output path,
+a resolved-path alias and a hardlink alias. They initially returned exit 0 and
+destroyed a cited report. The T0-only output guard now returns exit 2 and preserves
+every input byte in all three cases.
 
 ## What this does not establish
 

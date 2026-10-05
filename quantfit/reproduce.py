@@ -2437,6 +2437,22 @@ def within_hardware_identical(report_paths, *, out_path: str | None = None) -> d
     if len(paths) < 2:
         raise ReproduceError(f"T0 needs at least 2 replicate reports to compare; got {len(paths)}")
 
+    if out_path is not None:
+        output = Path(out_path)
+        aliased_source = None
+        try:
+            destination = output.resolve()
+            for path in paths:
+                if destination == Path(path).resolve() or (output.exists() and output.samefile(path)):
+                    aliased_source = path
+                    break
+        except (OSError, RuntimeError) as exc:
+            raise ReproduceError(f"cannot validate T0 output path {out_path}: {exc}") from exc
+        if aliased_source is not None:
+            raise ReproduceError(
+                f"T0 output {out_path} aliases a cited source report {aliased_source}; inputs preserved"
+            )
+
     views = [_load(path, f"replicate[{i}]") for i, path in enumerate(paths)]
 
     resolved: dict[str, int] = {}

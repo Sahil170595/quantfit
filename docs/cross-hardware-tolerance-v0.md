@@ -412,6 +412,8 @@ no bound identity remain ingestible as **unverified**, and cannot license
 The source SHA256 and parsed report facts must come from the same read buffer;
 hashing one file version and parsing a later version would break this binding.
 Duplicate keys and nonfinite JSON values are invalid evidence.
+The T0 output must not alias a cited source by resolved path or hardlink; that
+invocation is refused with exit 2 before writing, preserving the source bytes.
 
 Equal recorded environments are not physical-host verification: schema-v2's `cpu`
 device names no CPU model, and a GPU model name identifies no unique machine.

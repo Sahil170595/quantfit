@@ -355,6 +355,23 @@ def test_standalone_t0_cli_minimum_and_json_envelope(tmp_path, capsys, n, expect
         assert not out.exists()
 
 
+@pytest.mark.parametrize("alias", ["exact", "resolved", "hardlink"])
+def test_t0_output_cannot_overwrite_a_cited_source(tmp_path, capsys, alias):
+    paths = _reports(tmp_path)
+    original = {path: Path(path).read_bytes() for path in paths}
+    output = Path(paths[0])
+    if alias == "resolved":
+        (tmp_path / "nested").mkdir()
+        output = tmp_path / "nested" / ".." / output.name
+    elif alias == "hardlink":
+        output = tmp_path / "source-hardlink.json"
+        output.hardlink_to(paths[0])
+    assert main(["t0", "--reports", *paths, "--out", str(output), "--json"]) == 2
+    envelope = json.loads(capsys.readouterr().out)
+    assert envelope["command"] == "t0" and envelope["exit_code"] == 2
+    assert {path: Path(path).read_bytes() for path in paths} == original
+
+
 def test_standalone_t0_returns_failed_agreement_without_claiming_a_pass(tmp_path, capsys):
     from test_reproduce import _drift
 
