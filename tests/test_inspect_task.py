@@ -365,33 +365,17 @@ def _build_task(monkeypatch, scenario=MAIN, **task_kwargs):
 
 
 def test_inspect_task_error_is_a_runtime_error():
-    # A conditional truth, and the module says so: nothing in quantfit/ imports this
-    # module and 0.8 wires no `inspect` subcommand, so this is a property the class HAS
-    # (cli:main turns RuntimeError into a clean exit 2) rather than a path anything takes.
+    # inspect-run's operational failures use the existing CLI exit-2 boundary.
     assert issubclass(InspectTaskError, RuntimeError)
 
 
-def test_nothing_in_quantfit_imports_this_module_yet():
-    # The claim the docstring makes about the CLI is conditional BECAUSE of this. If a
-    # future PR wires a subcommand, this test fails and the wording gets revisited.
-    # IMPORT statements only — refreports.py names the module in a comment (it
-    # cross-checks CONFORMS_TO strings), which is a reference, not a dependency.
-    import pathlib
-    import re
-
-    imports = re.compile(
-        r"^\s*(?:from\s+[.\w]*\binspect_task\s+import\b"
-        r"|import\s+[.\w]*\binspect_task\b"
-        r"|from\s+[.\w]*quantfit\s+import\s+[^#\n]*\binspect_task\b)",
-        re.MULTILINE,
+def test_cli_and_observation_adapter_keep_optional_imports_lazy():
+    code = (
+        "import sys; import quantfit.cli; import quantfit.inspect_hf; "
+        "print(('torch' in sys.modules, 'inspect_ai' in sys.modules, 'transformers' in sys.modules))"
     )
-    package = pathlib.Path(__file__).resolve().parent.parent / "quantfit"
-    importers = sorted(
-        path.name
-        for path in package.rglob("*.py")
-        if path.name != "inspect_task.py" and imports.search(path.read_text(encoding="utf-8"))
-    )
-    assert importers == [], f"{importers} now import inspect_task; the CLI wording needs revisiting"
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
+    assert out.stdout.strip() == "(False, False, False)"
 
 
 def test_module_imports_without_torch_or_inspect_ai():

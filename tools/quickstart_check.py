@@ -199,6 +199,9 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     "verify": (REQ_ARTIFACT, REQ_GPU),
     # Two arms + the judge. Refined to CPU for all-GGUF pairs (CHANGELOG 0.4.1).
     "verify-safety": (REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),
+    # quantfit.inspect_hf: immutable snapshots, HF model and real pinned judge.
+    # Actual CPU qualification is tools/ci_inspect_acceptance.py; no GPU required.
+    "inspect-run": (REQ_NETWORK, REQ_DOWNLOAD),
     "gate": (REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),
     # Plus a target manifest that a clean venv does not have.
     "screen": (REQ_ARTIFACT, REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),

@@ -302,6 +302,13 @@ detection threshold is the smallest possible, so a floor-mode FAIL runs at an
 uncontrolled α and is a candidate for human verification). A reference GitHub
 Action and a weekly CPU canary ship in `.github/`; see [`docs/ci-integration.md`](https://github.com/Sahil170595/quantfit/blob/main/docs/ci-integration.md).
 
+The optional Inspect HF runner is available as `quantfit inspect-run`. It requires
+immutable revisions for both arms, observes loaded precision and model/tokenizer
+source, and measures per-arm generation through the existing pinned judge and
+probe pipeline. See [the CLI contract and CPU qualification scope](docs/inspect-run.md).
+Generation parity with verify-safety and quantization sensitivity are not
+established by its identical-arm CPU canary.
+
 ## GPU-aware quantization
 
 **3-tier capacity.** `check` reads HF metadata (no download) to estimate the footprint:

@@ -143,6 +143,21 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     pv.add_argument("--model", required=True, help="path to a quantized output dir or .gguf")
 
+    pinspect = sub.add_parser(
+        "inspect-run",
+        parents=[tok],
+        help="observed HF Inspect paired run (same 0/2/3/4 exits as verify-safety)",
+    )
+    pinspect.add_argument("--baseline", default=None, help="Inspect HF spec: hf/org/repo")
+    pinspect.add_argument("--quant", default=None, help="Inspect HF spec: hf/org/repo")
+    pinspect.add_argument("--baseline-revision", default=None, help="immutable baseline HF commit SHA")
+    pinspect.add_argument("--quant-revision", default=None, help="immutable quantized HF commit SHA")
+    pinspect.add_argument("--max-new-tokens", type=int, default=64)
+    pinspect.add_argument("--report", default=None, metavar="PATH", help="write aggregate-only schema-v2 report")
+    pinspect.add_argument(
+        "--log-dir", default=None, metavar="DIR", help="LOCAL capture-class Inspect logs; never commit"
+    )
+
     pvs = sub.add_parser(
         "verify-safety",
         parents=[tok],
@@ -595,6 +610,60 @@ def _dispatch(args: argparse.Namespace) -> int:
             {"path": args.model, "passed": ok, "message": msg},
             lambda: print(("PASS: " if ok else "FAIL: ") + msg),
         )
+
+    if args.cmd == "inspect-run":
+        import contextlib
+        import tempfile
+        from pathlib import Path
+
+        from quantfit.inspect_task import qsr_eval
+
+        if not args.baseline or not args.quant:
+            raise RuntimeError("inspect-run needs --baseline and --quant HF specs")
+        if not args.baseline_revision or not args.quant_revision:
+            raise RuntimeError("inspect-run needs both immutable --baseline-revision and --quant-revision")
+        # Temporary logs disappear even on failure. Explicit logs are local-only
+        # captures; stdout must remain exactly one JSON envelope.
+        with contextlib.ExitStack() as stack:
+            log_dir = args.log_dir or stack.enter_context(
+                tempfile.TemporaryDirectory(prefix="quantfit-inspect-capture-")
+            )
+            if args.log_dir:
+                print(
+                    "Inspect logs contain probe/completion text: local-only; never commit or attach them.",
+                    file=sys.stderr,
+                )
+            with contextlib.redirect_stdout(sys.stderr):
+                run = qsr_eval(
+                    args.baseline,
+                    args.quant,
+                    token=args.token,
+                    max_new_tokens=args.max_new_tokens,
+                    hf_revisions=(args.baseline_revision, args.quant_revision),
+                    log_dir=log_dir,
+                    display="none",
+                    max_samples=1,
+                )
+                if run.observed_arms is None:
+                    raise RuntimeError("Inspect did not return actual loaded arm observations")
+                if args.report:
+                    Path(args.report).parent.mkdir(parents=True, exist_ok=True)
+                    run.write_report(args.report, *run.observed_arms, args.max_new_tokens)
+            code = 3 if run.drift.regression_detected else 4 if run.drift.unmeasurable_axes else 0
+            return _emit(
+                args,
+                "inspect-run",
+                code,
+                {
+                    "regression_detected": run.drift.regression_detected,
+                    "unmeasurable_axes": list(run.drift.unmeasurable_axes),
+                    "summary": run.drift.summary(),
+                    "report_path": args.report,
+                    "log_dir": args.log_dir,
+                    "observed": True,
+                },
+                lambda: print(run.drift.summary()),
+            )
 
     if args.cmd == "verify-safety":
         from quantfit.safety.verify import verify_safety

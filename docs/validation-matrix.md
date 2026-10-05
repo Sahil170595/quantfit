@@ -64,8 +64,9 @@ is an unvalidated flag.
 Read from `_build_parser()` on 2026‑08‑07 at 22:25. `reproduce` and `audit` were wired
 into the CLI on this branch; `CHANGELOG.md:51` still says "none of the three new modules
 is reachable from the CLI", which was true at 0.5.3 and is no longer true of `reproduce`
-**[V]**. Two of the three (`refreports`, `inspect_task`) remain library-only and stay out
-of scope for "every advertised *command*" — see §4, finding 4.
+**[V]**. This was the historical surface inventory. On 2026-10-05, `inspect-run`
+adds the observed HF Inspect runner; its scope and evidence are recorded below.
+`refreports` remains library-only on this branch — see §4, finding 4.
 
 ### 0.2 The evidence ladder
 
@@ -307,6 +308,14 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **CLOSED 2026-08-14** | The transformers-vs-transformers path under the shipped verdict machinery — the README's own headline example, and the largest gap this document carried. The 0.4.0-era transformers run produced a **schema‑v1** report the shipped parser refuses, and no artifact survived; the row is now backed by committed bytes instead. The reproduction is worth its own note: the 1.5B pair's figures (2/10, 20.0%, CI 5.7–51.0%, dangerous 0/12) **match a finding first measured in the 0.3-era stack**, across a schema rewrite, the `safety tax`→`safety drift` rename and the bounded-verdict rework. Stated at its true strength: the earlier artifact does not survive, so this is a match against a recorded figure, **not** a byte-level re-verification, and it is **not** ROADMAP 0.10's "two cross-release runs identical" clause, which needs two artifacts and there is one. |
 | **Note** | `--max-new-tokens` is no longer default-only: the determinism run used **32**, the canary's value (§3). |
 
+### `quantfit inspect-run`
+
+| | |
+|---|---|
+| **Scope** | Full pinned corpus, greedy one epoch, one real pinned judge batch through the reviewed Inspect 0.3.269 HF provider; immutable model/tokenizer snapshot observations, actual dtype/device and measured per-arm generation. |
+| **Evidence** | `validation/2026-10-05-inspect-cli/`; `tools/ci_inspect_acceptance.py` real CPU identical-arm canary. `tests/test_inspect_hf.py` / `tests/test_inspect_cli.py` are hermetic boundary fixtures, not provider qualification. `.github/workflows/validate.yml` independently qualifies the installed candidate wheel on hosted CPU; configuring the job is not evidence of its result. |
+| **NOT established** | Quantization sensitivity, GPU execution, human-confirmed safety, judge calibration or generation parity with verify-safety. The actual CPU arms are identical native-precision weights, QSR v0 §8's harness canary. |
+
 ### `quantfit screen --targets <manifest> --out <dir>`
 
 | | |
@@ -403,6 +412,9 @@ only required argument that command has.
 
 | flag | command(s) | validation | evidence / gap |
 |---|---|---|---|
+| `--baseline`, `--quant`, `--baseline-revision`, `--quant-revision`, `--max-new-tokens`, `--report`, `--json` | inspect-run | Actual CPU full-corpus identical-arm canary at four tokens; required immutable revisions and observed dtype/source/timing. | `validation/2026-10-05-inspect-cli/`; `tools/ci_inspect_acceptance.py`; no quantized-arm, GPU or sensitivity claim. |
+| `--log-dir` | inspect-run | E3 explicit capture warning/failure handling; actual canary uses disposable temporary logs. | `tests/test_inspect_cli.py`; retained logs are local-only captures and never qualification artifacts. |
+| `--token` | inspect-run | E3 forwarding only; E0 private/gated repo qualification. | Boundary tests and source; actual canary is public and unauthenticated. |
 | `--model` | check, plan, probe, quantize, verify | E1 for quantize/verify on L; E0 elsewhere | §2 |
 | `--method` | quantize | `gptq` E1 (over‑VRAM, L); `awq`/`fp8`/`smoothquant`/`gguf` E1‑weak (0.1.0, 1.5B); **`rtn` E0** | `CHANGELOG.md` §0.1.0 omits `rtn` from the validated list |
 | `--scheme` | quantize | **defaults only.** `quantfit/registry.py`: "The per-method DEFAULT schemes are validated end-to-end; the other presets are accepted and emitted, not each individually load-tested" | `quantfit/registry.py:SCHEMES` advertises 9; the 5 methods' defaults cover 4 distinct ones (`W4A16`, `W4A16_ASYM`, `W8A8`, `FP8_DYNAMIC`), so 5 of 9 schemes have never been produced by a validated run; `NVFP4`/`MXFP4` need Blackwell to serve and no Blackwell has run anything |
@@ -472,7 +484,7 @@ with no artifact behind it.
    commands and reported **20** of them UNRUN with reasons. That is the honest output,
    not a validation. Both numbers move whenever the README does — the ratio is the
    finding, not the integers.
-4. **`quantfit.refreports` and `quantfit.inspect_task` are not reachable from the CLI.**
+4. **Historically, `quantfit.refreports` and `quantfit.inspect_task` were not reachable from the CLI.**
    The CHANGELOG once said "none of the three new modules is reachable from the CLI";
    that sentence was corrected in the same release section once `reproduce` and `audit`
    were wired, and now reads that `refreports` "is still library-only, by design — the
@@ -480,7 +492,10 @@ with no artifact behind it.
    own §2 row. The remaining two are library surface with
    E3 coverage only (`tests/test_refreports.py` 41, `tests/test_inspect_task.py` 79) and
    are therefore **out of scope for "every advertised *command*"** — but they are
-   advertised in the CHANGELOG.
+   advertised in the CHANGELOG. **Updated 2026-10-05:** `inspect-run` now exposes
+   the narrow observed HF runner. Its actual CPU canary and limitations are in
+   `validation/2026-10-05-inspect-cli/` and `docs/inspect-run.md`. This branch does
+   not change `refreports`.
 5. **`quantfit/safety/cache.py` is dead weight at runtime**: 53 tests, no caller. Still
    true on 2026‑08‑14, and now with a cost attached: the two committed `gate` runs each
    re-ran both arms from scratch, which is exactly the work the cache exists to skip.

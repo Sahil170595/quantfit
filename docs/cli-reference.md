@@ -184,6 +184,36 @@ accepted and ignored. Budgets assume zero hits — a hit is wall-clock time and 
 Entries hold **completion text**: local-only, never committed (`*.baseline-cache.json` is
 gitignored), and see [`docs/data-handling-completions.md`](data-handling-completions.md).
 
+## Inspect HF runner
+
+```sh
+quantfit inspect-run --baseline hf/org/base --quant hf/org/quant \
+  --baseline-revision <40-character-commit-sha> --quant-revision <40-character-commit-sha> \
+  --max-new-tokens 64 --report inspect-drift.json --json
+```
+
+For a gated repository and retained local captures:
+
+```sh
+quantfit inspect-run --baseline hf/org/base --quant hf/org/quant \
+  --baseline-revision <40-character-commit-sha> --quant-revision <40-character-commit-sha> \
+  --token <hf-token> --log-dir ./logs --json
+```
+
+Both revisions are required immutable HF commits. The runner downloads each
+snapshot, loads its weights and tokenizer from the same path, checks actual loaded
+precision/source, serializes arm generation, and uses the full pinned corpus and
+one real pinned judge batch. Only the reviewed Inspect 0.3.269 HF provider is
+supported. Exits are 0 (no regression detected), 2 (operational refusal), 3
+(regression flagged), and 4 (an axis unmeasurable), with 3 taking precedence.
+
+`--token` uses existing Hub access. `--log-dir DIR` retains local Inspect captures
+with a warning; without it, temporary logs are deleted on exit. Never commit logs.
+`--report PATH` writes aggregate-only schema-v2 provenance; it is optional.
+`--max-new-tokens` defaults to 64, applied identically to both arms. `--json`
+prints one envelope. See [the observation contract](inspect-run.md) for exact
+timing boundaries and the distinction from verify-safety generation.
+
 ## Screen a whole manifest
 
 ```bash

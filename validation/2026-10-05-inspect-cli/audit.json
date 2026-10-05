@@ -1,0 +1,612 @@
+{
+  "checks": {
+    "citation_resolution": {
+      "coverage": {
+        "citations_in_fences": 3,
+        "citations_marked_ignore": 0,
+        "docs_scanned": [
+          "CHANGELOG.md",
+          "CONTRIBUTING.md",
+          "README.md",
+          "ROADMAP.md",
+          "SECURITY.md",
+          "docs/artifacts-and-versions.md",
+          "docs/bus-factor.md",
+          "docs/ci-integration.md",
+          "docs/cli-reference.md",
+          "docs/cross-hardware-tolerance-v0.md",
+          "docs/data-handling-completions.md",
+          "docs/dependency-policy.md",
+          "docs/hosted-ci.md",
+          "docs/injected-control-design.md",
+          "docs/inspect-run.md",
+          "docs/judge-calibration-v0.md",
+          "docs/reference-reports-v0.md",
+          "docs/requirements-research-2026-08.md",
+          "docs/sensitivity-control-v0.md",
+          "docs/validation-matrix.md",
+          "llms.txt",
+          "spec/qsr-v0.md",
+          "spec/qsr-v1-freeze-plan.md"
+        ],
+        "line_citations": 219,
+        "quoted_line_citations": 13,
+        "repo_files_indexed": 291,
+        "symbol_citations": 155
+      },
+      "findings": [],
+      "n_errors": 0,
+      "n_findings": 0,
+      "n_warnings": 0
+    },
+    "command_parity": {
+      "coverage": {
+        "cli_commands": [
+          "audit",
+          "calibrate",
+          "calibrate ingest",
+          "calibrate sheet",
+          "check",
+          "emit",
+          "gate",
+          "inspect-run",
+          "list",
+          "plan",
+          "probe",
+          "quantize",
+          "reproduce",
+          "screen",
+          "verify",
+          "verify-safety"
+        ],
+        "code_spans_marked_ignore": 10,
+        "commands_documented": [
+          "audit",
+          "calibrate",
+          "calibrate ingest",
+          "calibrate sheet",
+          "check",
+          "emit",
+          "gate",
+          "inspect-run",
+          "list",
+          "plan",
+          "probe",
+          "quantize",
+          "reproduce",
+          "screen",
+          "verify",
+          "verify-safety"
+        ],
+        "docs_scanned": [
+          "CHANGELOG.md",
+          "CONTRIBUTING.md",
+          "README.md",
+          "ROADMAP.md",
+          "SECURITY.md",
+          "docs/artifacts-and-versions.md",
+          "docs/bus-factor.md",
+          "docs/ci-integration.md",
+          "docs/cli-reference.md",
+          "docs/cross-hardware-tolerance-v0.md",
+          "docs/data-handling-completions.md",
+          "docs/dependency-policy.md",
+          "docs/hosted-ci.md",
+          "docs/injected-control-design.md",
+          "docs/inspect-run.md",
+          "docs/judge-calibration-v0.md",
+          "docs/reference-reports-v0.md",
+          "docs/requirements-research-2026-08.md",
+          "docs/sensitivity-control-v0.md",
+          "docs/validation-matrix.md",
+          "llms.txt",
+          "spec/qsr-v0.md",
+          "spec/qsr-v1-freeze-plan.md"
+        ],
+        "flags_documented_by_command": {
+          "audit": [
+            "--json",
+            "--json-out",
+            "--root"
+          ],
+          "calibrate": [],
+          "calibrate ingest": [
+            "--json",
+            "--key",
+            "--out",
+            "--sheet"
+          ],
+          "calibrate sheet": [
+            "--capture",
+            "--json",
+            "--key",
+            "--sheet"
+          ],
+          "check": [
+            "--json",
+            "--model",
+            "--token"
+          ],
+          "emit": [
+            "--json",
+            "--report"
+          ],
+          "gate": [
+            "--baseline",
+            "--baseline-cache",
+            "--eps-source",
+            "--eps-upper",
+            "--fp16",
+            "--help",
+            "--json",
+            "--junit",
+            "--max-new-tokens",
+            "--out",
+            "--quant",
+            "--report",
+            "--threshold",
+            "--tier",
+            "--token"
+          ],
+          "inspect-run": [
+            "--baseline",
+            "--baseline-revision",
+            "--json",
+            "--log-dir",
+            "--max-new-tokens",
+            "--quant",
+            "--quant-revision",
+            "--report",
+            "--token"
+          ],
+          "list": [
+            "--json"
+          ],
+          "plan": [
+            "--json",
+            "--model",
+            "--prefer"
+          ],
+          "probe": [
+            "--bits",
+            "--json",
+            "--model",
+            "--samples",
+            "--token"
+          ],
+          "quantize": [
+            "--json",
+            "--method",
+            "--model",
+            "--no-check",
+            "--out",
+            "--private",
+            "--push",
+            "--scheme",
+            "--token"
+          ],
+          "reproduce": [
+            "--candidate",
+            "--json",
+            "--out",
+            "--reference",
+            "--t0-candidate",
+            "--t0-reference"
+          ],
+          "screen": [
+            "--attempts",
+            "--capture",
+            "--json",
+            "--junit",
+            "--max-new-tokens",
+            "--out",
+            "--resume",
+            "--targets",
+            "--token"
+          ],
+          "verify": [
+            "--json",
+            "--model"
+          ],
+          "verify-safety": [
+            "--baseline",
+            "--baseline-cache",
+            "--capture",
+            "--demo",
+            "--fp16",
+            "--json",
+            "--junit",
+            "--max-new-tokens",
+            "--quant",
+            "--report",
+            "--token"
+          ]
+        },
+        "flags_in_corpus": 68,
+        "invocations_parsed": 161
+      },
+      "findings": [],
+      "n_errors": 0,
+      "n_findings": 0,
+      "n_warnings": 0
+    },
+    "constant_parity": {
+      "coverage": {
+        "at_risk_slack": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.reproduce:AT_RISK_SLACK"
+        },
+        "cache_entry_suffix": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.safety.cache:CACHE_ENTRY_SUFFIX"
+        },
+        "calibration_schema": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 2,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.safety.calibrate:CALIBRATION_SCHEMA"
+        },
+        "capture_protocol_version": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.safety.cache:CAPTURE_PROTOCOL_VERSION"
+        },
+        "current_spec_version": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.refreports:CURRENT_SPEC_VERSION"
+        },
+        "default_max_new_tokens": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 2,
+          "named_without_value": 6,
+          "scoped_out_as_historical": 1,
+          "target": "quantfit.safety.verify:DEFAULT_MAX_NEW_TOKENS"
+        },
+        "drift_report_schema": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 12,
+          "named_without_value": 1,
+          "scoped_out_as_historical": 1,
+          "target": "quantfit.safety.report:SCHEMA_VERSION"
+        },
+        "flip_count_slack": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.reproduce:FLIP_COUNT_SLACK"
+        },
+        "full_threshold": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 2,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.gate:FULL_THRESHOLD"
+        },
+        "gate_schema_version": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 4,
+          "named_without_value": 3,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.gate:GATE_SCHEMA_VERSION"
+        },
+        "gguf_unquantized_types": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 3,
+          "named_without_value": 4,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.safety.gguf_arm:UNQUANTIZED_FILE_TYPES"
+        },
+        "inspect_conforms_to": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.inspect_task:CONFORMS_TO"
+        },
+        "judge_input_contract": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 3,
+          "named_without_value": 2,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.safety.verify:JUDGE_INPUT_CONTRACT"
+        },
+        "judge_measured_accuracy": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.safety.verify:JUDGE_MEASURED_ACCURACY"
+        },
+        "judge_measured_false_positive_rate": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.safety.verify:JUDGE_MEASURED_FALSE_POSITIVE_RATE"
+        },
+        "judge_model_id": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 2,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.safety.verify:JUDGE_MODEL_ID"
+        },
+        "judge_revision": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 3,
+          "named_without_value": 10,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.safety.verify:JUDGE_REVISION"
+        },
+        "llamacpp_commit": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 5,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.backends.gguf:LLAMACPP_COMMIT"
+        },
+        "llamacpp_tag": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 16,
+          "named_without_value": 1,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.backends.gguf:LLAMACPP_TAG"
+        },
+        "manifest_schema_version": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.screen:MANIFEST_SCHEMA_VERSION"
+        },
+        "max_reference_reports": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 6,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.refreports:MAX_REFERENCE_REPORTS"
+        },
+        "package_version": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 2,
+          "named_without_value": 7,
+          "scoped_out_as_historical": 2,
+          "target": "quantfit:__version__"
+        },
+        "probe_dataset_id": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 2,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.safety.verify:PROBE_DATASET_ID"
+        },
+        "probe_dataset_revision": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 5,
+          "named_without_value": 12,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.safety.verify:PROBE_DATASET_REVISION"
+        },
+        "refreport_schema_version": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.refreports:REFREPORT_SCHEMA_VERSION"
+        },
+        "reproduce_spec_version": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.reproduce:SPEC_VERSION"
+        },
+        "reproduction_schema_version": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 1,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.reproduce:REPRODUCTION_SCHEMA_VERSION"
+        },
+        "screen_summary_filename": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 2,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.screen:SUMMARY_FILENAME"
+        },
+        "shipped_corpus_n": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 2,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.gate:SHIPPED_CORPUS_N"
+        },
+        "shipped_expected_safe_n": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.gate:SHIPPED_EXPECTED_SAFE_N"
+        },
+        "shipped_expected_unsafe_n": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 2,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.gate:SHIPPED_EXPECTED_UNSAFE_N"
+        },
+        "smoke_threshold": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 4,
+          "named_without_value": 2,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.gate:SMOKE_THRESHOLD"
+        },
+        "summary_schema_version": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.screen:SUMMARY_SCHEMA_VERSION"
+        },
+        "tier_names": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 16,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 4,
+          "target": "quantfit.gate:TIERS"
+        },
+        "tolerance_doc": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 0,
+          "scoped_out_as_historical": 0,
+          "target": "quantfit.reproduce:TOLERANCE_DOC"
+        },
+        "verified_inspect_ai_version": {
+          "asserted_mismatch": 0,
+          "asserted_ok": 1,
+          "named_without_value": 4,
+          "scoped_out_as_historical": 4,
+          "target": "quantfit.inspect_task:VERIFIED_INSPECT_AI_VERSION"
+        }
+      },
+      "findings": [],
+      "n_errors": 0,
+      "n_findings": 0,
+      "n_warnings": 0
+    },
+    "exit_code_parity": {
+      "coverage": {
+        "canonical_codes": {
+          "fail": 3,
+          "operational": 2,
+          "pass": 0,
+          "unmeasurable": 4,
+          "unresolvable": 5
+        },
+        "cli_help_claims_classified": 27,
+        "dispatch_branches": {
+          "audit": [],
+          "calibrate": [],
+          "check": [],
+          "emit": [],
+          "gate": [],
+          "inspect-run": [],
+          "list": [],
+          "plan": [],
+          "probe": [],
+          "quantize": [],
+          "reproduce": [],
+          "screen": [],
+          "verify": [],
+          "verify-safety": []
+        },
+        "doc_claims_classified": 22,
+        "docs_scanned": [
+          "CONTRIBUTING.md",
+          "README.md",
+          "docs/ci-integration.md",
+          "spec/qsr-v0.md"
+        ]
+      },
+      "findings": [],
+      "n_errors": 0,
+      "n_findings": 0,
+      "n_warnings": 0
+    },
+    "schema_field_parity": {
+      "coverage": {
+        "calibration_report": {
+          "accepted_universe": 158,
+          "docs": [
+            "docs/judge-calibration-v0.md"
+          ],
+          "emitted_keys": 66,
+          "modules": [
+            "quantfit/safety/calibrate.py"
+          ],
+          "tokens_checked": 22,
+          "tokens_marked_not_a_field": 0
+        },
+        "drift_report_v2": {
+          "accepted_universe": 309,
+          "docs": [
+            "spec/qsr-v0.md"
+          ],
+          "emitted_keys": 139,
+          "modules": [
+            "quantfit/safety/report.py",
+            "quantfit/safety/verify.py"
+          ],
+          "tokens_checked": 33,
+          "tokens_marked_not_a_field": 0
+        },
+        "gate_decision": {
+          "accepted_universe": 230,
+          "docs": [
+            "docs/ci-integration.md"
+          ],
+          "emitted_keys": 119,
+          "modules": [
+            "quantfit/gate.py"
+          ],
+          "tokens_checked": 41,
+          "tokens_marked_not_a_field": 0
+        },
+        "reproduction_record": {
+          "accepted_universe": 443,
+          "docs": [
+            "docs/cross-hardware-tolerance-v0.md"
+          ],
+          "emitted_keys": 261,
+          "modules": [
+            "quantfit/reproduce.py",
+            "quantfit/screen.py"
+          ],
+          "tokens_checked": 17,
+          "tokens_marked_not_a_field": 0
+        },
+        "screen_summary": {
+          "accepted_universe": 174,
+          "docs": [
+            "spec/qsr-v0.md"
+          ],
+          "emitted_keys": 87,
+          "modules": [
+            "quantfit/screen.py"
+          ],
+          "tokens_checked": 19,
+          "tokens_marked_not_a_field": 0
+        }
+      },
+      "findings": [],
+      "n_errors": 0,
+      "n_findings": 0,
+      "n_warnings": 0
+    }
+  },
+  "counts": {
+    "errors": 0,
+    "findings": 0,
+    "warnings": 0
+  },
+  "exit_code": 0,
+  "ok": true,
+  "root": "C:\\tmp\\quantfit-inspect-20261005",
+  "schema_version": 1
+}

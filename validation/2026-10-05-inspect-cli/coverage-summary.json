@@ -1,0 +1,15 @@
+{
+  "deselected": 6,
+  "passed": 1455,
+  "scientific_branch_percent": {
+    "quantfit/gate.py": 93.47826086956522,
+    "quantfit/safety/mde.py": 100.0,
+    "quantfit/safety/report.py": 91.66666666666667
+  },
+  "scope": "final full hermetic suite with branch coverage",
+  "skipped": 1,
+  "totals": {
+    "percent_branches_covered": 89.209726443769,
+    "percent_covered": 91.11480865224625
+  }
+}
