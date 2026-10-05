@@ -215,6 +215,7 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     # Pure local JSON comparison — of TWO drift reports that must already exist
     # (quantfit/reproduce.py: --reference and --candidate are both read from disk).
     "reproduce": (REQ_ARTIFACT,),
+    # Offline drift/calibration reads (quantfit/resolution.py: analyze_resolution).
     "resolution": (REQ_ARTIFACT,),
     # Bundled listing is pure local metadata (quantfit/reference_cli.py).
     "references": (),

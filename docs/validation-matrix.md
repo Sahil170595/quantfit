@@ -408,7 +408,7 @@ only; no published reference or measurement claim is established.
 
 | flag | command | evidence | artifact |
 |---|---|---|---|
-| `--registry` / `--slug` | references | Local functional checks against explicitly synthetic registry and bytes; no publication proof | `validation/2026-10-05-reference-cli/` |
+| `--registry` / `--slug` / `--report` | references | Local functional checks against explicitly synthetic registry and bytes; no publication proof | `validation/2026-10-05-reference-cli/` |
 
 Enumerated from `_build_parser()`, not from memory, on 2026‑08‑07 at 22:25. §0.1 stakes
 this table on flag-level completeness, so the flags that had **no row at all** are named

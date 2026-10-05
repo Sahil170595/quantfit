@@ -42,3 +42,36 @@ publication flags and makes no authenticated citation claim.
 
 The dated 2026-10-05 correction to the stale registry-state prose is grounded in
 `validation/2026-08-21-screen-complete/README.md`; that historical record is unchanged.
+
+After integration onto the four prerequisite branches, `integration.json` and
+`integration-tests.xml` record the combined source qualification separately from
+the standalone results above. The suite passed 1,623 tests; the pass count was
+also derived from JUnit. Combined coverage was 91.66% overall and 89.96% of
+branches, with all scientific module floors passing. Installed wheel and rebuilt
+sdist each passed 423 acceptance tests. The installed README check recognized
+36 commands and ran seven clean-environment commands; its other 29 commands were
+not executed. These counts describe this local instrument qualification only.
+
+Exact additional commands (same hardware and locked interpreter as above):
+
+```powershell
+python -m pytest tests -q --cov=quantfit --cov-branch --cov-report=term-missing --cov-report=json:C:/tmp/quantfit-stack-coverage-20261005.json --junitxml=C:/tmp/quantfit-stack-tests-20261005.xml
+python tools/ci_coverage.py C:/tmp/quantfit-stack-coverage-20261005.json
+python tools/ci_mutation.py
+python -m mypy --strict quantfit/spec.py quantfit/engines/base.py
+C:/tmp/actionlint-quantfit-20261004/actionlint.exe -color
+python -m build --no-isolation --outdir C:/tmp/quantfit-stack-dist-20261005
+python -m twine check C:/tmp/quantfit-stack-dist-20261005/*
+uvx --from uv==0.12.23 uv pip install --python C:/tmp/quantfit-resolution-installed-env-20261005/Scripts/python.exe --no-deps --no-build-isolation --reinstall C:/tmp/quantfit-stack-dist-20261005/quantfit-0.15.1-py3-none-any.whl
+C:/tmp/quantfit-resolution-installed-env-20261005/Scripts/python.exe tools/ci_installed.py --checkout C:/tmp/quantfit-reference-20261005
+uvx --from uv==0.12.23 uv pip install --python C:/tmp/quantfit-resolution-installed-env-20261005/Scripts/python.exe --no-deps --no-build-isolation --reinstall C:/tmp/quantfit-stack-dist-20261005/quantfit-0.15.1.tar.gz
+C:/tmp/quantfit-resolution-installed-env-20261005/Scripts/python.exe tools/ci_installed.py --checkout C:/tmp/quantfit-reference-20261005
+C:/tmp/quantfit-resolution-installed-env-20261005/Scripts/python.exe tools/quickstart_check.py --min-commands 20 --quantfit-bin 'C:/tmp/quantfit-resolution-installed-env-20261005/Scripts/python.exe -m quantfit.cli' --json C:/tmp/quantfit-stack-quickstart-20261005.json
+```
+
+Candidate package installation was isolated; dependencies were borrowed through
+a `.pth` from the shared locked environment. This is distinct from hosted CI's
+fresh runner installations. Production Inspect provider files were unchanged
+by integration; the prior actual CPU record is preserved, not rerun or promoted
+to GPU or sensitivity evidence here. Hosted checks must qualify the published
+heads before this stack is declared ready for review.
