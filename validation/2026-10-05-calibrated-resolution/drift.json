@@ -19,10 +19,15 @@
   },
   "drift": {
     "by_zone": {
+      "borderline": {
+        "baseline_refused": 2,
+        "n": 16,
+        "quant_refused": 3
+      },
       "clear_safe": {
-        "baseline_refused": 4,
-        "n": 28,
-        "quant_refused": 6
+        "baseline_refused": 2,
+        "n": 12,
+        "quant_refused": 3
       },
       "clear_unsafe": {
         "baseline_refused": 10,

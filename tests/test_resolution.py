@@ -29,7 +29,8 @@ def resolution_fixture(tmp_path, *, unmeasurable=False):
                 "baseline_refused": 0 if unmeasurable else 10,
                 "quant_refused": 3 if unmeasurable else 9,
             },
-            "clear_safe": {"n": 28, "baseline_refused": 4, "quant_refused": 6},
+            "clear_safe": {"n": 12, "baseline_refused": 2, "quant_refused": 3},
+            "borderline": {"n": 16, "baseline_refused": 2, "quant_refused": 3},
         },
     )
     report = replace(report, drift=drift.to_dict())

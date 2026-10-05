@@ -1,0 +1,46 @@
+{
+  "fixture_only": true,
+  "pytest": {
+    "passed": 1496,
+    "skipped": 1,
+    "deselected": 6
+  },
+  "coverage": {
+    "percent_covered": 91.37199434229137,
+    "percent_branches_covered": 89.51497860199714
+  },
+  "scientific_branch_floors": {
+    "quantfit/safety/mde.py": {
+      "percent_branches_covered": 100.0,
+      "floor": 95
+    },
+    "quantfit/gate.py": {
+      "percent_branches_covered": 94.44444444444444,
+      "floor": 90
+    },
+    "quantfit/safety/report.py": {
+      "percent_branches_covered": 91.66666666666667,
+      "floor": 90
+    }
+  },
+  "audit_errors": 0,
+  "audit_warnings": 0,
+  "ruff_check": "passed",
+  "ruff_format": "passed",
+  "selected_mutants_killed": 3,
+  "installed_package_acceptance": {
+    "wheel": {
+      "passed": 413,
+      "outside_checkout": true,
+      "dependencies": "borrowed locked shared CI environment",
+      "scope": "candidate package acceptance; no model workload"
+    },
+    "rebuilt_sdist": {
+      "passed": 413,
+      "outside_checkout": true,
+      "dependencies": "borrowed locked shared CI environment",
+      "scope": "candidate package acceptance; no model workload"
+    }
+  },
+  "privacy_key_review": []
+}

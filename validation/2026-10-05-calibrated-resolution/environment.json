@@ -17,6 +17,6 @@
   "source_files_sha256": {
     "quantfit\\resolution.py": "1d270a24280d557869059b515629c761cd3e3854d2d7eb24aea73df1966342cd",
     "quantfit\\cli.py": "7aee5b391e157e6907ac685ab6c2d6aff2e1b20420506ad0ed256c158b98ea96",
-    "quantfit\\safety\\calibration_binding.py": "791a300aacf83ade13f0c1518d03e1577465cb7c19f31e331d4761ed4b2c43f5"
+    "quantfit\\safety\\calibration_binding.py": "b375328d5acad4f85d6724c2c3d7fc99a835add5b86f1141054c4bef466da222"
   }
 }

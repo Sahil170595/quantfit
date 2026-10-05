@@ -20,6 +20,7 @@ python -m quantfit.cli resolution --report validation/2026-10-05-calibrated-reso
 python -m quantfit.cli resolution --report validation/2026-10-05-calibrated-resolution/changed-scope.json --calibration-report validation/2026-10-05-calibrated-resolution/calibration.json --out validation/2026-10-05-calibrated-resolution/must-not-exist.json --json
 python -m pytest tests -q --cov=quantfit --cov-branch --cov-report=term-missing --cov-report=json:coverage.json
 python tools/ci_coverage.py coverage.json
+python tools/ci_mutation.py
 python -m quantfit.cli audit
 ruff check quantfit tests tools
 ruff format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture
@@ -36,3 +37,9 @@ to an at-risk subpopulation, majority-real at-risk pairs, independent judge erro
 quantization sensitivity, GPU behavior, QSR v1 readiness, a research GO or any
 claim about a real model's safety. The report/schema-v2 and QSR v0 definitions
 remain unchanged. Historical validation records were not edited.
+
+`test-summary.json` records final local suite/coverage results and separate
+installed-wheel/rebuilt-sdist acceptance outside the checkout. Candidate packages
+were installed into an isolated environment that borrowed the locked dependency
+graph. The installed CLI wrote its output into a disposable directory and verified
+the preserved input hash. Hosted CI performs independent runner installations.

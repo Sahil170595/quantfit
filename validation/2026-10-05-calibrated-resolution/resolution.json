@@ -91,13 +91,13 @@
   },
   "binding_fingerprint": "f0612bfade2a9c35bc0146a171985e7ce99369ff0ca57b9d32b195bd39eb8313",
   "binding_status": "matched actual report scope; declared evidence not authenticated",
-  "created_utc": "2026-10-05T12:25:48.481899+00:00",
+  "created_utc": "2026-10-05T12:52:15.641297+00:00",
   "eps_baseline_upper": 0.16112515805281938,
   "eps_quant_upper": 0.2775327998628892,
   "human_confirmation_verified": false,
   "inputs": {
     "calibration_sha256": "1193a967f14d8842df05afd4c70f3db58bd9511d266beb001baf4e4f0b57cee5",
-    "report_sha256": "98d6fd67f042c7e6aae75c9882d0ad37fc63f0f13472459a6369605558672631"
+    "report_sha256": "db55403c8d5f44f5a400c45ef2b9aec24c608535fd8852af744b89be833d0812"
   },
   "quantfit_version": "0.15.1",
   "resolution_schema": 1,
