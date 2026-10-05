@@ -71,6 +71,15 @@ The passed/skipped totals were independently counted from its 1,443 test cases;
 `checks.json` retains that count and the JUnit hash. Both Ruff checks passed using
 CI's exact scopes. The suite emitted the existing SWIG deprecation warnings.
 
+The same dated protocol correction also addresses GGUF engine completeness. Added
+regressions first observed eleven failures: missing/non-integer/non-positive thread
+counts and missing/unknown/mutable-release source declarations all passed. The
+checker now requires positive exact-integer threads, an executable SHA256 and either
+the producer's pinned-release source with its explicit tag or the explicit unverified
+user-build marker permitted by QSR v0 §3.2. No release tag is inferred from current
+constants, and a matching user-built executable is not claimed as pinned-release
+provenance. Follow-up full-suite and coverage evidence is recorded separately below.
+
 ## What this does not establish
 
 This is not an independently executed three-replicate measurement campaign. Distinct

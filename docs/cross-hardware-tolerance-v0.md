@@ -381,6 +381,12 @@ T0 requires immutable reported judge/dataset/arm pins, explicit greedy decoding 
 template policy, the same complete arm engine identities and instrument version,
 and equal recorded `env` objects, before comparing `drift` blocks. A baseline served
 from the completion cache is refused even when report files have different bytes.
+GGUF engine identity requires the executable SHA256, a positive exact-integer thread
+count (booleans are refused), and the source's pinned release tag or explicit
+`QUANTFIT_LLAMACPP` user-build marker. Unknown values on both sides are not evidence
+of agreement. The user-build path is permitted by QSR v0 §3.2 and remains explicitly
+unverified as pinned-release provenance; matching metadata never verifies an archive
+or executable's origin. No current tag is inferred for a historical report.
 The CLI requires at least three reports; the library still records a two-report
 partial set with `meets_protocol_replicate_count: false` and `protocol_pass: false`.
 Exit 0 means protocol-count agreement, 3 means disagreement, and 2 means invalid or

@@ -407,6 +407,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -420,6 +421,10 @@ from quantfit.safety.report import DriftReport, ReportError
 REPRODUCTION_SCHEMA_VERSION = 1
 T0_SCHEMA_VERSION = 1
 T0_REQUIRED_REPLICATES = 3
+_T0_PINNED_LLAMACPP_SOURCE = re.compile(
+    r"provisioned from pinned release archive b[0-9]+ \(archive SHA256-verified when provisioned\)"
+)
+_T0_USER_LLAMACPP_SOURCE = "QUANTFIT_LLAMACPP (user-provided build; tag not verified by quantfit)"
 
 # The spec version the rule was written against, and the rule's citation. Both ride in
 # every artifact: §10.3 makes a published report valid *as-of* a spec version, and a
@@ -2318,6 +2323,16 @@ def _t0_identity(view: _View) -> tuple[dict, dict, str]:
                 require(
                     _is_hex_digest(engine.get("binary_sha256"), 64),
                     f"{name}.engine.binary_sha256 must pin the executable",
+                )
+                require(
+                    _is_int(engine.get("threads")) and engine["threads"] > 0,
+                    f"{name}.engine.threads must record a positive integer thread count",
+                )
+                source = engine.get("source")
+                require(
+                    isinstance(source, str)
+                    and (source == _T0_USER_LLAMACPP_SOURCE or bool(_T0_PINNED_LLAMACPP_SOURCE.fullmatch(source))),
+                    f"{name}.engine.source must identify its pinned release tag or explicitly unverified user build",
                 )
             else:
                 require(

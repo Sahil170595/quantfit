@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
-from test_reproduce import _CLEAN, _ENV_F, _ENV_L, _arm, _write
+from test_reproduce import _CLEAN, _ENV_F, _ENV_L, _arm, _gguf_arms, _write
 
 from quantfit.cli import main
 from quantfit.reproduce import ReproduceError, compare, within_hardware_identical
@@ -30,6 +30,54 @@ def _edit(path, section, field, value):
     payload = json.loads(Path(path).read_text())
     payload[section][field] = value
     Path(path).write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _gguf_reports(tmp_path, engine):
+    return [
+        _write(tmp_path, f"gguf-{i}.json", created_utc=f"2026-10-05T00:00:0{i}+00:00", **_gguf_arms(engine=engine))
+        for i in range(3)
+    ]
+
+
+@pytest.mark.parametrize("threads", [None, True, False, 0, -1, "16", 16.0])
+def test_gguf_t0_requires_positive_exact_integer_thread_provenance(tmp_path, threads):
+    engine = {
+        "name": "llama.cpp",
+        "binary_sha256": "b" * 64,
+        "source": "provisioned from pinned release archive b9817 (archive SHA256-verified when provisioned)",
+        "device": "cpu",
+    }
+    if threads is not None:
+        engine["threads"] = threads
+    with pytest.raises(ReproduceError, match="threads"):
+        within_hardware_identical(_gguf_reports(tmp_path, engine))
+
+
+@pytest.mark.parametrize(
+    "source",
+    [None, "", "pinned", "provisioned from pinned release archive main (archive SHA256-verified when provisioned)"],
+)
+def test_gguf_t0_cannot_treat_unknown_source_or_unpinned_release_as_same_provenance(tmp_path, source):
+    engine = {"name": "llama.cpp", "binary_sha256": "b" * 64, "threads": 16, "device": "cpu"}
+    if source is not None:
+        engine["source"] = source
+    with pytest.raises(ReproduceError, match="source|tag"):
+        within_hardware_identical(_gguf_reports(tmp_path, engine))
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "provisioned from pinned release archive b9817 (archive SHA256-verified when provisioned)",
+        "QUANTFIT_LLAMACPP (user-provided build; tag not verified by quantfit)",
+    ],
+)
+def test_gguf_t0_retains_complete_pinned_or_explicitly_user_build_provenance(tmp_path, source):
+    engine = {"name": "llama.cpp", "binary_sha256": "b" * 64, "threads": 16, "source": source, "device": "cpu"}
+    result = within_hardware_identical(_gguf_reports(tmp_path, engine))
+    assert result["protocol_pass"] is True
+    assert result["measurement_identity"]["arms"]["baseline"]["engine"] == engine
+    assert result["independent_execution_verified"] is False
 
 
 @pytest.mark.parametrize(

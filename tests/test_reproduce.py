@@ -116,7 +116,14 @@ _INSPECT_DECODE = {
     "chat_template": "provider-default (inspect_ai:hf) — not verified against verify._encode_prompt",
     "recorded_by": "quantfit.inspect_task",
 }
-_LCPP_ENGINE = {"name": "llama.cpp", "binary_sha256": "b" * 64, "source": "pinned", "threads": 16, "device": "cpu"}
+# Synthetic byte hash, with the complete source shape emitted by gguf_arm._binary_source.
+_LCPP_ENGINE = {
+    "name": "llama.cpp",
+    "binary_sha256": "b" * 64,
+    "source": "provisioned from pinned release archive b9817 (archive SHA256-verified when provisioned)",
+    "threads": 16,
+    "device": "cpu",
+}
 
 # The two hardwares of §3.1's shape. Only `env` differs — which is the point: env.device is
 # NOT a T1 field, and a passed tolerance is exactly the claim that it differed while the
@@ -1544,7 +1551,10 @@ def test_witnessed_block_reads_gguf_fields_when_the_arms_are_gguf(tmp_path):
     assert factors["different llama.cpp executable"]["reference"]["baseline.engine.binary_sha256"] == "b" * 64
     assert factors["different weights, GGUF arm"]["equal"] is True
     assert factors["different host CPU model / core count"]["equal"] is True  # threads present on both
-    assert factors["user-built llama.cpp instead of the pin"]["reference"]["baseline.engine.source"] == "pinned"
+    assert (
+        factors["user-built llama.cpp instead of the pin"]["reference"]["baseline.engine.source"]
+        == _LCPP_ENGINE["source"]
+    )
 
 
 # --- operational failures (exit 2) ------------------------------------------------------
