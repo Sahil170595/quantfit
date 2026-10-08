@@ -23,6 +23,13 @@ exception in `docs/dependency-policy.md` §5 limits the cap move to hosted CPU e
 and keeps GPU AWQ/GPTQ qualification open. CPU Torch's local `+cpu` suffix is normalized
 to its public release version for advisory lookup; Torch remains included in the audit.
 
+On 2026-10-08 the release-candidate dependency audit correctly rejected fsspec
+2026.4.0 for CVE-2026-104851. The lock now selects fixed fsspec 2026.6.0 and
+matching s3fs 2026.6.0 without changing the pinned datasets or Inspect versions.
+Sanitized failure evidence and fresh local checks are in
+`validation/2026-10-08-fsspec-advisory/`; the full hosted graph must pass
+requalification before merge and publication.
+
 The candidate wheel and sdist are built once. Linux and Windows independently install
 each candidate with full dependencies and run CLI/report/gate/JUnit/statistical behavior
 from a temporary directory. The import check refuses source shadowing. Source-tree unit

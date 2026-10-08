@@ -52,6 +52,10 @@ The consumer action defaults to `>=0.16.0,<0.17`. No QSR v1 freeze, human calibr
 sensitivity control, GPU qualification, cross-hardware result, independent
 reproduction, or research GO is claimed by this software release.
 
+The candidate dependency audit found CVE-2026-104851 in locked fsspec 2026.4.0;
+the validation lock now uses fixed fsspec/s3fs 2026.6.0. The failed gate and
+correction are recorded in `validation/2026-10-08-fsspec-advisory/`.
+
 ## 0.15.1
 
 A patch releasing the hosted CI and security compatibility changes in #112. The

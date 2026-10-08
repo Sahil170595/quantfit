@@ -1,0 +1,27 @@
+{
+  "run": "https://github.com/Sahil170595/quantfit/actions/runs/37852886308",
+  "job": "https://github.com/Sahil170595/quantfit/actions/runs/37852886308/job/113570110203",
+  "candidate_head": "3652f301c94bef978661fcd0ff85829fea001c80",
+  "candidate_install": "passed",
+  "full_runtime_pip_check": "passed",
+  "audit_exit_code": 1,
+  "diagnostic": "Found 1 known vulnerability in 1 package: fsspec 2026.4.0 CVE-2026-104851; Fix Versions 2026.6.0",
+  "upstream_fix": "https://github.com/fsspec/filesystem_spec/commit/86438783f93b1398ef245b92f0e6063b445b611c",
+  "observed_installed_s3fs_2026.4.0_fsspec_requirement": "fsspec==2026.4.0",
+  "current_pypi_constraints": {
+    "datasets_5.0.1": "fsspec[http]<=2026.6.0,>=2023.1.0",
+    "inspect_ai_0.3.269": "fsspec<=2026.6.0,>=2023.1.0",
+    "s3fs_2026.6.0": "fsspec<2026.6.1,>=2026.6.0"
+  },
+  "pypi_metadata_sources": [
+    "https://pypi.org/pypi/datasets/5.0.1/json",
+    "https://pypi.org/pypi/inspect-ai/0.3.269/json",
+    "https://pypi.org/pypi/s3fs/2026.6.0/json"
+  ],
+  "lock_command": "uvx --from uv==0.12.23 uv lock --directory tools/ci --upgrade-package fsspec==2026.6.0 --upgrade-package s3fs==2026.6.0",
+  "changed_packages": {
+    "fsspec": {"before": "2026.4.0", "after": "2026.6.0"},
+    "s3fs": {"before": "2026.4.0", "after": "2026.6.0"}
+  },
+  "no_advisory_suppression": true
+}
