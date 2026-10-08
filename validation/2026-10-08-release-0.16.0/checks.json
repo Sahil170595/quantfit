@@ -1,0 +1,107 @@
+{
+  "python": "3.12.13 (main, May  8 2026, 18:37:00) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "commands": [
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\ruff.exe",
+        "check",
+        "quantfit",
+        "tests",
+        "tools"
+      ],
+      "exit_code": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\ruff.exe",
+        "format",
+        "--check",
+        "quantfit",
+        "tests",
+        "tools\\ci_constraints.py",
+        "tools\\ci_coverage.py",
+        "tools\\ci_cpu_acceptance.py",
+        "tools\\ci_dependency_audit.py",
+        "tools\\ci_gate_check.py",
+        "tools\\ci_inspect_acceptance.py",
+        "tools\\ci_installed.py",
+        "tools\\ci_mutation.py",
+        "tools/ci_gate_fixture"
+      ],
+      "exit_code": 0,
+      "stdout": "98 files already formatted\n",
+      "stderr": "",
+      "earlier_attempt": {
+        "command": [
+          "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\ruff.exe",
+          "format",
+          "--check",
+          "quantfit",
+          "tests",
+          "tools\\ci_constraints.py",
+          "tools\\ci_coverage.py",
+          "tools\\ci_cpu_acceptance.py",
+          "tools\\ci_dependency_audit.py",
+          "tools\\ci_gate_check.py",
+          "tools\\ci_inspect_acceptance.py",
+          "tools\\ci_installed.py",
+          "tools\\ci_mutation.py",
+          "tools/ci_gate_fixture"
+        ],
+        "exit_code": 1,
+        "stdout": "unformatted: File would be reformatted\n  --> quantfit\\__init__.py:7:23\n  |\n6 |\n  - __version__ = \"0.16.0\"\n7 + __version__ = \"0.16.0\"\n8 |\n  |\n\n1 file would be reformatted, 97 files already formatted\n",
+        "stderr": ""
+      },
+      "correction": "Ruff normalized mixed LF/CRLF introduced in the version line"
+    },
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\mypy.exe",
+        "--strict",
+        "quantfit/spec.py",
+        "quantfit/engines/base.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Success: no issues found in 2 source files\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\quantfit.exe",
+        "audit"
+      ],
+      "exit_code": 0,
+      "stdout": "command_parity: 0 error(s), 0 warning(s)\ncitation_resolution: 0 error(s), 0 warning(s)\nexit_code_parity: 0 error(s), 0 warning(s)\nconstant_parity: 0 error(s), 0 warning(s)\nschema_field_parity: 0 error(s), 0 warning(s)\ndocs=code parity: 0 error(s), 0 warning(s)\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests",
+        "-q",
+        "--ignore=tests/test_numerical_properties.py",
+        "--junitxml=C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-release-0.16.0\\unit.xml"
+      ],
+      "exit_code": 0,
+      "stdout": "........................................................................ [  4%]\n........................................................................ [  8%]\n........................................................................ [ 13%]\n........................................................................ [ 17%]\n........................................................................ [ 22%]\ns....s.........................................................ss....... [ 26%]\n........................................................................ [ 31%]\n........................................................................ [ 35%]\n................................................s....................... [ 40%]\n........................................................................ [ 44%]\n........................................................................ [ 48%]\n........................................................................ [ 53%]\n........................................................................ [ 57%]\n........................................................................ [ 62%]\n........................................................................ [ 66%]\n........................................................................ [ 71%]\n........................................................................ [ 75%]\n........................................................................ [ 80%]\n.....s.................................................................. [ 84%]\n........................................................................ [ 88%]\n........................................................................ [ 93%]\n........................................................................ [ 97%]\n....................................                                     [100%]\n1614 passed, 8 skipped in 124.82s (0:02:04)\n",
+      "stderr": ""
+    }
+  ],
+  "junit_independent_count": {
+    "tests": 1622,
+    "skipped": 8,
+    "failures": 0,
+    "errors": 0
+  },
+  "junit_suite_attributes": {
+    "tests": "1622",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "8"
+  }
+}
