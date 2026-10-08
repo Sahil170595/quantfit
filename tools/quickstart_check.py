@@ -199,6 +199,9 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     "verify": (REQ_ARTIFACT, REQ_GPU),
     # Two arms + the judge. Refined to CPU for all-GGUF pairs (CHANGELOG 0.4.1).
     "verify-safety": (REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),
+    # quantfit.inspect_hf: immutable snapshots, HF model and real pinned judge.
+    # Actual CPU qualification is tools/ci_inspect_acceptance.py; no GPU required.
+    "inspect-run": (REQ_NETWORK, REQ_DOWNLOAD),
     "gate": (REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),
     # Plus a target manifest that a clean venv does not have.
     "screen": (REQ_ARTIFACT, REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),
@@ -206,9 +209,16 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     "emit": (REQ_ARTIFACT,),
     # Pure local — but of a capture / labeling sheet that must already exist.
     "calibrate": (REQ_ARTIFACT,),
+    # Offline CPU JSON check; requires >=3 existing uncached replicate reports
+    # (quantfit/reproduce.py: within_hardware_identical; docs/cli-reference.md).
+    "t0": (REQ_ARTIFACT,),
     # Pure local JSON comparison — of TWO drift reports that must already exist
     # (quantfit/reproduce.py: --reference and --candidate are both read from disk).
     "reproduce": (REQ_ARTIFACT,),
+    # Offline drift/calibration reads (quantfit/resolution.py: analyze_resolution).
+    "resolution": (REQ_ARTIFACT,),
+    # Bundled listing is pure local metadata (quantfit/reference_cli.py).
+    "references": (),
     # Pure local, no network, no GPU — but it audits a SOURCE CHECKOUT: `--root`
     # defaults to "the one containing quantfit" (quantfit/cli.py), which in a clean
     # venv is site-packages, where the README, docs/ and spec/ it reads do not exist.
@@ -564,6 +574,12 @@ def _refine(subcommand: str, argv: Sequence[str], reqs: set[str]) -> list[str]:
     covering it.
     """
     extra: list[str] = []
+
+    if subcommand == "references" and (
+        "verify" in argv or any(arg == "--registry" or arg.startswith("--registry=") for arg in argv)
+    ):
+        reqs.add(REQ_ARTIFACT)
+        extra.append("external registry or verification needs local input artifacts")
 
     if subcommand == "verify-safety" and "--demo" in argv:
         # `--demo` runs the real tabulation over bundled FIXTURES: no model, no network,

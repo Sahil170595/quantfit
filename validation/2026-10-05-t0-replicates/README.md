@@ -1,0 +1,148 @@
+# T0 synthetic offline functional validation — 2026-10-05
+
+This record verifies the standalone T0 command and consumption of its output. Every
+input under `synthetic-reports/` is a constructed aggregate fixture. No model was
+loaded, no judge ran, no weights were downloaded, and no person adjudicated any output.
+
+The schema-v2 fixture pins (`a`/`c`/`d`/`e` repeated to digest length), model and dataset
+IDs, engine version and environment strings are explicitly **synthetic**. Their shape
+and equality are checked against the protocol; no claim is made that these digests
+identify actual external content. The fixtures use the project's `_tabulate` primitive
+to compute aggregates instead of reproducing its count/interval arithmetic by hand.
+
+The first drift-only reading would accept mixed instrument settings, mixed environments
+and cached baselines. The intended reading refuses them. The dated correction is in
+`docs/cross-hardware-tolerance-v0.md` (2026-10-05); the failing regressions were observed
+before implementation, and the current tests are in `tests/test_t0.py` and
+`tests/test_reproduce.py`.
+
+## Machine and pins
+
+Executed on Windows CPU, Intel Core i9-13980HX (24 cores / 32 logical processors).
+The borrowed coordinator-owned environment uses Python 3.12.13, pytest 9.0.3 and Ruff
+0.16.2. `pins.json` records the observed OS, installed package versions, CI lock hash,
+source base HEAD and SHA256s of the changed implementation/test files. Installed torch
+is a CPU build; its presence does not turn fixture evaluation into model execution.
+This is source-checkout validation, not installed-wheel or hosted-runner qualification.
+
+## Exact invocations
+
+Run from the repository root. On this machine `$py` was
+`C:\tmp\quantfit-calibration-20261005\tools\ci\.venv\Scripts\python.exe`.
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+& $py validation/2026-10-05-t0-replicates/run_validation.py
+& $py -m pytest -q -p no:cacheprovider --basetemp=C:\tmp\quantfit-t0-pytest-20261005 --junitxml=validation/2026-10-05-t0-replicates/full-suite.junit.xml
+& $py -m ruff check quantfit tests tools
+$taskRuffPaths = @('quantfit', 'tests') + @(Get-ChildItem tools\ci_*.py | ForEach-Object FullName) + @('tools/ci_gate_fixture')
+& $py -m ruff format --check @taskRuffPaths
+```
+
+The generator's exact per-command argv and observed exits are in
+`functional-results.json`. Its CLI subprocesses use `python -m quantfit.cli`; there is
+no `quantfit.__main__` entry point. They run with the Hub offline and CUDA masked.
+`*-stdout.json` stores each parsed stdout envelope; the requested `--out` files retain
+the bare standalone artifact. Relative source paths are relative to the repository
+root, which is also the working directory for consumption.
+
+## Observed outcomes
+
+| Synthetic case | Observed exit / state | Evidence |
+|---|---|---|
+| Three agreeing uncached reports | 0; `protocol_pass: true`; execution independence unverified | `agreement.json`, `agreement-stdout.json` |
+| Same identity, one differing drift block | 3; `pass: false` | `disagreement.json`, `disagreement-stdout.json` |
+| Cached baseline | 2; no output artifact | `cached-refusal-stdout.json` |
+| Mixed judge or recorded environment | 2; no output artifact | `mixed-judge-refusal-stdout.json`, `mixed-environment-refusal-stdout.json` |
+| Byte-identical copy or repeated path | 2; no output artifact | `byte-copy-refusal-stdout.json`, `repeated-path-refusal-stdout.json` |
+| CLI with two reports | 2; no output artifact | `short-set-refusal-stdout.json` |
+| Library with two agreeing reports | Agreement recorded; count requirement and `protocol_pass` false | `partial-library.json` |
+| Standalone artifact consumed for two member reports | 0; bound to exact report bytes and identities | `bound-comparison.json` |
+| Same-identity report whose bytes are absent from the T0 set | 3; `reproduced_t0_unverified` | `nonmember-comparison.json` |
+| Legacy bare positive assertions | 3; `reproduced_t0_unverified` | `legacy-assertion-comparison.json` |
+| Repository audit | 0; no findings, errors or warnings | `audit-stdout.json` |
+
+The automated tests additionally exercise missing and floating pins, equal malformed
+decode declarations, source changes after artifact creation, misreported source counts,
+the existing report-list CLI invocation, legacy positive artifact ingestion, and a
+successful subprocess with model backend imports blocked. `full-suite.junit.xml`
+contains the repository-suite result: **1,442 passed, 1 skipped, 6 deselected**, exit 0.
+The passed/skipped totals were independently counted from its 1,443 test cases;
+`checks.json` retains that count and the JUnit hash. Both Ruff checks passed using
+CI's exact scopes. The suite emitted the existing SWIG deprecation warnings.
+
+The same dated protocol correction also addresses GGUF engine completeness. Added
+regressions first observed eleven failures: missing/non-integer/non-positive thread
+counts and missing/unknown/mutable-release source declarations all passed. The
+checker now requires positive exact-integer threads, an executable SHA256 and either
+the producer's pinned-release source with its explicit tag or the explicit unverified
+user-build marker permitted by QSR v0 §3.2. No release tag is inferred from current
+constants, and a matching user-built executable is not claimed as pinned-release
+provenance. Follow-up full-suite and coverage evidence is recorded separately below.
+Another controlled regression changed each file immediately after its hash read:
+the previous loader emitted original byte hashes with the changed files' identities.
+The loader now constructs schema-v2 reports from that same byte buffer, and refuses
+duplicate keys and nonfinite JSON numbers. The report schema and operational exit-2
+contract are preserved.
+The observed-HF regression initially failed with `baseline.engine.version is
+required` on the complete actual-shaped Inspect engine. T0 now consumes the shared
+PR1 causal engine contract and validates actual ArmRun provenance, observed call
+counts and output metadata while excluding timers/prose from identity. Synthetic
+fixtures cover malformed observations, operator-only metadata and actual causal
+differences; this is compatibility evidence, not a new inference campaign.
+Three CLI regressions then demonstrated source overwrite for an exact output path,
+a resolved-path alias and a hardlink alias. They initially returned exit 0 and
+destroyed a cited report. The T0-only output guard now returns exit 2 and preserves
+every input byte in all three cases.
+
+## Final source qualification
+
+The final source is `1b2fdc7c3d3dcaee0af5cd2febd90c33b0b4f0d5`, stacked on
+PR1 prerequisite `9713b5ac17cfebb7491efb991fe37228a83ab329`. With the same CPU and
+borrowed environment recorded above, the unchanged implementation passed
+**1,544 tests, 1 skipped, 6 deselected**, exit 0. The declared JUnit totals and an
+independent count of its 1,545 test cases agree. `final-checks.json` records exact
+source hashes, current installed versions, the lock hash and the JUnit hash.
+
+```powershell
+& $py -m pytest -q -p no:cacheprovider --basetemp=C:/tmp/quantfit-t0-final-pytest-20261005 --cov=quantfit --cov-branch --cov-report=json:C:/tmp/quantfit-t0-coverage-20261005.json --junitxml=validation/2026-10-05-t0-replicates/final-coverage.junit.xml
+& $py tools/ci_coverage.py C:/tmp/quantfit-t0-coverage-20261005.json
+& $py validation/2026-10-05-t0-replicates/final_checks.py --coverage C:/tmp/quantfit-t0-coverage-20261005.json --inspect-report C:/tmp/quantfit-inspect-20261005/validation/2026-10-05-inspect-cli/inspect-drift.json
+```
+
+The recorder reruns the gate, audit and both exact CI Ruff scopes shown above.
+The gate passed: total coverage **91.37%** (floor 88%), branch coverage **89.88%**
+(floor 85%); `mde.py` branches **100%**, `gate.py` **94.44%**, and `report.py`
+**91.67%**, each exceeding its own floor. Audit returned no findings, errors or
+warnings; Ruff check and format passed (90 files already formatted).
+`final-audit-stdout.json` preserves the actual audit envelope. The suite emitted
+the existing SWIG deprecation warnings.
+
+The same recorder accepted and canonicalized the existing actual Inspect report
+`validation/2026-10-05-inspect-cli/inspect-drift.json`, SHA256
+`8b090f3124bd1edf6c76fad3f704bfb55e819c251dd2f5f9b95640c3f7064ae0`.
+Its causal identity is retained in `final-checks.json`. This only checks report
+compatibility; it adds no execution or independently run replicates. The Inspect
+artifact is owned by PR4 and joins this branch during coordinator integration.
+
+The earlier shared-helper qualification (source `5168105c858d871a42acd0a14e0a2dc37f8091b3`,
+1,536 passed, 1 skipped, total 91.34%, branches 89.76%) is preserved separately as
+`inspect-coverage.junit.xml` and `inspect-coverage-checks.json`; its historical
+source and counts were not rewritten after the later prerequisite/output fix.
+
+## What this does not establish
+
+This is not an independently executed three-replicate measurement campaign. Distinct
+paths, hashes, timestamps and runtimes cannot prove separate executions. Identical
+reported `env` objects cannot verify physical-host identity; schema-v2 `cpu` identifies
+no CPU model, and a GPU model string identifies no unique host. Reports contain unsigned
+provenance assertions. All new T0 artifacts record
+`independent_execution_verified: false`.
+
+The agreeing synthetic reports and the synthetic comparison's exit 0 establish CLI
+and binding behavior only. They establish no model safety, quantization sensitivity,
+judge calibration, new reference report, hardware causality, research GO, hosted-runner
+success or installed-package acceptance. Historical validation records remain unchanged.
+
+JSON artifacts were walked for keys matching `prompt|completion|response|text|generation`;
+none occurred. No captures, labeling sheets/keys or baseline cache entries were committed.

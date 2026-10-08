@@ -116,7 +116,14 @@ _INSPECT_DECODE = {
     "chat_template": "provider-default (inspect_ai:hf) — not verified against verify._encode_prompt",
     "recorded_by": "quantfit.inspect_task",
 }
-_LCPP_ENGINE = {"name": "llama.cpp", "binary_sha256": "b" * 64, "source": "pinned", "threads": 16, "device": "cpu"}
+# Synthetic byte hash, with the complete source shape emitted by gguf_arm._binary_source.
+_LCPP_ENGINE = {
+    "name": "llama.cpp",
+    "binary_sha256": "b" * 64,
+    "source": "provisioned from pinned release archive b9817 (archive SHA256-verified when provisioned)",
+    "threads": 16,
+    "device": "cpu",
+}
 
 # The two hardwares of §3.1's shape. Only `env` differs — which is the point: env.device is
 # NOT a T1 field, and a passed tolerance is exactly the claim that it differed while the
@@ -203,12 +210,12 @@ def _write(tmp_path, name, *, spec=None, drift=None, env=None, **overrides):
         "schema_version": SCHEMA_VERSION,
         "quantfit_version": "0.5.2",
         "created_utc": "2026-08-01T00:00:00+00:00",
-        "judge": {"id": "judge", "revision": "j" * 40, "input_contract": "completion-only"},
-        "probe_dataset": {"id": "probes", "revision": "p" * 40, "split": "train", "n_probes": 40},
+        "judge": {"id": "judge", "revision": "c" * 40, "input_contract": "completion-only"},
+        "probe_dataset": {"id": "probes", "revision": "d" * 40, "split": "train", "n_probes": 40},
         "decode": dict(_VERIFY_DECODE),
         "env": dict(env or _ENV_L),
         "baseline": _arm(),
-        "quantized": _arm(model="org/quant", revision="q" * 40, runtime_s=2.0),
+        "quantized": _arm(model="org/quant", revision="e" * 40, runtime_s=2.0),
         "judge_runtime_s": 0.5,
         "drift": _drift(spec) if drift is None else drift,
     }
@@ -223,16 +230,30 @@ def _pair(tmp_path, *, reference=None, candidate=None, ref_kwargs=None, cand_kwa
     return ref, cand
 
 
-def _t0(tmp_path, label, *, spec=None, env=None, broken=False, n=3):
+def _t0(tmp_path, label, *, spec=None, env=None, broken=False, n=3, source=None):
     """A real `within_hardware_identical` result over `n` distinct replicates (§3.1: three).
 
     Replicates differ in `created_utc` and `judge_runtime_s` — as six genuine runs would
     — because byte-identical replicates are refused, not counted (§3.2's tautology).
     `n=2` is the below-protocol partial run the function records rather than refuses.
     """
+    source = source or tmp_path / ("candidate.json" if label == "F" else "reference.json")
+    seed = json.loads(Path(source).read_text()) if Path(source).exists() else None
     specs = [spec] * n
     if broken:
         specs[-1] = {**_CLEAN, "clear_safe": (0, 0, 1)}
+    if seed is not None:
+        paths = [str(source)]
+        for k in range(1, n):
+            payload = json.loads(json.dumps(seed))
+            payload["created_utc"] = f"2026-09-0{k + 1}T00:00:00+00:00"
+            payload["judge_runtime_s"] = float(k)
+            if broken and k == n - 1:
+                payload["drift"] = _drift(specs[k])
+            path = tmp_path / f"t0-{label}-rep{k}.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            paths.append(str(path))
+        return within_hardware_identical(paths)
     paths = [
         _write(
             tmp_path,
@@ -249,11 +270,19 @@ def _t0(tmp_path, label, *, spec=None, env=None, broken=False, n=3):
 
 def _gated(tmp_path, ref, cand, **kwargs):
     """`compare` with a passing T0 on both sides — the only way to reach `reproduced`."""
+
+    def evidence(path, label):
+        try:
+            return _t0(tmp_path, label, source=path)
+        except ReproduceError:
+            # Deliberately malformed T1 identity fixtures cannot supply passing T0.
+            return None
+
     return compare(
         ref,
         cand,
-        t0_reference=_t0(tmp_path, "L", env=_ENV_L),
-        t0_candidate=_t0(tmp_path, "F", env=_ENV_F),
+        t0_reference=evidence(ref, "L"),
+        t0_candidate=evidence(cand, "F"),
         **kwargs,
     )
 
@@ -401,11 +430,12 @@ def test_t0_failure_on_either_side_is_void_and_never_a_breach(tmp_path, side):
 def test_t0_may_be_supplied_as_a_bare_bool_and_is_recorded_as_asserted(tmp_path):
     ref, cand = _pair(tmp_path)
     result = compare(ref, cand, t0_reference=True, t0_candidate=True)
-    assert result["outcome"] == OUTCOME_REPRODUCED
+    assert result["outcome"] == OUTCOME_T0_UNVERIFIED
     block = result["preconditions"]["T0_within_hardware_byte_identity"]["reference"]
     assert block == {
         "supplied": True,
-        "pass": True,
+        "pass": None,
+        "reported_pass": True,
         "evidence": None,
         "note": block["note"],
     }
@@ -619,7 +649,7 @@ def test_t1_absent_on_both_passes_but_is_recorded(tmp_path):
     no_contract = {"judge": {"id": "judge", "revision": "j" * 40}}
     ref, cand = _pair(tmp_path, ref_kwargs=no_contract, cand_kwargs=no_contract)
     result = _gated(tmp_path, ref, cand)
-    assert result["outcome"] == OUTCOME_REPRODUCED
+    assert result["outcome"] == OUTCOME_T0_UNVERIFIED  # incomplete identity cannot establish T0
     assert "judge.input_contract" in result["checks"]["T1_same_measurement"]["absent_on_both"]
 
 
@@ -741,7 +771,8 @@ def test_greediness_is_the_derived_boolean_on_both_sides(tmp_path, reference_dec
     )
     result = _gated(tmp_path, ref, cand)
     assert _predicate(result, "T1.equal.decode.greedy")["pass"] is expected
-    assert (result["outcome"] == OUTCOME_REPRODUCED) is expected
+    sampled = reference_decode.get("do_sample") is True or candidate_decode.get("do_sample") is True
+    assert (result["outcome"] == OUTCOME_REPRODUCED) is (expected and not sampled)
     assert (result["outcome"] == OUTCOME_VOID) is not expected
 
 
@@ -775,7 +806,7 @@ def test_a_chat_template_absent_on_both_sides_is_recorded_and_not_compared(tmp_p
     mute = {"decode": {"max_new_tokens": 64, "do_sample": False}}
     ref, cand = _pair(tmp_path, ref_kwargs=mute, cand_kwargs=mute)
     result = _gated(tmp_path, ref, cand)
-    assert result["outcome"] == OUTCOME_REPRODUCED
+    assert result["outcome"] == OUTCOME_T0_UNVERIFIED  # undeclared template cannot establish T0
     t1 = result["checks"]["T1_same_measurement"]
     assert "decode.chat_template" in t1["absent_on_both"]
     assert t1["decode"]["chat_template_policy"]["present"] == {"reference": False, "candidate": False}
@@ -1352,7 +1383,7 @@ def test_artifact_round_trips(tmp_path):
         identity = parsed["reports"][side]
         assert identity["path"] == path
         assert len(identity["report_sha256"]) == 64
-        assert identity["judge"]["revision"] == "j" * 40
+        assert identity["judge"]["revision"] == "c" * 40
         assert set(identity["arms"]) == {"baseline", "quantized"}
         # Runtimes and timestamps differ across hardware BY DESIGN (§1.1) — never compared.
         assert "runtime_s" not in identity["arms"]["baseline"]
@@ -1450,7 +1481,7 @@ def test_witnessed_block_matches_what_the_reports_actually_carry(tmp_path):
     assert "engine.device" in judge_device["detectable_from_the_artifacts"]
 
     assert factors["different judge"]["equal"] is True
-    assert factors["different judge"]["reference"] == {"judge.id": "judge", "judge.revision": "j" * 40}
+    assert factors["different judge"]["reference"] == {"judge.id": "judge", "judge.revision": "c" * 40}
     assert factors["different torch / transformers / python"]["equal"] is False  # torch/python differ
 
     # Rows the artifact cannot witness at all: no fields, `equal` unknown, and named in
@@ -1499,7 +1530,7 @@ def test_null_on_both_sides_is_unknown_never_equal(tmp_path):
     # T1 may still pass trivially over the same field (ambiguity 1) — a DIFFERENT claim:
     # T1 says no difference was found, the table says none could have been.
     assert _predicate(result, "T1.equal.baseline.artifact_sha256")["pass"] is True
-    assert result["outcome"] == OUTCOME_REPRODUCED
+    assert result["outcome"] == OUTCOME_T0_UNVERIFIED  # no immutable weight identity for T0
     assert "never true" in result["witnessed"]["three_valued_equal_statement"]
 
 
@@ -1520,7 +1551,10 @@ def test_witnessed_block_reads_gguf_fields_when_the_arms_are_gguf(tmp_path):
     assert factors["different llama.cpp executable"]["reference"]["baseline.engine.binary_sha256"] == "b" * 64
     assert factors["different weights, GGUF arm"]["equal"] is True
     assert factors["different host CPU model / core count"]["equal"] is True  # threads present on both
-    assert factors["user-built llama.cpp instead of the pin"]["reference"]["baseline.engine.source"] == "pinned"
+    assert (
+        factors["user-built llama.cpp instead of the pin"]["reference"]["baseline.engine.source"]
+        == _LCPP_ENGINE["source"]
+    )
 
 
 # --- operational failures (exit 2) ------------------------------------------------------

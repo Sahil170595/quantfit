@@ -1,0 +1,22 @@
+{
+  "system": "Windows",
+  "release": "11",
+  "machine": "AMD64",
+  "python": "3.12.13",
+  "quantfit": "0.15.1",
+  "gpu_used": false,
+  "versions": {
+    "torch": "2.13.0+cpu",
+    "transformers": "5.17.0",
+    "inspect-ai": "0.3.269",
+    "pytest": "9.0.3",
+    "ruff": "0.16.2",
+    "scipy": "1.15.3"
+  },
+  "tool_lock_sha256": "8b7814b7e12f065217cf4c0330022cf134a1d4f66804e3cbf179970e5e0cc017",
+  "source_files_sha256": {
+    "quantfit\\resolution.py": "1d270a24280d557869059b515629c761cd3e3854d2d7eb24aea73df1966342cd",
+    "quantfit\\cli.py": "7aee5b391e157e6907ac685ab6c2d6aff2e1b20420506ad0ed256c158b98ea96",
+    "quantfit\\safety\\calibration_binding.py": "b375328d5acad4f85d6724c2c3d7fc99a835add5b86f1141054c4bef466da222"
+  }
+}

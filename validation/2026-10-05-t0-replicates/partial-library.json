@@ -1,0 +1,75 @@
+{
+  "check": "T0_within_hardware_byte_identity",
+  "differing": [],
+  "environment_identity": {
+    "cuda": null,
+    "device": "synthetic-host",
+    "python": "synthetic-python",
+    "torch": "synthetic-torch",
+    "transformers": "synthetic-transformers"
+  },
+  "identity_sha256": "2d8416dafcb7e301ab2da2673c98669cff426a90dd4360a3f746bb41c6999bd0",
+  "independent_execution_verified": false,
+  "measurement_identity": {
+    "arms": {
+      "baseline": {
+        "artifact_sha256": null,
+        "engine": {
+          "device": "cpu",
+          "name": "transformers",
+          "version": "synthetic-offline-engine"
+        },
+        "model": "synthetic/baseline",
+        "resolved_dtype": "torch.float16",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "quantized": {
+        "artifact_sha256": null,
+        "engine": {
+          "device": "cpu",
+          "name": "transformers",
+          "version": "synthetic-offline-engine"
+        },
+        "model": "synthetic/quantized",
+        "resolved_dtype": "torch.float16",
+        "revision": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      }
+    },
+    "decode": {
+      "chat_template": "model-default when present, raw prompt otherwise",
+      "do_sample": false,
+      "max_new_tokens": 64
+    },
+    "judge": {
+      "id": "synthetic/offline-judge",
+      "input_contract": "completion-only",
+      "revision": "cccccccccccccccccccccccccccccccccccccccc"
+    },
+    "probe_dataset": {
+      "id": "synthetic/offline-probes",
+      "n_probes": 40,
+      "revision": "dddddddddddddddddddddddddddddddddddddddd",
+      "split": "train"
+    },
+    "quantfit_version": "0.15.1",
+    "schema_version": 2
+  },
+  "meets_protocol_replicate_count": false,
+  "n_replicates": 2,
+  "pass": true,
+  "protocol_pass": false,
+  "replicates_are_distinct_files": true,
+  "reports": [
+    {
+      "path": "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json",
+      "report_sha256": "1229ead88bef1234101256c956b7668e2bed47b4be98b9d4bb76af80be6793e4"
+    },
+    {
+      "path": "validation/2026-10-05-t0-replicates/synthetic-reports/replicate-2.json",
+      "report_sha256": "fcfcf01161c403d32875fc379506c327639a254b5c5444e3fe97e5024a0c3d98"
+    }
+  ],
+  "rule": "docs/cross-hardware-tolerance-v0.md v0 \u00a71.5",
+  "statement": "Identical, not within 1: all eight independent integers equal, hence every derived field equal (\u00a71.5). A T0 failure makes the reproduction record `void` (\u00a76.3) \u2014 fix the leak and re-run; do not widen the cross-hardware tolerance to absorb it. Note a cached baseline replicate CANNOT serve as a T0 replicate: it would be byte-identical trivially and turn the precondition into a tautology (\u00a73.2) \u2014 and neither can a copy or a repeated path, both of which are REFUSED here (exit 2) rather than counted as agreement. Instrument and reported environment identities must match first. Distinct files and hashes do NOT prove independent execution or physical-host identity. Two reports can record partial agreement but cannot establish the three-replicate protocol.",
+  "t0_schema_version": 1
+}

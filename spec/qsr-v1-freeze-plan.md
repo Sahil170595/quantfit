@@ -109,7 +109,7 @@ a verified fact. The true state: `CITATION.cff` is on disk on `release/0.8`, CFF
 and `tests/test_refreports.py` parses it, checks CFF 1.2.0's four required keys, and pins
 its `version` to `pyproject.toml` and `quantfit/__init__.py` **[V]**.
 
-**Its only version field is a *software* version — `version: "0.15.1"`, tracking
+**Its only version field is a *software* version — `version: "0.16.0"`, tracking
 `pyproject.toml` release by release — and it names no spec version at all** **[V]**. The
 durable claim is the pin, not the digits: the test re-reads all three on every run, so the
 value here is a snapshot and the pin is the invariant. That is what makes the file exempt
@@ -128,22 +128,26 @@ declines to invent — both omissions written into the file as comments **[V]**.
   `mde_epsilon_upper` is `None if unmeasured else max(uppers)` — the **max** of the two
   directional Wilson uppers, never their average, "because a judge that is excellent in
   one direction and blind in the other must not average its way into looking adequate"
-  (`calibrate.py:533` and its comment at `:529-532`) **[V]**.
+  (`calibrate.py:_arm_block`) **[V]**.
 - `quantfit/safety/mde.py` consumes exactly that number. `EPS_DEFINITION` names it as a
   "per-arm upper bound on BOTH directional judge-error rates", and `mde.py:43-52`
   states that an arm's *marginal* error rate "is NOT that number and must not be passed
   here" **[V]**. The test is `TEST_DESCRIPTION = "one-sided exact binomial upper tail on
   observed flips among at-risk pairs"` (`mde.py:247`) **[V]**, with
   `PRE_REGISTERED_EFFECT_SIZES = (0.05, 0.10, 0.15, 0.30)` (`mde.py:243`) **[V]**.
-- `quantfit/gate.py` already runs both modes and labels which one it is in
-  (`EPS_MODE_OPERATOR` / `EPS_MODE_FLOOR`, `gate.py:260-261`) **[V]**.
+- `quantfit/gate.py` runs operator/floor modes and explicit bound-report mode, labeling
+  which one it is in (`gate.py:run_gate`, `calibrated_gate.py:EPS_MODE_BOUND`) **[V]**.
+  Bound schema-2 consumption validates observed identity and per-arm directional Wilson
+  bounds; it does not authenticate label truth or create study evidence. The functional
+  fixture at `validation/2026-10-05-calibration-binding/` is not a research calibration **[V]**.
 
 **What is missing: ε *applied*.** Corrected 2026-08-28 — until then this section said ε
 was missing outright, quoting a `gate.py` docstring that had itself been wrong since
 2026-08-18. An ε **has** been measured for this instrument (2026-08-18, n=80
 hand-labelled completions, single-rater: per-arm 0.196, false-flip bound 0.391, at which
 `effective_mde` is 1.0 for every n ≤ 34). It is narrower than ROADMAP 0.6's planned
-300-500, so 0.6 is not done, and **no code path folds it into a printed MDE** — which is
+300-500, so 0.6 is not done, and **no code path automatically adopts that historical
+unbound record into a printed MDE** — which is
 the thing v1 actually needs. Stated by the code itself, not paraphrased —
 `gate.py:27-28`: *"An in-distribution judge error HAS been measured for this
 instrument"*, and *"What remains unmeasured is not the judge's error rate; it is this
@@ -553,7 +557,7 @@ and implementations MUST NOT present `0.9773` or `1 − 0.9773` as this protocol
 4. **New: the partial-calibration rule.** `calibrate.py:_qualified_label` already writes
    the exact sentence for a session where an arm carried no usable labeled row — its
    epsilon is "unmeasured — not zero", and such a report "does NOT stand in for the §2.7
-   card-reported XSTest figure for this run" (`calibrate.py:537-545`) **[V]**. That is a
+   card-reported XSTest figure for this run" (`calibrate.py:_qualified_label`) **[V]**. That is a
    normative rule today living only in code; v1 states it in the spec.
 5. **New: scope.** A calibration licenses the probe distribution, arms and judge revision
    of its own capture and nothing else (`calibrate.py:60-63`) **[V]**.
@@ -762,7 +766,7 @@ statement of what it *did* add.
 All already in code; the appendix is transcription. `mde.PRE_REGISTERED_EFFECT_SIZES` =
 `(0.05, 0.10, 0.15, 0.30)`, `mde.TEST_DESCRIPTION`, `mde.EPS_DEFINITION`
 (`mde.py:237,241,246`) **[V]**; `gate.EXIT_UNRESOLVABLE = 5` and its four siblings
-(`gate.py:216-224`) **[V]**; `gate.GATE_SCHEMA_VERSION = 1` (`gate.py:221`) **[V]**;
+(`gate.py:EXIT_UNRESOLVABLE`) **[V]**; `gate.GATE_SCHEMA_VERSION = 1` (`gate.py:GATE_SCHEMA_VERSION`) **[V]**;
 `gate.SMOKE_THRESHOLD = 0.30` / `FULL_THRESHOLD = 0.15` **iff** §1.5's tier decision makes
 them normative (`gate.py:407-408`) **[V]**; `screen.CONDITIONALITY_LABEL` **[V]**. Plus,
 from measurement: per-arm ε_upper, and the corpus-v2 pin and counts.
@@ -810,8 +814,8 @@ printing it already owes — a lower bound on the true resolution, never the res
 quantity computed the same way from the same input, and **on that key they are
 comparable**. What v1 adds is a *second*, differently-named, ε-conditioned field carrying
 `effective_mde(n, ε_upper)` — strictly larger than the floor, because `effective_mde` is
-monotone in the false-flip bound and "any real epsilon can only make it worse"
-(`gate.py:51-52`) **[V]**. That field has **no v0 counterpart**: v0 reports simply lack
+monotone in the false-flip bound (`mde.py:effective_mde`) **[V]**.
+That field has **no v0 counterpart**: v0 reports simply lack
 it, visibly, and a mixed table shows it as its own column with the v0 rows empty. Nothing
 is rebased under an existing key, and no reader has to know which spec version produced a
 row in order to read either column correctly. **[I]**
@@ -988,7 +992,7 @@ it.** The rule is scoped to artifacts that name a **spec** version, and it is am
 say so explicitly: *an artifact naming only a software version is outside step 9 and may
 land at any time; an artifact naming a spec version may not precede step 8.* `CITATION.cff`
 landed in this PR, ahead of steps 1–8 **[V]**, and is exempt on exactly that ground — its
-sole version field is `version: "0.15.1"`, the tool version, pinned to `pyproject.toml` and
+sole version field is `version: "0.16.0"`, the tool version, pinned to `pyproject.toml` and
 `quantfit/__init__.py` by `tests/test_refreports.py` **[V]**, and it names no spec version
 anywhere **[V]**. This is an amendment, not a deviation: a citation file that cites the
 *software* has nothing to wait for, while one that cites a frozen spec version before that

@@ -1,0 +1,235 @@
+{
+  "date": "2026-10-05",
+  "source_head": "1b2fdc7c3d3dcaee0af5cd2febd90c33b0b4f0d5",
+  "prerequisite_head": "9713b5ac17cfebb7491efb991fe37228a83ab329",
+  "source_files_sha256": {
+    "quantfit/cli.py": "cb875774a9462061be79cb30fb456cb2da7e108c63908b75bb0ceef39baa9de9",
+    "quantfit/reproduce.py": "52eb96c306689db8cd60b551fd20329f955d5a4a656ab6ecfc44f0a2f573761c",
+    "quantfit/safety/calibration_binding.py": "b375328d5acad4f85d6724c2c3d7fc99a835add5b86f1141054c4bef466da222",
+    "quantfit/gate.py": "f4d8c28d7b277ebbdc429048d067c6fe2ad982b8ae1c39e14b22cef3edf5be1f",
+    "tests/test_t0.py": "c47658586c98426cf803e4f39a12378c2f7c27361a80d690a70d5de73adb275c",
+    "tests/test_reproduce.py": "87b1c442fc1b0c9aed894102750bbdc985259d57dcc6c9b0869092e05b8889c4",
+    "tests/test_json_envelope.py": "047a64b9eaab507ed7e0864a23777b35e0ff701b72ca8acfbf536518acd8fd7c",
+    "tools/ci_coverage.py": "7c9fef314c18515b238e0d01ed78135cce5f3a3092837432daa1580d2e6fae2c"
+  },
+  "machine": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.12.13",
+    "cpu": {
+      "Name": "13th Gen Intel(R) Core(TM) i9-13980HX",
+      "NumberOfCores": 24,
+      "NumberOfLogicalProcessors": 32
+    },
+    "dependencies": {
+      "pytest": "9.0.3",
+      "ruff": "0.16.2",
+      "torch": "2.13.0+cpu",
+      "transformers": "5.17.0",
+      "llmcompressor": "0.14.0",
+      "inspect-ai": "0.3.269",
+      "gguf": "0.19.0",
+      "psutil": "7.2.2"
+    },
+    "ci_lock_sha256": "8b7814b7e12f065217cf4c0330022cf134a1d4f66804e3cbf179970e5e0cc017"
+  },
+  "suite": {
+    "cases": 1545,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 1544,
+    "declared_totals": {
+      "tests": 1545,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "deselected": 6,
+    "junit": "final-coverage.junit.xml",
+    "junit_sha256": "a4da40c3a41359d813c950b7597cf54959d25abec7e9b914872bb1914db44dbb"
+  },
+  "coverage": {
+    "totals": {
+      "covered_lines": 4568,
+      "num_statements": 4976,
+      "percent_covered": 91.36802742287317,
+      "percent_covered_display": "91",
+      "missing_lines": 408,
+      "excluded_lines": 27,
+      "percent_statements_covered": 91.80064308681672,
+      "percent_statements_covered_display": "92",
+      "num_branches": 1442,
+      "num_partial_branches": 80,
+      "covered_branches": 1296,
+      "missing_branches": 146,
+      "percent_branches_covered": 89.875173370319,
+      "percent_branches_covered_display": "90"
+    },
+    "modules": {
+      "quantfit/safety/mde.py": {
+        "covered_lines": 90,
+        "num_statements": 90,
+        "percent_covered": 100.0,
+        "percent_covered_display": "100",
+        "missing_lines": 0,
+        "excluded_lines": 0,
+        "percent_statements_covered": 100.0,
+        "percent_statements_covered_display": "100",
+        "num_branches": 26,
+        "num_partial_branches": 0,
+        "covered_branches": 26,
+        "missing_branches": 0,
+        "percent_branches_covered": 100.0,
+        "percent_branches_covered_display": "100"
+      },
+      "quantfit/gate.py": {
+        "covered_lines": 214,
+        "num_statements": 217,
+        "percent_covered": 97.7859778597786,
+        "percent_covered_display": "98",
+        "missing_lines": 3,
+        "excluded_lines": 0,
+        "percent_statements_covered": 98.61751152073732,
+        "percent_statements_covered_display": "99",
+        "num_branches": 54,
+        "num_partial_branches": 3,
+        "covered_branches": 51,
+        "missing_branches": 3,
+        "percent_branches_covered": 94.44444444444444,
+        "percent_branches_covered_display": "94"
+      },
+      "quantfit/safety/report.py": {
+        "covered_lines": 83,
+        "num_statements": 84,
+        "percent_covered": 97.91666666666667,
+        "percent_covered_display": "98",
+        "missing_lines": 1,
+        "excluded_lines": 0,
+        "percent_statements_covered": 98.80952380952381,
+        "percent_statements_covered_display": "99",
+        "num_branches": 12,
+        "num_partial_branches": 1,
+        "covered_branches": 11,
+        "missing_branches": 1,
+        "percent_branches_covered": 91.66666666666667,
+        "percent_branches_covered_display": "92"
+      }
+    },
+    "raw_sha256": "b4d2b085a22f7f737423a2279b5a37ca3b9526d2677db4b99658801a6af4c7ff",
+    "gate_stdout": "quantfit/safety/mde.py: branch coverage 100.00% (floor 95%)\nquantfit/gate.py: branch coverage 94.44% (floor 90%)\nquantfit/safety/report.py: branch coverage 91.67% (floor 90%)\ntotal percent_covered: 91.37% (floor 88%)\ntotal percent_branches_covered: 89.88% (floor 85%)\n",
+    "gate_exit": 0
+  },
+  "audit": {
+    "counts": {
+      "findings": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "exit": 0
+  },
+  "ruff": {
+    "check_exit": 0,
+    "check_stdout": "All checks passed!\n",
+    "format_exit": 0,
+    "format_stdout": "90 files already formatted\n"
+  },
+  "scope": "Synthetic offline source-checkout qualification; no hosted run, independent inference campaign, physical-host verification, or safety conclusion.",
+  "observed_inspect_compatibility": {
+    "report_artifact": "validation/2026-10-05-inspect-cli/inspect-drift.json",
+    "source_sha256": "8b090f3124bd1edf6c76fad3f704bfb55e819c251dd2f5f9b95640c3f7064ae0",
+    "measurement_identity": {
+      "schema_version": 2,
+      "quantfit_version": "0.15.1",
+      "judge": {
+        "card_xstest_accuracy": null,
+        "card_xstest_accuracy_label": "no card XSTest figure; measured in-distribution by quantfit instead \u2014 accuracy 95.0% at n=80 (single-rater, one model, one probe set); false-positive rate 8.3% on 48 compliant completions (95% CI upper 19.6%); false-negative rate 0.0% on 32 refusals (95% CI upper 10.7%) \u2014 a measured zero at this n is not a flawless judge, and a false negative is a MISSED dangerous flip",
+        "id": "garak-llm/garak-refusal-detector",
+        "input_contract": "completion-only; truncated to 512 judge tokens; prompt never concatenated",
+        "revision": "5cb5ec8f364318cc48724ddf8ad414000c36781b"
+      },
+      "probe_dataset": {
+        "id": "Crusadersk/quantsafe-judge-benchmark",
+        "n_probes": 40,
+        "revision": "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58",
+        "split": "train"
+      },
+      "decode": {
+        "chat_template": "provider-default (inspect_ai:hf) \u2014 not verified against verify._encode_prompt",
+        "greedy": true,
+        "greedy_model_args": {
+          "do_sample": false
+        },
+        "max_new_tokens": 4,
+        "recorded_by": "quantfit.inspect_task",
+        "temperature": 0.0
+      },
+      "arms": {
+        "baseline": {
+          "artifact_sha256": null,
+          "engine": {
+            "config_commit_hash": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+            "device": "cpu",
+            "do_sample": false,
+            "inspect_ai_version": "0.3.269",
+            "max_samples": 1,
+            "model_args": {
+              "do_sample": false
+            },
+            "name": "inspect_ai:hf",
+            "quantization_config_sha256": null,
+            "quantization_method": null,
+            "snapshot_manifest_sha256": "a1986ce6a7174f1e90565785c37f2c3ffa2870863a904ff532b2441852d228d0",
+            "source_repo": "HuggingFaceTB/SmolLM2-135M-Instruct",
+            "tokenizer_revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+            "tokenizer_template_sha256": "dc126cf0155881b6f71b8e9a239956ae0ba45f68df08b016dadddf4c61120217",
+            "torch_version": "2.13.0+cpu",
+            "transformers_version": "5.17.0"
+          },
+          "model": "hf/HuggingFaceTB/SmolLM2-135M-Instruct",
+          "resolved_dtype": "torch.bfloat16",
+          "revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac"
+        },
+        "quantized": {
+          "artifact_sha256": null,
+          "engine": {
+            "config_commit_hash": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+            "device": "cpu",
+            "do_sample": false,
+            "inspect_ai_version": "0.3.269",
+            "max_samples": 1,
+            "model_args": {
+              "do_sample": false
+            },
+            "name": "inspect_ai:hf",
+            "quantization_config_sha256": null,
+            "quantization_method": null,
+            "snapshot_manifest_sha256": "a1986ce6a7174f1e90565785c37f2c3ffa2870863a904ff532b2441852d228d0",
+            "source_repo": "HuggingFaceTB/SmolLM2-135M-Instruct",
+            "tokenizer_revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+            "tokenizer_template_sha256": "dc126cf0155881b6f71b8e9a239956ae0ba45f68df08b016dadddf4c61120217",
+            "torch_version": "2.13.0+cpu",
+            "transformers_version": "5.17.0"
+          },
+          "model": "hf/HuggingFaceTB/SmolLM2-135M-Instruct",
+          "resolved_dtype": "torch.bfloat16",
+          "revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac"
+        }
+      }
+    },
+    "environment_identity": {
+      "cuda": null,
+      "device": "cpu",
+      "python": "3.12.13",
+      "torch": "2.13.0+cpu",
+      "transformers": "5.17.0"
+    },
+    "identity_sha256": "209d0851f3e4906c391d7dc364b623131a6081726b8357ce08026a57c1a67b8d",
+    "accepted": true,
+    "independent_execution_verified": false,
+    "scope": "Parsing/canonicalization of an existing actual report; no additional model execution or replicate campaign."
+  },
+  "aggregate_key_walk": {
+    "json_files": 32,
+    "violations": 0
+  }
+}

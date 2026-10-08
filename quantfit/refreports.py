@@ -9,11 +9,11 @@ stale**.
 --------------------------------------------------------------------------------
 ## The registry ships EMPTY, and that is a fact about the project, not a stub
 
-**No reference report exists.** None may be fabricated here, because every entry
-would be a claim about a run:
+**No reference report is registered here.** Entries are publication claims, not
+validation-directory records:
 
-  - the 0.5 existence-proof screen has **not run** (`screens/targets-0.5.json` is a
-    curated target list, not a result), so there is no report to publish;
+  - the 0.5 screen has run (`validation/2026-08-21-screen-complete`), but those run
+    records are not the capped, pinned publication registry;
   - the 0.8 gate — "one reference report reproduced from scratch on a free T4 within
     the 0.7 tolerance" — has **not been attempted**: `docs/cross-hardware-tolerance-v0.md`
     §6.1 records that no T4/Colab/Kaggle run of any kind has happened;
@@ -70,14 +70,10 @@ and for the same reason), a spec timeline that is not oldest-first (the ordering
 `validity()` reads supersession out of, so a misordered one would invert the verdict
 rather than fail), and two entries claiming the same pair at the same spec version.
 
-`RefReportError` is a `RuntimeError` subclass, and that is stated here as the
-*conditional* guarantee it actually is. **No CLI subcommand exposes this module today**:
-nothing under `quantfit/` imports `refreports`, and `quantfit/cli.py` has no
-reference-report branch. The module is reached as a library surface (`from
-quantfit.refreports import ...`, plus whatever `quantfit/__init__.py` re-exports lazily).
-What the subclassing buys is that *when* a CLI surface is wired, `cli.py`'s existing
-`except (RuntimeError, OSError)` handler already turns these into a clean exit 2 with no
-traceback — the same operational class as `ScreenError`, `GateError` and `ReportError`
+`RefReportError` is a `RuntimeError` subclass. The offline `references list` and
+`references verify` CLI commands expose this module through `reference_cli`.
+The CLI's existing operational-error handler returns exit 2 with no traceback,
+the same operational class as `ScreenError`, `GateError` and `ReportError`
 (QSR v0 §5.7) — instead of that being a second change someone has to remember.
 
 **Verdicts are return values; only operational failures raise.** `verify_published`
@@ -336,9 +332,9 @@ class ReferenceReport:
 # --- the registry -----------------------------------------------------------------
 # EMPTY BY CONSTRUCTION, and it stays empty until runs exist. Every field of an entry
 # is a claim about a run that has happened: the pair that was measured, the bytes that
-# were uploaded, the tool version that produced them. None of those runs has been made
-# (module docstring; docs/cross-hardware-tolerance-v0.md §6.1; ROADMAP 0.5's screen is
-# unrun), so there is nothing here that would not be invented.
+# were uploaded, the tool version that produced them. The 0.5 screen has run
+# (validation/2026-08-21-screen-complete), but no artifact has been registered here.
+# Screen validation evidence is distinct from this capped publication registry.
 #
 # An entry lands only when ALL of these are true, in this order:
 #   1. `quantfit verify-safety` produced the schema-v2 report on real hardware;
@@ -349,7 +345,8 @@ class ReferenceReport:
 _REGISTRY_ENTRIES: tuple[ReferenceReport, ...] = ()
 
 REGISTRY_STATE = (
-    "EMPTY: zero reference reports have been published. The 0.5 existence-proof screen has not run, the 0.8 "
+    "EMPTY: zero reference reports have been registered. The 0.5 screen is recorded in "
+    "validation/2026-08-21-screen-complete; it is distinct from this publication registry. The 0.8 "
     "free-T4 reproduction has not been attempted (docs/cross-hardware-tolerance-v0.md §6.1), and QSR v1 is not "
     "frozen (QSR v0 §10.3). Entries land only when the runs happen — see docs/reference-reports-v0.md."
 )

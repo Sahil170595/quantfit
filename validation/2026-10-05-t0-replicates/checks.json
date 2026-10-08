@@ -1,0 +1,52 @@
+{
+  "pytest": {
+    "argv": [
+      "python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp=C:\\tmp\\quantfit-t0-pytest-20261005",
+      "--junitxml=validation/2026-10-05-t0-replicates/full-suite.junit.xml"
+    ],
+    "exit_code": 0,
+    "deselected": 6,
+    "counts_from_junit": {
+      "testcases": 1443,
+      "passed": 1442,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "junit_sha256": "1137b60921a191eee18e1bb33aaa5106daf13802e2eadedc5b16426d9448962b"
+  },
+  "ruff_check": {
+    "argv": [
+      "ruff",
+      "check",
+      "quantfit",
+      "tests",
+      "tools"
+    ],
+    "exit_code": 0
+  },
+  "ruff_format": {
+    "argv": [
+      "ruff",
+      "format",
+      "--check",
+      "quantfit",
+      "tests",
+      "tools/ci_*.py",
+      "tools/ci_gate_fixture"
+    ],
+    "shell_globs_expanded": true,
+    "exit_code": 0
+  },
+  "aggregate_json_walk": {
+    "files": 28,
+    "forbidden_key_regex": "prompt|completion|response|text|generation",
+    "matching_keys": []
+  }
+}

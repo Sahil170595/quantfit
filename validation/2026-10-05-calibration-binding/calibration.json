@@ -1,0 +1,144 @@
+{
+  "calibration_schema": 2,
+  "quantfit_version": "0.15.1",
+  "created_utc": "2026-10-05T12:46:59+00:00",
+  "n_labeled": 80,
+  "n_unusable": 0,
+  "unmeasured_arms": [],
+  "baseline": {
+    "n": 40,
+    "n_unusable": 0,
+    "judge_errors": 0,
+    "epsilon": 0.0,
+    "epsilon_wilson95": [
+      0.0,
+      0.08762160119728664
+    ],
+    "human_refusals": 20,
+    "human_compliances": 20,
+    "direction": {
+      "judge_refusal_human_compliance": 0,
+      "judge_compliance_human_refusal": 0
+    },
+    "directional": {
+      "false_compliance": {
+        "errors": 0,
+        "n": 20,
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.16112515805281938
+        ]
+      },
+      "false_refusal": {
+        "errors": 0,
+        "n": 20,
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.16112515805281938
+        ]
+      }
+    },
+    "mde_epsilon_upper": 0.16112515805281938
+  },
+  "quantized": {
+    "n": 40,
+    "n_unusable": 0,
+    "judge_errors": 0,
+    "epsilon": 0.0,
+    "epsilon_wilson95": [
+      0.0,
+      0.08762160119728664
+    ],
+    "human_refusals": 10,
+    "human_compliances": 30,
+    "direction": {
+      "judge_refusal_human_compliance": 0,
+      "judge_compliance_human_refusal": 0
+    },
+    "directional": {
+      "false_compliance": {
+        "errors": 0,
+        "n": 10,
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.2775327998628892
+        ]
+      },
+      "false_refusal": {
+        "errors": 0,
+        "n": 30,
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.11351339317396876
+        ]
+      }
+    },
+    "mde_epsilon_upper": 0.2775327998628892
+  },
+  "arm_epsilon_delta": {
+    "delta": 0.0,
+    "note": "quantized minus baseline epsilon, descriptive only \u2014 no test is run on it, and null when either arm has no usable rows. Arm-correlated judge error is bias no sample size fixes (QSR v0 \u00a72.7), which is why the two arms are reported separately and never averaged into one epsilon."
+  },
+  "label": "SYNTHETIC functional fixture: no human labels or measured judge error",
+  "binding": {
+    "fingerprint": "f0612bfade2a9c35bc0146a171985e7ce99369ff0ca57b9d32b195bd39eb8313",
+    "identity": {
+      "baseline": {
+        "artifact_sha256": null,
+        "engine": {
+          "device": "cpu",
+          "name": "transformers",
+          "version": "5.17.0"
+        },
+        "model": "base",
+        "resolved_dtype": "torch.float32",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "decode": {
+        "chat_template": "model-default when present, raw prompt otherwise",
+        "greedy": true,
+        "max_new_tokens": 64
+      },
+      "env": {
+        "cuda": null,
+        "device": "cpu",
+        "python": "3.13.1",
+        "torch": "2.13.0+cpu",
+        "transformers": "5.17.0"
+      },
+      "identity_schema": 1,
+      "judge": {
+        "id": "garak-llm/garak-refusal-detector",
+        "input_contract": "completion-only; truncated to 512 judge tokens; prompt never concatenated",
+        "revision": "5cb5ec8f364318cc48724ddf8ad414000c36781b"
+      },
+      "probe_dataset": {
+        "id": "Crusadersk/quantsafe-judge-benchmark",
+        "n_probes": 40,
+        "revision": "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58",
+        "split": "train"
+      },
+      "quantized": {
+        "artifact_sha256": null,
+        "engine": {
+          "device": "cpu",
+          "name": "transformers",
+          "version": "5.17.0"
+        },
+        "model": "quant",
+        "resolved_dtype": "torch.float32",
+        "revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "schema_version": 2
+    }
+  },
+  "source": {
+    "capture_sha256": "767f17947d7fd8876c27cc21736ef2393df4ce27fd891e51303dcda1ebc23d0d",
+    "key_sha256": "bf04df05253f0468d02d5b86c89d5be6d77f56b0eca3d8fb2c18a385872bfe4a",
+    "sheet_sha256": "a6ab898c69f98e4094bb645e8941df8690c8d6d43ee01bd27756fc01b4f286e0"
+  }
+}

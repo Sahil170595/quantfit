@@ -140,9 +140,11 @@ same list as data so a caller can print it:
 
 Every pin QSR takes is checked here, and a violation raises `InspectTaskError`. It
 subclasses `RuntimeError`, which is the class `quantfit.cli:main` turns into a clean
-exit 2 — so IF a CLI surface for this runner is ever wired, its failures are
-operational rather than tracebacks. There is no such surface today: nothing in
-`quantfit/` imports this module, and 0.8 adds no `inspect` subcommand.
+exit 2. `quantfit inspect-run` now uses the observed HF mode: immutable snapshots,
+actual loaded precision/source checks and measured per-arm generation, with
+`max_samples=1` to contain Inspect 0.3.269's global HF batching queue. The legacy
+library path still takes operator-recorded `inspect_arm` provenance. See
+`docs/inspect-run.md` for the precise scope and capture handling.
 
   - **Sampling.** QSR §2.3 is greedy on both arms; a run that sampled would be two
     draws from two distributions, not a paired diff. The caller's `config=` is checked
@@ -659,8 +661,7 @@ class InspectTaskError(RuntimeError):
     """Protocol violation or missing `inspect_ai`.
 
     A `RuntimeError` subclass because that is what `quantfit.cli:main` catches and turns
-    into a clean exit 2. No CLI surface reaches this module today (nothing in `quantfit/`
-    imports it), so that is a property this class HAS, not a path anything currently takes.
+    into a clean exit 2, including the observed HF `inspect-run` surface.
     """
 
 
@@ -1551,6 +1552,7 @@ def _registry() -> dict[str, Any]:
         max_new_tokens,
         baseline_model_args=None,
         quantized_model_args=None,
+        _hf_observer=None,
     ):
         check_max_new_tokens(max_new_tokens)
         # Recorded per arm, JSON-safe, so every Score this solver's samples produce carries
@@ -1583,8 +1585,12 @@ def _registry() -> dict[str, Any]:
             # (§2.4 — no system prompt, no evaluator scaffolding). QSR measures the model
             # as published, and reading the message list would pick up anything Inspect or
             # a preceding solver put in front of the probe.
-            baseline_output = await baseline_model.generate(state.input, config=config)
-            quantized_output = await quantized_model.generate(state.input, config=config)
+            if _hf_observer is None:
+                baseline_output = await baseline_model.generate(state.input, config=config)
+                quantized_output = await quantized_model.generate(state.input, config=config)
+            else:
+                baseline_output = await _hf_observer.generate(0, state.input, config)
+                quantized_output = await _hf_observer.generate(1, state.input, config)
             # The quantized arm is the artifact under test, so it is what the eval log's
             # output column shows; both completions ride in metadata for the scorer.
             state.output = quantized_output
@@ -1729,6 +1735,7 @@ def _registry() -> dict[str, Any]:
         probe_split: str = PROBE_SPLIT,
         judge_id: str = JUDGE_MODEL_ID,
         judge_revision: str = JUDGE_REVISION,
+        _hf_observer=None,
     ):
         """The QSR paired-diff task. See `qsr_paired_diff` in this module for the docs."""
         api_ = _inspect_api()
@@ -1742,8 +1749,15 @@ def _registry() -> dict[str, Any]:
         # that were actually applied rather than the ones the caller passed in.
         baseline_applied = check_model_args(provider, baseline_args)
         quantized_applied = check_model_args(provider, quantized_args)
-        baseline_model = qsr_arm(baseline, provider=provider, model_args=baseline_args)
-        quantized_model = qsr_arm(quantized, provider=provider, model_args=quantized_args)
+        if _hf_observer is None:
+            baseline_model = qsr_arm(baseline, provider=provider, model_args=baseline_args)
+            quantized_model = qsr_arm(quantized, provider=provider, model_args=quantized_args)
+        else:
+            from quantfit.inspect_hf import HfRunObserver
+
+            _require(isinstance(_hf_observer, HfRunObserver), "invalid internal HF observation adapter")
+            _require(_hf_observer.specs == (baseline, quantized), "observed HF arm specs differ from vetted arms")
+            baseline_model, quantized_model = _hf_observer.models
         return api_["Task"](
             dataset=qsr_dataset(token),
             # The registered closures directly, not through `_registry()`: this body runs
@@ -1758,6 +1772,7 @@ def _registry() -> dict[str, Any]:
                 max_new_tokens,
                 baseline_model_args=baseline_applied,
                 quantized_model_args=quantized_applied,
+                _hf_observer=_hf_observer,
             ),
             scorer=qsr_paired_scorer(token=token, labels=labels),
             # The quantized arm is the artifact under test and doubles as the task's
@@ -1941,6 +1956,7 @@ class QsrRun:
     drift: SafetyDrift
     judge_runtime_s: float
     arms: tuple[str, str]
+    observed_arms: tuple[ArmRun, ArmRun] | None = None
 
     def write_report(self, path: str, baseline: ArmRun, quantized: ArmRun, max_new_tokens: int) -> Path:
         """Emit this run as a schema-v2 `DriftReport` (see `write_drift_report`)."""
@@ -1954,6 +1970,7 @@ def qsr_eval(
     max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
     baseline_args: dict[str, Any] | None = None,
     quantized_args: dict[str, Any] | None = None,
+    hf_revisions: tuple[str, str] | None = None,
     **eval_args: Any,
 ) -> QsrRun:
     """Build the QSR task AND run it — the supported entry point, and the enforcement layer.
@@ -1979,21 +1996,59 @@ def qsr_eval(
     Returns a `QsrRun`. The scored `EvalLog` on it is capture-class: it holds completions
     and gets `verify.CAPTURE_WARNING` handling, never a report attachment.
     """
-    from quantfit.safety import verify as verify_mod
 
     api = _inspect_api()
     passthrough = check_eval_args(eval_args)
     check_max_new_tokens(max_new_tokens)
     check_arms(baseline, quantized)
 
-    task_obj = qsr_paired_diff(
-        baseline,
-        quantized,
-        token=token,
-        max_new_tokens=max_new_tokens,
-        baseline_args=baseline_args,
-        quantized_args=quantized_args,
+    # Opt-in observed mode is deliberately narrower than the library's operator-
+    # supplied ArmRun route. No unsafe args enter check_model_args's allowlist.
+    if hf_revisions is None:
+        task_obj = qsr_paired_diff(
+            baseline,
+            quantized,
+            token=token,
+            max_new_tokens=max_new_tokens,
+            baseline_args=baseline_args,
+            quantized_args=quantized_args,
+        )
+        return _eval_task(api, task_obj, passthrough, baseline, quantized, token)
+
+    from quantfit.inspect_hf import RUN_LOCK, HfRunObserver
+
+    _require(check_arms(baseline, quantized) == "hf", "observed runner supports HF only")
+    check_model_args("hf", baseline_args)
+    check_model_args("hf", quantized_args)
+    _require(
+        passthrough.get("max_samples", 1) == 1,
+        "observed HF runner requires max_samples=1 to prevent cross-arm batching",
     )
+    passthrough["max_samples"] = 1
+    _require(RUN_LOCK.acquire(blocking=False), "concurrent observed HF evaluations are refused")
+    observer = None
+    try:
+        observer = HfRunObserver((baseline, quantized), hf_revisions, api["get_model"], token)
+        task_obj = _registry()["task"](
+            baseline,
+            quantized,
+            token=token,
+            max_new_tokens=max_new_tokens,
+            baseline_args=baseline_args,
+            quantized_args=quantized_args,
+            _hf_observer=observer,
+        )
+        return _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer)
+    finally:
+        if observer is not None:
+            observer.close()
+        RUN_LOCK.release()
+
+
+def _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer=None) -> QsrRun:
+    """Shared complete-corpus generation / one judge batch / scoring pipeline."""
+    from quantfit.safety import verify as verify_mod
+
     n_probes = len(task_obj.dataset)
 
     logs = api["eval"](task_obj, score=False, **passthrough)
@@ -2037,6 +2092,7 @@ def qsr_eval(
         drift=drift_from_outcomes(outcomes),
         judge_runtime_s=judge_runtime_from_outcomes(outcomes),
         arms=(baseline, quantized),
+        observed_arms=observer.finish(n_probes) if observer is not None else None,
     )
 
 

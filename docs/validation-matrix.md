@@ -64,8 +64,9 @@ is an unvalidated flag.
 Read from `_build_parser()` on 2026‑08‑07 at 22:25. `reproduce` and `audit` were wired
 into the CLI on this branch; `CHANGELOG.md:51` still says "none of the three new modules
 is reachable from the CLI", which was true at 0.5.3 and is no longer true of `reproduce`
-**[V]**. Two of the three (`refreports`, `inspect_task`) remain library-only and stay out
-of scope for "every advertised *command*" — see §4, finding 4.
+**[V]**. This was the historical surface inventory. On 2026-10-05, `inspect-run`
+adds the observed HF Inspect runner; its scope and evidence are recorded below.
+`refreports` remains library-only on this branch — see §4, finding 4.
 
 ### 0.2 The evidence ladder
 
@@ -307,6 +308,14 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **CLOSED 2026-08-14** | The transformers-vs-transformers path under the shipped verdict machinery — the README's own headline example, and the largest gap this document carried. The 0.4.0-era transformers run produced a **schema‑v1** report the shipped parser refuses, and no artifact survived; the row is now backed by committed bytes instead. The reproduction is worth its own note: the 1.5B pair's figures (2/10, 20.0%, CI 5.7–51.0%, dangerous 0/12) **match a finding first measured in the 0.3-era stack**, across a schema rewrite, the `safety tax`→`safety drift` rename and the bounded-verdict rework. Stated at its true strength: the earlier artifact does not survive, so this is a match against a recorded figure, **not** a byte-level re-verification, and it is **not** ROADMAP 0.10's "two cross-release runs identical" clause, which needs two artifacts and there is one. |
 | **Note** | `--max-new-tokens` is no longer default-only: the determinism run used **32**, the canary's value (§3). |
 
+### `quantfit inspect-run`
+
+| | |
+|---|---|
+| **Scope** | Full pinned corpus, greedy one epoch, one real pinned judge batch through the reviewed Inspect 0.3.269 HF provider; immutable model/tokenizer snapshot observations, actual dtype/device and measured per-arm generation. |
+| **Evidence** | `validation/2026-10-05-inspect-cli/`; `tools/ci_inspect_acceptance.py` real CPU identical-arm canary. `tests/test_inspect_hf.py` / `tests/test_inspect_cli.py` are hermetic boundary fixtures, not provider qualification. `.github/workflows/validate.yml` independently qualifies the installed candidate wheel on hosted CPU; configuring the job is not evidence of its result. |
+| **NOT established** | Quantization sensitivity, GPU execution, human-confirmed safety, judge calibration or generation parity with verify-safety. The actual CPU arms are identical native-precision weights, QSR v0 §8's harness canary. |
+
 ### `quantfit screen --targets <manifest> --out <dir>`
 
 | | |
@@ -361,6 +370,15 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Superseded reading (2026-08-15)** | **Done, and it breached.** The second machine is the CI runner, not a GPU: the canary's green run emits a schema-v2 report for the same model, probe revision and decode settings. **T3 failed on both axes** — `at_risk` 8 vs 7 and 4 vs 3 at `slack=0`, MDEs 18.2→20.5pp and 33.1→41.5pp — while both sides returned zero flips and the same verdict. The paired drift vector is stable across machines; the *resolution* is not. `docs/cross-hardware-tolerance-v0.md` §6.1's "no cross-hardware comparison" is retired — `validation/2026-08-15-crosshw-smollm2/`. |
 | **NOT validated** | **That hardware is the cause.** Four variables differ at once (device, python 3.13.1/3.12.13, torch 2.11.0+cu128/2.13.0+cpu, transformers 5.10.1/5.15.0), and `reproduce` refused the attribution itself rather than being told to. The T0 replicate path (`--t0-reference` / `--t0-candidate`) still needs three replicate runs per side that do not exist, so the reserved `breach` name is withheld exactly as `reproduced` was. Exit 0 and exit 4 have never been observed — and exit 0 **cannot** be until a T0 set is collected. |
 
+### `quantfit t0 --reports A B C --out PATH [--json]`
+
+| | |
+|---|---|
+| **Validated** | **E3, synthetic functional validation, 2026-10-05.** Offline CLI agreement exits 0, disagreement exits 3, and missing scope, cached baselines or fewer than three reports exit 2. Consumption rechecks source bytes and requires the comparison report to be a member of the cited set. |
+| **Hardware** | Windows CPU; no inference, model download, judge execution or GPU operation. |
+| **Evidence** | `validation/2026-10-05-t0-replicates/`; `tests/test_t0.py`; `tests/test_reproduce.py`; `docs/cross-hardware-tolerance-v0.md` dated 2026-10-05 clarification. |
+| **NOT validated** | An independently executed three-run measurement campaign, physical-host identity, cross-hardware causality, safety, calibration or a research GO. Synthetic hash-shaped pins are not verified model content. Equal recorded environments, distinct paths and hashes cannot establish those facts. |
+
 ### `quantfit audit [--root DIR] [--json PATH]`
 
 | | |
@@ -374,6 +392,24 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+**Offline resolution machinery (2026-10-05):** aggregate-only synthetic fixtures
+exercise the actual CLI and exact-byte scope matching. Evidence is
+`validation/2026-10-05-calibrated-resolution/`; this is functional evidence, not a
+human calibration study, hardware campaign or research GO.
+
+| flag | command(s) | validation | evidence / gap |
+|---|---|---|---|
+| `--calibration-report` | resolution | Synthetic bound-scope input; per-arm bounds remain separate; changed revision refused | `validation/2026-10-05-calibrated-resolution/` |
+| `--report` / `--out` / `--json` | resolution | Actual offline invocation, separate artifact and unchanged inputs | as above; no new safety verdict |
+The offline `references` command has aggregate functional evidence at
+`validation/2026-10-05-reference-cli/`: bundled empty-list, explicit synthetic
+external registry, exact-byte match and mismatch. It establishes command behavior
+only; no published reference or measurement claim is established.
+
+| flag | command | evidence | artifact |
+|---|---|---|---|
+| `--registry` / `--slug` / `--report` | references | Local functional checks against explicitly synthetic registry and bytes; no publication proof | `validation/2026-10-05-reference-cli/` |
+
 Enumerated from `_build_parser()`, not from memory, on 2026‑08‑07 at 22:25. §0.1 stakes
 this table on flag-level completeness, so the flags that had **no row at all** are named
 here rather than quietly added: `--threshold` (the gate's *primary* resolution
@@ -384,6 +420,9 @@ only required argument that command has.
 
 | flag | command(s) | validation | evidence / gap |
 |---|---|---|---|
+| `--baseline`, `--quant`, `--baseline-revision`, `--quant-revision`, `--max-new-tokens`, `--report`, `--json` | inspect-run | Actual CPU full-corpus identical-arm canary at four tokens; required immutable revisions and observed dtype/source/timing. | `validation/2026-10-05-inspect-cli/`; `tools/ci_inspect_acceptance.py`; no quantized-arm, GPU or sensitivity claim. |
+| `--log-dir` | inspect-run | E3 explicit capture warning/failure handling; actual canary uses disposable temporary logs. | `tests/test_inspect_cli.py`; retained logs are local-only captures and never qualification artifacts. |
+| `--token` | inspect-run | E3 forwarding only; E0 private/gated repo qualification. | Boundary tests and source; actual canary is public and unauthenticated. |
 | `--model` | check, plan, probe, quantize, verify | E1 for quantize/verify on L; E0 elsewhere | §2 |
 | `--method` | quantize | `gptq` E1 (over‑VRAM, L); `awq`/`fp8`/`smoothquant`/`gguf` E1‑weak (0.1.0, 1.5B); **`rtn` E0** | `CHANGELOG.md` §0.1.0 omits `rtn` from the validated list |
 | `--scheme` | quantize | **defaults only.** `quantfit/registry.py`: "The per-method DEFAULT schemes are validated end-to-end; the other presets are accepted and emitted, not each individually load-tested" | `quantfit/registry.py:SCHEMES` advertises 9; the 5 methods' defaults cover 4 distinct ones (`W4A16`, `W4A16_ASYM`, `W8A8`, `FP8_DYNAMIC`), so 5 of 9 schemes have never been produced by a validated run; `NVFP4`/`MXFP4` need Blackwell to serve and no Blackwell has run anything |
@@ -401,6 +440,7 @@ only required argument that command has.
 | `--junit` | verify-safety, gate, screen | **E1 on verify-safety and gate; E0 on screen.** Both real shapes rendered: a `<failure type="SafetyDrift">` carrying its at-risk denominator (`over-refusal: 2/10 at-risk pairs flipped`), and the gate's three-case form where the ungated axis comes back **`skipped`** with the regression named rather than as a green pass. `screen --junit` has never run, because `screen` has never run | `validation/2026-08-14-qwen1.5b-awq/{drift.xml,gate.xml}`; §2 `screen` row |
 | `--capture` | verify-safety (writes), calibrate sheet (reads) | **E1 on the write end, E0 on the read end.** Two captures were written on 2026-08-18 and both were adjudicated by hand — the sensitivity control's and the 1.5B AWQ pair's. `calibrate sheet` has still never read one, so the round trip is unexercised | `validation/2026-08-18-sensitivity-control/adjudication.json`, `validation/2026-08-14-qwen1.5b-awq/adjudication.json`; captures themselves are local-only (`docs/data-handling-completions.md`) |
 | `--eps-upper` / `--eps-source` | gate | **E0**: never exercised. Not "unusable" — an ε **has** been measured for this instrument (2026-08-18, n=80, per-arm 0.196), it has simply never been passed to the gate. Corrected 2026-08-28; the previous cell said no ε existed | `quantfit/gate.py` "Epsilon: measured for this instrument, not folded into these numbers"; `validation/2026-08-18-judge-calibration/` |
+| `--calibration-report` | gate | **E3 functional fixture**: coherent schema-2 identity round trip, separate per-arm Wilson uppers, CLI exit-5 refusal, exclusive operator inputs, post-run mismatch refusal. No real calibration study, truthful human labels, independent errors, or sensitivity result is established | `validation/2026-10-05-calibration-binding/`; `tests/test_bound_calibration_pipeline.py` |
 | `--targets` | screen | **E0** | the screen has not run |
 | `--threshold` | gate | **E1 for the refusal leg, E0 for a pass.** `--threshold 1` was supplied to a real run on 2026-08-14 and **exited 5 before loading any model or judge**, naming the corpus revision the refusal was computed from. That is ROADMAP 0.7's "a too-fine threshold is refused with the documented exit code", previously asserted only in the uncitable canary. No *resolvable* raw threshold has been passed to a real run — every real gate run so far used `--tier` | §2 `gate` row; `tests/test_gate.py` (60, E3) |
 | `--tier smoke` | gate | **E1.** Gated two real pairs on 2026-08-14, both exit 0, artifacts committed. The tier constants (threshold 0.30, the ">=30pp" disclosure) print in both artifacts, so they are no longer evidenced only by the unrun canary's assertion | `validation/2026-08-14-qwen1.5b-awq/gate.json`, `validation/2026-08-14-smollm2-determinism/gate.json` |
@@ -408,9 +448,10 @@ only required argument that command has.
 | `--sheet` | calibrate sheet (writes), calibrate ingest (reads) | **E0.** The blinded CSV has never been written from a real capture or opened by a labeler; spreadsheet mangling on the round trip is the documented threat model and is therefore untested against the thing it fears | `docs/judge-calibration-v0.md` front matter; `tests/test_calibrate.py` (53, E3) |
 | `--key` | calibrate sheet (writes), calibrate ingest (reads) | **E0.** The unblinding key is the artifact that makes the round trip auditable, and no round trip has happened | as `--sheet` |
 | `--reference` / `--candidate` | reproduce | **E1 on both comparisons that exist.** Same-hardware (2026-08-14): T1–T5 held, exit 3. **Cross-hardware (2026-08-15): T3 failed on both axes** between **L** and the CI runner, `cross-hardware difference witnessed: yes`, exit 3 | `validation/2026-08-14-smollm2-determinism/reproduce.json`, `validation/2026-08-15-crosshw-smollm2/reproduce.json` |
-| `--t0-reference` / `--t0-candidate` | reproduce | **E0.** T0 needs three replicate runs; one replicate pair exists (0.4.1's byte-identical rerun at 0.5B) and three do not | `docs/cross-hardware-tolerance-v0.md` §6.1, "No replicate set" |
+| `--reports` / `--out` | t0 | **E3**, synthetic offline functional validation; minimum three, pinned measurement and recorded environment equality, cache refusal, file writing and JSON envelope. No independent execution campaign | `validation/2026-10-05-t0-replicates/`; `tests/test_t0.py`; §2 `t0` row |
+| `--t0-reference` / `--t0-candidate` | reproduce | **E3 for single-artifact and existing report-list consumption, 2026-10-05**, with source rechecking and target membership tested on synthetic aggregates. The earlier E0 reading concerned real T0 measurement campaigns; this functional run does not establish one | `validation/2026-10-05-t0-replicates/`; `tests/test_t0.py`; historical measurement records remain as recorded |
 | `--root` / `--json-out` | audit | **E0.** `audit` itself is E2 (§2), but it runs there with neither flag: `--root` on a foreign checkout, and `--json-out` consumed by anything, are both unexercised. **This row previously named the flag `--json`, which is a different flag on the same command** — `--json-out PATH` writes the findings file, `--json` emits the stdout envelope. One row described one flag under the other's name | `.github/workflows/validate.yml` runs the bare command; `quantfit/cli.py:286` |
-| `--json` | all 14 leaf commands | **E1 on `audit` only** (run locally 2026-08-14, 0 errors / 0 warnings across five checks). E0 on the other thirteen — the envelope that `CHANGELOG.md` §0.6.0 describes as the point of a machine-readable surface has never been consumed by a caller | `tests/` per-command envelope assertions are E3 |
+| `--json` | every leaf command, including t0 | **E1 on `audit`** (run locally 2026-08-14, 0 errors / 0 warnings across five checks); **E3 on t0**, synthetic CLI envelope consumption recorded 2026-10-05. Earlier fourteen-leaf reading was E0 on the other thirteen | `tests/` per-command envelope assertions are E3; `validation/2026-10-05-t0-replicates/` |
 | `--version` / `-V` | top level | **E2.** Executed by `tools/quickstart_check.py` as a clean-venv command on ubuntu **and** windows in `install-smoke`, green on run 31772386477 | `tools/quickstart_check.py` (`[PASS] L19 quantfit --version`) |
 | `--demo` | verify-safety | **E1‑weak, and misclassified by the gate that should cover it.** Run locally 2026-08-14 under `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 CUDA_VISIBLE_DEVICES=-1`: exit 0, sub-second, fixture verdict printed with its own "No model was loaded and nothing was judged" disclaimer. It is **not** run by `install-smoke`, because `quickstart_check.py` files it under `c:gpu` — see §4 finding 6 | §4 finding 6 |
 | `--resume` | screen | **E1.** Used on 2026-08-21 to finish the 0.5 screen: it skipped the eleven targets already measured and ran the three that disk had blocked, and the summary it rebuilt is the one published | `validation/2026-08-21-screen-complete/README.md` ("`--resume` … skipped the eleven already measured"); `tests/test_screen.py` (2, E3) |
@@ -451,7 +492,7 @@ with no artifact behind it.
    commands and reported **20** of them UNRUN with reasons. That is the honest output,
    not a validation. Both numbers move whenever the README does — the ratio is the
    finding, not the integers.
-4. **`quantfit.refreports` and `quantfit.inspect_task` are not reachable from the CLI.**
+4. **Historically, `quantfit.refreports` and `quantfit.inspect_task` were not reachable from the CLI.**
    The CHANGELOG once said "none of the three new modules is reachable from the CLI";
    that sentence was corrected in the same release section once `reproduce` and `audit`
    were wired, and now reads that `refreports` "is still library-only, by design — the
@@ -459,7 +500,10 @@ with no artifact behind it.
    own §2 row. The remaining two are library surface with
    E3 coverage only (`tests/test_refreports.py` 41, `tests/test_inspect_task.py` 79) and
    are therefore **out of scope for "every advertised *command*"** — but they are
-   advertised in the CHANGELOG.
+   advertised in the CHANGELOG. **Updated 2026-10-05:** `inspect-run` now exposes
+   the narrow observed HF runner. Its actual CPU canary and limitations are in
+   `validation/2026-10-05-inspect-cli/` and `docs/inspect-run.md`. This branch does
+   not change `refreports`.
 5. **`quantfit/safety/cache.py` is dead weight at runtime**: 53 tests, no caller. Still
    true on 2026‑08‑14, and now with a cost attached: the two committed `gate` runs each
    re-ran both arms from scratch, which is exactly the work the cache exists to skip.

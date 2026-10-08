@@ -67,15 +67,17 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import io
 import json
+import re
 import secrets
 from datetime import datetime, timezone
 from pathlib import Path
 
 from quantfit.safety.verify import ARM_BASELINE, ARM_QUANTIZED, CAPTURE_SCHEMA, wilson_interval
 
-CALIBRATION_SCHEMA = 1  # the output calibration report — its own namespace
-KEY_SCHEMA = 1  # the unblinding key written alongside a sheet
+CALIBRATION_SCHEMA = 2  # bound or explicitly unbound aggregate evidence, own namespace
+KEY_SCHEMA = 2  # v1 local keys remain ingestible without inferred provenance
 
 ARMS = (ARM_BASELINE, ARM_QUANTIZED)
 
@@ -158,11 +160,18 @@ def _json_line(path: str, number: int, line: str):
         raise CalibrationError(f"capture {path} line {number} is not valid JSON: {exc}") from exc
 
 
-def _read_capture(path: str) -> tuple[dict, list[dict]]:
+def _artifact_bytes(path: str, kind: str) -> bytes:
+    try:
+        return Path(path).read_bytes()
+    except OSError as exc:
+        raise CalibrationError(f"unreadable {kind} {path}: {exc}") from exc
+
+
+def _read_capture(path: str, *, data: bytes | None = None) -> tuple[dict, list[dict]]:
     """Parse + structurally validate a capture JSONL: header line, then completion rows."""
     try:
-        text = Path(path).read_text(encoding="utf-8")
-    except OSError as exc:
+        text = (data if data is not None else _artifact_bytes(path, "capture")).decode("utf-8")
+    except UnicodeError as exc:
         raise CalibrationError(f"unreadable capture {path}: {exc}") from exc
 
     lines = [line for line in text.splitlines() if line.strip()]
@@ -172,7 +181,7 @@ def _read_capture(path: str) -> tuple[dict, list[dict]]:
     _require(isinstance(header, dict), f"capture {path} line 1 is not a JSON object (expected the capture header)")
     got = header.get("capture_schema")
     _require(
-        got == CAPTURE_SCHEMA,
+        type(got) is int and got in (1, CAPTURE_SCHEMA),
         f"capture {path} has capture_schema {got!r}; this quantfit reads {CAPTURE_SCHEMA}",
     )
     n_pairs = header.get("n_pairs")
@@ -180,6 +189,19 @@ def _read_capture(path: str) -> tuple[dict, list[dict]]:
         isinstance(n_pairs, int) and not isinstance(n_pairs, bool) and n_pairs > 0,
         f"capture {path} header has n_pairs {n_pairs!r}; expected a positive integer",
     )
+    if got == CAPTURE_SCHEMA:
+        _require("binding" in header, f"capture {path} must explicitly declare binding or null")
+        if header["binding"] is not None:
+            from quantfit.safety.calibration_binding import validate_binding
+
+            binding = validate_binding(header["binding"])
+            identity = binding["identity"]
+            _require(identity["probe_dataset"]["n_probes"] == n_pairs, "capture binding pair count mismatch")
+            _require(
+                identity["baseline"]["model"] == header.get("baseline")
+                and identity["quantized"]["model"] == header.get("quant"),
+                "capture binding arm mismatch",
+            )
 
     rows: list[dict] = []
     seen: set[tuple[int, str]] = set()
@@ -231,16 +253,17 @@ def _read_capture(path: str) -> tuple[dict, list[dict]]:
 # --- sheet -------------------------------------------------------------------------
 
 
-def _read_sheet(path: str) -> list[dict]:
+def _read_sheet(path: str, *, data: bytes | None = None) -> list[dict]:
     """Read a labeling sheet as rows carrying their 1-based line number (refusals name it).
 
     `utf-8-sig`, not `utf-8`: Excel and several other spreadsheets write a BOM on
     save, and a labeler's hours must not be unreadable over three leading bytes.
     """
     try:
-        with Path(path).open("r", encoding="utf-8-sig", newline="") as handle:
+        snapshot = data if data is not None else _artifact_bytes(path, "labeling sheet")
+        with io.StringIO(snapshot.decode("utf-8-sig"), newline="") as handle:
             table = list(csv.reader(handle))
-    except OSError as exc:
+    except UnicodeError as exc:
         raise CalibrationError(f"unreadable labeling sheet {path}: {exc}") from exc
 
     _require(bool(table), f"labeling sheet {path} is empty")
@@ -342,7 +365,8 @@ def build_labeling_sheet(capture_path: str, sheet_path: str, key_path: str) -> t
 
     Returns (sheet path, key path).
     """
-    header, rows = _read_capture(capture_path)
+    capture_bytes = _artifact_bytes(capture_path, "capture")
+    header, rows = _read_capture(capture_path, data=capture_bytes)
     _refuse_overwriting_filled_sheet(sheet_path)
     _refuse_overwriting_key(key_path)
     salt = _new_salt()
@@ -375,6 +399,8 @@ def build_labeling_sheet(capture_path: str, sheet_path: str, key_path: str) -> t
         "capture": {field: header.get(field) for field in ("created_utc", "baseline", "quant", "n_pairs")},
         "salt": salt,
         "ids": {row_id: entries[row_id] for row_id in order},
+        "binding": header.get("binding") if header["capture_schema"] == CAPTURE_SCHEMA else None,
+        "capture_sha256": hashlib.sha256(capture_bytes).hexdigest(),
     }
     try:
         Path(key_path).write_text(json.dumps(key, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -386,15 +412,29 @@ def build_labeling_sheet(capture_path: str, sheet_path: str, key_path: str) -> t
 # --- key ---------------------------------------------------------------------------
 
 
-def _read_key(path: str) -> dict:
+def _read_key(path: str, *, data: bytes | None = None) -> dict:
     """Parse + structurally validate an unblinding key."""
     try:
-        payload = json.loads(Path(path).read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = json.loads(data if data is not None else _artifact_bytes(path, "labeling key"))
+    except (UnicodeError, json.JSONDecodeError) as exc:
         raise CalibrationError(f"unreadable labeling key {path}: {exc}") from exc
     _require(isinstance(payload, dict), f"labeling key {path} is not a JSON object")
     got = payload.get("key_schema")
-    _require(got == KEY_SCHEMA, f"labeling key {path} has key_schema {got!r}; this quantfit reads {KEY_SCHEMA}")
+    _require(
+        type(got) is int and got in (1, KEY_SCHEMA),
+        f"labeling key {path} has key_schema {got!r}; this quantfit reads 1/{KEY_SCHEMA}",
+    )
+    if got == KEY_SCHEMA:
+        _require("binding" in payload, f"labeling key {path} must explicitly declare binding or null")
+        if payload["binding"] is not None:
+            from quantfit.safety.calibration_binding import validate_binding
+
+            validate_binding(payload["binding"])
+        digest = payload.get("capture_sha256")
+        _require(
+            isinstance(digest, str) and re.fullmatch(r"[0-9a-f]{64}", digest) is not None,
+            f"labeling key {path} needs capture_sha256",
+        )
     salt = payload.get("salt")
     _require(
         isinstance(salt, str) and bool(salt),
@@ -429,16 +469,33 @@ def _read_key(path: str) -> dict:
             f"{where} does not hash to its own (pair {entry['pair']}, arm {entry['arm']!r}) under the recorded "
             f"salt — the key was edited after the sheet was built, so it cannot be trusted to unblind it",
         )
+    if got == KEY_SCHEMA and payload["binding"] is not None:
+        identity = payload["binding"]["identity"]
+        n_pairs = identity["probe_dataset"]["n_probes"]
+        pairs = {(entry["pair"], entry["arm"]) for entry in ids.values()}
+        _require(
+            len(ids) == 2 * n_pairs and pairs == {(pair, arm) for pair in range(n_pairs) for arm in ARMS},
+            f"labeling key {path} does not cover both complete bound arms",
+        )
+        captured = payload.get("capture", {})
+        _require(
+            isinstance(captured, dict)
+            and type(captured.get("n_pairs")) is int
+            and captured.get("n_pairs") == n_pairs
+            and captured.get("baseline") == identity["baseline"]["model"]
+            and captured.get("quant") == identity["quantized"]["model"],
+            f"labeling key {path} capture scope mismatch",
+        )
     return payload
 
 
 # --- ingest ------------------------------------------------------------------------
 
 
-def _join(sheet_path: str, key_path: str, ids: dict) -> dict[str, dict]:
+def _join(sheet_path: str, key_path: str, ids: dict, *, data: bytes | None = None) -> dict[str, dict]:
     """Validate every sheet row and join it to the key; refusals name row, id and fault."""
     joined: dict[str, dict] = {}
-    for row in _read_sheet(sheet_path):
+    for row in _read_sheet(sheet_path, data=data):
         row_id = row["id"]
         where = f"labeling sheet {sheet_path} row {row['line']}"
         _require(bool(row_id), f"{where} has an empty id column")
@@ -564,9 +621,11 @@ def ingest_labels(sheet_path: str, key_path: str, out_path: str) -> dict:
     """
     import quantfit
 
-    key = _read_key(key_path)
+    key_bytes = _artifact_bytes(key_path, "labeling key")
+    key = _read_key(key_path, data=key_bytes)
     ids = key["ids"]
-    joined = _join(sheet_path, key_path, ids)
+    sheet_bytes = _artifact_bytes(sheet_path, "labeling sheet")
+    joined = _join(sheet_path, key_path, ids, data=sheet_bytes)
 
     counts = {
         arm: {
@@ -622,6 +681,12 @@ def ingest_labels(sheet_path: str, key_path: str, out_path: str) -> dict:
             "note": _DELTA_NOTE,
         },
         "label": CALIBRATION_LABEL if not unmeasured_arms else _qualified_label(unmeasured_arms),
+        "binding": key.get("binding") if key["key_schema"] == KEY_SCHEMA else None,
+        "source": {
+            "capture_sha256": key.get("capture_sha256") if key["key_schema"] == KEY_SCHEMA else None,
+            "key_sha256": hashlib.sha256(key_bytes).hexdigest(),
+            "sheet_sha256": hashlib.sha256(sheet_bytes).hexdigest(),
+        },
     }
     try:
         Path(out_path).write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.15.1"
+  },
+  "command": "t0",
+  "exit_code": 2,
+  "result": null,
+  "error": {
+    "kind": "ReproduceError",
+    "message": "T0 replicate[2] is the same file as replicate[0]: validation/2026-10-05-t0-replicates/synthetic-reports/replicate-1.json. T0 over one file counted twice is a tautology, not a determinism check (§1.5, §3.2) — supply the reports of independent runs."
+  }
+}

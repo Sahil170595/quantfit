@@ -1,0 +1,83 @@
+{
+  "source_commit": "9713b5ac17cfebb7491efb991fe37228a83ab329",
+  "source_branch": "codex/calibration-binding",
+  "pytest": {
+    "command": "tools/ci/.venv/Scripts/python.exe -m pytest tests -q --cov=quantfit --cov-branch --cov-report=json:coverage.json --junitxml=validation/2026-10-05-calibration-binding/pytest.xml",
+    "exit_code": 0,
+    "passed": 1474,
+    "skipped": 1,
+    "deselected": 6,
+    "warnings": 2,
+    "junit_sha256": "5e0553e1c391d6c272662d7b04713cf87b572eb8c4ca5ce7f9e8b6b5afb869ec",
+    "private_report_regression_present": true,
+    "parsed_snapshot_regressions_present": true
+  },
+  "coverage": {
+    "command": "tools/ci/.venv/Scripts/python.exe tools/ci_coverage.py coverage.json",
+    "exit_code": 0,
+    "total_statement_and_branch_percent": 91.27137786382704,
+    "total_branch_percent": 89.51965065502183,
+    "total_combined_floor_percent": 88,
+    "total_branch_floor_percent": 85,
+    "modules": [
+      {
+        "file": "quantfit/safety/mde.py",
+        "branch_percent": 100,
+        "floor": 95
+      },
+      {
+        "file": "quantfit/gate.py",
+        "branch_percent": 94.44444444444444,
+        "floor": 90
+      },
+      {
+        "file": "quantfit/safety/report.py",
+        "branch_percent": 91.66666666666667,
+        "floor": 90
+      }
+    ]
+  },
+  "mutations": {
+    "command": "tools/ci/.venv/Scripts/python.exe tools/ci_mutation.py",
+    "exit_code": 0,
+    "selected_mutants_killed": [
+      {
+        "killed": true,
+        "file": "quantfit/safety/mde.py",
+        "mutation": "if _binom_sf(k, pairs, q) >= alpha:"
+      },
+      {
+        "killed": true,
+        "file": "quantfit/policy/probe.py",
+        "mutation": "torch.floor(w / scale)"
+      },
+      {
+        "killed": true,
+        "file": "quantfit/policy/probe.py",
+        "mutation": "qmax = 1"
+      }
+    ],
+    "scope": "Three existing selected decision mutants, not an overall mutation score"
+  },
+  "standalone_binding_module": {
+    "command": "tools/ci/.venv/Scripts/python.exe -m pytest -o pythonpath= --import-mode=importlib tests/test_calibration_binding.py -q",
+    "exit_code": 0,
+    "passed": 44,
+    "scope": "Source-mode import isolation; hosted installed-wheel/sdist proof remains separate"
+  },
+  "ruff": {
+    "check": "quantfit tests tools",
+    "format_check": "quantfit tests",
+    "exit_code": 0
+  },
+  "audit": {
+    "artifact": "audit.json",
+    "errors": 0,
+    "warnings": 0,
+    "exit_code": 0
+  },
+  "limits": [
+    "Synthetic functional fixtures only; no human calibration or sensitivity/control result",
+    "Hosted CI and installed-artifact acceptance pending branch publication"
+  ]
+}

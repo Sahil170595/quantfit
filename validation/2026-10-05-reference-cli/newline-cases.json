@@ -1,0 +1,30 @@
+[
+  {
+    "declared_ending": "LF",
+    "match_expected": true,
+    "exit_code": 0,
+    "expected_sha256": "6bcb3ae5f3bd8ebf79a23bef3fb765e37833ba95648dc656ee80aa4e24aa59e3",
+    "actual_sha256": "6bcb3ae5f3bd8ebf79a23bef3fb765e37833ba95648dc656ee80aa4e24aa59e3"
+  },
+  {
+    "declared_ending": "LF",
+    "match_expected": false,
+    "exit_code": 3,
+    "expected_sha256": "6bcb3ae5f3bd8ebf79a23bef3fb765e37833ba95648dc656ee80aa4e24aa59e3",
+    "actual_sha256": "85bf631eff889db6865961be53d033f89ed3ac888f36c71f46ecf3ad3590d2c7"
+  },
+  {
+    "declared_ending": "CRLF",
+    "match_expected": true,
+    "exit_code": 0,
+    "expected_sha256": "85bf631eff889db6865961be53d033f89ed3ac888f36c71f46ecf3ad3590d2c7",
+    "actual_sha256": "85bf631eff889db6865961be53d033f89ed3ac888f36c71f46ecf3ad3590d2c7"
+  },
+  {
+    "declared_ending": "CRLF",
+    "match_expected": false,
+    "exit_code": 3,
+    "expected_sha256": "85bf631eff889db6865961be53d033f89ed3ac888f36c71f46ecf3ad3590d2c7",
+    "actual_sha256": "6bcb3ae5f3bd8ebf79a23bef3fb765e37833ba95648dc656ee80aa4e24aa59e3"
+  }
+]

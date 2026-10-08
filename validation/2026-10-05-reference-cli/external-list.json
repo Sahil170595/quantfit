@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.15.1"
+  },
+  "command": "references list",
+  "exit_code": 0,
+  "result": {
+    "refreport_schema_version": 1,
+    "current_spec_version": "v0",
+    "n_registered": 1,
+    "max_reference_reports": 3,
+    "n_stale": 0,
+    "registry_state": null,
+    "reports": [
+      {
+        "refreport_schema_version": 1,
+        "slug": "fixture",
+        "spec_version": "v0",
+        "current_spec_version": "v0",
+        "quantfit_version": "fixture-only",
+        "regeneration_required": false,
+        "invalidated_by_tool_or_dependency_bump": false,
+        "reason": "Declared spec v0 compared with current spec v0; this does not verify the declared run, publication or citation provenance.",
+        "rule": "Spec-version comparison of declarations only; no authenticity or publication verification.",
+        "declared_spec_validity": "valid",
+        "publication_verified": false,
+        "citable": false,
+        "entry": {
+          "slug": "fixture",
+          "baseline": "fixture/baseline",
+          "quant": "fixture/quant",
+          "stratum": "gguf",
+          "spec_version": "v0",
+          "quantfit_version": "fixture-only",
+          "report_sha256": "85bf631eff889db6865961be53d033f89ed3ac888f36c71f46ecf3ad3590d2c7",
+          "hf_repo_type": "dataset",
+          "hf_repo": "fixture/references",
+          "hf_path": "fixture.json",
+          "hf_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "hf_url": "https://huggingface.co/datasets/fixture/references/blob/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/fixture.json"
+      }
+    ],
+    "rule": "Spec-version comparison of declarations only; no authenticity or publication verification.",
+    "official_registry": false,
+    "registry_source": "validation/2026-10-05-reference-cli/synthetic-registry.json",
+    "registry_sha256": "c84f16aad1df787d670d3b290425b278a7f1a4b38d886d58e0188e9a961b4b49",
+    "publication_verified": false,
+    "scope": "Offline declared-registry and exact-byte checks; no measurement or publication verification."
+  }
+}

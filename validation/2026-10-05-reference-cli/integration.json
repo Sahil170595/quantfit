@@ -1,0 +1,78 @@
+{
+  "source_head": "50fb2043de0b357c19b6187b5f4894bf235144b9",
+  "stack_order": [
+    "calibration-binding",
+    "calibrated-resolution",
+    "t0-replicates",
+    "inspect-cli",
+    "reference-cli"
+  ],
+  "pytest": {
+    "passed": 1623,
+    "skipped": 1,
+    "deselected": 6,
+    "count_confirmed_from_junit": true
+  },
+  "coverage": {
+    "percent_covered": 91.66427134233976,
+    "percent_branches_covered": 89.96113989637306
+  },
+  "scientific_branch_floors": {
+    "quantfit/safety/mde.py": {
+      "observed": 100.0,
+      "floor": 95
+    },
+    "quantfit/gate.py": {
+      "observed": 94.44444444444444,
+      "floor": 90
+    },
+    "quantfit/safety/report.py": {
+      "observed": 91.66666666666667,
+      "floor": 90
+    }
+  },
+  "installed_package_acceptance": {
+    "wheel": {
+      "passed": 423,
+      "outside_checkout": true,
+      "candidate_dependencies": "borrowed locked environment; package installed separately"
+    },
+    "sdist": {
+      "passed": 423,
+      "outside_checkout": true,
+      "candidate_dependencies": "borrowed locked environment; package installed separately"
+    }
+  },
+  "selected_mutants_killed": 3,
+  "ruff_check": "passed",
+  "ruff_format": "passed",
+  "strict_mypy": "passed",
+  "actionlint": "passed",
+  "audit_errors": 0,
+  "audit_warnings": 0,
+  "readme": {
+    "advertised_commands": 36,
+    "clean_venv_commands": 7,
+    "verdict": "PASS"
+  },
+  "source_files_sha256": {
+    "quantfit/cli.py": "f9983cd20baec9c3c6f66935676f03c37e44891206a7d80141f0d0839decb51b",
+    "quantfit/safety/calibration_binding.py": "b375328d5acad4f85d6724c2c3d7fc99a835add5b86f1141054c4bef466da222",
+    "quantfit/resolution.py": "1d270a24280d557869059b515629c761cd3e3854d2d7eb24aea73df1966342cd",
+    "quantfit/reproduce.py": "52eb96c306689db8cd60b551fd20329f955d5a4a656ab6ecfc44f0a2f573761c",
+    "quantfit/inspect_hf.py": "48ee48850786480c39e85488ea295e69258e29ce5c1f0b7c07ecec7c14f82852",
+    "quantfit/inspect_task.py": "4ac7d227274109f02a9cedab4ebadd35cdcdb1eb16f4c516fe09f4b3f54d3d05",
+    "quantfit/reference_cli.py": "86c3677f674d43928267878eefcdace03e73e58506ecf90328def479ebbf2c0f",
+    "tools/ci_installed.py": "e37740fb1fc63055fcd51d08194087178500c699336cc911acf7f13f6165f119",
+    "tools/ci/uv.lock": "8b7814b7e12f065217cf4c0330022cf134a1d4f66804e3cbf179970e5e0cc017"
+  },
+  "distributions_sha256": {
+    "quantfit-0.15.1-py3-none-any.whl": "5e1f6321cd5d06a58180932e524972d2ccc89327d824cfd9007b4465fa5ed5f5",
+    "quantfit-0.15.1.tar.gz": "5089b3e7b5898f4ac2132aad859cb853071e21d62e9613a12533c3a00e4bfe3f"
+  },
+  "limits": [
+    "Offline and synthetic cases validate instrument behavior, not a human calibration study or research GO.",
+    "Prior actual installed Inspect CPU record remains a separate harness qualification; quantization sensitivity and GPU behavior are not established.",
+    "Hosted validation of the published exact heads remains required."
+  ]
+}

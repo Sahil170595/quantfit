@@ -1,0 +1,36 @@
+{
+  "prior_source_head": "eb52f4337cc3c460ba53b1bd986def92eb90e03b",
+  "python": "3.12.13",
+  "hardware": "same local Windows CPU host; no model workload",
+  "locked_groups": [
+    "numerical",
+    "tooling"
+  ],
+  "versions": {
+    "torch": "2.13.0+cpu",
+    "pytest": "9.0.3",
+    "ruff": "0.16.2",
+    "scipy": "1.15.3"
+  },
+  "installed_wheel": {
+    "passed": 422,
+    "skipped": 1,
+    "skip_reason": "live Transformers environment fingerprint test; runtime group absent",
+    "outside_checkout": true,
+    "pass_count_confirmed_from_junit": true
+  },
+  "newline_cases": 4,
+  "source_sha256": "3259319b94abe71e16f085d735ab352628702aaeedf00fc17ce534a0752333e3",
+  "wheel_sha256": "78a129d5b017679a2931ceebeb6a1a5395456ed71579072a0c250c2f6948ae13",
+  "ruff_check": "passed",
+  "ruff_format": "passed",
+  "strict_mypy": "passed",
+  "audit_errors": 0,
+  "audit_warnings": 0,
+  "production_byte_verifier_changed": false,
+  "failed_hosted_job": "https://github.com/Sahil170595/quantfit/actions/runs/37315947731/job/111782812735",
+  "limits": [
+    "Synthetic fixture/installed CLI qualification only; no model workload or authenticated publication.",
+    "Fresh hosted runtime-group wheel and sdist acceptance remains required on exact final head."
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.15.1"
+  },
+  "command": "references verify",
+  "exit_code": 0,
+  "result": {
+    "refreport_schema_version": 1,
+    "slug": "fixture",
+    "path": "validation/2026-10-05-reference-cli/synthetic-bytes.json",
+    "expected_sha256": "85bf631eff889db6865961be53d033f89ed3ac888f36c71f46ecf3ad3590d2c7",
+    "actual_sha256": "85bf631eff889db6865961be53d033f89ed3ac888f36c71f46ecf3ad3590d2c7",
+    "matches": true,
+    "spec_version": "v0",
+    "quantfit_version": "fixture-only",
+    "hf_url": "https://huggingface.co/datasets/fixture/references/blob/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/fixture.json",
+    "citable": false,
+    "statement": "MATCH: file SHA256 85bf631eff889db6865961be53d033f89ed3ac888f36c71f46ecf3ad3590d2c7; declared registry SHA256 85bf631eff889db6865961be53d033f89ed3ac888f36c71f46ecf3ad3590d2c7. This is an exact-byte comparison against a declaration. Publication, measurement validity and citation provenance are not authenticated.",
+    "declared_reference_citable": true,
+    "official_registry": false,
+    "registry_source": "validation/2026-10-05-reference-cli/synthetic-registry.json",
+    "registry_sha256": "c84f16aad1df787d670d3b290425b278a7f1a4b38d886d58e0188e9a961b4b49",
+    "publication_verified": false,
+    "scope": "Offline declared-registry and exact-byte checks; no measurement or publication verification."
+  }
+}

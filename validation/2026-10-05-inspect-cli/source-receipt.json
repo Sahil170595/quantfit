@@ -1,0 +1,19 @@
+{
+  "files": {
+    "cli.py": {
+      "installed_raw_sha256": "c191c068f653308c9d5c7778f5b0df79555fc2675fa5267e2cfa0bb89139c93e",
+      "universal_newline_utf8_sha256": "5bde67c1175b91478715bc817847b559fb7cda6d0aa09b29ee5da1edf54f343f"
+    },
+    "inspect_hf.py": {
+      "installed_raw_sha256": "2afa5c7af8f6f0447ef05bfa7fdc415fc065ea833e158a1b9de04e38e00f96c5",
+      "universal_newline_utf8_sha256": "2afa5c7af8f6f0447ef05bfa7fdc415fc065ea833e158a1b9de04e38e00f96c5"
+    },
+    "inspect_task.py": {
+      "installed_raw_sha256": "4ad753753ad4a543a5c1c0aef22b89f032a6d332710dc6fc1a494b7a1c8942fd",
+      "universal_newline_utf8_sha256": "9b8965f28d24a94194abb65b097b2a15909ff3bd81cd64ef68e2af0d13fd0ec1"
+    }
+  },
+  "schema_version": 1,
+  "scope": "source equality after universal-newline normalization only",
+  "wheel_sha256": "ba1f7a95e65804f613061c42f6c9d4c1623fbadd362fa5d59edc79458657b96b"
+}

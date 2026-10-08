@@ -1,0 +1,115 @@
+{
+  "python": "3.12.13 (main, May  8 2026, 18:37:00) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "commands": [
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "exit_code": 1,
+      "stdout": "quantfit 0.16.0 requires accelerate, which is not installed.\nquantfit 0.16.0 requires datasets, which is not installed.\nquantfit 0.16.0 requires llmcompressor, which is not installed.\nquantfit 0.16.0 requires torch, which is not installed.\nquantfit 0.16.0 requires transformers, which is not installed.\n",
+      "stderr": "",
+      "expected_exit_code": 1,
+      "limitation": "unit/tooling graph deliberately excludes these five runtime dependencies"
+    },
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "tools/ci_dependency_audit.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "WARNING:pip_audit._cli:--no-deps is supported, but users are encouraged to fully hash their pinned dependencies\nWARNING:pip_audit._cli:Consider using a tool like `pip-compile`: https://pip-tools.readthedocs.io/en/latest/#using-hashes\nNo known vulnerabilities found\n"
+    },
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\ruff.exe",
+        "check",
+        "quantfit",
+        "tests",
+        "tools"
+      ],
+      "exit_code": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\ruff.exe",
+        "format",
+        "--check",
+        "quantfit",
+        "tests",
+        "tools\\ci_constraints.py",
+        "tools\\ci_coverage.py",
+        "tools\\ci_cpu_acceptance.py",
+        "tools\\ci_dependency_audit.py",
+        "tools\\ci_gate_check.py",
+        "tools\\ci_inspect_acceptance.py",
+        "tools\\ci_installed.py",
+        "tools\\ci_mutation.py",
+        "tools/ci_gate_fixture"
+      ],
+      "exit_code": 0,
+      "stdout": "98 files already formatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\mypy.exe",
+        "--strict",
+        "quantfit/spec.py",
+        "quantfit/engines/base.py"
+      ],
+      "exit_code": 0,
+      "stdout": "Success: no issues found in 2 source files\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\quantfit.exe",
+        "audit"
+      ],
+      "exit_code": 0,
+      "stdout": "command_parity: 0 error(s), 0 warning(s)\ncitation_resolution: 0 error(s), 0 warning(s)\nexit_code_parity: 0 error(s), 0 warning(s)\nconstant_parity: 0 error(s), 0 warning(s)\nschema_field_parity: 0 error(s), 0 warning(s)\ndocs=code parity: 0 error(s), 0 warning(s)\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests",
+        "-q",
+        "--ignore=tests/test_numerical_properties.py",
+        "--junitxml=C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-fsspec-advisory\\unit.xml"
+      ],
+      "exit_code": 0,
+      "stdout": "........................................................................ [  4%]\n........................................................................ [  8%]\n........................................................................ [ 13%]\n........................................................................ [ 17%]\n........................................................................ [ 22%]\ns....s.........................................................ss....... [ 26%]\n........................................................................ [ 31%]\n........................................................................ [ 35%]\n................................................s....................... [ 40%]\n........................................................................ [ 44%]\n........................................................................ [ 48%]\n........................................................................ [ 53%]\n........................................................................ [ 57%]\n........................................................................ [ 62%]\n........................................................................ [ 66%]\n........................................................................ [ 71%]\n........................................................................ [ 75%]\n........................................................................ [ 80%]\n.....s.................................................................. [ 84%]\n........................................................................ [ 88%]\n........................................................................ [ 93%]\n........................................................................ [ 97%]\n....................................                                     [100%]\n1614 passed, 8 skipped in 118.94s (0:01:58)\n",
+      "stderr": ""
+    }
+  ],
+  "junit_independent_count": {
+    "tests": 1622,
+    "skipped": 8,
+    "failures": 0,
+    "errors": 0
+  },
+  "installed_versions": {
+    "fsspec": "2026.6.0",
+    "s3fs": "2026.6.0",
+    "inspect-ai": "0.3.269",
+    "ruff": "0.16.2",
+    "pytest": "9.0.3"
+  },
+  "lock_sha256": "364d0f0e444b8069cb182c139adea35cd8dd5aaf72755b5f2bfb409b4779eeaa",
+  "junit_suite_attributes": {
+    "tests": "1622",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "8"
+  }
+}

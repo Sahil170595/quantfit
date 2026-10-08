@@ -89,7 +89,7 @@ from typing import TYPE_CHECKING
 from quantfit.torchrt import free_gpu, pick_device
 
 if TYPE_CHECKING:  # runtime import stays lazy (torch-adjacent module)
-    from quantfit.safety.report import ArmRun
+    from quantfit.safety.report import ArmRun, DriftReport
 
 # --- Verified external API constants (see module docstring for provenance) -------
 JUDGE_MODEL_ID = "garak-llm/garak-refusal-detector"
@@ -145,7 +145,7 @@ REFUSAL_LABEL_ID = 1  # verified default: id2label {0:"compliance", 1:"refusal"}
 # The arm names are the vocabulary of the capture AND of the calibration key that
 # unblinds it (quantfit.safety.calibrate), so they are constants, not literals
 # spelled twice.
-CAPTURE_SCHEMA = 1
+CAPTURE_SCHEMA = 2  # v1 local captures remain readable; v2 can carry observed binding
 ARM_BASELINE = "baseline"
 ARM_QUANTIZED = "quantized"
 CAPTURE_WARNING = "may contain harmful model output; local artifact — never commit, redistribute, or attach to a report"
@@ -449,8 +449,9 @@ def verify_safety(
     quant_ref = flags[len(probes) :]
 
     drift = _tabulate(probes, baseline_ref, quant_ref)
+    actual_report = None
     if report_path:
-        _write_report(report_path, drift, baseline_arm, quant_arm, judge_runtime_s, max_new_tokens)
+        actual_report = _write_report(report_path, drift, baseline_arm, quant_arm, judge_runtime_s, max_new_tokens)
     if capture_path:
         # After the report, deliberately: the auditable artifact is what a run owes
         # the world, and an unwritable capture must not cost a completed run its report.
@@ -469,6 +470,11 @@ def verify_safety(
                 quant_completions,
                 baseline_ref,
                 quant_ref,
+                actual_report=(
+                    actual_report
+                    if actual_report is not None
+                    else _make_report(drift, baseline_arm, quant_arm, judge_runtime_s, max_new_tokens)
+                ),
             )
         except OSError as exc:
             print(f"warning: capture not written to {capture_path}: {exc}")
@@ -522,14 +528,27 @@ def _write_report(
     quantized: ArmRun,
     judge_runtime_s: float,
     max_new_tokens: int,
-) -> None:
-    """Assemble and write the schema-v2 report for one completed run."""
+) -> DriftReport:
+    """Write and return the same observed report used by optional capture binding."""
+    report = _make_report(drift, baseline, quantized, judge_runtime_s, max_new_tokens)
+    report.to_json(path)
+    return report
+
+
+def _make_report(
+    drift: SafetyDrift,
+    baseline: ArmRun,
+    quantized: ArmRun,
+    judge_runtime_s: float,
+    max_new_tokens: int,
+) -> DriftReport:
+    """Assemble the schema-v2 report for one completed run."""
     from datetime import datetime, timezone
 
     import quantfit
     from quantfit.safety.report import SCHEMA_VERSION, DriftReport, environment_fingerprint
 
-    DriftReport(
+    return DriftReport(
         schema_version=SCHEMA_VERSION,
         quantfit_version=quantfit.__version__,
         created_utc=datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -558,7 +577,7 @@ def _write_report(
         quantized=quantized,
         judge_runtime_s=judge_runtime_s,
         drift=drift.to_dict(),
-    ).to_json(path)
+    )
 
 
 def _write_capture(
@@ -570,6 +589,8 @@ def _write_capture(
     quant_completions: list[str],
     baseline_ref: list[bool],
     quant_ref: list[bool],
+    *,
+    actual_report: DriftReport | None = None,
 ) -> None:
     """Write both arms' completions + their judge labels as JSONL (header line first).
 
@@ -586,6 +607,19 @@ def _write_capture(
     from datetime import datetime, timezone
     from pathlib import Path
 
+    from quantfit.safety.calibration_binding import CalibrationBindingError, identity_fingerprint, measurement_identity
+
+    binding = None
+    binding_error = "actual report provenance unavailable; local labeling only"
+    if actual_report is not None:
+        try:
+            identity = measurement_identity(actual_report)
+            binding = {"identity": identity, "fingerprint": identity_fingerprint(identity)}
+            binding_error = None
+        except CalibrationBindingError as exc:
+            # Raw capture remains useful for local labeling even when a local weight
+            # directory lacks immutable identity. Never fill its gaps with current pins.
+            binding_error = str(exc)
     header = {
         "capture_schema": CAPTURE_SCHEMA,
         "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -593,6 +627,8 @@ def _write_capture(
         "quant": quant_path,
         "n_pairs": len(probes),
         "warning": CAPTURE_WARNING,
+        "binding": binding,
+        "binding_error": binding_error,
     }
     lines = [json.dumps(header, sort_keys=True)]
     # Baseline block then quantized block — the order the single judge load saw

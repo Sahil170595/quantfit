@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.15.1"
+  },
+  "command": "resolution",
+  "exit_code": 2,
+  "result": null,
+  "error": {
+    "kind": "ResolutionError",
+    "message": "calibration scope does not match the actual run report"
+  }
+}

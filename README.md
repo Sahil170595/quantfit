@@ -302,6 +302,13 @@ detection threshold is the smallest possible, so a floor-mode FAIL runs at an
 uncontrolled α and is a candidate for human verification). A reference GitHub
 Action and a weekly CPU canary ship in `.github/`; see [`docs/ci-integration.md`](https://github.com/Sahil170595/quantfit/blob/main/docs/ci-integration.md).
 
+The optional Inspect HF runner is available as `quantfit inspect-run`. It requires
+immutable revisions for both arms, observes loaded precision and model/tokenizer
+source, and measures per-arm generation through the existing pinned judge and
+probe pipeline. See [the CLI contract and CPU qualification scope](docs/inspect-run.md).
+Generation parity with verify-safety and quantization sensitivity are not
+established by its identical-arm CPU canary.
+
 ## GPU-aware quantization
 
 **3-tier capacity.** `check` reads HF metadata (no download) to estimate the footprint:
@@ -362,6 +369,23 @@ are comparable.
 [`Dockerfile`](https://github.com/Sahil170595/quantfit/blob/main/Dockerfile) builds an isolated CUDA image. For GGUF in Docker, the official
 `ghcr.io/ggml-org/llama.cpp:full` image carries the convert + quantize tooling.
 
+## Analyze an existing run offline
+
+`quantfit resolution --report drift.json --calibration-report calibration.json --out resolution.json --json`
+matches immutable measurement scope, validates paired counts and reports
+conditional per-axis resolution using each arm's directional error bound in a
+separate artifact. It preserves the inputs and their QSR v0 verdict; matching
+metadata does not authenticate human labels or verify the statistical assumptions.
+See [CLI reference](docs/cli-reference.md) and
+[synthetic functional evidence](validation/2026-10-05-calibrated-resolution/README.md).
+
 ## License
 
 Apache-2.0.
+### Offline reference artifacts
+
+`quantfit references list --json` shows the bundled reference registry, currently
+empty. `quantfit references verify --slug NAME --report report.json --json` checks
+exact bytes against a declared reference. An explicit `--registry registry.json`
+selects an external registry without registering or publishing it. See
+[`docs/cli-reference.md`](docs/cli-reference.md) for the schema and exit codes.

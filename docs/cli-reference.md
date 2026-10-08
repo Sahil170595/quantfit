@@ -41,6 +41,30 @@ quantfit list --json
 fit. `--prefer` takes `quality` (default), `speed` or `size`. `list` prints the supported
 method × scheme matrix.
 
+## Offline reference artifacts
+
+```bash
+quantfit references list --json
+quantfit references list --registry references.json --json
+quantfit references verify --registry references.json --slug my-report --report report.json --json
+```
+
+`references list` shows declared entries, pinned URLs and spec validity. The bundled
+registry is empty. `--registry` selects an explicitly external registry, never adds to
+the official registry, and does not verify publication. Its object contains
+`refreport_schema_version: 1` and `reports`, an array of complete `ReferenceReport`
+entries; the existing cap, uniqueness and spec rules apply. `hf_revision` is null or an
+immutable 40-hex commit. No network request is made.
+
+`references verify` checks local bytes against the selected `--slug`: exit 0 match,
+3 mismatch, 2 unreadable/invalid input or unknown slug. A match verifies bytes, not
+measurement validity, human adjudication or reproduction. No model or judge loads.
+
+`citable` remains false because publication and citation provenance were not
+authenticated. `declared_reference_citable` preserves the library's narrower
+pin-present flag; list entries expose `declared_spec_validity` rather than a
+measurement validity verdict. Each entry carries its own publication disclaimer.
+
 ## Quantize
 
 ```bash
@@ -184,6 +208,36 @@ accepted and ignored. Budgets assume zero hits — a hit is wall-clock time and 
 Entries hold **completion text**: local-only, never committed (`*.baseline-cache.json` is
 gitignored), and see [`docs/data-handling-completions.md`](data-handling-completions.md).
 
+## Inspect HF runner
+
+```sh
+quantfit inspect-run --baseline hf/org/base --quant hf/org/quant \
+  --baseline-revision <40-character-commit-sha> --quant-revision <40-character-commit-sha> \
+  --max-new-tokens 64 --report inspect-drift.json --json
+```
+
+For a gated repository and retained local captures:
+
+```sh
+quantfit inspect-run --baseline hf/org/base --quant hf/org/quant \
+  --baseline-revision <40-character-commit-sha> --quant-revision <40-character-commit-sha> \
+  --token <hf-token> --log-dir ./logs --json
+```
+
+Both revisions are required immutable HF commits. The runner downloads each
+snapshot, loads its weights and tokenizer from the same path, checks actual loaded
+precision/source, serializes arm generation, and uses the full pinned corpus and
+one real pinned judge batch. Only the reviewed Inspect 0.3.269 HF provider is
+supported. Exits are 0 (no regression detected), 2 (operational refusal), 3
+(regression flagged), and 4 (an axis unmeasurable), with 3 taking precedence.
+
+`--token` uses existing Hub access. `--log-dir DIR` retains local Inspect captures
+with a warning; without it, temporary logs are deleted on exit. Never commit logs.
+`--report PATH` writes aggregate-only schema-v2 provenance; it is optional.
+`--max-new-tokens` defaults to 64, applied identically to both arms. `--json`
+prints one envelope. See [the observation contract](inspect-run.md) for exact
+timing boundaries and the distinction from verify-safety generation.
+
 ## Screen a whole manifest
 
 ```bash
@@ -239,13 +293,34 @@ quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out \
 
 # Or declare the resolution you need explicitly, in percentage points.
 quantfit gate --fp16 Qwen/Qwen2.5-1.5B-Instruct --quant ./out --threshold 30 --json
+
+# Or explicitly consume a calibration bound to this exact measurement scope.
+quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out \
+  --tier smoke --calibration-report calibration.json --report drift.json --out gate.json --json
 ```
 
 `--tier` picks a named threshold; `--threshold` states one directly in percentage points.
-`--eps-upper` supplies a measured judge-error bound and `--eps-source` records where it came
-from — without them the printed MDE is a perfect-judge floor. `--out` writes the gate
+`--eps-upper` supplies an operator judge-error bound and `--eps-source` records where it came
+from. Without those inputs or a bound calibration report, the printed MDE is a perfect-judge
+floor. `--out` writes the gate
 decision artifact. The gate exits `5` rather than passing a threshold the run could not
 have resolved.
+
+`--calibration-report PATH` instead reads a schema-2 calibration produced through the
+capture → key → label-ingest pipeline. It is exclusive with `--eps-upper`/`--eps-source`.
+Each arm retains its own recomputed directional Wilson upper bound. Judge, corpus, decode,
+immutable arm weights, actual precision, engine and environment must match. A pre-run refusal
+validates requested scope but has not observed actual weights; a run that proceeds must match
+its actual report before a calibrated decision is emitted. Old unbound calibration reports
+remain available for explicit operator use. Binding does not authenticate human label truth,
+independent judge errors, sensitivity or a research GO; `eps.measured` remains `false`.
+The aggregate read is limited to 2 MiB; duplicate keys and non-finite/overflow literals
+are refused. `eps.assumptions_verified` stays `false`: applicability to realized at-risk
+populations (A1), conditional arm independence (A2) and majority-real at-risk probes (A3)
+remain assumptions of the existing MDE bound, even when measurement identities match.
+Bound runs validate a private aggregate before publishing `--report`; shared output files
+are never the provenance oracle. The calibration input must differ from report/decision
+outputs, including same-file aliases.
 
 `--junit` renders the gate as three cases rather than one. **Exit 5 fails as a refusal, not
 as a breached threshold** — "I cannot resolve what you asked" and "you failed what you
@@ -268,18 +343,64 @@ quantfit calibrate ingest --sheet labels.labels.csv \
 `sheet` builds a blinded labeling sheet; the key file is what unblinds it and the labeler
 never receives it. `ingest` folds the filled labels into a per-arm judge-error report.
 
+## Analyze an existing run's resolution
+
+```bash
+quantfit resolution --report drift.json --calibration-report calibration.json \
+  --out resolution.json --json
+```
+
+This offline command consumes an existing schema-v2 report and a bound schema-2
+calibration aggregate with exactly matching observed measurement scope. It checks
+the paired count arithmetic and recomputes the calibration bounds, retaining each
+arm's directional upper bound separately. The separate `resolution_schema: 1`
+artifact includes both input SHA256 hashes, the binding fingerprint, flagged flip
+counts, realized at-risk denominators, exact-binomial thresholds, effective MDEs
+and power at pre-registered effect sizes. Input bytes and QSR v0 verdicts are preserved.
+
+`--out` is required and cannot overwrite either input, including through a hard
+link. Input reports are limited to 8 MiB and 4096 probes to bound the existing
+exact-binomial calculator's work. Malformed counts, unbound legacy calibration or
+scope mismatches exit 2 before output; exit 0 means the analysis ran, including
+an unmeasurable axis. It is not a safety gate. Counts remain judge-flagged, not
+human-confirmed. Matching metadata cannot authenticate human labels or establish
+that directional bounds apply to the at-risk subpopulation, that the at-risk set
+is majority-real, or that judge errors are arm-independent; the artifact carries
+these assumptions explicitly. No sample size fixes correlated judge error.
+
 ## Reproduction and reporting
 
 ```bash
+quantfit t0 --reports ref-a.json ref-b.json ref-c.json --out replicates-ref.json --json
+
 quantfit reproduce --reference ref.json --candidate t4.json --out record.json \
   --t0-reference replicates-ref.json --t0-candidate replicates-cand.json --json
 
 quantfit emit model-card --report drift.json --json
 ```
 
-`--t0-*` supply the three within-hardware replicate runs that establish determinism; without
-that evidence the outcome can never be the reserved gate pass. `emit` renders a report as a
-paste-ready model-card section.
+`t0 --reports REPORT [REPORT ...] --out PATH` checks at least three existing uncached
+schema-v2 reports on CPU, without loading models or using the network. Their pinned
+judge/corpus/arms, decode settings, engine builds and recorded environments must match
+before the `drift` blocks are compared. `--out` writes the standalone T0 artifact;
+`--json` emits the existing stdout envelope. Exit **0** means agreement under these
+reported prerequisites, **3** means disagreement, and **2** means invalid evidence,
+including fewer than three reports. Distinct paths and hashes do not establish actual
+execution independence or physical-host identity. See the dated 2026-10-05 clarification
+in `docs/cross-hardware-tolerance-v0.md` and the synthetic functional record at
+`validation/2026-10-05-t0-replicates/`.
+
+`--t0-reference` and `--t0-candidate` each accept one standalone artifact, or the existing
+list of replicate report paths. New T0 artifacts record canonical absolute source
+paths and can be consumed from another working directory. Older relative-path
+artifacts remain readable from the producer's directory; regenerate them before
+consuming them elsewhere. Positive
+evidence is reread and checked against its hashes; each compared report must belong to
+its side's source set by exact bytes and identity. Bare `true` and legacy identity-less
+positive results are accepted as unverified assertions, so they cannot produce the
+reserved gate pass. A reported failure remains conservative failure. The library can
+record a two-report partial set but its `protocol_pass` is false. `emit` renders a report
+as a paste-ready model-card section.
 
 ## Audit this repository
 

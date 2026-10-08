@@ -1,0 +1,43 @@
+{
+  "elapsed_s": 380.0196665000112,
+  "environment": {
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python": "3.12.13",
+    "torch_threads": 2,
+    "versions": {
+      "datasets": "5.0.1",
+      "huggingface-hub": "1.31.0",
+      "inspect-ai": "0.3.269",
+      "torch": "2.13.0+cpu",
+      "transformers": "5.17.0"
+    }
+  },
+  "exit_code": 4,
+  "judge_batch_sizes": [
+    80
+  ],
+  "max_new_tokens": 4,
+  "model": "hf/HuggingFaceTB/SmolLM2-135M-Instruct",
+  "n_probes": 40,
+  "not_established": [
+    "quantization sensitivity",
+    "GPU execution",
+    "generation parity with verify-safety",
+    "human-confirmed safety",
+    "judge calibration"
+  ],
+  "package_source": {
+    "files_sha256": {
+      "cli.py": "c191c068f653308c9d5c7778f5b0df79555fc2675fa5267e2cfa0bb89139c93e",
+      "inspect_hf.py": "2afa5c7af8f6f0447ef05bfa7fdc415fc065ea833e158a1b9de04e38e00f96c5",
+      "inspect_task.py": "4ad753753ad4a543a5c1c0aef22b89f032a6d332710dc6fc1a494b7a1c8942fd"
+    },
+    "scope": "installed distribution outside checkout"
+  },
+  "qualification_schema": 1,
+  "report": "inspect-drift.json",
+  "revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+  "scope": "actual installed Inspect HF identical-arm CPU orchestration; full pinned corpus and one real pinned judge batch"
+}

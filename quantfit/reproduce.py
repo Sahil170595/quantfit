@@ -365,9 +365,11 @@ up. Each is resolved conservatively and each resolution is recoverable from the 
      rate only below 56.1%; out of 2 it is weaker still) — so it routes to
      `reproduced_t0_unverified` with the count and the reason in the artifact, exactly as
      an unsupplied side does. An evidence dict that does not *state* it met the count is
-     treated as not having met it: silence is not evidence. A caller who genuinely
-     established T0 by other means passes a bare `True`, which is recorded as asserted
-     rather than shown.
+     treated as not having met it: silence is not evidence. The dated 2026-10-05
+     correction also requires matching reported measurement/environment identities,
+     uncached generation, rechecked source hashes and comparison-report membership.
+     A bare `True` or legacy identity-less positive dict is accepted as an unverified
+     assertion; a negative assertion remains conservative failure.
  10. **The detection table's `null` cells are not distinguished from equal cells.** §2.3
      marks `revision` detectable "when non-null" and `artifact_sha256` as a GGUF-arm row,
      both of which a transformers pair carries as `null` on both sides. Implemented as:
@@ -377,9 +379,9 @@ up. Each is resolved conservatively and each resolution is recoverable from the 
  11. **A report compared with itself is not addressed at all.** `compare(x, x)` — or two
      paths holding byte-identical content — passes every clause by construction, which is
      the same tautology §3.2 refuses for T0 replicates ("it would be byte-identical
-     trivially and turn the precondition into a tautology"). Two genuine runs cannot be
-     byte-identical: `created_utc`, both `runtime_s` and `judge_runtime_s` differ by
-     construction (§1.1). Implemented as a second precondition, `P1_distinct_reports`,
+     trivially and turn the precondition into a tautology"). Identical bytes cannot
+     distinguish separately produced reports, and different timestamps or runtimes
+     cannot prove separate execution. Implemented as a second precondition, `P1_distinct_reports`,
      failing to `void` (exit 4 — nothing was compared). It resolves to an outcome rather
      than to a raised error, unlike the same check in `within_hardware_identical`, because
      `compare` writes an auditable artifact and the refusal is worth recording in one;
@@ -405,17 +407,25 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
 from quantfit.safety.report import SCHEMA_VERSION as REPORT_SCHEMA_VERSION
-from quantfit.safety.report import DriftReport, ReportError
+from quantfit.safety.report import ArmRun, DriftReport, ReportError
 
 # The comparison artifact's own schema namespace, distinct from the drift report's (2),
 # the gate decision's (1) and the screen summary's (1). QSR v0 §10.2: those numbers
 # version different artifacts and a bare `schema_version` means nothing until you know
 # which file you are holding.
 REPRODUCTION_SCHEMA_VERSION = 1
+T0_SCHEMA_VERSION = 1
+T0_REQUIRED_REPLICATES = 3
+_T0_PINNED_LLAMACPP_SOURCE = re.compile(
+    r"provisioned from pinned release archive b[0-9]+ \(archive SHA256-verified when provisioned\)"
+)
+_T0_USER_LLAMACPP_SOURCE = "QUANTFIT_LLAMACPP (user-provided build; tag not verified by quantfit)"
 
 # The spec version the rule was written against, and the rule's citation. Both ride in
 # every artifact: §10.3 makes a published report valid *as-of* a spec version, and a
@@ -733,6 +743,7 @@ class _View:
     path: str
     sha256: str
     raw: dict
+    report: DriftReport
 
 
 def _load(path: str, side: str) -> _View:
@@ -748,9 +759,37 @@ def _load(path: str, side: str) -> _View:
         data = Path(path).read_bytes()
     except OSError as exc:
         raise ReproduceError(f"unreadable {side} report {path}: {exc}") from exc
+
+    def _pairs(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ReportError(f"duplicate report JSON key {key!r}")
+            result[key] = value
+        return result
+
+    def _nonfinite(value):
+        raise ReportError(f"report JSON must contain finite numbers: {value}")
+
+    def _float(value):
+        parsed = float(value)
+        if not math.isfinite(parsed):
+            raise ReportError("report JSON numbers must be finite")
+        return parsed
+
     try:
-        report = DriftReport.from_json(path)
-    except ReportError as exc:
+        # Provenance binds these exact parsed bytes, never a second read of the path.
+        payload = json.loads(
+            data.decode("utf-8"), object_pairs_hook=_pairs, parse_constant=_nonfinite, parse_float=_float
+        )
+        if not isinstance(payload, dict):
+            raise ReportError("report must be a JSON object")
+        if type(payload.get("schema_version")) is not int or payload["schema_version"] != REPORT_SCHEMA_VERSION:
+            raise ReportError(f"schema_version must be {REPORT_SCHEMA_VERSION}")
+        report = DriftReport(
+            baseline=ArmRun(**payload.pop("baseline")), quantized=ArmRun(**payload.pop("quantized")), **payload
+        )
+    except (ValueError, TypeError, KeyError, RecursionError, ReportError) as exc:
         raise ReproduceError(f"{side} report is not a readable schema-v{REPORT_SCHEMA_VERSION} report: {exc}") from exc
 
     raw = {
@@ -772,7 +811,7 @@ def _load(path: str, side: str) -> _View:
             "artifact_sha256": arm.artifact_sha256,
             "engine": arm.engine,
         }
-    view = _View(side=side, path=str(path), sha256=hashlib.sha256(data).hexdigest(), raw=raw)
+    view = _View(side=side, path=str(path), sha256=hashlib.sha256(data).hexdigest(), raw=raw, report=report)
     _validate_drift(view)
     return view
 
@@ -1281,8 +1320,7 @@ def _t5_refusal_totals(ref: _View, cand: _View) -> dict:
 # `supplied: false` contradicts itself in the same file, and the per-side blocks are the
 # ground truth: whichever a reader believes, one of them was lying.
 _T0_HEAD_BOTH = (
-    "T0 (§1.5) was supplied as evidence for BOTH sides, from `within_hardware_identical` over each hardware's "
-    "replicate set."
+    "T0 (§1.5) was supplied as evidence for BOTH sides. Its verified or asserted status is recorded per side."
 )
 _T0_HEAD_NEITHER = "NO T0 RESULT WAS SUPPLIED FOR EITHER SIDE, so the gate's T0 leg is UNVERIFIED on both hardwares."
 _T0_HEAD_ONE_SIDE = (
@@ -1298,9 +1336,10 @@ _T0_SUB_PROTOCOL_CLAUSE = (
     "is withheld is the licence, not the evidence."
 )
 _T0_TAIL = (
-    "T0 is within-hardware byte-identity of the `drift` block across each side's replicates and is NOT recomputed "
-    "here — this comparison holds two reports, not two replicate sets — so whatever was supplied is recorded "
-    "verbatim below and the record is auditable from this file. A T0 FAILURE on either side makes the record "
+    "T0 is within-hardware byte-identity of the `drift` block across each side's replicates. Positive bound "
+    "evidence is rechecked from its source files and must contain this side's comparison report bytes, with "
+    "matching instrument and reported environment identity. Distinct files do not prove independent execution "
+    "or physical-host identity. A T0 FAILURE on either side makes the record "
     "`void` (§6.3) no matter what T1-T5 say; an UNVERIFIED leg on either side caps the outcome at "
     "`reproduced_t0_unverified` (exit 3), because §6.3 defines `reproduced` as `T0 on both sides, THEN T1-T5 all "
     "pass` — never exit 0. A difference between A and B cannot be attributed to hardware while one of the "
@@ -1770,9 +1809,10 @@ _CAUSE_ASSERTING_OUTCOMES = (OUTCOME_BREACH, OUTCOME_DENOMINATOR_DRIFT)
 
 _ATTRIBUTION_T0_PASSED = (
     "T0 PASSED ON BOTH SIDES (evidence supplied and recorded under "
-    "preconditions.T0_within_hardware_byte_identity), so each hardware was shown to agree with itself across its "
-    "replicates and within-hardware nondeterminism IS excluded as the cause of any difference recorded here. That "
-    "is what makes a cross-hardware difference ATTRIBUTABLE to hardware at all (§1.5)."
+    "preconditions.T0_within_hardware_byte_identity): the uncached supplied reports agree under matching "
+    "measurement and reported environment identities. Within-hardware nondeterminism is excluded for these "
+    "provided replicates under the protocol's execution-independence and physical-host assumptions (§1.5); "
+    "the checker does not verify those assumptions or exclude rare disagreement in future runs."
 )
 
 _ATTRIBUTION_T0_FAILED = (
@@ -1783,7 +1823,8 @@ _ATTRIBUTION_T0_FAILED = (
 
 _ATTRIBUTION_T0_NOT_COLLECTED = (
     "T0 WAS NEVER COLLECTED — no `within_hardware_identical` result established §1.5 for at least one side (not "
-    "supplied, or supplied below §3.1's three replicates). WITHIN-HARDWARE NONDETERMINISM IS THEREFORE NOT "
+    "supplied, supplied below §3.1's three replicates, or supplied without verified bound evidence). "
+    "WITHIN-HARDWARE NONDETERMINISM IS THEREFORE NOT "
     "EXCLUDED as the cause of anything recorded here."
 )
 
@@ -1925,13 +1966,14 @@ def _identity(view: _View) -> dict:
     }
 
 
-def _t0_side(value, side: str) -> tuple[bool | None, dict]:
+def _t0_side(value, side: str, target: _View) -> tuple[bool | None, dict]:
     """Normalize one side's supplied T0 result into (pass|None, the recorded block).
 
-    Accepts a `within_hardware_identical` result (the auditable form — its replicate paths
-    and sha256s ride into the artifact), or a bare bool for a caller who checked T0 some
-    other way, or None for "not supplied". Anything else is operational: a T0 leg that
-    cannot be read is not a T0 leg that passed.
+    Positive current artifacts are rechecked from their source paths and hashes and
+    bound to the target's exact bytes, measurement and reported environment. A bare
+    True or legacy identity-less positive dict is accepted but remains unverified;
+    False conservatively voids the comparison. None means "not supplied". Malformed
+    current evidence is an operational error.
 
     **A supplied `pass` is consulted together with `meets_protocol_replicate_count`, not
     alone.** `within_hardware_identical` accepts two replicates so a partial run can still
@@ -1948,15 +1990,15 @@ def _t0_side(value, side: str) -> tuple[bool | None, dict]:
     if value is None:
         return None, {"supplied": False, "pass": None, "evidence": None}
     if isinstance(value, bool):
-        return value, {
+        return (False if value is False else None), {
             "supplied": True,
-            "pass": value,
+            "pass": False if value is False else None,
+            "reported_pass": value,
             "evidence": None,
             "note": (
                 "Supplied as a bare boolean: NO replicate evidence rides in this artifact, so the T0 leg is "
-                "asserted here rather than shown — including its replicate count, which this process therefore "
-                "cannot check against §3.1's three. Pass the `within_hardware_identical` result instead to make "
-                "it auditable from this file alone."
+                "asserted here rather than shown. A positive assertion is unverified and cannot license "
+                "reproduced; a negative assertion conservatively voids it. Supply bound replicate evidence."
             ),
         }
     if isinstance(value, dict) and isinstance(value.get("pass"), bool):
@@ -1974,6 +2016,56 @@ def _t0_side(value, side: str) -> tuple[bool | None, dict]:
             block["sub_protocol_replicate_count"] = True
             block["note"] = _T0_SUB_PROTOCOL_NOTE
             return None, block
+        if value["pass"] is True:
+            if value.get("t0_schema_version") != T0_SCHEMA_VERSION or "measurement_identity" not in value:
+                block.update(
+                    {
+                        "pass": None,
+                        "reported_pass": True,
+                        "note": "Legacy or unbound positive T0: identity not verified.",
+                    }
+                )
+                return None, block
+            sources = value.get("reports")
+            if not isinstance(sources, list) or any(
+                not isinstance(source, dict) or not isinstance(source.get("path"), str) for source in sources
+            ):
+                raise ReproduceError(f"t0_{side} has malformed source report evidence")
+            expected_sources = [{**source, "path": _absolute_report_path(source["path"])} for source in sources]
+            actual = within_hardware_identical([source["path"] for source in expected_sources])
+            for key in (
+                "reports",
+                "measurement_identity",
+                "environment_identity",
+                "identity_sha256",
+                "pass",
+                "n_replicates",
+                "meets_protocol_replicate_count",
+                "protocol_pass",
+            ):
+                expected = expected_sources if key == "reports" else value.get(key)
+                if actual[key] != expected:
+                    raise ReproduceError(f"t0_{side} source evidence changed or contradicts its {key}")
+            identity, environment, fingerprint = _t0_identity(target)
+            member = any(source["report_sha256"] == target.sha256 for source in actual["reports"])
+            bound = (
+                actual["protocol_pass"]
+                and member
+                and actual["identity_sha256"] == fingerprint
+                and actual["measurement_identity"] == identity
+                and actual["environment_identity"] == environment
+            )
+            block["bound_to_comparison_report"] = bound
+            block["comparison_report_is_member"] = member
+            if not bound:
+                block.update(
+                    {
+                        "pass": None,
+                        "reported_pass": True,
+                        "note": "T0 does not bind to this comparison report's bytes and scope.",
+                    }
+                )
+                return None, block
         return value["pass"], block
     raise ReproduceError(
         f"t0_{side} must be a within_hardware_identical() result (a dict with a boolean `pass`), a bool, or None; "
@@ -2005,6 +2097,15 @@ def _t0_statement(ref_block: dict, cand_block: dict) -> str:
     ]
     if short:
         parts.append(_T0_SUB_PROTOCOL_CLAUSE.format(sides=" and ".join(short)))
+    unverified = [
+        side
+        for side, block in (("reference", ref_block), ("candidate", cand_block))
+        if block["supplied"] and block["pass"] is None and not block.get("sub_protocol_replicate_count")
+    ]
+    if unverified:
+        parts.append(
+            f"Positive T0 for {' and '.join(unverified)} is UNVERIFIED: no bound replicate evidence licensed it."
+        )
     parts.append(_T0_TAIL)
     return " ".join(parts)
 
@@ -2026,8 +2127,10 @@ def compare(
 
     `t0_reference` and `t0_candidate` carry each side's T0 result — the dict
     `within_hardware_identical` returns over that hardware's replicate set (§1.5, §3.1).
-    They are **evidence, not a recomputation**: T0 is a rule over three replicates and this
-    function holds two reports. §6.3 makes T0 the first half of `reproduced`, so:
+    Positive evidence is rechecked from its source files and bound to that side's report
+    bytes and strict instrument/environment identity. Bare positive booleans and legacy
+    identity-less dicts remain accepted as unverified assertions. §6.3 makes T0 the first
+    half of `reproduced`, so:
 
       - `False` on either side -> `void` (exit 4). §6.3: a T0 failure voids the record no
         matter what T1-T5 say.
@@ -2063,8 +2166,10 @@ def compare(
 
     import quantfit
 
-    t0_ref_pass, t0_ref_block = _t0_side(t0_reference, "reference")
-    t0_cand_pass, t0_cand_block = _t0_side(t0_candidate, "candidate")
+    ref = _load(reference_path, "reference")
+    cand = _load(candidate_path, "candidate")
+    t0_ref_pass, t0_ref_block = _t0_side(t0_reference, "reference", ref)
+    t0_cand_pass, t0_cand_block = _t0_side(t0_candidate, "candidate", cand)
     # False beats None: a side that FAILED T0 voids the record even if the other side was
     # never supplied. None beats True, so one unsupplied side withholds the reserved name.
     if t0_ref_pass is False or t0_cand_pass is False:
@@ -2073,9 +2178,6 @@ def compare(
         t0_pass = None
     else:
         t0_pass = True
-
-    ref = _load(reference_path, "reference")
-    cand = _load(candidate_path, "candidate")
 
     t1 = _t1_same_measurement(ref, cand)
     t2 = _t2_verdict_class(ref, cand)
@@ -2191,7 +2293,129 @@ def compare(
     return artifact
 
 
-def within_hardware_identical(report_paths) -> dict:
+def _t0_identity(view: _View) -> tuple[dict, dict, str]:
+    """Strict reported instrument/environment identity; no claim about physical hosts."""
+    from quantfit.safety.cache import SERVED_ENGINE_KEY, CacheError, _arm_identity, _env_identity, _is_hex_digest
+    from quantfit.safety.calibration_binding import (
+        CalibrationBindingError,
+        engine_causal_identity,
+        measurement_identity,
+    )
+
+    raw = view.raw
+
+    def require(condition: bool, message: str) -> None:
+        if not condition:
+            raise ReproduceError(f"T0 {view.side} has insufficient identity: {message}")
+
+    require(bool(raw["quantfit_version"].strip()), "quantfit_version must identify the instrument build")
+
+    for section, fields in (("judge", ("id", "input_contract")), ("probe_dataset", ("id", "split"))):
+        block = raw[section]
+        for field in fields:
+            require(isinstance(block.get(field), str) and bool(block[field].strip()), f"{section}.{field} is required")
+        require(_is_hex_digest(block.get("revision"), 40, 64), f"{section}.revision must be an immutable pin")
+    n = raw["probe_dataset"].get("n_probes")
+    require(_is_int(n) and n > 0, "probe_dataset.n_probes must be positive")
+    require(n == sum(zone["n"] for zone in raw["drift"]["by_zone"].values()), "probe count differs from drift counts")
+    decode = raw["decode"]
+    require(_is_int(decode.get("max_new_tokens")) and decode["max_new_tokens"] > 0, "decode token budget is required")
+    for field in _DECODE_GREEDINESS_FIELDS:
+        require(field not in decode or isinstance(decode[field], bool), f"decode.{field} must be a boolean")
+    require(_decode_greediness(view)[0] is True, "greedy decode is required")
+    require(
+        decode.get("do_sample") is not True and decode.get("greedy") is not False,
+        "decode declarations contradict greediness",
+    )
+    require(
+        "temperature" not in decode or (_is_number(decode["temperature"]) and decode["temperature"] == 0),
+        "decode.temperature must be numeric zero",
+    )
+    require(
+        isinstance(decode.get("chat_template"), str) and bool(decode["chat_template"].strip()),
+        "decode template policy is required",
+    )
+    arms = {}
+    try:
+        # The shared observed-report contract checks Inspect's arm/repo/revision and
+        # dtype facts against real ArmRuns; no missing runtime observation is invented.
+        inspect_scope = (
+            measurement_identity(view.report)
+            if any(raw[name]["engine"].get("name") == "inspect_ai:hf" for name in _T1_ARMS)
+            else None
+        )
+        environment = _env_identity(raw["env"], "T0 environment")
+        for key in ("python", "torch", "transformers"):
+            require(
+                isinstance(environment.get(key), str) and bool(environment[key].strip()),
+                f"environment.{key} is required",
+            )
+        require(
+            environment["cuda"] is None or isinstance(environment["cuda"], str),
+            "environment.cuda must be a version or null",
+        )
+        for name in _T1_ARMS:
+            record = raw[name]
+            marker = record["engine"].get(SERVED_ENGINE_KEY)
+            require(
+                marker is None or (isinstance(marker, dict) and marker.get("served") is False),
+                f"{name}: cached baseline generation cannot be a T0 replicate",
+            )
+            arms[name] = _arm_identity(record)
+            engine = record["engine"]
+            arms[name]["engine"] = engine_causal_identity(engine, n_probes=n)
+            if engine["name"] == "inspect_ai:hf":
+                arms[name] = inspect_scope[name]
+            if engine["name"] == "llama.cpp":
+                require(
+                    _is_hex_digest(engine.get("binary_sha256"), 64),
+                    f"{name}.engine.binary_sha256 must pin the executable",
+                )
+                require(
+                    _is_int(engine.get("threads")) and engine["threads"] > 0,
+                    f"{name}.engine.threads must record a positive integer thread count",
+                )
+                source = engine.get("source")
+                require(
+                    isinstance(source, str)
+                    and (source == _T0_USER_LLAMACPP_SOURCE or bool(_T0_PINNED_LLAMACPP_SOURCE.fullmatch(source))),
+                    f"{name}.engine.source must identify its pinned release tag or explicitly unverified user build",
+                )
+            elif engine["name"] != "inspect_ai:hf":
+                require(
+                    isinstance(engine.get("version"), str) and bool(engine["version"].strip()),
+                    f"{name}.engine.version is required",
+                )
+    except (CacheError, CalibrationBindingError) as exc:
+        raise ReproduceError(f"T0 {view.side} has insufficient identity: {exc}") from exc
+    identity = {
+        "schema_version": raw["schema_version"],
+        "quantfit_version": raw["quantfit_version"],
+        "judge": raw["judge"],
+        "probe_dataset": raw["probe_dataset"],
+        "decode": decode,
+        "arms": arms,
+    }
+    try:
+        canonical = json.dumps(
+            {"measurement": identity, "environment": environment},
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        )
+    except (TypeError, ValueError) as exc:
+        raise ReproduceError(f"T0 {view.side} identity must contain finite JSON values: {exc}") from exc
+    return identity, environment, hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _absolute_report_path(path: str) -> str:
+    try:
+        return str(Path(path).resolve())
+    except (OSError, RuntimeError) as exc:
+        raise ReproduceError(f"cannot resolve report path {path}: {exc}") from exc
+
+
+def within_hardware_identical(report_paths, *, out_path: str | None = None) -> dict:
     """T0 (§1.5) — the within-hardware precondition, over ONE hardware's replicate set.
 
     Not part of the tolerance. T0 is what makes a cross-hardware difference
@@ -2212,16 +2436,31 @@ def within_hardware_identical(report_paths) -> dict:
     warns about. Called with one path twice — or with three copies of one report — every
     `drift` block is trivially equal and `pass` would be `True` having tested nothing,
     which is precisely the "byte-identical trivially" failure §3.2 refuses for a cached
-    baseline replicate. Two genuine replicates CANNOT be byte-identical: `created_utc`,
-    both `runtime_s` and `judge_runtime_s` differ by construction (§1.1), and T0 is
-    defined over the `drift` block precisely because those fields do differ. So byte
-    identity between two replicate files is proof of a copy, never evidence of
-    determinism, and it is an operational refusal (exit 2) rather than a `pass: False`:
-    a `False` would report a determinism failure that was never observed.
+    baseline replicate. Identical bytes cannot distinguish separately produced reports;
+    distinct bytes cannot prove independent execution either. Byte-identical reports
+    are an operational refusal (exit 2), rather than a `pass: False` claiming observed
+    nondeterminism. All reports must first identify the same pinned instrument and
+    reported environment, and neither arm may carry a served-baseline cache marker.
     """
-    paths = [str(p) for p in report_paths]
+    paths = [_absolute_report_path(str(p)) for p in report_paths]
     if len(paths) < 2:
         raise ReproduceError(f"T0 needs at least 2 replicate reports to compare; got {len(paths)}")
+
+    if out_path is not None:
+        output = Path(out_path)
+        aliased_source = None
+        try:
+            destination = output.resolve()
+            for path in paths:
+                if destination == Path(path).resolve() or (output.exists() and output.samefile(path)):
+                    aliased_source = path
+                    break
+        except (OSError, RuntimeError) as exc:
+            raise ReproduceError(f"cannot validate T0 output path {out_path}: {exc}") from exc
+        if aliased_source is not None:
+            raise ReproduceError(
+                f"T0 output {out_path} aliases a cited source report {aliased_source}; inputs preserved"
+            )
 
     views = [_load(path, f"replicate[{i}]") for i, path in enumerate(paths)]
 
@@ -2243,13 +2482,20 @@ def within_hardware_identical(report_paths) -> dict:
         if view.sha256 in by_sha:
             raise ReproduceError(
                 f"T0 replicate[{i}] {view.path} is BYTE-IDENTICAL to replicate[{by_sha[view.sha256]}] "
-                f"{views[by_sha[view.sha256]].path} (sha256 {view.sha256}). Two genuine replicates cannot be: "
-                "created_utc and the three runtimes differ by construction (§1.1), so identical bytes mean one "
-                "report was copied. T0 over a copy is a tautology (§3.2), not a determinism check."
+                f"{views[by_sha[view.sha256]].path} (sha256 {view.sha256}). These bytes cannot distinguish "
+                "separately produced reports. Indistinguishable inputs are REFUSED: counting them as "
+                "agreement would make T0 a tautology (§3.2), not a determinism check."
             )
         by_sha[view.sha256] = i
 
     first = views[0]
+    identity, environment, fingerprint = _t0_identity(first)
+    for view in views[1:]:
+        other_identity, other_environment, other_fingerprint = _t0_identity(view)
+        if other_environment != environment:
+            raise ReproduceError(f"T0 {view.side} environment identity differs from replicate[0]")
+        if other_identity != identity or other_fingerprint != fingerprint:
+            raise ReproduceError(f"T0 {view.side} measurement identity differs from replicate[0]")
     differing: list[dict] = []
     for view in views[1:]:
         if view.raw["drift"] != first.raw["drift"]:
@@ -2265,16 +2511,21 @@ def within_hardware_identical(report_paths) -> dict:
                 }
             )
 
-    return {
+    result = {
+        "t0_schema_version": T0_SCHEMA_VERSION,
         "check": "T0_within_hardware_byte_identity",
         "rule": f"{TOLERANCE_DOC} {SPEC_VERSION} §1.5",
         "pass": not differing,
         "n_replicates": len(paths),
-        "meets_protocol_replicate_count": len(paths) >= 3,
+        "meets_protocol_replicate_count": len(paths) >= T0_REQUIRED_REPLICATES,
+        "protocol_pass": not differing and len(paths) >= T0_REQUIRED_REPLICATES,
+        "measurement_identity": identity,
+        "environment_identity": environment,
+        "identity_sha256": fingerprint,
+        "independent_execution_verified": False,
         "reports": [{"path": v.path, "report_sha256": v.sha256} for v in views],
-        # Every replicate's own sha256 is above and all of them are distinct — checked, not
-        # assumed. A `pass` here is a claim about independent runs agreeing, and it is only
-        # worth reading because the identical-bytes case was refused rather than counted.
+        # Distinct file paths and hashes are checked. Execution independence and
+        # physical-host identity remain external protocol assumptions.
         "replicates_are_distinct_files": True,
         "differing": differing,
         "statement": (
@@ -2283,6 +2534,11 @@ def within_hardware_identical(report_paths) -> dict:
             "widen the cross-hardware tolerance to absorb it. Note a cached baseline replicate CANNOT serve as a "
             "T0 replicate: it would be byte-identical trivially and turn the precondition into a tautology (§3.2) "
             "— and neither can a copy or a repeated path, both of which are REFUSED here (exit 2) rather than "
-            "counted as agreement."
+            "counted as agreement. Instrument and reported environment identities must match first. "
+            "Distinct files and hashes do NOT prove independent execution or physical-host identity. "
+            "Two reports can record partial agreement but cannot establish the three-replicate protocol."
         ),
     }
+    if out_path is not None:
+        _write(out_path, result)
+    return result

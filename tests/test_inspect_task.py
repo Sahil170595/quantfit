@@ -365,33 +365,17 @@ def _build_task(monkeypatch, scenario=MAIN, **task_kwargs):
 
 
 def test_inspect_task_error_is_a_runtime_error():
-    # A conditional truth, and the module says so: nothing in quantfit/ imports this
-    # module and 0.8 wires no `inspect` subcommand, so this is a property the class HAS
-    # (cli:main turns RuntimeError into a clean exit 2) rather than a path anything takes.
+    # inspect-run's operational failures use the existing CLI exit-2 boundary.
     assert issubclass(InspectTaskError, RuntimeError)
 
 
-def test_nothing_in_quantfit_imports_this_module_yet():
-    # The claim the docstring makes about the CLI is conditional BECAUSE of this. If a
-    # future PR wires a subcommand, this test fails and the wording gets revisited.
-    # IMPORT statements only — refreports.py names the module in a comment (it
-    # cross-checks CONFORMS_TO strings), which is a reference, not a dependency.
-    import pathlib
-    import re
-
-    imports = re.compile(
-        r"^\s*(?:from\s+[.\w]*\binspect_task\s+import\b"
-        r"|import\s+[.\w]*\binspect_task\b"
-        r"|from\s+[.\w]*quantfit\s+import\s+[^#\n]*\binspect_task\b)",
-        re.MULTILINE,
+def test_cli_and_observation_adapter_keep_optional_imports_lazy():
+    code = (
+        "import sys; import quantfit.cli; import quantfit.inspect_hf; "
+        "print(('torch' in sys.modules, 'inspect_ai' in sys.modules, 'transformers' in sys.modules))"
     )
-    package = pathlib.Path(__file__).resolve().parent.parent / "quantfit"
-    importers = sorted(
-        path.name
-        for path in package.rglob("*.py")
-        if path.name != "inspect_task.py" and imports.search(path.read_text(encoding="utf-8"))
-    )
-    assert importers == [], f"{importers} now import inspect_task; the CLI wording needs revisiting"
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
+    assert out.stdout.strip() == "(False, False, False)"
 
 
 def test_module_imports_without_torch_or_inspect_ai():
@@ -1052,7 +1036,7 @@ def test_report_decode_records_what_the_inspect_path_did(tmp_path, monkeypatch):
         inspect_decode("openai", DEFAULT_MAX_NEW_TOKENS)
 
 
-def test_decode_states_greedy_as_a_machine_comparable_fact():
+def test_decode_states_greedy_as_a_machine_comparable_fact(tmp_path, monkeypatch):
     """Dropping `do_sample` was right; dropping GREEDINESS with it broke comparability.
 
     `quantfit.reproduce`'s T1 compares decode fields as VALUES, so an Inspect report that
@@ -1078,11 +1062,15 @@ def test_decode_states_greedy_as_a_machine_comparable_fact():
     # The shipped path's own decode block still spells greediness the transformers way,
     # which is what the two-spellings contract exists to bridge. Read from verify rather
     # than restated here, so this test fails if that side ever changes.
-    import inspect as _inspect
-
     import quantfit.safety.verify as sv
+    from quantfit.safety.report import DriftReport
 
-    assert '"do_sample": False' in _inspect.getsource(sv._write_report)
+    _stub_env(monkeypatch)
+    path = tmp_path / "native-drift.json"
+    sv._write_report(str(path), _expected_drift(), _arm(), _arm(QUANTIZED_SPEC), 0.5, DEFAULT_MAX_NEW_TOKENS)
+    native = DriftReport.from_json(str(path))
+    assert native.decode["do_sample"] is False
+    assert native.decode["max_new_tokens"] == DEFAULT_MAX_NEW_TOKENS
 
 
 def test_report_refuses_arms_the_run_did_not_measure(tmp_path, monkeypatch):

@@ -1,0 +1,64 @@
+[
+  {
+    "case": "official-list",
+    "command": [
+      "python",
+      "-m",
+      "quantfit.cli",
+      "references",
+      "list",
+      "--json"
+    ],
+    "exit_code": 0
+  },
+  {
+    "case": "external-list",
+    "command": [
+      "python",
+      "-m",
+      "quantfit.cli",
+      "references",
+      "list",
+      "--registry",
+      "validation/2026-10-05-reference-cli/synthetic-registry.json",
+      "--json"
+    ],
+    "exit_code": 0
+  },
+  {
+    "case": "match",
+    "command": [
+      "python",
+      "-m",
+      "quantfit.cli",
+      "references",
+      "verify",
+      "--registry",
+      "validation/2026-10-05-reference-cli/synthetic-registry.json",
+      "--slug",
+      "fixture",
+      "--report",
+      "validation/2026-10-05-reference-cli/synthetic-bytes.json",
+      "--json"
+    ],
+    "exit_code": 0
+  },
+  {
+    "case": "mismatch",
+    "command": [
+      "python",
+      "-m",
+      "quantfit.cli",
+      "references",
+      "verify",
+      "--registry",
+      "validation/2026-10-05-reference-cli/synthetic-registry.json",
+      "--slug",
+      "fixture",
+      "--report",
+      "validation/2026-10-05-reference-cli/synthetic-changed-bytes.json",
+      "--json"
+    ],
+    "exit_code": 3
+  }
+]

@@ -361,6 +361,69 @@ fails on either hardware, the run is `void`: a difference between A and B cannot
 attributed to hardware when one of the hardwares disagrees with itself. §5.2 explains
 why this is the *only* thing the replicates buy.
 
+**Dated protocol defect clarification — 2026-10-05.** There were two readings of
+"same real pair" and "on each hardware independently": compare only the `drift`
+blocks of three different files, or first establish one reported instrument and
+environment scope and uncached generation for those files. The second is intended.
+Under the first reading, synthetic reports with equal counts but different judges,
+weights, decode settings, environments, or cached baselines passed the old checker;
+under the intended reading they are invalid T0 evidence. This difference is recorded
+in `validation/2026-10-05-t0-replicates/`; it is a functional fixture result, not a
+hardware campaign or a change to T1–T5's slacks.
+
+The standalone command is now:
+
+```sh
+quantfit t0 --reports replicate-1.json replicate-2.json replicate-3.json --out t0.json --json
+```
+
+T0 requires immutable reported judge/dataset/arm pins, explicit greedy decoding and
+template policy, the same complete arm engine identities and instrument version,
+and equal recorded `env` objects, before comparing `drift` blocks. A baseline served
+from the completion cache is refused even when report files have different bytes.
+GGUF engine identity requires the executable SHA256, a positive exact-integer thread
+count (booleans are refused), and the source's pinned release tag or explicit
+`QUANTFIT_LLAMACPP` user-build marker. Unknown values on both sides are not evidence
+of agreement. The user-build path is permitted by QSR v0 §3.2 and remains explicitly
+unverified as pinned-release provenance; matching metadata never verifies an archive
+or executable's origin. No current tag is inferred for a historical report.
+Observed Inspect HF reports use the shared strict causal engine contract in
+`quantfit/safety/calibration_binding.py`: actual backend/dependency versions,
+repo/revision, device, dtype, snapshot, tokenizer, quantization and greedy model
+arguments are identity. Complete observed call counts and finite timing/prose
+metadata are validated, then outputs are excluded from identity; different valid
+wall times do not make repeated measurements different instruments. Operator-only
+Inspect metadata, unknown fields and contradictory arm/revision facts are refused.
+This corrects the earlier generic `engine.version` reading, which rejected actual
+Inspect reports while comparing measured wall times as causal settings.
+The CLI requires at least three reports; the library still records a two-report
+partial set with `meets_protocol_replicate_count: false` and `protocol_pass: false`.
+Exit 0 means protocol-count agreement, 3 means disagreement, and 2 means invalid or
+unreadable evidence; none of these is a safety verdict or a research GO.
+
+Positive T0 consumption by `compare` also rereads the cited source reports, checks
+their hashes and scope, and requires that side's comparison report bytes to be a
+member of the replicate set. CLI `--t0-reference` and `--t0-candidate` accept either a
+single standalone T0 artifact or their existing list of replicate report paths.
+**2026-10-05 path-handling correction:** newly produced artifacts record canonical
+absolute source paths, so consuming them from a different working directory reads
+the same cited files. Existing relative-path artifacts remain recheckable from
+their producer's directory; regenerate them before consuming them elsewhere.
+Bare positive booleans and legacy positive dicts with
+no bound identity remain ingestible as **unverified**, and cannot license
+`reproduced`; negative assertions still conservatively void the comparison.
+The source SHA256 and parsed report facts must come from the same read buffer;
+hashing one file version and parsing a later version would break this binding.
+Duplicate keys and nonfinite JSON values are invalid evidence.
+The T0 output must not alias a cited source by resolved path or hardlink; that
+invocation is refused with exit 2 before writing, preserving the source bytes.
+
+Equal recorded environments are not physical-host verification: schema-v2's `cpu`
+device names no CPU model, and a GPU model name identifies no unique machine.
+Distinct paths, hashes, timestamps, and runtimes do not prove independent execution.
+Reports are unsigned provenance assertions; the checker records this limit rather
+than manufacturing proof of a same-hardware or independently executed campaign.
+
 ---
 
 ## 2. What the tolerance covers, and what it cannot

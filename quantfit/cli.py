@@ -143,6 +143,21 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     pv.add_argument("--model", required=True, help="path to a quantized output dir or .gguf")
 
+    pinspect = sub.add_parser(
+        "inspect-run",
+        parents=[tok],
+        help="observed HF Inspect paired run (same 0/2/3/4 exits as verify-safety)",
+    )
+    pinspect.add_argument("--baseline", default=None, help="Inspect HF spec: hf/org/repo")
+    pinspect.add_argument("--quant", default=None, help="Inspect HF spec: hf/org/repo")
+    pinspect.add_argument("--baseline-revision", default=None, help="immutable baseline HF commit SHA")
+    pinspect.add_argument("--quant-revision", default=None, help="immutable quantized HF commit SHA")
+    pinspect.add_argument("--max-new-tokens", type=int, default=64)
+    pinspect.add_argument("--report", default=None, metavar="PATH", help="write aggregate-only schema-v2 report")
+    pinspect.add_argument(
+        "--log-dir", default=None, metavar="DIR", help="LOCAL capture-class Inspect logs; never commit"
+    )
+
     pvs = sub.add_parser(
         "verify-safety",
         parents=[tok],
@@ -306,6 +321,13 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="STR",
         help="where --eps-upper came from (required with it: an unsourced epsilon is not evidence)",
     )
+    pg.add_argument(
+        "--calibration-report",
+        default=None,
+        metavar="PATH",
+        help="bound schema-2 calibration report; mutually exclusive with --eps-upper/--eps-source. "
+        "Scope matching does not verify human labels or sensitivity",
+    )
     pg.add_argument("--max-new-tokens", type=int, default=64, help="completion length per probe (default 64)")
     pg.add_argument("--report", default=None, metavar="PATH", help="also write the schema-v2 drift report")
     pg.add_argument("--out", default=None, metavar="PATH", help="write the gate decision artifact JSON")
@@ -317,6 +339,29 @@ def _build_parser() -> argparse.ArgumentParser:
         "axis as separate cases, so exit 5 fails as a refusal rather than as a breached threshold",
     )
     pg.add_argument("--baseline-cache", default=None, metavar="DIR", help=_BASELINE_CACHE_HELP)
+
+    pres = sub.add_parser(
+        "resolution",
+        help="offline conditional resolution from a drift report and bound calibration (exit 0 = analysis completed, 2 = operational error)",
+    )
+    pres.add_argument("--report", required=True, metavar="PATH", help="existing schema-v2 drift report")
+    pres.add_argument(
+        "--calibration-report",
+        required=True,
+        metavar="PATH",
+        help="bound calibration report matching the actual measurement scope",
+    )
+    pres.add_argument(
+        "--out", required=True, metavar="PATH", help="separate resolution artifact; must not overwrite either input"
+    )
+
+    pt0 = sub.add_parser(
+        "t0",
+        help="check at least three uncached same-environment replicate reports "
+        "(exit 0 = agreement, 3 = disagreement, 2 = invalid evidence)",
+    )
+    pt0.add_argument("--reports", nargs="+", required=True, metavar="REPORT", help="three or more replicate reports")
+    pt0.add_argument("--out", required=True, metavar="PATH", help="write the aggregate T0 evidence JSON")
 
     pr = sub.add_parser(
         "reproduce",
@@ -330,17 +375,28 @@ def _build_parser() -> argparse.ArgumentParser:
         "--t0-reference",
         nargs="+",
         default=None,
-        metavar="REPORT",
-        help="within-hardware replicate reports for the REFERENCE side (3 per the protocol). T0 is not "
-        "computable from two reports, so without this the outcome can never be the gate pass",
+        metavar="PATH",
+        help="one standalone T0 artifact, or within-hardware replicate reports for the REFERENCE side "
+        "(3 per the protocol). Positive evidence must bind to the compared report",
     )
     pr.add_argument(
         "--t0-candidate",
         nargs="+",
         default=None,
-        metavar="REPORT",
-        help="within-hardware replicate reports for the CANDIDATE side",
+        metavar="PATH",
+        help="one standalone T0 artifact, or within-hardware replicate reports for the CANDIDATE side",
     )
+
+    pref = sub.add_parser("references", help="offline reference registry and exact artifact-byte verification")
+    rsub = pref.add_subparsers(dest="references_cmd", required=True)
+    rlist = rsub.add_parser("list", help="list declared reference entries and spec validity")
+    rverify = rsub.add_parser("verify", help="verify local bytes against a declared reference digest")
+    for child in (rlist, rverify):
+        child.add_argument(
+            "--registry", default=None, metavar="PATH", help="external registry JSON; default: bundled registry"
+        )
+    rverify.add_argument("--slug", required=True, help="registered reference slug")
+    rverify.add_argument("--report", required=True, metavar="PATH", help="local artifact bytes to verify")
 
     pau = sub.add_parser(
         "audit",
@@ -566,6 +622,60 @@ def _dispatch(args: argparse.Namespace) -> int:
             lambda: print(("PASS: " if ok else "FAIL: ") + msg),
         )
 
+    if args.cmd == "inspect-run":
+        import contextlib
+        import tempfile
+        from pathlib import Path
+
+        from quantfit.inspect_task import qsr_eval
+
+        if not args.baseline or not args.quant:
+            raise RuntimeError("inspect-run needs --baseline and --quant HF specs")
+        if not args.baseline_revision or not args.quant_revision:
+            raise RuntimeError("inspect-run needs both immutable --baseline-revision and --quant-revision")
+        # Temporary logs disappear even on failure. Explicit logs are local-only
+        # captures; stdout must remain exactly one JSON envelope.
+        with contextlib.ExitStack() as stack:
+            log_dir = args.log_dir or stack.enter_context(
+                tempfile.TemporaryDirectory(prefix="quantfit-inspect-capture-")
+            )
+            if args.log_dir:
+                print(
+                    "Inspect logs contain probe/completion text: local-only; never commit or attach them.",
+                    file=sys.stderr,
+                )
+            with contextlib.redirect_stdout(sys.stderr):
+                run = qsr_eval(
+                    args.baseline,
+                    args.quant,
+                    token=args.token,
+                    max_new_tokens=args.max_new_tokens,
+                    hf_revisions=(args.baseline_revision, args.quant_revision),
+                    log_dir=log_dir,
+                    display="none",
+                    max_samples=1,
+                )
+                if run.observed_arms is None:
+                    raise RuntimeError("Inspect did not return actual loaded arm observations")
+                if args.report:
+                    Path(args.report).parent.mkdir(parents=True, exist_ok=True)
+                    run.write_report(args.report, *run.observed_arms, args.max_new_tokens)
+            code = 3 if run.drift.regression_detected else 4 if run.drift.unmeasurable_axes else 0
+            return _emit(
+                args,
+                "inspect-run",
+                code,
+                {
+                    "regression_detected": run.drift.regression_detected,
+                    "unmeasurable_axes": list(run.drift.unmeasurable_axes),
+                    "summary": run.drift.summary(),
+                    "report_path": args.report,
+                    "log_dir": args.log_dir,
+                    "observed": True,
+                },
+                lambda: print(run.drift.summary()),
+            )
+
     if args.cmd == "verify-safety":
         from quantfit.safety.verify import verify_safety
 
@@ -753,6 +863,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             tier=args.tier,
             eps_upper=args.eps_upper,
             eps_source=args.eps_source,
+            calibration_report=args.calibration_report,
             token=args.token,
             max_new_tokens=args.max_new_tokens,
             report_path=args.report,
@@ -784,6 +895,20 @@ def _dispatch(args: argparse.Namespace) -> int:
             {**decision, "decision_path": args.out, "report_path": args.report, "junit_path": args.junit},
             _human_gate,
         )
+
+    if args.cmd == "resolution":
+        from quantfit.resolution import analyze_resolution
+
+        result = analyze_resolution(args.report, args.calibration_report, args.out)
+
+        def human_resolution():
+            for name, axis in result["axes"].items():
+                print(f"{name}: {axis['flagged_flips']}/{axis['n_at_risk']} flagged flips")
+                print(f"  {axis['resolution']['headline']}")
+            print("Conditional analysis; calibration label truth and statistical assumptions are not verified.")
+            print(f"resolution artifact -> {args.out}")
+
+        return _emit(args, "resolution", 0, result, human_resolution)
 
     if args.cmd == "calibrate":
         if args.calibrate_cmd == "sheet":
@@ -832,14 +957,44 @@ def _dispatch(args: argparse.Namespace) -> int:
             _human_ingest,
         )
 
-    if args.cmd == "reproduce":
-        from quantfit.reproduce import compare, within_hardware_identical
+    if args.cmd == "t0":
+        from quantfit.reproduce import T0_REQUIRED_REPLICATES, ReproduceError, within_hardware_identical
 
-        # Replicate sets are turned into T0 results HERE rather than inside compare():
-        # T0 is a within-hardware property of three runs, and keeping the conversion at
-        # the boundary is what lets the artifact record which files supplied it.
-        t0_ref = within_hardware_identical(args.t0_reference) if args.t0_reference else None
-        t0_cand = within_hardware_identical(args.t0_candidate) if args.t0_candidate else None
+        if len(args.reports) < T0_REQUIRED_REPLICATES:
+            raise ReproduceError(
+                f"t0 requires at least {T0_REQUIRED_REPLICATES} replicate reports; got {len(args.reports)}"
+            )
+        result = within_hardware_identical(args.reports, out_path=args.out)
+
+        def _human_t0() -> None:
+            print(f"T0: {'agreement' if result['pass'] else 'DISAGREEMENT'} across {result['n_replicates']} reports")
+            print(result["statement"])
+            print(f"T0 evidence -> {args.out}")
+
+        return _emit(args, "t0", 0 if result["protocol_pass"] else 3, {**result, "record_path": args.out}, _human_t0)
+
+    if args.cmd == "reproduce":
+        from pathlib import Path
+
+        from quantfit.reproduce import ReproduceError, compare, within_hardware_identical
+
+        def _t0_input(paths):
+            if not paths:
+                return None
+            if len(paths) > 1:
+                return within_hardware_identical(paths)
+            # Keep existing report-list invocations; a single path now consumes the
+            # standalone artifact. compare rechecks positive sources and target binding.
+            try:
+                value = json.loads(Path(paths[0]).read_text(encoding="utf-8"))
+            except (OSError, ValueError, UnicodeError) as exc:
+                raise ReproduceError(f"unreadable T0 artifact {paths[0]}: {exc}") from exc
+            if isinstance(value, bool) or (isinstance(value, dict) and isinstance(value.get("pass"), bool)):
+                return value
+            raise ReproduceError("one T0 input must be a standalone artifact; otherwise supply replicate report paths")
+
+        t0_ref = _t0_input(args.t0_reference)
+        t0_cand = _t0_input(args.t0_candidate)
         decision = compare(args.reference, args.candidate, args.out, t0_reference=t0_ref, t0_candidate=t0_cand)
 
         def _human_reproduce() -> None:
@@ -854,6 +1009,19 @@ def _dispatch(args: argparse.Namespace) -> int:
             {**decision, "record_path": args.out},
             _human_reproduce,
         )
+
+    if args.cmd == "references":
+        from quantfit.reference_cli import list_references, verify_reference
+
+        if args.references_cmd == "list":
+            result = list_references(args.registry)
+            code = 0
+            message = result["registry_state"] or f"{result['n_registered']} declared reference reports"
+        else:
+            result = verify_reference(args.slug, args.report, args.registry)
+            code = 0 if result["matches"] else 3
+            message = result["statement"]
+        return _emit(args, f"references {args.references_cmd}", code, result, lambda: print(message))
 
     if args.cmd == "audit":
         from pathlib import Path

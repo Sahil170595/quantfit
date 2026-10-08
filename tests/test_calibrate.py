@@ -121,6 +121,7 @@ def _capture(tmp_path, name="capture.jsonl", header_overrides=None, rows=None):
         "quant": "quant",
         "n_pairs": _N_PAIRS,
         "warning": CAPTURE_WARNING,
+        "binding": None,
     }
     header.update(header_overrides or {})
     if rows is None:
@@ -725,6 +726,8 @@ def test_calibration_report_round_trips(tmp_path):
         ARM_QUANTIZED,
         "arm_epsilon_delta",
         "label",
+        "binding",
+        "source",
     }
     assert report["unmeasured_arms"] == []
     for arm in (ARM_BASELINE, ARM_QUANTIZED):
@@ -908,7 +911,7 @@ def test_flipped_judge_label_in_the_key_is_not_caught_by_the_hash(tmp_path):
 @pytest.mark.parametrize(
     ("mutation", "match"),
     [
-        ({"key_schema": 2}, "key_schema"),
+        ({"key_schema": 3}, "key_schema"),
         ({"key_schema": None}, "key_schema"),
         ({"salt": ""}, "records no salt"),
         ({"ids": {}}, "no non-empty 'ids' map"),
@@ -969,7 +972,7 @@ def test_wrong_sheet_header_refused(tmp_path):
 @pytest.mark.parametrize(
     ("overrides", "rows", "match"),
     [
-        ({"capture_schema": 2}, None, "capture_schema"),
+        ({"capture_schema": 3}, None, "capture_schema"),
         ({"capture_schema": None}, None, "capture_schema"),
         ({"n_pairs": 0}, None, "n_pairs 0"),
         ({"n_pairs": "5"}, None, "n_pairs '5'"),

@@ -17,14 +17,14 @@ does, your build fails.** Everything below follows from that.
 
 ## 1. Read this before you wire anything up
 
-**An epsilon has been measured for this instrument, and nothing applies it for you.**
+**Historical epsilon is never adopted implicitly.**
 On 2026-08-18 quantfit hand-labelled n=80 of its own completions from a real paired run
 (single-rater): per-arm ε **0.196**, false-flip bound **0.391**. At that bound
 `effective_mde` is **1.0 for every n ≤ 34** — no effect size detectable at any at-risk n
 this project has run. It is narrower than ROADMAP 0.6's planned 300–500, so 0.6 is not
-done, and **no code path folds it into a printed MDE**. Consequences you inherit:
+done. That historical unbound record is not automatically consumed. Consequences you inherit:
 
-- Unless you supply an epsilon upper bound yourself, the gate runs in **perfect-judge
+- Unless you supply an operator epsilon upper bound or `--calibration-report PATH`, the gate runs in **perfect-judge
   floor** mode: the printed MDE is `effective_mde(n, 0.0)` — a **lower bound** on the true
   resolution, computed as if the judge never mislabeled anything. `effective_mde` is
   monotone in the false-flip bound, so any real epsilon can only make the true resolution
@@ -35,10 +35,9 @@ done, and **no code path folds it into a printed MDE**. Consequences you inherit
   my threshold is resolvable") is exactly the failure mode this milestone exists to
   prevent.
 - Every artifact this version writes carries `eps.measured: false` — **including runs
-  where you supplied an epsilon.** The gate cannot authenticate a free-text source label,
-  so it never upgrades its own honesty flag on the strength of a string you typed. A
-  consumer verifies your epsilon by reading the calibration report, not by trusting a
-  field.
+  where you supplied an epsilon or bound calibration.** The gate cannot authenticate a
+  free-text source label or the truth of labels in a file, so binding never upgrades this
+  flag. A consumer still examines the underlying study evidence.
 - The judge card's 0.9773 XSTest accuracy is **not** an error rate for this probe
   distribution, and spec §2.7 forbids presenting it (or `1 − 0.9773 = 0.0227`) as one.
   Do not pass `0.0227` as `eps-upper`: it was measured on external XSTest/GPT-4 responses,
@@ -48,6 +47,16 @@ done, and **no code path folds it into a printed MDE**. Consequences you inherit
 were the real resolution would be worse than no gate: it would put a green check mark
 under a promise nobody has measured. Hence exit 5, hence the required `eps-source` label,
 hence no soft-fail input.
+
+For explicit calibration consumption, use the CLI's `--calibration-report PATH` with a
+current schema-2 aggregate report. The capture, key and calibration retain one canonical
+measurement identity and source hashes; directional Wilson uppers remain separate by arm.
+The gate checks scope before generation and the actual resolved report after generation.
+A pre-run refusal records `scope_validated_actual_run_unobserved`, never an actual-run
+match. This flag is exclusive with operator epsilon/source inputs. The composite action's
+inputs remain the operator/floor interface; this new mode is a CLI invocation.
+Unbound legacy records remain ingestible and never gain invented historical pins.
+See `validation/2026-10-05-calibration-binding/` for synthetic functional evidence and limits.
 
 ---
 
@@ -76,12 +85,12 @@ jobs:
       - uses: actions/checkout@v7
 
       - id: gate
-        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.15.1
+        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.16.0
         with:
           baseline: Qwen/Qwen2.5-1.5B-Instruct
           quant: ./out/qwen2.5-1.5b-awq
           tier: smoke                    # 30pp — gates >=30pp only, and says so
-          quantfit-version: "==0.15.1"    # the instrument version is part of the measurement
+          quantfit-version: "==0.16.0"    # the instrument version is part of the measurement
           hf-token: ${{ secrets.HF_TOKEN }}
 
       # Runs only on exit 0 — the action fails the job on 2/3/4/5.
@@ -122,7 +131,7 @@ checkout to happen first, and takes no `@ref`:
           quantfit-path: "."     # install the checked-out source instead of PyPI
 ```
 
-Two independent pins, and you want both: `@v0.15.1` pins the *action*, `quantfit-version`
+Two independent pins, and you want both: `@v0.16.0` pins the *action*, `quantfit-version`
 pins the *instrument*. A floating action ref with a pinned instrument is a supply-chain
 hole; a pinned action ref with a floating instrument silently changes what your gate
 measures between releases.
@@ -141,7 +150,7 @@ measures between releases.
 | `eps-source` | `""` | **Required** with `eps-upper`. Where the bound came from, recorded verbatim in the artifact. |
 | `max-new-tokens` | `""` (CLI default 64) | Applied identically to both arms (§2.3). |
 | `python-version` | `3.12` | Same version quantfit's own CI pins. |
-| `quantfit-version` | `>=0.15.1,<0.16` | PEP 440 specifier. Pin exactly for a reproducible gate. |
+| `quantfit-version` | `>=0.16.0,<0.17` | PEP 440 specifier. Pin exactly for a reproducible gate. |
 | `quantfit-path` | `""` | Install from a local path instead of PyPI; overrides `quantfit-version`. |
 | `report` | `quantfit-gate/drift.json` | Schema-v2 drift report (`quantfit gate --report`). |
 | `gate-out` | `quantfit-gate/gate.json` | Gate decision artifact, schema 1 (`quantfit gate --out`). Written on refusals too. |

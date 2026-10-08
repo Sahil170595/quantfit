@@ -13,6 +13,49 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.16.0
+
+A minor release integrating #114–#118: bound calibration, conditional resolution,
+protocol-grade T0 membership, observed Inspect HF runs, and offline reference checks.
+The aggregate release candidate is qualified by `.github/workflows/publish.yml`;
+historical validation records retain their producing versions.
+
+- Bound calibration capture/key/report schema 2 retains observed measurement identity and
+  source hashes. `gate --calibration-report` checks directional Wilson bounds per arm and
+  requires actual-run identity matching before a calibrated decision. Manual epsilon/floor
+  behavior and legacy local ingest remain available. Synthetic functional evidence and its
+  pre-run refusal are in `validation/2026-10-05-calibration-binding/`; no human calibration
+  study, sensitivity control, independent judge error, or research GO is claimed.
+- Add offline `resolution` analysis with bound calibration scope, validated paired
+  counts, separate per-arm directional bounds and a separate aggregate artifact.
+  Input bytes and QSR v0 verdicts are preserved; the analysis makes no safety gate
+  decision and does not authenticate human labels or statistical assumptions.
+  Functional evidence: `validation/2026-10-05-calibrated-resolution/` (synthetic).
+- T0 evidence requires three uncached, scope-matched aggregate reports and rereads
+  their exact source bytes before accepting comparison membership. New source paths
+  are canonical absolute paths, so a different consumer directory cannot select a
+  namesake file. Synthetic protocol and path regression evidence is in
+  `validation/2026-10-05-t0-replicates/` and `validation/2026-10-05-t0-path-fix/`;
+  these checks do not prove independent execution or physical-host identity.
+- `inspect-run --engine hf` records resolved HF generation facts and produces an
+  aggregate schema-2 report from Inspect scoring. Installed CPU qualification uses
+  a pinned public model, full corpus and actual judge through
+  `tools/ci_inspect_acceptance.py`; its scope is `docs/inspect-run.md`.
+- Offline `references list` and `references verify`, including explicit external
+  registries with strict schema/commit validation. Exact-byte matches do not
+  establish measurement validity or publication. Functional evidence:
+  `validation/2026-10-05-reference-cli/`.
+- Correct the registry's stale claim that the 0.5 screen never ran. Its committed
+  screen evidence remains distinct from the empty reference publication registry.
+
+The consumer action defaults to `>=0.16.0,<0.17`. No QSR v1 freeze, human calibration,
+sensitivity control, GPU qualification, cross-hardware result, independent
+reproduction, or research GO is claimed by this software release.
+
+The candidate dependency audit found CVE-2026-104851 in locked fsspec 2026.4.0;
+the validation lock now uses fixed fsspec/s3fs 2026.6.0. The failed gate and
+correction are recorded in `validation/2026-10-08-fsspec-advisory/`.
+
 ## 0.15.1
 
 A patch releasing the hosted CI and security compatibility changes in #112. The
