@@ -24,8 +24,16 @@ for path in sorted(OUT.rglob("*.json")) + sorted((OUT / "producer").rglob("*.md"
         if isinstance(item, dict):
             for key, child in item.items():
                 if re.search(r"prompt|completion|response|text|generation", key, re.IGNORECASE):
-                    assert key == "completion_cache_requested" and child is False, (relative, pointer, key)
-                    hits.append({"file": relative, "pointer": pointer + "/" + key, "value": False, "meaning": "Explicitly false cache-request metadata, no payload."})
+                    cache_metadata = key == "completion_cache_requested" and child is False
+                    run_provenance = (
+                        path.name == "final-local-receipts.json"
+                        and pointer == ""
+                        and key == "focused_run_context"
+                        and child == "Before the d15 source commit, on unchanged working implementation bytes subsequently reconciled to d15; full final qualification ran on frozen d15."
+                    )
+                    assert cache_metadata or run_provenance, (relative, pointer, key)
+                    hits.append({"file": relative, "pointer": pointer + "/" + key, "value": child,
+                                 "meaning": "Explicitly false cache-request metadata, no payload." if cache_metadata else "Exact run/source provenance sentence; context matches the broad text pattern, but contains no model or label payload."})
                 walk(child, pointer + "/" + key)
         elif isinstance(item, list):
             for index, child in enumerate(item):
