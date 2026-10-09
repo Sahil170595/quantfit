@@ -1,0 +1,266 @@
+{
+  "base_head": "95c8e5f8d141da8c5931e41a386656037f660f95",
+  "environment": {
+    "cpu_identifier": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "installed_versions": {
+      "gguf": "0.19.0",
+      "huggingface-hub": "1.31.0",
+      "inspect-ai": "0.3.269",
+      "mypy": "1.20.2",
+      "numpy": "2.4.6",
+      "psutil": "7.2.2",
+      "pytest": "9.0.3",
+      "ruff": "0.16.2",
+      "scipy": "1.15.3",
+      "torch": null
+    },
+    "logical_cpu_count": 32,
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.12.13",
+    "torch_absent": true,
+    "total_ram_bytes": 68319571968
+  },
+  "functional": {
+    "actual_cli_invocations": 6,
+    "artifact": "functional.json",
+    "bound_synthetic_policy_preflight_exit": 5,
+    "legacy_ignored_fields": [
+      "created_utc"
+    ],
+    "no_new_inference": true,
+    "offline_dangerous_policy_exit": 0,
+    "phi4_dangerous_at_risk": 12,
+    "phi4_dangerous_flags": 0,
+    "phi4_native_result": "REGRESSION DETECTED (over-refusal axis)",
+    "phi4_overrefusal_at_risk": 20,
+    "phi4_overrefusal_flags": 2,
+    "phi4_source_sha256": "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+    "relocated_bundles_verified": 2,
+    "synthetic_legacy_comparisons": 5
+  },
+  "functional_source_head": "150eaa4b8c3b81de5c68c4ba8438d2b113d85f4c",
+  "gates": {
+    "audit": {
+      "counts": {
+        "errors": 0,
+        "findings": 0,
+        "warnings": 0
+      },
+      "exit_code": 0,
+      "ok": true
+    },
+    "focused": {
+      "cases": 192,
+      "errors": 0,
+      "failures": 0,
+      "passed": 185,
+      "skipped": 7,
+      "suite_seconds": 7.11
+    },
+    "mypy": {
+      "artifact": "types-final.log",
+      "exit_code": 0,
+      "source_files": 2
+    },
+    "quickstart": {
+      "artifact": "quickstart-final.json",
+      "commands_executed": 0,
+      "commands_parsed": 46,
+      "scope": "source CLI syntax validation only; --no-run"
+    },
+    "ruff_check": {
+      "artifact": "lint-final.log",
+      "exit_code": 0
+    },
+    "ruff_format": {
+      "artifact": "format-final.log",
+      "exit_code": 0,
+      "files": 112
+    },
+    "scipy_properties": {
+      "cases": 2,
+      "errors": 0,
+      "failures": 0,
+      "passed": 2,
+      "skipped": 0,
+      "suite_seconds": 1.363
+    },
+    "unit": {
+      "cases": 1892,
+      "errors": 0,
+      "failures": 0,
+      "passed": 1858,
+      "skipped": 34,
+      "suite_seconds": 77.521
+    }
+  },
+  "independent_review": {
+    "domain": "PASS",
+    "head": "edc69700fe58646563adcb917b728b0e598b0493",
+    "resources_created": false,
+    "reviewer": "root/cf_next_contract_audit",
+    "root_challenge": "PASS; ten bounded independent probes"
+  },
+  "limitations": [
+    "No Torch or RTN property execution locally; hosted full numerical lane pending.",
+    "Installed candidate wheel/sdist, actual composite-action hosted acceptance and actionlint pending after batch publication.",
+    "Existing Phi4 report is an earlier hosted measurement; no new model, judge or Hub execution here.",
+    "Zero dangerous flags means the detector did not fire; two over-refusal flags remain unconfirmed.",
+    "Synthetic bound calibration is arithmetic/binding evidence, not authenticated human truth or verified assumptions.",
+    "No new scientific GO, sensitivity, independent-host, GPU or reproduction qualification."
+  ],
+  "recorded_utc": "2026-10-09 17:12:36 UTC",
+  "resource_receipt": {
+    "dependency_copy": "tools/ci/.venv (pre-existing)",
+    "development_evidence": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development",
+    "new_dependency_model_or_container_copies": 0,
+    "owner": "root shared five-feature batch",
+    "reason": "root-owned shared checkout and approved sparse environment still consumed; prior cleanup rejection is retained without retry",
+    "status": "PRESERVE",
+    "task_owned_processes_remaining": 0,
+    "worktree": "C:\\tmp\\qf-release-0.16.0-20261008"
+  },
+  "schema_version": 1,
+  "source_association": "150 to edc changes only validation-matrix documentation; functional results and implementation bytes are retained, not relabelled as new runs",
+  "source_files": [
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "23f284ae1bcd24d047a328d6ec4f8f669aa8ee90bffbe7930619c96b935551bb",
+      "path": ".gitattributes",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "b86fb6629a98eccf5dd57d6cfd1782895975b82ce03015ab673c0efafb703fe4"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "5a9478c2f9854d616a7aaa2ffcfea050bfbdc1836599ebf17daf3939f6965ae4",
+      "path": ".github/actions/quantfit-gate/action.yml",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "93a01496f8988c2f7a38c9fa923dec12702c2948d63480f52895c25431f936ca"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "548ced6f911ad5a416fe699d0bfd28d04bac31531e69d2465bc5e84694fa5a5e",
+      "path": ".github/workflows/validate.yml",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "9348cf7b720a16cdb0f0635816953c7f852639949ac11e65df84abb5feb6c129"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "78eb7a0686c28f67e35abc3c1f85316ba5fca07fe788d6cf4eb185081da801ac",
+      "path": "CHANGELOG.md",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "2f52bb1d41ab87b2cfb240a97335daef66b5618524962649faeffa377a1c7871"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "53f5e2decff26c6ff613a89b6aa91fee1e8df263a268fb20d278074aaed3acff",
+      "path": "README.md",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": true,
+      "working_sha256": "53f5e2decff26c6ff613a89b6aa91fee1e8df263a268fb20d278074aaed3acff"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "bf146e95c01a32b878de2f1cbb1c6888cb447582b6bfa1f46b8f19d396c5a454",
+      "path": "docs/ci-integration.md",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "c4d913c99f78c7995198ed6b667610783c6405d1ade793476210736e940e5535"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "c6967b2ac1c7f0ffda5e6cc6da7de66be91fb1a13de6e6cf95d208d0687b4f65",
+      "path": "docs/saved-report-gate.md",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": true,
+      "working_sha256": "c6967b2ac1c7f0ffda5e6cc6da7de66be91fb1a13de6e6cf95d208d0687b4f65"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "2fa0568a75a36eb487eb024f8d4e6b826387482840a32d4d3278a66f5aa634e1",
+      "path": "docs/validation-matrix.md",
+      "source150_equals_tested_head": false,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "6807da29a3216964ed528f3fa5ac0a9fc2dd3f07f0a6c7dbded3c63d6f57aed9"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "2b4c653248cf6ffb12c1c726dff636185789afd4f4f9478fbb7975c4e3c5759a",
+      "path": "quantfit/bundle.py",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "ca0c14172477c9c191e13d9d58267b184013524ef19a96d883428c50b3e44388"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "0b8723d88ecc39fc42912767e98f9bb9c61fba0079239a640100fde4ab8a74bd",
+      "path": "quantfit/cli.py",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "7f4cf72628780e3afa1c22072e8617a3f1bd79b0e961e52565a595fa08f94711"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "a047a76a9d1cf01e0150643189311e01ee0ac18886eaf93b80098160e0512bb3",
+      "path": "quantfit/gate.py",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "3686f7714280d4b138190f2476848d1763af9b1e95b921c8ff00831fe629333b"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "63de68305b92203819908fd321fe6e6d2df33643116346eb2188bad6d8eb8b60",
+      "path": "quantfit/modelcard.py",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "20da3b7bf6cfe431e7ef381e15131d56b8e16a83a79124958f07119643fa3dc2"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "8052bf63ad199e9e9a0f79addd859b2a042e1018e4ee1b3fbe25e1698b1048a5",
+      "path": "quantfit/safety/calibrated_gate.py",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "95397cd0059f88165580118ffc1090273396b965438158b8cda5f01ee8e4ae3b"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "4b14b1587df4a6fc617b9c0437036d101d4ccbde290f80c701995805ffb0a0b5",
+      "path": "quantfit/saved_gate.py",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "849fbbaacca7be733f24dd40929aec117376d88e94c843f953823f1a4aa66316"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "c7ddc4a08bc4d91a23d178e6d878258e9e2b0b695c65f28caddcacd636b1772a",
+      "path": "tests/test_saved_report_gate.py",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "a44a4583c97c4e2b974813a6adb2935279827eb91381550d984c95dfa8171665"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "7da8167c3066725fdfc1aac13d67a993d3aad7ac7867553d5e2c5763758bd61f",
+      "path": "tools/ci_gate_check.py",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "5fede119cc2d0bddc7ab0b4e004ae9e93b3618adf13d04d4b945d11dd75087e4"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "0aadf0baf2d913650d91099de10ff9696fd86893beebcf6e7242c8835fbf9d51",
+      "path": "tools/ci_installed.py",
+      "source150_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "9265fbe1e913334f680718d8ce9ff7d8fe5ffccbed0dccb3620192548bb4a3cf"
+    }
+  ],
+  "tested_head": "edc69700fe58646563adcb917b728b0e598b0493",
+  "tested_tree": "3e31c5515ccd9821052a4f254e487f3b1f97e3a4",
+  "utc_source": "clock tool"
+}
