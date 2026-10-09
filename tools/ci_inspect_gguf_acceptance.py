@@ -43,9 +43,18 @@ def main() -> None:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     report_path = args.out.with_name("inspect-gguf-drift.json")
     batches = []
+    observed = []
     real_judge = verify._classify_refusals
 
     def measured_judge(outputs, token):
+        assert len(observed) == 1, "native release must complete before actual judge load"
+        observer = observed[0]
+        assert all(m.api.closed and m.api.server.proc.poll() is not None for m in observer.models)
+        assert all(
+            m.api.server.cleanup["direct_child_reaped"]
+            and m.api.server.cleanup["no_live_group_members_observed"] is True
+            for m in observer.models
+        )
         batches.append(len(outputs))
         return real_judge(outputs, token)
 
@@ -59,6 +68,14 @@ def main() -> None:
         model = get_model(f"quantfit_gguf/{baseline}", memoize=False)
         assert type(model.api).__module__ == "quantfit.inspect_gguf"
         model.api.close()  # construction resolved bytes; no server/model generation yet
+        from quantfit.inspect_gguf import GgufRunObserver
+
+        before_judge = GgufRunObserver.before_judge
+
+        def measured_release(observer, n_probes):
+            before_judge(observer, n_probes)
+            observed.append(observer)
+
         argv = [
             "inspect-run",
             "--baseline",
@@ -72,7 +89,11 @@ def main() -> None:
             "--json",
         ]
         output = io.StringIO()
-        with patch.object(verify, "_classify_refusals", measured_judge), contextlib.redirect_stdout(output):
+        with (
+            patch.object(verify, "_classify_refusals", measured_judge),
+            patch.object(GgufRunObserver, "before_judge", measured_release),
+            contextlib.redirect_stdout(output),
+        ):
             code = cli(argv)
         envelope = json.loads(output.getvalue())
         assert code in (0, 3, 4) and envelope["exit_code"] == code, envelope
