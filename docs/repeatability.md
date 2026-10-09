@@ -16,8 +16,8 @@ str | None = None) -> dict`. Input modes are mutually exclusive. Every report
 is read once into a bounded buffer; validation, hashing, comparison and native T0
 consume those same bytes. Bundle verification returns the held included bytes;
 original producer locators remain unverified labels and are never followed.
-Invalid argument syntax retains the CLI's argparse boundary: exit 2, usage on
-stderr, and empty stdout. Operational errors after parsing support the JSON envelope.
+Argument errors rejected by argparse produce exit 2, usage on stderr and empty
+stdout. Errors dispatched after parsing use the selected JSON/prose mode.
 
 Comparison covers the **full decoded original JSON**, including provenance
 outside the native T0 identity. Exactly four predeclared volatile fields are
