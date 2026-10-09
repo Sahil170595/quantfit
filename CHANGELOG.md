@@ -15,6 +15,12 @@
 
 ## Unreleased
 
+- Offline saved-report gate API/CLI (`gate --from-report`) with exact-byte report
+  binding, native policy/refusal precedence, recorded-arm JUnit, portable replay
+  bundles and optional composite-action routing. No new inference; bound calibration
+  matches recorded scope without authenticating labels or the producing host.
+  Functional evidence and limitations: `validation/2026-10-09-saved-report-gate/`.
+
 - Actual pinned Phi4 BF16/Q4_K_M hosted CPU campaign: three fresh uncached
   full40 native runs with the public token flag omitted and actual default64
   recorded, native exits3/3/3, T0/full-report repeatability passing. Each run

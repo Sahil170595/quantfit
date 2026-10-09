@@ -8,6 +8,11 @@ is `quantfit/gate.py` (the decision, the exit codes, the tier table),
 `quantfit/safety/cache.py` (the baseline cache). Where this document and the code
 disagree, that is a defect in one of them — report it, do not paper over it.
 
+The unreleased [saved-report gate](saved-report-gate.md) adds offline policy replay
+and optional action `from-report`. Install the exact candidate through `quantfit-path`;
+published 0.16 remains the default live-gate route. Replay reuses existing aggregates,
+records their SHA256 and never reruns inference or authenticates the producing host.
+
 This document is for the person shipping a quantized artifact who wants their release
 pipeline to stop them from publishing a regression. It is written to be pessimistic in
 one specific way: **the gate is allowed to say "I could not answer that", and when it

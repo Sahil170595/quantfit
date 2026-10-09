@@ -317,8 +317,14 @@ def _build_parser() -> argparse.ArgumentParser:
         "(exit 0 = pass, 3 = fail, 4 = gated axis unmeasurable, 5 = threshold finer than the "
         "instrument's resolution, 2 = operational error)",
     )
-    pg.add_argument("--baseline", "--fp16", dest="baseline", required=True, help="the unquantized baseline arm")
-    pg.add_argument("--quant", required=True, help="the quantized artifact to gate")
+    pg.add_argument("--baseline", "--fp16", dest="baseline", default=None, help="the live unquantized baseline arm")
+    pg.add_argument("--quant", default=None, help="the live quantized artifact to gate")
+    pg.add_argument(
+        "--from-report",
+        default=None,
+        metavar="PATH",
+        help="offline policy replay of a saved schema-v2 aggregate; exclusive with live arms/generation options",
+    )
     gthr = pg.add_mutually_exclusive_group(required=True)
     gthr.add_argument(
         "--threshold",
@@ -348,7 +354,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="bound schema-2 calibration report; mutually exclusive with --eps-upper/--eps-source. "
         "Scope matching does not verify human labels or sensitivity",
     )
-    pg.add_argument("--max-new-tokens", type=int, default=64, help="completion length per probe (default 64)")
+    pg.add_argument(
+        "--max-new-tokens",
+        type=int,
+        default=None,
+        help="live completion length per probe (default 64); refused for saved reports",
+    )
     pg.add_argument("--report", default=None, metavar="PATH", help="also write the schema-v2 drift report")
     pg.add_argument("--out", default=None, metavar="PATH", help="write the gate decision artifact JSON")
     pg.add_argument(
@@ -928,26 +939,40 @@ def _dispatch(args: argparse.Namespace) -> int:
         )
 
     if args.cmd == "gate":
-        from quantfit.gate import run_gate
+        from quantfit.gate import GateError, evaluate_report, run_gate, validate_replay_outputs
 
         # --threshold is percentage points at the CLI boundary; run_gate takes a rate.
         # The conversion lives here so the machinery has one unit and the operator has
         # the one they think in (a silent 100x is the failure mode this splits apart).
         threshold = args.threshold / 100 if args.threshold is not None else None
-        decision = run_gate(
-            args.baseline,
-            args.quant,
-            threshold=threshold,
-            tier=args.tier,
-            eps_upper=args.eps_upper,
-            eps_source=args.eps_source,
-            calibration_report=args.calibration_report,
-            token=args.token,
-            max_new_tokens=args.max_new_tokens,
-            report_path=args.report,
-            out_path=args.out,
-            baseline_cache_dir=args.baseline_cache,
-        )
+        options = {
+            "threshold": threshold,
+            "tier": args.tier,
+            "eps_upper": args.eps_upper,
+            "eps_source": args.eps_source,
+            "calibration_report": args.calibration_report,
+            "out_path": args.out,
+        }
+        if args.from_report is not None:
+            if any(
+                value is not None
+                for value in (args.baseline, args.quant, args.max_new_tokens, args.token, args.baseline_cache)
+            ):
+                raise GateError("--from-report is exclusive with live arms, token, token limit and baseline cache")
+            validate_replay_outputs([args.from_report, args.calibration_report], [args.report, args.out, args.junit])
+            decision = evaluate_report(args.from_report, report_path_out=args.report, **options)
+        else:
+            if args.baseline is None or args.quant is None:
+                raise GateError("live gate requires both --baseline and --quant (or use --from-report)")
+            decision = run_gate(
+                args.baseline,
+                args.quant,
+                token=args.token,
+                max_new_tokens=64 if args.max_new_tokens is None else args.max_new_tokens,
+                report_path=args.report,
+                baseline_cache_dir=args.baseline_cache,
+                **options,
+            )
 
         if args.junit:
             from pathlib import Path
@@ -955,7 +980,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             from quantfit.junit import gate_to_junit
 
             Path(args.junit).write_text(
-                gate_to_junit(decision, baseline=args.baseline, quant=args.quant),
+                gate_to_junit(decision, baseline=decision["arms"]["baseline"], quant=decision["arms"]["quant"]),
                 encoding="utf-8",
             )
 

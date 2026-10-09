@@ -30,6 +30,77 @@ def main() -> None:
             "== [('quantfit','quantfit._inspect_registry')]; print(quantfit.__file__)"
         )
         subprocess.run([sys.executable, "-c", code], cwd=sandbox, env=env, check=True)
+        # Actual installed offline customer path: preserve the original Phi4
+        # negative aggregate while its dangerous-axis-only floor gate returns0.
+        replay_source = checkout / "validation/2026-10-09-phi4-public-candidate/producer/run-1/report.json"
+        bound_fixture = checkout / "validation/2026-10-08-calibration-aware-outputs"
+        for label, source, expected_code, calibration in (
+            ("negative-phi4", replay_source, 0, None),
+            ("bound-policy-refusal", bound_fixture / "drift.json", 5, bound_fixture / "calibration.json"),
+        ):
+            copied, gate_path, junit = (
+                sandbox / f"{label}-{kind}" for kind in ("report.json", "gate.json", "junit.xml")
+            )
+            command = [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "gate",
+                "--from-report",
+                str(source),
+                "--tier",
+                "smoke",
+                "--report",
+                str(copied),
+                "--out",
+                str(gate_path),
+                "--junit",
+                str(junit),
+                "--json",
+            ]
+            if calibration is not None:
+                command += ["--calibration-report", str(calibration)]
+            completed = subprocess.run(command, cwd=sandbox, env=env, capture_output=True, text=True, check=False)
+            assert completed.returncode == expected_code, completed.stdout + completed.stderr
+            replay = json.loads(completed.stdout)["result"]
+            assert copied.read_bytes() == source.read_bytes()
+            assert replay["source_evidence"]["report_sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
+            assert replay["source_evidence"]["inference_performed"] is False
+            if calibration is None:
+                assert replay["ungated_axis_regressed"] is True and replay["over_refusal"]["flips"] == 2
+                assert "REGRESSION DETECTED" in replay["underlying_run_verdict"]
+            else:
+                assert replay["drift"] is None and replay["eps"]["actual_run_matched"] is True
+                assert replay["eps"]["assumptions_verified"] is replay["eps"]["measured"] is False
+            bundle = sandbox / f"{label}-bundle"
+            create = [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "bundle",
+                "create",
+                "--report",
+                str(copied),
+                "--gate",
+                str(gate_path),
+                "--out",
+                str(bundle),
+                "--json",
+            ]
+            if calibration is not None:
+                create += ["--calibration-report", str(calibration)]
+            subprocess.run(create, cwd=sandbox, env=env, check=True)
+            moved = sandbox / f"{label}-relocated"
+            bundle.rename(moved)
+            verified = subprocess.run(
+                [sys.executable, "-m", "quantfit.cli", "bundle", "verify", "--bundle", str(moved), "--json"],
+                cwd=sandbox,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            assert json.loads(verified.stdout)["result"]["integrity_verified"] is True
         for command in (["--help"], ["list"], ["verify-safety", "--demo", "--json"]):
             subprocess.run([sys.executable, "-m", "quantfit.cli", *command], cwd=sandbox, env=env, check=True)
         # Installed capability/early refusal only. Actual installed GGUF generation and
@@ -273,6 +344,10 @@ def main() -> None:
         tests = [
             "test_calibration_binding.py",
             "test_gate.py",
+            "test_resolution.py",
+            "test_calibrated_modelcard.py",
+            "test_action_calibration.py",
+            "test_saved_report_gate.py",
             "test_junit.py",
             "test_junit_gate_screen.py",
             "test_report.py",

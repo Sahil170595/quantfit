@@ -110,16 +110,23 @@ branding:
 # ---------------------------------------------------------------------------------
 
 inputs:
+  from-report:
+    description: >-
+      Offline policy replay of an existing schema-v2 aggregate, without new inference.
+      Exclusive with baseline, quant, max-new-tokens and hf-token. Requires a candidate
+      installed via quantfit-path until a published version advertises --from-report.
+    required: false
+    default: ""
   baseline:
     description: >-
       The unquantized baseline arm: an HF id (loads at its native dtype), or for GGUF
       pairs an F16/BF16/F32 *.gguf path or hf:<org>/<repo>/<file>.gguf ref.
-    required: true
+    required: false
   quant:
     description: >-
       The quantized artifact under test. Must be the same engine class as `baseline`
       (both transformers, or both GGUF) — a mixed pair is refused with exit 2.
-    required: true
+    required: false
   tier:
     description: >-
       Named tier: `smoke` (30pp — gates catastrophic dangerous-axis regressions >=30pp
@@ -221,6 +228,15 @@ inputs:
     default: ""
 
 outputs:
+  replay-source-sha256:
+    description: Exact consumed saved-report SHA256; not_applicable for live gates.
+    value: ${{ steps.read.outputs.replay-source-sha256 }}
+  evaluation-phase:
+    description: Saved-report policy_preflight or observed_counts; not_applicable for live gates.
+    value: ${{ steps.read.outputs.evaluation-phase }}
+  inference-performed:
+    description: false for saved-report replay; not_applicable for live gates.
+    value: ${{ steps.read.outputs.inference-performed }}
   verdict:
     description: The gate's verdict string, verbatim from the gate artifact (`unknown` if absent).
     value: ${{ steps.read.outputs.verdict }}
@@ -323,11 +339,20 @@ runs:
         EPS_UPPER: ${{ inputs.eps-upper }}
         EPS_SOURCE: ${{ inputs.eps-source }}
         CALIBRATION_REPORT: ${{ inputs.calibration-report }}
+        FROM_REPORT: ${{ inputs.from-report }}
+        MAX_NEW_TOKENS: ${{ inputs.max-new-tokens }}
+        HF_TOKEN_INPUT: ${{ inputs.hf-token }}
       run: |
         set -euo pipefail
         # `required: true` is not enforced for local composite actions, so check here.
-        [ -n "$BASELINE" ] && [ -n "$QUANT" ] || {
-          echo "::error::baseline and quant are both required"; exit 2; }
+        if [ -n "${FROM_REPORT:-}" ]; then
+          if [ -n "$BASELINE" ] || [ -n "$QUANT" ] || [ -n "${MAX_NEW_TOKENS:-}" ] || [ -n "${HF_TOKEN_INPUT:-}" ]; then
+            echo "::error::from-report is exclusive with live arms, max-new-tokens and hf-token"; exit 2
+          fi
+        else
+          [ -n "$BASELINE" ] && [ -n "$QUANT" ] || {
+            echo "::error::baseline and quant are both required for a live gate"; exit 2; }
+        fi
         if [ -n "$TIER" ] && [ -n "$THRESHOLD_PP" ]; then
           # A tier is a named resolution contract; a threshold is a number. Accepting
           # both would leave the report unable to say which one bound the verdict.
@@ -434,6 +459,7 @@ runs:
       shell: bash
       env:
         CALIBRATION_REPORT: ${{ inputs.calibration-report }}
+        FROM_REPORT: ${{ inputs.from-report }}
         REPORT: ${{ inputs.report }}
         GATE_OUT: ${{ inputs.gate-out }}
         JUNIT: ${{ inputs.junit }}
@@ -457,6 +483,9 @@ runs:
         for flag in --baseline --quant --tier --threshold --eps-upper --eps-source --report --out --max-new-tokens --junit; do
           if [[ ! "$gate_help" =~ (^|[^-])"$flag"([^a-z-]|$) ]]; then missing+=("$flag"); fi
         done
+        if [ -n "${FROM_REPORT:-}" ] && [[ ! "$gate_help" =~ (^|[^-])--from-report([^a-z-]|$) ]]; then
+          missing+=(--from-report)
+        fi
         if [ -n "$CALIBRATION_REPORT" ] && [[ ! "$gate_help" =~ (^|[^-])--calibration-report([^a-z-]|$) ]]; then
           missing+=(--calibration-report)
         fi
@@ -481,6 +510,16 @@ runs:
                 raise SystemExit("calibration input must differ from all action outputs, including JUnit")
         PY
         fi
+        if [ -n "${FROM_REPORT:-}" ]; then
+          python - <<'PY'
+        import os
+        from quantfit.gate import validate_replay_outputs
+        validate_replay_outputs(
+            [os.environ["FROM_REPORT"], os.environ.get("CALIBRATION_REPORT") or None],
+            [os.environ.get(key) or None for key in ("REPORT", "GATE_OUT", "JUNIT")],
+        )
+        PY
+        fi
         echo "gate flag contract OK"
 
     - name: Run quantfit gate
@@ -488,6 +527,7 @@ runs:
       shell: bash
       env:
         BASELINE: ${{ inputs.baseline }}
+        FROM_REPORT: ${{ inputs.from-report }}
         QUANT: ${{ inputs.quant }}
         TIER: ${{ inputs.tier }}
         THRESHOLD_PP: ${{ inputs.threshold-pp }}
@@ -506,7 +546,12 @@ runs:
         mkdir -p "$(dirname "$REPORT")" "$(dirname "$GATE_OUT")" "$(dirname "$JUNIT")"
         # `--out` is the gate DECISION artifact (gate.py:run_gate's out_path); `--report`
         # is the schema-v2 drift report verify_safety writes. Two files, two contracts.
-        args=(gate --baseline "$BASELINE" --quant "$QUANT" --report "$REPORT" --out "$GATE_OUT" --junit "$JUNIT")
+        args=(gate --report "$REPORT" --out "$GATE_OUT" --junit "$JUNIT")
+        if [ -n "${FROM_REPORT:-}" ]; then
+          args+=(--from-report "$FROM_REPORT")
+        else
+          args+=(--baseline "$BASELINE" --quant "$QUANT")
+        fi
         # `if` rather than `[ x ] && args+=(...)`: under `set -e` a trailing false
         # AND-OR list is a foot-gun for whoever edits this next.
         if [ -n "$TIER" ]; then args+=(--tier "$TIER"); fi
@@ -667,6 +712,10 @@ runs:
         proven = flag("resolution_proven")
         ungated = flag("ungated_axis_regressed")
         underlying = flag("underlying_run_verdict")
+        replay = sub(gate, "source_evidence")
+        replay_hash = replay.get("report_sha256", UNKNOWN) if replay else "not_applicable"
+        replay_phase = replay.get("evaluation_phase", UNKNOWN) if replay else "not_applicable"
+        replay_inference = ("false" if replay.get("inference_performed") is False else UNKNOWN) if replay else "not_applicable"
         reconciliation = flag("verdict_reconciliation")
 
         # `resolution.printed_mde` is a RATE; the human-facing output is pp. One decimal,
@@ -734,6 +783,9 @@ runs:
         write_outputs(
             single=(
                 ("verdict", verdict),
+                ("replay-source-sha256", replay_hash),
+                ("evaluation-phase", replay_phase),
+                ("inference-performed", replay_inference),
                 ("printed-mde-pp", mde),
                 ("resolution-status", status),
                 ("mde-is-floor", floor),
@@ -812,6 +864,10 @@ runs:
             f"- underlying run verdict: `{inline(underlying)}`",
             f"- over-refusal (UNGATED) axis regressed: `{inline(ungated)}`",
         ]
+        if replay:
+            lines += ["", "Offline saved-report policy replay; no new inference or judge execution.",
+                      f"- consumed report SHA256: `{inline(replay_hash)}`",
+                      f"- policy phase: `{inline(replay_phase)}` (pre_run is policy order, not measurement chronology)"]
         if reconciliation not in (UNKNOWN, ""):
             # Present when the gate's verdict and the underlying run's differ. That
             # divergence is legitimate — the gate governs one axis at one threshold — but it
