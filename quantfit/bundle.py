@@ -21,6 +21,7 @@ from quantfit.resolution import MAX_REPORT_BYTES, _axes, analyze_resolution_byte
 from quantfit.safety.calibration_binding import (
     _ENGINE_OUTPUTS,
     _INSPECT_CAUSAL,
+    _INSPECT_GGUF_CAUSAL,
     MAX_CALIBRATION_BYTES,
     _same_numbers,
     load_bound_calibration_bytes,
@@ -168,6 +169,8 @@ def _engine(value: dict) -> None:
                 and all(type(value.get(k)) is type(v) and value[k] == v for k, v in CPU_OFFLOAD_CONTROLS.items()),
                 "native CPU offload controls must be complete and match the enforced contract",
             )
+    elif name == "inspect_ai:quantfit_gguf":
+        allowed = _INSPECT_GGUF_CAUSAL | _ENGINE_OUTPUTS
     elif name == "inspect_ai:hf":
         allowed = _INSPECT_CAUSAL | _ENGINE_OUTPUTS | {"inspect_ai", "provider"}
     elif isinstance(name, str) and name.startswith("inspect_ai:"):
@@ -218,6 +221,10 @@ def _report(raw: bytes):
         _scalars(report.decode["greedy_model_args"], {"do_sample"}, "decode greedy_model_args")
     for arm in (report.baseline, report.quantized):
         _engine(arm.engine)
+        if arm.engine["name"] == "inspect_ai:quantfit_gguf":
+            from quantfit.safety.calibration_binding import engine_causal_identity
+
+            engine_causal_identity(arm.engine, n_probes=report.probe_dataset["n_probes"])
     drift = report.drift
     _require(
         set(drift)

@@ -15,6 +15,13 @@
 
 ## Unreleased
 
+- Optional public Inspect GGUF provider/CLI observations with actual weight/binary
+  hashes, immutable Hub pins, applied CPU controls and owned cancellable server
+  lifecycle. Managed paired runs require80native calls/full40probes before one
+  pinned judge batch, close both resident models before judging and enforce a
+  conservative RAM estimate. Local synthetic evidence and pending hosted installed
+  model qualification: `validation/2026-10-09-inspect-gguf/`; no safety/reproduction GO.
+
 - Native GGUF server argv explicitly disables device/layer/host-operation offload,
   with causal controls recorded in the engine identity. A cached b9817 help/argv check
   and synthetic red/fix records are in `validation/2026-10-08-native-cpu-enforcement/`;

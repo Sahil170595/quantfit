@@ -1,6 +1,7 @@
 """CLI envelope/exit/capture tests, with synthetic run results explicitly isolated."""
 
 import json
+import os
 import types
 
 import pytest
@@ -69,6 +70,65 @@ def test_observation_failure_is_not_a_verdict(monkeypatch, capsys):
     monkeypatch.setattr(task, "qsr_eval", lambda *a, **k: types.SimpleNamespace(observed_arms=None))
     assert main(ARGS) == 2
     assert "actual loaded" in json.loads(capsys.readouterr().out)["error"]["message"]
+
+
+def test_gguf_local_pin_slots_forward_without_invented_revisions(monkeypatch, capsys):
+    import quantfit.inspect_task as task
+
+    received = []
+
+    def failed(*a, **kw):
+        received.append(kw)
+        raise RuntimeError("synthetic refusal before model loading")
+
+    monkeypatch.setattr(task, "qsr_eval", failed)
+    assert (
+        main(["inspect-run", "--baseline", "quantfit_gguf/base.gguf", "--quant", "quantfit_gguf/quant.gguf", "--json"])
+        == 2
+    )
+    assert received[0]["gguf_revisions"] == (None, None) and "hf_revisions" not in received[0]
+    assert not __import__("pathlib").Path(received[0]["log_dir"]).exists()
+    assert json.loads(capsys.readouterr().out)["exit_code"] == 2
+
+
+@pytest.mark.parametrize("alias", ["direct", "relative", "hardlink", "symlink"])
+def test_gguf_report_alias_refuses_before_contact(monkeypatch, capsys, tmp_path, alias):
+    import quantfit.inspect_task as task
+
+    base, quant = tmp_path / "base.gguf", tmp_path / "quant.gguf"
+    base.write_bytes(b"synthetic immutable weights")
+    quant.write_bytes(b"synthetic quant weights")
+    out = base
+    if alias == "relative":
+        monkeypatch.chdir(tmp_path)
+        out = __import__("pathlib").Path("base.gguf")
+    elif alias == "hardlink":
+        out = tmp_path / "alias.json"
+        os.link(base, out)
+    elif alias == "symlink":
+        out = tmp_path / "alias.json"
+        try:
+            out.symlink_to(base)
+        except OSError:
+            pytest.skip("Symlink privilege unavailable; hosted Linux exercises report alias")
+    monkeypatch.setattr(task, "qsr_eval", lambda *a, **kw: pytest.fail("model contact forbidden for aliased report"))
+    assert (
+        main(
+            [
+                "inspect-run",
+                "--baseline",
+                f"quantfit_gguf/{base}",
+                "--quant",
+                f"quantfit_gguf/{quant}",
+                "--report",
+                str(out),
+                "--json",
+            ]
+        )
+        == 2
+    )
+    assert "overwrite" in json.loads(capsys.readouterr().out)["error"]["message"]
+    assert base.read_bytes() == b"synthetic immutable weights" and quant.read_bytes() == b"synthetic quant weights"
 
 
 def test_explicit_log_dir_gets_capture_warning(monkeypatch, capsys, tmp_path):

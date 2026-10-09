@@ -52,11 +52,10 @@ gguf = ["gguf>=0.10,<1.0"]
 awq = ["gptqmodel>=7.1,<8"]
 # The Inspect-API runner (ROADMAP 0.8). Pure python, so CI installs it to run the
 # parity test — a parity claim whose only test permanently skips is not a claim.
-# Upper-bounded like every churning dep here: the runner depends on inspect_ai
-# internals (SampleScore/Score/Value, inspect_ai.score, and the epoch-reduction
-# behaviour of Score.value) and is VERIFIED against 0.3.252. The cap moves only
-# after a validated run on the new minor — the standing ROADMAP rule.
-inspect = ["inspect-ai>=0.3.252,<0.4"]
+# The observed HF/GGUF contracts require the actual inspected SDK 0.3.269.
+# Admit exactly that verified version; changing the pin requires qualifying the
+# public model/score/lifecycle API and installed consumers on the new candidate.
+inspect = ["inspect-ai==0.3.269", "httpx>=0.28.1,<0.29"]
 
 [project.urls]
 Homepage = "https://github.com/Sahil170595/quantfit"
@@ -64,6 +63,9 @@ Repository = "https://github.com/Sahil170595/quantfit"
 
 [project.scripts]
 quantfit = "quantfit.cli:main"
+
+[project.entry-points.inspect_ai]
+quantfit = "quantfit._inspect_registry"
 
 [tool.setuptools.packages.find]
 include = ["quantfit*"]

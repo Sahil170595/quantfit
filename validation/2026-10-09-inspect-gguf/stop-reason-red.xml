@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="3.782" timestamp="2026-10-09T00:22:49.686130-04:00" hostname="SahilKadadekar"><testcase classname="tests.test_inspect_gguf" name="test_missing_stop_metadata_is_unknown_not_clean_stop" time="3.641"><failure message="AssertionError: assert 'stop' == 'unknown'&#10;  &#10;  - unknown&#10;  + stop">fixture = (&lt;module 'quantfit.inspect_gguf' from 'C:\\tmp\\qf-release-0.16.0-20261008\\quantfit\\inspect_gguf.py'&gt;, &lt;function get...], WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1139/test_missing_stop_metadata_is_0/server'))
+
+    def test_missing_stop_metadata_is_unknown_not_clean_stop(fixture):
+        from inspect_ai.model import GenerateConfig
+    
+        _, get_model, arms, _, _ = fixture
+        model = get_model(f"quantfit_gguf/{arms[0].ref}", memoize=False)
+        try:
+            output = asyncio.run(model.generate("synthetic", config=GenerateConfig(temperature=0, max_tokens=64)))
+&gt;           assert output.stop_reason == "unknown"
+E           AssertionError: assert 'stop' == 'unknown'
+E             
+E             - unknown
+E             + stop
+
+tests\test_inspect_gguf.py:85: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,113 @@
+validation/2026-10-09-inspect-gguf/focused-initial.log:13: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/focused-initial.xml:9: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/focused-progress.log:13: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/focused-progress.log:39: trailing whitespace.
++tests\test_inspect_gguf.py:141: 
+validation/2026-10-09-inspect-gguf/focused-progress.xml:9: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/focused-progress.xml:35: trailing whitespace.
++tests\test_inspect_gguf.py:141: 
+validation/2026-10-09-inspect-gguf/managed-default-red.log:15: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/managed-default-red.log:23: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/managed-default-red.log:28: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/managed-default-red.log:31: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/managed-default-red.log:52: trailing whitespace.
++tests\test_inspect_gguf.py:199: 
+validation/2026-10-09-inspect-gguf/managed-default-red.xml:11: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/managed-default-red.xml:19: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/managed-default-red.xml:24: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/managed-default-red.xml:27: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/managed-default-red.xml:48: trailing whitespace.
++tests\test_inspect_gguf.py:199: 
+validation/2026-10-09-inspect-gguf/red.log:11: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:24: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:37: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:50: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:63: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:76: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:89: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:102: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:115: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:128: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:141: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:154: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.log:167: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:7: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:17: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:27: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:37: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:47: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:57: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:67: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:77: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:87: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:97: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:107: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:117: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/red.xml:127: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/report-alias-red.log:13: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/report-alias-red.log:34: trailing whitespace.
++tests\test_inspect_cli.py:115: 
+validation/2026-10-09-inspect-gguf/report-alias-red.xml:9: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/report-alias-red.xml:30: trailing whitespace.
++tests\test_inspect_cli.py:115: 
+validation/2026-10-09-inspect-gguf/second-pin-red.log:13: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/second-pin-red.log:21: trailing whitespace.
++tests\test_inspect_gguf.py:169: 
+validation/2026-10-09-inspect-gguf/second-pin-red.xml:9: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/second-pin-red.xml:17: trailing whitespace.
++tests\test_inspect_gguf.py:169: 
+validation/2026-10-09-inspect-gguf/standalone-pin-red.log:14: trailing whitespace.
++tests\test_inspect_gguf.py:186: 
+validation/2026-10-09-inspect-gguf/standalone-pin-red.xml:10: trailing whitespace.
++tests\test_inspect_gguf.py:186: 
+validation/2026-10-09-inspect-gguf/stop-reason-red.log:9: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/stop-reason-red.log:16: trailing whitespace.
++E             
+validation/2026-10-09-inspect-gguf/stop-reason-red.xml:5: trailing whitespace.
++    
+validation/2026-10-09-inspect-gguf/stop-reason-red.xml:12: trailing whitespace.
++E             
+Scoped command: git -c core.whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol diff --check --cached; exit=2; original JSON CRLF bytes retained.

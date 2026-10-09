@@ -353,6 +353,8 @@ SAMPLING_FIELDS = ("top_p", "top_k", "best_of", "frequency_penalty", "presence_p
 GREEDY_PROVIDER_ARGS: dict[str, dict[str, Any]] = {
     "hf": {"do_sample": False},
     "mockllm": {},
+    # Owned compiled llama.cpp extension shares the native temperature0 request.
+    "quantfit_gguf": {},
 }
 
 #: The inspect_ai release every API claim in this module was checked against, by
@@ -388,6 +390,7 @@ MODEL_ARG_ALLOWLIST: dict[str, frozenset[str]] = {
     # carry a measurement (see GREEDY_PROVIDER_ARGS). It is recorded in the arm's
     # provenance like every other surviving arg, so a report from a mockllm run says so.
     "mockllm": frozenset({"custom_outputs"}),
+    "quantfit_gguf": frozenset(),
 }
 
 #: Named reasons for the model args an operator is most likely to reach for. Anything not
@@ -1324,12 +1327,34 @@ def inspect_decode(provider: str, max_new_tokens: int) -> dict[str, Any]:
     }
 
 
+def check_report_output(path: str, protected_inputs: tuple[str, ...]) -> Path:
+    """Refuse canonical/inode aliases of consumed weights or native executables."""
+    from pathlib import Path
+
+    target = Path(path)
+    for source in protected_inputs:
+        original = Path(source)
+        _require(target.resolve() != original.resolve(), "report output must not overwrite a measured input")
+        if target.exists() and original.exists():
+            _require(not target.samefile(original), "report output must not overwrite a hard-linked measured input")
+    return target
+
+
+def local_gguf_inputs(specs: tuple[str, ...]) -> tuple[str, ...]:
+    prefix = "quantfit_gguf/"
+    return tuple(
+        spec[len(prefix) :] for spec in specs if spec.startswith(prefix) and not spec[len(prefix) :].startswith("hf:")
+    )
+
+
 def write_drift_report(
     path: str,
     outcomes: list[PairOutcome],
     baseline: ArmRun,
     quantized: ArmRun,
     max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
+    *,
+    protected_inputs: tuple[str, ...] = (),
 ) -> Path:
     """Emit this Inspect run as a schema-v2 `DriftReport` — the comparability deliverable.
 
@@ -1373,6 +1398,11 @@ def write_drift_report(
 
     check_max_new_tokens(max_new_tokens)
     provider = check_run_arms(outcomes, baseline.model, quantized.model)
+    if provider == "quantfit_gguf":
+        _require(
+            bool(protected_inputs),
+            "GGUF report writer requires resolved weight/binary protected inputs; use QsrRun.write_report",
+        )
     applied = run_model_args(outcomes)
     drift = drift_from_outcomes(outcomes)
     arms = tuple(
@@ -1380,7 +1410,8 @@ def write_drift_report(
         for arm, role in ((baseline, ARM_BASELINE), (quantized, ARM_QUANTIZED))
     )
 
-    final = _Path(path)
+    inputs = (*protected_inputs, *local_gguf_inputs((baseline.model, quantized.model)))
+    final = check_report_output(path, inputs)
     fd, tmp_name = tempfile.mkstemp(dir=str(final.parent), prefix=".quantfit-inspect-report-", suffix=".tmp")
     os.close(fd)
     try:
@@ -1391,6 +1422,7 @@ def write_drift_report(
         with open(tmp_name, "r+b") as handle:  # the bytes are on the device before the name points at them
             handle.flush()
             os.fsync(handle.fileno())
+        check_report_output(path, inputs)  # Recheck after assembly, before atomic publication.
         os.replace(tmp_name, final)
     finally:
         # No-op after a successful replace (the temp name is gone); on any failure this is
@@ -1753,9 +1785,10 @@ def _registry() -> dict[str, Any]:
             baseline_model = qsr_arm(baseline, provider=provider, model_args=baseline_args)
             quantized_model = qsr_arm(quantized, provider=provider, model_args=quantized_args)
         else:
+            from quantfit.inspect_gguf import GgufRunObserver
             from quantfit.inspect_hf import HfRunObserver
 
-            _require(isinstance(_hf_observer, HfRunObserver), "invalid internal HF observation adapter")
+            _require(isinstance(_hf_observer, (HfRunObserver, GgufRunObserver)), "invalid internal observation adapter")
             _require(_hf_observer.specs == (baseline, quantized), "observed HF arm specs differ from vetted arms")
             baseline_model, quantized_model = _hf_observer.models
         return api_["Task"](
@@ -1957,10 +1990,14 @@ class QsrRun:
     judge_runtime_s: float
     arms: tuple[str, str]
     observed_arms: tuple[ArmRun, ArmRun] | None = None
+    observation_receipt: dict | None = None
+    protected_report_inputs: tuple[str, ...] = ()
 
     def write_report(self, path: str, baseline: ArmRun, quantized: ArmRun, max_new_tokens: int) -> Path:
         """Emit this run as a schema-v2 `DriftReport` (see `write_drift_report`)."""
-        return write_drift_report(path, self.outcomes, baseline, quantized, max_new_tokens)
+        return write_drift_report(
+            path, self.outcomes, baseline, quantized, max_new_tokens, protected_inputs=self.protected_report_inputs
+        )
 
 
 def qsr_eval(
@@ -1971,6 +2008,7 @@ def qsr_eval(
     baseline_args: dict[str, Any] | None = None,
     quantized_args: dict[str, Any] | None = None,
     hf_revisions: tuple[str, str] | None = None,
+    gguf_revisions: tuple[str | None, str | None] | None = None,
     **eval_args: Any,
 ) -> QsrRun:
     """Build the QSR task AND run it — the supported entry point, and the enforcement layer.
@@ -2000,7 +2038,45 @@ def qsr_eval(
     api = _inspect_api()
     passthrough = check_eval_args(eval_args)
     check_max_new_tokens(max_new_tokens)
-    check_arms(baseline, quantized)
+    provider = check_arms(baseline, quantized)
+    if provider == "quantfit_gguf":
+        _require(hf_revisions is None, "GGUF observation cannot use HF revision mode")
+        # Public GGUF evaluations always own admission, uncached generation and
+        # both server groups. Local files have no revision; Hub arms still need
+        # explicit immutable pins and are refused by the observer before load.
+        if gguf_revisions is None:
+            gguf_revisions = (None, None)
+    _require(hf_revisions is None or gguf_revisions is None, "HF and GGUF observation modes are mutually exclusive")
+
+    if gguf_revisions is not None:
+        from quantfit.inspect_gguf import RUN_LOCK as GGUF_RUN_LOCK
+        from quantfit.inspect_gguf import GgufRunObserver
+
+        _require(check_arms(baseline, quantized) == "quantfit_gguf", "observed GGUF requires matching GGUF providers")
+        check_model_args("quantfit_gguf", baseline_args)
+        check_model_args("quantfit_gguf", quantized_args)
+        _require(passthrough.get("max_samples", 1) == 1, "observed GGUF requires max_samples=1")
+        passthrough["max_samples"] = 1
+        _require(GGUF_RUN_LOCK.acquire(blocking=False), "concurrent observed GGUF evaluations refused")
+        observer = None
+        try:
+            observer = GgufRunObserver((baseline, quantized), gguf_revisions, api["get_model"], token)
+            task_obj = _registry()["task"](
+                baseline,
+                quantized,
+                token=token,
+                max_new_tokens=max_new_tokens,
+                baseline_args=baseline_args,
+                quantized_args=quantized_args,
+                _hf_observer=observer,
+            )
+            return _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer)
+        finally:
+            try:
+                if observer is not None:
+                    observer.close()
+            finally:
+                GGUF_RUN_LOCK.release()
 
     # Opt-in observed mode is deliberately narrower than the library's operator-
     # supplied ArmRun route. No unsafe args enter check_model_args's allowlist.
@@ -2060,6 +2136,8 @@ def _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer=
     log = logs[0]
 
     records = _completion_records(log, n_probes)
+    if observer is not None and getattr(observer, "release_before_judge", False):
+        observer.before_judge(n_probes)
     flags, judge_runtime_s = verify_mod._classify_refusals(
         [record[ARM_BASELINE] for record in records] + [record[ARM_QUANTIZED] for record in records], token
     )
@@ -2093,6 +2171,10 @@ def _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer=
         judge_runtime_s=judge_runtime_from_outcomes(outcomes),
         arms=(baseline, quantized),
         observed_arms=observer.finish(n_probes) if observer is not None else None,
+        observation_receipt=observer.receipt() if observer is not None and hasattr(observer, "receipt") else None,
+        protected_report_inputs=observer.report_inputs()
+        if observer is not None and hasattr(observer, "report_inputs")
+        else (),
     )
 
 

@@ -1,0 +1,171 @@
+{
+  "calibration_schema": 2,
+  "quantfit_version": "fixture",
+  "created_utc": "2026-10-09T04:29:20+00:00",
+  "n_labeled": 80,
+  "n_unusable": 0,
+  "unmeasured_arms": [],
+  "baseline": {
+    "n": 40,
+    "n_unusable": 0,
+    "judge_errors": 0,
+    "epsilon": 0.0,
+    "epsilon_wilson95": [
+      0.0,
+      0.08762160119728664
+    ],
+    "human_refusals": 20,
+    "human_compliances": 20,
+    "direction": {
+      "judge_refusal_human_compliance": 0,
+      "judge_compliance_human_refusal": 0
+    },
+    "directional": {
+      "false_compliance": {
+        "errors": 0,
+        "n": 20,
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.16112515805281938
+        ]
+      },
+      "false_refusal": {
+        "errors": 0,
+        "n": 20,
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.16112515805281938
+        ]
+      }
+    },
+    "mde_epsilon_upper": 0.16112515805281938
+  },
+  "quantized": {
+    "n": 40,
+    "n_unusable": 0,
+    "judge_errors": 0,
+    "epsilon": 0.0,
+    "epsilon_wilson95": [
+      0.0,
+      0.08762160119728664
+    ],
+    "human_refusals": 10,
+    "human_compliances": 30,
+    "direction": {
+      "judge_refusal_human_compliance": 0,
+      "judge_compliance_human_refusal": 0
+    },
+    "directional": {
+      "false_compliance": {
+        "errors": 0,
+        "n": 10,
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.2775327998628892
+        ]
+      },
+      "false_refusal": {
+        "errors": 0,
+        "n": 30,
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.11351339317396876
+        ]
+      }
+    },
+    "mde_epsilon_upper": 0.2775327998628892
+  },
+  "arm_epsilon_delta": {
+    "delta": 0.0,
+    "note": "synthetic"
+  },
+  "label": "SYNTHETIC, not human evidence",
+  "binding": {
+    "identity": {
+      "baseline": {
+        "artifact_sha256": "cae662172fd450bb0cd710a769079c05bfc5d8e35efa6576edc7d0377afdd4a2",
+        "engine": {
+          "binary_sha256": "0184705e7acfe20d60703250ce4f1e52bed97c52150f0345b85b9249966bb38d",
+          "device": "cpu",
+          "inspect_ai_version": "0.3.269",
+          "model_args": {},
+          "n_gpu_layers": 0,
+          "name": "inspect_ai:quantfit_gguf",
+          "native_context_size": 4096,
+          "offload_device": "none",
+          "op_offload": false,
+          "served_build": "synthetic",
+          "served_model_verified": true,
+          "served_template_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "source": "synthetic fixture binary; never provisioned or executed",
+          "threads": 2,
+          "total_slots": 1
+        },
+        "model": "quantfit_gguf/C:\\Users\\sahil\\AppData\\Local\\Temp\\quantfit-inspect-synthetic-xdv7fjp3\\base.gguf",
+        "resolved_dtype": "F16",
+        "revision": null
+      },
+      "decode": {
+        "chat_template": "provider-default (inspect_ai:quantfit_gguf) \u2014 not verified against verify._encode_prompt",
+        "greedy": true,
+        "greedy_model_args": {},
+        "max_new_tokens": 64,
+        "recorded_by": "quantfit.inspect_task",
+        "temperature": 0.0
+      },
+      "env": {
+        "cuda": null,
+        "device": "cpu",
+        "python": "3.12.13",
+        "torch": "not installed; synthetic fixture",
+        "transformers": "not installed; synthetic fixture"
+      },
+      "identity_schema": 1,
+      "judge": {
+        "id": "garak-llm/garak-refusal-detector",
+        "input_contract": "completion-only; truncated to 512 judge tokens; prompt never concatenated",
+        "revision": "5cb5ec8f364318cc48724ddf8ad414000c36781b"
+      },
+      "probe_dataset": {
+        "id": "Crusadersk/quantsafe-judge-benchmark",
+        "n_probes": 40,
+        "revision": "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58",
+        "split": "train"
+      },
+      "quantized": {
+        "artifact_sha256": "7327d4d86dcf6bd569c05303ab188992c7ed923898b393c1cddf63973d7245ff",
+        "engine": {
+          "binary_sha256": "0184705e7acfe20d60703250ce4f1e52bed97c52150f0345b85b9249966bb38d",
+          "device": "cpu",
+          "inspect_ai_version": "0.3.269",
+          "model_args": {},
+          "n_gpu_layers": 0,
+          "name": "inspect_ai:quantfit_gguf",
+          "native_context_size": 4096,
+          "offload_device": "none",
+          "op_offload": false,
+          "served_build": "synthetic",
+          "served_model_verified": true,
+          "served_template_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "source": "synthetic fixture binary; never provisioned or executed",
+          "threads": 2,
+          "total_slots": 1
+        },
+        "model": "quantfit_gguf/C:\\Users\\sahil\\AppData\\Local\\Temp\\quantfit-inspect-synthetic-xdv7fjp3\\quant.gguf",
+        "resolved_dtype": "Q4_K_M",
+        "revision": null
+      },
+      "schema_version": 2
+    },
+    "fingerprint": "c63db8517474c62d0399cec065c64525adca284e8e7571c6426e5626bacf3a4f"
+  },
+  "source": {
+    "capture_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "key_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "sheet_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  }
+}

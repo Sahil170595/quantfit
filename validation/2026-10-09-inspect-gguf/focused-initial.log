@@ -1,0 +1,30 @@
+............F                                                            [100%]
+================================== FAILURES ===================================
+______ test_actual_public_inspect_full_fixture_batch_closes_before_judge ______
+
+fixture = (<module 'quantfit.inspect_gguf' from 'C:\\tmp\\qf-release-0.16.0-20261008\\quantfit\\inspect_gguf.py'>, <function get...], WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1135/test_actual_public_inspect_ful0/server'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002D155117500>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1135/test_actual_public_inspect_ful0')
+
+    def test_actual_public_inspect_full_fixture_batch_closes_before_judge(fixture, monkeypatch, tmp_path):
+        import quantfit.inspect_task as task
+        from quantfit.safety import verify
+        from quantfit.safety.report import DriftReport
+    
+        ext, _, arms, servers, _ = fixture
+        probes = [verify.Probe(f"synthetic {i}", "clear_unsafe" if i < 20 else "clear_safe",
+                               "unsafe" if i < 20 else "safe") for i in range(40)]
+        monkeypatch.setattr(verify, "_load_probes", lambda token: probes)
+        batches = []
+        def judge(outputs, token):
+            assert len(servers) == 2 and all(s.closed for s in servers)
+            batches.append(len(outputs))
+            return [True] * len(outputs), 0.1
+        monkeypatch.setattr(verify, "_classify_refusals", judge)
+>       monkeypatch.setattr(verify, "env_fingerprint", lambda: {"device": "cpu"})
+E       AttributeError: <module 'quantfit.safety.verify' from 'C:\\tmp\\qf-release-0.16.0-20261008\\quantfit\\safety\\verify.py'> has no attribute 'env_fingerprint'
+
+tests\test_inspect_gguf.py:129: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/test_inspect_gguf.py::test_actual_public_inspect_full_fixture_batch_closes_before_judge
+1 failed, 12 passed in 3.92s

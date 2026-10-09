@@ -1,0 +1,266 @@
+{
+  "qualification_source_head_observed": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf",
+  "source_tree_observed": "c2f82bd356d0356955455aa38c5b2e6672f4f5b6",
+  "scope": "actual Windows unit/numerical properties and synthetic public SDK/CLI; installed native CPU proof pending hosted",
+  "hardware": {
+    "system": "Windows",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "cpu_observed_cim": {
+      "Name": "13th Gen Intel(R) Core(TM) i9-13980HX",
+      "NumberOfCores": 24,
+      "NumberOfLogicalProcessors": 32
+    },
+    "ram_total_bytes": 68319571968,
+    "gpu_execution_observed": false
+  },
+  "versions": {
+    "quantfit": "0.16.0",
+    "inspect-ai": "0.3.269",
+    "httpx": "0.28.1",
+    "gguf": "0.19.0",
+    "pytest": "9.0.3",
+    "ruff": "0.16.2",
+    "mypy": "1.20.2",
+    "scipy": "1.15.3",
+    "hypothesis": "6.152.5",
+    "psutil": "7.2.2"
+  },
+  "python": "3.12.13",
+  "full_available_unit": {
+    "cases": 1806,
+    "passed": 1774,
+    "skipped": 32,
+    "failed": 0,
+    "errors": 0
+  },
+  "numerical_properties": {
+    "cases": 2,
+    "passed": 2,
+    "skipped": 0,
+    "failed": 0,
+    "errors": 0
+  },
+  "independent_count_method": "one XML testcase count/classification; agrees with separate pytest summary regex",
+  "source_hashes": {
+    ".github/workflows/validate.yml": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:.github/workflows/validate.yml",
+      "git_blob_oid": "44990f93ca8e50d050b440356d6f9e0e968af147",
+      "consumed_working_sha256": "c1df1f4e05a2eb763c4f68d24c6c66172e5fc955472b8adbd96883dbd484c30e",
+      "canonical_git_blob_sha256": "93611903ae1c402afa0062de8de428d7245d84255a900a29c04d4fb99158a1e3",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "pyproject.toml": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:pyproject.toml",
+      "git_blob_oid": "e47babbd937a39d9b93f3a8aa5db5401a0fd06fa",
+      "consumed_working_sha256": "98da94b83e093bbcc9d6b4870126a3a31b776065ebc35dd4340aee65d1f830dc",
+      "canonical_git_blob_sha256": "bcc65688306c0c0aad10ccf2d8e4fca39db8b42d21348f183a86e857c3931c3c",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "quantfit/_inspect_registry.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:quantfit/_inspect_registry.py",
+      "git_blob_oid": "3609ed597e107a53b9cb0fa912c14ecaa46aff46",
+      "consumed_working_sha256": "86ed3069aa2fbd23e0e5b121d202de3b44b69e1a132e407e63527e55e641e98f",
+      "canonical_git_blob_sha256": "86ed3069aa2fbd23e0e5b121d202de3b44b69e1a132e407e63527e55e641e98f",
+      "raw_equal": true,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "quantfit/bundle.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:quantfit/bundle.py",
+      "git_blob_oid": "65b4f0eae31485bab227bddf80bd76ea79539f8f",
+      "consumed_working_sha256": "3cf66b8659507182f055037760bb5eab0cd5762f5666fddbf5b6630c0fa1b497",
+      "canonical_git_blob_sha256": "68d92316557c234eee446ff7cdae1c7d695f3c21e88873ab2c31637d4212eaaf",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "quantfit/cli.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:quantfit/cli.py",
+      "git_blob_oid": "35cea230e807b2aae95498fa399507d323ae8199",
+      "consumed_working_sha256": "727f7d2da1a371e9d2ff34db0c0bc5fad308fcaaae9f0f2dc171b3bf4c584709",
+      "canonical_git_blob_sha256": "2afd3598695c51267e679199d68ad08a80da40ae08dffe642362dcae033379e1",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "quantfit/inspect_gguf.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:quantfit/inspect_gguf.py",
+      "git_blob_oid": "5f158ca2f024cce54c44ffdf3acfe6b5f0238aac",
+      "consumed_working_sha256": "1f50878f74e30d6f2a9a372219e5b124a4a4c79112e4795a752f766ff6bf4d95",
+      "canonical_git_blob_sha256": "1f50878f74e30d6f2a9a372219e5b124a4a4c79112e4795a752f766ff6bf4d95",
+      "raw_equal": true,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "quantfit/inspect_task.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:quantfit/inspect_task.py",
+      "git_blob_oid": "df89210b7b8b3aab4cf27ad4f0d0f6184a25145c",
+      "consumed_working_sha256": "38fb241966b8adb0cf4a579c8d29347118b654d931841bd0904bc0298ac88e42",
+      "canonical_git_blob_sha256": "fcc4dd7a48d3b45dce169aad46f3ce85fd796f49e8749ee94601b18934681960",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "quantfit/safety/calibration_binding.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:quantfit/safety/calibration_binding.py",
+      "git_blob_oid": "ec14ef33b9a53e14286982baf8035e8399d7cba9",
+      "consumed_working_sha256": "188b66cc98dd88249cd69bc8e5d6824fcb4380904987420b2a63b7124310895f",
+      "canonical_git_blob_sha256": "a53ecc4b14fb549bd40f57866b5c5dfa968f8ea9338aa8badadac81a39371e9f",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "quantfit/safety/gguf_arm.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:quantfit/safety/gguf_arm.py",
+      "git_blob_oid": "0ced9739e2f6d34fc7e305858927e5026359dd9c",
+      "consumed_working_sha256": "fb9465d7fc1e2802965a8953f6bbcf0ea107295e4854e38336395a1b8469e8ae",
+      "canonical_git_blob_sha256": "4fa15b3182904f0941981880eeb9e025d01053181ba00504d69c83c2694ea2cf",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "tests/test_ci_constraints.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:tests/test_ci_constraints.py",
+      "git_blob_oid": "0b2bac22c782e0a6a5e132ec67e95f055589685d",
+      "consumed_working_sha256": "a25766f4549cfb53439f2d2ccd6b4a7b59ab19c1df489d0bfef1a42c604a7140",
+      "canonical_git_blob_sha256": "98d8f581c2ff3fcccd31d94590ff356cab093ee86849aed1066773ebe7e650a2",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "tests/test_inspect_cli.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:tests/test_inspect_cli.py",
+      "git_blob_oid": "5d05a5c0005f087a3c5f988ebf89b5dee2d6ad87",
+      "consumed_working_sha256": "ce5c874c175d08d6f7a4e84c3e507d6479249656e6fbebe08ce72080f10470b8",
+      "canonical_git_blob_sha256": "4c8dfbf486e0bdd8a8bf84e44919e2c0a6311fee903be27f2247e7fdcf71f098",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "tests/test_inspect_gguf.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:tests/test_inspect_gguf.py",
+      "git_blob_oid": "b7019c504c721cb7e956eeac92fdca4f2c9fcc0d",
+      "consumed_working_sha256": "3dfb071ef79ba2b396064c995268d057824ec777f360a4dbd507c3ba4d24a4a3",
+      "canonical_git_blob_sha256": "3dfb071ef79ba2b396064c995268d057824ec777f360a4dbd507c3ba4d24a4a3",
+      "raw_equal": true,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "tests/test_inspect_task.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:tests/test_inspect_task.py",
+      "git_blob_oid": "523038863817116d20e97ae66259a671a0b247d8",
+      "consumed_working_sha256": "f277e846e67c501476adca65aac17f1ed8e8ba7bfc9ac60af03a7edaa4f1c7d9",
+      "canonical_git_blob_sha256": "9bd1b9d0c14fb70235b5ebab1f4c41eddbcc19ad94354e5afcdcfc5003f6dbc2",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "tools/ci_constraints.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:tools/ci_constraints.py",
+      "git_blob_oid": "656bcaca5f29af2437d469f6c8bb313f3f055af6",
+      "consumed_working_sha256": "e4ee842e25a1e40ec987532f7ab1fa3673230080a9f76179484c388e02aedc55",
+      "canonical_git_blob_sha256": "ad1bca49c9dd8273aedbee9671c60bca9023ef55cb4d76fe6def3c13b83da20c",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "tools/ci_cpu_acceptance.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:tools/ci_cpu_acceptance.py",
+      "git_blob_oid": "95326c7b1f6fbfca53229ace2e67218c79788951",
+      "consumed_working_sha256": "b15c15cd68fd2e7e3788f3e2a3d0f0a4492f3717f466bee18644cb401803eae3",
+      "canonical_git_blob_sha256": "1e52c203e695f8865b600b35ccb3b3bed9d86bd1553214985d8a2eed9f5198b1",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "tools/ci_inspect_gguf_acceptance.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:tools/ci_inspect_gguf_acceptance.py",
+      "git_blob_oid": "0e358ef16f2a0217885d8a4bdd0af1886b6cc5de",
+      "consumed_working_sha256": "3dc4eb967a07606e97bf60d955d982fb061def9241802452dfeaf05dffc1315b",
+      "canonical_git_blob_sha256": "3dc4eb967a07606e97bf60d955d982fb061def9241802452dfeaf05dffc1315b",
+      "raw_equal": true,
+      "exact_crlf_to_lf_equivalence": true
+    },
+    "tools/ci_installed.py": {
+      "git_blob_ref": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf:tools/ci_installed.py",
+      "git_blob_oid": "439fc601ef7e09f5badf5288846797bc5168480e",
+      "consumed_working_sha256": "9869a24d298ab0dd3677656baf0a1d51429c09f0a4941902e59cf1e0d495f256",
+      "canonical_git_blob_sha256": "9e1360bfd879cfdbb0c8b3bd377ea1a317a001ac7475552b3bf6252abc8e915e",
+      "raw_equal": false,
+      "exact_crlf_to_lf_equivalence": true
+    }
+  },
+  "gate_exits_observed": {
+    "unit": 0,
+    "properties": 0,
+    "exact_ruff_check": 0,
+    "exact_ruff_format": 0,
+    "exact_mypy": 0,
+    "audit": 0
+  },
+  "exact_invocations": [
+    "tools/ci/.venv/Scripts/python.exe -m pytest tests -q --ignore=tests/test_numerical_properties.py --junitxml=validation/2026-10-09-inspect-gguf/final-unit.xml",
+    "tools/ci/.venv/Scripts/python.exe -m pytest tests/test_numerical_properties.py -q -k 'not rtn' --junitxml=validation/2026-10-09-inspect-gguf/final-properties.xml",
+    "tools/ci/.venv/Scripts/python.exe -m ruff check quantfit tests tools",
+    "tools/ci/.venv/Scripts/python.exe -m ruff format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture",
+    "tools/ci/.venv/Scripts/python.exe -m mypy --strict quantfit/spec.py quantfit/engines/base.py",
+    "tools/ci/.venv/Scripts/python.exe -m quantfit.cli audit --json",
+    "tools/ci/.venv/Scripts/python.exe validation/2026-10-09-inspect-gguf/run-synthetic.py --out validation/2026-10-09-inspect-gguf/qualified-synthetic"
+  ],
+  "historical_runs": {
+    "f72_full_available": {
+      "source_head": "f72d1d964ffd22240dde57106cd2fc08d499041a",
+      "cases": 1788,
+      "passed": 1758,
+      "skipped": 30,
+      "failed": 0,
+      "errors": 0
+    },
+    "778_packaging_metadata": {
+      "source_head": "7782f4efba7e6e08ba7f07328a7a6b630a74427f",
+      "cases": 102,
+      "passed": 100,
+      "skipped": 2,
+      "failed": 0,
+      "errors": 0
+    },
+    "1c8_full_failed_old_cap_sentinel": {
+      "source_head": "1c8e71eacdcf6eec103fd1fe7e013a643653d41f",
+      "cases": 1799,
+      "passed": 1766,
+      "skipped": 32,
+      "failed": 1,
+      "errors": 0,
+      "scope": "single stale less-than syntax assertion rejected exact269 pin; no production false-pass"
+    },
+    "9f_interrupted_full_suite": {
+      "source_head": "9f936f4324b0348f2afb05ed6d697bb382b16ec3",
+      "completed": false,
+      "log": "superseded-9f-unit-interrupted.log",
+      "observed_exit": -1,
+      "reason": "stopped owned Python wrapper/direct child77500/52524 after report alias defect demonstrated; no final results claimed"
+    }
+  },
+  "fixture_result": {
+    "public_sdk_calls": [
+      40,
+      40
+    ],
+    "judge_fixture_batches": [
+      80
+    ],
+    "actual_negative_exit": 3,
+    "native_requests": 0,
+    "models_loaded": 0,
+    "binding_human_labels_verified": false,
+    "bundle_scientific_claims_verified": false
+  },
+  "hosted_required_unrun_local": [
+    "actual installed wheel entrypoint discovery",
+    "real GGUF full40 and real80-label judge",
+    "actual Linux synthetic socket cancellation and process-group cleanup",
+    "Torch numerical RTN/coverage/mutations"
+  ],
+  "wsl": "UNRUN; prior global sharing-violation resources preserved, no launch/repair/shutdown/dismount attempt",
+  "new_dependency_or_model_installs": false,
+  "new_worktrees": false,
+  "raw_captures_retained": false,
+  "scientific_go": false,
+  "human_labels_authenticated": false,
+  "assumptions_verified": false,
+  "limitations": [
+    "Synthetic files/server facts and judge flags are declared fixtures, not native execution or human labels.",
+    "RAM admission is a conservative estimate, not peak RSS; two resident servers cannot imply Phi4 memory equivalence.",
+    "No sensitivity, T0, native-generation parity, GPU/crosshardware or independent reproduction; QSRv1 remains unfrozen."
+  ]
+}

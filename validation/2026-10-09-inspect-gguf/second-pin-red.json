@@ -1,0 +1,11 @@
+{
+  "source_head_observed": "1c8e71eacdcf6eec103fd1fe7e013a643653d41f",
+  "source_file": "quantfit/inspect_gguf.py",
+  "canonical_git_blob_sha256": "a62cca505ef582bf9af61edb52e48bc51bfd8260a79f282c8a398b80ed99f07d",
+  "scope": "actual public SDK baseline-resolution tripwire with invalid second pin; no download or model execution",
+  "red_junit": "second-pin-red.xml",
+  "cause": "single validate/load loop constructed valid baseline before checking second missing Hub revision",
+  "baseline_provider_construction_attempted": true,
+  "actual_weight_download": false,
+  "scientific_go": false
+}
