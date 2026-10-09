@@ -1,6 +1,6 @@
 # Inspect GGUF provider
 
-Install `quantfit[inspect,gguf]` and use `quantfit_gguf/<local-file.gguf>` or
+Install `quantfit[inspect,gguf]` (pinned Inspect0.3.269) and use `quantfit_gguf/<local-file.gguf>` or
 `quantfit_gguf/hf:<org>/<repo>/<file>.gguf` on Linux with `/proc` process observation.
 Hub arms need each immutable40hex revision; local arms omit revision flags and
 are bound by actual file SHA256. Mixed providers, quantized baseline, mismatched
