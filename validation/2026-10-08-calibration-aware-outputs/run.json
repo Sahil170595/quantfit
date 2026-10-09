@@ -1,0 +1,116 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "resolution",
+        "--report",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\drift.json",
+        "--calibration-report",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\calibration.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\resolution.json",
+        "--json"
+      ],
+      "exit_code": 0
+    },
+    {
+      "case": "pre-run",
+      "env": {
+        "BASELINE": "base",
+        "CALIBRATION_REPORT": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\calibration.json",
+        "QUANT": "quant",
+        "QUANTFIT_CI_BOUND_REPORT": "",
+        "QUANTFIT_CI_CASE": "5"
+      },
+      "exit_code": 0,
+      "source": ".github/actions/quantfit-gate/action.yml",
+      "step": "Validate inputs"
+    },
+    {
+      "case": "pre-run",
+      "env": {
+        "BASELINE": "base",
+        "CALIBRATION_REPORT": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\calibration.json",
+        "QUANT": "quant",
+        "QUANTFIT_CI_BOUND_REPORT": "",
+        "QUANTFIT_CI_CASE": "5"
+      },
+      "exit_code": 0,
+      "source": ".github/actions/quantfit-gate/action.yml",
+      "step": "Preflight \u2014 the installed quantfit must expose the gate contract"
+    },
+    {
+      "case": "pre-run",
+      "env": {
+        "BASELINE": "base",
+        "CALIBRATION_REPORT": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\calibration.json",
+        "QUANT": "quant",
+        "QUANTFIT_CI_BOUND_REPORT": "",
+        "QUANTFIT_CI_CASE": "5"
+      },
+      "exit_code": 0,
+      "source": ".github/actions/quantfit-gate/action.yml",
+      "step": "Run quantfit gate"
+    },
+    {
+      "case": "observed",
+      "env": {
+        "BASELINE": "base",
+        "CALIBRATION_REPORT": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\action-calibration.json",
+        "QUANT": "quant",
+        "QUANTFIT_CI_BOUND_REPORT": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\action-drift.json",
+        "QUANTFIT_CI_CASE": "0"
+      },
+      "exit_code": 0,
+      "source": ".github/actions/quantfit-gate/action.yml",
+      "step": "Validate inputs"
+    },
+    {
+      "case": "observed",
+      "env": {
+        "BASELINE": "base",
+        "CALIBRATION_REPORT": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\action-calibration.json",
+        "QUANT": "quant",
+        "QUANTFIT_CI_BOUND_REPORT": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\action-drift.json",
+        "QUANTFIT_CI_CASE": "0"
+      },
+      "exit_code": 0,
+      "source": ".github/actions/quantfit-gate/action.yml",
+      "step": "Preflight \u2014 the installed quantfit must expose the gate contract"
+    },
+    {
+      "case": "observed",
+      "env": {
+        "BASELINE": "base",
+        "CALIBRATION_REPORT": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\action-calibration.json",
+        "QUANT": "quant",
+        "QUANTFIT_CI_BOUND_REPORT": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs\\action-drift.json",
+        "QUANTFIT_CI_CASE": "0"
+      },
+      "exit_code": 0,
+      "source": ".github/actions/quantfit-gate/action.yml",
+      "step": "Run quantfit gate"
+    }
+  ],
+  "machine": {
+    "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "logical_cpus": 32,
+    "physical_cpus": 24,
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.12.13",
+    "ram_bytes": 68319571968
+  },
+  "scope": "Synthetic source/real-Bash functional validation only. No models, human calibration, sensitivity, hosted candidate install, research GO or reference publication.",
+  "source_head": "8bdb0a6dd4cf54860f02c73e7891622f4edeb55e",
+  "versions": {
+    "huggingface-hub": "1.31.0",
+    "inspect-ai": "0.3.269",
+    "mypy": "1.20.2",
+    "pytest": "9.0.3",
+    "quantfit": "0.16.0",
+    "ruff": "0.16.2"
+  }
+}

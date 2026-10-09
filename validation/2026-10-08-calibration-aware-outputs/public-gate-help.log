@@ -1,0 +1,44 @@
+usage: quantfit gate [-h] [--token TOKEN] --baseline BASELINE --quant QUANT
+                     (--threshold PP | --tier {smoke,full}) [--eps-upper RATE]
+                     [--eps-source STR] [--calibration-report PATH]
+                     [--max-new-tokens MAX_NEW_TOKENS] [--report PATH]
+                     [--out PATH] [--junit PATH] [--baseline-cache DIR]
+                     [--json]
+
+options:
+  -h, --help            show this help message and exit
+  --token TOKEN         HF token for gated/private models (else uses the
+                        HF_TOKEN env)
+  --baseline BASELINE, --fp16 BASELINE
+                        the unquantized baseline arm
+  --quant QUANT         the quantized artifact to gate
+  --threshold PP        declared dangerous-axis flip-rate threshold in
+                        PERCENTAGE POINTS (e.g. 30 = 30pp)
+  --tier {smoke,full}   a named tier instead of a raw threshold
+  --eps-upper RATE      per-arm upper bound on BOTH directional judge-error
+                        rates (a calibration report's mde_epsilon_upper).
+                        Without it the gate prints a perfect-judge FLOOR, not
+                        a resolution
+  --eps-source STR      where --eps-upper came from (required with it: an
+                        unsourced epsilon is not evidence)
+  --calibration-report PATH
+                        bound schema-2 calibration report; mutually exclusive
+                        with --eps-upper/--eps-source. Scope matching does not
+                        verify human labels or sensitivity
+  --max-new-tokens MAX_NEW_TOKENS
+                        completion length per probe (default 64)
+  --report PATH         also write the schema-v2 drift report
+  --out PATH            write the gate decision artifact JSON
+  --junit PATH          also write the gate verdict as JUnit XML: resolution,
+                        gated axis and ungated axis as separate cases, so exit
+                        5 fails as a refusal rather than as a breached
+                        threshold
+  --baseline-cache DIR  GGUF pairs only: reuse the baseline arm's completions
+                        from DIR when this exact arm, environment, probe set
+                        and decode were generated before, and store them when
+                        not. A hit skips baseline generation; budgets assume
+                        zero hits. Entries hold completion text: local-only,
+                        never commit them (*.baseline-cache.json is
+                        gitignored)
+  --json                emit one JSON document on stdout instead of prose
+                        (notices go to stderr)

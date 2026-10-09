@@ -668,7 +668,7 @@ fails loudly instead of arriving as an "operational error" in the middle of a me
 ```
 quantfit gate --baseline REF --quant REF
               (--tier smoke|full | --threshold PP)   # PERCENTAGE POINTS; 30pp is 30, not 0.30
-              [--eps-upper RATE --eps-source LABEL]  # eps IS still a rate in (0,1]
+              [--eps-upper RATE --eps-source LABEL | --calibration-report PATH]
               [--max-new-tokens N]
               --report PATH --out PATH
 ```
