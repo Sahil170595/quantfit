@@ -46,6 +46,42 @@ def test_complete_quantized_rows_pass_structure_not_weight_quality(tmp_path, ver
     assert result["quantization_quality_verified"] is False
 
 
+@pytest.mark.parametrize("namespace", ["base_model", "dataset"])
+def test_standard_indexed_source_metadata_is_not_invalid_snake_case(tmp_path, namespace):
+    # b9817 preserves these actual pinned SmolLM2 converter fields during quantization.
+    metadata = [(f"general.{namespace}.count", 4, struct.pack("<I", 1))]
+    for field, value in (
+        ("name", "SmolLM2 135M"),
+        ("organization", "HuggingFaceTB"),
+        ("repo_url", "https://huggingface.co/HuggingFaceTB/SmolLM2-135M"),
+    ):
+        metadata.append((f"general.{namespace}.0.{field}", 8, string(value)))
+    result = verify_gguf(str(write(tmp_path, fixture_bytes(metadata=metadata))))
+    assert result["exit_code"] == 0 and result["structure"]["metadata_entries"] == 4
+    assert result["quantization_quality_verified"] is False
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        "general.base_model..name",
+        "general.base_model.-1.name",
+        "general.base_model.0.Name",
+        "general.base_model.0/name",
+        "general.base_model.0.unknown_field",
+        "other.base_model.0.name",
+    ],
+)
+def test_indexed_source_key_exception_does_not_relax_other_key_syntax(tmp_path, key):
+    raw = fixture_bytes(metadata=[(key, 8, string("aggregate metadata"))])
+    assert verify_gguf(str(write(tmp_path, raw)))["exit_code"] == 3
+
+
+def test_indexed_source_keys_still_require_unique_entries(tmp_path):
+    metadata = [("general.base_model.0.name", 8, string("same source"))] * 2
+    assert verify_gguf(str(write(tmp_path, fixture_bytes(metadata=metadata))))["exit_code"] == 3
+
+
 def test_declared_ne0_not_reversed_numpy_shape_controls_row_divisibility(tmp_path):
     result = verify_gguf(str(write(tmp_path, fixture_bytes(dims=(16, 2), payload_size=18))))
     assert result["exit_code"] == 3

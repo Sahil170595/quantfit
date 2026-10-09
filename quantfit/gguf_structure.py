@@ -15,6 +15,12 @@ MAX_METADATA = 100000
 MAX_TENSORS = 100000
 MAX_ARRAY_ITEMS = 2000000
 _KEY = re.compile(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*(?:\.[a-z][a-z0-9]*(?:_[a-z0-9]+)*)*\Z")
+# The format's standardized source keys explicitly contain decimal index segments.
+# b9817 Metadata.set_gguf_meta_model emits these and quantization preserves them.
+_INDEXED_SOURCE_KEY = re.compile(
+    r"general\.(?:base_model|dataset)\.[0-9]+\."
+    r"(?:name|author|version|organization|description|url|doi|uuid|repo_url)\Z"
+)
 _SCALARS = {0: "B", 1: "b", 2: "H", 3: "h", 4: "I", 5: "i", 6: "f", 7: "B", 10: "Q", 11: "q", 12: "d"}
 
 
@@ -138,7 +144,7 @@ def scan(path: str) -> tuple[dict, dict, tuple[int, int, int, int]]:
         for _ in range(metadata):
             key = reader.string(65535, format_bound=True)
             _valid(
-                key.isascii() and _KEY.fullmatch(key) is not None,
+                key.isascii() and (_KEY.fullmatch(key) is not None or _INDEXED_SOURCE_KEY.fullmatch(key) is not None),
                 "invalid hierarchical ASCII lower_snake_case GGUF key",
             )
             _valid(key not in keys, "duplicate GGUF metadata key")

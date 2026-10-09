@@ -40,7 +40,8 @@ big-endian forms, version 1 and nested arrays are unverified, rather than declar
 corrupt. Missing constants clearly name `pip install 'quantfit[gguf]'`.
 
 Known syntax checks include UTF8 strings, hierarchical ASCII lower_snake_case
-metadata keys with the specified 65,535-byte maximum, duplicate keys/names,
+metadata keys and the standardized decimal-indexed `general.base_model.{id}` /
+`general.dataset.{id}` lineage fields, with the specified 65,535-byte maximum, duplicate keys/names,
 boolean encodings 0/1, tensor names at most 64 bytes, UINT32 nonzero power-of-two
 alignment, positive dimensions, row divisibility, aligned nonoverlapping positive
 tensor intervals and complete extents within EOF. Declared dimensions use `ne0`
@@ -53,6 +54,12 @@ rule is not imposed on GGUF. Gaps/trailing padding and an empty unique tensor
 name are not invented corruption. Zero-filled valid tensor storage can pass
 structure and still be meaningless weights. Generic aligned extent validity
 does not promise native b9817's stricter contiguous layout or architecture rules.
+
+2026-10-09 format-profile defect: interpreting the specification's generic
+snake-case prose literally rejected its explicitly standardized indexed lineage
+keys. The pinned producer emitted these keys in the hosted qualification. The
+scanner now admits only their known source fields; arbitrary numeric namespaces,
+malformed indices and duplicate keys remain refused.
 
 Optional runtime requires Linux with `/proc` before binary provisioning. The
 existing conservative RAM admission requires available RAM at least twice model

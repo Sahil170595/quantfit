@@ -172,7 +172,9 @@ def gguf_acceptance(root: Path, cold_output: Path) -> dict:
 
     baseline, file, conversion = gguf_pair(root)
     verification = verify_gguf(str(file), runtime=True, max_new_tokens=4)
-    assert verification["exit_code"] == 0 and verification["runtime"]["status"] == "pass"
+    assert verification["exit_code"] == 0 and verification["runtime"]["status"] == "pass", json.dumps(
+        verification, sort_keys=True
+    )
     assert verification["structure"]["general_file_type_name"] == "Q4_K_M", "actual recorded scheme differs"
     assert verification["runtime"]["requests_observed"] == 1 and verification["runtime"]["output_characters"] > 0
     packed = verification["structure"]["packed_tensors"]
