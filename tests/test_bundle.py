@@ -2,7 +2,9 @@
 
 import hashlib
 import json
+import os
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -160,6 +162,24 @@ def test_symlink_sources_and_bundle_members_are_refused(tmp_path):
     (out / "report.json").symlink_to(report)
     with pytest.raises(BundleError):
         verify_bundle(str(out))
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows junction contract; POSIX links have a separate test")
+def test_windows_junction_sources_and_output_parents_are_refused(tmp_path):
+    report, *_ = inputs(tmp_path)
+    junction = tmp_path / "junction"
+    quoted_link, quoted_target = [str(p).replace("'", "''") for p in (junction, tmp_path)]
+    command = f"New-Item -ItemType Junction -Path '{quoted_link}' -Target '{quoted_target}' | Out-Null"
+    completed = subprocess.run(["powershell.exe", "-NoProfile", "-Command", command], capture_output=True, check=False)
+    assert completed.returncode == 0, completed.stderr
+    try:
+        with pytest.raises(BundleError, match="junction"):
+            create_bundle(str(junction / report.name), str(tmp_path / "refused"))
+        with pytest.raises(BundleError, match="junction"):
+            create_bundle(str(report), str(junction / "refused"))
+        assert report.is_file() and not (tmp_path / "refused").exists()
+    finally:
+        junction.rmdir()  # remove only the owned junction, never its target tree
 
 
 def test_cli_create_reports_integrity_and_no_science_upgrade(tmp_path, capsys):
