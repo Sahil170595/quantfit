@@ -1,0 +1,94 @@
+{
+  "actual_hosted_campaign_and_publication": "PENDING",
+  "actual_red_provenance": "atomic-actual-red.json",
+  "correction": "Same-directory owned temporary files, complete byte write and close before atomic replace; all public buffers use this helper. Handled failures remove temporary files. Explicit upload paths exclude temporary files.",
+  "earlier_1f_analysis_body_ast_unchanged": true,
+  "exact_old_source_partial_stream_red": {
+    "cases": 2,
+    "errors": 0,
+    "failed": 2,
+    "passed": 0,
+    "skipped": 0
+  },
+  "focused": {
+    "cases": 44,
+    "errors": 0,
+    "failed": 0,
+    "passed": 44,
+    "skipped": 0
+  },
+  "full_available_unit": {
+    "cases": 1850,
+    "errors": 0,
+    "failed": 0,
+    "passed": 1818,
+    "skipped": 32
+  },
+  "historical_records_unchanged": "1f/72c qualification and domain reds remain historical. Initial fd-wrapper and scenario-shadowing harness failures are preserved separately, not promoted into evidence of the source defect.",
+  "human_labels_authenticated": false,
+  "independent_count_method": "XML testcase classification matched independently parsed pytest summary",
+  "limitations": [
+    "Actual-main terminal tests use synthetic weights/runtime/CLI observations and real aggregate primitives/stream writes; no new native model or public-byte proof.",
+    "Full Torch numerical and installed native candidate qualification remain hosted-only.",
+    "Global WSL preserved without launch, repair or cleanup retry. QSRv1 remains unfrozen."
+  ],
+  "local_models_loaded": 0,
+  "new_installs_or_worktrees": false,
+  "numerical_properties": {
+    "cases": 2,
+    "errors": 0,
+    "failed": 0,
+    "passed": 2,
+    "skipped": 0
+  },
+  "observed_gate_exits": {
+    "audit": 0,
+    "exact_format": 0,
+    "exact_lint": 0,
+    "exact_mypy": 0,
+    "properties": 0,
+    "unit": 0
+  },
+  "platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.12.13",
+  "qualification_source_head_observed": "65005c59604a64bc6dc1ffad6b8aceb710c7aded",
+  "scientific_go": false,
+  "source_hashes": {
+    ".gitattributes": {
+      "canonical_git_blob_sha256": "b6514d1ae7661df18f26a96583304d0df5667f301f957c41f6faebc25b914374",
+      "consumed_working_sha256": "8faa55ada18866286609db1ed992c1b99e1d681bbead319326ab9613bdd31056",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "65005c59604a64bc6dc1ffad6b8aceb710c7aded:.gitattributes",
+      "raw_equal": false
+    },
+    ".github/workflows/ci.yml": {
+      "canonical_git_blob_sha256": "13bee57158626ee61d2ebeaa06f2db9c962083b4e7f91a7a178af33550248bf2",
+      "consumed_working_sha256": "6b7fe901fd9c59fc83efa85b61659774a689303a05ba895abc076097b9f92a09",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "65005c59604a64bc6dc1ffad6b8aceb710c7aded:.github/workflows/ci.yml",
+      "raw_equal": false
+    },
+    "docs/reference-campaign-v0.md": {
+      "canonical_git_blob_sha256": "30750292daf6967bb0964a38200115e13c4f7171481444298ac4d1588861fbcf",
+      "consumed_working_sha256": "30750292daf6967bb0964a38200115e13c4f7171481444298ac4d1588861fbcf",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "65005c59604a64bc6dc1ffad6b8aceb710c7aded:docs/reference-campaign-v0.md",
+      "raw_equal": true
+    },
+    "tests/test_reference_campaign.py": {
+      "canonical_git_blob_sha256": "02606ac11a3494274b4aa980e8e0ec41f7a0bb2458e0df718e10f673878beecf",
+      "consumed_working_sha256": "02606ac11a3494274b4aa980e8e0ec41f7a0bb2458e0df718e10f673878beecf",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "65005c59604a64bc6dc1ffad6b8aceb710c7aded:tests/test_reference_campaign.py",
+      "raw_equal": true
+    },
+    "tools/ci_reference_campaign.py": {
+      "canonical_git_blob_sha256": "483ea8dcf3d9ae05bbe323215ec2ef692c24830a6f2b0c77309c8e76fa7473c2",
+      "consumed_working_sha256": "483ea8dcf3d9ae05bbe323215ec2ef692c24830a6f2b0c77309c8e76fa7473c2",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "65005c59604a64bc6dc1ffad6b8aceb710c7aded:tools/ci_reference_campaign.py",
+      "raw_equal": true
+    }
+  },
+  "tree_observed": "7d50f913eb0670a0b1e5c04361023aca7386c4b9"
+}

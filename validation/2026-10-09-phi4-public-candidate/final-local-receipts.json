@@ -1,0 +1,109 @@
+{
+  "actual_heavy_campaign_rerun_for_metadata": false,
+  "actual_hosted_run": "https://github.com/Sahil170595/quantfit/actions/runs/37890682118",
+  "actual_measurement_source_head": "2997c9304f4c0de02f2299fe7c42f1693539bf6d",
+  "audit_counts": {
+    "errors": 0,
+    "findings": 2,
+    "warnings": 2
+  },
+  "campaign_controller_and_workflow_blobs_unchanged": true,
+  "changed_package_modules": [
+    "quantfit/refreports.py"
+  ],
+  "focused_refreports_and_campaign": {
+    "cases": 115,
+    "errors": 0,
+    "failed": 0,
+    "passed": 115,
+    "skipped": 0
+  },
+  "focused_run_context": "Before the d15 source commit, on unchanged working implementation bytes subsequently reconciled to d15; full final qualification ran on frozen d15.",
+  "full_available_unit": {
+    "cases": 1850,
+    "errors": 0,
+    "failed": 0,
+    "passed": 1818,
+    "skipped": 32
+  },
+  "human_labels_authenticated": false,
+  "independent_count_method": "XML testcase classification matched independently parsed pytest summary",
+  "limitations": [
+    "The actual installed producer is source2997; final local qualification is sourced15. Native algorithms/blobs remain identical, while registry status prose and docs now describe the measured publication.",
+    "Fresh flags are unadjudicated; no sensitivity/absence, independent host, GPU/free-T4 or Inspect parity claim.",
+    "Final exact-head hosted PR package/native qualification is pending at receipt creation. No global WSL retry or new local model/dependency environment."
+  ],
+  "matching_measured_package_modules": 45,
+  "native_exits": [
+    3,
+    3,
+    3
+  ],
+  "numerical_properties": {
+    "cases": 2,
+    "errors": 0,
+    "failed": 0,
+    "passed": 2,
+    "skipped": 0
+  },
+  "observed_gate_exits": {
+    "audit": 0,
+    "exact_format": 0,
+    "exact_lint": 0,
+    "exact_mypy": 0,
+    "properties": 0,
+    "unit": 0
+  },
+  "only_registry_status_constant_changed_ast_verified": true,
+  "public_commit": "3a4ff4e086f9d72ad828134873b01fa19b550059",
+  "public_download_verified": true,
+  "qualification_source_head_observed": "d15a436f9da2c106def5c265c5fea30c88887ec2",
+  "qualified_reference_count": 0,
+  "scientific_go": false,
+  "source_hashes": {
+    ".gitattributes": {
+      "canonical_git_blob_sha256": "514c7387b2ef33d0661302dc3e8dee9098955a9fd32fec683748e755320304e1",
+      "consumed_working_sha256": "94f4f47ce3aad5e92dc872a66ab4afdd4a746811a5c7999afed7168b2ab3b594",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "d15a436f9da2c106def5c265c5fea30c88887ec2:.gitattributes",
+      "raw_equal": false
+    },
+    ".github/workflows/ci.yml": {
+      "canonical_git_blob_sha256": "13bee57158626ee61d2ebeaa06f2db9c962083b4e7f91a7a178af33550248bf2",
+      "consumed_working_sha256": "6b7fe901fd9c59fc83efa85b61659774a689303a05ba895abc076097b9f92a09",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "d15a436f9da2c106def5c265c5fea30c88887ec2:.github/workflows/ci.yml",
+      "raw_equal": false
+    },
+    "CHANGELOG.md": {
+      "canonical_git_blob_sha256": "03dcd04d46598dbbd74eff96e163abcd83d0ef77816096e9901c73a32ff73102",
+      "consumed_working_sha256": "628469530c35f7f10ef31f389e7a5f4d988770d30c88ad50dd8466cf427a74c9",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "d15a436f9da2c106def5c265c5fea30c88887ec2:CHANGELOG.md",
+      "raw_equal": false
+    },
+    "docs/reference-reports-v0.md": {
+      "canonical_git_blob_sha256": "767bc38c217cd8786c38971b705e117772bbe004cb9e3c39932ef6b476cb6e00",
+      "consumed_working_sha256": "c66e876d1b18c00da8bb6c9bebdfc87b7e88c3708f40ec4872e65f76e15ee0ef",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "d15a436f9da2c106def5c265c5fea30c88887ec2:docs/reference-reports-v0.md",
+      "raw_equal": false
+    },
+    "quantfit/refreports.py": {
+      "canonical_git_blob_sha256": "6cdf1f6270a48ea7bf4a70517035503245bdf93709dc196b7d1ec172d27b7a40",
+      "consumed_working_sha256": "ab8791b9c7d0a93f579edf846a7ac28a64a2435c69ab017e2c89caa7f8a8a241",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "d15a436f9da2c106def5c265c5fea30c88887ec2:quantfit/refreports.py",
+      "raw_equal": false
+    },
+    "tools/ci_reference_campaign.py": {
+      "canonical_git_blob_sha256": "483ea8dcf3d9ae05bbe323215ec2ef692c24830a6f2b0c77309c8e76fa7473c2",
+      "consumed_working_sha256": "483ea8dcf3d9ae05bbe323215ec2ef692c24830a6f2b0c77309c8e76fa7473c2",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "d15a436f9da2c106def5c265c5fea30c88887ec2:tools/ci_reference_campaign.py",
+      "raw_equal": true
+    }
+  },
+  "t0_and_full_report_repeatability": true,
+  "tree_observed": "e9c5ec564a2aef0599bcca0969e553ac62ba3820"
+}

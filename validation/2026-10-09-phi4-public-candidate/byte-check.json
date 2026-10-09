@@ -1,0 +1,120 @@
+{
+  "exact_producer_hashes_sizes_checked": 10,
+  "files": [
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/integration-verification.json",
+      "sha256": "a7e9d6ccbb43191111b0a4eaa5aeb1c558346defdb46bae287ba9844f89a80f1",
+      "size_bytes": 2642,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/producer/assessment.json",
+      "sha256": "16d85ae68349cd8fb5012a7cd24964c7f07eaf80c115f77533b3d521eae063fd",
+      "size_bytes": 9006,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/producer/campaign.json",
+      "sha256": "497bc1718583e2d42583d01932e330ce05b276c3caa19f6ce069fdbb87908fba",
+      "size_bytes": 12383,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/producer/native-cold-run.json",
+      "sha256": "4608d254c376fa6fe2978a0521e560b9bd1b4f2d167197ed7d5bdc3c95039c41",
+      "size_bytes": 22783,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/producer/native-t0.json",
+      "sha256": "3b4424e1c985245ad81cb0dbbbfe14a31f5efcd1f88970785dfa6d65af22fd91",
+      "size_bytes": 4567,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/producer/run-1/report.json",
+      "sha256": "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+      "size_bytes": 3762,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/producer/run-2/report.json",
+      "sha256": "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+      "size_bytes": 3759,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/producer/run-3/report.json",
+      "sha256": "4f8d91c0a026bb0003d49d9d307cb563a91b5dc624484a5e8ea719d8f963a8f8",
+      "size_bytes": 3761,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/public-manifest.json",
+      "sha256": "4c0d6449a2690fc9be622f1c3c84d3159b8d8d5a23ce117d98a415c9d36dd653",
+      "size_bytes": 2714,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/public-reference-publication.json",
+      "sha256": "d34d92645e3c427c963aef04f930591c0c99db554b213373a1d307141da56238",
+      "size_bytes": 3027,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/relocated-assessment.json",
+      "sha256": "76d2800f7d8586e7adec31b52b20e696820ce0235a5458b1711738a9249fe019",
+      "size_bytes": 9258,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/relocated-t0.json",
+      "sha256": "829bbb6606f9e7ef8eb35160a4ef7fe0d594e0f0bf19c22d7ea0c67a1755c7e4",
+      "size_bytes": 4693,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/root-hosted-verification.json",
+      "sha256": "76470991f7fcf1f9ce414c2328ac89900c22338f239c5de0675192f4327e1d04",
+      "size_bytes": 5832,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/producer/run-1/model-card.md",
+      "sha256": "512cd09286ab271b737a663b09735e4f10259d93ad070497fd94517150bc8c44",
+      "size_bytes": 4007,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/producer/run-2/model-card.md",
+      "sha256": "b7068c2417cd1dd4d7eeb2046b1cede4f1ab8315377ab05ff10b4aaa19fb7629",
+      "size_bytes": 4007,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/producer/run-3/model-card.md",
+      "sha256": "d8a3cdb124ed720fad086301bce3a00133eb92c7f2df944a77144b4a29da07ad",
+      "size_bytes": 4007,
+      "working_index_bytes_equal": true
+    },
+    {
+      "path": "validation/2026-10-09-phi4-public-candidate/public-dataset-card.md",
+      "sha256": "44dba650aa8513448a69c48a0bb8961d68a8e5929cfe34caa20dba51ec0910ba",
+      "size_bytes": 3634,
+      "working_index_bytes_equal": true
+    }
+  ],
+  "files_checked": 17,
+  "public_commit": "3a4ff4e086f9d72ad828134873b01fa19b550059",
+  "qualified_reference_count": 0,
+  "raw_field_metadata_hits": [
+    {
+      "file": "validation/2026-10-09-phi4-public-candidate/producer/native-cold-run.json",
+      "meaning": "Explicitly false cache-request metadata, no payload.",
+      "pointer": "/completion_cache_requested",
+      "value": false
+    }
+  ],
+  "raw_payloads_found": false,
+  "scope": "Exact Git-index/input bytes, original hosted and anonymous downloaded evidence. Integrity does not authenticate human truth or imply scientific GO."
+}
