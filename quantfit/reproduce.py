@@ -792,6 +792,11 @@ def _load(path: str, side: str) -> _View:
     except (ValueError, TypeError, KeyError, RecursionError, ReportError) as exc:
         raise ReproduceError(f"{side} report is not a readable schema-v{REPORT_SCHEMA_VERSION} report: {exc}") from exc
 
+    return _view_from_report(report, data, path, side)
+
+
+def _view_from_report(report: DriftReport, data: bytes, path: str, side: str) -> _View:
+    """Build a validated view from already consumed bytes; no path access."""
     raw = {
         "schema_version": report.schema_version,
         "quantfit_version": report.quantfit_version,
@@ -2464,12 +2469,19 @@ def within_hardware_identical(report_paths, *, out_path: str | None = None) -> d
 
     views = [_load(path, f"replicate[{i}]") for i, path in enumerate(paths)]
 
+    result = _t0_from_views(views)
+    if out_path is not None:
+        _write(out_path, result)
+    return result
+
+
+def _t0_from_views(views: list[_View]) -> dict:
+    """Native T0 over held views. Paths are labels only, never opened or resolved."""
+    if len(views) < 2:
+        raise ReproduceError(f"T0 needs at least 2 replicate reports to compare; got {len(views)}")
     resolved: dict[str, int] = {}
     for i, view in enumerate(views):
-        try:
-            key = str(Path(view.path).resolve())
-        except OSError:  # pragma: no cover - the file was just read successfully
-            key = view.path
+        key = view.path
         if key in resolved:
             raise ReproduceError(
                 f"T0 replicate[{i}] is the same file as replicate[{resolved[key]}]: {view.path}. T0 over one file "
@@ -2516,9 +2528,9 @@ def within_hardware_identical(report_paths, *, out_path: str | None = None) -> d
         "check": "T0_within_hardware_byte_identity",
         "rule": f"{TOLERANCE_DOC} {SPEC_VERSION} §1.5",
         "pass": not differing,
-        "n_replicates": len(paths),
-        "meets_protocol_replicate_count": len(paths) >= T0_REQUIRED_REPLICATES,
-        "protocol_pass": not differing and len(paths) >= T0_REQUIRED_REPLICATES,
+        "n_replicates": len(views),
+        "meets_protocol_replicate_count": len(views) >= T0_REQUIRED_REPLICATES,
+        "protocol_pass": not differing and len(views) >= T0_REQUIRED_REPLICATES,
         "measurement_identity": identity,
         "environment_identity": environment,
         "identity_sha256": fingerprint,
@@ -2539,6 +2551,4 @@ def within_hardware_identical(report_paths, *, out_path: str | None = None) -> d
             "Two reports can record partial agreement but cannot establish the three-replicate protocol."
         ),
     }
-    if out_path is not None:
-        _write(out_path, result)
     return result

@@ -52,6 +52,62 @@ def main() -> None:
             "== [('quantfit','quantfit._inspect_registry')]; print(quantfit.__file__)"
         )
         subprocess.run([sys.executable, "-c", code], cwd=sandbox, env=env, check=True)
+        # Exact historical producer bytes, with disposable input copies removed
+        # before relocated verification. Original native locators are never followed.
+        producer = checkout / "validation/2026-10-09-phi4-public-candidate/producer"
+        reports = [sandbox / f"original-{i}.json" for i in range(1, 4)]
+        original_t0 = sandbox / "original-t0.json"
+        held = [(producer / f"run-{i}/report.json").read_bytes() for i in range(1, 4)]
+        held_t0 = (producer / "native-t0.json").read_bytes()
+        for path, raw in zip(reports, held, strict=True):
+            path.write_bytes(raw)
+        original_t0.write_bytes(held_t0)
+        replay_bundle = sandbox / "replicate-bundle"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "bundle",
+                "replay-create",
+                "--reports",
+                *map(str, reports),
+                "--t0",
+                str(original_t0),
+                "--out",
+                str(replay_bundle),
+                "--json",
+            ],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert completed.returncode == 0, completed.stdout + completed.stderr
+        for path in [*reports, original_t0]:
+            path.unlink()
+        moved_replay = sandbox / "relocated-replicates"
+        replay_bundle.rename(moved_replay)
+        completed = subprocess.run(
+            [sys.executable, "-m", "quantfit.cli", "bundle", "replay-verify", "--bundle", str(moved_replay), "--json"],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert completed.returncode == 0, completed.stdout + completed.stderr
+        replay = json.loads(completed.stdout)["result"]
+        assert replay["integrity_verified"] is True
+        assert replay["original_t0"]["protocol_pass"] is replay["receiving_t0"]["protocol_pass"] is True
+        assert replay["producer_locations_verified"] is replay["scientific_claims_verified"] is False
+        assert replay["receiving_t0"]["independent_execution_verified"] is False
+        assert (moved_replay / "t0.json").read_bytes() == held_t0
+        for i, raw in enumerate(held, 1):
+            copied = (moved_replay / f"report-{i}.json").read_bytes()
+            assert copied == raw
+            assert json.loads(copied)["drift"]["over_refusal"]["overrefusal_regressions"] == 2
         # Actual installed offline customer path: preserve the original Phi4
         # negative aggregate while its dangerous-axis-only floor gate returns0.
         replay_source = checkout / "validation/2026-10-09-phi4-public-candidate/producer/run-1/report.json"
@@ -371,6 +427,7 @@ def main() -> None:
             "test_calibrated_modelcard.py",
             "test_action_calibration.py",
             "test_saved_report_gate.py",
+            "test_replay_bundle.py",
             "test_junit.py",
             "test_junit_gate_screen.py",
             "test_report.py",

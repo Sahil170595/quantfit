@@ -15,6 +15,13 @@
 
 ## Unreleased
 
+- Portable three-report T0 handoff API/CLI (`bundle replay-create` /
+  `bundle replay-verify`): exact original aggregate/T0 bytes, ordered hash and
+  native identity/decision validation, separate relocated T0 and preserved
+  disagreement. Producer locators are unverified labels; schema-1 bundles stay
+  unchanged. Integrity establishes neither independent execution, full-payload
+  repeatability nor scientific GO. Evidence: `validation/2026-10-09-replicate-bundles/`.
+
 - Offline saved-report gate API/CLI (`gate --from-report`) with exact-byte report
   binding, native policy/refusal precedence, recorded-arm JUnit, portable replay
   bundles and optional composite-action routing. No new inference; bound calibration

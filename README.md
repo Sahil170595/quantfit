@@ -467,6 +467,20 @@ means a byte mismatch and exit 2 means unsafe/unsupported input. Original gate
 no-answer/refusal states survive bundling. Integrity is not producer authenticity,
 statistical validity or a safety GO. See [the bundle contract](docs/portable-evidence-bundles.md).
 
+Candidate three-report T0 handoff (unreleased; needs the candidate checkout/wheel):
+
+```bash
+quantfit bundle replay-create --reports run-1.json run-2.json run-3.json --t0 native-t0.json --out replicate-evidence/ --json
+quantfit bundle replay-verify --bundle relocated/replicate-evidence/ --json
+```
+
+All three reports and the original T0 bytes are preserved. Producer path strings
+are unverified labels; verification returns a separate receiving-path T0 after
+relocation, without reopening producer locations. An intact negative T0 still
+exits 0 while `protocol_pass` stays false. It does not establish full-payload
+repeatability, independent execution, human-label truth or scientific GO.
+See [the three-report handoff contract](docs/replicate-bundles.md).
+
 ## Fresh native cold replicates
 
 On the qualified Linux `/proc` runner, use a new output directory:

@@ -707,3 +707,17 @@ def verify_bundle(bundle_path: str) -> dict:
         if isinstance(exc, BundleError):
             raise
         raise BundleError(str(exc)) from exc
+
+
+def create_replay_bundle(report_paths: list[str], t0_path: str, out_path: str) -> dict:
+    """Package exactly three aggregates with their original identity-bound T0 bytes."""
+    from quantfit.replay_bundle import create_replay_bundle as create
+
+    return create(report_paths, t0_path, out_path)
+
+
+def verify_replay_bundle(bundle_path: str) -> dict:
+    """Verify portable schema-2 members and return a separate receiving-path T0."""
+    from quantfit.replay_bundle import verify_replay_bundle as verify
+
+    return verify(bundle_path)
