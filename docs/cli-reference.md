@@ -1,5 +1,10 @@
 # CLI reference — every command, every flag
 
+Candidate `quantfit repeatability` compares three saved full aggregates directly
+or through a portable replay bundle, with separate native T0/original outcomes.
+The typed API, JSON/JUnit, strict comparison and exit contract are in
+[Offline replicate agreement](repeatability.md).
+
 `quantfit cold-run` starts three fresh uncached native GGUF children and checks existing
 T0 on POSIX hosts. Native measurement exits remain separate from T0. Its revision,
 cleanup and aggregate-output contract is in [Three fresh native GGUF runs](cold-replicate-runner.md).

@@ -481,6 +481,22 @@ exits 0 while `protocol_pass` stays false. It does not establish full-payload
 repeatability, independent execution, human-label truth or scientific GO.
 See [the three-report handoff contract](docs/replicate-bundles.md).
 
+Candidate offline comparison keeps full-report agreement, native T0 and original
+per-run outcomes separate:
+
+```bash
+quantfit repeatability --reports run-1.json run-2.json run-3.json --out agreement.json --junit agreement.xml --json
+quantfit repeatability --bundle relocated/replicate-evidence/ --out agreement.json --junit agreement.xml --json
+```
+
+Only the four timestamp/runtime fields declared in
+[the comparison contract](docs/repeatability.md) are ignored. All remaining
+decoded types and values are exact. Exit 0 requires agreement and all original
+native runs to pass; repeated original flags still exit 3, an otherwise agreeing
+unmeasured axis exits 4, and native T0 refusal or malformed evidence exits 2.
+No counts are pooled and agreement does not establish independent execution,
+human-label truth, sensitivity or scientific GO.
+
 ## Fresh native cold replicates
 
 On the qualified Linux `/proc` runner, use a new output directory:

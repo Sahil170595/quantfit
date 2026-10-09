@@ -1,0 +1,23 @@
+..............................................s...........s............. [ 48%]
+...........................F............................................ [ 97%]
+....                                                                     [100%]
+================================== FAILURES ===================================
+_____ test_repeatability_input_modes_preserve_existing_argparse_boundary ______
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1363/test_repeatability_input_modes0')
+
+    def test_repeatability_input_modes_preserve_existing_argparse_boundary(tmp_path):
+        blocked = tmp_path / "blocked"
+        blocked.mkdir()
+        for argv in ([], ["--reports", "a", "b"], ["--reports", "a", "b", "c", "--bundle", "d"]):
+            process = _run("repeatability", *argv, "--json", block_backends=blocked)
+>           assert process.returncode == 2 and process.stdout == b""
+E           assert (2 == 2 and b"error: [Win...008\\\\b'\r\n" == b''
+E            +  where 2 = CompletedProcess(args=['C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe', '-m', 'quantfit.c...WinError 2] The system cannot find the file specified: 'C:\\\\tmp\\\\qf-release-0.16.0-20261008\\\\b'\r\n", stderr=b'').returncode
+E             
+E             Use -v to get more diff)
+
+tests\test_json_envelope.py:311: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_json_envelope.py::test_repeatability_input_modes_preserve_existing_argparse_boundary
+1 failed, 145 passed, 2 skipped in 68.72s (0:01:08)
