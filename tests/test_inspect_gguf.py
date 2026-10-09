@@ -145,6 +145,18 @@ def test_managed_retry_override_is_refused_instead_of_overwritten(fixture):
         observer.close()
 
 
+def test_public_qsr_eval_missing_hub_pins_refuses_before_any_load(fixture, monkeypatch):
+    import quantfit.inspect_task as task
+    from quantfit.safety import verify
+
+    ext, _, _, servers, _ = fixture
+    monkeypatch.setattr(ext.ga, "_resolve", lambda *a, **kw: pytest.fail("weight resolution forbidden"))
+    monkeypatch.setattr(verify, "_load_probes", lambda *a, **kw: pytest.fail("dataset load forbidden"))
+    with pytest.raises(InspectTaskError, match="immutable revision"):
+        task.qsr_eval("quantfit_gguf/hf:org/repo/base.gguf", "quantfit_gguf/hf:org/repo/quant.gguf")
+    assert not servers and not ext.RUN_LOCK.locked()
+
+
 def test_observer_detects_source_substitution_and_closes_both(fixture):
     from inspect_ai.model import GenerateConfig
 
@@ -163,7 +175,8 @@ def test_observer_detects_source_substitution_and_closes_both(fixture):
     assert len(servers) == 2 and all(s.closed for s in servers)
 
 
-def test_actual_public_inspect_full_fixture_batch_closes_before_judge(fixture, monkeypatch, tmp_path):
+@pytest.mark.parametrize("pin_mode", ["explicit", "omitted"])
+def test_actual_public_inspect_full_fixture_batch_closes_before_judge(fixture, monkeypatch, tmp_path, pin_mode):
     import quantfit.inspect_task as task
     from quantfit.safety import verify
     from quantfit.safety.report import DriftReport
@@ -197,7 +210,7 @@ def test_actual_public_inspect_full_fixture_batch_closes_before_judge(fixture, m
     )
     run = task.qsr_eval(
         *(f"quantfit_gguf/{a.ref}" for a in arms),
-        gguf_revisions=(None, None),
+        **({"gguf_revisions": (None, None)} if pin_mode == "explicit" else {}),
         max_new_tokens=64,
         log_dir=str(tmp_path / "private"),
         display="none",

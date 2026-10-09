@@ -42,6 +42,9 @@ response. Standalone consumers must manage that layer; only the managed runner
 checks the complete observation contract. No successful generation fallback/retry.
 Native token-limit termination maps to Inspect `max_tokens`; missing or unknown
 endpoint termination metadata stays `unknown` rather than claiming a clean stop.
+Public `qsr_eval` selects this managed route for GGUF even when local revision
+slots are omitted; Hub revision omissions refuse before loading weights/probes.
+Lower-level standalone `qsr_paired_diff` tasks/SDK callers own provider closure.
 
 Aggregate reports retain original verdict/counts, measured call totals, loaded
 hashes/served facts and a companion RAM/process receipt. Calibration binding and

@@ -2006,7 +2006,14 @@ def qsr_eval(
     api = _inspect_api()
     passthrough = check_eval_args(eval_args)
     check_max_new_tokens(max_new_tokens)
-    check_arms(baseline, quantized)
+    provider = check_arms(baseline, quantized)
+    if provider == "quantfit_gguf":
+        _require(hf_revisions is None, "GGUF observation cannot use HF revision mode")
+        # Public GGUF evaluations always own admission, uncached generation and
+        # both server groups. Local files have no revision; Hub arms still need
+        # explicit immutable pins and are refused by the observer before load.
+        if gguf_revisions is None:
+            gguf_revisions = (None, None)
     _require(hf_revisions is None or gguf_revisions is None, "HF and GGUF observation modes are mutually exclusive")
 
     if gguf_revisions is not None:
