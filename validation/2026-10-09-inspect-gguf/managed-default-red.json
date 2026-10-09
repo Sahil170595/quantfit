@@ -1,0 +1,10 @@
+{
+  "source_head_observed": "5ddb847973ef3911bf1d15a60dac614a677ca811",
+  "source_file": "quantfit/inspect_task.py",
+  "consumed_working_sha256": "db8bf27d01dbb156c4bb307121b59f6670b71102d65001cd0407f689fd05ab17",
+  "canonical_git_blob_sha256": "99e0a9ddcb0070905fc6650e0975cadb43c09beca9d3b6d4f11de9f47749a913",
+  "scope": "actual public SDK full40 synthetic omission regression; fake native servers, no model execution",
+  "demonstrated_cause": "GGUF qsr_eval omitted gguf_revisions enters legacy observer=None route, memoizes/retains two servers and judges before cleanup",
+  "human_labels_authenticated": false,
+  "scientific_go": false
+}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="13" time="5.243" timestamp="2026-10-09T00:08:39.070693-04:00" hostname="SahilKadadekar"><testcase classname="tests.test_inspect_gguf" name="test_public_provider_reuses_one_server_and_reports_actual_calls" time="2.754" /><testcase classname="tests.test_inspect_gguf" name="test_public_source_or_runtime_override_refuses_before_server[kwargs0]" time="0.009" /><testcase classname="tests.test_inspect_gguf" name="test_public_source_or_runtime_override_refuses_before_server[kwargs1]" time="0.009" /><testcase classname="tests.test_inspect_gguf" name="test_public_source_or_runtime_override_refuses_before_server[kwargs2]" time="0.008" /><testcase classname="tests.test_inspect_gguf" name="test_public_source_or_runtime_override_refuses_before_server[kwargs3]" time="0.007" /><testcase classname="tests.test_inspect_gguf" name="test_provider_rejects_ignored_generation_knobs[kwargs0]" time="0.090" /><testcase classname="tests.test_inspect_gguf" name="test_provider_rejects_ignored_generation_knobs[kwargs1]" time="0.053" /><testcase classname="tests.test_inspect_gguf" name="test_provider_rejects_ignored_generation_knobs[kwargs2]" time="0.063" /><testcase classname="tests.test_inspect_gguf" name="test_provider_rejects_ignored_generation_knobs[kwargs3]" time="0.056" /><testcase classname="tests.test_inspect_gguf" name="test_provider_rejects_ignored_generation_knobs[kwargs4]" time="0.014" /><testcase classname="tests.test_inspect_gguf" name="test_pair_ram_admission_happens_before_any_server" time="0.015" /><testcase classname="tests.test_inspect_gguf" name="test_observer_detects_source_substitution_and_closes_both" time="0.068" /><testcase classname="tests.test_inspect_gguf" name="test_actual_public_inspect_full_fixture_batch_closes_before_judge" time="1.951"><failure message="quantfit.safety.calibration_binding.CalibrationBindingError: unsupported environment identity fields">fixture = (&lt;module 'quantfit.inspect_gguf' from 'C:\\tmp\\qf-release-0.16.0-20261008\\quantfit\\inspect_gguf.py'&gt;, &lt;function get...], WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1136/test_actual_public_inspect_ful0/server'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x0000026EF8527620&gt;
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1136/test_actual_public_inspect_ful0')
+
+    def test_actual_public_inspect_full_fixture_batch_closes_before_judge(fixture, monkeypatch, tmp_path):
+        import quantfit.inspect_task as task
+        from quantfit.safety import verify
+        from quantfit.safety.report import DriftReport
+    
+        ext, _, arms, servers, _ = fixture
+        probes = [verify.Probe(f"synthetic {i}", "clear_unsafe" if i &lt; 20 else "clear_safe",
+                               "unsafe" if i &lt; 20 else "safe") for i in range(40)]
+        monkeypatch.setattr(verify, "_load_probes", lambda token: probes)
+        batches = []
+        def judge(outputs, token):
+            assert len(servers) == 2 and all(s.closed for s in servers)
+            batches.append(len(outputs))
+            return [True] * len(outputs), 0.1
+        monkeypatch.setattr(verify, "_classify_refusals", judge)
+        import quantfit.safety.report as report_module
+        monkeypatch.setattr(report_module, "environment_fingerprint", lambda: {"device": "cpu"})
+        run = task.qsr_eval(*(f"quantfit_gguf/{a.ref}" for a in arms), gguf_revisions=(None, None),
+                            max_new_tokens=64, log_dir=str(tmp_path / "private"), display="none", max_samples=1)
+        assert batches == [80] and len(run.outcomes) == 40
+        assert [a.engine["generate_calls"] for a in run.observed_arms] == [40, 40]
+        report = tmp_path / "report.json"
+        run.write_report(str(report), *run.observed_arms, 64)
+        parsed = DriftReport.from_json(str(report))
+        from quantfit.bundle import _report
+        from quantfit.safety.calibration_binding import measurement_identity
+        _report(report.read_bytes())
+&gt;       assert measurement_identity(parsed)["baseline"]["engine"]["name"] == "inspect_ai:quantfit_gguf"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_inspect_gguf.py:141: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\safety\calibration_binding.py:270: in measurement_identity
+    return _measurement_identity(report, require_observation=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quantfit\safety\calibration_binding.py:297: in _measurement_identity
+    _require(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False, message = 'unsupported environment identity fields'
+
+    def _require(condition: bool, message: str) -&gt; None:
+        if not condition:
+&gt;           raise CalibrationBindingError(message)
+E           quantfit.safety.calibration_binding.CalibrationBindingError: unsupported environment identity fields
+
+quantfit\safety\calibration_binding.py:63: CalibrationBindingError</failure></testcase></testsuite></testsuites>

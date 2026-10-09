@@ -1,0 +1,35 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+__ test_standalone_public_hub_provider_requires_immutable_pin_before_resolve __
+
+fixture = (<module 'quantfit.inspect_gguf' from 'C:\\tmp\\qf-release-0.16.0-20261008\\quantfit\\inspect_gguf.py'>, <function get...], WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1154/test_standalone_public_hub_pro0/server'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000024DB82236E0>
+
+    def test_standalone_public_hub_provider_requires_immutable_pin_before_resolve(fixture, monkeypatch):
+        ext, get_model, _, servers, _ = fixture
+        monkeypatch.setattr(ext.ga, "_resolve", lambda *a, **kw: pytest.fail("moving Hub source resolution forbidden"))
+        with pytest.raises(RuntimeError, match="immutable revision"):
+>           get_model("quantfit_gguf/hf:org/repo/model.gguf", memoize=False)
+
+tests\test_inspect_gguf.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\ci\.venv\Lib\site-packages\inspect_ai\model\_model.py:2388: in get_model
+    modelapi_instance = modelapi_type(
+tools\ci\.venv\Lib\site-packages\inspect_ai\model\_registry.py:56: in model_wrapper
+    model = model_type(*args, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quantfit\inspect_gguf.py:223: in __init__
+    self.arm = ga._resolve(model_name, api_key, **({"revision": revision} if revision else {}))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+a = ('hf:org/repo/model.gguf', None), kw = {}
+
+>   monkeypatch.setattr(ext.ga, "_resolve", lambda *a, **kw: pytest.fail("moving Hub source resolution forbidden"))
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: moving Hub source resolution forbidden
+
+tests\test_inspect_gguf.py:184: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_inspect_gguf.py::test_standalone_public_hub_provider_requires_immutable_pin_before_resolve
+1 failed, 49 deselected in 5.96s

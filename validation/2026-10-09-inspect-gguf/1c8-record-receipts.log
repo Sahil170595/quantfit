@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\tmp\qf-release-0.16.0-20261008\validation\2026-10-09-inspect-gguf\record-receipts.py", line 103, in <module>
+    main()
+  File "C:\tmp\qf-release-0.16.0-20261008\validation\2026-10-09-inspect-gguf\record-receipts.py", line 53, in main
+    assert final["failed"] == final["errors"] == 0
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

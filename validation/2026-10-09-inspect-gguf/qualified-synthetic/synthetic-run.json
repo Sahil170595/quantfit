@@ -1,0 +1,57 @@
+{
+  "source_head_observed": "6bf34b4ed80b076bb647ad23bc4b859f063d0ebf",
+  "scope": "actual public Inspect SDK and quantfit CLI over synthetic files/server/judge, no native model proof",
+  "fixture_dependencies": [
+    "tests/test_inspect_gguf.py:fixture",
+    "tests/test_calibration_binding.py:calibration_fixture"
+  ],
+  "declared_not_observed": [
+    "native served metadata",
+    "CPU inference",
+    "available RAM",
+    "GGUF dtype/architecture",
+    "native process cleanup",
+    "protocol dataset membership",
+    "judge classifications"
+  ],
+  "actual_public_sdk_calls": [
+    40,
+    40
+  ],
+  "actual_judge_fixture_batch_sizes": [
+    80
+  ],
+  "native_requests": 0,
+  "models_loaded": 0,
+  "real_judge_loaded": false,
+  "fixtures": [
+    {
+      "name": "base",
+      "actual_file_bytes": 4,
+      "actual_file_sha256": "cae662172fd450bb0cd710a769079c05bfc5d8e35efa6576edc7d0377afdd4a2"
+    },
+    {
+      "name": "quant",
+      "actual_file_bytes": 5,
+      "actual_file_sha256": "7327d4d86dcf6bd569c05303ab188992c7ed923898b393c1cddf63973d7245ff"
+    },
+    {
+      "name": "synthetic binary NOT executed",
+      "actual_file_bytes": 16,
+      "actual_file_sha256": "0184705e7acfe20d60703250ce4f1e52bed97c52150f0345b85b9249966bb38d"
+    }
+  ],
+  "artifact_report_sha256": "4c2cab880d6c4aa90d5c1819bb5b9f7d02ba7824ffc43cb740dc7992fd0e44ad",
+  "omitted_token_flag_default": 64,
+  "negative_cli_exit": 3,
+  "scientific_go": false,
+  "human_labels_authenticated": false,
+  "assumptions_verified": false,
+  "sdk_version": "0.3.269",
+  "default_private_log_dir_removed": true,
+  "limitations": [
+    "Synthetic binding is not human labels or calibrated sensitivity.",
+    "No GPU/crosshardware, native-generation parity, T0 or independent reproduction.",
+    "Actual installed wheel/model/real judge/POSIX qualification remains hosted-only pending."
+  ]
+}
