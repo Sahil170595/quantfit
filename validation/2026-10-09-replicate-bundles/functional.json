@@ -1,0 +1,114 @@
+{
+  "base_native_blob_sha256": "b3460cb6958fff8e09d8f68d3cbfe15bf6f21d76a5e4fc0bef38bc48559a4783",
+  "base_native_head": "ef03db2ebf02eef6f356b3ccb66b9e1d08a801fd",
+  "cases": [
+    {
+      "case": "historical-phi4",
+      "native_old_dictionary_equal": true,
+      "original_bytes_unchanged": true,
+      "original_t0_sha256": "3b4424e1c985245ad81cb0dbbbfe14a31f5efcd1f88970785dfa6d65af22fd91",
+      "producer_copies_removed": true,
+      "report_sha256": [
+        "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+        "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+        "4f8d91c0a026bb0003d49d9d307cb563a91b5dc624484a5e8ea719d8f963a8f8"
+      ],
+      "synthetic": false,
+      "t0_protocol_pass": true
+    },
+    {
+      "case": "synthetic-disagreement",
+      "native_old_dictionary_equal": true,
+      "original_bytes_unchanged": true,
+      "original_t0_sha256": "ade3fac3357dfcb96d8377a6313132061078a5c849f41c0ff9beb725cd8808ac",
+      "producer_copies_removed": true,
+      "report_sha256": [
+        "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+        "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+        "defa7d6003ad723d6ad96b85fc81ae9e9c74b9d04a21ad4aaadb2d9868b05636"
+      ],
+      "synthetic": true,
+      "t0_protocol_pass": false
+    }
+  ],
+  "invocations": [
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "replay-create",
+        "--reports",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\historical-phi4\\disposable-producer\\run-1.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\historical-phi4\\disposable-producer\\run-2.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\historical-phi4\\disposable-producer\\run-3.json",
+        "--t0",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\historical-phi4\\disposable-producer\\t0.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\historical-phi4\\bundle",
+        "--json"
+      ],
+      "exit_code": 0,
+      "integrity_verified": true,
+      "phase": "create",
+      "protocol_pass": true
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "replay-verify",
+        "--bundle",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\historical-phi4\\relocated",
+        "--json"
+      ],
+      "exit_code": 0,
+      "integrity_verified": true,
+      "phase": "verify",
+      "protocol_pass": true
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "replay-create",
+        "--reports",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\synthetic-disagreement\\disposable-producer\\run-1.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\synthetic-disagreement\\disposable-producer\\run-2.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\synthetic-disagreement\\disposable-producer\\run-3.json",
+        "--t0",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\synthetic-disagreement\\disposable-producer\\t0.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\synthetic-disagreement\\bundle",
+        "--json"
+      ],
+      "exit_code": 0,
+      "integrity_verified": true,
+      "phase": "create",
+      "protocol_pass": false
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "replay-verify",
+        "--bundle",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\synthetic-disagreement\\relocated",
+        "--json"
+      ],
+      "exit_code": 0,
+      "integrity_verified": true,
+      "phase": "verify",
+      "protocol_pass": false
+    }
+  ],
+  "scope": "Actual source CLI only, no new inference; prior Phi4 measurement and synthetic disagreement.",
+  "source_head_observed": "307e1c63bc24db29b41a7a8706c0cf75c25edcf0"
+}

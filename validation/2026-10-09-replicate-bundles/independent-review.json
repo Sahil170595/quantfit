@@ -1,0 +1,31 @@
+{
+  "domain_review": {
+    "checks": [
+      "preserved historical Phi4 and synthetic disagreement",
+      "producer loader/resolve tripwires",
+      "base ef03 native T0 dictionary equals current extracted native entry",
+      "sole tests-only307-to3b delta confirmed48 additions/1 deletion; inventory kept exact"
+    ],
+    "in_memory_adverse_cases": 14,
+    "reviewer": "/root/cf_next_contract_audit",
+    "status": "PASS"
+  },
+  "evidence_source": "explicit collaboration review messages materialized by builder; not a new builder run",
+  "model_or_network_execution": false,
+  "product_head": "307e1c63bc24db29b41a7a8706c0cf75c25edcf0",
+  "resources_created": false,
+  "reviewed_head": "3b766ce6a5511a0332fdb4cd664d3fecd55ee59a",
+  "reviewed_tree": "7b79d7af42c23e97a105cc896d146eb275a7e177",
+  "root_review": {
+    "checks": [
+      "typed/count/independence/hash/unknown forgery refusal",
+      "swapped held reports refusal",
+      "four exact held buffers retained with original and receiving T0",
+      "producer locations and scientific claims flags false"
+    ],
+    "in_memory_challenge_cases": 8,
+    "reviewer": "/root",
+    "status": "PASS"
+  },
+  "schema_version": 1
+}

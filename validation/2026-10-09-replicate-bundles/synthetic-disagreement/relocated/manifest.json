@@ -1,0 +1,33 @@
+{
+  "bundle_schema": 2,
+  "created_utc": "2026-10-09T17:31:39.711297+00:00",
+  "files": [
+    {
+      "path": "report-1.json",
+      "role": "replicate-1",
+      "sha256": "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+      "size_bytes": 3762
+    },
+    {
+      "path": "report-2.json",
+      "role": "replicate-2",
+      "sha256": "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+      "size_bytes": 3759
+    },
+    {
+      "path": "report-3.json",
+      "role": "replicate-3",
+      "sha256": "defa7d6003ad723d6ad96b85fc81ae9e9c74b9d04a21ad4aaadb2d9868b05636",
+      "size_bytes": 3762
+    },
+    {
+      "path": "t0.json",
+      "role": "t0",
+      "sha256": "ade3fac3357dfcb96d8377a6313132061078a5c849f41c0ff9beb725cd8808ac",
+      "size_bytes": 5164
+    }
+  ],
+  "quantfit_version": "0.16.0",
+  "scientific_claims_verified": false,
+  "scope": "Offline exact-byte integrity and native T0 over three saved aggregates only. Producer locations are unverified labels; no full-payload repeatability, independent execution or physical-host authentication, human-label truth, sensitivity, scientific GO or reproduction qualification is established."
+}
