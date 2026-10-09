@@ -43,6 +43,12 @@ To see real output in about a second, with no model, no network and no weights:
 
 ## Honest limits
 
+Candidate offline features (unreleased; require the candidate checkout/wheel):
+
+- `quantfit repeatability --reports a.json b.json c.json --out agreement.json --junit agreement.xml --json`, or `quantfit repeatability --bundle relocated/evidence --json`: exact full decoded agreement except four declared volatile fields, separate native T0 and original axes. Exit 0 requires all agreement/native passes, 3 retains differences or original flags, 4 retains an otherwise agreeing unmeasured axis, and 2 means malformed evidence, output failure or native T0 refusal. No pooled counts or independent-execution/human-label/sensitivity/GO claim; see [the contract](https://github.com/Sahil170595/quantfit/blob/main/docs/repeatability.md).
+- `quantfit bundle replay-create --reports a.json b.json c.json --t0 t0.json --out evidence --json` and `quantfit bundle replay-verify --bundle relocated/evidence --json`: preserve exact three-report/T0 bytes and treat producer paths only as labels. Integrity exit 0 can retain a negative original T0; integrity is not execution authenticity.
+- `quantfit gate --from-report drift.json --tier smoke --out replay-gate.json --json`: offline native policy replay without inference. The dangerous-axis gate may pass while original over-refusal flags remain visible; recorded calibration scope is not authenticated human truth or a fresh environment observation.
+
 - A no-detection result **bounds** the drift; it does not certify safety. At the shipped probe set's dangerous-axis size that bound is wide.
 - The judge is uncalibrated until `calibrate` has been run, so the printed MDE is a perfect-judge floor — a lower bound on the true resolution, never the resolution.
 - Only weight quantization is measured. KV-cache quantization, where recent work locates alignment collapse, is not an axis this tool can see.
