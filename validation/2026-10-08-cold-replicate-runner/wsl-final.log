@@ -1,0 +1,35 @@
+............F....                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_report_substitution_cannot_leave_positive_t0 _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-sahil_1/pytest-195/test_report_substitution_canno0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x708f000274d0>
+
+    @pytest.mark.skipif(os.name != "posix", reason="cold-run requires POSIX process-session containment")
+    def test_report_substitution_cannot_leave_positive_t0(tmp_path, monkeypatch):
+        import quantfit.cold_run as runner
+    
+        synthetic_children(tmp_path, monkeypatch)
+        original = runner.within_hardware_identical
+    
+        def substituted(paths, **kwargs):
+            assert not kwargs  # no positive artifact may be written before source comparison
+            path = Path(paths[0])
+            data = json.loads(path.read_bytes())
+            data["created_utc"] = "substituted-after-observation"
+            path.write_text(json.dumps(data), encoding="utf-8")
+            return original(paths)
+    
+        monkeypatch.setattr(runner, "within_hardware_identical", substituted)
+        result = runner.cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+>       assert result["exit_code"] == 2 and result["status"] == "t0_operational_refusal"
+E       AssertionError: assert (2 == 2 and 'aggregate_provenance_failure' == 't0_operational_refusal'
+E         
+E         - t0_operational_refusal
+E         + aggregate_provenance_failure)
+
+tests/test_cold_run.py:165: AssertionError
+- generated xml file: /mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-cold-replicate-runner/wsl-final.xml -
+=========================== short test summary info ============================
+FAILED tests/test_cold_run.py::test_report_substitution_cannot_leave_positive_t0
+1 failed, 16 passed in 30.14s

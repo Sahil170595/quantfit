@@ -1,0 +1,181 @@
+{
+  "source_commit": "e8bfc0e1a5798b5bf2e17ed9e18b5ec6ec7f9491",
+  "actual_windows_head_now": "e8bfc0e1a5798b5bf2e17ed9e18b5ec6ec7f9491",
+  "local_full_suite_provenance": "Started at actual HEAD3f1de493 with final working implementation; finished after source commit e8bfc0e. No semantic implementation changes occurred during execution. Windows source autocrlf EOLs differ for legacy files; both hashes and exact CRLF-to-LF equivalence are recorded. Comment formatting yielded no Git content change. These runs are not relabelled as exact Gitblob-byte launches. Functional driver independently recorded its actual consumed raw source hashes at immutable e8; future hosted campaign must cite Gitblob hashes.",
+  "source_files": {
+    "quantfit/cold_run.py": {
+      "consumed_working_sha256": "c6d5af9e59c98b09d4d27519002df0c8e1c2f2bef31c117e2761a389d61598cd",
+      "git_blob_sha256": "c6d5af9e59c98b09d4d27519002df0c8e1c2f2bef31c117e2761a389d61598cd",
+      "working_equals_source_git_blob": true,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/safety/gguf_arm.py": {
+      "consumed_working_sha256": "c1ea7bc1532da26963fc64e3083d733dc14e65d0948e1d44b9d9848b450e0b11",
+      "git_blob_sha256": "aba6ab7e6a73578d7d00f928fcbbc44f0a5feee27daee25cb925b741c05a17bc",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/safety/verify.py": {
+      "consumed_working_sha256": "e1d695d8d4578decd98a4566028077a6f3886948072538745da6515822a595a0",
+      "git_blob_sha256": "2ab243ae83a5cbbc1eb726077111da29beea716ee50e48ee3c54c042cf27cf26",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/cli.py": {
+      "consumed_working_sha256": "48150a5f46ba734c0be2c4f8cbfedbba74363770eaf5353396210c46599b2c32",
+      "git_blob_sha256": "be6256f3d8fa41d9d66c268fc06d927e1035983e4512f305e92201ca508007c9",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tests/test_cold_run.py": {
+      "consumed_working_sha256": "8caa05a0fd25611a43ca96a194af973376cadc11237e70dd3b17cafbff81f82d",
+      "git_blob_sha256": "8caa05a0fd25611a43ca96a194af973376cadc11237e70dd3b17cafbff81f82d",
+      "working_equals_source_git_blob": true,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tests/test_gguf_arm.py": {
+      "consumed_working_sha256": "1d3f6e9d9bfc7a4c7ba3a51b08286598919729930c3b845d75ba4b5cfac984a1",
+      "git_blob_sha256": "5286175e3fcef6096ec8b175c598a17dcf4ba4d72a57a63baf6673c0351f75f1",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tests/test_dependencies.py": {
+      "consumed_working_sha256": "0f0f699754d484c901661b15e70b248276e6045a6500a781b2ec98367551c242",
+      "git_blob_sha256": "a6a4944dff08724b71754e068348a64ff04f45783a5d5d195392f0bd7e9a50d4",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tools/ci_installed.py": {
+      "consumed_working_sha256": "6d66f87e3d7f178ca0e8009e2e6de5496236a13b1ae3f4079b7dd71ba246ed21",
+      "git_blob_sha256": "6e4ff46ca0033806345c58ccafce7623b2350af8aa48c5be42b11b6a47470df0",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tools/quickstart_check.py": {
+      "consumed_working_sha256": "5f75fc38bd5590f2bea66f1100e982219a72b82669e1eb733d4b55c31d0d8bfa",
+      "git_blob_sha256": "6f34ea54f582bcc5d3b1de6fa6f5fbe939df70b4780c665d41b37dd12e01c28b",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    }
+  },
+  "windows_host": {
+    "python": "3.12.13",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "ram_total_bytes": 68319571968
+  },
+  "installed_versions": {
+    "quantfit": "0.16.0",
+    "pytest": "9.0.3",
+    "ruff": "0.16.2",
+    "mypy": "1.20.2",
+    "scipy": "1.15.3",
+    "hypothesis": "6.152.5",
+    "huggingface-hub": "1.31.0",
+    "psutil": "7.2.2",
+    "inspect-ai": "0.3.269",
+    "gguf": "0.19.0",
+    "torch": "not installed",
+    "transformers": "not installed"
+  },
+  "installed_sdk": {
+    "hf_hub_download_signature": "(repo_id: str, filename: str, *, subfolder: str | None = None, repo_type: str | None = None, revision: str | None = None, library_name: str | None = None, library_version: str | None = None, cache_dir: str | pathlib.Path | None = None, local_dir: str | pathlib.Path | None = None, user_agent: dict | str | None = None, force_download: bool = False, etag_timeout: float = 10, token: bool | str | None = None, local_files_only: bool = False, headers: dict[str, str] | None = None, endpoint: str | None = None, tqdm_class: type[tqdm.asyncio.tqdm_asyncio] | None = None, dry_run: bool = False) -> str | huggingface_hub.file_download.DryRunFileInfo",
+    "introspected_source_file": "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Lib\\site-packages\\huggingface_hub\\utils\\_validators.py",
+    "introspected_source_sha256": "b6e0b5538cb107ee172886a364c9ca65448abd9eaa3e9c9d63c2c8b5f6b4838d"
+  },
+  "final_available_unit": {
+    "cases": 1725,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 29,
+    "passed": 1696
+  },
+  "actual_wsl": {
+    "cases": 17,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 17
+  },
+  "scipy_oracle": {
+    "cases": 15,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 15
+  },
+  "numerical_properties_without_torch": {
+    "cases": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 2
+  },
+  "functional_cli_cases": 9,
+  "gates": {
+    "ruff_check": 0,
+    "ruff_exact_format_final": 0,
+    "mypy_exact_paths": 0,
+    "audit": 0
+  },
+  "historical_failures_preserved": {
+    "revision_red": "9 TypeError failures before revision implementation",
+    "cold_red": "new CLI absent before implementation",
+    "wsl_cold": {
+      "cases": 7,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 5
+    },
+    "pair_admission_red": {
+      "cases": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 0
+    },
+    "terminal_hygiene_red": {
+      "cases": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 0
+    },
+    "source_hygiene_red": {
+      "cases": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 0
+    },
+    "initial_full_unit": {
+      "cases": 1722,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 26,
+      "passed": 1695
+    },
+    "format_initial": "line-ending format issue, Ruff correction yielded no Git content delta",
+    "wsl_final_previous": {
+      "cases": 17,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 16
+    },
+    "scope": "working-tree reds at actual base3f; final immutable source includes their narrow fixes. Intermediate logs/XML are observations, not final qualification or new model runs."
+  },
+  "limitations": [
+    "No model, Hub download or llama-server executable ran.",
+    "Arm bytes/revisions/statistics are fixture declarations, not authenticated observations.",
+    "Direct children were waited/reaped. Grandchild reaping is not established.",
+    "No human adjudication, sensitivity, GPU, crosshardware or independent reproduction claim.",
+    "Hosted installed model/T0 campaign remains pending.",
+    "Full Torch numerical/branch coverage/mutation, hosted matrices, installed consumer execution and real installed model campaign are pending batch push.",
+    "Native default64/full40 model execution is not established by fixture substitution.",
+    "Public reference target remains uncreated/unuploaded; no HF write happened.",
+    "QSRv1 remains unfrozen."
+  ],
+  "lifecycle": "PRESERVE shared worktree/source refs under individual review, unpushed by approved batch plan; approved environment/caches retained, prior blocked dependency/cache cleanup never retried. Task native children waited/reaped; groups have no live members observed; transient shim/server directories closed; no new dependencies/models/worktrees/containers."
+}

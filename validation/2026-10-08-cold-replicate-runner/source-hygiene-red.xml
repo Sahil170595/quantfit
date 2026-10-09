@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="3.497" timestamp="2026-10-08T23:06:44.060920-04:00" hostname="SahilKadadekar"><testcase classname="tests.test_cold_run" name="test_raw_substitution_after_t0_read_is_removed_before_handback" time="2.143"><failure message="assert (0 == 2)">tmp_path = PosixPath('/tmp/pytest-of-sahil_1/pytest-194/test_raw_substitution_after_t00')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x704f33c30fb0&gt;
+
+    @pytest.mark.skipif(os.name != "posix", reason="cold-run requires POSIX process-session containment")
+    def test_raw_substitution_after_t0_read_is_removed_before_handback(tmp_path, monkeypatch):
+        import quantfit.cold_run as runner
+    
+        synthetic_children(tmp_path, monkeypatch)
+        original = runner.within_hardware_identical
+    
+        def substituted(paths):
+            t0 = original(paths)
+            path = Path(paths[0])
+            data = json.loads(path.read_bytes())
+            data["completion"] = "local raw data must never remain"
+            path.write_text(json.dumps(data), encoding="utf-8")
+            return t0
+    
+        monkeypatch.setattr(runner, "within_hardware_identical", substituted)
+        result = runner.cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+&gt;       assert result["exit_code"] == 2 and result["t0"] is None
+E       assert (0 == 2)
+
+tests/test_cold_run.py:186: AssertionError</failure></testcase></testsuite></testsuites>
