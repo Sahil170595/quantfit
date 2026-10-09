@@ -19,6 +19,7 @@ import re
 import signal
 import subprocess
 import sys
+import tempfile
 import zipfile
 from pathlib import Path
 
@@ -261,9 +262,22 @@ def _aggregate(value):
             _aggregate(child)
 
 
+def _stage_bytes(path: Path, raw: bytes):
+    """Publish only complete buffers; owned temporary files are never upload paths."""
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=path.parent, prefix=".staging-", delete=False) as stream:
+            temporary = Path(stream.name)
+            require(stream.write(raw) == len(raw), "incomplete aggregate staging write")
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
 def _write(path: Path, value: dict):
     _aggregate(value)
-    path.write_bytes((json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n").encode())
+    _stage_bytes(path, (json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n").encode())
 
 
 def _finish(public: Path, state: dict, exit_code: int):
@@ -483,14 +497,14 @@ def main() -> int:
             )
             destination = public / f"run-{index}"
             destination.mkdir()
-            (destination / "report.json").write_bytes(raw)
-            (destination / "model-card.md").write_text(
-                model_card_fragment(str(destination / "report.json")), encoding="utf-8"
+            _stage_bytes(destination / "report.json", raw)
+            _stage_bytes(
+                destination / "model-card.md", model_card_fragment(str(destination / "report.json")).encode("utf-8")
             )
         _write(public / "assessment.json", assessment)
         native_t0 = _read(working / "t0.json", MAX_REPORT_BYTES)
         require(_json(native_t0) == result["t0"], "original native T0 changed before publication staging")
-        (public / "native-t0.json").write_bytes(native_t0)
+        _stage_bytes(public / "native-t0.json", native_t0)
         state["status"] = "measured_candidate"
         state["reference_eligibility"] = assessment["registry_admission"]
         state["actual_native_exits"] = assessment["native_exits"]

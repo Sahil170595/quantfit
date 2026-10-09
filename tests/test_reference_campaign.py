@@ -2,6 +2,7 @@
 
 import copy
 import hashlib
+import io
 import json
 import shutil
 import sys
@@ -225,6 +226,8 @@ def test_failure_receipt_is_narrow_on_unsupported_local_platform(tmp_path, monke
         "null-interrupt-after-t0",
         "null-write-after-campaign",
         "persistent-after-t0",
+        "partial-report",
+        "partial-card",
     ],
 )
 def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkeypatch, mode):
@@ -317,8 +320,49 @@ def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkey
         return 0
 
     monkeypatch.setattr(cli, "main", fake_cli)
+    partial = mode in ("partial-report", "partial-card")
+    partial_written = []
+    if partial:
+        real_open = io.open
+        write_index = []
+        partial_index = 1 if mode == "partial-report" else 2
+
+        class PartialWrite:
+            def __init__(self, stream):
+                self.stream = stream
+
+            def __getattr__(self, key):
+                return getattr(self.stream, key)
+
+            def __enter__(self):
+                self.stream.__enter__()
+                return self
+
+            def __exit__(self, *args):
+                return self.stream.__exit__(*args)
+
+            def write(self, data):
+                halfway = data[: len(data) // 2]
+                self.stream.write(halfway)
+                self.stream.flush()
+                partial_written.append(halfway)
+                raise OSError("SYNTHETIC partial stream write, no model execution")
+
+        def partial_open(file, mode="r", *args, **kwargs):
+            stream = real_open(file, mode, *args, **kwargs)
+            if isinstance(file, int):
+                return stream
+            path = Path(file)
+            directory = root / "publication/run-1"
+            if "w" in mode and (path == directory or path.parent == directory):
+                write_index.append((str(path), mode))
+                if len(write_index) == partial_index:
+                    return PartialWrite(stream)
+            return stream
+
+        monkeypatch.setattr(io, "open", partial_open)
     if fault:
-        real_write = Path.write_bytes
+        real_replace = campaign.os.replace
         target = (
             "assessment.json"
             if mode.endswith("assessment")
@@ -328,10 +372,11 @@ def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkey
         )
         raised = []
 
-        def failed_write(path, data):
+        def failed_replace(source, destination):
+            path = Path(destination)
             if mode == "persistent-after-t0" and raised and path.is_relative_to(root / "publication"):
                 raise OSError("SYNTHETIC persistent storage failure")
-            result = real_write(path, data)
+            result = real_replace(source, destination)
             if path == root / "publication" / target and not raised:
                 raised.append(True)
                 if "interrupt" in mode:
@@ -339,7 +384,7 @@ def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkey
                 raise OSError("SYNTHETIC post-write failure, no model execution")
             return result
 
-        monkeypatch.setattr(Path, "write_bytes", failed_write)
+        monkeypatch.setattr(campaign.os, "replace", failed_replace)
     monkeypatch.setattr(sys, "argv", ["campaign", "--out", str(root), "--wheel", "synthetic-unused.whl"])
     success = mode in ("null", "flags")
     try:
@@ -371,7 +416,7 @@ def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkey
     else:
         assert value["status"] == "operational_failure" and value["reference_eligibility"] == "blocked"
         assert not (public / "native-t0.json").exists()
-        if fault:
+        if fault or partial:
             assessment = json.loads((public / "assessment.json").read_bytes())
             assert (
                 assessment["registry_admission"] == "blocked" and assessment["eligible_axes_before_publication"] == []
@@ -383,8 +428,18 @@ def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkey
             assert (
                 native["t0"]["protocol_pass"] is True
             )  # Preserve the genuine original observation, with nonqualification explicit.
+            if partial:
+                assert len(partial_written) == 1
+                assert not (public / "run-1/model-card.md").exists()
+                if mode == "partial-report":
+                    assert not (public / "run-1/report.json").exists(), write_index
+                else:
+                    assert (public / "run-1/report.json").read_bytes() == paths[0].read_bytes()
+                assert all(not (public / f"run-{i}").exists() for i in (2, 3))
+                assert json.loads((root / "native/t0.json").read_bytes())["protocol_pass"] is True
             for i, original in enumerate(paths, 1):
-                assert (public / f"run-{i}/report.json").read_bytes() == original.read_bytes()
+                if not partial:
+                    assert (public / f"run-{i}/report.json").read_bytes() == original.read_bytes()
                 assert assessment["axes_by_run"][i - 1]["refusal-robustness"]["flagged_flips"] == int(flagged)
         else:
             assert not (public / "assessment.json").exists()

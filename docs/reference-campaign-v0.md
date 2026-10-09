@@ -55,6 +55,10 @@ revocation markers, the earlier qualification copies are withheld and execution
 fails; a failure receipt cannot be claimed when it could not be written. This
 staging correction is documented in the new dated local red/fix records and
 does not change the measured T0 rule or the report decision.
+Public reports, cards and JSON metadata are written to owned temporary files
+and atomically replaced only after the complete buffer is closed. Partial
+writes cannot leave an uploadable final path; temporary paths are excluded
+from the explicit upload allowlist and removed on handled failures.
 
 The approved public dataset destination is
 `Crusadersk/quantfit-reference-reports`. Publication uses aggregate-only paths
