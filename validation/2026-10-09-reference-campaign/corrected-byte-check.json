@@ -1,0 +1,129 @@
+{
+  "broad_raw_field_key_hits": [],
+  "files": [
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/audit.json",
+      "size_bytes": 22795,
+      "working_git_index_sha256": "25ba4abfa4c6b43b9ae7b8c3af8f6873455e577176d622fa11a699a201c3f8fa"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/byte-check.json",
+      "size_bytes": 4255,
+      "working_git_index_sha256": "6d38b98f9fb1ca3124ad9cedd109648fe2392b84d751ecfbf27393092fcee8b2"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/corrected-audit.json",
+      "size_bytes": 22795,
+      "working_git_index_sha256": "d1479910d711bf9f6698a741cb8ef07aea415c3531e777286af75b99be89b003"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/corrected-local-receipts.json",
+      "size_bytes": 4039,
+      "working_git_index_sha256": "88a6865dc5c219afc98929e68f3c8dddab9d01c57be5ef76c4c4f061c236b2ba"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/independent-partial-write-red.json",
+      "size_bytes": 721,
+      "working_git_index_sha256": "41d0894ac587b2e1e738152e44a8d190d2c5342c489694fd997ca8df08b808e3"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/independent-staging-red.json",
+      "size_bytes": 908,
+      "working_git_index_sha256": "78b2af466977329416cda5dc5ece475092430995ae1f46058ba4ebf050e85858"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/local-receipts.json",
+      "size_bytes": 3945,
+      "working_git_index_sha256": "63443a708cc74b0a233089a925ce232933fd4d7ec1cbab66b36e84ad5ec36c1b"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/axis-limited/assessment.json",
+      "size_bytes": 9285,
+      "working_git_index_sha256": "7cecaf1069f81c1ce94417403c30fdea69a401b2effab89e861039e86e2f0f6b"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/axis-limited/report-0.json",
+      "size_bytes": 3193,
+      "working_git_index_sha256": "cec855b7fdcd4b7d1b32cd8d2d216d643e7c5f605f68e0a4ab5014b40a4c3060"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/axis-limited/report-1.json",
+      "size_bytes": 3193,
+      "working_git_index_sha256": "efd2f0221c02fe93a1b8ca4fa95590b3c480eca84293204815a343dcefd18bbd"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/axis-limited/report-2.json",
+      "size_bytes": 3193,
+      "working_git_index_sha256": "897db5e313315d97df88fa00c90ee600fe9ace837bac5270e3e12309d6fbc455"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/null/assessment.json",
+      "size_bytes": 9304,
+      "working_git_index_sha256": "95add66f5a18e802e2ed4c0e71565a930f7318577c7a7d1d13c3c51b17b3763e"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/null/report-0.json",
+      "size_bytes": 3214,
+      "working_git_index_sha256": "f72aa82e679649c98f53af20ec4b4ec77a482c90dc08c19570a2410f94c4bca6"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/null/report-1.json",
+      "size_bytes": 3214,
+      "working_git_index_sha256": "bc000bf7bdea5e042fdf2c34d183377858d74e6d0f3f6e3df52796ff18cf67ae"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/null/report-2.json",
+      "size_bytes": 3214,
+      "working_git_index_sha256": "f42fcb7c6e97aea71e8b559092883a001339940febd7c8a08d7b6d6dc2337db1"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/unconfirmed-flags/assessment.json",
+      "size_bytes": 9339,
+      "working_git_index_sha256": "7ddbbc14cd186f2c03cd26e3d4d22b7a7644d58278863bf3e04b7a02d08d55f7"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/unconfirmed-flags/report-0.json",
+      "size_bytes": 3188,
+      "working_git_index_sha256": "2c7f43f0cc943564810760a6a80f6b2345153220e03c544c623e3b7c67bd2096"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/unconfirmed-flags/report-1.json",
+      "size_bytes": 3188,
+      "working_git_index_sha256": "61a0ebf4bddf62d6081e97d897640b4c0895b71dfe9033532fde8f5884f9c871"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/unconfirmed-flags/report-2.json",
+      "size_bytes": 3188,
+      "working_git_index_sha256": "bcaeb1d60555c16ad2da4d20ca5c88b0dbb8882aee1d045759f8a9b2d488f095"
+    },
+    {
+      "exact_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic-run.json",
+      "size_bytes": 1732,
+      "working_git_index_sha256": "de1af35dfd665d6412963613bee3242ce515c520aa87b6ddbbb064c0c8243bb3"
+    }
+  ],
+  "files_checked": 20,
+  "scientific_claims_verified": false,
+  "scope": "New dated local initial/corrected qualification only; original receipts unchanged, no native/public-byte proof.",
+  "source_report_hashes_sizes_checked": 9
+}
