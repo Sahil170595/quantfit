@@ -5,19 +5,19 @@
 [![License](https://img.shields.io/pypi/l/quantfit.svg)](https://github.com/Sahil170595/quantfit/blob/main/LICENSE)
 [![CI](https://github.com/Sahil170595/quantfit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Sahil170595/quantfit/actions/workflows/ci.yml)
 
-**Quantize an LLM — and check it still refuses what it should.**
+**Quantize an LLM and measure refusal/compliance drift.**
 
 Quantization makes a model cheaper to serve. It can also quietly strip safety
 behavior: a 4-bit model that answers prompts the full-precision model refused is a regression
-you will not see in a perplexity number. `quantfit` quantizes across the SOTA method
-matrix, is honest about whether a model fits your GPU, and — uniquely — measures the
-**safety drift** of the quantization it just performed.
+you will not see in a perplexity number. `quantfit` wraps supported quantization
+methods, reports model-fit assumptions, and measures **safety drift** through
+paired generations, a pinned local judge and explicit statistical limits.
 
 ```bash
 pip install quantfit
 
 quantfit --version                                                     # confirm the install
-quantfit verify-safety --demo                                          # a real verdict in ~1s, no model needed
+quantfit verify-safety --demo                                          # fixture statistics in ~1s; no model ran
 ```
 
 That last one runs the actual tabulation over bundled fixtures, so you can see
@@ -32,17 +32,41 @@ quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out  # di
 ```
 
 Every command takes `--json` and prints exactly one document on stdout, so any of
-this drops into a pipeline. Exit codes are the CI contract: **0** clean, **2**
-operational, **3** verdict failed, **4** nothing measured, **5** the gate cannot
-resolve your threshold. 4 and 5 are not passes.
+this drops into a pipeline. Exit codes are command-specific: measurement/gate
+commands use **2** for operational failure, **3** for a detected regression or
+failed decision, **4** for a required unmeasured axis, and **5** for an unresolved
+gate threshold. Check the command contract before treating **0** as a verdict: a
+demo, an intact bundle and a cold-run T0 agreement do not establish model safety.
+Exits 4 and 5 are not passes.
+
+## Release and source scope
+
+The published release is [0.16.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.16.0).
+This README also covers the open review stack
+[#120](https://github.com/Sahil170595/quantfit/pull/120) through
+[#124](https://github.com/Sahil170595/quantfit/pull/124):
+calibration-aware cards/action outputs, portable evidence bundles, fresh native
+cold replicates, managed GGUF Inspect and the bounded public campaign.
+These additions require the reviewed source; installing 0.16.0 does not add them.
+For the exact reviewed source, including Inspect:
+
+```bash
+pip install "quantfit[inspect] @ git+https://github.com/Sahil170595/quantfit.git@9d59739645e5c0021aec8288b480ed2e9c5bea30"
+```
+
+Inspect is pinned to `inspect-ai==0.3.269`; the provider uses that qualified API.
+The core runtime includes Torch. GGUF generation uses native CPU inference;
+CPU qualification does not establish GPU execution or cross-hardware parity.
 
 ## What it has found
 
-Every line below links to a committed run record; none is a projection.
+The findings below are the dated August 2026 studies, not a cumulative count of
+later canaries or the new publication campaign. Each links to a committed run.
+Fresh classifier flags do not inherit these studies' human confirmations.
 
-- **Ordinary quantization did not break refusals in anything measured.** Fourteen
+- **The dangerous-axis detector flagged no regressions in the 2026-08-21 screen.** Fourteen
   third-party quantized artifacts — twelve GGUF, two compressed-tensors, five quantizer
-  organisations — and **zero** probes where the baseline refused and the quant complied
+  organisations — produced **zero classifier-flagged** baseline-refused/quant-complied flips
   ([`2026-08-21-screen-complete`](validation/2026-08-21-screen-complete/)).
 - **That null bounds the instrument, not the models.** The judge's error was measured
   in-distribution (4 false positives in 48 compliant completions, 0 misses in 32 refusals),
@@ -70,7 +94,7 @@ What it **cannot** tell you yet is how small a dangerous-axis regression it woul
 The lever is the calibration set's size and the probe corpus's size, not a better judge —
 §2.7b gives the arithmetic.
 
-## The safety check — what nothing else does
+## The paired safety check
 
 `verify-safety` generates from both the unquantized baseline (at its native dtype)
 and the quantized model over a
@@ -110,18 +134,23 @@ safety — nearly the inverse of what this measures.)
 
 **GGUF pairs — the format third-party quants actually ship in.** Point both arms
 at GGUF files (local `*.gguf` or `hf:<org>/<repo>/<file>.gguf`) and the diff runs
-under the **identical pinned llama.cpp binary** on CPU — F16 baseline vs Qn quant,
+under the **identical pinned llama.cpp binary** on CPU — unquantized baseline vs Qn quant,
 same binary, same device, only the weights differ, so the diff isolates the
-quantization. The F16 arm runs in RAM, which removes the baseline VRAM cap:
-7-8B pairs work on a 12 GB GPU box.
+quantization. The unquantized arm runs in RAM, which removes the baseline VRAM cap:
+the pair must still fit system RAM, and a CPU result is not a GPU result.
 
 ```bash
 quantfit verify-safety \
-  --baseline hf:bartowski/Qwen2.5-7B-Instruct-GGUF/Qwen2.5-7B-Instruct-f16.gguf \
-  --quant    hf:bartowski/Qwen2.5-7B-Instruct-GGUF/Qwen2.5-7B-Instruct-Q4_K_M.gguf
+  --baseline hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf \
+  --quant hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf \
+  --baseline-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 \
+  --quant-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 \
+  --report drift.json --json
 ```
 
-The baseline must be unquantized (F16/BF16/F32 — read from the file's own
+The pinned example downloads about 10.2 GB of weights and performs real CPU
+generation over the full probe set; allow sufficient RAM, disk and time. The
+baseline must be unquantized (F16/BF16/F32 — read from the file's own
 metadata, never the filename) and both files must share an architecture; a
 transformers-baseline vs GGUF-quant mix is refused — that measures engine +
 quantization at once (a deployment delta), never pooled with a quantization diff.
@@ -134,7 +163,7 @@ same-binary mandate is auditable from the report alone — artifact hashes, an
 environment fingerprint, per-arm runtimes, and the full drift vector with CIs —
 enough to audit, diff against a rerun, or cite.
 
-**Scale it and publish it.** The protocol is versioned as **QSR v0**
+**Aggregate and render a run.** The protocol is versioned as **QSR v0**
 ([`spec/qsr-v0.md`](https://github.com/Sahil170595/quantfit/blob/main/spec/qsr-v0.md)); `quantfit screen --targets targets.json --out reports/` runs
 the paired diff over a whole manifest of quants and aggregates per-stratum,
 per-axis Wilson prevalence bounds (flagged flips stay candidates until
@@ -154,9 +183,9 @@ quantfit reproduce --reference ref.json --candidate t4.json --out record.json
 
 It compares measurement identity, verdict class, denominators, flip counts and
 per-zone refusals, quoting **both** sides' numbers for every predicate. Exit 0
-means reproduced, 3 means the tolerance was not met, 4 means nothing was
-compared (the two files are not the same measurement, or nothing was measured),
-2 is operational. Within-hardware determinism (T0) is a property of three
+means reproduced, 3 means the gate was not met or not established (including
+missing valid T0), and 4 means the comparison is void: measurement identity,
+failed T0, source aliasing or an unmeasured axis can void it. Exit 2 is operational. Within-hardware determinism (T0) is a property of three
 replicate runs and cannot be derived from two reports, so pass them explicitly
 with `--t0-reference` and `--t0-candidate`; without that evidence the outcome is
 never the gate pass.
@@ -240,12 +269,12 @@ branch on either. An operational failure returns the same envelope with an
 one case you cannot. `schema_version` is there so a consumer can tell when its
 assumptions expired.
 
-**Every flag, in one place.** [`docs/cli-reference.md`](https://github.com/Sahil170595/quantfit/blob/main/docs/cli-reference.md)
+**Every flag, in one place.** [`docs/cli-reference.md`](https://github.com/Sahil170595/quantfit/blob/9d59739645e5c0021aec8288b480ed2e9c5bea30/docs/cli-reference.md)
 is the complete surface — every command, every flag, with a worked invocation.
 `quantfit audit` checks it against the real parser, so it fails the build rather
 than rotting.
 
-**If an assistant is reading this for you.** [`llms.txt`](https://github.com/Sahil170595/quantfit/blob/main/llms.txt) in the repository root is
+**If an assistant is reading this for you.** [`llms.txt`](https://github.com/Sahil170595/quantfit/blob/9d59739645e5c0021aec8288b480ed2e9c5bea30/llms.txt) in the repository root is
 the retrieval surface coding agents fetch by convention, and it carries the
 command list, the exit-code contract and the stated limits rather than only the
 pitch. `.claude/skills/quantfit/SKILL.md` is the usage-facing skill — distinct
@@ -294,20 +323,38 @@ nothing, 5 unresolvable, 2 operational — **4 and 5 are not passes**.
 
 An in-distribution judge error **has** been measured for this instrument (2026-08-18,
 n=80, single-rater — narrower than ROADMAP 0.6's planned 300–500, so 0.6 is not done),
-but nothing folds it into a printed MDE. So the printed MDE is labeled a perfect-judge **floor** —
-a lower bound on the true resolution, never the resolution — unless you supply
-`--eps-upper` with an `--eps-source`. The floor cuts both ways and the gate says
+but that historical record is never adopted implicitly. Without an operator
+`--eps-upper`/`--eps-source` or a matching `--calibration-report`, the printed
+MDE remains a perfect-judge **floor**, not the true resolution. Bound calibration
+uses separate directional errors for conditional resolution; matching scope and
+hashes do not authenticate human labels or establish the assumptions. The floor cuts both ways and the gate says
 both: optimistic about resolution, and permissive about detection (at ε=0 the
 detection threshold is the smallest possible, so a floor-mode FAIL runs at an
 uncontrolled α and is a candidate for human verification). A reference GitHub
-Action and a weekly CPU canary ship in `.github/`; see [`docs/ci-integration.md`](https://github.com/Sahil170595/quantfit/blob/main/docs/ci-integration.md).
+Action and a weekly CPU canary ship in `.github/`; see [`docs/ci-integration.md`](https://github.com/Sahil170595/quantfit/blob/9d59739645e5c0021aec8288b480ed2e9c5bea30/docs/ci-integration.md).
 
-The optional Inspect HF runner is available as `quantfit inspect-run`. It requires
-immutable revisions for both arms, observes loaded precision and model/tokenizer
-source, and measures per-arm generation through the existing pinned judge and
-probe pipeline. See [the CLI contract and CPU qualification scope](docs/inspect-run.md).
-Generation parity with verify-safety and quantization sensitivity are not
-established by its identical-arm CPU canary.
+The optional `quantfit inspect-run` supports both `hf/org/repo` and
+`quantfit_gguf/<local-path or hf:org/repo/file.gguf>` pairs. Hub arms require
+immutable revisions; local GGUF paths omit revision flags. On Linux with
+`/proc`, the GGUF path manages its native servers, applies CPU/no-offload controls,
+disables completion caching and retries, and closes both servers before the
+pinned batched judge. The HF path observes its actual loaded dtype, source and
+device through a separate provider; it does not inherit those native server controls.
+The real GGUF CPU canary measured a full 40-probe F16/Q4 pair; its classifier
+regression exit remained negative evidence. This does not establish native
+verify-safety parity, GPU residency, sensitivity or human confirmation.
+
+```bash
+quantfit inspect-run \
+  --baseline quantfit_gguf/./baseline.gguf --quant quantfit_gguf/./quant.gguf \
+  --report inspect-drift.json --json
+```
+
+Provide matching, unquantized-baseline GGUF files and sufficient system RAM;
+the managed Inspect pair admits two resident native servers, unlike sequential
+native arms. Inspect logs are local capture-class data: an optional `--log-dir`
+never belongs in Git, CI uploads or public bundles. See the
+[HF contract](docs/inspect-run.md) and [GGUF contract](docs/inspect-gguf.md).
 
 ## GPU-aware quantization
 
@@ -318,7 +365,8 @@ load into CPU RAM and llm-compressor's default **sequential onloading** streams 
 layer at a time to the GPU — no accelerate `device_map`; validated over-VRAM:
 Qwen2.5-7B GPTQ, 15.2 GB bf16 on a 12 GB card, GPU peak 9.0 GB with 28 GB
 process RSS observed, ~32 min); won't fit
-even in RAM → refuse, naming the real limit. No OOM 20 minutes into a job.
+even in RAM → refuse, naming the estimated limit. Fit estimates do not guarantee
+peak runtime memory; the validated run above applies to that model and hardware.
 
 Method caveat at over-VRAM sizes: **use `gptq`** — AWQ's 20-point grid search is
 transfer-bound under onloading (observed ~2 h for a single 7B layer, projecting
@@ -328,7 +376,7 @@ transfer-bound under onloading (observed ~2 h for a single 7B layer, projecting
 
 | method | what | default scheme |
 |---|---|---|
-| `awq` | activation-aware weight quant (best 4-bit quality) | W4A16_ASYM |
+| `awq` | activation-aware weight quantization | W4A16_ASYM |
 | `gptq` | Hessian/OBQ weight quant | W4A16 |
 | `smoothquant` | activation smoothing + W8A8 | W8A8 |
 | `fp8` | FP8 E4M3 dynamic, no calibration | FP8_DYNAMIC |
@@ -352,8 +400,9 @@ are comparable.
   preservation**. Both run end-to-end, validated on Qwen2.5-1.5B ([`CHANGELOG.md`](https://github.com/Sahil170595/quantfit/blob/main/CHANGELOG.md)
   0.1.0) and over-VRAM (Qwen2.5-7B GPTQ on a 12 GB card via sequential
   onloading, telemetry-confirmed CPU spill; the safety check covers 7B GGUF
-  pairs with the F16 baseline in CPU RAM). Llama-3.2-1B appears in the 0.5 screen
-  target list, which is a list of things to run, not a record of runs.
+  pairs with the F16 baseline in CPU RAM). The screen target manifest is planning
+  input; actual coverage is the dated [screen result](validation/2026-08-21-screen-complete/),
+  not membership in that manifest.
 - It ships **transparent config help**, not auto-quantization: `quantfit plan --model <id>`
   shows the config a heuristic would pick and *why* (instant, no quantize); `quantfit
   probe --model <id>` measures per-bit-width quantization sensitivity (forward-only RTN-KL,
@@ -371,21 +420,104 @@ are comparable.
 
 ## Analyze an existing run offline
 
-`quantfit resolution --report drift.json --calibration-report calibration.json --out resolution.json --json`
-matches immutable measurement scope, validates paired counts and reports
-conditional per-axis resolution using each arm's directional error bound in a
-separate artifact. It preserves the inputs and their QSR v0 verdict; matching
-metadata does not authenticate human labels or verify the statistical assumptions.
-See [CLI reference](docs/cli-reference.md) and
+```bash
+quantfit resolution --report drift.json --calibration-report calibration.json --out resolution.json --json
+quantfit emit model-card --report drift.json --calibration-report calibration.json
+```
+
+Supply a schema-2 calibration with matching immutable measurement scope. These
+commands validate paired counts and use each arm's directional error bound for
+separately labeled conditional resolution. The native report/QSR v0 verdict,
+flagged counts and perfect-judge floor remain intact. Neither scope/hash binding
+nor a model card authenticates human labels or establishes the statistical
+assumptions. Without calibration, `emit model-card --report drift.json` retains
+floor-only wording. See [CLI reference](docs/cli-reference.md) and
 [synthetic functional evidence](validation/2026-10-05-calibrated-resolution/README.md).
+
+## Portable aggregate evidence
+
+```bash
+quantfit bundle create --report drift.json --out evidence/ --json
+quantfit bundle verify --bundle evidence/ --json
+# Optional matching calibration and analysis; the output directory must be new.
+quantfit bundle create --report drift.json --calibration-report calibration.json --resolution resolution.json --out calibrated-evidence/ --json
+```
+
+Fixed file roles and exact hashes make a bundle verifiable after relocation,
+without weights, captures, network or optional model packages. Creation/verification
+exit 0 means an aggregate bundle was created or its bytes are intact; exit 3
+means a byte mismatch and exit 2 means unsafe/unsupported input. Original gate
+no-answer/refusal states survive bundling. Integrity is not producer authenticity,
+statistical validity or a safety GO. See [the bundle contract](docs/portable-evidence-bundles.md).
+
+## Fresh native cold replicates
+
+On the qualified Linux `/proc` runner, use a new output directory:
+
+```bash
+quantfit cold-run \
+  --baseline hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf \
+  --quant hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf \
+  --baseline-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 \
+  --quant-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 \
+  --out cold-runs/ --timeout-seconds 3600 --json
+```
+
+The omitted `--max-new-tokens` uses the shipped greedy default of 64. Each of
+three fresh native children runs the full probe set without completion cache or
+capture, with a per-child deadline and owned process-session cleanup. Weight
+caches may be reused. Reports, original native exits, resource observations and
+T0 remain separate: parent exit 0 means aggregate T0 agreement, 3 means T0
+disagreement, and 2 is operational; a child's regression 3 or unmeasured-axis 4
+never becomes a model pass. Windows refuses before creating output. Other POSIX
+hosts do not inherit Linux's `/proc` cleanup qualification.
+
+To check three existing actual source files after relocation, recompute T0 from
+those paths rather than editing the producer's original T0 receipt:
+
+```bash
+quantfit t0 --reports cold-runs/run-1/report.json cold-runs/run-2/report.json cold-runs/run-3/report.json --out relocated-t0.json --json
+```
+
+T0 validates aggregate agreement and identity, not human confirmation, detection
+sensitivity, independent hardware or cross-hardware tolerance. Reference admission
+also requires full report repeatability, permitting only the protocol's explicit
+timestamp/runtime differences. See [the cold-run contract](docs/cold-replicate-runner.md).
+
+## Public campaigns and offline reference artifacts
+
+The [2026-10-09 hosted Phi4 CPU campaign](https://github.com/Sahil170595/quantfit/actions/runs/37890682118)
+ran the pinned BF16/Q4_K_M pair over all 40 probes in three fresh native
+processes using the omitted token flag's greedy-64 default. Each run had
+**2/20 classifier-flagged over-refusal flips** and **0/12 dangerous-axis flags**:
+the detector did not fire on that axis. Native exits **3/3/3** remain regressions;
+parent cold-run exit **0** records passing T0, and full-report repeatability
+also passed. These are repeats of one pair, not three independent pairs. The
+new flags have no human adjudication.
+
+The aggregate-only [public dataset](https://huggingface.co/datasets/Crusadersk/quantfit-reference-reports)
+is pinned at immutable commit `3a4ff4e086f9d72ad828134873b01fa19b550059`; downloaded bytes were checked
+against the source SHA256 values. Public candidate evidence and registry admission
+are separate. The built-in registry has **zero qualified reference entries**:
+fresh unconfirmed flags block this candidate's admission. Its public reports
+preserve the negative result without transferring historical human confirmations.
+
+```bash
+quantfit references list --json
+quantfit references verify --slug NAME --report report.json --json
+quantfit verify --model ./out --json
+```
+
+The verification example requires a registered slug from `references list`;
+the built-in registry currently has none. Reference verification checks declared bytes, not a rerun hash or the validity
+of the science. `verify --model` checks a quantized artifact's format/metadata; it
+does not run the paired safety measurement. An explicit `--registry registry.json`
+selects an external registry without registering or publishing it. See
+[publication criteria](docs/reference-reports-v0.md), the
+[bounded campaign](docs/reference-campaign-v0.md), and
+[CLI reference](docs/cli-reference.md). No new T4 reproduction, sensitivity,
+human-adjudication, cross-hardware or QSR v1 freeze follows from a publication.
 
 ## License
 
 Apache-2.0.
-### Offline reference artifacts
-
-`quantfit references list --json` shows the bundled reference registry, currently
-empty. `quantfit references verify --slug NAME --report report.json --json` checks
-exact bytes against a declared reference. An explicit `--registry registry.json`
-selects an external registry without registering or publishing it. See
-[`docs/cli-reference.md`](docs/cli-reference.md) for the schema and exit codes.
