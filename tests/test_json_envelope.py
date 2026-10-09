@@ -119,7 +119,8 @@ def test_the_leaf_set_is_what_we_think_it_is():
     expected = {
         "check", "list", "plan", "probe", "verify", "verify-safety", "inspect-run", "screen", "emit",
         "calibrate sheet", "calibrate ingest", "gate", "t0", "reproduce", "audit", "quantize", "resolution",
-        "references list", "references verify", "bundle create", "bundle verify", "cold-run",
+        "references list", "references verify", "bundle create", "bundle verify",
+        "bundle replay-create", "bundle replay-verify", "cold-run",
     }  # fmt: skip
     assert leaves == expected, f"leaf command set changed: {sorted(leaves ^ expected)}"
 
@@ -159,6 +160,23 @@ _CASES = [
     ("t0-missing", ["t0", "--reports", "no-a.json", "no-b.json", "no-c.json", "--out", "unused-t0.json"], 2),
     ("bundle-create-missing", ["bundle", "create", "--report", "no-report.json", "--out", "unused-bundle"], 2),
     ("bundle-verify-missing", ["bundle", "verify", "--bundle", "no-bundle-xyz"], 2),
+    (
+        "bundle-replay-create-missing",
+        [
+            "bundle",
+            "replay-create",
+            "--reports",
+            "no-a.json",
+            "no-b.json",
+            "no-c.json",
+            "--t0",
+            "no-t0.json",
+            "--out",
+            "unused-replay-bundle",
+        ],
+        2,
+    ),
+    ("bundle-replay-verify-missing", ["bundle", "replay-verify", "--bundle", "no-replay-bundle-xyz"], 2),
     ("cold-run-unsupported", ["cold-run", "--baseline", "base", "--quant", "q", "--out", "unused-cold"], 2),
 ]
 
@@ -219,6 +237,35 @@ def test_t0_agreement_runs_without_model_backends_and_writes_its_artifact(tmp_pa
     assert artifact["protocol_pass"] is True
     assert document["result"] == {**artifact, "record_path": str(out)}
     assert artifact["independent_execution_verified"] is False
+
+
+@pytest.mark.parametrize("disagreement", [False, True])
+def test_replay_bundle_real_stream_contract_without_backends(tmp_path, disagreement):
+    from test_replay_bundle import inputs
+
+    paths, t0 = inputs(tmp_path, disagreement=disagreement)
+    out, blocked = tmp_path / "bundle", tmp_path / "blocked"
+    blocked.mkdir()
+    process = _run(
+        "bundle",
+        "replay-create",
+        "--reports",
+        *paths,
+        "--t0",
+        str(t0),
+        "--out",
+        str(out),
+        "--json",
+        block_backends=blocked,
+    )
+    document = json.loads(process.stdout.decode("utf-8"))
+    assert document["command"] == "bundle" and document["exit_code"] == process.returncode == 0
+    assert document["result"]["original_t0"]["protocol_pass"] is (not disagreement)
+    process = _run("bundle", "replay-verify", "--bundle", str(out), "--json", block_backends=blocked)
+    checked = json.loads(process.stdout.decode("utf-8"))
+    assert checked["exit_code"] == process.returncode == 0 and "error" not in checked
+    assert checked["result"]["receiving_t0"]["protocol_pass"] is (not disagreement)
+    assert checked["result"]["scientific_claims_verified"] is False
 
 
 def test_a_verdict_failure_is_not_reported_as_an_error(monkeypatch, capsys):
