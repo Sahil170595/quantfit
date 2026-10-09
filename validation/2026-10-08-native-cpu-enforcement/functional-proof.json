@@ -1,0 +1,287 @@
+{
+  "kind": "synthetic functional actual POSIX process/session/CLI acceptance, not model execution",
+  "source_head": "b745506c49f017fc17ba6372629835d37fc535d7",
+  "source_head_observation": "supplied by Windows git rev-parse HEAD; WSL did not read worktree Git metadata",
+  "source_hashes": {
+    "quantfit/cold_run.py": "ee6edabd4efe7bfbce07da964117e00709555f9d70154534999a3f5d78dedb54",
+    "quantfit/safety/gguf_arm.py": "56a775e62734da89aa6ec649567ab7ed79bd89496f929ea03bdcd5f8aaea7128",
+    "quantfit/safety/verify.py": "e1d695d8d4578decd98a4566028077a6f3886948072538745da6515822a595a0",
+    "quantfit/cli.py": "48150a5f46ba734c0be2c4f8cbfedbba74363770eaf5353396210c46599b2c32",
+    "tests/test_cold_run.py": "ffb036406b9d1f8f2c5cbd74c5c3fc3361982a7a0bfe708e821bde438d3e39f1",
+    "tools/ci_installed.py": "6d66f87e3d7f178ca0e8009e2e6de5496236a13b1ae3f4079b7dd71ba246ed21"
+  },
+  "python": "3.12.3",
+  "pytest": "8.4.2",
+  "platform": "Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "psutil": "5.9.8",
+  "cases": [
+    {
+      "case": "regression",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "cold-run",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--out",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/regression",
+        "--timeout-seconds",
+        "10",
+        "--json"
+      ],
+      "actual_exit": 0,
+      "native_exits": [
+        3,
+        3,
+        3
+      ],
+      "status": "t0_agreement",
+      "t0_protocol_pass": true,
+      "fresh_pid_count": 3,
+      "raw_stdout_from_children_retained": false,
+      "shim_removed": true
+    },
+    {
+      "case": "null",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "cold-run",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--out",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/null",
+        "--timeout-seconds",
+        "10",
+        "--json"
+      ],
+      "actual_exit": 0,
+      "native_exits": [
+        0,
+        0,
+        0
+      ],
+      "status": "t0_agreement",
+      "t0_protocol_pass": true,
+      "fresh_pid_count": 3,
+      "raw_stdout_from_children_retained": false,
+      "shim_removed": true
+    },
+    {
+      "case": "unmeasured",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "cold-run",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--out",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/unmeasured",
+        "--timeout-seconds",
+        "10",
+        "--json"
+      ],
+      "actual_exit": 0,
+      "native_exits": [
+        4,
+        4,
+        4
+      ],
+      "status": "t0_agreement",
+      "t0_protocol_pass": true,
+      "fresh_pid_count": 3,
+      "raw_stdout_from_children_retained": false,
+      "shim_removed": true
+    },
+    {
+      "case": "disagreement",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "cold-run",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--out",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/disagreement",
+        "--timeout-seconds",
+        "10",
+        "--json"
+      ],
+      "actual_exit": 3,
+      "native_exits": [
+        3,
+        3,
+        3
+      ],
+      "status": "t0_disagreement",
+      "t0_protocol_pass": false,
+      "fresh_pid_count": 3,
+      "raw_stdout_from_children_retained": false,
+      "shim_removed": true
+    },
+    {
+      "case": "operational",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "cold-run",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--out",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/operational",
+        "--timeout-seconds",
+        "10",
+        "--json"
+      ],
+      "actual_exit": 2,
+      "native_exits": [
+        2,
+        2,
+        2
+      ],
+      "status": "native_operational_failure",
+      "t0_protocol_pass": null,
+      "fresh_pid_count": 3,
+      "raw_stdout_from_children_retained": false,
+      "shim_removed": true
+    },
+    {
+      "case": "timeout",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "cold-run",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--out",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/timeout",
+        "--timeout-seconds",
+        "1",
+        "--json"
+      ],
+      "actual_exit": 2,
+      "native_exits": [
+        null,
+        null,
+        null
+      ],
+      "status": "native_operational_failure",
+      "t0_protocol_pass": null,
+      "fresh_pid_count": 3,
+      "raw_stdout_from_children_retained": false,
+      "shim_removed": true
+    },
+    {
+      "case": "different-binary",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "cold-run",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--out",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/different-binary",
+        "--timeout-seconds",
+        "10",
+        "--json"
+      ],
+      "actual_exit": 2,
+      "native_exits": [
+        3,
+        3,
+        3
+      ],
+      "status": "native_operational_failure",
+      "t0_protocol_pass": null,
+      "fresh_pid_count": 3,
+      "raw_stdout_from_children_retained": false,
+      "shim_removed": true
+    },
+    {
+      "case": "different-threads",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "cold-run",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--out",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/different-threads",
+        "--timeout-seconds",
+        "10",
+        "--json"
+      ],
+      "actual_exit": 2,
+      "native_exits": [
+        3,
+        3,
+        3
+      ],
+      "status": "native_operational_failure",
+      "t0_protocol_pass": null,
+      "fresh_pid_count": 3,
+      "raw_stdout_from_children_retained": false,
+      "shim_removed": true
+    },
+    {
+      "case": "quantized-baseline",
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "cold-run",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--out",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/quantized-baseline",
+        "--timeout-seconds",
+        "10",
+        "--json"
+      ],
+      "actual_exit": 2,
+      "native_exits": [
+        3,
+        3,
+        3
+      ],
+      "status": "native_operational_failure",
+      "t0_protocol_pass": null,
+      "fresh_pid_count": 3,
+      "raw_stdout_from_children_retained": false,
+      "shim_removed": true
+    }
+  ],
+  "limitations": [
+    "No model, Hub download or llama-server executable ran.",
+    "Arm bytes/revisions/statistics are fixture declarations, not authenticated observations.",
+    "Direct children were waited/reaped. Grandchild reaping is not established.",
+    "No human adjudication, sensitivity, GPU, crosshardware or independent reproduction claim.",
+    "Hosted installed model/T0 campaign remains pending."
+  ]
+}

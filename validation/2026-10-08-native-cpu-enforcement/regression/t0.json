@@ -1,0 +1,90 @@
+{
+  "t0_schema_version": 1,
+  "check": "T0_within_hardware_byte_identity",
+  "rule": "docs/cross-hardware-tolerance-v0.md v0 \u00a71.5",
+  "pass": true,
+  "n_replicates": 3,
+  "meets_protocol_replicate_count": true,
+  "protocol_pass": true,
+  "measurement_identity": {
+    "schema_version": 2,
+    "quantfit_version": "0.16.0",
+    "judge": {
+      "card_xstest_accuracy_label": "SYNTHETIC fixture; no judge ran",
+      "id": "garak-llm/garak-refusal-detector",
+      "input_contract": "completion-only; truncated to 512 judge tokens; prompt never concatenated",
+      "revision": "5cb5ec8f364318cc48724ddf8ad414000c36781b"
+    },
+    "probe_dataset": {
+      "id": "Crusadersk/quantsafe-judge-benchmark",
+      "n_probes": 40,
+      "revision": "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58",
+      "split": "train"
+    },
+    "decode": {
+      "chat_template": "model-default when present, raw prompt otherwise",
+      "do_sample": false,
+      "max_new_tokens": 64
+    },
+    "arms": {
+      "baseline": {
+        "model": "b.gguf",
+        "revision": null,
+        "resolved_dtype": "F16",
+        "engine": {
+          "binary_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "device": "cpu",
+          "n_gpu_layers": 0,
+          "name": "llama.cpp",
+          "offload_device": "none",
+          "op_offload": false,
+          "source": "QUANTFIT_LLAMACPP (user-provided build; tag not verified by quantfit)",
+          "threads": 2
+        },
+        "artifact_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "quantized": {
+        "model": "q.gguf",
+        "revision": null,
+        "resolved_dtype": "Q4_K_M",
+        "engine": {
+          "binary_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "device": "cpu",
+          "n_gpu_layers": 0,
+          "name": "llama.cpp",
+          "offload_device": "none",
+          "op_offload": false,
+          "source": "QUANTFIT_LLAMACPP (user-provided build; tag not verified by quantfit)",
+          "threads": 2
+        },
+        "artifact_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    }
+  },
+  "environment_identity": {
+    "cuda": null,
+    "device": "cpu",
+    "python": "3.13.1",
+    "torch": "2.13.0+cpu",
+    "transformers": "5.17.0"
+  },
+  "identity_sha256": "a6b48c4fdf555b073774ee3fd9d9f9eb2648b3d2278e9a9bb384dc4850322f20",
+  "independent_execution_verified": false,
+  "reports": [
+    {
+      "path": "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/regression/run-1/report.json",
+      "report_sha256": "68f9ec1ebad271f04800c2a55167e5c38c1b32058d693bb504743477540c5d2a"
+    },
+    {
+      "path": "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/regression/run-2/report.json",
+      "report_sha256": "623a641920f64f5ffc5675e26dc318ab83ae4e4c896d9401008d77966d6407a0"
+    },
+    {
+      "path": "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-native-cpu-enforcement/regression/run-3/report.json",
+      "report_sha256": "56dd7d18318c149afd5636be2f4d0935dc887a010b42dedeb26f8cc7f5ca49e9"
+    }
+  ],
+  "replicates_are_distinct_files": true,
+  "differing": [],
+  "statement": "Identical, not within 1: all eight independent integers equal, hence every derived field equal (\u00a71.5). A T0 failure makes the reproduction record `void` (\u00a76.3) \u2014 fix the leak and re-run; do not widen the cross-hardware tolerance to absorb it. Note a cached baseline replicate CANNOT serve as a T0 replicate: it would be byte-identical trivially and turn the precondition into a tautology (\u00a73.2) \u2014 and neither can a copy or a repeated path, both of which are REFUSED here (exit 2) rather than counted as agreement. Instrument and reported environment identities must match first. Distinct files and hashes do NOT prove independent execution or physical-host identity. Two reports can record partial agreement but cannot establish the three-replicate protocol."
+}
