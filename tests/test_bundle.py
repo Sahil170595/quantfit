@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -168,6 +169,89 @@ def test_calibration_and_resolution_must_match_consumed_report_bytes(tmp_path):
             str(report), str(tmp_path / "bundle"), calibration_path=str(calibration), resolution_path=str(resolution)
         )
     assert not (tmp_path / "bundle").exists()
+
+
+@pytest.mark.parametrize("direction", [math.inf, -math.inf])
+def test_resolution_roundoff_preserves_exact_original_bytes(tmp_path, direction):
+    report, calibration, resolution, gate = inputs(tmp_path)
+    supplied = json.loads(resolution.read_bytes())
+    block = supplied["axes"]["refusal-robustness"]["resolution"]
+    block["perfect_judge_mde"] = math.nextafter(block["perfect_judge_mde"], direction)
+    raw = json.dumps(supplied).encode()
+    resolution.write_bytes(raw)
+    out = tmp_path / "bundle"
+    result = create_bundle(
+        str(report), str(out), calibration_path=str(calibration), resolution_path=str(resolution), gate_path=str(gate)
+    )
+    assert result["scientific_claims_verified"] is False
+    assert (out / "resolution.json").read_bytes() == raw
+    member = next(row for row in result["manifest"]["files"] if row["role"] == "resolution")
+    assert member["sha256"] == hashlib.sha256(raw).hexdigest()
+    assert verify_bundle(str(out))["integrity_verified"] is True
+
+
+@pytest.mark.parametrize(
+    ("path", "replacement"),
+    [
+        (("human_confirmation_verified",), 0),
+        (("assumptions_verified",), True),
+        (("resolution_schema",), True),
+        (("binding_fingerprint",), "0" * 64),
+        (("inputs", "report_sha256"), "0" * 64),
+        (("binding_status",), "scientific GO"),
+        (("axes", "refusal-robustness", "n_at_risk"), "float_count"),
+        (("axes", "refusal-robustness", "n_at_risk"), "changed_count"),
+        (("axes", "refusal-robustness", "resolution", "perfect_judge_mde"), "changed_statistic"),
+    ],
+)
+def test_resolution_numeric_portability_does_not_relax_declared_facts(tmp_path, path, replacement):
+    report, calibration, resolution, _ = inputs(tmp_path)
+    supplied = json.loads(resolution.read_bytes())
+    node = supplied
+    for key in path[:-1]:
+        node = node[key]
+    old = node[path[-1]]
+    node[path[-1]] = (
+        float(old)
+        if replacement == "float_count"
+        else old + 1
+        if replacement == "changed_count"
+        else old + 1e-5
+        if replacement == "changed_statistic"
+        else replacement
+    )
+    resolution.write_text(json.dumps(supplied), encoding="utf-8")
+    with pytest.raises(BundleError, match="resolution"):
+        create_bundle(
+            str(report), str(tmp_path / "refused"), calibration_path=str(calibration), resolution_path=str(resolution)
+        )
+    assert not (tmp_path / "refused").exists()
+
+
+@pytest.mark.parametrize("path", [("eps", "baseline_upper"), ("mde_block", "perfect_judge_mde")])
+def test_recomputed_gate_statistics_accept_adjacent_float_bytes(tmp_path, path):
+    report, calibration, _, gate = inputs(tmp_path)
+    supplied = json.loads(gate.read_bytes())
+    supplied[path[0]][path[1]] = math.nextafter(supplied[path[0]][path[1]], -math.inf)
+    raw = json.dumps(supplied).encode()
+    gate.write_bytes(raw)
+    out = tmp_path / "bundle"
+    result = create_bundle(str(report), str(out), calibration_path=str(calibration), gate_path=str(gate))
+    assert result["declared_results"]["gate"]["exit_code"] == 5
+    assert (out / "gate.json").read_bytes() == raw
+    assert verify_bundle(str(out))["integrity_verified"] is True
+
+
+@pytest.mark.parametrize("path", [("resolution", "not_refused"), ("mde_block", "n_at_risk")])
+def test_gate_derived_count_and_boolean_types_stay_exact(tmp_path, path):
+    report, calibration, _, gate = inputs(tmp_path)
+    supplied = json.loads(gate.read_bytes())
+    old = supplied[path[0]][path[1]]
+    supplied[path[0]][path[1]] = int(old) if type(old) is bool else float(old)
+    gate.write_text(json.dumps(supplied), encoding="utf-8")
+    with pytest.raises(BundleError, match="gate"):
+        create_bundle(str(report), str(tmp_path / "refused"), calibration_path=str(calibration), gate_path=str(gate))
+    assert not (tmp_path / "refused").exists()
 
 
 def test_create_refuses_existing_output_and_input_alias_without_modification(tmp_path):

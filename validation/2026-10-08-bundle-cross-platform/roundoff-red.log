@@ -1,0 +1,204 @@
+FFF.F...F..                                                              [100%]
+================================== FAILURES ===================================
+________ test_resolution_roundoff_preserves_exact_original_bytes[inf] _________
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1128/test_resolution_roundoff_prese0')
+direction = inf
+
+    @pytest.mark.parametrize("direction", [math.inf, -math.inf])
+    def test_resolution_roundoff_preserves_exact_original_bytes(tmp_path, direction):
+        report, calibration, resolution, gate = inputs(tmp_path)
+        supplied = json.loads(resolution.read_bytes())
+        block = supplied["axes"]["refusal-robustness"]["resolution"]
+        block["perfect_judge_mde"] = math.nextafter(block["perfect_judge_mde"], direction)
+        raw = json.dumps(supplied).encode()
+        resolution.write_bytes(raw)
+        out = tmp_path / "bundle"
+>       result = create_bundle(
+            str(report), str(out), calibration_path=str(calibration), resolution_path=str(resolution), gate_path=str(gate)
+        )
+
+tests\test_bundle.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\bundle.py:526: in create_bundle
+    declarations = _validate(data)
+                   ^^^^^^^^^^^^^^^
+quantfit\bundle.py:475: in _validate
+    _require(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'resolution does not match consumed report/calibration bytes and conditional analysis'
+
+    def _require(condition: bool, message: str) -> None:
+        if not condition:
+>           raise BundleError(message)
+E           quantfit.bundle.BundleError: resolution does not match consumed report/calibration bytes and conditional analysis
+
+quantfit\bundle.py:76: BundleError
+________ test_resolution_roundoff_preserves_exact_original_bytes[-inf] ________
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1128/test_resolution_roundoff_prese1')
+direction = -inf
+
+    @pytest.mark.parametrize("direction", [math.inf, -math.inf])
+    def test_resolution_roundoff_preserves_exact_original_bytes(tmp_path, direction):
+        report, calibration, resolution, gate = inputs(tmp_path)
+        supplied = json.loads(resolution.read_bytes())
+        block = supplied["axes"]["refusal-robustness"]["resolution"]
+        block["perfect_judge_mde"] = math.nextafter(block["perfect_judge_mde"], direction)
+        raw = json.dumps(supplied).encode()
+        resolution.write_bytes(raw)
+        out = tmp_path / "bundle"
+>       result = create_bundle(
+            str(report), str(out), calibration_path=str(calibration), resolution_path=str(resolution), gate_path=str(gate)
+        )
+
+tests\test_bundle.py:152: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\bundle.py:526: in create_bundle
+    declarations = _validate(data)
+                   ^^^^^^^^^^^^^^^
+quantfit\bundle.py:475: in _validate
+    _require(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'resolution does not match consumed report/calibration bytes and conditional analysis'
+
+    def _require(condition: bool, message: str) -> None:
+        if not condition:
+>           raise BundleError(message)
+E           quantfit.bundle.BundleError: resolution does not match consumed report/calibration bytes and conditional analysis
+
+quantfit\bundle.py:76: BundleError
+_ test_resolution_numeric_portability_does_not_relax_declared_facts[path0-0] __
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1128/test_resolution_numeric_portab0')
+path = ('human_confirmation_verified',), replacement = 0
+
+    @pytest.mark.parametrize(
+        ("path", "replacement"),
+        [
+            (("human_confirmation_verified",), 0),
+            (("assumptions_verified",), True),
+            (("resolution_schema",), True),
+            (("binding_fingerprint",), "0" * 64),
+            (("inputs", "report_sha256"), "0" * 64),
+            (("binding_status",), "scientific GO"),
+            (("axes", "refusal-robustness", "n_at_risk"), "float_count"),
+            (("axes", "refusal-robustness", "n_at_risk"), "changed_count"),
+            (("axes", "refusal-robustness", "resolution", "perfect_judge_mde"), "changed_statistic"),
+        ],
+    )
+    def test_resolution_numeric_portability_does_not_relax_declared_facts(tmp_path, path, replacement):
+        report, calibration, resolution, _ = inputs(tmp_path)
+        supplied = json.loads(resolution.read_bytes())
+        node = supplied
+        for key in path[:-1]:
+            node = node[key]
+        old = node[path[-1]]
+        node[path[-1]] = (
+            float(old)
+            if replacement == "float_count"
+            else old + 1
+            if replacement == "changed_count"
+            else old + 1e-5
+            if replacement == "changed_statistic"
+            else replacement
+        )
+        resolution.write_text(json.dumps(supplied), encoding="utf-8")
+>       with pytest.raises(BundleError, match="resolution"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'quantfit.bundle.BundleError'>
+
+tests\test_bundle.py:193: Failed
+_ test_resolution_numeric_portability_does_not_relax_declared_facts[path2-True] _
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1128/test_resolution_numeric_portab2')
+path = ('resolution_schema',), replacement = True
+
+    @pytest.mark.parametrize(
+        ("path", "replacement"),
+        [
+            (("human_confirmation_verified",), 0),
+            (("assumptions_verified",), True),
+            (("resolution_schema",), True),
+            (("binding_fingerprint",), "0" * 64),
+            (("inputs", "report_sha256"), "0" * 64),
+            (("binding_status",), "scientific GO"),
+            (("axes", "refusal-robustness", "n_at_risk"), "float_count"),
+            (("axes", "refusal-robustness", "n_at_risk"), "changed_count"),
+            (("axes", "refusal-robustness", "resolution", "perfect_judge_mde"), "changed_statistic"),
+        ],
+    )
+    def test_resolution_numeric_portability_does_not_relax_declared_facts(tmp_path, path, replacement):
+        report, calibration, resolution, _ = inputs(tmp_path)
+        supplied = json.loads(resolution.read_bytes())
+        node = supplied
+        for key in path[:-1]:
+            node = node[key]
+        old = node[path[-1]]
+        node[path[-1]] = (
+            float(old)
+            if replacement == "float_count"
+            else old + 1
+            if replacement == "changed_count"
+            else old + 1e-5
+            if replacement == "changed_statistic"
+            else replacement
+        )
+        resolution.write_text(json.dumps(supplied), encoding="utf-8")
+>       with pytest.raises(BundleError, match="resolution"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'quantfit.bundle.BundleError'>
+
+tests\test_bundle.py:193: Failed
+_ test_resolution_numeric_portability_does_not_relax_declared_facts[path6-float_count] _
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1128/test_resolution_numeric_portab6')
+path = ('axes', 'refusal-robustness', 'n_at_risk'), replacement = 'float_count'
+
+    @pytest.mark.parametrize(
+        ("path", "replacement"),
+        [
+            (("human_confirmation_verified",), 0),
+            (("assumptions_verified",), True),
+            (("resolution_schema",), True),
+            (("binding_fingerprint",), "0" * 64),
+            (("inputs", "report_sha256"), "0" * 64),
+            (("binding_status",), "scientific GO"),
+            (("axes", "refusal-robustness", "n_at_risk"), "float_count"),
+            (("axes", "refusal-robustness", "n_at_risk"), "changed_count"),
+            (("axes", "refusal-robustness", "resolution", "perfect_judge_mde"), "changed_statistic"),
+        ],
+    )
+    def test_resolution_numeric_portability_does_not_relax_declared_facts(tmp_path, path, replacement):
+        report, calibration, resolution, _ = inputs(tmp_path)
+        supplied = json.loads(resolution.read_bytes())
+        node = supplied
+        for key in path[:-1]:
+            node = node[key]
+        old = node[path[-1]]
+        node[path[-1]] = (
+            float(old)
+            if replacement == "float_count"
+            else old + 1
+            if replacement == "changed_count"
+            else old + 1e-5
+            if replacement == "changed_statistic"
+            else replacement
+        )
+        resolution.write_text(json.dumps(supplied), encoding="utf-8")
+>       with pytest.raises(BundleError, match="resolution"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'quantfit.bundle.BundleError'>
+
+tests\test_bundle.py:193: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_bundle.py::test_resolution_roundoff_preserves_exact_original_bytes[inf]
+FAILED tests/test_bundle.py::test_resolution_roundoff_preserves_exact_original_bytes[-inf]
+FAILED tests/test_bundle.py::test_resolution_numeric_portability_does_not_relax_declared_facts[path0-0]
+FAILED tests/test_bundle.py::test_resolution_numeric_portability_does_not_relax_declared_facts[path2-True]
+FAILED tests/test_bundle.py::test_resolution_numeric_portability_does_not_relax_declared_facts[path6-float_count]
+5 failed, 6 passed, 52 deselected in 3.02s

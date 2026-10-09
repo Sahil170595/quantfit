@@ -1,0 +1,74 @@
+[
+  {
+    "gate": "ruff-check",
+    "argv": [
+      "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+      "-m",
+      "ruff",
+      "check",
+      "quantfit",
+      "tests",
+      "tools"
+    ],
+    "exit_code": 0
+  },
+  {
+    "gate": "ruff-format",
+    "argv": [
+      "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+      "-m",
+      "ruff",
+      "format",
+      "--check",
+      "quantfit",
+      "tests",
+      "tools/ci_constraints.py",
+      "tools/ci_coverage.py",
+      "tools/ci_cpu_acceptance.py",
+      "tools/ci_dependency_audit.py",
+      "tools/ci_gate_check.py",
+      "tools/ci_inspect_acceptance.py",
+      "tools/ci_installed.py",
+      "tools/ci_mutation.py",
+      "tools/ci_gate_fixture"
+    ],
+    "exit_code": 0
+  },
+  {
+    "gate": "mypy",
+    "argv": [
+      "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+      "-m",
+      "mypy",
+      "--strict",
+      "quantfit/spec.py",
+      "quantfit/engines/base.py"
+    ],
+    "exit_code": 0
+  },
+  {
+    "gate": "audit",
+    "argv": [
+      "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+      "-m",
+      "quantfit.cli",
+      "audit",
+      "--json"
+    ],
+    "exit_code": 0
+  },
+  {
+    "gate": "properties",
+    "argv": [
+      "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "tests/test_numerical_properties.py",
+      "-q",
+      "-k",
+      "not rtn",
+      "--junitxml=validation\\2026-10-08-bundle-cross-platform\\properties.xml"
+    ],
+    "exit_code": 0
+  }
+]
