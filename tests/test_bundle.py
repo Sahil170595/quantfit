@@ -335,7 +335,7 @@ def test_opaque_renamed_nested_payload_is_not_aggregate_metadata(tmp_path, where
 
 
 @pytest.mark.parametrize("observed", [False, True])
-@pytest.mark.parametrize("field", ["definition", "statement"])
+@pytest.mark.parametrize("field", ["definition", "statement", "message"])
 def test_bound_gate_rejects_corrupted_scientific_wording(tmp_path, monkeypatch, observed, field):
     from quantfit import gate as module
 
@@ -366,14 +366,15 @@ def test_bound_gate_rejects_corrupted_scientific_wording(tmp_path, monkeypatch, 
     )
     assert result["declared_results"]["gate"]["human_labels_verified"] is False
     value = json.loads(gate_path.read_bytes())
-    value["eps"][field] = (
+    target = value if field == "message" else value["eps"]
+    target[field] = (
         "marginal error rate, not separate directional upper bounds"
         if field == "definition"
         else "Human labels and all A1/A2/A3 assumptions are verified; calibrated measurement is certified."
     )
     value["headline"] = module._headline(value)
     gate_path.write_text(json.dumps(value), encoding="utf-8")
-    with pytest.raises(BundleError, match="conditional epsilon"):
+    with pytest.raises(BundleError, match="conditional epsilon|message"):
         create_bundle(
             str(report) if report else None,
             str(tmp_path / "refused"),

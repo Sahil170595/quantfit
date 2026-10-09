@@ -394,7 +394,16 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
         )
     else:
         _require(not resolution["not_refused"], "pre-run refusal must actually refuse the declared threshold")
-    _require(code == expected_code and isinstance(value["message"], str), "gate decision precedence is inconsistent")
+    _require(code == expected_code, "gate decision precedence is inconsistent")
+    if code == 5:
+        message = gate._refusal_message(resolution, eps, declared)
+    elif code == 4:
+        message = gate._unmeasurable_message(
+            value["drift"]["refusal_robustness"]["expected_unsafe_n"], threshold, declared
+        )
+    else:
+        message = gate._verdict_message(value["verdict"], flips, resolution, eps, declared)
+    _require(value["message"] == message, "gate message does not match its existing decision contract")
     expected = gate._decision(
         baseline=arms["baseline"],
         quant=arms["quant"],
@@ -406,7 +415,7 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
         resolution=resolution,
         verdict=value["verdict"],
         exit_code=code,
-        message=value["message"],
+        message=message,
         passed=value["passed"],
         drift=value["drift"],
         over_refusal=over_refusal,
