@@ -1,0 +1,79 @@
+{
+  "qualified_source_head": "ad95062b23fc189769e463c48a71daadd709079f",
+  "scope": "Existing actual hosted Phi4 aggregates, local editable CLI consumers only; no new model/network/calibration/human labels. Native regression exit3 preserved; consumer exit0 is card/bundle integrity or T0 agreement.",
+  "committed_source_report": "validation/2026-10-09-phi4-public-candidate/producer/run-1/report.json",
+  "source_report_sha256": "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+  "native_source_exit": 3,
+  "producer_t0_original_sha256": "3b4424e1c985245ad81cb0dbbbfe14a31f5efcd1f88970785dfa6d65af22fd91",
+  "steps": [
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "emit",
+        "model-card",
+        "--report",
+        "C:\\tmp\\qf-next-pr-receipts-20261008\\hosted-reference-campaign-37890682118\\run-1\\report.json"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "create",
+        "--report",
+        "C:\\tmp\\qf-next-pr-receipts-20261008\\hosted-reference-campaign-37890682118\\run-1\\report.json",
+        "--out",
+        "C:\\tmp\\qf-readme-draft-20261009\\actual-phi4-offline-final\\evidence",
+        "--json"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "verify",
+        "--bundle",
+        "C:\\tmp\\qf-readme-draft-20261009\\actual-phi4-offline-final\\evidence",
+        "--json"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "t0",
+        "--reports",
+        "C:\\tmp\\qf-next-pr-receipts-20261008\\hosted-reference-campaign-37890682118\\run-1\\report.json",
+        "C:\\tmp\\qf-next-pr-receipts-20261008\\hosted-reference-campaign-37890682118\\run-2\\report.json",
+        "C:\\tmp\\qf-next-pr-receipts-20261008\\hosted-reference-campaign-37890682118\\run-3\\report.json",
+        "--out",
+        "C:\\tmp\\qf-readme-draft-20261009\\actual-phi4-offline-final\\relocated-t0.json",
+        "--json"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "references",
+        "list",
+        "--json"
+      ],
+      "exit": 0
+    }
+  ],
+  "all_zero": true,
+  "relocated_t0_protocol_pass": true
+}

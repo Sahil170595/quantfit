@@ -1,0 +1,50 @@
+{
+  "qualified_source_head": "ad95062b23fc189769e463c48a71daadd709079f",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.12.13",
+  "scope": "Documentation change. Reused sparse local CI environment; numerical/model-heavy Torch coverage and actual installed clean-runtime README execution are hosted gates, not this local syntax check. No local models/new dependencies/worktrees/containers.",
+  "gates": [
+    {
+      "name": "unit",
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests",
+        "-q",
+        "--ignore=tests/test_numerical_properties.py",
+        "--junitxml=C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-cli-readme\\unit.xml"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "properties",
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_numerical_properties.py",
+        "-q",
+        "--junitxml=C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-cli-readme\\properties.xml"
+      ],
+      "exit": 1
+    }
+  ],
+  "readme_sha256": "79898fa417390c47cea3863b57f03744a2c64c7c4aaed9199a1cb2cbd4288e6f",
+  "unit": {
+    "cases": 1850,
+    "skipped": 32,
+    "failed": 0,
+    "errors": 0,
+    "passed": 1818
+  },
+  "properties": {
+    "cases": 3,
+    "skipped": 0,
+    "failed": 1,
+    "errors": 0,
+    "passed": 2
+  },
+  "hosted_final_head": "PENDING",
+  "raw_payloads": false
+}

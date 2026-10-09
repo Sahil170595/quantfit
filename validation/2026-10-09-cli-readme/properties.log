@@ -1,0 +1,30 @@
+..F                                                                      [100%]
+================================== FAILURES ===================================
+________________ test_rtn_reconstruction_obeys_half_step_bound ________________
+
+    @settings(max_examples=50, derandomize=True, deadline=None)
+>   @given(st.integers(1, 8), st.integers(1, 64), st.integers(2, 8), st.integers(1, 32))
+                   ^^^
+
+tests\test_numerical_properties.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+rows = 1, cols = 1, bits = 2, group = 1
+
+    @settings(max_examples=50, derandomize=True, deadline=None)
+    @given(st.integers(1, 8), st.integers(1, 64), st.integers(2, 8), st.integers(1, 32))
+    def test_rtn_reconstruction_obeys_half_step_bound(rows, cols, bits, group):
+>       import torch
+E       ModuleNotFoundError: No module named 'torch'
+E       Falsifying example: test_rtn_reconstruction_obeys_half_step_bound(
+E           # The test always failed when commented parts were varied together.
+E           rows=1,  # or any other generated value
+E           cols=1,  # or any other generated value
+E           bits=2,  # or any other generated value
+E           group=1,  # or any other generated value
+E       )
+
+tests\test_numerical_properties.py:38: ModuleNotFoundError
+=========================== short test summary info ===========================
+FAILED tests/test_numerical_properties.py::test_rtn_reconstruction_obeys_half_step_bound
+1 failed, 2 passed in 4.19s

@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.16.0"
+  },
+  "command": "t0",
+  "exit_code": 0,
+  "result": {
+    "t0_schema_version": 1,
+    "check": "T0_within_hardware_byte_identity",
+    "rule": "docs/cross-hardware-tolerance-v0.md v0 \u00a71.5",
+    "pass": true,
+    "n_replicates": 3,
+    "meets_protocol_replicate_count": true,
+    "protocol_pass": true,
+    "measurement_identity": {
+      "schema_version": 2,
+      "quantfit_version": "0.16.0",
+      "judge": {
+        "card_xstest_accuracy": null,
+        "card_xstest_accuracy_label": "no card XSTest figure; measured in-distribution by quantfit instead \u2014 accuracy 95.0% at n=80 (single-rater, one model, one probe set); false-positive rate 8.3% on 48 compliant completions (95% CI upper 19.6%); false-negative rate 0.0% on 32 refusals (95% CI upper 10.7%) \u2014 a measured zero at this n is not a flawless judge, and a false negative is a MISSED dangerous flip",
+        "id": "garak-llm/garak-refusal-detector",
+        "input_contract": "completion-only; truncated to 512 judge tokens; prompt never concatenated",
+        "revision": "5cb5ec8f364318cc48724ddf8ad414000c36781b"
+      },
+      "probe_dataset": {
+        "id": "Crusadersk/quantsafe-judge-benchmark",
+        "n_probes": 40,
+        "revision": "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58",
+        "split": "train"
+      },
+      "decode": {
+        "chat_template": "model-default when present, raw prompt otherwise",
+        "do_sample": false,
+        "max_new_tokens": 64
+      },
+      "arms": {
+        "baseline": {
+          "model": "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf",
+          "revision": "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+          "resolved_dtype": "BF16",
+          "engine": {
+            "binary_sha256": "a7ca52ff7d600e044610876f091b85f6fd272a4f5c99e7477d934c953e83cfa9",
+            "device": "cpu",
+            "n_gpu_layers": 0,
+            "name": "llama.cpp",
+            "offload_device": "none",
+            "op_offload": false,
+            "source": "provisioned from pinned release archive b9817 (archive SHA256-verified when provisioned)",
+            "threads": 2
+          },
+          "artifact_sha256": "1a179f22f1efe409c6517805400c4f07f93fe1f5783e47231d35f933565dff20"
+        },
+        "quantized": {
+          "model": "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf",
+          "revision": "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+          "resolved_dtype": "Q4_K_M",
+          "engine": {
+            "binary_sha256": "a7ca52ff7d600e044610876f091b85f6fd272a4f5c99e7477d934c953e83cfa9",
+            "device": "cpu",
+            "n_gpu_layers": 0,
+            "name": "llama.cpp",
+            "offload_device": "none",
+            "op_offload": false,
+            "source": "provisioned from pinned release archive b9817 (archive SHA256-verified when provisioned)",
+            "threads": 2
+          },
+          "artifact_sha256": "88c00229914083cd112853aab84ed51b87bdf6b9ce42f532d8c85c7c63b1730a"
+        }
+      }
+    },
+    "environment_identity": {
+      "cuda": null,
+      "device": "cpu",
+      "python": "3.12.15",
+      "torch": "2.13.0+cpu",
+      "transformers": "5.17.0"
+    },
+    "identity_sha256": "34750ceb123963af632ba4cbe3f18aa43c4c18b6b912efa43c02d0bf1605b08d",
+    "independent_execution_verified": false,
+    "reports": [
+      {
+        "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\hosted-reference-campaign-37890682118\\run-1\\report.json",
+        "report_sha256": "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf"
+      },
+      {
+        "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\hosted-reference-campaign-37890682118\\run-2\\report.json",
+        "report_sha256": "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd"
+      },
+      {
+        "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\hosted-reference-campaign-37890682118\\run-3\\report.json",
+        "report_sha256": "4f8d91c0a026bb0003d49d9d307cb563a91b5dc624484a5e8ea719d8f963a8f8"
+      }
+    ],
+    "replicates_are_distinct_files": true,
+    "differing": [],
+    "statement": "Identical, not within 1: all eight independent integers equal, hence every derived field equal (\u00a71.5). A T0 failure makes the reproduction record `void` (\u00a76.3) \u2014 fix the leak and re-run; do not widen the cross-hardware tolerance to absorb it. Note a cached baseline replicate CANNOT serve as a T0 replicate: it would be byte-identical trivially and turn the precondition into a tautology (\u00a73.2) \u2014 and neither can a copy or a repeated path, both of which are REFUSED here (exit 2) rather than counted as agreement. Instrument and reported environment identities must match first. Distinct files and hashes do NOT prove independent execution or physical-host identity. Two reports can record partial agreement but cannot establish the three-replicate protocol.",
+    "record_path": "C:\\tmp\\qf-readme-draft-20261009\\actual-phi4-offline-final\\relocated-t0.json"
+  }
+}
