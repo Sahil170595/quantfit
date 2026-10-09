@@ -78,3 +78,21 @@ dataset publication. Original counts/verdict/floors remain distinct from conditi
 MDEs. A null means the detector did not fire; no passing positive control is inferred.
 All JSON was walked for prompt/completion/response/text/generation keys: none found.
 No prior dated validation record was edited.
+
+## Review correction: preserve the actual hashed input bytes
+
+Root review found a byte-provenance defect at the first evidence head
+`12e25521295251141cfb19d7b94908a7f94fbc92`: Windows `core.autocrlf=true`
+normalized the four working JSON inputs from CRLF to LF in Git. The emitted hashes
+correctly described the bytes consumed during validation, but those bytes differed
+from the committed inputs. `byte-provenance-failure.json` records the actual mismatch.
+
+The correction uses a narrowly scoped `.gitattributes` `-text` rule for JSON recursively
+under **this new directory only**, then stages the exact existing working bytes. Input
+and emitted evidence hashes were not regenerated to fit Git's transformed copy, no
+measurement was repeated, and no older validation archive was renormalized.
+`byte-provenance-corrected.json` verifies index bytes equal original working bytes for
+all existing JSON records, and verifies the four input hashes against the model card,
+resolution artifact and real action output records. Final handback additionally compares
+every JSON Git blob with its working file after committing, including these two receipts.
+Implementation and prior local test results remain unchanged.

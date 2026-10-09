@@ -1,0 +1,2 @@
+# Preserve the actual hashed bytes of this new validation record only.
+validation/2026-10-08-calibration-aware-outputs/**/*.json -text

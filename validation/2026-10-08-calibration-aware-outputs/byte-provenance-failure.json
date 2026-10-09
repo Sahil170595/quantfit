@@ -1,0 +1,40 @@
+{
+  "cause": "core.autocrlf=true normalized JSON CRLF working bytes into LF git blob bytes; output hashes described working bytes rather than committed inputs",
+  "files": [
+    {
+      "committed_bytes": 2606,
+      "committed_sha256": "3eaa5d0657c3860d5a88b8ac9965b32c432fbeab08dbce1d6a9f4d917d22591d",
+      "matches": false,
+      "path": "validation/2026-10-08-calibration-aware-outputs/drift.json",
+      "working_bytes": 2707,
+      "working_sha256": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa"
+    },
+    {
+      "committed_bytes": 3698,
+      "committed_sha256": "3607aa1b17c70977bf5a052377e0dc4c86dd8ff5ca7dbe257f25ed7893f72e5d",
+      "matches": false,
+      "path": "validation/2026-10-08-calibration-aware-outputs/calibration.json",
+      "working_bytes": 3842,
+      "working_sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014"
+    },
+    {
+      "committed_bytes": 2554,
+      "committed_sha256": "f4ce0d567a6b4c80bc2400e62e6603228268e6046d945d8e8a38e261bfaf2959",
+      "matches": false,
+      "path": "validation/2026-10-08-calibration-aware-outputs/action-drift.json",
+      "working_bytes": 2650,
+      "working_sha256": "5720a3c878847f5c7c8daa1984d6891507ddad01b9b9c922eab0c3a1ac8afde7"
+    },
+    {
+      "committed_bytes": 3733,
+      "committed_sha256": "01c101f4e911e1056e33ae864c9f7a21e6f9be7437869ce13f83eac64108f6f3",
+      "matches": false,
+      "path": "validation/2026-10-08-calibration-aware-outputs/action-calibration.json",
+      "working_bytes": 3877,
+      "working_sha256": "74fe3227b0a61859819cc350c0ee5d4a90ab696477b7b76e1bfd0c0ec7bad788"
+    }
+  ],
+  "reviewed_head": "12e25521295251141cfb19d7b94908a7f94fbc92",
+  "scope": "Only newly created calibration-aware-output records; earlier archives unchanged.",
+  "status": "FAIL"
+}
