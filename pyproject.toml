@@ -56,7 +56,7 @@ awq = ["gptqmodel>=7.1,<8"]
 # internals (SampleScore/Score/Value, inspect_ai.score, and the epoch-reduction
 # behaviour of Score.value) and is VERIFIED against 0.3.252. The cap moves only
 # after a validated run on the new minor — the standing ROADMAP rule.
-inspect = ["inspect-ai>=0.3.252,<0.4"]
+inspect = ["inspect-ai>=0.3.252,<0.4", "httpx>=0.28.1,<0.29"]
 
 [project.urls]
 Homepage = "https://github.com/Sahil170595/quantfit"
@@ -64,6 +64,9 @@ Repository = "https://github.com/Sahil170595/quantfit"
 
 [project.scripts]
 quantfit = "quantfit.cli:main"
+
+[project.entry-points.inspect_ai]
+quantfit = "quantfit._inspect_registry"
 
 [tool.setuptools.packages.find]
 include = ["quantfit*"]

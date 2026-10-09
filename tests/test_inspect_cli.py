@@ -71,6 +71,25 @@ def test_observation_failure_is_not_a_verdict(monkeypatch, capsys):
     assert "actual loaded" in json.loads(capsys.readouterr().out)["error"]["message"]
 
 
+def test_gguf_local_pin_slots_forward_without_invented_revisions(monkeypatch, capsys):
+    import quantfit.inspect_task as task
+
+    received = []
+
+    def failed(*a, **kw):
+        received.append(kw)
+        raise RuntimeError("synthetic refusal before model loading")
+
+    monkeypatch.setattr(task, "qsr_eval", failed)
+    assert (
+        main(["inspect-run", "--baseline", "quantfit_gguf/base.gguf", "--quant", "quantfit_gguf/quant.gguf", "--json"])
+        == 2
+    )
+    assert received[0]["gguf_revisions"] == (None, None) and "hf_revisions" not in received[0]
+    assert not __import__("pathlib").Path(received[0]["log_dir"]).exists()
+    assert json.loads(capsys.readouterr().out)["exit_code"] == 2
+
+
 def test_explicit_log_dir_gets_capture_warning(monkeypatch, capsys, tmp_path):
     import quantfit.inspect_task as task
 

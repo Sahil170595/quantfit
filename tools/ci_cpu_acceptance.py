@@ -138,23 +138,14 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
     }
 
 
-def gguf_acceptance(root: Path, cold_output: Path) -> dict:
-    from gguf import GGUFReader
+def gguf_pair(root: Path) -> tuple[Path, Path, dict]:
+    """Small pinned quant + fresh F16 baseline; shared by actual hosted consumers."""
     from huggingface_hub import snapshot_download
 
     from quantfit.backends.gguf import LLAMACPP_COMMIT, convert_script, quantize_gguf
-    from quantfit.safety.gguf_arm import _resolve, generate_completions
 
     out = quantize_gguf(MODEL, "Q4_K_M", str(root / "gguf"), revision=REVISION)
     file = out / "model.Q4_K_M.gguf"
-    arm = _resolve(str(file), None)
-    assert arm.file_type == "Q4_K_M"
-    reader = GGUFReader(str(file))
-    packed = sum(int(t.tensor_type) not in (0, 1) for t in reader.tensors)
-    assert packed > 0, "metadata without packed tensors does not establish quantization"
-    del reader
-    outputs, provenance = generate_completions(arm, ["The capital of France is"], 4)
-    assert len(outputs) == 1 and outputs[0].strip(), "loaded quantized model must generate"
     # quantize_gguf deliberately deletes its F16 intermediate. Produce a fresh
     # baseline with the supported pinned converter, reusing the pinned Hub cache.
     source = snapshot_download(MODEL, revision=REVISION)
@@ -166,6 +157,30 @@ def gguf_acceptance(root: Path, cold_output: Path) -> dict:
     assert actual_convert_head == LLAMACPP_COMMIT
     baseline = out / "cold-baseline.f16.gguf"
     subprocess.run([sys.executable, str(converter), source, "--outtype", "f16", "--outfile", str(baseline)], check=True)
+    return (
+        baseline,
+        file,
+        {
+            "converter_commit": actual_convert_head,
+            "converter_sha256": hashlib.sha256(converter.read_bytes()).hexdigest(),
+        },
+    )
+
+
+def gguf_acceptance(root: Path, cold_output: Path) -> dict:
+    from gguf import GGUFReader
+
+    from quantfit.safety.gguf_arm import _resolve, generate_completions
+
+    baseline, file, conversion = gguf_pair(root)
+    arm = _resolve(str(file), None)
+    assert arm.file_type == "Q4_K_M"
+    reader = GGUFReader(str(file))
+    packed = sum(int(t.tensor_type) not in (0, 1) for t in reader.tensors)
+    assert packed > 0, "metadata without packed tensors does not establish quantization"
+    del reader
+    outputs, provenance = generate_completions(arm, ["The capital of France is"], 4)
+    assert len(outputs) == 1 and outputs[0].strip(), "loaded quantized model must generate"
     cold = cold_acceptance(baseline, file, cold_output)
     return {
         "scheme": "Q4_K_M",
@@ -173,8 +188,7 @@ def gguf_acceptance(root: Path, cold_output: Path) -> dict:
         "artifact_sha256": arm.sha256,
         "inference_sha256": hashlib.sha256(outputs[0].encode()).hexdigest(),
         "engine": provenance.engine,
-        "converter_commit": actual_convert_head,
-        "converter_sha256": hashlib.sha256(converter.read_bytes()).hexdigest(),
+        **conversion,
         "cold_run": cold,
     }
 
