@@ -497,6 +497,22 @@ unmeasured axis exits 4, and native T0 refusal or malformed evidence exits 2.
 No counts are pooled and agreement does not establish independent execution,
 human-label truth, sensitivity or scientific GO.
 
+## Retrieve public aggregate evidence
+
+Candidate public aggregate retrieval (unreleased; candidate checkout/wheel):
+
+```bash
+quantfit evidence fetch --out public-evidence/ --timeout-seconds 120 --json
+```
+
+The installed package pins twelve original files at one immutable public dataset
+commit, downloads anonymously with bounded raw bytes/deadline, and publishes only
+a new directory on supported Linux/Windows filesystems. The original negative
+Phi4 flags remain visible in separate receiving analysis: fetch integrity 0
+coexists with native analysis 3. No inference, registration, authenticated human
+labels, independent execution, sensitivity or scientific GO is established.
+See [the fixed snapshot and API contract](docs/public-evidence-fetch.md).
+
 ## Fresh native cold replicates
 
 On the qualified Linux `/proc` runner, use a new output directory:

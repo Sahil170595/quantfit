@@ -120,7 +120,7 @@ def test_the_leaf_set_is_what_we_think_it_is():
         "check", "list", "plan", "probe", "verify", "verify-safety", "inspect-run", "screen", "emit",
         "calibrate sheet", "calibrate ingest", "gate", "t0", "reproduce", "audit", "quantize", "resolution",
         "references list", "references verify", "bundle create", "bundle verify",
-        "bundle replay-create", "bundle replay-verify", "cold-run", "repeatability",
+        "bundle replay-create", "bundle replay-verify", "cold-run", "repeatability", "evidence fetch",
     }  # fmt: skip
     assert leaves == expected, f"leaf command set changed: {sorted(leaves ^ expected)}"
 
@@ -151,6 +151,7 @@ def test_json_is_not_a_flag_on_the_parent_of_a_subcommand():
 # Heavy commands are covered on their ERROR path where that path is reachable without a
 # backend — which is also the path a caller most needs to be able to parse.
 _CASES = [
+    ("evidence-invalid-deadline", ["evidence", "fetch", "--out", "unused-evidence", "--timeout-seconds", "0"], 2),
     ("repeatability-missing-reports", ["repeatability", "--reports", "no-a.json", "no-b.json", "no-c.json"], 2),
     ("repeatability-missing-bundle", ["repeatability", "--bundle", "no-replay-bundle-xyz"], 2),
     ("list", ["list"], 0),

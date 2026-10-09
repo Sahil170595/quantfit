@@ -43,7 +43,9 @@ To see real output in about a second, with no model, no network and no weights:
 
 ## Honest limits
 
-Candidate offline features (unreleased; require the candidate checkout/wheel):
+Candidate workflows (unreleased; require the candidate checkout/wheel):
+
+- `quantfit evidence fetch --out public-evidence --timeout-seconds 120 --json` anonymously retrieves twelve fixed aggregate files from an immutable approved public dataset, with installed independent byte pins and bounded raw streaming. Fetch integrity 0 retains original negative native analysis 3. New-directory publication supports Linux/Windows; no inference, registration, human authentication, sensitivity or GO is established. See [the contract](https://github.com/Sahil170595/quantfit/blob/main/docs/public-evidence-fetch.md). This command requires network; the workflows below run offline.
 
 - `quantfit repeatability --reports a.json b.json c.json --out agreement.json --junit agreement.xml --json`, or `quantfit repeatability --bundle relocated/evidence --json`: exact full decoded agreement except four declared volatile fields, separate native T0 and original axes. Exit 0 requires all agreement/native passes, 3 retains differences or original flags, 4 retains an otherwise agreeing unmeasured axis, and 2 means malformed evidence, output failure or native T0 refusal. No pooled counts or independent-execution/human-label/sensitivity/GO claim; see [the contract](https://github.com/Sahil170595/quantfit/blob/main/docs/repeatability.md).
 - `quantfit bundle replay-create --reports a.json b.json c.json --t0 t0.json --out evidence --json` and `quantfit bundle replay-verify --bundle relocated/evidence --json`: preserve exact three-report/T0 bytes and treat producer paths only as labels. Integrity exit 0 can retain a negative original T0; integrity is not execution authenticity.

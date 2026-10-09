@@ -424,6 +424,10 @@ pending. See `docs/portable-evidence-bundles.md` for the supported four-role sco
 
 | Flag | Command | Observed scope | Evidence |
 |---|---|---|---|
+| `--out` / `--timeout-seconds` / `--json` | evidence fetch | Local source CLI over fake HTTP serving the twelve exact historical public files; independent cap/SHA, redirects/deadline, schema/false-marker and staged-output adverse checks. Original negative flags retained. No local real download qualification; Ubuntu/Windows installed wheel/sdist anonymous consumer pending hosted batch | `tests/test_evidence_fetch.py`; `validation/2026-10-09-evidence-fetch/` |
+
+| Flag | Command | Observed scope | Evidence |
+|---|---|---|---|
 | `--reports` / `--bundle` | repeatability | Mutually exclusive three-report or relocated schema-2 bundle input; same held bytes, full exact decoded comparison, native T0 and original negative outcomes separate. No new inference or independent-execution proof | `tests/test_repeatability.py`; `validation/2026-10-09-repeatability/` |
 | `--out` / `--junit` / `--json` | repeatability | Actual source CLI historical exit 3 and explicit synthetic 0/3/4/2 cases; eight JUnit cases, protected staged outputs, real stream checks with model imports blocked. Installed qualification pending hosted batch | `tests/test_json_envelope.py`; `validation/2026-10-09-repeatability/` |
 

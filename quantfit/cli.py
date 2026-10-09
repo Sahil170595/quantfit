@@ -470,6 +470,12 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     breverify.add_argument("--bundle", required=True, metavar="DIR", help="schema-2 replay bundle directory")
 
+    pevidence = sub.add_parser("evidence", help="approved immutable public aggregates (integrity 0; refusal 2)")
+    esub = pevidence.add_subparsers(dest="evidence_cmd", required=True)
+    efetch = esub.add_parser("fetch", help="bounded anonymous fixed twelve-file retrieval; no model inference")
+    efetch.add_argument("--out", required=True, metavar="DIR", help="new receiving directory; parent must exist")
+    efetch.add_argument("--timeout-seconds", type=float, default=120, help="whole network deadline, finite (0,600]")
+
     pau = sub.add_parser(
         "audit",
         help="docs=code parity: do the docs still describe the code? "
@@ -1040,6 +1046,20 @@ def _dispatch(args: argparse.Namespace) -> int:
             print(result["scope"])
 
         return _emit(args, "repeatability", result["exit_code"], result, human_repeatability)
+
+    if args.cmd == "evidence":
+        from quantfit.evidence import fetch_evidence
+
+        result = fetch_evidence(args.out, timeout_seconds=args.timeout_seconds)
+
+        def human_evidence():
+            print("Public aggregate byte integrity: PASS")
+            print(
+                f"Original native outcomes retained; receiving analysis exit {result['receiving_analysis']['exit_code']}"
+            )
+            print(result["scope"])
+
+        return _emit(args, "evidence", 0, result, human_evidence)
 
     if args.cmd == "bundle":
         from quantfit.bundle import create_bundle, create_replay_bundle, verify_bundle, verify_replay_bundle

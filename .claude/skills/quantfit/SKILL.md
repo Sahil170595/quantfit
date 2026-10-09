@@ -86,7 +86,14 @@ on `exit_code`, and check `schema_version` before relying on field names.
 
 ## Gating a release
 
-Candidate offline workflows are unreleased and require the candidate checkout/wheel:
+Candidate workflows are unreleased and require the candidate checkout/wheel:
+
+For the fixed public aggregate snapshot, candidate `quantfit evidence fetch --out
+public-evidence --timeout-seconds 120 --json` performs an anonymous bounded network
+fetch using twelve independent installed byte pins. It requires a new directory
+on Linux/Windows and preserves original negative flags: integrity 0 coexists with
+receiving native analysis 3. No model inference, registration, human-label
+authentication, independent execution, sensitivity or GO is established.
 `quantfit gate --from-report drift.json --tier smoke --out replay-gate.json --json`
 replays native policy on saved aggregate bytes without inference. Original
 over-refusal flags remain visible even when that dangerous-axis gate passes.
