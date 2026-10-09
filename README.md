@@ -48,10 +48,10 @@ This README also covers the open review stack
 calibration-aware cards/action outputs, portable evidence bundles, fresh native
 cold replicates, managed GGUF Inspect and the bounded public campaign.
 These additions require the reviewed source; installing 0.16.0 does not add them.
-For the exact reviewed source, including Inspect:
+For the exact reviewed source, including Inspect and the GGUF recipes:
 
 ```bash
-pip install "quantfit[inspect] @ git+https://github.com/Sahil170595/quantfit.git@9d59739645e5c0021aec8288b480ed2e9c5bea30"
+pip install "quantfit[inspect,gguf] @ git+https://github.com/Sahil170595/quantfit.git@9d59739645e5c0021aec8288b480ed2e9c5bea30"
 ```
 
 Inspect is pinned to `inspect-ai==0.3.269`; the provider uses that qualified API.
