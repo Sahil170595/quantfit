@@ -1,0 +1,254 @@
+{
+  "actual_cli_invocations": 7,
+  "historical_original_bytes_sha256": [
+    "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+    "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+    "4f8d91c0a026bb0003d49d9d307cb563a91b5dc624484a5e8ea719d8f963a8f8"
+  ],
+  "historical_prose_exit": 3,
+  "new_inference_performed": false,
+  "new_network_calls": 0,
+  "observations": [
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "repeatability",
+        "--reports",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-phi4-public-candidate\\producer\\run-1\\report.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-phi4-public-candidate\\producer\\run-2\\report.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-phi4-public-candidate\\producer\\run-3\\report.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\historical-direct.json",
+        "--junit",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\historical-direct.xml",
+        "--json"
+      ],
+      "case": "historical-direct",
+      "exit_code": 3,
+      "full_report_pass": true,
+      "junit_counts": {
+        "errors": "0",
+        "failures": "3",
+        "skipped": "0",
+        "tests": "8"
+      },
+      "native_t0_status": "computed",
+      "original_native_exits": [
+        3,
+        3,
+        3
+      ],
+      "outcome": "native_flags",
+      "report_sha256": [
+        "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+        "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+        "4f8d91c0a026bb0003d49d9d307cb563a91b5dc624484a5e8ea719d8f963a8f8"
+      ],
+      "stderr_bytes": 0,
+      "synthetic": false
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "repeatability",
+        "--bundle",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-replicate-bundles\\historical-phi4\\relocated",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\historical-relocated.json",
+        "--junit",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\historical-relocated.xml",
+        "--json"
+      ],
+      "case": "historical-relocated",
+      "exit_code": 3,
+      "full_report_pass": true,
+      "junit_counts": {
+        "errors": "0",
+        "failures": "3",
+        "skipped": "0",
+        "tests": "8"
+      },
+      "native_t0_status": "computed",
+      "original_native_exits": [
+        3,
+        3,
+        3
+      ],
+      "outcome": "native_flags",
+      "report_sha256": [
+        "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+        "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+        "4f8d91c0a026bb0003d49d9d307cb563a91b5dc624484a5e8ea719d8f963a8f8"
+      ],
+      "stderr_bytes": 0,
+      "synthetic": false
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "repeatability",
+        "--reports",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-pass-inputs\\report-1.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-pass-inputs\\report-2.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-pass-inputs\\report-3.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-pass.json",
+        "--junit",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-pass.xml",
+        "--json"
+      ],
+      "case": "synthetic-pass",
+      "exit_code": 0,
+      "full_report_pass": true,
+      "junit_counts": {
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "8"
+      },
+      "native_t0_status": "computed",
+      "original_native_exits": [
+        0,
+        0,
+        0
+      ],
+      "outcome": "repeatable",
+      "report_sha256": [
+        "991b835ae52f38ca329223244b258b893828df04e91c9966ac51960fdf68586c",
+        "03cbd817122d5c939d10a100bef20b9a13ddb80ada7fcc9f3ff2253525a5c477",
+        "0f6751cdb1a5e71cc4ef955b9b68fadf52fc6d73779fe3ec1de97fffb0857d90"
+      ],
+      "stderr_bytes": 0,
+      "synthetic": true
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "repeatability",
+        "--reports",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-flag-inputs\\report-1.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-flag-inputs\\report-2.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-flag-inputs\\report-3.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-flag.json",
+        "--junit",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-flag.xml",
+        "--json"
+      ],
+      "case": "synthetic-flag",
+      "exit_code": 3,
+      "full_report_pass": true,
+      "junit_counts": {
+        "errors": "0",
+        "failures": "3",
+        "skipped": "0",
+        "tests": "8"
+      },
+      "native_t0_status": "computed",
+      "original_native_exits": [
+        3,
+        3,
+        3
+      ],
+      "outcome": "native_flags",
+      "report_sha256": [
+        "6689ebb34a13ab5bce6f8354197fe164d6520138e11a70a96f06359911c281d5",
+        "5277797f3fe5b0a17e402fbcdee9b2d81fccf958dde6d176c8a2a921a6a9a338",
+        "8a4643fcd587e8e170c9ae40e365c620d5c4178cbcd8e794486985703c3f8673"
+      ],
+      "stderr_bytes": 0,
+      "synthetic": true
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "repeatability",
+        "--reports",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-unmeasured-inputs\\report-1.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-unmeasured-inputs\\report-2.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-unmeasured-inputs\\report-3.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-unmeasured.json",
+        "--junit",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-unmeasured.xml",
+        "--json"
+      ],
+      "case": "synthetic-unmeasured",
+      "exit_code": 4,
+      "full_report_pass": true,
+      "junit_counts": {
+        "errors": "0",
+        "failures": "0",
+        "skipped": "3",
+        "tests": "8"
+      },
+      "native_t0_status": "computed",
+      "original_native_exits": [
+        4,
+        4,
+        4
+      ],
+      "outcome": "unmeasured",
+      "report_sha256": [
+        "6ab6e901d0fcc515df0557a02ada13e342e04a7ef15deb97e2e71846cf15f50b",
+        "e2cbab74004742aa69ec5cc5d5c984c563bbb9e0dc3cce3f14c6f8da50ee3d9c",
+        "66008c4aba01e486b33f668fff6d5145edfb27ef5789efb4434c7243e632f7d1"
+      ],
+      "stderr_bytes": 0,
+      "synthetic": true
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "repeatability",
+        "--reports",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-refused-inputs\\report-1.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-refused-inputs\\report-2.json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-refused-inputs\\report-3.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-refused.json",
+        "--junit",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-repeatability\\synthetic-refused.xml",
+        "--json"
+      ],
+      "case": "synthetic-refused",
+      "exit_code": 2,
+      "full_report_pass": false,
+      "junit_counts": {
+        "errors": "1",
+        "failures": "1",
+        "skipped": "0",
+        "tests": "8"
+      },
+      "native_t0_status": "refused",
+      "original_native_exits": [
+        0,
+        0,
+        0
+      ],
+      "outcome": "t0_refused",
+      "report_sha256": [
+        "991b835ae52f38ca329223244b258b893828df04e91c9966ac51960fdf68586c",
+        "7d25cbcd34a2b39adb0a3932253339afcddc9424c91fad90f1138084e3847897",
+        "0f6751cdb1a5e71cc4ef955b9b68fadf52fc6d73779fe3ec1de97fffb0857d90"
+      ],
+      "stderr_bytes": 0,
+      "synthetic": true
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Source CLI only; historical Phi4 aggregates and explicitly synthetic policy cases, no installed-distribution proof.",
+  "source_product_head": "424babb3f6b185c8ff563f5cafce023653eb4202"
+}

@@ -1,0 +1,47 @@
+..............................................s...........s............. [ 48%]
+...........................F............................................ [ 97%]
+....                                                                     [100%]
+================================== FAILURES ===================================
+_____ test_repeatability_input_modes_are_exclusive_and_errors_still_json ______
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1362/test_repeatability_input_modes0')
+
+    def test_repeatability_input_modes_are_exclusive_and_errors_still_json(tmp_path):
+        blocked = tmp_path / "blocked"
+        blocked.mkdir()
+        for argv in ([], ["--reports", "a", "b"], ["--reports", "a", "b", "c", "--bundle", "d"]):
+            process = _run("repeatability", *argv, "--json", block_backends=blocked)
+>           document = json.loads(process.stdout)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_json_envelope.py:311: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\json\__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\json\decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <json.decoder.JSONDecoder object at 0x000001F630A31D30>, s = '', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\json\decoder.py:356: JSONDecodeError
+=========================== short test summary info ===========================
+FAILED tests/test_json_envelope.py::test_repeatability_input_modes_are_exclusive_and_errors_still_json
+1 failed, 145 passed, 2 skipped in 67.51s (0:01:07)
