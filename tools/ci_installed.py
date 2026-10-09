@@ -7,10 +7,32 @@ import hashlib
 import importlib.metadata
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+
+def _pytest_code(checkout: Path) -> str:
+    """Keep installed application provenance in the same process as fixture tests."""
+    return f"""
+import pathlib, sys, quantfit, pytest
+checkout = pathlib.Path({str(checkout)!r}).resolve()
+def guard():
+    assert checkout not in {{pathlib.Path(p or '.').resolve() for p in sys.path}}, 'checkout root injected into pytest'
+    for name, module in tuple(sys.modules.items()):
+        if name == 'quantfit' or name.startswith('quantfit.'):
+            origin = getattr(module, '__file__', None)
+            assert origin and not pathlib.Path(origin).resolve().is_relative_to(checkout), 'source-shadowed application: ' + name
+class Guard:
+    def pytest_sessionstart(self, session): guard()
+    def pytest_sessionfinish(self, session, exitstatus): guard()
+guard()
+code = pytest.main(sys.argv[1:], plugins=[Guard()])
+guard()
+raise SystemExit(code)
+"""
 
 
 def main() -> None:
@@ -338,9 +360,10 @@ def main() -> None:
                 result = document["result"]
                 assert result["expected_sha256"] == hashlib.sha256(reference_bytes).hexdigest()
                 assert result["actual_sha256"] == hashlib.sha256(Path(command[-2]).read_bytes()).hexdigest()
-        # Explicit config prevents pyproject's pythonpath=['.'] injecting the source.
+        # Only sibling test helpers are visible; checkout application imports
+        # remain forbidden before/during/after this same pytest process.
         config = sandbox / "pytest.ini"
-        config.write_text("[pytest]\n", encoding="utf-8")
+        config.write_text(f"[pytest]\npythonpath = {shlex.quote((checkout / 'tests').as_posix())}\n", encoding="utf-8")
         tests = [
             "test_calibration_binding.py",
             "test_gate.py",
@@ -358,8 +381,8 @@ def main() -> None:
         subprocess.run(
             [
                 sys.executable,
-                "-m",
-                "pytest",
+                "-c",
+                _pytest_code(checkout),
                 "-c",
                 str(config),
                 "--import-mode=importlib",
