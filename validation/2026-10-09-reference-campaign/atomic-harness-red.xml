@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.319" timestamp="2026-10-09T01:45:02.330163-04:00" hostname="SahilKadadekar"><testcase classname="tests.test_reference_campaign" name="test_campaign_terminal_staging_is_aggregate_and_fail_closed[partial-report]" time="0.065"><failure message="FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\sahil\\AppData\\Local\\Temp\\pytest-of-sahil\\pytest-1166\\test_campaign_terminal_staging0\\campaign\\publication\\assessment.json'">tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1166/test_campaign_terminal_staging0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001AD642592E0&gt;
+mode = 'partial-report'
+
+    @pytest.mark.parametrize(
+        "mode",
+        [
+            "null",
+            "flags",
+            "cleanup-failed",
+            "raw-receipt",
+            "source-changed",
+            "interrupt-after-assessment",
+            "write-after-assessment",
+            "interrupt-after-t0",
+            "write-after-t0",
+            "interrupt-after-campaign",
+            "write-after-campaign",
+            "null-interrupt-after-t0",
+            "null-write-after-campaign",
+            "persistent-after-t0",
+            "partial-report",
+            "partial-card",
+        ],
+    )
+    def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkeypatch, mode):
+        """Real campaign control flow, declared fake weights/runtime/CLI observations."""
+        from quantfit import cli, cold_run
+        from quantfit.backends import gguf as backend
+        from quantfit.safety import gguf_arm
+    
+        root = tmp_path / "campaign"
+        source = tmp_path / "reports"
+        source.mkdir()
+        fault = "after-" in mode
+        flagged = mode == "flags" or fault and not mode.startswith("null-")
+        paths = reports(source, flips=1 if flagged else 0)
+        binary_sha = json.loads(paths[0].read_bytes())["baseline"]["engine"]["binary_sha256"]
+        checked_require = campaign.require
+        monkeypatch.setattr(
+            campaign,
+            "require",
+            lambda condition, message: None if message == "campaign is POSIX-only" else checked_require(condition, message),
+        )
+        monkeypatch.setitem(
+            sys.modules,
+            "torch",
+            SimpleNamespace(
+                cuda=SimpleNamespace(is_available=lambda: False),
+                backends=SimpleNamespace(mps=SimpleNamespace(is_available=lambda: False)),
+                set_num_threads=lambda _: None,
+            ),
+        )
+        monkeypatch.setattr(campaign, "_candidate", lambda _: {"scope": "SYNTHETIC candidate observation"})
+        monkeypatch.setattr(cold_run, "_resources", lambda _: {"scope": "SYNTHETIC hardware observation"})
+        monkeypatch.setattr(gguf_arm, "_threads", lambda: 2)
+    
+        def resolve(ref, token, revision):
+            expected = next(item for item in campaign.PAIR.values() if item["ref"] == ref)
+            return SimpleNamespace(
+                sha256=expected["sha256"],
+                revision=revision,
+                file_type=expected["dtype"],
+                path=SimpleNamespace(stat=lambda: SimpleNamespace(st_size=expected["size_bytes"])),
+            )
+    
+        monkeypatch.setattr(gguf_arm, "_resolve", resolve)
+        archive = tmp_path / "synthetic-archive"
+        archive.write_bytes(b"not an executable or actual verified archive")
+        monkeypatch.setattr(backend, "_cache_dir", lambda: tmp_path)
+        monkeypatch.setattr(backend, "_binary_asset", lambda: archive.name)
+        monkeypatch.setattr(backend, "llama_server_bin", lambda: archive)
+        monkeypatch.setattr(backend, "_verify_or_die", lambda *_: None)
+        monkeypatch.setattr(backend, "_sha256", lambda _: binary_sha)
+        monkeypatch.delenv("QUANTFIT_LLAMACPP", raising=False)
+    
+        def fake_cli(argv):
+            assert "--max-new-tokens" not in argv
+            native = Path(argv[argv.index("--out") + 1])
+            native.mkdir()
+            outputs = []
+            for i, path in enumerate(paths, 1):
+                directory = native / f"run-{i}"
+                directory.mkdir()
+                output = directory / "report.json"
+                shutil.copyfile(path, output)
+                outputs.append(output)
+            t0 = campaign.within_hardware_identical([str(path) for path in outputs])
+            result = {
+                "status": "t0_agreement",
+                "requested": {"max_new_tokens": 64},
+                "completion_cache_requested": False,
+                "t0": t0,
+                "runs": [
+                    {
+                        "pid": i + 1000,
+                        "native_exit_code": 3 if flagged else 0,
+                        "argv": ["--max-new-tokens", "64"],
+                        "cleanup": {
+                            "direct_child_reaped": True,
+                            "no_live_group_members_observed": mode != "cleanup-failed",
+                        },
+                    }
+                    for i in range(3)
+                ],
+            }
+            (native / "t0.json").write_bytes((json.dumps(t0) + "\n").encode())
+            if mode == "raw-receipt":
+                result["completion"] = "synthetic private value must never escape"
+            if mode == "source-changed":
+                edit(outputs[0], lambda value: value.update(created_utc="changed-after-native-t0"))
+            print(json.dumps({"result": result}))
+            return 0
+    
+        monkeypatch.setattr(cli, "main", fake_cli)
+        partial = mode in ("partial-report", "partial-card")
+        partial_written = []
+        if partial:
+            real_open = io.open
+            write_index = []
+    
+            class PartialWrite:
+                def __init__(self, stream):
+                    self.stream = stream
+    
+                def __getattr__(self, key):
+                    return getattr(self.stream, key)
+    
+                def __enter__(self):
+                    self.stream.__enter__()
+                    return self
+    
+                def __exit__(self, *args):
+                    return self.stream.__exit__(*args)
+    
+                def write(self, data):
+                    halfway = data[: len(data) // 2]
+                    self.stream.write(halfway)
+                    self.stream.flush()
+                    partial_written.append(halfway)
+                    raise OSError("SYNTHETIC partial stream write, no model execution")
+    
+            def partial_open(file, mode="r", *args, **kwargs):
+                stream = real_open(file, mode, *args, **kwargs)
+                path = Path(file)
+                directory = root / "publication/run-1"
+                if "w" in mode and (path == directory or path.parent == directory):
+                    write_index.append(True)
+                    if len(write_index) == (1 if mode == "partial-report" else 2):
+                        return PartialWrite(stream)
+                return stream
+    
+            monkeypatch.setattr(io, "open", partial_open)
+        if fault:
+            real_write = Path.write_bytes
+            target = (
+                "assessment.json"
+                if mode.endswith("assessment")
+                else "native-t0.json"
+                if mode.endswith("t0")
+                else "campaign.json"
+            )
+            raised = []
+    
+            def failed_write(path, data):
+                if mode == "persistent-after-t0" and raised and path.is_relative_to(root / "publication"):
+                    raise OSError("SYNTHETIC persistent storage failure")
+                result = real_write(path, data)
+                if path == root / "publication" / target and not raised:
+                    raised.append(True)
+                    if "interrupt" in mode:
+                        raise KeyboardInterrupt()
+                    raise OSError("SYNTHETIC post-write failure, no model execution")
+                return result
+    
+            monkeypatch.setattr(Path, "write_bytes", failed_write)
+        monkeypatch.setattr(sys, "argv", ["campaign", "--out", str(root), "--wheel", "synthetic-unused.whl"])
+        success = mode in ("null", "flags")
+        try:
+            actual = campaign.main()
+        except (Exception, KeyboardInterrupt) as exc:  # noqa: BLE001 - capture this synthetic boundary failure as a test assertion.
+            actual = type(exc).__name__
+        assert actual == ("OSError" if mode == "persistent-after-t0" else 0 if success else 2)
+        public = root / "publication"
+        if mode == "persistent-after-t0":
+            # No storage is available even for a failure receipt: retain measured
+            # aggregates, withhold every earlier positive/pending qualification file.
+            assert {p.relative_to(public).as_posix() for p in public.rglob("*") if p.is_file()} == {
+                f"run-{i}/{name}" for i in range(1, 4) for name in ("report.json", "model-card.md")
+            }
+            for index, original in enumerate(paths, 1):
+                assert (public / f"run-{index}/report.json").read_bytes() == original.read_bytes()
+            assert json.loads((root / "native/t0.json").read_bytes())["protocol_pass"] is True
+            return
+        value = json.loads((public / "campaign.json").read_bytes())
+        assert value["reference_registered"] is False and value["scientific_go"] is False
+        assert {p.relative_to(public).as_posix() for p in public.rglob("*") if p.is_file()} &lt;= set(campaign.PUBLIC_FILES)
+        if success:
+            assert len(value["public_files"]) == 9
+            expected = "blocked" if mode == "flags" else "pending_public_byte_verification"
+            assert value["reference_eligibility"] == expected
+            assert (public / "native-t0.json").is_file()
+            for index, original in enumerate(paths, 1):
+                assert (public / f"run-{index}/report.json").read_bytes() == original.read_bytes()
+        else:
+            assert value["status"] == "operational_failure" and value["reference_eligibility"] == "blocked"
+            assert not (public / "native-t0.json").exists()
+            if fault or partial:
+&gt;               assessment = json.loads((public / "assessment.json").read_bytes())
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_reference_campaign.py:416: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+file = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1166/test_campaign_terminal_staging0/campaign/publication/assessment.json')
+mode = 'rb', args = (-1, None, None, None), kwargs = {}
+
+    def partial_open(file, mode="r", *args, **kwargs):
+&gt;       stream = real_open(file, mode, *args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\sahil\\AppData\\Local\\Temp\\pytest-of-sahil\\pytest-1166\\test_campaign_terminal_staging0\\campaign\\publication\\assessment.json'
+
+tests\test_reference_campaign.py:351: FileNotFoundError</failure></testcase><testcase classname="tests.test_reference_campaign" name="test_campaign_terminal_staging_is_aggregate_and_fail_closed[partial-card]" time="0.041"><failure message="FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\sahil\\AppData\\Local\\Temp\\pytest-of-sahil\\pytest-1166\\test_campaign_terminal_staging1\\campaign\\publication\\assessment.json'">tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1166/test_campaign_terminal_staging1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001AD6414C590&gt;
+mode = 'partial-card'
+
+    @pytest.mark.parametrize(
+        "mode",
+        [
+            "null",
+            "flags",
+            "cleanup-failed",
+            "raw-receipt",
+            "source-changed",
+            "interrupt-after-assessment",
+            "write-after-assessment",
+            "interrupt-after-t0",
+            "write-after-t0",
+            "interrupt-after-campaign",
+            "write-after-campaign",
+            "null-interrupt-after-t0",
+            "null-write-after-campaign",
+            "persistent-after-t0",
+            "partial-report",
+            "partial-card",
+        ],
+    )
+    def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkeypatch, mode):
+        """Real campaign control flow, declared fake weights/runtime/CLI observations."""
+        from quantfit import cli, cold_run
+        from quantfit.backends import gguf as backend
+        from quantfit.safety import gguf_arm
+    
+        root = tmp_path / "campaign"
+        source = tmp_path / "reports"
+        source.mkdir()
+        fault = "after-" in mode
+        flagged = mode == "flags" or fault and not mode.startswith("null-")
+        paths = reports(source, flips=1 if flagged else 0)
+        binary_sha = json.loads(paths[0].read_bytes())["baseline"]["engine"]["binary_sha256"]
+        checked_require = campaign.require
+        monkeypatch.setattr(
+            campaign,
+            "require",
+            lambda condition, message: None if message == "campaign is POSIX-only" else checked_require(condition, message),
+        )
+        monkeypatch.setitem(
+            sys.modules,
+            "torch",
+            SimpleNamespace(
+                cuda=SimpleNamespace(is_available=lambda: False),
+                backends=SimpleNamespace(mps=SimpleNamespace(is_available=lambda: False)),
+                set_num_threads=lambda _: None,
+            ),
+        )
+        monkeypatch.setattr(campaign, "_candidate", lambda _: {"scope": "SYNTHETIC candidate observation"})
+        monkeypatch.setattr(cold_run, "_resources", lambda _: {"scope": "SYNTHETIC hardware observation"})
+        monkeypatch.setattr(gguf_arm, "_threads", lambda: 2)
+    
+        def resolve(ref, token, revision):
+            expected = next(item for item in campaign.PAIR.values() if item["ref"] == ref)
+            return SimpleNamespace(
+                sha256=expected["sha256"],
+                revision=revision,
+                file_type=expected["dtype"],
+                path=SimpleNamespace(stat=lambda: SimpleNamespace(st_size=expected["size_bytes"])),
+            )
+    
+        monkeypatch.setattr(gguf_arm, "_resolve", resolve)
+        archive = tmp_path / "synthetic-archive"
+        archive.write_bytes(b"not an executable or actual verified archive")
+        monkeypatch.setattr(backend, "_cache_dir", lambda: tmp_path)
+        monkeypatch.setattr(backend, "_binary_asset", lambda: archive.name)
+        monkeypatch.setattr(backend, "llama_server_bin", lambda: archive)
+        monkeypatch.setattr(backend, "_verify_or_die", lambda *_: None)
+        monkeypatch.setattr(backend, "_sha256", lambda _: binary_sha)
+        monkeypatch.delenv("QUANTFIT_LLAMACPP", raising=False)
+    
+        def fake_cli(argv):
+            assert "--max-new-tokens" not in argv
+            native = Path(argv[argv.index("--out") + 1])
+            native.mkdir()
+            outputs = []
+            for i, path in enumerate(paths, 1):
+                directory = native / f"run-{i}"
+                directory.mkdir()
+                output = directory / "report.json"
+                shutil.copyfile(path, output)
+                outputs.append(output)
+            t0 = campaign.within_hardware_identical([str(path) for path in outputs])
+            result = {
+                "status": "t0_agreement",
+                "requested": {"max_new_tokens": 64},
+                "completion_cache_requested": False,
+                "t0": t0,
+                "runs": [
+                    {
+                        "pid": i + 1000,
+                        "native_exit_code": 3 if flagged else 0,
+                        "argv": ["--max-new-tokens", "64"],
+                        "cleanup": {
+                            "direct_child_reaped": True,
+                            "no_live_group_members_observed": mode != "cleanup-failed",
+                        },
+                    }
+                    for i in range(3)
+                ],
+            }
+            (native / "t0.json").write_bytes((json.dumps(t0) + "\n").encode())
+            if mode == "raw-receipt":
+                result["completion"] = "synthetic private value must never escape"
+            if mode == "source-changed":
+                edit(outputs[0], lambda value: value.update(created_utc="changed-after-native-t0"))
+            print(json.dumps({"result": result}))
+            return 0
+    
+        monkeypatch.setattr(cli, "main", fake_cli)
+        partial = mode in ("partial-report", "partial-card")
+        partial_written = []
+        if partial:
+            real_open = io.open
+            write_index = []
+    
+            class PartialWrite:
+                def __init__(self, stream):
+                    self.stream = stream
+    
+                def __getattr__(self, key):
+                    return getattr(self.stream, key)
+    
+                def __enter__(self):
+                    self.stream.__enter__()
+                    return self
+    
+                def __exit__(self, *args):
+                    return self.stream.__exit__(*args)
+    
+                def write(self, data):
+                    halfway = data[: len(data) // 2]
+                    self.stream.write(halfway)
+                    self.stream.flush()
+                    partial_written.append(halfway)
+                    raise OSError("SYNTHETIC partial stream write, no model execution")
+    
+            def partial_open(file, mode="r", *args, **kwargs):
+                stream = real_open(file, mode, *args, **kwargs)
+                path = Path(file)
+                directory = root / "publication/run-1"
+                if "w" in mode and (path == directory or path.parent == directory):
+                    write_index.append(True)
+                    if len(write_index) == (1 if mode == "partial-report" else 2):
+                        return PartialWrite(stream)
+                return stream
+    
+            monkeypatch.setattr(io, "open", partial_open)
+        if fault:
+            real_write = Path.write_bytes
+            target = (
+                "assessment.json"
+                if mode.endswith("assessment")
+                else "native-t0.json"
+                if mode.endswith("t0")
+                else "campaign.json"
+            )
+            raised = []
+    
+            def failed_write(path, data):
+                if mode == "persistent-after-t0" and raised and path.is_relative_to(root / "publication"):
+                    raise OSError("SYNTHETIC persistent storage failure")
+                result = real_write(path, data)
+                if path == root / "publication" / target and not raised:
+                    raised.append(True)
+                    if "interrupt" in mode:
+                        raise KeyboardInterrupt()
+                    raise OSError("SYNTHETIC post-write failure, no model execution")
+                return result
+    
+            monkeypatch.setattr(Path, "write_bytes", failed_write)
+        monkeypatch.setattr(sys, "argv", ["campaign", "--out", str(root), "--wheel", "synthetic-unused.whl"])
+        success = mode in ("null", "flags")
+        try:
+            actual = campaign.main()
+        except (Exception, KeyboardInterrupt) as exc:  # noqa: BLE001 - capture this synthetic boundary failure as a test assertion.
+            actual = type(exc).__name__
+        assert actual == ("OSError" if mode == "persistent-after-t0" else 0 if success else 2)
+        public = root / "publication"
+        if mode == "persistent-after-t0":
+            # No storage is available even for a failure receipt: retain measured
+            # aggregates, withhold every earlier positive/pending qualification file.
+            assert {p.relative_to(public).as_posix() for p in public.rglob("*") if p.is_file()} == {
+                f"run-{i}/{name}" for i in range(1, 4) for name in ("report.json", "model-card.md")
+            }
+            for index, original in enumerate(paths, 1):
+                assert (public / f"run-{index}/report.json").read_bytes() == original.read_bytes()
+            assert json.loads((root / "native/t0.json").read_bytes())["protocol_pass"] is True
+            return
+        value = json.loads((public / "campaign.json").read_bytes())
+        assert value["reference_registered"] is False and value["scientific_go"] is False
+        assert {p.relative_to(public).as_posix() for p in public.rglob("*") if p.is_file()} &lt;= set(campaign.PUBLIC_FILES)
+        if success:
+            assert len(value["public_files"]) == 9
+            expected = "blocked" if mode == "flags" else "pending_public_byte_verification"
+            assert value["reference_eligibility"] == expected
+            assert (public / "native-t0.json").is_file()
+            for index, original in enumerate(paths, 1):
+                assert (public / f"run-{index}/report.json").read_bytes() == original.read_bytes()
+        else:
+            assert value["status"] == "operational_failure" and value["reference_eligibility"] == "blocked"
+            assert not (public / "native-t0.json").exists()
+            if fault or partial:
+&gt;               assessment = json.loads((public / "assessment.json").read_bytes())
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_reference_campaign.py:416: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+file = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1166/test_campaign_terminal_staging1/campaign/publication/assessment.json')
+mode = 'rb', args = (-1, None, None, None), kwargs = {}
+
+    def partial_open(file, mode="r", *args, **kwargs):
+&gt;       stream = real_open(file, mode, *args, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\sahil\\AppData\\Local\\Temp\\pytest-of-sahil\\pytest-1166\\test_campaign_terminal_staging1\\campaign\\publication\\assessment.json'
+
+tests\test_reference_campaign.py:351: FileNotFoundError</failure></testcase></testsuite></testsuites>
