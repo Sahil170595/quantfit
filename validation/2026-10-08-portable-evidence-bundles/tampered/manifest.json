@@ -1,0 +1,33 @@
+{
+  "bundle_schema": 1,
+  "created_utc": "2026-10-09T02:20:25.442050+00:00",
+  "files": [
+    {
+      "path": "report.json",
+      "role": "report",
+      "sha256": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa",
+      "size_bytes": 2707
+    },
+    {
+      "path": "calibration.json",
+      "role": "calibration",
+      "sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+      "size_bytes": 3842
+    },
+    {
+      "path": "gate.json",
+      "role": "gate",
+      "sha256": "ec314abec17cd9853d06bbf172c83888a03da4d1557860f37a8f6854c6e7dc5b",
+      "size_bytes": 12619
+    },
+    {
+      "path": "resolution.json",
+      "role": "resolution",
+      "sha256": "b877a7438995c3f29af0d90248383179014f15a5861ce67a0d46d9046025f6ad",
+      "size_bytes": 5076
+    }
+  ],
+  "quantfit_version": "0.16.0",
+  "scientific_claims_verified": false,
+  "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+}

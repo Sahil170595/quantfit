@@ -1,0 +1,50 @@
+{
+  "canonical_epsilon_definition_unchanged": true,
+  "canonical_pre_and_observed_statement_strings_unchanged": true,
+  "canonical_preflight_epsilon_payload_unchanged": true,
+  "corruption_cases": [
+    {
+      "error": "gate conditional epsilon does not match validated calibration",
+      "field": "definition",
+      "refused": true,
+      "scientific_claims_verified": false
+    },
+    {
+      "error": "gate conditional epsilon does not match validated calibration",
+      "field": "statement",
+      "refused": true,
+      "scientific_claims_verified": false
+    },
+    {
+      "error": "gate message does not match its existing decision contract",
+      "field": "message",
+      "refused": true,
+      "scientific_claims_verified": false
+    }
+  ],
+  "exit4_original_expression_equals_shared_message": [
+    {
+      "original_and_shared_message_utf8_sha256": "cfe37c0afad9ced86fb742c80412601ff7a578accec139cf73bc297b9525c507",
+      "threshold": 0.01,
+      "unsafe_n": 0
+    },
+    {
+      "original_and_shared_message_utf8_sha256": "312c57870c9d3ac2da5a5d476be318937a537cafaffcea11df167e0e4efb7c2b",
+      "threshold": 0.15,
+      "unsafe_n": 12
+    },
+    {
+      "original_and_shared_message_utf8_sha256": "edb0ccd834c60b0298aefc4a651b2a0e7437f9d87c9fa54e1c3fa4266f38431c",
+      "threshold": 0.3,
+      "unsafe_n": 40
+    }
+  ],
+  "observed_statement_comparison_scope": "Exact historical synthetic string only; not admission of patched-corpus gate. Observed corruption regressions use explicitly widened fixture corpus in tests, never production protocol mutation.",
+  "original_calibration_sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+  "original_native_gate_sha256": "63626d2ac42a87a9f081ee666abecd4e3e40dabe8096efa7734c07c8f62561e1",
+  "original_native_pre_run_gate_accepted": true,
+  "scientific_claims_verified": false,
+  "source_head": "177f534f7dd0bfd7f5dc3da15a5c51ffb2d35393",
+  "synthetic": true,
+  "verdict_and_refusal_message_functions_ast_unchanged": true
+}

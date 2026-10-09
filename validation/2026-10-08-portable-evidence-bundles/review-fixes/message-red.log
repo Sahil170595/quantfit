@@ -1,0 +1,16 @@
+....FF                                                                   [100%]
+================================== FAILURES ===================================
+_____ test_bound_gate_rejects_corrupted_scientific_wording[message-False] _____
+tests\test_bundle.py:376: in test_bound_gate_rejects_corrupted_scientific_wording
+    with pytest.raises(BundleError, match="conditional epsilon|message"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE <class 'quantfit.bundle.BundleError'>
+_____ test_bound_gate_rejects_corrupted_scientific_wording[message-True] ______
+tests\test_bundle.py:376: in test_bound_gate_rejects_corrupted_scientific_wording
+    with pytest.raises(BundleError, match="conditional epsilon|message"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE <class 'quantfit.bundle.BundleError'>
+=========================== short test summary info ===========================
+FAILED tests/test_bundle.py::test_bound_gate_rejects_corrupted_scientific_wording[message-False]
+FAILED tests/test_bundle.py::test_bound_gate_rejects_corrupted_scientific_wording[message-True]
+2 failed, 4 passed, 46 deselected in 2.98s
