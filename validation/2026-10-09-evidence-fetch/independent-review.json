@@ -1,0 +1,23 @@
+{
+  "final_cases": [
+    "original12held remains valid/native3",
+    "coherently rebound cold thread refusal",
+    "coherently rebound requested token refusal",
+    "coherently rebound cold final path refusal"
+  ],
+  "final_root_readonly_cases": 4,
+  "independent_final_delta": "PASS exactc751/treee6fa held-binding/test delta: original results unchanged; coherent thread/token/path/device/assessment-label mutations refused; direct held binder does not reopen producer locations",
+  "initial_cases": [
+    "approved12heldoriginals produce native3/fullPASS/T0PASS",
+    "legitimate immutable resolve/cache paths accepted",
+    "sameREV/member unapprovedrepo refused",
+    "assessmentauthTrue/campaignauth0/manifestregisteredFalse/nativecoldcacheTrue refused",
+    "assessment overrefusal flag forgery refused by held recomputation"
+  ],
+  "initial_root_head": "434ef91bec4ec9b42d8dd98056b9db696a9c3ad2",
+  "initial_root_readonly_cases": 9,
+  "resources": "CLEANED readonly reviews, no inference/network/files/processes",
+  "schema_version": 1,
+  "source_head": "c751f9d1c73a5484438f728d84c9302cc6f319f1",
+  "status": "PASS"
+}

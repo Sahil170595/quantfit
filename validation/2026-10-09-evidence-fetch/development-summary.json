@@ -1,0 +1,143 @@
+{
+  "causes": {
+    "audit-prefreeze.json": "exit0 with one warning: existing CONTRIBUTING Ruff line citation shifted by required package metadata; exact live citation corrected",
+    "companion-binding-isolated-red.xml": "new adversarial harness omitted hashlib import, three NameError failures; corrected without product change",
+    "companion-binding-isolated-v2.xml": "actual three DID-NOT-RAISE failures after coherent campaign/manifest hash rebinding exposed missing companion thread/requested-token/path relationships; product434 source fixedc751",
+    "companion-binding-red.xml": "initial nonisolated mutations already refused by existing publication SHA relationships; all15cases passed",
+    "red.xml": "TDD missing-module collection failure before implementation"
+  },
+  "checker_waivers": 0,
+  "runs": [
+    {
+      "artifact": "red.xml",
+      "counts": {
+        "cases": 1,
+        "errors": 1,
+        "failures": 0,
+        "passed": 0,
+        "skipped": 0,
+        "suite_seconds": 1.076
+      },
+      "immutable_head": null,
+      "scope": "working-source development; immutable qualification is final unit atc751"
+    },
+    {
+      "artifact": "initial-green.xml",
+      "counts": {
+        "cases": 33,
+        "errors": 0,
+        "failures": 0,
+        "passed": 33,
+        "skipped": 0,
+        "suite_seconds": 1.38
+      },
+      "immutable_head": null,
+      "scope": "working-source development; immutable qualification is final unit atc751"
+    },
+    {
+      "artifact": "focused-v2.xml",
+      "counts": {
+        "cases": 75,
+        "errors": 0,
+        "failures": 0,
+        "passed": 75,
+        "skipped": 0,
+        "suite_seconds": 3.214
+      },
+      "immutable_head": null,
+      "scope": "working-source development; immutable qualification is final unit atc751"
+    },
+    {
+      "artifact": "focused-v3.xml",
+      "counts": {
+        "cases": 173,
+        "errors": 0,
+        "failures": 0,
+        "passed": 172,
+        "skipped": 1,
+        "suite_seconds": 81.575
+      },
+      "immutable_head": null,
+      "scope": "working-source development; immutable qualification is final unit atc751"
+    },
+    {
+      "artifact": "focused-v4.xml",
+      "counts": {
+        "cases": 85,
+        "errors": 0,
+        "failures": 0,
+        "passed": 84,
+        "skipped": 1,
+        "suite_seconds": 7.569
+      },
+      "immutable_head": null,
+      "scope": "working-source development; immutable qualification is final unit atc751"
+    },
+    {
+      "artifact": "feature-final.xml",
+      "counts": {
+        "cases": 91,
+        "errors": 0,
+        "failures": 0,
+        "passed": 90,
+        "skipped": 1,
+        "suite_seconds": 6.883
+      },
+      "immutable_head": null,
+      "scope": "working-source development; immutable qualification is final unit atc751"
+    },
+    {
+      "artifact": "companion-binding-red.xml",
+      "counts": {
+        "cases": 15,
+        "errors": 0,
+        "failures": 0,
+        "passed": 15,
+        "skipped": 0,
+        "suite_seconds": 1.08
+      },
+      "immutable_head": null,
+      "scope": "working-source development; immutable qualification is final unit atc751"
+    },
+    {
+      "artifact": "companion-binding-isolated-red.xml",
+      "counts": {
+        "cases": 15,
+        "errors": 0,
+        "failures": 3,
+        "passed": 12,
+        "skipped": 0,
+        "suite_seconds": 1.671
+      },
+      "immutable_head": null,
+      "scope": "working-source development; immutable qualification is final unit atc751"
+    },
+    {
+      "artifact": "companion-binding-isolated-v2.xml",
+      "counts": {
+        "cases": 15,
+        "errors": 0,
+        "failures": 3,
+        "passed": 12,
+        "skipped": 0,
+        "suite_seconds": 1.201
+      },
+      "immutable_head": null,
+      "scope": "working-source development; immutable qualification is final unit atc751"
+    },
+    {
+      "artifact": "companion-binding-green.xml",
+      "counts": {
+        "cases": 88,
+        "errors": 0,
+        "failures": 0,
+        "passed": 87,
+        "skipped": 1,
+        "suite_seconds": 7.19
+      },
+      "immutable_head": null,
+      "scope": "working-source development; immutable qualification is final unit atc751"
+    }
+  ],
+  "schema_version": 1
+}

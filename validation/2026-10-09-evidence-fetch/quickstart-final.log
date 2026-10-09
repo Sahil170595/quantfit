@@ -1,0 +1,103 @@
+readme:      C:\tmp\qf-release-0.16.0-20261008\README.md
+quantfit:    C:/tmp/qf-release-0.16.0-20261008/tools/ci/.venv/Scripts/python.exe -m quantfit.cli
+commands:    51 extracted  {'a:clean-venv': 7, 'b:network': 5, 'c:gpu': 8, 'd:long-download': 4, 'e:not-runnable': 27}
+
+category (a) - runnable in a clean venv (no network, no GPU, no artifact):
+  (not executed: --no-run)
+
+NOT RUN - every other advertised command, with the reason it was not run:
+  [UNRUN] L17 pip install quantfit
+          b:network: reaches the network (Hub metadata or a package index)
+  [UNRUN] L27 quantfit check --model Qwen/Qwen2.5-7B-Instruct
+          b:network: reaches the network (Hub metadata or a package index)
+  [UNRUN] L29 quantfit quantize --model Qwen/Qwen2.5-1.5B-Instruct --method awq --out ./out
+          c:gpu: materializes multi-GB weights; loads weights through torch / llm-compressor; reaches the network (Hub metadata or a package index)
+  [UNRUN] L30 quantfit probe --model Qwen/Qwen2.5-1.5B-Instruct --bits 4 8
+          c:gpu: materializes multi-GB weights; loads weights through torch / llm-compressor; reaches the network (Hub metadata or a package index)
+  [UNRUN] L31 quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out
+          c:gpu: materializes multi-GB weights; loads weights through torch / llm-compressor; reaches the network (Hub metadata or a package index)
+  [UNRUN] L54 pip install 'quantfit[inspect,gguf] @ git+https://github.com/Sahil170595/quantfit.git@9d59739645e5c0021aec8288b480ed2e9c5bea30'
+          b:network: reaches the network (Hub metadata or a package index)
+  [UNRUN] L143 quantfit verify-safety --baseline hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf --quant hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf --baseline-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 --quant-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 --report drift.json --json
+          d:long-download: materializes multi-GB weights; reaches the network (Hub metadata or a package index); both arms are GGUF: runs on CPU under one pinned llama.cpp binary, so no GPU
+  [UNRUN] L167 quantfit screen --targets targets.json --out reports/
+          e:not-runnable: consumes an artifact a clean venv does not have; materializes multi-GB weights; loads weights through torch / llm-compressor; reaches the network (Hub metadata or a package index)
+  [UNRUN] L172 quantfit emit model-card --report drift.json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L177 quantfit reproduce
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L182 quantfit reproduce --reference ref.json --candidate t4.json --out record.json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L194 quantfit audit
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L199 quantfit audit
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L200 quantfit audit --json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L201 quantfit audit --json-out out.json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L202 quantfit audit --root /path/to/quantfit
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L213 quantfit calibrate sheet
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L213 quantfit calibrate ingest
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L248 quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --json
+          c:gpu: materializes multi-GB weights; loads weights through torch / llm-compressor; reaches the network (Hub metadata or a package index)
+  [UNRUN] L249 quantfit check --model Qwen/Qwen2.5-7B-Instruct --json
+          b:network: reaches the network (Hub metadata or a package index)
+  [UNRUN] L275 quantfit audit
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L283 quantfit audit
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L291 quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --junit drift.xml
+          c:gpu: materializes multi-GB weights; loads weights through torch / llm-compressor; reaches the network (Hub metadata or a package index)
+  [UNRUN] L308 quantfit gate
+          c:gpu: materializes multi-GB weights; loads weights through torch / llm-compressor; reaches the network (Hub metadata or a package index)
+  [UNRUN] L312 quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --tier smoke --out gate.json
+          c:gpu: materializes multi-GB weights; loads weights through torch / llm-compressor; reaches the network (Hub metadata or a package index)
+  [UNRUN] L319 quantfit gate --from-report drift.json --tier smoke --report replay-drift.json --out replay-gate.json --junit replay.xml
+          c:gpu: materializes multi-GB weights; loads weights through torch / llm-compressor; reaches the network (Hub metadata or a package index)
+  [UNRUN] L353 quantfit inspect-run
+          d:long-download: materializes multi-GB weights; reaches the network (Hub metadata or a package index)
+  [UNRUN] L365 quantfit inspect-run --baseline quantfit_gguf/./baseline.gguf --quant quantfit_gguf/./quant.gguf --report inspect-drift.json --json
+          d:long-download: materializes multi-GB weights; reaches the network (Hub metadata or a package index)
+  [UNRUN] L423 quantfit plan --model '<id>'
+          e:not-runnable: contains a <placeholder> and cannot be run verbatim
+  [UNRUN] L424 quantfit probe --model '<id>'
+          e:not-runnable: materializes multi-GB weights; loads weights through torch / llm-compressor; reaches the network (Hub metadata or a package index); contains a <placeholder> and cannot be run verbatim
+  [UNRUN] L441 quantfit resolution --report drift.json --calibration-report calibration.json --out resolution.json --json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L442 quantfit emit model-card --report drift.json --calibration-report calibration.json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L457 quantfit bundle create --report drift.json --out evidence/ --json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L458 quantfit bundle verify --bundle evidence/ --json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L460 quantfit bundle create --report drift.json --calibration-report calibration.json --resolution resolution.json --out calibrated-evidence/ --json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L473 quantfit bundle replay-create --reports run-1.json run-2.json run-3.json --t0 native-t0.json --out replicate-evidence/ --json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L474 quantfit bundle replay-verify --bundle relocated/replicate-evidence/ --json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L488 quantfit repeatability --reports run-1.json run-2.json run-3.json --out agreement.json --junit agreement.xml --json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L489 quantfit repeatability --bundle relocated/replicate-evidence/ --out agreement.json --junit agreement.xml --json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L505 quantfit evidence fetch --out public-evidence/ --timeout-seconds 120 --json
+          b:network: reaches the network (Hub metadata or a package index)
+  [UNRUN] L521 quantfit cold-run --baseline hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf --quant hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf --baseline-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 --quant-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 --out cold-runs/ --timeout-seconds 3600 --json
+          d:long-download: materializes multi-GB weights; reaches the network (Hub metadata or a package index)
+  [UNRUN] L542 quantfit t0 --reports cold-runs/run-1/report.json cold-runs/run-2/report.json cold-runs/run-3/report.json --out relocated-t0.json --json
+          e:not-runnable: consumes an artifact a clean venv does not have
+  [UNRUN] L570 quantfit references verify --slug NAME --report report.json --json
+          e:not-runnable: consumes an artifact a clean venv does not have; external registry or verification needs local input artifacts
+  [UNRUN] L571 quantfit verify --model ./out --json
+          e:not-runnable: consumes an artifact a clean venv does not have; loads weights through torch / llm-compressor
+
+findings: none - every advertised subcommand, flag and choice exists in the installed CLI.
+
+report -> validation\2026-10-09-evidence-fetch\quickstart-final.json
+
+PASS: 51 advertised command(s) all exist in the installed CLI; 0 clean-venv command(s) ran and passed.
+      This gate covers existence + the clean-venv subset ONLY. 44 command(s) were NOT run - see the UNRUN list.
