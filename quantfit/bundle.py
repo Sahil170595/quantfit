@@ -22,6 +22,7 @@ from quantfit.safety.calibration_binding import (
     _ENGINE_OUTPUTS,
     _INSPECT_CAUSAL,
     MAX_CALIBRATION_BYTES,
+    _same_numbers,
     load_bound_calibration_bytes,
 )
 from quantfit.safety.report import DriftReport
@@ -277,7 +278,7 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
             arms["baseline"] == report.baseline.model and arms["quant"] == report.quantized.model,
             "gate arm names do not match bundled report",
         )
-        _require(value["drift"] == report.drift, "gate drift does not match bundled report counts")
+        _same_numbers(value["drift"], report.drift, "gate drift")
         _require(
             value["decode"] == {"max_new_tokens": report.decode.get("max_new_tokens"), "do_sample": False}
             and report.decode.get("do_sample", not report.decode.get("greedy", False)) is False,
@@ -320,14 +321,14 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
             }
             and eps["upper"] is None
             and eps["resolution_is_a_floor"] is False
-            and eps["baseline_upper"] == calibration.eps_baseline_upper
-            and eps["quantized_upper"] == calibration.eps_quant_upper
             and eps["source"] == calibration.eps_source
             and eps["assumptions"] == ASSUMPTIONS
             and eps["definition"] == EPS_DEFINITION
             and eps["statement"] == (OBSERVED_STATEMENT if observed else PREFLIGHT_STATEMENT),
             "gate conditional epsilon does not match validated calibration",
         )
+        _same_numbers(eps["baseline_upper"], calibration.eps_baseline_upper, "gate conditional epsilon.baseline_upper")
+        _same_numbers(eps["quantized_upper"], calibration.eps_quant_upper, "gate conditional epsilon.quantized_upper")
         _require(
             eps["actual_run_matched"] is observed
             and eps["binding_status"]
@@ -348,6 +349,12 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
             else eps == gate._eps(eps.get("upper"), eps.get("source")),
             "gate epsilon mode/values are inconsistent",
         )
+    calculation_eps = dict(eps)
+    if eps.get("mode") == "bound_calibration_report":
+        # A nearby serialized float is not the source of the decision. Recompute
+        # discrete thresholds from the validated calibration's canonical bounds.
+        calculation_eps["baseline_upper"] = calibration.eps_baseline_upper
+        calculation_eps["quantized_upper"] = calibration.eps_quant_upper
     # Reuse the gate's calculations and assembler. This checks its existing
     # decision contract; integrity does not upgrade that decision into science.
     settings = value["gate"]
@@ -368,15 +375,15 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
         "gate decode must retain the greedy aggregate contract",
     )
     n = value["drift"]["refusal_robustness"]["at_risk"] if observed else gate.SHIPPED_EXPECTED_UNSAFE_N
-    block = gate._block(eps, n)
+    block = gate._block(calculation_eps, n)
     stage = gate.STAGE_POST_RUN if observed else gate.STAGE_PRE_RUN
-    resolution = gate._resolution(stage, threshold, block, eps, gate.SHIPPED_EXPECTED_UNSAFE_N)
+    resolution = gate._resolution(stage, threshold, block, calculation_eps, gate.SHIPPED_EXPECTED_UNSAFE_N)
     over_refusal = None
     expected_code = 5
     if observed:
         axis = value["drift"]["over_refusal"]
         over_refusal = {
-            **gate._block(eps, axis["at_risk"]),
+            **gate._block(calculation_eps, axis["at_risk"]),
             "flips": axis["overrefusal_regressions"],
             "best_case_n_at_risk": gate.SHIPPED_EXPECTED_SAFE_N,
             "gated": False,
@@ -396,13 +403,13 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
         _require(not resolution["not_refused"], "pre-run refusal must actually refuse the declared threshold")
     _require(code == expected_code, "gate decision precedence is inconsistent")
     if code == 5:
-        message = gate._refusal_message(resolution, eps, declared)
+        message = gate._refusal_message(resolution, calculation_eps, declared)
     elif code == 4:
         message = gate._unmeasurable_message(
             value["drift"]["refusal_robustness"]["expected_unsafe_n"], threshold, declared
         )
     else:
-        message = gate._verdict_message(value["verdict"], flips, resolution, eps, declared)
+        message = gate._verdict_message(value["verdict"], flips, resolution, calculation_eps, declared)
     _require(value["message"] == message, "gate message does not match its existing decision contract")
     expected = gate._decision(
         baseline=arms["baseline"],
@@ -410,7 +417,7 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
         threshold=threshold,
         tier=tier,
         declared_as=declared,
-        eps=eps,
+        eps=calculation_eps,
         block=block,
         resolution=resolution,
         verdict=value["verdict"],
@@ -425,7 +432,7 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
     for key in ("created_utc", "quantfit_version"):
         _require(isinstance(value[key], str) and bool(value[key]), f"gate {key} must be a string")
         expected[key] = value[key]
-    _require(value == expected, "gate aggregate fields do not match its existing decision contract")
+    _same_numbers(value, expected, "gate aggregate")
     return {
         "exit_code": code,
         "verdict": value["verdict"],
@@ -472,9 +479,10 @@ def _validate(data: dict[str, bytes]) -> dict:
         for key in ("created_utc", "quantfit_version"):
             _require(isinstance(supplied[key], str) and bool(supplied[key]), f"resolution {key} must be a string")
             supplied[key] = expected[key]
-        _require(
-            supplied == expected, "resolution does not match consumed report/calibration bytes and conditional analysis"
-        )
+        # Recomputed MDEs can differ by a final binary digit across math libraries.
+        # Reuse calibration's typed statistic comparison; original bytes and their
+        # SHA256 binding are unchanged, and counts/declarations remain exact.
+        _same_numbers(supplied, expected, "resolution")
         declarations["resolution"] = {
             "human_confirmation_verified": False,
             "assumptions_verified": False,

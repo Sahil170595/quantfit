@@ -106,8 +106,9 @@ def main() -> None:
             env=env,
             capture_output=True,
             text=True,
-            check=True,
+            check=False,
         )
+        assert completed.returncode == 0, completed.stdout
         created = json.loads(completed.stdout)["result"]
         assert created["integrity_verified"] is True and created["scientific_claims_verified"] is False
         relocated = sandbox / "relocated-bundle"

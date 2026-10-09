@@ -33,6 +33,13 @@ report with matching arms, decode and drift counts. Gate arithmetic and decision
 precedence are checked with the existing gate primitives; the bundle does not replace
 the gate's decision rule or suppress an ungated-axis regression.
 
+Computed floating-point statistics use the calibration validator's existing
+`1e-12` relative/absolute tolerance so a final binary-digit difference between
+Windows and Linux does not refuse unchanged evidence. Counts retain integer types;
+booleans, hashes, status and claim wording remain exact. Bound gate decisions are
+recomputed from the validated calibration bounds. The original JSON bytes are copied
+and hashed without rounding or regeneration.
+
 A real pre-run refusal has no observed report. Package it without inventing one:
 
 ```bash
