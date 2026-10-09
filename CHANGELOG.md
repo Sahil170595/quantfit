@@ -15,6 +15,19 @@
 
 ## Unreleased
 
+- Native GGUF server argv explicitly disables device/layer/host-operation offload,
+  with causal controls recorded in the engine identity. A cached b9817 help/argv check
+  and synthetic red/fix records are in `validation/2026-10-08-native-cpu-enforcement/`;
+  no GPU execution is claimed. Hosted installed cold consumer added to existing GGUF
+  qualification (pending execution); older validation records remain unchanged.
+
+- POSIX `cold-run` starts three fresh uncached native GGUF children, preserves native
+  negative/operational outcomes separately from existing T0, and records companion
+  hardware/process/hash facts. Hub GGUF revision flags pass immutable pins to the
+  downloader and check actual snapshot resolution; local pins are refused. Synthetic
+  orchestration evidence: `validation/2026-10-08-cold-replicate-runner/`. Hosted installed
+  model evidence is pending; no independent-host, human-label, sensitivity or GO claim.
+
 - Offline `bundle create`/`bundle verify` preserve exact aggregate bytes, conditional
   flags, negative gate decisions and reportless pre-run refusals after relocation.
   Fixed role paths and same-buffer validators refuse raw payloads and substitutions;

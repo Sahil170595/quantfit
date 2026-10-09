@@ -159,7 +159,15 @@ def _engine(value: dict) -> None:
     if name == "transformers":
         allowed = {"name", "version", "device"} | _ENGINE_OUTPUTS
     elif name == "llama.cpp":
-        allowed = {"name", "binary_sha256", "source", "threads", "device"} | _ENGINE_OUTPUTS
+        from quantfit.safety.gguf_arm import CPU_OFFLOAD_CONTROLS
+
+        allowed = {"name", "binary_sha256", "source", "threads", "device"} | _ENGINE_OUTPUTS | set(CPU_OFFLOAD_CONTROLS)
+        if set(value) & set(CPU_OFFLOAD_CONTROLS):
+            _require(
+                value.get("device") == "cpu"
+                and all(type(value.get(k)) is type(v) and value[k] == v for k, v in CPU_OFFLOAD_CONTROLS.items()),
+                "native CPU offload controls must be complete and match the enforced contract",
+            )
     elif name == "inspect_ai:hf":
         allowed = _INSPECT_CAUSAL | _ENGINE_OUTPUTS | {"inspect_ai", "provider"}
     elif isinstance(name, str) and name.startswith("inspect_ai:"):

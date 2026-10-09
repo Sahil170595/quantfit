@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="17" time="30.136" timestamp="2026-10-08T23:07:08.185832-04:00" hostname="SahilKadadekar"><testcase classname="tests.test_cold_run" name="test_cold_run_rejects_non_gguf_and_windows_without_starting" time="0.153" /><testcase classname="tests.test_cold_run" name="test_actual_three_fresh_children_preserve_negative_and_operational[regression-0-True]" time="1.972" /><testcase classname="tests.test_cold_run" name="test_actual_three_fresh_children_preserve_negative_and_operational[null-0-True]" time="1.888" /><testcase classname="tests.test_cold_run" name="test_actual_three_fresh_children_preserve_negative_and_operational[unmeasured-0-True]" time="1.961" /><testcase classname="tests.test_cold_run" name="test_actual_three_fresh_children_preserve_negative_and_operational[disagreement-3-False]" time="2.014" /><testcase classname="tests.test_cold_run" name="test_actual_three_fresh_children_preserve_negative_and_operational[operational-2-None]" time="1.993" /><testcase classname="tests.test_cold_run" name="test_actual_three_fresh_children_preserve_negative_and_operational[raw-2-None]" time="1.938" /><testcase classname="tests.test_cold_run" name="test_actual_three_fresh_children_preserve_negative_and_operational[cache-2-None]" time="1.959" /><testcase classname="tests.test_cold_run" name="test_actual_three_fresh_children_preserve_negative_and_operational[different-binary-2-None]" time="2.008" /><testcase classname="tests.test_cold_run" name="test_actual_three_fresh_children_preserve_negative_and_operational[different-threads-2-None]" time="1.998" /><testcase classname="tests.test_cold_run" name="test_actual_three_fresh_children_preserve_negative_and_operational[quantized-baseline-2-None]" time="1.949" /><testcase classname="tests.test_cold_run" name="test_timeout_kills_actual_owned_descendants_and_discards_output" time="3.088" /><testcase classname="tests.test_cold_run" name="test_report_substitution_cannot_leave_positive_t0" time="1.955"><failure message="AssertionError: assert (2 == 2 and 'aggregate_provenance_failure' == 't0_operational_refusal'&#10;  &#10;  - t0_operational_refusal&#10;  + aggregate_provenance_failure)">tmp_path = PosixPath('/tmp/pytest-of-sahil_1/pytest-195/test_report_substitution_canno0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x708f000274d0&gt;
+
+    @pytest.mark.skipif(os.name != "posix", reason="cold-run requires POSIX process-session containment")
+    def test_report_substitution_cannot_leave_positive_t0(tmp_path, monkeypatch):
+        import quantfit.cold_run as runner
+    
+        synthetic_children(tmp_path, monkeypatch)
+        original = runner.within_hardware_identical
+    
+        def substituted(paths, **kwargs):
+            assert not kwargs  # no positive artifact may be written before source comparison
+            path = Path(paths[0])
+            data = json.loads(path.read_bytes())
+            data["created_utc"] = "substituted-after-observation"
+            path.write_text(json.dumps(data), encoding="utf-8")
+            return original(paths)
+    
+        monkeypatch.setattr(runner, "within_hardware_identical", substituted)
+        result = runner.cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+&gt;       assert result["exit_code"] == 2 and result["status"] == "t0_operational_refusal"
+E       AssertionError: assert (2 == 2 and 'aggregate_provenance_failure' == 't0_operational_refusal'
+E         
+E         - t0_operational_refusal
+E         + aggregate_provenance_failure)
+
+tests/test_cold_run.py:165: AssertionError</failure></testcase><testcase classname="tests.test_cold_run" name="test_raw_substitution_after_t0_read_is_removed_before_handback" time="1.954" /><testcase classname="tests.test_cold_run" name="test_cancellation_closes_child_session_and_keeps_partial_receipt" time="0.552" /><testcase classname="tests.test_cold_run" name="test_terminal_failures_remove_actual_raw_child_report[cancel-after-raw]" time="0.647" /><testcase classname="tests.test_cold_run" name="test_terminal_failures_remove_actual_raw_child_report[cleanup-failure-after-raw]" time="0.655" /></testsuite></testsuites>

@@ -1,5 +1,9 @@
 # CLI reference — every command, every flag
 
+`quantfit cold-run` starts three fresh uncached native GGUF children and checks existing
+T0 on POSIX hosts. Native measurement exits remain separate from T0. Its revision,
+cleanup and aggregate-output contract is in [Three fresh native GGUF runs](cold-replicate-runner.md).
+
 `quantfit bundle create` and `quantfit bundle verify` package and check portable
 aggregate evidence offline. Their role/flag/exit-code contract and worked commands are
 in [Portable aggregate evidence bundles](portable-evidence-bundles.md). Integrity never

@@ -218,6 +218,17 @@ def _build_parser() -> argparse.ArgumentParser:
         "docs/data-handling-completions.md; use the *.capture.jsonl suffix)",
     )
     pvs.add_argument("--baseline-cache", default=None, metavar="DIR", help=_BASELINE_CACHE_HELP)
+    pvs.add_argument("--baseline-revision", default=None, help="immutable 40-hex commit; Hub GGUF refs only")
+    pvs.add_argument("--quant-revision", default=None, help="immutable 40-hex commit; Hub GGUF refs only")
+
+    pcold = sub.add_parser("cold-run", help="three fresh uncached native GGUF children + T0; POSIX only")
+    pcold.add_argument("--baseline", required=True, help="unquantized GGUF path or hf: GGUF ref")
+    pcold.add_argument("--quant", required=True, help="quantized GGUF path or hf: GGUF ref")
+    pcold.add_argument("--baseline-revision", default=None, help="immutable Hub GGUF commit; refuses local pins")
+    pcold.add_argument("--quant-revision", default=None, help="immutable Hub GGUF commit; refuses local pins")
+    pcold.add_argument("--out", required=True, metavar="NEW_DIR", help="new aggregate output directory")
+    pcold.add_argument("--timeout-seconds", type=float, default=3600, help="deadline per child (default 3600)")
+    pcold.add_argument("--max-new-tokens", type=_positive_int, default=64)
 
     ps = sub.add_parser(
         "screen",
@@ -702,6 +713,26 @@ def _dispatch(args: argparse.Namespace) -> int:
                 lambda: print(run.drift.summary()),
             )
 
+    if args.cmd == "cold-run":
+        from quantfit.cold_run import cold_run
+
+        result = cold_run(
+            args.baseline,
+            args.quant,
+            args.out,
+            timeout_seconds=args.timeout_seconds,
+            max_new_tokens=args.max_new_tokens,
+            baseline_revision=args.baseline_revision,
+            quant_revision=args.quant_revision,
+        )
+        return _emit(
+            args,
+            "cold-run",
+            result["exit_code"],
+            result,
+            lambda: print(f"{result['status']} -> {args.out}; native exits remain separate from T0"),
+        )
+
     if args.cmd == "verify-safety":
         from quantfit.safety.verify import verify_safety
 
@@ -715,6 +746,8 @@ def _dispatch(args: argparse.Namespace) -> int:
                 ("--capture", args.capture),
                 ("--junit", args.junit),
                 ("--baseline-cache", args.baseline_cache),
+                ("--baseline-revision", args.baseline_revision),
+                ("--quant-revision", args.quant_revision),
             ):
                 if value:
                     raise RuntimeError(
@@ -746,6 +779,11 @@ def _dispatch(args: argparse.Namespace) -> int:
                 "run `quantfit verify-safety --demo`."
             )
 
+        revisions = {}
+        if args.baseline_revision is not None:
+            revisions["baseline_revision"] = args.baseline_revision
+        if args.quant_revision is not None:
+            revisions["quant_revision"] = args.quant_revision
         drift = verify_safety(
             args.baseline,
             args.quant,
@@ -754,6 +792,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             report_path=args.report,
             capture_path=args.capture,
             baseline_cache_dir=args.baseline_cache,
+            **revisions,
         )
         # Exit codes are the CI contract; they must not collide with 2 (operational
         # failure, from main's handler) or an unmeasured run would read as a verdict.

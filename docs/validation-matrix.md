@@ -392,6 +392,20 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+### Cold native replicates (2026-10-08)
+
+`cold-run` functional evidence is actual POSIX child orchestration with explicitly
+synthetic aggregate measurement substitution in `validation/2026-10-08-cold-replicate-runner/`.
+It is E3, not model execution. Hosted installed model/T0 qualification is pending the
+later reference campaign with unchanged Quant3 source hashes. Windows cold-run refuses
+before output; native verify-safety remains available. Existing protocol rules are unchanged.
+
+| Flag | Command | Scope validated | Evidence |
+|---|---|---|---|
+| `--baseline` / `--quant` / `--out` / `--max-new-tokens` | cold-run | Native GGUF-only; new output dir, actual3fresh children, separate0/3/4measurement outcomes and T0, no capture/completion cache | `tests/test_cold_run.py`; new dated record |
+| `--timeout-seconds` | cold-run | Finite positive child deadline; actual owned process-session TERM/KILL and direct child wait; no grandchild reap claim | `tests/test_cold_run.py`; new dated record |
+| `--baseline-revision` / `--quant-revision` | verify-safety, cold-run | Hub GGUF immutable commit consumed and resolved snapshot compared; local/non-GGUF/moving labels refused | `tests/test_gguf_arm.py`; new dated record; live model download pending |
+
 The offline bundle interface has synthetic functional records at
 `validation/2026-10-08-portable-evidence-bundles/`: relocation and byte matching,
 reportless pre-run refusal, exact-buffer copying, unsafe layouts and tampering. These

@@ -71,6 +71,47 @@ def test_snapshot_commit_parsed_from_hub_cache_layout(tmp_path):
     assert _snapshot_commit(tmp_path / "elsewhere" / "file.gguf") is None
 
 
+def test_requested_hub_revision_is_consumed_and_observed(tmp_path, monkeypatch):
+    import huggingface_hub
+
+    revision = "b" * 40
+    target = tmp_path / "snapshots" / revision / "model.gguf"
+    calls = []
+
+    def download(repo, filename, **kwargs):
+        calls.append((repo, filename, kwargs))
+        return str(target)
+
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", download)
+    assert _fetch("hf:org/repo/model.gguf", None, revision=revision) == (target, revision)
+    assert calls == [("org/repo", "model.gguf", {"token": None, "revision": revision})]
+
+
+@pytest.mark.parametrize("returned", ["c" * 40, "z" * 40, None])
+def test_requested_revision_refuses_unobserved_or_different_snapshot(tmp_path, monkeypatch, returned):
+    import huggingface_hub
+
+    path = tmp_path / "snapshots" / returned / "model.gguf" if returned else tmp_path / "model.gguf"
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda *a, **k: str(path))
+    with pytest.raises(RuntimeError, match="resolved snapshot"):
+        _fetch("hf:org/repo/model.gguf", None, revision="b" * 40)
+
+
+@pytest.mark.parametrize("revision", ["main", "b" * 39, "B" * 40, "z" * 40])
+def test_revision_must_be_immutable_lowercase_commit(revision):
+    with pytest.raises(RuntimeError, match="40 lowercase hexadecimal"):
+        _fetch("hf:org/repo/model.gguf", None, revision=revision)
+
+
+def test_local_revision_refused_before_any_probe_load(tmp_path):
+    from quantfit.safety.verify import verify_safety
+
+    with pytest.raises(RuntimeError, match="Hub GGUF"):
+        _fetch(str(tmp_path / "local.gguf"), None, revision="b" * 40)
+    with pytest.raises(RuntimeError, match="Hub GGUF"):
+        verify_safety("org/base", "org/quant", baseline_revision="b" * 40)
+
+
 # --- metadata: facts come from the file, not the filename --------------------------
 
 
@@ -234,6 +275,12 @@ def test_generate_completions_hermetic(stub_server, tmp_path, monkeypatch):
     assert "--jinja" in spawned["cmd"] and "--parallel" in spawned["cmd"]
     assert run.resolved_dtype == "F16" and run.artifact_sha256 == arm.sha256
     assert run.engine["name"] == "llama.cpp" and run.engine["device"] == "cpu"
+    command = spawned["cmd"]
+    assert command[command.index("--device") + 1] == "none"
+    assert command[command.index("--n-gpu-layers") + 1] == "0"
+    assert "--no-op-offload" in command
+    assert run.engine["offload_device"] == "none"
+    assert run.engine["n_gpu_layers"] == 0 and run.engine["op_offload"] is False
     from quantfit.backends.gguf import _sha256
 
     assert run.engine["binary_sha256"] == _sha256(fake_bin)  # the binary actually "run"

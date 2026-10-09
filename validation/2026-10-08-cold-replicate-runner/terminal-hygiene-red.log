@@ -1,0 +1,95 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___ test_terminal_failures_remove_actual_raw_child_report[cancel-after-raw] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-sahil_1/pytest-192/test_terminal_failures_remove_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7589f14ed8b0>
+fault = 'cancel-after-raw'
+
+    @pytest.mark.skipif(os.name != "posix", reason="cold-run requires POSIX process-session containment")
+    @pytest.mark.parametrize("fault", ["cancel-after-raw", "cleanup-failure-after-raw"])
+    def test_terminal_failures_remove_actual_raw_child_report(tmp_path, monkeypatch, fault):
+        import quantfit.cold_run as runner
+    
+        synthetic_children(tmp_path, monkeypatch, "raw")
+        if fault == "cancel-after-raw":
+            original = subprocess.Popen.wait
+            interrupted = False
+    
+            def cancel_once(proc, *args, **kwargs):
+                nonlocal interrupted
+                code = original(proc, *args, **kwargs)
+                if not interrupted:
+                    interrupted = True
+                    raise KeyboardInterrupt
+                return code
+    
+            monkeypatch.setattr(subprocess.Popen, "wait", cancel_once)
+            with pytest.raises(KeyboardInterrupt):
+                runner.cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+        else:
+            original = runner._close_group
+    
+            def failed(proc):
+                value = original(proc)  # actual process cleanup still happens in this test
+                value["no_live_group_members_observed"] = False  # bounded control-flow failure injection
+                return value
+    
+            monkeypatch.setattr(runner, "_close_group", failed)
+            result = runner.cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+            assert result["exit_code"] == 2
+>       assert not (tmp_path / "runs/run-1/report.json").exists()
+E       AssertionError: assert not True
+E        +  where True = exists()
+E        +    where exists = (PosixPath('/tmp/pytest-of-sahil_1/pytest-192/test_terminal_failures_remove_0') / 'runs/run-1/report.json').exists
+
+tests/test_cold_run.py:228: AssertionError
+_ test_terminal_failures_remove_actual_raw_child_report[cleanup-failure-after-raw] _
+
+tmp_path = PosixPath('/tmp/pytest-of-sahil_1/pytest-192/test_terminal_failures_remove_1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7589f12135c0>
+fault = 'cleanup-failure-after-raw'
+
+    @pytest.mark.skipif(os.name != "posix", reason="cold-run requires POSIX process-session containment")
+    @pytest.mark.parametrize("fault", ["cancel-after-raw", "cleanup-failure-after-raw"])
+    def test_terminal_failures_remove_actual_raw_child_report(tmp_path, monkeypatch, fault):
+        import quantfit.cold_run as runner
+    
+        synthetic_children(tmp_path, monkeypatch, "raw")
+        if fault == "cancel-after-raw":
+            original = subprocess.Popen.wait
+            interrupted = False
+    
+            def cancel_once(proc, *args, **kwargs):
+                nonlocal interrupted
+                code = original(proc, *args, **kwargs)
+                if not interrupted:
+                    interrupted = True
+                    raise KeyboardInterrupt
+                return code
+    
+            monkeypatch.setattr(subprocess.Popen, "wait", cancel_once)
+            with pytest.raises(KeyboardInterrupt):
+                runner.cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+        else:
+            original = runner._close_group
+    
+            def failed(proc):
+                value = original(proc)  # actual process cleanup still happens in this test
+                value["no_live_group_members_observed"] = False  # bounded control-flow failure injection
+                return value
+    
+            monkeypatch.setattr(runner, "_close_group", failed)
+            result = runner.cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+            assert result["exit_code"] == 2
+>       assert not (tmp_path / "runs/run-1/report.json").exists()
+E       AssertionError: assert not True
+E        +  where True = exists()
+E        +    where exists = (PosixPath('/tmp/pytest-of-sahil_1/pytest-192/test_terminal_failures_remove_1') / 'runs/run-1/report.json').exists
+
+tests/test_cold_run.py:228: AssertionError
+- generated xml file: /mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-cold-replicate-runner/terminal-hygiene-red.xml -
+=========================== short test summary info ============================
+FAILED tests/test_cold_run.py::test_terminal_failures_remove_actual_raw_child_report[cancel-after-raw]
+FAILED tests/test_cold_run.py::test_terminal_failures_remove_actual_raw_child_report[cleanup-failure-after-raw]
+2 failed, 14 deselected in 2.87s
