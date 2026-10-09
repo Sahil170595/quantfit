@@ -387,6 +387,9 @@ class GgufRunObserver:
             "human_labels_authenticated": False,
         }
 
+    def report_inputs(self) -> tuple[str, ...]:
+        return tuple(dict.fromkeys(str(path.resolve()) for m in self.models for path in (m.api.arm.path, m.api.binary)))
+
 
 # Keep the original class for a real observed-provider type check. Inspect's
 # supported decorator registers its wrapper; get_model resolves the global name.

@@ -668,11 +668,13 @@ def _dispatch(args: argparse.Namespace) -> int:
         import tempfile
         from pathlib import Path
 
-        from quantfit.inspect_task import qsr_eval
+        from quantfit.inspect_task import check_report_output, local_gguf_inputs, qsr_eval
 
         if not args.baseline or not args.quant:
             raise RuntimeError("inspect-run needs --baseline and --quant Inspect HF or quantfit_gguf specs")
         gguf = args.baseline.startswith("quantfit_gguf/") or args.quant.startswith("quantfit_gguf/")
+        if gguf and args.report:
+            check_report_output(args.report, local_gguf_inputs((args.baseline, args.quant)))
         if not gguf and (not args.baseline_revision or not args.quant_revision):
             raise RuntimeError("inspect-run needs both immutable --baseline-revision and --quant-revision")
         observations = {"gguf_revisions" if gguf else "hf_revisions": (args.baseline_revision, args.quant_revision)}

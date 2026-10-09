@@ -45,6 +45,13 @@ endpoint termination metadata stays `unknown` rather than claiming a clean stop.
 Public `qsr_eval` selects this managed route for GGUF even when local revision
 slots are omitted; Hub revision omissions refuse before loading weights/probes.
 Lower-level standalone `qsr_paired_diff` tasks/SDK callers own provider closure.
+Report destinations that canonically or by inode alias a local arm refuse before
+model contact. Observed library report writes also protect both resolved weight
+files and native executables (including Hub cache files); unrelated existing
+report files remain replaceable.
+Bare GGUF `write_drift_report` calls require explicit resolved `protected_inputs`;
+the supported observed `QsrRun.write_report` supplies these automatically. The
+writer does not download/re-resolve models to guess a Hub cache or executable.
 
 Aggregate reports retain original verdict/counts, measured call totals, loaded
 hashes/served facts and a companion RAM/process receipt. Calibration binding and

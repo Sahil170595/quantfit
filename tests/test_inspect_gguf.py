@@ -181,7 +181,7 @@ def test_actual_public_inspect_full_fixture_batch_closes_before_judge(fixture, m
     from quantfit.safety import verify
     from quantfit.safety.report import DriftReport
 
-    ext, _, arms, servers, _ = fixture
+    ext, _, arms, servers, binary = fixture
     probes = [
         verify.Probe(f"synthetic {i}", "clear_unsafe" if i < 20 else "clear_safe", "unsafe" if i < 20 else "safe")
         for i in range(40)
@@ -228,6 +228,16 @@ def test_actual_public_inspect_full_fixture_batch_closes_before_judge(fixture, m
     assert measurement_identity(parsed)["baseline"]["engine"]["name"] == "inspect_ai:quantfit_gguf"
     assert parsed.baseline.artifact_sha256 == arms[0].sha256
     assert not ext.RUN_LOCK.locked()
+    # Prevent any destructive red run: the assembler is an explicit tripwire.
+    monkeypatch.setattr(verify, "_write_report", lambda *a, **kw: pytest.fail("writer reached a protected input"))
+    with pytest.raises(InspectTaskError, match="protected inputs"):
+        task.write_drift_report(str(tmp_path / "bare-report.json"), run.outcomes, *run.observed_arms, 64)
+    assert not (tmp_path / "bare-report.json").exists()
+    for source in (*[a.path for a in arms], binary):
+        original = source.read_bytes()
+        with pytest.raises(InspectTaskError, match="overwrite"):
+            run.write_report(str(source), *run.observed_arms, 64)
+        assert source.read_bytes() == original
 
 
 def test_async_cancellation_closes_both_without_worker_thread(fixture, monkeypatch):
