@@ -173,11 +173,20 @@ jobs:
       matrix:
         code: [0, 2, 3, 4, 5]
         calibration: [none]
+        replay: [none]
         include:
           - code: 5
             calibration: bound
+            replay: none
           - code: 0
             calibration: observed
+            replay: none
+          - code: 0
+            calibration: none
+            replay: phi4
+          - code: 5
+            calibration: bound
+            replay: bound
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -215,19 +224,20 @@ jobs:
           PIP_NO_INDEX: '1' # the installed locked graph must satisfy the candidate
           QUANTFIT_CI_CASE: ${{ matrix.code }}
           QUANTFIT_CI_BOUND_REPORT: ${{ matrix.calibration == 'observed' && 'validation/2026-10-08-calibration-aware-outputs/action-drift.json' || '' }}
-          PYTHONPATH: ${{ github.workspace }}/tools/ci_gate_fixture
+          PYTHONPATH: ${{ matrix.replay == 'none' && format('{0}/tools/ci_gate_fixture', github.workspace) || '' }}
         with:
-          baseline: ${{ matrix.calibration != 'none' && 'base' || 'CI_LABEL_FIXTURE' }}
-          quant: ${{ matrix.calibration != 'none' && 'quant' || 'CI_LABEL_FIXTURE' }}
+          baseline: ${{ matrix.replay == 'none' && (matrix.calibration != 'none' && 'base' || 'CI_LABEL_FIXTURE') || '' }}
+          quant: ${{ matrix.replay == 'none' && (matrix.calibration != 'none' && 'quant' || 'CI_LABEL_FIXTURE') || '' }}
+          from-report: ${{ matrix.replay == 'phi4' && 'validation/2026-10-09-phi4-public-candidate/producer/run-1/report.json' || (matrix.replay == 'bound' && 'validation/2026-10-08-calibration-aware-outputs/drift.json' || '') }}
           calibration-report: ${{ matrix.calibration == 'observed' && 'validation/2026-10-08-calibration-aware-outputs/action-calibration.json' || (matrix.calibration == 'bound' && 'validation/2026-10-08-calibration-aware-outputs/calibration.json' || '') }}
           quantfit-path: ${{ env.WHEEL }}
           python-version: ''
           tier: ''
           threshold-pp: ${{ matrix.code == 5 && '0.01' || '30' }}
-          report: cases/${{ matrix.code }}-${{ matrix.calibration }}/drift.json
-          gate-out: cases/${{ matrix.code }}-${{ matrix.calibration }}/gate.json
-          junit: cases/${{ matrix.code }}-${{ matrix.calibration }}/junit.xml
-          artifact-name: consumer-control-${{ matrix.code }}-${{ matrix.calibration }}
+          report: cases/${{ matrix.code }}-${{ matrix.calibration }}-${{ matrix.replay }}/drift.json
+          gate-out: cases/${{ matrix.code }}-${{ matrix.calibration }}-${{ matrix.replay }}/gate.json
+          junit: cases/${{ matrix.code }}-${{ matrix.calibration }}-${{ matrix.replay }}/junit.xml
+          artifact-name: consumer-control-${{ matrix.code }}-${{ matrix.calibration }}-${{ matrix.replay }}
           retention-days: '1'
       - name: Verify action outcome, real decision and JUnit
         if: always()
@@ -237,7 +247,9 @@ jobs:
           ACTION_OUTCOME: ${{ steps.gate.outcome }}
           ACTION_CODE: ${{ steps.gate.outputs.exit-code }}
           ACTION_VERDICT: ${{ steps.gate.outputs.verdict }}
-          CASE_DIR: cases/${{ matrix.code }}-${{ matrix.calibration }}
+          CASE_DIR: cases/${{ matrix.code }}-${{ matrix.calibration }}-${{ matrix.replay }}
+          REPLAY: ${{ matrix.replay }}
+          REPLAY_SOURCE: ${{ matrix.replay == 'phi4' && 'validation/2026-10-09-phi4-public-candidate/producer/run-1/report.json' || (matrix.replay == 'bound' && 'validation/2026-10-08-calibration-aware-outputs/drift.json' || '') }}
           CALIBRATED: ${{ matrix.calibration != 'none' && '1' || '0' }}
           CALIBRATION_FILE: ${{ matrix.calibration == 'observed' && 'validation/2026-10-08-calibration-aware-outputs/action-calibration.json' || 'validation/2026-10-08-calibration-aware-outputs/calibration.json' }}
           ACTION_BINDING: ${{ steps.gate.outputs.binding-status }}

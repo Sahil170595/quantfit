@@ -312,6 +312,22 @@ promise resolution it does not have:
 quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --tier smoke --out gate.json
 ```
 
+**Re-evaluate a saved report offline (unreleased candidate).** A new policy threshold
+does not require rerunning the models. Install the candidate first, then:
+
+```bash
+quantfit gate --from-report drift.json --tier smoke --report replay-drift.json --out replay-gate.json --junit replay.xml
+```
+
+The saved report's validated counts, original verdict and exact bytes remain intact.
+Replay records its input SHA256 and performs no inference or judge execution. Native
+best-case policy refusal still precedes count evaluation; `pre_run` identifies that
+policy phase and does not claim the saved measurement happened later. A dangerous-axis
+gate can pass while the original report flags over-refusal; both results stay visible.
+Live arms, token, token-limit and baseline-cache options are refused in this mode.
+An optional matching `--calibration-report` provides conditional bounds with labels
+and assumptions unverified. See [the offline API/action contract](docs/saved-report-gate.md).
+
 You declare the resolution you need; the gate proves it can deliver it — once
 **before any model loads** (best-case at-risk pairs) and again at the run's
 realized n — and refuses with exit **5** if it cannot, naming the threshold, the

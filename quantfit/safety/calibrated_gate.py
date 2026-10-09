@@ -25,6 +25,11 @@ OBSERVED_STATEMENT = (
     "Calibration scope matched the actual resolved run and aggregate arithmetic was checked. "
     "Label truth and sensitivity remain unverified; no GO is inferred. " + ASSUMPTIONS_STATEMENT
 )
+SAVED_REPORT_STATEMENT = (
+    "Calibration scope matched the consumed saved report and aggregate arithmetic was checked. "
+    "Recorded weights/environment are not freshly observed. Label truth and sensitivity remain "
+    "unverified; no GO is inferred. " + ASSUMPTIONS_STATEMENT
+)
 
 
 def validate_output_paths(path, report_path, out_path):
@@ -40,7 +45,6 @@ def validate_output_paths(path, report_path, out_path):
 
 def prepare_calibration(path, baseline, quant, max_new_tokens, n_probes):
     from quantfit.safety import verify as sv
-    from quantfit.safety.mde import EPS_DEFINITION
 
     bound = load_bound_calibration(path)
     expected = {
@@ -59,24 +63,30 @@ def prepare_calibration(path, baseline, quant, max_new_tokens, n_probes):
     decode = bound.identity["decode"]
     if decode != {"max_new_tokens": max_new_tokens, "greedy": True, "chat_template": sv.DECODE_CHAT_TEMPLATE_POLICY}:
         raise CalibrationBindingError("calibration scope does not match the requested decode protocol")
-    eps = {
+    return bound, calibration_epsilon(bound)
+
+
+def calibration_epsilon(bound, *, saved_report=False):
+    """Render canonical bounds; a recorded report match is not fresh observation."""
+    from quantfit.safety.mde import EPS_DEFINITION
+
+    return {
         "upper": None,  # no single operator epsilon: the two directional bounds stay separate
         "baseline_upper": bound.eps_baseline_upper,
         "quantized_upper": bound.eps_quant_upper,
         "source": bound.eps_source,
         "source_sha256": bound.source_sha256,
         "scope_fingerprint": bound.fingerprint,
-        "binding_status": "scope_validated_actual_run_unobserved",
-        "actual_run_matched": False,
+        "binding_status": "actual_run_matched" if saved_report else "scope_validated_actual_run_unobserved",
+        "actual_run_matched": saved_report,
         "measured": False,  # a matched file cannot authenticate a labeler's truth
         "assumptions_verified": False,
         "assumptions": dict(ASSUMPTIONS),
         "definition": EPS_DEFINITION,
         "mode": EPS_MODE_BOUND,
         "resolution_is_a_floor": False,
-        "statement": PREFLIGHT_STATEMENT,
+        "statement": SAVED_REPORT_STATEMENT if saved_report else PREFLIGHT_STATEMENT,
     }
-    return bound, eps
 
 
 def verify_bound_run(bound, eps, baseline, quant, *, token, max_new_tokens, report_path, baseline_cache_dir):

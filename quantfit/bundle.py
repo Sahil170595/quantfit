@@ -261,13 +261,21 @@ def _report(raw: bytes):
     return report
 
 
-def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict:
+def _validate_gate(value: dict, report: DriftReport | None, calibration, *, report_sha256: str | None = None) -> dict:
     from quantfit import gate
-    from quantfit.safety.calibrated_gate import ASSUMPTIONS, OBSERVED_STATEMENT, PREFLIGHT_STATEMENT
+    from quantfit.safety.calibrated_gate import (
+        ASSUMPTIONS,
+        OBSERVED_STATEMENT,
+        PREFLIGHT_STATEMENT,
+        SAVED_REPORT_STATEMENT,
+    )
     from quantfit.safety.mde import EPS_DEFINITION
 
+    replay = "source_evidence" in value
     _require(
-        set(value) == _GATE_KEYS and type(value.get("schema_version")) is int and value["schema_version"] == 1,
+        set(value) == _GATE_KEYS | ({"source_evidence"} if replay else set())
+        and type(value.get("schema_version")) is int
+        and value["schema_version"] == 1,
         "gate role requires the supported aggregate gate schema 1",
     )
     code = value["exit_code"]
@@ -287,6 +295,41 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
     _require(all(isinstance(arms[key], str) and arms[key] for key in ("baseline", "quant")), "invalid gate arm names")
     _require(arms["report"] is None or isinstance(arms["report"], str), "gate report locator must be a string/null")
     observed = value["drift"] is not None
+    source_evidence = None
+    if replay:
+        source_evidence = value["source_evidence"]
+        _require(
+            report is not None and report_sha256 is not None, "saved-report gate requires its exact consumed report"
+        )
+        _require(
+            isinstance(source_evidence, dict)
+            and set(source_evidence) == {"kind", "report_sha256", "evaluation_phase", "inference_performed"}
+            and source_evidence["kind"] == "saved_report"
+            and isinstance(source_evidence["report_sha256"], str)
+            and source_evidence["report_sha256"] == report_sha256
+            and source_evidence["evaluation_phase"] == ("observed_counts" if observed else "policy_preflight")
+            and source_evidence["inference_performed"] is False,
+            "saved-report provenance contradicts consumed bytes or policy phase",
+        )
+        _require(
+            arms["baseline"] == report.baseline.model and arms["quant"] == report.quantized.model,
+            "saved-report gate arm names differ from consumed report",
+        )
+        _require(
+            value["decode"] == {"max_new_tokens": report.decode.get("max_new_tokens"), "do_sample": False}
+            and report.decode.get("do_sample", not report.decode.get("greedy", False)) is False
+            and report.decode.get("greedy", True) is True
+            and type(report.decode.get("temperature", 0)) in (int, float)
+            and report.decode.get("temperature", 0) == 0,
+            "saved-report gate decode differs from report",
+        )
+        canonical = _check_original_statistics(report)
+        _require(
+            type(report.drift["regression_detected"]) is bool
+            and report.drift["regression_detected"] is canonical["regression_detected"]
+            and report.drift["unmeasurable_axes"] == canonical["unmeasurable_axes"],
+            "saved-report derived flags contradict validated counts",
+        )
     if observed:
         _require(report is not None, "observed gate requires its aggregate report")
         _require(
@@ -339,15 +382,16 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
             and eps["source"] == calibration.eps_source
             and eps["assumptions"] == ASSUMPTIONS
             and eps["definition"] == EPS_DEFINITION
-            and eps["statement"] == (OBSERVED_STATEMENT if observed else PREFLIGHT_STATEMENT),
+            and eps["statement"]
+            == (SAVED_REPORT_STATEMENT if replay else OBSERVED_STATEMENT if observed else PREFLIGHT_STATEMENT),
             "gate conditional epsilon does not match validated calibration",
         )
         _same_numbers(eps["baseline_upper"], calibration.eps_baseline_upper, "gate conditional epsilon.baseline_upper")
         _same_numbers(eps["quantized_upper"], calibration.eps_quant_upper, "gate conditional epsilon.quantized_upper")
         _require(
-            eps["actual_run_matched"] is observed
+            eps["actual_run_matched"] is (observed or replay)
             and eps["binding_status"]
-            == ("actual_run_matched" if observed else "scope_validated_actual_run_unobserved"),
+            == ("actual_run_matched" if observed or replay else "scope_validated_actual_run_unobserved"),
             "gate actual-run status contradicts its drift",
         )
         identity = calibration.identity
@@ -393,6 +437,12 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
     block = gate._block(calculation_eps, n)
     stage = gate.STAGE_POST_RUN if observed else gate.STAGE_PRE_RUN
     resolution = gate._resolution(stage, threshold, block, calculation_eps, gate.SHIPPED_EXPECTED_UNSAFE_N)
+    if replay and observed:
+        pre_block = gate._block(calculation_eps, gate.SHIPPED_EXPECTED_UNSAFE_N)
+        pre = gate._resolution(
+            gate.STAGE_PRE_RUN, threshold, pre_block, calculation_eps, gate.SHIPPED_EXPECTED_UNSAFE_N
+        )
+        _require(pre["not_refused"], "saved-report observed decision bypasses native best-case policy refusal")
     over_refusal = None
     expected_code = 5
     if observed:
@@ -425,7 +475,10 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
         )
     else:
         message = gate._verdict_message(value["verdict"], flips, resolution, calculation_eps, declared)
-    _require(value["message"] == message, "gate message does not match its existing decision contract")
+    _require(
+        value["message"] == (gate.replay_message(message) if replay else message),
+        "gate message does not match its existing decision contract",
+    )
     expected = gate._decision(
         baseline=arms["baseline"],
         quant=arms["quant"],
@@ -443,6 +496,7 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
         over_refusal=over_refusal,
         max_new_tokens=decode["max_new_tokens"],
         report_path=arms["report"],
+        source_evidence=source_evidence,
     )
     for key in ("created_utc", "quantfit_version"):
         _require(isinstance(value[key], str) and bool(value[key]), f"gate {key} must be a string")
@@ -504,7 +558,12 @@ def _validate(data: dict[str, bytes]) -> dict:
             "binding_status": expected["binding_status"],
         }
     if "gate" in data:
-        declarations["gate"] = _validate_gate(payloads["gate"], report, calibration)
+        declarations["gate"] = _validate_gate(
+            payloads["gate"],
+            report,
+            calibration,
+            report_sha256=hashlib.sha256(data["report"]).hexdigest() if report is not None else None,
+        )
     return declarations
 
 

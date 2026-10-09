@@ -80,7 +80,7 @@ def model_card_fragment(report_path: str, *, calibration_report: str | None = No
     return "\n".join(lines) + "\n"
 
 
-def _check_original_statistics(report: DriftReport) -> None:
+def _check_original_statistics(report: DriftReport) -> dict:
     """Bound presentation must not republish an unsupported source verdict or floor."""
     from quantfit.safety.verify import SafetyDrift
 
@@ -118,6 +118,7 @@ def _check_original_statistics(report: DriftReport) -> None:
                     )
                 if not valid:
                     raise ReportError(f"source {key}.{field} disagrees with validated flagged counts")
+    return expected
 
 
 def _render(report: DriftReport, resolution: dict | None = None) -> list[str]:
