@@ -131,8 +131,12 @@ def _no_links(path: Path) -> None:
 
 def _read(path: Path, limit: int) -> bytes:
     _no_links(path)
-    # O_NOFOLLOW closes the final-component replacement seam where available.
-    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0))
+    _require(stat.S_ISREG(path.lstat().st_mode), f"member must be a regular file: {path}")
+    # O_NOFOLLOW refuses final-component link replacement. O_NONBLOCK prevents
+    # a substituted POSIX FIFO from hanging before the descriptor type check.
+    descriptor = os.open(
+        path, os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+    )
     with os.fdopen(descriptor, "rb") as handle:
         _require(stat.S_ISREG(os.fstat(handle.fileno()).st_mode), f"member must be a regular file: {path}")
         data = handle.read(limit + 1)
@@ -243,7 +247,8 @@ def _report(raw: bytes):
 
 def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict:
     from quantfit import gate
-    from quantfit.safety.calibrated_gate import ASSUMPTIONS
+    from quantfit.safety.calibrated_gate import ASSUMPTIONS, OBSERVED_STATEMENT, PREFLIGHT_STATEMENT
+    from quantfit.safety.mde import EPS_DEFINITION
 
     _require(
         set(value) == _GATE_KEYS and type(value.get("schema_version")) is int and value["schema_version"] == 1,
@@ -319,7 +324,8 @@ def _validate_gate(value: dict, report: DriftReport | None, calibration) -> dict
             and eps["quantized_upper"] == calibration.eps_quant_upper
             and eps["source"] == calibration.eps_source
             and eps["assumptions"] == ASSUMPTIONS
-            and isinstance(eps["statement"], str),
+            and eps["definition"] == EPS_DEFINITION
+            and eps["statement"] == (OBSERVED_STATEMENT if observed else PREFLIGHT_STATEMENT),
             "gate conditional epsilon does not match validated calibration",
         )
         _require(

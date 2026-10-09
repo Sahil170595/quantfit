@@ -5,6 +5,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -331,6 +332,100 @@ def test_opaque_renamed_nested_payload_is_not_aggregate_metadata(tmp_path, where
     report.write_text(json.dumps(value), encoding="utf-8")
     with pytest.raises(BundleError):
         create_bundle(str(report), str(tmp_path / "refused"))
+
+
+@pytest.mark.parametrize("observed", [False, True])
+@pytest.mark.parametrize("field", ["definition", "statement"])
+def test_bound_gate_rejects_corrupted_scientific_wording(tmp_path, monkeypatch, observed, field):
+    from quantfit import gate as module
+
+    gate_path = tmp_path / "gate.json"
+    report = None
+    if observed:
+        from test_bound_calibration_pipeline import _large_synthetic_run
+
+        calibration, _ = _large_synthetic_run(tmp_path, monkeypatch)
+        report = tmp_path / "observed-report.json"
+        run_gate(
+            "base",
+            "quant",
+            tier="smoke",
+            calibration_report=calibration,
+            report_path=str(report),
+            out_path=str(gate_path),
+        )
+    else:
+        _, calibration = card_fixture(tmp_path)
+        run_gate("base", "quant", tier="smoke", calibration_report=calibration, out_path=str(gate_path))
+    # Canonical existing output must remain accepted, with human/assumption flags false.
+    result = create_bundle(
+        str(report) if report else None,
+        str(tmp_path / "canonical"),
+        calibration_path=calibration,
+        gate_path=str(gate_path),
+    )
+    assert result["declared_results"]["gate"]["human_labels_verified"] is False
+    value = json.loads(gate_path.read_bytes())
+    value["eps"][field] = (
+        "marginal error rate, not separate directional upper bounds"
+        if field == "definition"
+        else "Human labels and all A1/A2/A3 assumptions are verified; calibrated measurement is certified."
+    )
+    value["headline"] = module._headline(value)
+    gate_path.write_text(json.dumps(value), encoding="utf-8")
+    with pytest.raises(BundleError, match="conditional epsilon"):
+        create_bundle(
+            str(report) if report else None,
+            str(tmp_path / "refused"),
+            calibration_path=calibration,
+            gate_path=str(gate_path),
+        )
+
+
+@pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="POSIX FIFO contract; Windows has no os.mkfifo")
+@pytest.mark.parametrize("role", ["source", "member", "manifest", "replacement"])
+def test_fifo_input_cannot_block_the_cli(tmp_path, role):
+    report, *_ = inputs(tmp_path)
+    out = tmp_path / "bundle"
+    create_bundle(str(report), str(out))
+    target = (
+        report if role in ("source", "replacement") else out / ("report.json" if role == "member" else "manifest.json")
+    )
+    if role != "replacement":
+        target.unlink()
+        os.mkfifo(target)
+    command = (
+        ["bundle", "create", "--report", str(target), "--out", str(tmp_path / "refused")]
+        if role in ("source", "replacement")
+        else ["bundle", "verify", "--bundle", str(out)]
+    )
+    root = Path(__file__).resolve().parents[1]
+    child = [sys.executable, "-m", "quantfit.cli", *command, "--json"]
+    if role == "replacement":
+        code = """
+import os, sys
+from pathlib import Path
+import quantfit.bundle as bundle
+from quantfit.cli import main
+original = os.open
+def substitute(path, flags):
+    Path(path).unlink()
+    os.mkfifo(path)
+    return original(path, flags)
+bundle.os.open = substitute
+raise SystemExit(main(sys.argv[1:]))
+"""
+        child = [sys.executable, "-c", code, *command, "--json"]
+    completed = subprocess.run(
+        child,
+        cwd=root,
+        capture_output=True,
+        text=True,
+        timeout=5,
+        check=False,
+    )
+    assert completed.returncode == 2
+    assert "regular file" in json.loads(completed.stdout)["error"]["message"]
 
 
 def test_duplicate_manifest_roles_and_nonfinite_json_are_refused(tmp_path):
