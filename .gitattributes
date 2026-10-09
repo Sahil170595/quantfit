@@ -1,3 +1,4 @@
 # Preserve the actual hashed bytes of this new validation record only.
 validation/2026-10-08-calibration-aware-outputs/**/*.json -text
 validation/2026-10-08-portable-evidence-bundles/**/*.json -text
+validation/2026-10-08-cold-replicate-runner/**/*.json -text

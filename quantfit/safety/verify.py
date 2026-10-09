@@ -344,6 +344,8 @@ def verify_safety(
     report_path: str | None = None,
     capture_path: str | None = None,
     baseline_cache_dir: str | None = None,
+    baseline_revision: str | None = None,
+    quant_revision: str | None = None,
 ) -> SafetyDrift:
     """Compare refusal behavior of the unquantized baseline vs a quantized artifact.
 
@@ -373,7 +375,10 @@ def verify_safety(
     generation's. Budgets assume zero hits (`cache.BUDGET_RULE`). Entries hold completion
     text and are local-only.
     """
-    from quantfit.safety.gguf_arm import is_gguf_ref
+    from quantfit.safety.gguf_arm import is_gguf_ref, validate_revision
+
+    validate_revision(baseline_model_id, baseline_revision)
+    validate_revision(quant_path, quant_revision)
 
     baseline_gguf = is_gguf_ref(baseline_model_id)
     quant_gguf = is_gguf_ref(quant_path)
@@ -404,7 +409,12 @@ def verify_safety(
 
         # Both files resolved + mandates enforced (unquantized baseline, same
         # architecture) BEFORE any server starts or generation time is spent.
-        baseline_res, quant_res = gguf_arm.resolve_pair(baseline_model_id, quant_path, token)
+        revisions = {}
+        if baseline_revision is not None:
+            revisions["baseline_revision"] = baseline_revision
+        if quant_revision is not None:
+            revisions["quant_revision"] = quant_revision
+        baseline_res, quant_res = gguf_arm.resolve_pair(baseline_model_id, quant_path, token, **revisions)
         cached = None
         if baseline_cache_dir:
             from quantfit.safety import cache
