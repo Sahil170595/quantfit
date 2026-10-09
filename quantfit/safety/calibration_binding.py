@@ -416,10 +416,18 @@ def load_bound_calibration(path: str, *, report: DriftReport | None = None) -> B
     try:
         with Path(path).open("rb") as handle:
             data = handle.read(MAX_CALIBRATION_BYTES + 1)
+    except OSError as exc:
+        raise CalibrationBindingError(f"unreadable calibration report {path}: {exc}") from exc
+    return load_bound_calibration_bytes(data, report=report)
+
+
+def load_bound_calibration_bytes(data: bytes, *, report: DriftReport | None = None) -> BoundCalibration:
+    """Validate the exact supplied aggregate buffer, without rereading any path."""
+    try:
         _require(len(data) <= MAX_CALIBRATION_BYTES, "calibration report exceeds the 2 MiB aggregate limit")
         payload = json.loads(data, object_pairs_hook=_pairs, parse_constant=_nonfinite, parse_float=_finite_float)
-    except (OSError, UnicodeError, ValueError) as exc:
-        raise CalibrationBindingError(f"unreadable calibration report {path}: {exc}") from exc
+    except (UnicodeError, ValueError, RecursionError) as exc:
+        raise CalibrationBindingError(f"unreadable calibration buffer: {exc}") from exc
     _require(
         isinstance(payload, dict)
         and type(payload.get("calibration_schema")) is int
