@@ -168,26 +168,22 @@ def gguf_pair(root: Path) -> tuple[Path, Path, dict]:
 
 
 def gguf_acceptance(root: Path, cold_output: Path) -> dict:
-    from gguf import GGUFReader
-
-    from quantfit.safety.gguf_arm import _resolve, generate_completions
+    from quantfit.gguf_verify import verify_gguf
 
     baseline, file, conversion = gguf_pair(root)
-    arm = _resolve(str(file), None)
-    assert arm.file_type == "Q4_K_M"
-    reader = GGUFReader(str(file))
-    packed = sum(int(t.tensor_type) not in (0, 1) for t in reader.tensors)
+    verification = verify_gguf(str(file), runtime=True, max_new_tokens=4)
+    assert verification["exit_code"] == 0 and verification["runtime"]["status"] == "pass"
+    assert verification["structure"]["general_file_type_name"] == "Q4_K_M", "actual recorded scheme differs"
+    assert verification["runtime"]["requests_observed"] == 1 and verification["runtime"]["output_characters"] > 0
+    packed = verification["structure"]["packed_tensors"]
     assert packed > 0, "metadata without packed tensors does not establish quantization"
-    del reader
-    outputs, provenance = generate_completions(arm, ["The capital of France is"], 4)
-    assert len(outputs) == 1 and outputs[0].strip(), "loaded quantized model must generate"
     cold = cold_acceptance(baseline, file, cold_output)
     return {
         "scheme": "Q4_K_M",
         "packed_tensors": packed,
-        "artifact_sha256": arm.sha256,
-        "inference_sha256": hashlib.sha256(outputs[0].encode()).hexdigest(),
-        "engine": provenance.engine,
+        "artifact_sha256": verification["runtime"]["model_sha256_before"],
+        "engine": verification["runtime"]["engine"],
+        "gguf_verification": verification,
         **conversion,
         "cold_run": cold,
     }

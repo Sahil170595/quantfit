@@ -15,6 +15,14 @@
 
 ## Unreleased
 
+- Bounded GGUF structure API/CLI verification replaces magic-only acceptance,
+  with separate optional native CPU usability, one capped request and required
+  owned cleanup. Held metadata/extent checks, explicit outside-profile refusals,
+  original Inspect aliases and legacy Transformers/tuple behavior are retained.
+  No weight-quality, safety or GO claim. Local crafted/fake lifecycle evidence:
+  `validation/2026-10-09-gguf-verification/`; actual installed/native qualification
+  is pending the existing hosted consumers.
+
 - Fixed immutable public aggregate retrieval API/CLI (`evidence fetch`) with
   independent installed twelve-file byte pins, anonymous bounded raw streaming,
   closed file-specific validation and exclusive atomic Linux/Windows publication.

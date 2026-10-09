@@ -151,6 +151,7 @@ def test_json_is_not_a_flag_on_the_parent_of_a_subcommand():
 # Heavy commands are covered on their ERROR path where that path is reachable without a
 # backend — which is also the path a caller most needs to be able to parse.
 _CASES = [
+    ("verify-runtime-deadline-exclusive", ["verify", "--model", "missing.gguf", "--timeout-seconds", "1"], 2),
     ("evidence-invalid-deadline", ["evidence", "fetch", "--out", "unused-evidence", "--timeout-seconds", "0"], 2),
     ("repeatability-missing-reports", ["repeatability", "--reports", "no-a.json", "no-b.json", "no-c.json"], 2),
     ("repeatability-missing-bundle", ["repeatability", "--bundle", "no-replay-bundle-xyz"], 2),
@@ -311,6 +312,35 @@ def test_repeatability_input_modes_preserve_existing_argparse_boundary(tmp_path)
         process = _run("repeatability", "--json", *argv, block_backends=blocked)
         assert process.returncode == 2 and process.stdout == b""
         assert b"usage:" in process.stderr
+
+
+@pytest.mark.parametrize("json_mode", [False, True])
+@pytest.mark.parametrize("kind,expected", [("valid", 0), ("truncated", 3), ("unsupported", 2)])
+def test_actual_gguf_structure_stream_without_model_or_inspect_backends(tmp_path, json_mode, kind, expected):
+    from test_verify import fixture_bytes
+
+    raw = fixture_bytes()
+    if kind == "truncated":
+        raw = b"GGUF"
+    elif kind == "unsupported":
+        raw = raw[:4] + (1).to_bytes(4, "little") + raw[8:]
+    path = tmp_path / "model.GGUF"
+    path.write_bytes(raw)
+    blocked = tmp_path / "blocked"
+    blocked.mkdir()
+    (blocked / "inspect_ai.py").write_text("raise ImportError('optional Inspect must not load')", encoding="utf-8")
+    process = _run("verify", "--model", str(path), *(["--json"] if json_mode else []), block_backends=blocked)
+    assert process.returncode == expected
+    if json_mode:
+        document = json.loads(process.stdout)
+        assert document["exit_code"] == expected and document["result"]["runtime"]["status"] == "not_requested"
+    else:
+        assert (b"PASS:" if expected == 0 else b"FAIL:" if expected == 3 else b"UNVERIFIED:") in process.stdout
+
+
+def test_verify_runtime_parser_errors_keep_usage_boundary(tmp_path):
+    process = _run("verify", "--model", "unused.gguf", "--runtime", "--timeout-seconds", "bad", "--json")
+    assert process.returncode == 2 and not process.stdout and b"usage:" in process.stderr
 
 
 def test_a_verdict_failure_is_not_reported_as_an_error(monkeypatch, capsys):
