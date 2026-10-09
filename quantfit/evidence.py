@@ -13,7 +13,7 @@ import sys
 import tempfile
 from collections.abc import Callable
 from pathlib import Path, PurePosixPath
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 
 import httpx
 from huggingface_hub import hf_hub_url
@@ -53,7 +53,13 @@ def _inventory() -> tuple[tuple[str, int, str], ...]:
 
 def _url(url: str, path: str) -> None:
     value = urlsplit(url)
-    allowed = {f"/datasets/{REPO}/resolve/{REVISION}/{path}", f"/api/resolve-cache/datasets/{REPO}/{REVISION}/{path}"}
+    # Hub resolve-cache redirects encode a nested filename's slashes as %2F.
+    # Accept that exact fixed-member spelling, without decoding arbitrary paths.
+    allowed = {
+        f"/datasets/{REPO}/resolve/{REVISION}/{path}",
+        f"/api/resolve-cache/datasets/{REPO}/{REVISION}/{path}",
+        f"/api/resolve-cache/datasets/{REPO}/{REVISION}/{quote(path, safe='')}",
+    }
     require(
         value.scheme == "https"
         and value.hostname == "huggingface.co"

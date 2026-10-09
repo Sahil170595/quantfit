@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 from pathlib import Path
+from urllib.parse import quote
 
 import httpx
 import pytest
@@ -247,7 +248,8 @@ def test_redirects_are_bounded_and_validated_before_following(tmp_path, monkeypa
     assert len(calls) == (4 if kind == "hops" else 1)
 
 
-def test_supported_relative_api_redirect_is_anonymous_and_exact(tmp_path, monkeypatch):
+@pytest.mark.parametrize("encode_member", [False, True])
+def test_supported_relative_api_redirect_is_anonymous_and_exact(tmp_path, monkeypatch, encode_member):
     factory, held, calls = httpx.AsyncClient, originals(), []
 
     def handle(request):
@@ -257,7 +259,12 @@ def test_supported_relative_api_redirect_is_anonymous_and_exact(tmp_path, monkey
             return httpx.Response(
                 307,
                 headers={
-                    "location": "/api/resolve-cache/datasets/" + evidence.REPO + "/" + evidence.REVISION + "/" + path,
+                    "location": "/api/resolve-cache/datasets/"
+                    + evidence.REPO
+                    + "/"
+                    + evidence.REVISION
+                    + "/"
+                    + (quote(path, safe="") if encode_member else path),
                     "Set-Cookie": "secret=not-real; Path=/",
                 },
             )
@@ -268,6 +275,35 @@ def test_supported_relative_api_redirect_is_anonymous_and_exact(tmp_path, monkey
     )
     assert evidence.fetch_evidence(str(tmp_path / "new"))["integrity_verified"]
     assert len(calls) == 24 and all("cookie" not in r.headers for r in calls)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ["repo", "revision", "member", "double-encoding", "traversal", "encoded-repo", "encoded-revision", "host"],
+)
+def test_encoded_cache_redirect_cannot_authorize_another_resource(mutation):
+    path = evidence.PREFIX + "run-1/report.json"
+    member = quote(path, safe="")
+    url = f"https://huggingface.co/api/resolve-cache/datasets/{evidence.REPO}/{evidence.REVISION}/{member}"
+    url = (
+        url.replace(evidence.REPO, "unapproved-owner/unapproved-repo")
+        if mutation == "repo"
+        else url.replace(evidence.REVISION, "0" * 40)
+        if mutation == "revision"
+        else url.replace(member, quote(path.replace("run-1", "run-2"), safe=""))
+        if mutation == "member"
+        else url.replace(member, quote(member, safe=""))
+        if mutation == "double-encoding"
+        else url.replace(member, quote("../" + path, safe=""))
+        if mutation == "traversal"
+        else url.replace(evidence.REPO, quote(evidence.REPO, safe=""))
+        if mutation == "encoded-repo"
+        else url.replace(evidence.REVISION, "%33" + evidence.REVISION[1:])
+        if mutation == "encoded-revision"
+        else url.replace("huggingface.co", "example.org")
+    )
+    with pytest.raises(evidence.EvidenceError, match="unsupported public evidence redirect"):
+        evidence._url(url, path)
 
 
 def test_one_deadline_covers_all_twelve_requests_and_closes_client(tmp_path, monkeypatch):
