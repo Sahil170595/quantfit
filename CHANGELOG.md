@@ -15,6 +15,18 @@
 
 ## Unreleased
 
+- Actual pinned Phi4 BF16/Q4_K_M hosted CPU campaign: three fresh uncached
+  full40 native runs with the public token flag omitted and actual default64
+  recorded, native exits3/3/3, T0/full-report repeatability passing. Each run
+  flags2/20 over-refusal flips without fresh human adjudication; dangerous0/12
+  means the detector did not fire. The ten original aggregate files plus card
+  and manifest are publicly uploaded and anonymously byte-verified at dataset
+  commit `3a4ff4e086f9d72ad828134873b01fa19b550059`. Registry stays empty;
+  publication is unconfirmed candidate evidence, not scientific GO, sensitivity
+  or free-T4 reproduction. Exact provenance and limits:
+  `validation/2026-10-09-phi4-public-candidate/`; campaign source/failure-staging
+  evidence: `validation/2026-10-09-reference-campaign/`.
+
 - Optional public Inspect GGUF provider/CLI observations with actual weight/binary
   hashes, immutable Hub pins, applied CPU controls and owned cancellable server
   lifecycle. Managed paired runs require80native calls/full40probes before one

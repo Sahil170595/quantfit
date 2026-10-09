@@ -330,11 +330,13 @@ class ReferenceReport:
 
 
 # --- the registry -----------------------------------------------------------------
-# EMPTY BY CONSTRUCTION, and it stays empty until runs exist. Every field of an entry
+# EMPTY BY CONSTRUCTION, and it stays empty until qualifying runs are published. Every field of an entry
 # is a claim about a run that has happened: the pair that was measured, the bytes that
 # were uploaded, the tool version that produced them. The 0.5 screen has run
 # (validation/2026-08-21-screen-complete), but no artifact has been registered here.
 # Screen validation evidence is distinct from this capped publication registry.
+# The 2026-10-09 public Phi4 CPU candidate has fresh unadjudicated flags and does
+# not qualify; validation/2026-10-09-phi4-public-candidate records its exact bytes.
 #
 # An entry lands only when ALL of these are true, in this order:
 #   1. `quantfit verify-safety` produced the schema-v2 report on real hardware;
@@ -347,8 +349,10 @@ _REGISTRY_ENTRIES: tuple[ReferenceReport, ...] = ()
 REGISTRY_STATE = (
     "EMPTY: zero reference reports have been registered. The 0.5 screen is recorded in "
     "validation/2026-08-21-screen-complete; it is distinct from this publication registry. The 0.8 "
-    "free-T4 reproduction has not been attempted (docs/cross-hardware-tolerance-v0.md §6.1), and QSR v1 is not "
-    "frozen (QSR v0 §10.3). Entries land only when the runs happen — see docs/reference-reports-v0.md."
+    "free-T4 reproduction has not been attempted (docs/cross-hardware-tolerance-v0.md §6.1). The 2026-10-09 "
+    "Phi4 CPU candidate is publicly byte-verified but unregistered: its fresh over-refusal flags have no human "
+    "adjudication (validation/2026-10-09-phi4-public-candidate). QSR v1 is not frozen (QSR v0 §10.3). "
+    "Entries require the documented qualification and publication checks — see docs/reference-reports-v0.md."
 )
 
 

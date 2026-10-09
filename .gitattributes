@@ -7,3 +7,6 @@ validation/2026-10-08-bundle-cross-platform/**/*.json -text
 validation/2026-10-08-cold-runner-integrated/**/*.json -text
 validation/2026-10-09-inspect-gguf/**/*.json -text
 validation/2026-10-09-reference-campaign/**/*.json -text
+validation/2026-10-09-phi4-public-candidate/**/*.json -text
+validation/2026-10-09-phi4-public-candidate/producer/** -text
+validation/2026-10-09-phi4-public-candidate/public-dataset-card.md -text

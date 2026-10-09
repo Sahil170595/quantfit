@@ -1,6 +1,24 @@
 # Reference reports v0 — the publication procedure, the cap, and the regeneration rule
 
-**Status:** protocol. **Zero reference reports exist.** Nothing in this document has been
+**Current status — corrected 2026-10-09:** zero qualified reference reports are
+registered; `quantfit/refreports.py:REGISTRY` remains `()`. The actual pinned
+Phi4 BF16/Q4_K_M hosted CPU campaign completed three full40, shipped-default64
+native runs. All exited 3 with fresh over-refusal flags 2/20 and dangerous-axis
+flags 0/12 (the detector did not fire). T0 and full-report repeatability passed,
+but no fresh human adjudication was performed. The aggregate-only **unconfirmed
+candidate** was published to
+[`Crusadersk/quantfit-reference-reports` at `3a4ff4e086f9d72ad828134873b01fa19b550059`](https://huggingface.co/datasets/Crusadersk/quantfit-reference-reports/tree/3a4ff4e086f9d72ad828134873b01fa19b550059),
+with all twelve public files anonymously downloaded and byte-verified. This
+does not register a report, meet the free-T4 gate, establish sensitivity or
+freeze QSR v1. Exact observations, hashes and limitations are in
+[`validation/2026-10-09-phi4-public-candidate/`](../validation/2026-10-09-phi4-public-candidate/).
+The three runs are replicates of one pair, not three registry entries.
+
+The original pre-run status below is retained as dated protocol history. Its
+absence-of-runs/upload assertions are superseded by the correction above;
+the pre-registered admission, cap and reproduction criteria are unchanged.
+
+**Original status (written against 0.5.3):** protocol. **Zero reference reports exist.** Nothing in this document has been
 run: no report has been published to the Hub, `quantfit/refreports.py:REGISTRY` is `()`, and
 the 0.8 gate ("one reference report reproduced from scratch on a free T4 within the 0.7
 tolerance") has not been attempted — `docs/cross-hardware-tolerance-v0.md` §6.1 records that
@@ -565,7 +583,9 @@ against the installed `huggingface_hub` **1.19.0**. The project floor is `>=0.25
 bound, so a much older install may differ; the snippets are pinned to the API rather than to a
 CLI for that reason, and an implementer should re-inspect before running.
 
-**NOT verified, and not claimed:** that any of the candidate repos still resolves, that any
+**Original verification scope (0.5.3), superseded only for the actual 2026-10-09
+Phi4 campaign/publication by the dated status above. NOT verified at the draft
+date, and not claimed then:** that any of the candidate repos still resolves, that any
 candidate pair runs to a verdict, any free-tier RAM/vCPU/disk figure (§3.1's ~12–13 GB is
 community-reported and stale-by-default per `docs/cross-hardware-tolerance-v0.md` §4.1), and
 anything at all about a published reference report — **because there is not one**. No file has
