@@ -13,6 +13,18 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## Unreleased
+
+- `emit model-card --calibration-report` recomputes bound conditional resolution from
+  the same validated report instance it renders. Original counts/verdict/floors remain
+  distinct from per-arm error-aware MDEs; inconsistent source statistics are refused.
+  Binding hashes, unverified A1/A2/A3 and unverified human labels travel with the card.
+- The reusable gate action accepts bound calibration, capability-checks the installed
+  CLI before generation, and exposes binding/assumption status without changing exit
+  semantics. Synthetic local records are in
+  `validation/2026-10-08-calibration-aware-outputs/`; hosted candidate qualification is
+  pending. These changes establish no human calibration, sensitivity result or GO.
+
 ## 0.16.0
 
 A minor release integrating #114–#118: bound calibration, conditional resolution,

@@ -1,5 +1,6 @@
 """Verify the real consumer action's step outcome, outputs and CLI JUnit."""
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -15,6 +16,16 @@ if code == 2:
 else:
     decision = json.loads((root / "gate.json").read_text())
     assert decision["exit_code"] == code
+    if os.environ.get("CALIBRATED") == "1":
+        assert code in (0, 5)
+        assert os.environ["ACTION_BINDING"] == (
+            "actual_run_matched" if code == 0 else "scope_validated_actual_run_unobserved"
+        )
+        assert os.environ["ACTION_MATCHED"] == ("true" if code == 0 else "false")
+        assert decision["eps"]["actual_run_matched"] is (code == 0)
+        assert os.environ["ACTION_ASSUMPTIONS"] == os.environ["ACTION_HUMAN"] == "false"
+        calibration = Path(os.environ["CALIBRATION_FILE"])
+        assert os.environ["ACTION_CALIBRATION_HASH"] == hashlib.sha256(calibration.read_bytes()).hexdigest()
     assert decision["verdict"] == {0: "PASS", 3: "FAIL", 4: "UNMEASURABLE", 5: "UNRESOLVABLE"}[code]
     assert os.environ["ACTION_VERDICT"] == decision["verdict"]
     junit = ET.parse(root / "junit.xml").getroot()
@@ -32,5 +43,6 @@ else:
     if code != 5:
         report = json.loads((root / "drift.json").read_text())
         assert report["schema_version"] == 2
-        assert report["baseline"]["engine"]["name"] == "fixture"
+        if os.environ.get("CALIBRATED") != "1":
+            assert report["baseline"]["engine"]["name"] == "fixture"
 print(f"consumer action faithfully propagated CLI exit {code}: {expected_outcome}; fixtures, not sensitivity")

@@ -33,7 +33,7 @@ branding:
 #
 #   quantfit gate --baseline REF --quant REF
 #                 (--tier smoke|full | --threshold PP)
-#                 [--eps-upper RATE --eps-source LABEL]
+#                 [--eps-upper RATE --eps-source LABEL | --calibration-report PATH]
 #                 [--max-new-tokens N]
 #                 --report PATH --out PATH
 #
@@ -98,10 +98,9 @@ branding:
 # attaches the floor statement to drift.json's numbers too. An honesty invariant that is
 # shed at a file boundary was never an invariant.
 #
-# JUDGE CALIBRATION IS NOT DONE (ROADMAP 0.6, gated on the 0.5 GO, which has not run).
-# So `printed-mde-pp` is a LOWER BOUND on the true MDE unless the run carried an
-# operator-supplied epsilon upper bound with a source label — and even then the gate
-# leaves `eps.measured` false, because it cannot authenticate a free-text label. This
+# `printed-mde-pp` is a perfect-judge FLOOR unless the run carries an operator bound
+# or a bound calibration report. Neither input authenticates human labels. Bound
+# calibration validates arithmetic and scope; A1/A2/A3 remain unverified. This
 # action relays that distinction (`mde-is-floor`) instead of hiding it, and when the
 # artifact does not state it, the action assumes "floor" — the conservative direction.
 #
@@ -157,6 +156,14 @@ inputs:
       report path/URL + its revision, or an explicit "operator assumption, unmeasured").
       An epsilon without provenance is an unlabeled number, and no judge error has been
       measured yet, so the label is the only thing separating a measurement from a guess.
+    required: false
+    default: ""
+  calibration-report:
+    description: >-
+      Bound schema-2 calibration JSON checked against the requested pinned protocol
+      and actual resolved run. Mutually exclusive with eps-upper/eps-source. Scope
+      matching does not authenticate human labels, verify A1/A2/A3 or pass sensitivity.
+      Supported by quantfit gate since 0.16.0; no model-card emit is invoked by this action.
     required: false
     default: ""
   max-new-tokens:
@@ -228,7 +235,7 @@ outputs:
     description: >-
       The artifact's top-level `resolution_is_a_floor`: `true` when the printed MDE is a
       LOWER BOUND on the true resolution (perfect-judge floor, no epsilon supplied),
-      `false` when an operator epsilon was supplied. Defaults to `true` when the artifact
+      `false` when operator epsilon or bound calibration was supplied. Defaults to `true` when the artifact
       does not say — the conservative direction.
     value: ${{ steps.read.outputs.mde-is-floor }}
   resolution-status:
@@ -239,8 +246,9 @@ outputs:
     value: ${{ steps.read.outputs.resolution-status }}
   resolution-proven:
     description: >-
-      The artifact's `resolution_proven`: `true` only when the declared threshold was shown
-      to be RESOLVED. Distinct from `resolution.not_refused` (renamed from the old
+      The artifact's `resolution_proven`: `true` when the declared threshold was shown
+      to be conditionally RESOLVED under the supplied error bounds. This does not
+      verify calibration labels or A1/A2/A3. Distinct from `resolution.not_refused` (renamed from the old
       `resolvable`), which is merely "the gate did not refuse it" — in floor mode
       `not_refused` can be true while this is false, and that gap is the whole point.
       `unknown` when the artifact does not carry the field.
@@ -256,6 +264,31 @@ outputs:
       `eps.source` — the provenance label the run recorded. In floor mode this is the
       gate's own labeled-floor text, not an empty field.
     value: ${{ steps.read.outputs.eps-source }}
+  eps-mode:
+    description: The artifact's epsilon mode; unknown when absent.
+    value: ${{ steps.read.outputs.eps-mode }}
+  binding-status:
+    description: >-
+      Bound calibration's binding_status. scope_validated_actual_run_unobserved is not
+      an actual-run match. not_applicable in other modes; unknown for missing bound fields.
+    value: ${{ steps.read.outputs.binding-status }}
+  actual-run-matched:
+    description: Bound calibration's actual_run_matched bool; not_applicable in other modes, unknown if missing.
+    value: ${{ steps.read.outputs.actual-run-matched }}
+  assumptions-verified:
+    description: Bound calibration's assumptions_verified bool; scope matching does not verify A1/A2/A3.
+    value: ${{ steps.read.outputs.assumptions-verified }}
+  human-labels-verified:
+    description: >-
+      Bound calibration's eps.measured flag (false for this instrument's artifacts).
+      Matching scope never authenticates declared human labels. not_applicable in other modes; unknown if absent.
+    value: ${{ steps.read.outputs.human-labels-verified }}
+  calibration-sha256:
+    description: SHA256 of the consumed calibration bytes; not_applicable in other modes, unknown if missing.
+    value: ${{ steps.read.outputs.calibration-sha256 }}
+  calibration-scope-fingerprint:
+    description: Matched measurement-scope fingerprint; not_applicable in other modes, unknown if missing.
+    value: ${{ steps.read.outputs.calibration-scope-fingerprint }}
   exit-code:
     description: >-
       The `quantfit gate` exit code, faithfully: 0 PASS / 2 operational / 3 FAIL (H0
@@ -289,6 +322,7 @@ runs:
         THRESHOLD_PP: ${{ inputs.threshold-pp }}
         EPS_UPPER: ${{ inputs.eps-upper }}
         EPS_SOURCE: ${{ inputs.eps-source }}
+        CALIBRATION_REPORT: ${{ inputs.calibration-report }}
       run: |
         set -euo pipefail
         # `required: true` is not enforced for local composite actions, so check here.
@@ -316,7 +350,11 @@ runs:
           echo "::error::eps-source was set without eps-upper — a provenance label with no number bounds nothing"
           exit 2
         fi
-        if [ -z "$EPS_UPPER" ]; then
+        if [ -n "$CALIBRATION_REPORT" ] && { [ -n "$EPS_UPPER" ] || [ -n "$EPS_SOURCE" ]; }; then
+          echo "::error::calibration-report is mutually exclusive with eps-upper/eps-source"
+          exit 2
+        fi
+        if [ -z "$EPS_UPPER" ] && [ -z "$CALIBRATION_REPORT" ]; then
           echo "note: no epsilon supplied — the printed MDE will be a perfect-judge FLOOR (a lower bound"
           echo "      on the true MDE), never the run's resolution. See docs/ci-integration.md."
         fi
@@ -394,6 +432,11 @@ runs:
 
     - name: Preflight — the installed quantfit must expose the gate contract
       shell: bash
+      env:
+        CALIBRATION_REPORT: ${{ inputs.calibration-report }}
+        REPORT: ${{ inputs.report }}
+        GATE_OUT: ${{ inputs.gate-out }}
+        JUNIT: ${{ inputs.junit }}
       run: |
         set -euo pipefail
         python -c "import quantfit; print('quantfit', quantfit.__version__)"
@@ -414,11 +457,29 @@ runs:
         for flag in --baseline --quant --tier --threshold --eps-upper --eps-source --report --out --max-new-tokens --junit; do
           if [[ ! "$gate_help" =~ (^|[^-])"$flag"([^a-z-]|$) ]]; then missing+=("$flag"); fi
         done
+        if [ -n "$CALIBRATION_REPORT" ] && [[ ! "$gate_help" =~ (^|[^-])--calibration-report([^a-z-]|$) ]]; then
+          missing+=(--calibration-report)
+        fi
         if [ ${#missing[@]} -gt 0 ]; then
           echo "::error::the installed 'quantfit gate' does not advertise: ${missing[*]}"
           echo "::error::This action's flag mapping is out of date against the CLI (or vice versa). Reconcile"
           echo "::error::against 'quantfit gate --help' — do not let a contract skew run as a measurement."
           exit 2
+        fi
+        if [ -n "$CALIBRATION_REPORT" ]; then
+          # The CLI protects gate/report destinations; the action additionally owns
+          # JUnit and must not let that output overwrite its calibration input.
+          python - <<'PY'
+        import os
+        from pathlib import Path
+        source = Path(os.environ["CALIBRATION_REPORT"]).resolve()
+        if not source.is_file():
+            raise SystemExit("calibration-report must be an existing file")
+        for key in ("REPORT", "GATE_OUT", "JUNIT"):
+            output = Path(os.environ[key]).resolve()
+            if output == source or output.exists() and output.samefile(source):
+                raise SystemExit("calibration input must differ from all action outputs, including JUnit")
+        PY
         fi
         echo "gate flag contract OK"
 
@@ -432,6 +493,7 @@ runs:
         THRESHOLD_PP: ${{ inputs.threshold-pp }}
         EPS_UPPER: ${{ inputs.eps-upper }}
         EPS_SOURCE: ${{ inputs.eps-source }}
+        CALIBRATION_REPORT: ${{ inputs.calibration-report }}
         MAX_NEW_TOKENS: ${{ inputs.max-new-tokens }}
         REPORT: ${{ inputs.report }}
         GATE_OUT: ${{ inputs.gate-out }}
@@ -454,6 +516,7 @@ runs:
         # Range/semantics of eps-upper belong to the CLI (which refuses 0 and >1); this
         # action only enforces that the number and its provenance travel together.
         if [ -n "$EPS_UPPER" ]; then args+=(--eps-upper "$EPS_UPPER" --eps-source "$EPS_SOURCE"); fi
+        if [ -n "$CALIBRATION_REPORT" ]; then args+=(--calibration-report "$CALIBRATION_REPORT"); fi
         if [ -n "$MAX_NEW_TOKENS" ]; then args+=(--max-new-tokens "$MAX_NEW_TOKENS"); fi
         printf 'running: quantfit'; printf ' %s' "${args[@]}"; printf '\n'
         # The exit code IS the contract, so it is captured rather than allowed to abort
@@ -580,6 +643,24 @@ runs:
         verdict = gate.get("verdict") or UNKNOWN
         status = res.get("verdict") or UNKNOWN  # resolved | not_refused_resolution_unproven | refused
         eps_source = eps.get("source") or "none"
+        eps_mode = eps.get("mode") or UNKNOWN
+
+        def calibration_field(key, boolean=False):
+            if eps_mode == UNKNOWN:
+                return UNKNOWN
+            if eps_mode != "bound_calibration_report":
+                return "not_applicable"
+            value = eps.get(key)
+            if boolean:
+                return str(value).lower() if isinstance(value, bool) else UNKNOWN
+            return value if isinstance(value, str) and value else UNKNOWN
+
+        binding = calibration_field("binding_status")
+        matched = calibration_field("actual_run_matched", boolean=True)
+        assumptions_verified = calibration_field("assumptions_verified", boolean=True)
+        human_verified = calibration_field("measured", boolean=True)
+        calibration_hash = calibration_field("source_sha256")
+        scope_fingerprint = calibration_field("scope_fingerprint")
         # `not_refused` is the rename of `resolvable`, and the rename is the point: the gate
         # not refusing a threshold is not the same claim as the threshold being resolvable.
         not_refused = flag("not_refused")
@@ -658,6 +739,13 @@ runs:
                 ("mde-is-floor", floor),
                 ("resolution-proven", proven),
                 ("ungated-axis-regressed", ungated),
+                ("eps-mode", eps_mode),
+                ("binding-status", binding),
+                ("actual-run-matched", matched),
+                ("assumptions-verified", assumptions_verified),
+                ("human-labels-verified", human_verified),
+                ("calibration-sha256", calibration_hash),
+                ("calibration-scope-fingerprint", scope_fingerprint),
             ),
             # Free text of unbounded length and unknown line count: the only output that
             # needs a heredoc, and the only one an operator's own string reaches.
@@ -729,6 +817,20 @@ runs:
             # divergence is legitimate — the gate governs one axis at one threshold — but it
             # is exactly the kind of thing a reader assumes is a bug unless it is explained.
             lines += ["", f"> Verdict reconciliation: {flow(reconciliation)}"]
+        if eps_mode == "bound_calibration_report":
+            lines += [
+                "", "#### Bound calibration: conditional resolution", "",
+                f"- binding: `{inline(binding)}`; actual run matched: `{inline(matched)}`",
+                f"- calibration SHA256: `{inline(calibration_hash)}`",
+                f"- scope fingerprint: `{inline(scope_fingerprint)}`",
+                f"- baseline epsilon upper: `{inline(eps.get('baseline_upper', UNKNOWN))}`; "
+                f"quantized epsilon upper: `{inline(eps.get('quantized_upper', UNKNOWN))}` (rates)",
+                f"- assumptions verified: `{inline(assumptions_verified)}`; "
+                f"human labels verified: `{inline(human_verified)}`",
+                "", "> Scope matching and arithmetic do not authenticate human labels. Resolution is conditional",
+                "> on A1 (at-risk applicability), A2 (arm-conditional independence), and A3 (majority-real at-risk).",
+                "> These assumptions remain unverified; no research GO or passing sensitivity control is inferred.",
+            ]
         if ungated == "true":
             lines += [
                 "",
@@ -747,8 +849,7 @@ runs:
             lines += [
                 "",
                 "> The printed MDE is a **lower bound** on the true resolution: no epsilon was folded in",
-                "> (judge calibration is ROADMAP 0.6 and has not run). The true resolution is coarser than",
-                "> this number by an unknown amount, the resolution verdict is",
+                "> for this run. Historical calibration is separate evidence. The resolution verdict is",
                 "> `not_refused_resolution_unproven` rather than `resolved`, and a pass here does NOT",
                 "> establish that the declared threshold was resolved.",
             ]
@@ -795,7 +896,7 @@ runs:
                 "",
                 "- `drift.<axis>.mde_at_80pct_power`: " + ", ".join(drift_floors),
                 "",
-                "> These are **the same perfect-judge floor** as the gate's printed MDE:",
+                "> These are **perfect-judge floors**, even when the gate uses conditional calibration:",
                 "> `mde_at_80pct_power` is computed with no epsilon term at all, so each is a **lower",
                 "> bound** on that axis' true MDE — including on a run where an operator epsilon was",
                 "> supplied and the gate's own printed MDE is not a floor. The drift report carries no",
