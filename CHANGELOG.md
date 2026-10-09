@@ -15,6 +15,12 @@
 
 ## Unreleased
 
+- Offline `bundle create`/`bundle verify` preserve exact aggregate bytes, conditional
+  flags, negative gate decisions and reportless pre-run refusals after relocation.
+  Fixed role paths and same-buffer validators refuse raw payloads and substitutions;
+  integrity never authenticates scientific or human-label claims. Synthetic functional
+  records are in `validation/2026-10-08-portable-evidence-bundles/`; hosted qualification
+  is pending.
 - `emit model-card --calibration-report` recomputes bound conditional resolution from
   the same validated report instance it renders. Original counts/verdict/floors remain
   distinct from per-arm error-aware MDEs; inconsistent source statistics are refused.

@@ -1,0 +1,201 @@
+{
+  "actual_posix_fifo_cli_cases": 4,
+  "check_exit_codes": {
+    "audit": 0,
+    "available_scipy_properties": 0,
+    "mypy_exact_ci_paths": 0,
+    "ruff_check": 0,
+    "ruff_format": 0
+  },
+  "counts_from_individual_junit_cases": {
+    "0b4df9c/unit-tests.xml": {
+      "errors": 0,
+      "failures": 0,
+      "independent_suite_total": 1695,
+      "passed": 1682,
+      "skipped": [
+        {
+          "class": "",
+          "name": "tests.test_judge_known_failure_modes",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "",
+          "name": "tests.test_probe",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_symlink_sources_and_bundle_members_are_refused",
+          "reason": "Symlink privilege unavailable; hosted Linux exercises this case"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_fifo_input_cannot_block_the_cli[source]",
+          "reason": "POSIX FIFO contract; Windows has no os.mkfifo"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_fifo_input_cannot_block_the_cli[member]",
+          "reason": "POSIX FIFO contract; Windows has no os.mkfifo"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_fifo_input_cannot_block_the_cli[manifest]",
+          "reason": "POSIX FIFO contract; Windows has no os.mkfifo"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_fifo_input_cannot_block_the_cli[replacement]",
+          "reason": "POSIX FIFO contract; Windows has no os.mkfifo"
+        },
+        {
+          "class": "tests.test_calibset",
+          "name": "test_the_probe_batch_is_the_packed_blocks_as_tensors",
+          "reason": "could not import 'torch': No module named 'torch'"
+        },
+        {
+          "class": "tests.test_ci_constraints",
+          "name": "test_the_inherited_cap_is_still_what_the_installed_parent_declares",
+          "reason": "no parent that imposes an inherited cap is installed here (CI's unit job)"
+        },
+        {
+          "class": "tests.test_dependencies",
+          "name": "test_parent_bounded_premises_hold_against_installed_metadata",
+          "reason": "no exemption chain link is installed here (CI's unit job installs with --no-deps)"
+        },
+        {
+          "class": "tests.test_dependencies",
+          "name": "test_floors_that_cannot_bind_are_recorded_not_discovered",
+          "reason": "no exemption chain parent is installed here (CI's unit job installs with --no-deps)"
+        },
+        {
+          "class": "tests.test_inspect_task",
+          "name": "test_missing_inspect_ai_is_an_operational_error_naming_the_install",
+          "reason": "inspect_ai is installed; the absent-dependency refusal is unreachable"
+        },
+        {
+          "class": "tests.test_report",
+          "name": "test_environment_fingerprint_is_resolved",
+          "reason": "fingerprint resolves the live torch env"
+        }
+      ],
+      "total_cases": 1695
+    },
+    "claims-red.xml": {
+      "errors": 0,
+      "failures": 4,
+      "independent_suite_total": 4,
+      "passed": 0,
+      "skipped": [],
+      "total_cases": 4
+    },
+    "local-numerical.xml": {
+      "errors": 0,
+      "failures": 0,
+      "independent_suite_total": 2,
+      "passed": 2,
+      "skipped": [],
+      "total_cases": 2
+    },
+    "message-red.xml": {
+      "errors": 0,
+      "failures": 2,
+      "independent_suite_total": 6,
+      "passed": 4,
+      "skipped": [],
+      "total_cases": 6
+    },
+    "unit-tests.xml": {
+      "errors": 0,
+      "failures": 0,
+      "independent_suite_total": 1697,
+      "passed": 1684,
+      "skipped": [
+        {
+          "class": "",
+          "name": "tests.test_judge_known_failure_modes",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "",
+          "name": "tests.test_probe",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_symlink_sources_and_bundle_members_are_refused",
+          "reason": "Symlink privilege unavailable; hosted Linux exercises this case"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_fifo_input_cannot_block_the_cli[source]",
+          "reason": "POSIX FIFO contract; Windows has no os.mkfifo"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_fifo_input_cannot_block_the_cli[member]",
+          "reason": "POSIX FIFO contract; Windows has no os.mkfifo"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_fifo_input_cannot_block_the_cli[manifest]",
+          "reason": "POSIX FIFO contract; Windows has no os.mkfifo"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_fifo_input_cannot_block_the_cli[replacement]",
+          "reason": "POSIX FIFO contract; Windows has no os.mkfifo"
+        },
+        {
+          "class": "tests.test_calibset",
+          "name": "test_the_probe_batch_is_the_packed_blocks_as_tensors",
+          "reason": "could not import 'torch': No module named 'torch'"
+        },
+        {
+          "class": "tests.test_ci_constraints",
+          "name": "test_the_inherited_cap_is_still_what_the_installed_parent_declares",
+          "reason": "no parent that imposes an inherited cap is installed here (CI's unit job)"
+        },
+        {
+          "class": "tests.test_dependencies",
+          "name": "test_parent_bounded_premises_hold_against_installed_metadata",
+          "reason": "no exemption chain link is installed here (CI's unit job installs with --no-deps)"
+        },
+        {
+          "class": "tests.test_dependencies",
+          "name": "test_floors_that_cannot_bind_are_recorded_not_discovered",
+          "reason": "no exemption chain parent is installed here (CI's unit job installs with --no-deps)"
+        },
+        {
+          "class": "tests.test_inspect_task",
+          "name": "test_missing_inspect_ai_is_an_operational_error_naming_the_install",
+          "reason": "inspect_ai is installed; the absent-dependency refusal is unreachable"
+        },
+        {
+          "class": "tests.test_report",
+          "name": "test_environment_fingerprint_is_resolved",
+          "reason": "fingerprint resolves the live torch env"
+        }
+      ],
+      "total_cases": 1697
+    }
+  },
+  "fifo_sha256_kind": "Actual consumed working source bytes observed in WSL; immutable source head explicitly supplied by Windows git, canonical source blob hash separately recorded.",
+  "final_actual_cli_commands": 9,
+  "full_hosted_graph_qualified": false,
+  "historical_qualifications_preserved": true,
+  "installed_candidate_qualified_locally": false,
+  "installed_consumer_scope": "Four native roles + gate-only actual pre-run refusal, relocated outside checkout, exact hashes, exit5/actualFalse/scienceFalse; implemented but hosted execution pending.",
+  "scientific_claims_verified": false,
+  "source_git_blob_sha256": {
+    "quantfit/bundle.py": "6a19d7ed318919539dec5e1bb3064a20042d7cf6b039d4767fbd7764f7c9bad2",
+    "quantfit/cli.py": "7d4b014dc55b50ab6628587aa07a58d4837281970163467db6a928f74c13aa87",
+    "quantfit/gate.py": "025d7306e556a0b34befb2589c001c87e80ad93c2e2ab6ce675380dbd2722db7",
+    "quantfit/resolution.py": "3dd6e309d2bb333c7a3dbc0cd7615dc08d838dc1f52f6cfea318acad7f712a47",
+    "quantfit/safety/calibrated_gate.py": "6fb44a8664e776def14b36f1d78747316984621e38f0fb950bda432ba27a7812",
+    "quantfit/safety/calibration_binding.py": "4d6a35b050ed4017c096b62ba677b750e025611d6cfcd025e1438b3736f684f3",
+    "tools/ci_installed.py": "ed8ea38948b41dc9f432c574a5e44686642eaf8e7b52f6afc74c8b6bc5909c0a"
+  },
+  "source_head": "177f534f7dd0bfd7f5dc3da15a5c51ffb2d35393"
+}

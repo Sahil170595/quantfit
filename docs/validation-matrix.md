@@ -392,6 +392,18 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+The offline bundle interface has synthetic functional records at
+`validation/2026-10-08-portable-evidence-bundles/`: relocation and byte matching,
+reportless pre-run refusal, exact-buffer copying, unsafe layouts and tampering. These
+are instrument checks over fixture-derived aggregates, not new measurements, human
+label authentication, GO or reproduction. Hosted installed-artifact qualification is
+pending. See `docs/portable-evidence-bundles.md` for the supported four-role scope.
+
+| Flag | Command | Observed scope | Evidence |
+|---|---|---|---|
+| `--bundle` | bundle verify | Offline relocated bundle; mismatched bytes exit 3, unsupported layout exit 2 | `validation/2026-10-08-portable-evidence-bundles/` |
+| `--gate` / `--resolution` / `--calibration-report` / `--report` / `--out` | bundle create | Supported aggregate roles only; actual reportless pre-run exit-5 refusal retained with actual-run match false | `validation/2026-10-08-portable-evidence-bundles/` |
+
 **Offline resolution machinery (2026-10-05):** aggregate-only synthetic fixtures
 exercise the actual CLI and exact-byte scope matching. Evidence is
 `validation/2026-10-05-calibrated-resolution/`; this is functional evidence, not a

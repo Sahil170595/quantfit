@@ -1,0 +1,14 @@
+{
+  "command": "bundle",
+  "error": {
+    "kind": "BundleError",
+    "message": "member paths must be canonical relative role filenames"
+  },
+  "exit_code": 2,
+  "result": null,
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.16.0"
+  }
+}

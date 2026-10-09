@@ -1,0 +1,54 @@
+{
+  "command": "bundle",
+  "exit_code": 0,
+  "result": {
+    "bundle_path": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\gate-only-relocated",
+    "bundle_schema": 1,
+    "declared_results": {
+      "calibration": {
+        "assumptions_verified": false,
+        "binding_fingerprint": "f0612bfade2a9c35bc0146a171985e7ce99369ff0ca57b9d32b195bd39eb8313",
+        "human_labels_verified": false
+      },
+      "gate": {
+        "actual_run_matched": false,
+        "assumptions_verified": false,
+        "exit_code": 5,
+        "human_labels_verified": false,
+        "resolution_is_a_floor": false,
+        "unmeasurable_axes": [],
+        "verdict": "UNRESOLVABLE"
+      }
+    },
+    "integrity_verified": true,
+    "manifest": {
+      "bundle_schema": 1,
+      "created_utc": "2026-10-09T02:20:26.631684+00:00",
+      "files": [
+        {
+          "path": "calibration.json",
+          "role": "calibration",
+          "sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+          "size_bytes": 3842
+        },
+        {
+          "path": "gate.json",
+          "role": "gate",
+          "sha256": "ec314abec17cd9853d06bbf172c83888a03da4d1557860f37a8f6854c6e7dc5b",
+          "size_bytes": 12619
+        }
+      ],
+      "quantfit_version": "0.16.0",
+      "scientific_claims_verified": false,
+      "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+    },
+    "mismatches": [],
+    "scientific_claims_verified": false,
+    "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+  },
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.16.0"
+  }
+}

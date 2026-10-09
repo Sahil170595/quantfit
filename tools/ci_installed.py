@@ -82,6 +82,104 @@ def main() -> None:
         assert "### Conditional resolution from bound calibration" in card
         assert "human labels: **unverified**" in card
         assert "no safety verdict, research GO or sensitivity-control result" in card
+        bundle = sandbox / "aggregate-bundle"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "bundle",
+                "create",
+                "--report",
+                str(fixture / "drift.json"),
+                "--calibration-report",
+                str(fixture / "calibration.json"),
+                "--resolution",
+                str(fixture / "resolution.json"),
+                "--gate",
+                str(fixture / "pre-run/gate.json"),
+                "--out",
+                str(bundle),
+                "--json",
+            ],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert completed.returncode == 0, completed.stdout
+        created = json.loads(completed.stdout)["result"]
+        assert created["integrity_verified"] is True and created["scientific_claims_verified"] is False
+        relocated = sandbox / "relocated-bundle"
+        bundle.rename(relocated)
+        completed = subprocess.run(
+            [sys.executable, "-m", "quantfit.cli", "bundle", "verify", "--bundle", str(relocated), "--json"],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        verified = json.loads(completed.stdout)["result"]
+        assert verified["integrity_verified"] is True and verified["scientific_claims_verified"] is False
+        assert verified["declared_results"] == created["declared_results"]
+        assert verified["declared_results"]["gate"]["exit_code"] == 5
+        assert verified["declared_results"]["gate"]["actual_run_matched"] is False
+        for member in verified["manifest"]["files"]:
+            assert member["sha256"] == hashlib.sha256((relocated / member["path"]).read_bytes()).hexdigest()
+        # Tampering changes the byte contract, even if the edited JSON still parses.
+        with (relocated / "report.json").open("ab") as stream:
+            stream.write(b" ")
+        completed = subprocess.run(
+            [sys.executable, "-m", "quantfit.cli", "bundle", "verify", "--bundle", str(relocated), "--json"],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert completed.returncode == 3
+        assert json.loads(completed.stdout)["result"]["integrity_verified"] is False
+        negative = sandbox / "negative-bundle"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "bundle",
+                "create",
+                "--gate",
+                str(fixture / "pre-run/gate.json"),
+                "--calibration-report",
+                str(fixture / "calibration.json"),
+                "--out",
+                str(negative),
+                "--json",
+            ],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        created = json.loads(completed.stdout)["result"]
+        assert created["scientific_claims_verified"] is False and "report" not in created["declared_results"]
+        moved_negative = sandbox / "relocated-negative"
+        negative.rename(moved_negative)
+        completed = subprocess.run(
+            [sys.executable, "-m", "quantfit.cli", "bundle", "verify", "--bundle", str(moved_negative), "--json"],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        verified = json.loads(completed.stdout)["result"]
+        assert verified["integrity_verified"] is True and verified["scientific_claims_verified"] is False
+        assert verified["declared_results"] == created["declared_results"]
+        assert verified["declared_results"]["gate"]["exit_code"] == 5
+        assert verified["declared_results"]["gate"]["actual_run_matched"] is False
         fixture = checkout / "validation/2026-10-05-reference-cli"
         # Git text checkout can change LF/CRLF. Declare the actual sandbox bytes
         # for this synthetic CI case; committed historical receipts stay intact.
