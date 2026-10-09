@@ -1,0 +1,327 @@
+{
+  "generic_payload_allowances": 0,
+  "matches": [
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/0/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "6a6c7341eabe976e36ef531b883e5a37f826dbfd6d7ffa8574e9a437fabd9a2b"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/1/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "2dfa1c7562d2c53703bf3d6d89632dbe9dfd9342b0f04e7e52e45f3056ed9bf2"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/2/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "4d76c3afddc8ec2eaa8b486301f227d1c4d67628bfa0c6b653196fbda5431d48"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/3/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "a895c47138b0fbfa16607aabbae12f3eabb6642d8bf1ee038114b12ce97490d4"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/4/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "baf8d8d6357c9c0e5d27001fca971c0e4667cf7697ebd7ddb162b591d4cc159b"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/5/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "4e17b6884312aa5fe0e39608b125661188e04ece2ae7f05633aaac0832dd11b0"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/6/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "f689441e180ba09fe99362c0a958292f01c1d85f764a716e91279218bb0d2eee"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/7/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "87c6a6fa382c3d68cc3f37440c18cfed4b6c814f209d1a54896aac23077fc35a"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/8/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "9c0ee89943d5f3e611c6bf67337a3e27ae3e29c7cf35bee06fbd436738de340d"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/9/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "5feb46a36966d04a27a3c51e9e332306f0ffe04a85a2229d0510ae263aa47741"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/10/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "4e153a5bc307de230fcf084ca96bab1b033cb194e14cdbc1e51ba147b1bb50ff"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/11/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "40da771d038a5977d8db6b7182a660b808b6d9a0ca88ed9c2fab04d6432067b4"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/12/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "aeef3ef8b811804d4b87b24f6cd8e8c1ecb08047f0e8d603ee277e6de9485880"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/13/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "f089383491fe9161d9924a84f607dd0fc650cb9621c251cc2236d105ef11a640"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/14/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "fe3a50ea7f189cb2dcd4d9ff2f538fb09ebff18fb659045650d6016388b893cd"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/15/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "afb189853f8485a253433930661bd026d768254bc7a6ef02863714c1c8abd257"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/16/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "d54d65ccdcfea8e018378d7faa78c7aec39a218643d73cd7d277a423ab0fd989"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/17/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "f39770856caf0bf88119196cc71367c74b6f14576dde908108f60583c4706eef"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/18/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "a392ce5f07cf3148c6408e262cc900cd0b1b10eba1247da3015f20c92d00dc43"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/19/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "b06a41dc8a32d464d0af4fd1aa89b525d6c77196f8f89ad03002c3a96a594eab"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/20/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "ab180ac510e00e88982e6755ad49ac175b8599f29f2d93b06af6c554a2dbf55f"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/21/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "178a527896ced429c2f573c728e311fd8ca0154a4aa87dda1e7680b99cb372b4"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/22/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "52e52808fc754117e51c0b5d36f297ee7deba54aabaa4e88ce43cc6d354e2e2e"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/23/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "52e52808fc754117e51c0b5d36f297ee7deba54aabaa4e88ce43cc6d354e2e2e"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/24/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "9b2216b4ae95fa0eb8f83129af19649bcf37c7761220d1b989ff77e98a5a1859"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/25/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "b5c12b3481a236d847d58fa98a3f1087c837f0214c0bce8a45fd8954af389794"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/26/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "fe3a50ea7f189cb2dcd4d9ff2f538fb09ebff18fb659045650d6016388b893cd"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/27/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "fe3a50ea7f189cb2dcd4d9ff2f538fb09ebff18fb659045650d6016388b893cd"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/28/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "78de121186191667e1f849d00e268698838b57d036046ff76f94a8ab9035ec0d"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/29/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "32181c6478c037f1e8af4fa448278bbab491e4a5f5095dcf218bf048a782c38a"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/30/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "c973a4b77386cc52b0c7f2f32bde0e673161b43700b87e9d8410bd1e5ac0b0fe"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/31/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "ea200c9e635da4265f791d4a1778d1a28418aba8f761a45d39d716b57cf55277"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/32/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "6a0274447f8ec62060ef714e31837f19657ae73a1befee8df10cdac7c0ae9aee"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/33/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "f97cb87e337b1d3abe1968cecb3499d2fdddeb03914028f8776f8036501d54af"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/34/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "f894d2fe2cf08f4df3509bbbc7e4d469b77302d336b17bdf07c42ec7d3ffc498"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/35/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "9c68a40dff0434c92868e1e456885a161c604df5b49e8a1e39811a23e871c2ae"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/36/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "5f3479b1a910a52bb29f28e2b37eab29cf428ff340d71dbf8b34865e6a5b8159"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/37/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "99346a8a1dca4c5dbd179070d41dddecb51eb77f35bf8674adfa061861d9eb13"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/38/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "4ba8863ac74eaffa971638c27f9348f5c37aa522637225977eb580e86df23a03"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/39/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "4949922adbbcf28520766eaf629b38d9ddeed7ba978ab031b6e128c388016c0f"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/40/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "7673c6c7b915a78b0fa13a6ea59d56f082e9bfccfc41fac9e15d8f58490c9703"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/41/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "9c4bf95422b0c2ce08930d3f2c440adea1258be44265efb4d344efb92a1aae26"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/42/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "8835cffb94d68180210c92f1c1b6bde5722ec3b92bd7de72537350bba9121b36"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/43/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "10f2b20394de3a36f7db0726ac1f84481d36687af30e56eebea3c5ff658687f9"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/44/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "72f4afcc7e079ef047ae51d222a011c8e853b1a187f7ca475dc1c3186af520e8"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/45/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "bfe40da39c3edbefac32925813adbcb564fa58a4c10455b2bbc59333c5636fc4"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/46/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "e7ec51d6db35e81c206053133c1a5a386bca85aac0f52e80eb3e60bfc1ece4bb"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/47/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "50e52581b6e9ce20a9906c1edc22dc370f948ef8b992f0cee078ac01abec6313"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/48/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "aae36ffc7c6aba1537847e95191332003ef6c090e1f5b94884e3705fccda535a"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/49/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "9afef9271f9a198aa9c3dd6f66031922c3df04e2d4879d5ae60b7e8533debeee"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/50/text",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "ce86895c81c6dba8d856aea08f98e1c885ccc326ddf38010e26fe9d648fc36ba"
+    },
+    {
+      "file": "relocated/v0/campaigns/2026-10-09-phi4-cpu/native-cold-run.json",
+      "pointer": "/completion_cache_requested",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "file": "installed-shape-definition",
+      "pointer": "/files/v0~1campaigns~12026-10-09-phi4-cpu~1native-cold-run.json/completion_cache_requested",
+      "scope": "Exact static README syntax, approved original false marker or installed schema definition requiring false; no payload allowance",
+      "value_sha256": "076de6e730df0b4c3860877a0f619c6ac11f8aefd78313ac793a2a703c026869"
+    }
+  ],
+  "no_model_data": true,
+  "original_false_marker_allowances": 1,
+  "patterns": "prompt|completion|response|text|generation",
+  "schema_version": 1
+}

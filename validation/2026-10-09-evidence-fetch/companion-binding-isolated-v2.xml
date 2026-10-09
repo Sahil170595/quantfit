@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="15" time="1.201" timestamp="2026-10-09T15:53:55.036657-04:00" hostname="SahilKadadekar"><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[axes-count]" time="0.034" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[confirmed]" time="0.004" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[registered-bool]" time="0.005" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[registered-count]" time="0.015" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[private-root]" time="0.004" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[private-nested]" time="0.004" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[nested-false-marker]" time="0.005" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[membership]" time="0.011" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[circular]" time="0.010" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[report-identity]" time="0.009" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[report-cache]" time="0.006" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[native-count]" time="0.011" /><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[cold-thread]" time="0.013"><failure message="Failed: DID NOT RAISE &lt;class 'RuntimeError'&gt;">fault = 'cold-thread'
+
+    @pytest.mark.parametrize(
+        "fault",
+        [
+            "axes-count",
+            "confirmed",
+            "registered-bool",
+            "registered-count",
+            "private-root",
+            "private-nested",
+            "nested-false-marker",
+            "membership",
+            "circular",
+            "report-identity",
+            "report-cache",
+            "native-count", "cold-thread", "cold-tokens", "cold-path",
+        ],
+    )
+    def test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha(fault):
+        held = originals()
+        name = (
+            "assessment.json"
+            if fault in ("axes-count", "confirmed", "private-root", "private-nested", "nested-false-marker")
+            else "manifest.json"
+            if fault.startswith("registered") or fault in ("membership", "circular")
+            else "native-cold-run.json"
+            if fault in ("native-count", "cold-thread", "cold-tokens", "cold-path")
+            else "run-2/report.json"
+        )
+        path = evidence.PREFIX + name
+        value = json.loads(held[path])
+        if fault == "axes-count":
+            value["axes_by_run"][0]["over-refusal"]["flagged_flips"] = 1
+        elif fault == "confirmed":
+            value["axes_by_run"][0]["over-refusal"]["human_confirmed_flips"] = 2
+        elif fault == "registered-bool":
+            value["registered_reference_count"] = False
+        elif fault == "registered-count":
+            value["registered_reference_count"] = 1
+        elif fault == "private-root":
+            value["completion"] = "synthetic forbidden payload"
+        elif fault == "private-nested":
+            value["t0"]["completion"] = "synthetic forbidden payload"
+        elif fault == "nested-false-marker":
+            value["t0"]["human_labels_authenticated"] = False
+        elif fault == "membership":
+            value["files"][0] = copy.deepcopy(value["files"][1])
+        elif fault == "circular":
+            value["files"][0]["path"] = evidence.PREFIX + "manifest.json"
+        elif fault == "report-identity":
+            value["baseline"]["engine"]["binary_sha256"] = "0" * 64
+        elif fault == "report-cache":
+            value["baseline"]["engine"]["baseline_cache"] = {"served": True}
+        elif fault == "cold-thread":
+            value["runs"][0]["final_report"]["arm_threads_observed"]["baseline"] = 3
+        elif fault == "cold-tokens":
+            value["requested"]["max_new_tokens"] = 65
+        elif fault == "cold-path":
+            value["runs"][0]["final_report"]["path"] = "unbound producer label"
+        else:
+            value["runs"][0]["native_exit_code"] = 0
+        held[path] = json.dumps(value).encode()
+        if fault in ("cold-thread", "cold-tokens", "cold-path"):
+            # Rebind all companion byte hashes to isolate semantic identity checks
+            # from the independently trusted remote-byte fence.
+            campaign_path = evidence.PREFIX + "campaign.json"
+            campaign = json.loads(held[campaign_path])
+            for entry in campaign["public_files"]:
+                raw = held[evidence.PREFIX + entry["path"]]
+                entry.update(sha256=hashlib.sha256(raw).hexdigest(), size_bytes=len(raw))
+            held[campaign_path] = json.dumps(campaign).encode()
+            manifest_path = evidence.PREFIX + "manifest.json"
+            manifest = json.loads(held[manifest_path])
+            for entry in manifest["files"]:
+                raw = held[entry["path"]]
+                entry.update(sha256=hashlib.sha256(raw).hexdigest(), size_bytes=len(raw))
+            held[manifest_path] = json.dumps(manifest).encode()
+&gt;       with pytest.raises(RuntimeError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE &lt;class 'RuntimeError'&gt;
+
+tests\test_evidence_fetch.py:408: Failed</failure></testcase><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[cold-tokens]" time="0.019"><failure message="Failed: DID NOT RAISE &lt;class 'RuntimeError'&gt;">fault = 'cold-tokens'
+
+    @pytest.mark.parametrize(
+        "fault",
+        [
+            "axes-count",
+            "confirmed",
+            "registered-bool",
+            "registered-count",
+            "private-root",
+            "private-nested",
+            "nested-false-marker",
+            "membership",
+            "circular",
+            "report-identity",
+            "report-cache",
+            "native-count", "cold-thread", "cold-tokens", "cold-path",
+        ],
+    )
+    def test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha(fault):
+        held = originals()
+        name = (
+            "assessment.json"
+            if fault in ("axes-count", "confirmed", "private-root", "private-nested", "nested-false-marker")
+            else "manifest.json"
+            if fault.startswith("registered") or fault in ("membership", "circular")
+            else "native-cold-run.json"
+            if fault in ("native-count", "cold-thread", "cold-tokens", "cold-path")
+            else "run-2/report.json"
+        )
+        path = evidence.PREFIX + name
+        value = json.loads(held[path])
+        if fault == "axes-count":
+            value["axes_by_run"][0]["over-refusal"]["flagged_flips"] = 1
+        elif fault == "confirmed":
+            value["axes_by_run"][0]["over-refusal"]["human_confirmed_flips"] = 2
+        elif fault == "registered-bool":
+            value["registered_reference_count"] = False
+        elif fault == "registered-count":
+            value["registered_reference_count"] = 1
+        elif fault == "private-root":
+            value["completion"] = "synthetic forbidden payload"
+        elif fault == "private-nested":
+            value["t0"]["completion"] = "synthetic forbidden payload"
+        elif fault == "nested-false-marker":
+            value["t0"]["human_labels_authenticated"] = False
+        elif fault == "membership":
+            value["files"][0] = copy.deepcopy(value["files"][1])
+        elif fault == "circular":
+            value["files"][0]["path"] = evidence.PREFIX + "manifest.json"
+        elif fault == "report-identity":
+            value["baseline"]["engine"]["binary_sha256"] = "0" * 64
+        elif fault == "report-cache":
+            value["baseline"]["engine"]["baseline_cache"] = {"served": True}
+        elif fault == "cold-thread":
+            value["runs"][0]["final_report"]["arm_threads_observed"]["baseline"] = 3
+        elif fault == "cold-tokens":
+            value["requested"]["max_new_tokens"] = 65
+        elif fault == "cold-path":
+            value["runs"][0]["final_report"]["path"] = "unbound producer label"
+        else:
+            value["runs"][0]["native_exit_code"] = 0
+        held[path] = json.dumps(value).encode()
+        if fault in ("cold-thread", "cold-tokens", "cold-path"):
+            # Rebind all companion byte hashes to isolate semantic identity checks
+            # from the independently trusted remote-byte fence.
+            campaign_path = evidence.PREFIX + "campaign.json"
+            campaign = json.loads(held[campaign_path])
+            for entry in campaign["public_files"]:
+                raw = held[evidence.PREFIX + entry["path"]]
+                entry.update(sha256=hashlib.sha256(raw).hexdigest(), size_bytes=len(raw))
+            held[campaign_path] = json.dumps(campaign).encode()
+            manifest_path = evidence.PREFIX + "manifest.json"
+            manifest = json.loads(held[manifest_path])
+            for entry in manifest["files"]:
+                raw = held[entry["path"]]
+                entry.update(sha256=hashlib.sha256(raw).hexdigest(), size_bytes=len(raw))
+            held[manifest_path] = json.dumps(manifest).encode()
+&gt;       with pytest.raises(RuntimeError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE &lt;class 'RuntimeError'&gt;
+
+tests\test_evidence_fetch.py:408: Failed</failure></testcase><testcase classname="tests.test_evidence_fetch" name="test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha[cold-path]" time="0.016"><failure message="Failed: DID NOT RAISE &lt;class 'RuntimeError'&gt;">fault = 'cold-path'
+
+    @pytest.mark.parametrize(
+        "fault",
+        [
+            "axes-count",
+            "confirmed",
+            "registered-bool",
+            "registered-count",
+            "private-root",
+            "private-nested",
+            "nested-false-marker",
+            "membership",
+            "circular",
+            "report-identity",
+            "report-cache",
+            "native-count", "cold-thread", "cold-tokens", "cold-path",
+        ],
+    )
+    def test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha(fault):
+        held = originals()
+        name = (
+            "assessment.json"
+            if fault in ("axes-count", "confirmed", "private-root", "private-nested", "nested-false-marker")
+            else "manifest.json"
+            if fault.startswith("registered") or fault in ("membership", "circular")
+            else "native-cold-run.json"
+            if fault in ("native-count", "cold-thread", "cold-tokens", "cold-path")
+            else "run-2/report.json"
+        )
+        path = evidence.PREFIX + name
+        value = json.loads(held[path])
+        if fault == "axes-count":
+            value["axes_by_run"][0]["over-refusal"]["flagged_flips"] = 1
+        elif fault == "confirmed":
+            value["axes_by_run"][0]["over-refusal"]["human_confirmed_flips"] = 2
+        elif fault == "registered-bool":
+            value["registered_reference_count"] = False
+        elif fault == "registered-count":
+            value["registered_reference_count"] = 1
+        elif fault == "private-root":
+            value["completion"] = "synthetic forbidden payload"
+        elif fault == "private-nested":
+            value["t0"]["completion"] = "synthetic forbidden payload"
+        elif fault == "nested-false-marker":
+            value["t0"]["human_labels_authenticated"] = False
+        elif fault == "membership":
+            value["files"][0] = copy.deepcopy(value["files"][1])
+        elif fault == "circular":
+            value["files"][0]["path"] = evidence.PREFIX + "manifest.json"
+        elif fault == "report-identity":
+            value["baseline"]["engine"]["binary_sha256"] = "0" * 64
+        elif fault == "report-cache":
+            value["baseline"]["engine"]["baseline_cache"] = {"served": True}
+        elif fault == "cold-thread":
+            value["runs"][0]["final_report"]["arm_threads_observed"]["baseline"] = 3
+        elif fault == "cold-tokens":
+            value["requested"]["max_new_tokens"] = 65
+        elif fault == "cold-path":
+            value["runs"][0]["final_report"]["path"] = "unbound producer label"
+        else:
+            value["runs"][0]["native_exit_code"] = 0
+        held[path] = json.dumps(value).encode()
+        if fault in ("cold-thread", "cold-tokens", "cold-path"):
+            # Rebind all companion byte hashes to isolate semantic identity checks
+            # from the independently trusted remote-byte fence.
+            campaign_path = evidence.PREFIX + "campaign.json"
+            campaign = json.loads(held[campaign_path])
+            for entry in campaign["public_files"]:
+                raw = held[evidence.PREFIX + entry["path"]]
+                entry.update(sha256=hashlib.sha256(raw).hexdigest(), size_bytes=len(raw))
+            held[campaign_path] = json.dumps(campaign).encode()
+            manifest_path = evidence.PREFIX + "manifest.json"
+            manifest = json.loads(held[manifest_path])
+            for entry in manifest["files"]:
+                raw = held[entry["path"]]
+                entry.update(sha256=hashlib.sha256(raw).hexdigest(), size_bytes=len(raw))
+            held[manifest_path] = json.dumps(manifest).encode()
+&gt;       with pytest.raises(RuntimeError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE &lt;class 'RuntimeError'&gt;
+
+tests\test_evidence_fetch.py:408: Failed</failure></testcase></testsuite></testsuites>

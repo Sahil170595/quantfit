@@ -15,6 +15,14 @@
 
 ## Unreleased
 
+- Fixed immutable public aggregate retrieval API/CLI (`evidence fetch`) with
+  independent installed twelve-file byte pins, anonymous bounded raw streaming,
+  closed file-specific validation and exclusive atomic Linux/Windows publication.
+  Original bytes/producer labels and negative native outcomes remain separate
+  from receiving analysis; no new inference, registration, human authentication,
+  sensitivity or GO. Local fixture-transport evidence:
+  `validation/2026-10-09-evidence-fetch/`; actual installed download pending hosted.
+
 - Offline three-report full-payload comparison API/CLI (`repeatability`) with
   fixed volatile fields, strict decoded types/values, unambiguous difference
   pointers, separate native T0 and original per-run axes, and eight-case JUnit.

@@ -149,6 +149,64 @@ def main() -> None:
             assert copied == raw
             assert json.loads(copied)["drift"]["over_refusal"]["overrefusal_regressions"] == 2
         check_repeatability(["--bundle", str(moved_replay)], "relocated-repeatability")
+        # Actual anonymous public aggregate download in this existing installed
+        # wheel/sdist consumer. No model, campaign or additional CI job is created.
+        public = sandbox / "public-evidence"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "evidence",
+                "fetch",
+                "--out",
+                str(public),
+                "--timeout-seconds",
+                "120",
+                "--json",
+            ],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=150,
+        )
+        assert completed.returncode == 0, completed.stdout + completed.stderr
+        fetched = json.loads(completed.stdout)["result"]
+        assert (
+            fetched["integrity_verified"] is True and fetched["revision"] == "3a4ff4e086f9d72ad828134873b01fa19b550059"
+        )
+        assert len(fetched["files"]) == 12 and sum(f["size_bytes"] for f in fetched["files"]) == 78390
+        assert (
+            fetched["reference_registered"]
+            is fetched["human_labels_authenticated"]
+            is fetched["scientific_go"]
+            is False
+        )
+        assert fetched["receiving_analysis"]["exit_code"] == 3
+        assert fetched["receiving_analysis"]["full_report_repeatability"]["pass"] is True
+        assert fetched["receiving_analysis"]["native_t0"]["result"]["protocol_pass"] is True
+        moved_public = sandbox / "relocated-public-evidence"
+        public.rename(moved_public)
+        for item in fetched["files"]:
+            raw = (moved_public / item["path"]).read_bytes()
+            assert len(raw) == item["size_bytes"] and hashlib.sha256(raw).hexdigest() == item["sha256"]
+        received_reports = [
+            str(moved_public / "v0/campaigns/2026-10-09-phi4-cpu" / f"run-{i}/report.json") for i in range(1, 4)
+        ]
+        completed = subprocess.run(
+            [sys.executable, "-m", "quantfit.cli", "repeatability", "--reports", *received_reports, "--json"],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert (
+            completed.returncode == 3
+            and json.loads(completed.stdout)["result"]["native_t0"]["result"]["protocol_pass"] is True
+        )
         # Actual installed offline customer path: preserve the original Phi4
         # negative aggregate while its dangerous-axis-only floor gate returns0.
         replay_source = checkout / "validation/2026-10-09-phi4-public-candidate/producer/run-1/report.json"
@@ -470,6 +528,7 @@ def main() -> None:
             "test_saved_report_gate.py",
             "test_replay_bundle.py",
             "test_repeatability.py",
+            "test_evidence_fetch.py",
             "test_junit.py",
             "test_junit_gate_screen.py",
             "test_report.py",

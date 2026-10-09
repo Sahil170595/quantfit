@@ -1,5 +1,10 @@
 # CLI reference — every command, every flag
 
+Candidate `quantfit evidence fetch` retrieves one fixed immutable public aggregate
+snapshot, with independent installed byte pins and separate negative native
+analysis. Its bounded anonymous API, publication and exit contract is in
+[Public aggregate retrieval](public-evidence-fetch.md).
+
 Candidate `quantfit repeatability` compares three saved full aggregates directly
 or through a portable replay bundle, with separate native T0/original outcomes.
 The typed API, JSON/JUnit, strict comparison and exit contract are in

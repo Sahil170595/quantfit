@@ -27,6 +27,7 @@ dependencies = [
   # >=4.56: the from_pretrained dtype= kwarg (torch_dtype was deprecated there).
   "transformers>=4.56",
   "huggingface_hub>=0.25",
+  "httpx>=0.28.1,<0.29",
   "datasets>=3.0",
   "accelerate>=1.0",
   # Upper-bounded: llm-compressor's modifier/oneshot API churns across minors; the
@@ -69,6 +70,9 @@ quantfit = "quantfit._inspect_registry"
 
 [tool.setuptools.packages.find]
 include = ["quantfit*"]
+
+[tool.setuptools.package-data]
+quantfit = ["data/reference-evidence-shape-v0.json"]
 
 [tool.pytest.ini_options]
 # Make `pytest tests/` import the package without an editable install (keeps CI light).
