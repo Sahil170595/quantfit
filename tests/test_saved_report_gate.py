@@ -266,6 +266,25 @@ def test_junit_cannot_overwrite_input_or_other_output(tmp_path, capsys):
     assert source.read_bytes() == raw
 
 
+def test_public_api_keyword_input_and_explicit_signature(tmp_path):
+    import inspect
+
+    source = saved(tmp_path)
+    assert evaluate_report(report_path=str(source), tier="smoke")["exit_code"] == 0
+    assert list(inspect.signature(evaluate_report).parameters) == [
+        "report_path",
+        "threshold",
+        "tier",
+        "eps_upper",
+        "eps_source",
+        "calibration_report",
+        "report_path_out",
+        "out_path",
+    ]
+    with pytest.raises(TypeError):
+        evaluate_report(str(source), tier="smoke", max_new_tokens=64)
+
+
 def test_replay_action_reader_outputs_source_and_phase(tmp_path):
     from test_action_calibration import action_reader
 

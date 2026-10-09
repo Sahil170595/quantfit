@@ -1045,11 +1045,30 @@ def _write(out_path: str, decision: dict) -> None:
         raise GateError(f"cannot write gate decision {out_path}: {exc}") from exc
 
 
-def evaluate_report(source_path: str, **options) -> dict:
+def evaluate_report(
+    report_path: str,
+    *,
+    threshold: float | None = None,
+    tier: str | None = None,
+    eps_upper: float | None = None,
+    eps_source: str | None = None,
+    calibration_report: str | None = None,
+    report_path_out: str | None = None,
+    out_path: str | None = None,
+) -> dict:
     """Offline policy replay; see quantfit.saved_gate.evaluate_report for input/output contract."""
     from quantfit.saved_gate import evaluate_report as evaluate
 
-    return evaluate(source_path, **options)
+    return evaluate(
+        report_path,
+        threshold=threshold,
+        tier=tier,
+        eps_upper=eps_upper,
+        eps_source=eps_source,
+        calibration_report=calibration_report,
+        report_path_out=report_path_out,
+        out_path=out_path,
+    )
 
 
 def run_gate(
