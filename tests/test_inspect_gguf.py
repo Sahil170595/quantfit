@@ -157,6 +157,36 @@ def test_public_qsr_eval_missing_hub_pins_refuses_before_any_load(fixture, monke
     assert not servers and not ext.RUN_LOCK.locked()
 
 
+@pytest.mark.parametrize("revision", [None, "main", "a" * 39])
+@pytest.mark.parametrize("baseline_kind", ["local", "hub"])
+def test_invalid_second_hub_pin_refuses_before_even_local_baseline_load(fixture, monkeypatch, revision, baseline_kind):
+    import quantfit.inspect_task as task
+    from quantfit.safety import verify
+
+    ext, _, arms, servers, _ = fixture
+    api = task._inspect_api()
+    api["get_model"] = lambda *a, **kw: pytest.fail("even baseline provider construction forbidden")
+    monkeypatch.setattr(task, "_inspect_api", lambda: api)
+    monkeypatch.setattr(ext.ga, "_resolve", lambda *a, **kw: pytest.fail("even baseline weight resolution forbidden"))
+    monkeypatch.setattr(verify, "_load_probes", lambda *a, **kw: pytest.fail("dataset load forbidden"))
+    baseline = f"quantfit_gguf/{arms[0].path}" if baseline_kind == "local" else "quantfit_gguf/hf:org/repo/base.gguf"
+    with pytest.raises(RuntimeError, match="immutable|revision"):
+        task.qsr_eval(
+            baseline,
+            "quantfit_gguf/hf:org/repo/quant.gguf",
+            gguf_revisions=(None if baseline_kind == "local" else "b" * 40, revision),
+        )
+    assert not servers and not ext.RUN_LOCK.locked()
+
+
+def test_standalone_public_hub_provider_requires_immutable_pin_before_resolve(fixture, monkeypatch):
+    ext, get_model, _, servers, _ = fixture
+    monkeypatch.setattr(ext.ga, "_resolve", lambda *a, **kw: pytest.fail("moving Hub source resolution forbidden"))
+    with pytest.raises(RuntimeError, match="immutable revision"):
+        get_model("quantfit_gguf/hf:org/repo/model.gguf", memoize=False)
+    assert not servers
+
+
 def test_observer_detects_source_substitution_and_closes_both(fixture):
     from inspect_ai.model import GenerateConfig
 

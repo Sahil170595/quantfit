@@ -12,6 +12,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from packaging.specifiers import SpecifierSet
+
 try:  # stdlib on 3.11+
     import tomllib
 except ModuleNotFoundError:  # 3.10: pytest declares `tomli>=1` there
@@ -101,11 +103,19 @@ def test_the_caps_that_motivated_this_tool_are_actually_emitted():
     emitted = cc.collect(_pyproject())
     for name in ("gguf", "inspect-ai", "ruff"):
         assert name in emitted, f"{name} is missing from the generated constraints"
-        assert re.search(r"<\s*\d", emitted[name]), (
+        bounds = SpecifierSet(emitted[name][len(name) :])
+        assert any(spec.operator in {"<", "<=", "==", "~="} for spec in bounds), (
             f"{name} is emitted as {emitted[name]!r} with no upper bound. It carried one when this "
             "tool was written; if the cap was removed on purpose, say so in pyproject and in "
             "tests/test_dependencies.py:_EXEMPTIONS rather than only here."
         )
+    # The observed extension is deliberately narrower than a minor cap. Prove
+    # the emitted constraint admits its actual SDK and refuses both neighbours.
+    from quantfit.inspect_task import VERIFIED_INSPECT_AI_VERSION
+
+    assert emitted["inspect-ai"] == f"inspect-ai=={VERIFIED_INSPECT_AI_VERSION}"
+    sdk = SpecifierSet(emitted["inspect-ai"][len("inspect-ai") :])
+    assert sdk.contains("0.3.269") and not sdk.contains("0.3.252") and not sdk.contains("0.3.270")
 
 
 def test_an_inherited_cap_is_emitted_for_a_dependency_pyproject_bounds_only_through_a_parent():

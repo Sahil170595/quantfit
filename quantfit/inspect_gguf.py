@@ -39,6 +39,25 @@ def _available_ram() -> int:
     return psutil.virtual_memory().available
 
 
+def _validate_source(spec: str, revision: str | None) -> None:
+    _require(spec.startswith(PROVIDER + "/"), "observed GGUF provider mismatch")
+    ref = spec[len(PROVIDER) + 1 :]
+    _require(bool(ref), "GGUF source path is missing")
+    if ref.startswith("hf:"):
+        _require(revision is not None, "Hub GGUF needs immutable revision")
+        parts = ref[3:].split("/")
+        _require(
+            len(parts) >= 3
+            and all(parts)
+            and parts[-1].lower().endswith(".gguf")
+            and not any(p in {".", ".."} for p in parts),
+            "bad Hub GGUF source ref",
+        )
+    else:
+        _require(Path(ref).is_file(), "local GGUF source file not found")
+    ga.validate_revision(ref, revision)
+
+
 def _config(config) -> int:
     values = config.model_dump(exclude_none=True)
     _require(
@@ -199,7 +218,7 @@ class GgufModelAPI(ModelAPI):
         _require(base_url is None and not kwargs, "GGUF provider refuses source/runtime overrides")
         if config is not None:
             _config(config)
-        ga.validate_revision(model_name, revision)
+        _validate_source(PROVIDER + "/" + model_name, revision)
         super().__init__(model_name, api_key=api_key)
         self.arm = ga._resolve(model_name, api_key, **({"revision": revision} if revision else {}))
         self.binary, self.threads = ga.llama_server_bin(), ga._threads()
@@ -257,11 +276,10 @@ class GgufRunObserver:
         self.specs, self.models = specs, []
         self.active_arm = None
         try:
-            for spec, revision in zip(specs, revisions, strict=True):
-                _require(spec.startswith(PROVIDER + "/"), "observed GGUF provider mismatch")
-                ref = spec[len(PROVIDER) + 1 :]
-                _require(not ref.startswith("hf:") or revision is not None, "Hub GGUF needs immutable revision")
-                ga.validate_revision(ref, revision)
+            pairs = tuple(zip(specs, revisions, strict=True))
+            for spec, revision in pairs:
+                _validate_source(spec, revision)
+            for spec, revision in pairs:
                 self.models.append(get_model(spec, revision=revision, api_key=token, memoize=False))
             _require(all(isinstance(m.api, GgufModelAPI) for m in self.models), "unexpected loaded GGUF provider")
             baseline, quant = (m.api for m in self.models)
