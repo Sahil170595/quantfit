@@ -169,9 +169,10 @@ the paired diff over a whole manifest of quants and aggregates per-stratum,
 per-axis Wilson prevalence bounds (flagged flips stay candidates until
 human-verified, and every bound is labeled "conditional on undemonstrated
 detection sensitivity" until the recorded sensitivity control passes); and
-`quantfit emit model-card --report drift.json` renders any report as a
-paste-ready model-card section with the drift table, provenance, and the exact
-serve command.
+`quantfit emit model-card --report drift.json` renders a model-card section
+with the drift table, provenance, and an engine-specific serving example when
+supported. Check model paths and runtime flags against the recorded provenance
+before using that example.
 
 **Check a reproduction.** `quantfit reproduce` decides whether one report
 reproduces another under the QSR v0 cross-hardware tolerance, so "it reproduced"
