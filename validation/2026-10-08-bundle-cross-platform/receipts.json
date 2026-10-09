@@ -1,0 +1,72 @@
+{
+  "observed_utc": "2026-10-09T03:44:46.901427+00:00",
+  "source_head": "a5f3fb66d96f7d71bedd05896828430c8aaeb043",
+  "hardware": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "logical_cpus": 32,
+    "ram_total_bytes": 68319571968,
+    "disk_free_bytes": 20209143808
+  },
+  "installed_versions": {
+    "pytest": "9.0.3",
+    "hypothesis": "6.152.5",
+    "ruff": "0.16.2",
+    "mypy": "1.20.2",
+    "psutil": "7.2.2",
+    "scipy": "1.15.3"
+  },
+  "xml_independent_counts": [
+    {
+      "path": "bundle.xml",
+      "cases": 63,
+      "passed": 58,
+      "skipped": 5,
+      "failed": 0
+    },
+    {
+      "path": "gate-roundoff-red.xml",
+      "cases": 4,
+      "passed": 0,
+      "skipped": 0,
+      "failed": 4
+    },
+    {
+      "path": "linux-bundle.xml",
+      "cases": 67,
+      "passed": 66,
+      "skipped": 1,
+      "failed": 0
+    },
+    {
+      "path": "properties.xml",
+      "cases": 2,
+      "passed": 2,
+      "skipped": 0,
+      "failed": 0
+    },
+    {
+      "path": "roundoff-red.xml",
+      "cases": 11,
+      "passed": 6,
+      "skipped": 0,
+      "failed": 5
+    },
+    {
+      "path": "unit-final.xml",
+      "cases": 1712,
+      "passed": 1699,
+      "skipped": 13,
+      "failed": 0
+    },
+    {
+      "path": "unit.xml",
+      "cases": 1712,
+      "passed": 1699,
+      "skipped": 13,
+      "failed": 0
+    }
+  ],
+  "raw_key_walk": [],
+  "scope": "source-level functional aggregate proof; no model/installed/hardware authentication/safety verdict"
+}

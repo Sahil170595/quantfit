@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="1.020" timestamp="2026-10-08T23:35:36.868915-04:00" hostname="SahilKadadekar"><testcase classname="tests.test_bundle" name="test_recomputed_gate_statistics_accept_adjacent_float_bytes[path0]" time="0.146"><failure message="quantfit.bundle.BundleError: gate conditional epsilon does not match validated calibration">tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1130/test_recomputed_gate_statistic0')
+path = ('eps', 'baseline_upper')
+
+    @pytest.mark.parametrize("path", [("eps", "baseline_upper"), ("mde_block", "perfect_judge_mde")])
+    def test_recomputed_gate_statistics_accept_adjacent_float_bytes(tmp_path, path):
+        report, calibration, _, gate = inputs(tmp_path)
+        supplied = json.loads(gate.read_bytes())
+        supplied[path[0]][path[1]] = math.nextafter(supplied[path[0]][path[1]], -math.inf)
+        raw = json.dumps(supplied).encode()
+        gate.write_bytes(raw)
+        out = tmp_path / "bundle"
+&gt;       result = create_bundle(str(report), str(out), calibration_path=str(calibration), gate_path=str(gate))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bundle.py:208: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\bundle.py:528: in create_bundle
+    declarations = _validate(data)
+                   ^^^^^^^^^^^^^^^
+quantfit\bundle.py:486: in _validate
+    declarations["gate"] = _validate_gate(payloads["gate"], report, calibration)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quantfit\bundle.py:303: in _validate_gate
+    _require(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'gate conditional epsilon does not match validated calibration'
+
+    def _require(condition: bool, message: str) -&gt; None:
+        if not condition:
+&gt;           raise BundleError(message)
+E           quantfit.bundle.BundleError: gate conditional epsilon does not match validated calibration
+
+quantfit\bundle.py:77: BundleError</failure></testcase><testcase classname="tests.test_bundle" name="test_recomputed_gate_statistics_accept_adjacent_float_bytes[path1]" time="0.094"><failure message="quantfit.bundle.BundleError: gate aggregate fields do not match its existing decision contract">tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1130/test_recomputed_gate_statistic1')
+path = ('mde_block', 'perfect_judge_mde')
+
+    @pytest.mark.parametrize("path", [("eps", "baseline_upper"), ("mde_block", "perfect_judge_mde")])
+    def test_recomputed_gate_statistics_accept_adjacent_float_bytes(tmp_path, path):
+        report, calibration, _, gate = inputs(tmp_path)
+        supplied = json.loads(gate.read_bytes())
+        supplied[path[0]][path[1]] = math.nextafter(supplied[path[0]][path[1]], -math.inf)
+        raw = json.dumps(supplied).encode()
+        gate.write_bytes(raw)
+        out = tmp_path / "bundle"
+&gt;       result = create_bundle(str(report), str(out), calibration_path=str(calibration), gate_path=str(gate))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bundle.py:208: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\bundle.py:528: in create_bundle
+    declarations = _validate(data)
+                   ^^^^^^^^^^^^^^^
+quantfit\bundle.py:486: in _validate
+    declarations["gate"] = _validate_gate(payloads["gate"], report, calibration)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quantfit\bundle.py:429: in _validate_gate
+    _require(value == expected, "gate aggregate fields do not match its existing decision contract")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'gate aggregate fields do not match its existing decision contract'
+
+    def _require(condition: bool, message: str) -&gt; None:
+        if not condition:
+&gt;           raise BundleError(message)
+E           quantfit.bundle.BundleError: gate aggregate fields do not match its existing decision contract
+
+quantfit\bundle.py:77: BundleError</failure></testcase><testcase classname="tests.test_bundle" name="test_gate_derived_count_and_boolean_types_stay_exact[path0]" time="0.098"><failure message="Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;">tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1130/test_gate_derived_count_and_bo0')
+path = ('resolution', 'not_refused')
+
+    @pytest.mark.parametrize("path", [("resolution", "not_refused"), ("mde_block", "n_at_risk")])
+    def test_gate_derived_count_and_boolean_types_stay_exact(tmp_path, path):
+        report, calibration, _, gate = inputs(tmp_path)
+        supplied = json.loads(gate.read_bytes())
+        old = supplied[path[0]][path[1]]
+        supplied[path[0]][path[1]] = int(old) if type(old) is bool else float(old)
+        gate.write_text(json.dumps(supplied), encoding="utf-8")
+&gt;       with pytest.raises(BundleError, match="gate"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;
+
+tests\test_bundle.py:221: Failed</failure></testcase><testcase classname="tests.test_bundle" name="test_gate_derived_count_and_boolean_types_stay_exact[path1]" time="0.095"><failure message="Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;">tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1130/test_gate_derived_count_and_bo1')
+path = ('mde_block', 'n_at_risk')
+
+    @pytest.mark.parametrize("path", [("resolution", "not_refused"), ("mde_block", "n_at_risk")])
+    def test_gate_derived_count_and_boolean_types_stay_exact(tmp_path, path):
+        report, calibration, _, gate = inputs(tmp_path)
+        supplied = json.loads(gate.read_bytes())
+        old = supplied[path[0]][path[1]]
+        supplied[path[0]][path[1]] = int(old) if type(old) is bool else float(old)
+        gate.write_text(json.dumps(supplied), encoding="utf-8")
+&gt;       with pytest.raises(BundleError, match="gate"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;
+
+tests\test_bundle.py:221: Failed</failure></testcase></testsuite></testsuites>

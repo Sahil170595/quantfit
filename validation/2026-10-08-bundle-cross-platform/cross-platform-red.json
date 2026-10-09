@@ -1,0 +1,52 @@
+{
+  "observed_utc": "2026-10-09T03:30:13.305950+00:00",
+  "hosted_failure_jobs": [
+    "https://github.com/Sahil170595/quantfit/actions/runs/37879024716/job/113654208695",
+    "https://github.com/Sahil170595/quantfit/actions/runs/37879024716/job/113654208553"
+  ],
+  "raw_publication_or_gpu_claim": false,
+  "reproductions": [
+    {
+      "platform": "Windows",
+      "python": "3.12.13",
+      "validator_git_head": "3f1de493cfd1d0edc46a082db5b62c54f477f9b7",
+      "validator_actual_sha256": "6a19d7ed318919539dec5e1bb3064a20042d7cf6b039d4767fbd7764f7c9bad2",
+      "input_sha256": {
+        "report": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa",
+        "calibration": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+        "resolution": "fd0570fafcdd297363f589fdd3f0337fa7a0e091d865a6ca186b539600815b01",
+        "gate": "63626d2ac42a87a9f081ee666abecd4e3e40dabe8096efa7734c07c8f62561e1"
+      },
+      "outcome": {
+        "accepted": true
+      },
+      "derived_analysis_diffs": [],
+      "scope": "exact committed3f bundle validator executed in isolated child; current unchanged ancillary resolution/calibration/gate source; not installed-distribution qualification"
+    },
+    {
+      "platform": "Linux",
+      "python": "3.12.3",
+      "validator_git_head": "3f1de493cfd1d0edc46a082db5b62c54f477f9b7",
+      "validator_actual_sha256": "6a19d7ed318919539dec5e1bb3064a20042d7cf6b039d4767fbd7764f7c9bad2",
+      "input_sha256": {
+        "report": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa",
+        "calibration": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+        "resolution": "fd0570fafcdd297363f589fdd3f0337fa7a0e091d865a6ca186b539600815b01",
+        "gate": "63626d2ac42a87a9f081ee666abecd4e3e40dabe8096efa7734c07c8f62561e1"
+      },
+      "outcome": {
+        "accepted": false,
+        "error_kind": "BundleError",
+        "error_message": "resolution does not match consumed report/calibration bytes and conditional analysis"
+      },
+      "derived_analysis_diffs": [
+        [
+          "/axes/refusal-robustness/resolution/perfect_judge_mde",
+          0.1486600774792154,
+          0.14866007747921536
+        ]
+      ],
+      "scope": "exact committed3f bundle validator executed in isolated child; current unchanged ancillary resolution/calibration/gate source; not installed-distribution qualification"
+    }
+  ]
+}
