@@ -1,0 +1,116 @@
+{
+  "actual_cli_invocations": 7,
+  "cases": [
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "verify",
+        "--model",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-gguf-verification\\complete.GGUF",
+        "--json"
+      ],
+      "artifact": "complete-json.json",
+      "case": "complete-json",
+      "exit_code": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "verify",
+        "--model",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-gguf-verification\\complete.GGUF"
+      ],
+      "artifact": "complete-prose.log",
+      "case": "complete-prose",
+      "exit_code": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "verify",
+        "--model",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-gguf-verification\\magic-only.gguf",
+        "--json"
+      ],
+      "artifact": "magic-only-json.json",
+      "case": "magic-only-json",
+      "exit_code": 3,
+      "stderr_bytes": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "verify",
+        "--model",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-gguf-verification\\version1.gguf",
+        "--json"
+      ],
+      "artifact": "version1-json.json",
+      "case": "version1-json",
+      "exit_code": 2,
+      "stderr_bytes": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "verify",
+        "--model",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-gguf-verification\\complete.GGUF",
+        "--timeout-seconds",
+        "1",
+        "--json"
+      ],
+      "artifact": "deadline-without-runtime.json",
+      "case": "deadline-without-runtime",
+      "exit_code": 2,
+      "stderr_bytes": 0
+    },
+    {
+      "artifact": "windows-runtime-refusal.json",
+      "binary_provisioning_attempted": false,
+      "case": "actual-windows-runtime-refusal",
+      "exit_code": 2
+    },
+    {
+      "artifact": "parser-refusal.log",
+      "case": "actual-parser-refusal",
+      "exit_code": 2,
+      "stdout_bytes": 0
+    }
+  ],
+  "external_network_calls": 0,
+  "inputs": [
+    {
+      "path": "complete.GGUF",
+      "sha256": "3c183d99df0a23dd9f464dc924eedd9e4516deff6072a66b4b1366b935b0c158",
+      "size_bytes": 164
+    },
+    {
+      "path": "magic-only.gguf",
+      "sha256": "b83633aa785344791618f2fddf131b010ea04912a60430760b070bad293f65bd",
+      "size_bytes": 4
+    },
+    {
+      "path": "version1.gguf",
+      "sha256": "d5f8259c5ee0b469d7cac3ed4af8bc14ab7b185aa162f0f7d08ae4b12d4ea4a0",
+      "size_bytes": 164
+    }
+  ],
+  "new_binary_provisioning_attempts": 0,
+  "new_model_inference_performed": false,
+  "schema_version": 1,
+  "scope": "Crafted zero-filled tensor binary syntax and operational/parser/platform refusal only; no native Linux execution or meaningful weights/quality/safety claim.",
+  "source_head": "60ee5a10922d9f8eaaf06d477348ae2060e5b510"
+}

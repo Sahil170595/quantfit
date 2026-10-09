@@ -1,0 +1,267 @@
+{
+  "base_head": "03036e099ab3de27d58c3693d4870f7924e797fe",
+  "environment": {
+    "cpu_identifier": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "installed_versions": {
+      "gguf": "0.19.0",
+      "httpx": "0.28.1",
+      "huggingface-hub": "1.31.0",
+      "inspect-ai": "0.3.269",
+      "mypy": "1.20.2",
+      "numpy": "2.4.6",
+      "psutil": "7.2.2",
+      "pytest": "9.0.3",
+      "ruff": "0.16.2",
+      "scipy": "1.15.3",
+      "torch": null
+    },
+    "logical_cpu_count": 32,
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.12.13",
+    "total_ram_bytes": 68319571968
+  },
+  "functional": {
+    "actual_cli_invocations": 7,
+    "artifact": "functional.json",
+    "binary_provisioning_attempts": 0,
+    "external_network_calls": 0,
+    "new_inference_performed": false,
+    "observed_structural_exits": [
+      0,
+      3,
+      2
+    ],
+    "source_head": "60ee5a10922d9f8eaaf06d477348ae2060e5b510",
+    "windows_actual_runtime_exit": 2
+  },
+  "gates": {
+    "audit": "PASS0errors0warnings0findings after metadata; audit-postmetadata.json",
+    "mypy": "PASS strict spec.py/engines/base.py; configured two modules only",
+    "readme_static_inventory": {
+      "commands_executed": 0,
+      "commands_parsed": 53
+    },
+    "rtn": "deselected, Torch absent; existing hosted numerical lane pending",
+    "ruff_check": "PASS exact CI quantfit/tests/tools",
+    "ruff_format": "PASS128files exact CI paths",
+    "scipy_properties": {
+      "cases": 2,
+      "errors": 0,
+      "failures": 0,
+      "passed": 2,
+      "skipped": 0,
+      "suite_seconds": 3.557
+    },
+    "unit": {
+      "cases": 2195,
+      "errors": 0,
+      "failures": 0,
+      "passed": 2151,
+      "skipped": 44,
+      "suite_seconds": 197.259
+    }
+  },
+  "inspected_sdk_constants": {
+    "gguf_version": "0.19.0",
+    "llama_q4_k_m_declared_filetype": {
+      "code": 15,
+      "name": "MOSTLY_Q4_K_M"
+    },
+    "q4_0_block_elements_bytes": [
+      32,
+      18
+    ],
+    "q4_k_block_elements_bytes": [
+      256,
+      144
+    ]
+  },
+  "limitations": [
+    "Crafted zero-filled syntax/fake lifecycle only; no actual native model inference, provisioning or new external requests.",
+    "Little-endian nonempty GGUF2/3/rank1..4/non-nested supported profile. Known syntax/extent failures3; valid outside profile unverified2. Binary IEEE nonfinite float encodings allowed.",
+    "Generic extent alignment does not guarantee native contiguous-layout/architecture usability; zero-filled valid syntax does not establish meaningful weights.",
+    "Actual installed Ubuntu/Windows consumers, existing Linux native one-request4-token slot and full Torch numerical lane await hosted batch. No extra generation/model/job is added.",
+    "Model/binary before/after hashes detect observed change, not served-byte authentication. Unknown termination stays unknown; grandchildren are not claimed reaped.",
+    "No quantization quality, refusal safety, sensitivity or scientific GO is established."
+  ],
+  "primary_sources": [
+    "https://github.com/ggml-org/ggml/blob/master/docs/gguf.md",
+    "https://github.com/ggml-org/llama.cpp/blob/b9817/ggml/src/gguf.cpp"
+  ],
+  "recorded_utc": "2026-10-09 20:44:27 UTC",
+  "resource_receipt": {
+    "new_environment_dependency_model_container_worktree_copies": 0,
+    "owner": "root sequential Quantfit feature batch",
+    "path": "C:\\tmp\\qf-release-0.16.0-20261008",
+    "reason": "Root-owned shared checkout and approved existing sparse environment remain consumed; earlier cleanup blocked by policy and not retried.",
+    "status": "PRESERVE",
+    "task_owned_persistent_processes_remaining": 0
+  },
+  "schema_version": 1,
+  "source_files": [
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "023d2cbba71bfafb5047f34c348767e4ed55f8c82cefd85dfe4aa8ab4ba931ac",
+      "observed_working_sha256": "713b130b11894218e0d7cfcd48e25f7251ffe031cc24d69b396fadecd87a703c",
+      "path": ".claude/skills/quantfit/SKILL.md",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "2068c5e895847c155234bd902b83a161b9b695db85d80b125a2df14c08537da6",
+      "observed_working_sha256": "e7747322874e5f45746e90e9073e9e432d838e9e14189d60439f94c9cf7ceede",
+      "path": ".gitattributes",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "b272f0a7cafdda91b020b6cdc154189b2f4218abfabae65eebc35ea6a5d03902",
+      "observed_working_sha256": "09b574e254c3d8d25d0293620a9adc00aa8d8e11696c8bcf09dd7ca57dad5141",
+      "path": "CHANGELOG.md",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "bed0ad2aa40c7f10be275f58d5b5c627667c820a084ac80ad29ffdafe88d22bb",
+      "observed_working_sha256": "b163a4516f29a639eef49925c57dadf8f61119e86b35e15f6c3879e32d7b7894",
+      "path": "CONTRIBUTING.md",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "9436795be57356cff759ca0b024660767993438f8cd1228d2d421ba3e99f6fe8",
+      "observed_working_sha256": "9436795be57356cff759ca0b024660767993438f8cd1228d2d421ba3e99f6fe8",
+      "path": "README.md",
+      "working_exactly_equals_git_blob": true
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "05b242ac188de7106502c5bdaf275ea6630235ad4af10ce53e3dede2b95f575c",
+      "observed_working_sha256": "3d7e3bd368171f82f2582b9745b271fa5453cce4de0ec2955231811c26aca121",
+      "path": "docs/cli-reference.md",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "4f75775a99b352c4a2e2191eeaea0eeee4c229ef4a2ded5781760dac0d9ed089",
+      "observed_working_sha256": "4f75775a99b352c4a2e2191eeaea0eeee4c229ef4a2ded5781760dac0d9ed089",
+      "path": "docs/gguf-verification.md",
+      "working_exactly_equals_git_blob": true
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "eda4ed98fdc98bceef39f82142c6bb412959e796ac7ea070119762b590931c49",
+      "observed_working_sha256": "fcefe1ccbdaeedf9b2f6073a35c511b05e7244be4f2f2f25b63f2f769b27d4ba",
+      "path": "docs/validation-matrix.md",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "fd66a26422d3c749dfcb177f1d88f6d6830f509a3d488d7fdba61f7bd72ecdc3",
+      "observed_working_sha256": "fa2ad38dd2fd554bd8f02e2b5199ef1518c7717527d7bb6c86774c880a02489d",
+      "path": "llms.txt",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "4513424baee07b3d1d9242c0ea1a031c5dbdeeb877fea472adddf2d598469f2c",
+      "observed_working_sha256": "bb032066dd0b40ef938cd5e2a477f3324e61d15e2585818bce48ac4ad97c7479",
+      "path": "quantfit/cli.py",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "19f7258f8126c1aa197c189b6dd95cc8387aa530faa5967ba38c83a1a213f236",
+      "observed_working_sha256": "19f7258f8126c1aa197c189b6dd95cc8387aa530faa5967ba38c83a1a213f236",
+      "path": "quantfit/gguf_runtime.py",
+      "working_exactly_equals_git_blob": true
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "8418eedab9ccd3b309b20338dd0552cf0144fa85bb6d318d388a0e7109723a71",
+      "observed_working_sha256": "5bcb69653493be99485fbe42715da4a0cb62643d2563ddd0b0261fc574eefef2",
+      "path": "quantfit/gguf_server.py",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "be8e97715658b3a417bbe321f5f6f5dd29768399ccc61d66759600beee288e2b",
+      "observed_working_sha256": "be8e97715658b3a417bbe321f5f6f5dd29768399ccc61d66759600beee288e2b",
+      "path": "quantfit/gguf_structure.py",
+      "working_exactly_equals_git_blob": true
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "db0d58d07ec35656c43b2e76a9cb2e20e4fbb288b67f924f79591260752e5247",
+      "observed_working_sha256": "db0d58d07ec35656c43b2e76a9cb2e20e4fbb288b67f924f79591260752e5247",
+      "path": "quantfit/gguf_verify.py",
+      "working_exactly_equals_git_blob": true
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "cf295e3ca1309435d6afa7aaf8e7171e01f9088f63f91d848241995ffffb8029",
+      "observed_working_sha256": "cf295e3ca1309435d6afa7aaf8e7171e01f9088f63f91d848241995ffffb8029",
+      "path": "quantfit/inspect_errors.py",
+      "working_exactly_equals_git_blob": true
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "84cc99c755d1568cb86f18fd3130abcd9aff796fd9f6c5b7afbf74bffacf350b",
+      "observed_working_sha256": "18d35cbfcbe6c42be5728b7deb6e94b5cf9ed353cea6cbc07ce8596ba6dec836",
+      "path": "quantfit/inspect_gguf.py",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "4c7c1fb58bace53b1cd02c04b8daef00befa7e81b11a632bc842e61383dcb670",
+      "observed_working_sha256": "7992ec2109ec0799fb155882bded955c25162dddb959392e18b1e55ed35e5e17",
+      "path": "quantfit/inspect_task.py",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "9a8ed8f4c320bb4dff60d99ad6894476f58f0a8c9113f891404db6de77d142c7",
+      "observed_working_sha256": "c9d31551df009d8f095f99788647b627109a420a5ed9bf24795b987745d77ad7",
+      "path": "quantfit/verify.py",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "673b1377a19a1a3d089b797fa814f8ae7c4b4dac9b3bd1ab4571f49ee6e019c2",
+      "observed_working_sha256": "673b1377a19a1a3d089b797fa814f8ae7c4b4dac9b3bd1ab4571f49ee6e019c2",
+      "path": "tests/test_gguf_verification.py",
+      "working_exactly_equals_git_blob": true
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "16e597b01ad1c0083aec47350336c2e5d7b0417018dca327027a9a1a1ff3ad4f",
+      "observed_working_sha256": "ded6f4f32f95e1be214ab663a5171dd0af1c5f5b476ec003b0cf013d7980fc3e",
+      "path": "tests/test_json_envelope.py",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "fc91c41e58d0190e9abb36dca8f1a33ed4383f66761831cd1b345bd9d3ab1824",
+      "observed_working_sha256": "ecafee614682172f3836f3ba4354eeff26262f91e22a3135bb3709591e386da3",
+      "path": "tests/test_verify.py",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "f5c209e6f04647bdf7f0cb042eb438d95bcc608a6dfcdf21b3daee52f2921d94",
+      "observed_working_sha256": "615f7ca308564acf6f35bddb8f9202ed69d5111792a4e1a433dc7a3fdd70ec0e",
+      "path": "tools/ci_cpu_acceptance.py",
+      "working_exactly_equals_git_blob": false
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "73f9905c883f6cc4f0853888ee8aef6412223fb9ebc7ce3baece057959cfe89d",
+      "observed_working_sha256": "9991f30c7e0814d45ec86de8d8654ecdec96629da345b2c94daf178e796feb3f",
+      "path": "tools/ci_installed.py",
+      "working_exactly_equals_git_blob": false
+    }
+  ],
+  "source_head": "60ee5a10922d9f8eaaf06d477348ae2060e5b510",
+  "source_tree": "017f5b5d1ad9b55f6516528c067da13432cc84ae",
+  "utc_source": "clock tool"
+}

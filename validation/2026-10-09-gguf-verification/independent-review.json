@@ -1,0 +1,25 @@
+{
+  "independent_cases": {
+    "bounded_http": 6,
+    "fake_native": 12,
+    "inprocess_mock_descriptor_cli": 7,
+    "mock_descriptor": 33
+  },
+  "independent_scope": "Exact60ee/tree017f bounded approach/source challenge; constructor/close/helper parity and aliases/error identity, standalone noinspect_ai; no actual native model/installed qualification",
+  "resources": "CLEANED readonly, no owned files/models/provisioning/processes",
+  "reviewer_harness_correction": "Initial assertion confused generic raw-diagnostics-discarded wording with a synthetic secret; corrected harness, no product defect",
+  "root_cases": [
+    "complete zero-filled Q4 rows structure0/qualityFalse/no runtime",
+    "four-byte magic3",
+    "wrong ne0 row3",
+    "short extent3",
+    "future4/big-endian3 unverified2",
+    "runtime string/int/None refusal2 before scan/provision",
+    "IEEE float infinity accepted",
+    "bool byte2 invalid"
+  ],
+  "root_descriptor_readonly_cases": 9,
+  "schema_version": 1,
+  "source_head": "60ee5a10922d9f8eaaf06d477348ae2060e5b510",
+  "status": "PASS"
+}
