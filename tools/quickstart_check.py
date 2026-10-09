@@ -212,6 +212,8 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     # Offline CPU JSON check; requires >=3 existing uncached replicate reports
     # (quantfit/reproduce.py: within_hardware_identical; docs/cli-reference.md).
     "t0": (REQ_ARTIFACT,),
+    # Full held aggregate comparison plus native T0; no inference/network.
+    "repeatability": (REQ_ARTIFACT,),
     # Pure local JSON comparison — of TWO drift reports that must already exist
     # (quantfit/reproduce.py: --reference and --candidate are both read from disk).
     "reproduce": (REQ_ARTIFACT,),

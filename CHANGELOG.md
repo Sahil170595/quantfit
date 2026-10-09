@@ -15,6 +15,13 @@
 
 ## Unreleased
 
+- Offline three-report full-payload comparison API/CLI (`repeatability`) with
+  fixed volatile fields, strict decoded types/values, unambiguous difference
+  pointers, separate native T0 and original per-run axes, and eight-case JUnit.
+  Agreement retains negative flags and unmeasured axes; it establishes neither
+  independent execution, human truth, sensitivity nor GO. Evidence:
+  `validation/2026-10-09-repeatability/`.
+
 - Portable three-report T0 handoff API/CLI (`bundle replay-create` /
   `bundle replay-verify`): exact original aggregate/T0 bytes, ordered hash and
   native identity/decision validation, separate relocated T0 and preserved
