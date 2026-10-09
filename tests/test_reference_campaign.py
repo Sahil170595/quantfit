@@ -208,7 +208,25 @@ def test_failure_receipt_is_narrow_on_unsupported_local_platform(tmp_path, monke
     assert json.loads(capsys.readouterr().out)["execution_exit"] == 2
 
 
-@pytest.mark.parametrize("mode", ["null", "flags", "cleanup-failed", "raw-receipt", "source-changed"])
+@pytest.mark.parametrize(
+    "mode",
+    [
+        "null",
+        "flags",
+        "cleanup-failed",
+        "raw-receipt",
+        "source-changed",
+        "interrupt-after-assessment",
+        "write-after-assessment",
+        "interrupt-after-t0",
+        "write-after-t0",
+        "interrupt-after-campaign",
+        "write-after-campaign",
+        "null-interrupt-after-t0",
+        "null-write-after-campaign",
+        "persistent-after-t0",
+    ],
+)
 def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkeypatch, mode):
     """Real campaign control flow, declared fake weights/runtime/CLI observations."""
     from quantfit import cli, cold_run
@@ -218,7 +236,9 @@ def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkey
     root = tmp_path / "campaign"
     source = tmp_path / "reports"
     source.mkdir()
-    paths = reports(source, flips=1 if mode == "flags" else 0)
+    fault = "after-" in mode
+    flagged = mode == "flags" or fault and not mode.startswith("null-")
+    paths = reports(source, flips=1 if flagged else 0)
     binary_sha = json.loads(paths[0].read_bytes())["baseline"]["engine"]["binary_sha256"]
     checked_require = campaign.require
     monkeypatch.setattr(
@@ -278,7 +298,7 @@ def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkey
             "runs": [
                 {
                     "pid": i + 1000,
-                    "native_exit_code": 3 if mode == "flags" else 0,
+                    "native_exit_code": 3 if flagged else 0,
                     "argv": ["--max-new-tokens", "64"],
                     "cleanup": {
                         "direct_child_reaped": True,
@@ -297,10 +317,47 @@ def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkey
         return 0
 
     monkeypatch.setattr(cli, "main", fake_cli)
+    if fault:
+        real_write = Path.write_bytes
+        target = (
+            "assessment.json"
+            if mode.endswith("assessment")
+            else "native-t0.json"
+            if mode.endswith("t0")
+            else "campaign.json"
+        )
+        raised = []
+
+        def failed_write(path, data):
+            if mode == "persistent-after-t0" and raised and path.is_relative_to(root / "publication"):
+                raise OSError("SYNTHETIC persistent storage failure")
+            result = real_write(path, data)
+            if path == root / "publication" / target and not raised:
+                raised.append(True)
+                if "interrupt" in mode:
+                    raise KeyboardInterrupt()
+                raise OSError("SYNTHETIC post-write failure, no model execution")
+            return result
+
+        monkeypatch.setattr(Path, "write_bytes", failed_write)
     monkeypatch.setattr(sys, "argv", ["campaign", "--out", str(root), "--wheel", "synthetic-unused.whl"])
     success = mode in ("null", "flags")
-    assert campaign.main() == (0 if success else 2)
+    try:
+        actual = campaign.main()
+    except (Exception, KeyboardInterrupt) as exc:  # noqa: BLE001 - capture this synthetic boundary failure as a test assertion.
+        actual = type(exc).__name__
+    assert actual == ("OSError" if mode == "persistent-after-t0" else 0 if success else 2)
     public = root / "publication"
+    if mode == "persistent-after-t0":
+        # No storage is available even for a failure receipt: retain measured
+        # aggregates, withhold every earlier positive/pending qualification file.
+        assert {p.relative_to(public).as_posix() for p in public.rglob("*") if p.is_file()} == {
+            f"run-{i}/{name}" for i in range(1, 4) for name in ("report.json", "model-card.md")
+        }
+        for index, original in enumerate(paths, 1):
+            assert (public / f"run-{index}/report.json").read_bytes() == original.read_bytes()
+        assert json.loads((root / "native/t0.json").read_bytes())["protocol_pass"] is True
+        return
     value = json.loads((public / "campaign.json").read_bytes())
     assert value["reference_registered"] is False and value["scientific_go"] is False
     assert {p.relative_to(public).as_posix() for p in public.rglob("*") if p.is_file()} <= set(campaign.PUBLIC_FILES)
@@ -313,6 +370,23 @@ def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkey
             assert (public / f"run-{index}/report.json").read_bytes() == original.read_bytes()
     else:
         assert value["status"] == "operational_failure" and value["reference_eligibility"] == "blocked"
-        assert not (public / "native-t0.json").exists() and not (public / "assessment.json").exists()
-        assert all(not (public / f"run-{i}").exists() for i in range(1, 4))
+        assert not (public / "native-t0.json").exists()
+        if fault:
+            assessment = json.loads((public / "assessment.json").read_bytes())
+            assert (
+                assessment["registry_admission"] == "blocked" and assessment["eligible_axes_before_publication"] == []
+            )
+            assert assessment["t0"] is None and assessment["campaign_execution_complete"] is False
+            assert "campaign_terminal_failure" in assessment["blocking_reasons"]
+            native = json.loads((public / "native-cold-run.json").read_bytes())
+            assert native["publication_qualification"] is False and native["campaign_execution_complete"] is False
+            assert (
+                native["t0"]["protocol_pass"] is True
+            )  # Preserve the genuine original observation, with nonqualification explicit.
+            for i, original in enumerate(paths, 1):
+                assert (public / f"run-{i}/report.json").read_bytes() == original.read_bytes()
+                assert assessment["axes_by_run"][i - 1]["refusal-robustness"]["flagged_flips"] == int(flagged)
+        else:
+            assert not (public / "assessment.json").exists()
+            assert all(not (public / f"run-{i}").exists() for i in range(1, 4))
         assert b"synthetic private value" not in (public / "campaign.json").read_bytes()

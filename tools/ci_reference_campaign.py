@@ -266,6 +266,54 @@ def _write(path: Path, value: dict):
     path.write_bytes((json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n").encode())
 
 
+def _finish(public: Path, state: dict, exit_code: int):
+    state["execution_exit"] = exit_code
+    state["public_files"] = [
+        {"path": name, "sha256": sha((public / name).read_bytes()), "size_bytes": (public / name).stat().st_size}
+        for name in PUBLIC_FILES
+        if name != "campaign.json" and (public / name).is_file()
+    ]
+    _write(public / "campaign.json", state)
+
+
+def _revoke(public: Path, assessment: dict | None, native: dict | None):
+    """A terminal failure cannot leave standalone positive qualification behind.
+
+    Private native originals are untouched. Retain valid aggregates and genuine
+    native observations, explicitly distinguishing them from campaign admission.
+    If a failure prevents rewriting qualification metadata, remove that owned
+    metadata rather than retain its earlier positive declaration.
+    """
+    (public / "native-t0.json").unlink(missing_ok=True)
+    (public / "campaign.json").unlink(missing_ok=True)
+    rewritten = {}
+    if assessment is not None:
+        value = copy.deepcopy(assessment)
+        value.update(
+            registry_admission="blocked",
+            eligible_axes_before_publication=[],
+            t0=None,
+            campaign_execution_complete=False,
+            t0_unavailable_reason="campaign_terminal_failure; original native observations are not qualification",
+        )
+        value["blocking_reasons"] = sorted(set(value["blocking_reasons"]) | {"campaign_terminal_failure"})
+        rewritten["assessment.json"] = value
+    if native is not None and (public / "native-cold-run.json").exists():
+        value = copy.deepcopy(native)
+        value.update(
+            publication_qualification=False,
+            campaign_execution_complete=False,
+            observation_scope="Original native observations only; campaign terminal failure revoked publication qualification.",
+        )
+        rewritten["native-cold-run.json"] = value
+    for name, value in rewritten.items():
+        path = public / name
+        try:
+            _write(path, value)
+        except (OSError, KeyboardInterrupt):
+            path.unlink(missing_ok=True)
+
+
 def _candidate(wheel: Path) -> dict:
     import quantfit
 
@@ -329,6 +377,9 @@ def main() -> int:
     }
     exit_code = 2
     previous = None
+    assessment = None
+    accepted_assessment = None
+    result = None
     try:
         require(os.name == "posix", "campaign is POSIX-only")
         previous = signal.signal(signal.SIGTERM, lambda *_: (_ for _ in ()).throw(KeyboardInterrupt()))
@@ -422,7 +473,7 @@ def main() -> int:
             "native exits differ from validated reports",
         )
         require(assessment["t0"] == result["t0"], "fresh rechecked T0 differs from native T0")
-        _write(public / "assessment.json", assessment)
+        accepted_assessment = assessment
         # Copy only buffers whose hash was just checked by the assessment, never the raw directory.
         for index, source in enumerate(paths, 1):
             raw = _read(source, MAX_REPORT_BYTES)
@@ -436,6 +487,7 @@ def main() -> int:
             (destination / "model-card.md").write_text(
                 model_card_fragment(str(destination / "report.json")), encoding="utf-8"
             )
+        _write(public / "assessment.json", assessment)
         native_t0 = _read(working / "t0.json", MAX_REPORT_BYTES)
         require(_json(native_t0) == result["t0"], "original native T0 changed before publication staging")
         (public / "native-t0.json").write_bytes(native_t0)
@@ -447,33 +499,30 @@ def main() -> int:
         state["t0_protocol_pass"] = assessment["t0"]["protocol_pass"]
         state["phase"] = "complete"
         exit_code = 0  # Successful evidence execution, even when measurement/reference eligibility is negative.
+        _finish(public, state, exit_code)
     except (Exception, KeyboardInterrupt) as exc:  # noqa: BLE001 - artifact boundary always fails CI; never retain raw error text.
+        exit_code = 2
         state["status"] = "operational_failure"
         state["failure_type"] = type(exc).__name__  # Never include arbitrary exception/raw server text.
         if isinstance(exc, CampaignError):
             state["failure_reason"] = str(exc)  # Only this tool's static messages, not SDK/native exception bodies.
         state["reference_eligibility"] = "blocked"
+        _revoke(public, accepted_assessment, result)
+        _finish(public, state, exit_code)
     finally:
         if previous is not None:
             signal.signal(signal.SIGTERM, previous)
-        state["execution_exit"] = exit_code
-        state["public_files"] = [
-            {"path": name, "sha256": sha((public / name).read_bytes()), "size_bytes": (public / name).stat().st_size}
-            for name in PUBLIC_FILES
-            if name != "campaign.json" and (public / name).is_file()
-        ]
-        _write(public / "campaign.json", state)
-        print(
-            json.dumps(
-                {
-                    "status": state["status"],
-                    "phase": state["phase"],
-                    "execution_exit": exit_code,
-                    "scientific_go": False,
-                    "reference_registered": False,
-                }
-            )
+    print(
+        json.dumps(
+            {
+                "status": state["status"],
+                "phase": state["phase"],
+                "execution_exit": exit_code,
+                "scientific_go": False,
+                "reference_registered": False,
+            }
         )
+    )
     return exit_code
 
 

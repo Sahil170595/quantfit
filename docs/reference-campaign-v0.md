@@ -48,6 +48,14 @@ aggregate receipts leave the runner; native temporary directories, logs, model
 files, completions and labels are excluded. No sensitivity, absence, safety GO,
 T4/crosshardware or Inspect parity claim follows from this campaign.
 
+Terminal interruptions also revoke standalone T0 and pending assessment
+eligibility. Validated reports/cards and original native observations remain
+distinct from qualification. If persistent storage failure prevents writing the
+revocation markers, the earlier qualification copies are withheld and execution
+fails; a failure receipt cannot be claimed when it could not be written. This
+staging correction is documented in the new dated local red/fix records and
+does not change the measured T0 rule or the report decision.
+
 The approved public dataset destination is
 `Crusadersk/quantfit-reference-reports`. Publication uses aggregate-only paths
 under `v0/`, an immutable dataset commit and a downloaded-byte SHA256 comparison.
