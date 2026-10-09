@@ -1,0 +1,19 @@
+I001 [*] Import block is un-sorted or un-formatted
+   --> tests\test_gguf_verification.py:293:5
+    |
+292 |   def test_native_ram_admission_precedes_binary_and_server(native_fixture, monkeypatch):
+293 | /     from types import SimpleNamespace
+294 | |     import psutil
+    | |_________________^
+295 |       path,_,runtime,_,servers=native_fixture
+296 |       monkeypatch.setattr(psutil,"virtual_memory",lambda:SimpleNamespace(available=1))
+    |
+help: Organize imports
+    |
+293 |     from types import SimpleNamespace
+294 +
+295 |     import psutil
+    |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

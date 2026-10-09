@@ -451,6 +451,23 @@ assumptions. Without calibration, `emit model-card --report drift.json` retains
 floor-only wording. See [CLI reference](docs/cli-reference.md) and
 [synthetic functional evidence](validation/2026-10-05-calibrated-resolution/README.md).
 
+## Verify GGUF structure and usability
+
+Candidate GGUF verification separates bounded structure from optional native
+CPU usability:
+
+```bash
+quantfit verify --model model.GGUF --json
+quantfit verify --model model.gguf --runtime --timeout-seconds 120 --json
+```
+
+Four magic bytes are insufficient. Structure checks declared metadata/tensor
+encodings and complete aligned extents without loading weights. Optional native
+usability requires Linux/proc, conservative RAM admission, one bounded request
+and verified owned cleanup. Exit 0 applies to the requested check, invalid binary
+3 and unverified/unsupported/operational states 2. Neither check establishes
+quantization quality or safety. See [the API and profile](docs/gguf-verification.md).
+
 ## Portable aggregate evidence
 
 ```bash

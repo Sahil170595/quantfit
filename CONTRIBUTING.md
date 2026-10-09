@@ -222,7 +222,7 @@ Three things a change must not do:
    this list is deliberately not counted and a new module extends it:
    `gate.py:GateError`, `screen.py:ScreenError`, `safety/report.py:ReportError`,
    `safety/calibrate.py:CalibrationError`, `safety/cache.py:CacheError`,
-   `safety/mde.py:MdeError`, `inspect_task.py:InspectTaskError`,
+   `safety/mde.py:MdeError`, `inspect_errors.py:InspectTaskError`,
    `refreports.py:RefReportError`, `reproduce.py:ReproduceError`,
    `audit.py:AuditError`, `quantize.py:CannotQuantize` — that last one is a
    `RuntimeError` whose name does not end in `Error`, which is precisely how a grep for

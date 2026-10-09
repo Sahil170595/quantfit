@@ -241,6 +241,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from quantfit.inspect_errors import InspectTaskError, _require
 from quantfit.safety.verify import (
     ARM_BASELINE,
     ARM_QUANTIZED,
@@ -658,19 +659,6 @@ EVAL_REFUSALS: dict[str, str] = {
 }
 
 _REGISTRY: dict[str, Any] = {}
-
-
-class InspectTaskError(RuntimeError):
-    """Protocol violation or missing `inspect_ai`.
-
-    A `RuntimeError` subclass because that is what `quantfit.cli:main` catches and turns
-    into a clean exit 2, including the observed HF `inspect-run` surface.
-    """
-
-
-def _require(condition: bool, message: str) -> None:
-    if not condition:
-        raise InspectTaskError(message)
 
 
 # --- lazy inspect_ai access -------------------------------------------------------

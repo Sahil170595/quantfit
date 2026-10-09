@@ -1,5 +1,9 @@
 # CLI reference — every command, every flag
 
+Candidate `quantfit verify` validates a bounded GGUF structural profile and offers
+explicit Linux native CPU usability with `--runtime`. Its profile, typed API,
+deadline/cleanup and 0/3/2 semantics are in [GGUF verification](gguf-verification.md).
+
 Candidate `quantfit evidence fetch` retrieves one fixed immutable public aggregate
 snapshot, with independent installed byte pins and separate negative native
 analysis. Its bounded anonymous API, publication and exit contract is in
@@ -150,7 +154,10 @@ At Qwen2.5's 151,936 entries that is 156 MB per block: 1.2 GB at the default 8 a
 quantfit verify --model ./out --json
 ```
 
-Smoke-loads and generates. For GGUF this is a structural magic-number check only.
+Smoke-loads and generates for Transformers artifacts. The candidate GGUF branch
+uses bounded structure validation, with separate optional native CPU usability
+through `--runtime` and its `--timeout-seconds` deadline. See
+[the supported profile](gguf-verification.md); neither result is a safety verdict.
 
 ## The safety check
 

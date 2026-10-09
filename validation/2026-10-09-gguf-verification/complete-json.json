@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.16.0"
+  },
+  "command": "verify",
+  "exit_code": 0,
+  "result": {
+    "verify_schema_version": 1,
+    "path": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-gguf-verification\\complete.GGUF",
+    "exit_code": 0,
+    "passed": true,
+    "structure": {
+      "status": "pass",
+      "version": 3,
+      "byte_order": "little",
+      "file_size_bytes": 164,
+      "metadata_entries": 1,
+      "tensor_count": 1,
+      "tensor_types": {
+        "Q4_0": 1
+      },
+      "packed_tensors": 1,
+      "alignment_bytes": 32,
+      "data_start_bytes": 128,
+      "directory_bytes_read": 120,
+      "directory_sha256": "8fe9e108cfeee9f1bc83e3768c099c1c28cdd8eb111c9a50bd2c567875ac87ba",
+      "tensor_payload_interpreted": false,
+      "general_file_type_code": null,
+      "general_file_type_name": null,
+      "profile": "nonempty little-endian GGUF2/3; scalar/non-nested typed arrays; rank1..4; aligned nonoverlapping complete extents"
+    },
+    "runtime": {
+      "requested": false,
+      "status": "not_requested"
+    },
+    "quantization_quality_verified": false,
+    "scientific_go": false,
+    "scope": "GGUF structure/usability only; tensor contents, quantization quality, safety and scientific GO are not established.",
+    "message": "GGUF structure OK; payload meaning and native usability unverified"
+  }
+}

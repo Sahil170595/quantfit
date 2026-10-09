@@ -1,0 +1,115 @@
+{
+  "causes": {
+    "audit-prefreeze.json": "existing CONTRIBUTING symbol citation referenced the moved definition; corrected to inspect_errors.py without changing public error import identity",
+    "focused-v2.xml": "one test incorrectly expected refusal with actual metadata count1 at allowed budget1; fixture changed to exceed boundary, production limit unchanged",
+    "red.xml": "TDD missing-module collection failure before implementation"
+  },
+  "checker_waivers": 0,
+  "runs": [
+    {
+      "artifact": "red.xml",
+      "counts": {
+        "cases": 1,
+        "errors": 1,
+        "failures": 0,
+        "passed": 0,
+        "skipped": 0,
+        "suite_seconds": 0.336
+      },
+      "immutable_head": null,
+      "scope": "working-source development; final qualification observes immutable60ee"
+    },
+    {
+      "artifact": "structure-first.xml",
+      "counts": {
+        "cases": 21,
+        "errors": 0,
+        "failures": 0,
+        "passed": 20,
+        "skipped": 1,
+        "suite_seconds": 0.582
+      },
+      "immutable_head": null,
+      "scope": "working-source development; final qualification observes immutable60ee"
+    },
+    {
+      "artifact": "shared-first.xml",
+      "counts": {
+        "cases": 71,
+        "errors": 0,
+        "failures": 0,
+        "passed": 69,
+        "skipped": 2,
+        "suite_seconds": 9.429
+      },
+      "immutable_head": null,
+      "scope": "working-source development; final qualification observes immutable60ee"
+    },
+    {
+      "artifact": "focused-v2.xml",
+      "counts": {
+        "cases": 281,
+        "errors": 0,
+        "failures": 1,
+        "passed": 276,
+        "skipped": 4,
+        "suite_seconds": 19.983
+      },
+      "immutable_head": null,
+      "scope": "working-source development; final qualification observes immutable60ee"
+    },
+    {
+      "artifact": "focused-v3.xml",
+      "counts": {
+        "cases": 281,
+        "errors": 0,
+        "failures": 0,
+        "passed": 277,
+        "skipped": 4,
+        "suite_seconds": 19.08
+      },
+      "immutable_head": null,
+      "scope": "working-source development; final qualification observes immutable60ee"
+    },
+    {
+      "artifact": "focused-v4.xml",
+      "counts": {
+        "cases": 296,
+        "errors": 0,
+        "failures": 0,
+        "passed": 292,
+        "skipped": 4,
+        "suite_seconds": 22.815
+      },
+      "immutable_head": null,
+      "scope": "working-source development; final qualification observes immutable60ee"
+    },
+    {
+      "artifact": "cli-integration.xml",
+      "counts": {
+        "cases": 168,
+        "errors": 0,
+        "failures": 0,
+        "passed": 166,
+        "skipped": 2,
+        "suite_seconds": 76.312
+      },
+      "immutable_head": null,
+      "scope": "working-source development; final qualification observes immutable60ee"
+    },
+    {
+      "artifact": "feature-final.xml",
+      "counts": {
+        "cases": 70,
+        "errors": 0,
+        "failures": 0,
+        "passed": 69,
+        "skipped": 1,
+        "suite_seconds": 1.371
+      },
+      "immutable_head": null,
+      "scope": "working-source development; final qualification observes immutable60ee"
+    }
+  ],
+  "schema_version": 1
+}

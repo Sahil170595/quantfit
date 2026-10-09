@@ -8,6 +8,7 @@ import importlib.metadata
 import json
 import os
 import shlex
+import struct
 import subprocess
 import sys
 import tempfile
@@ -53,6 +54,51 @@ def main() -> None:
             "== [('quantfit','quantfit._inspect_registry')]; print(quantfit.__file__)"
         )
         subprocess.run([sys.executable, "-c", code], cwd=sandbox, env=env, check=True)
+        # Complete tiny declared tensor directory, not the old magic-only fixture.
+        name = b"test.weight"
+        raw = b"GGUF" + struct.pack("<IQQQ", 3, 1, 0, len(name)) + name
+        raw += struct.pack("<IQQIQ", 2, 32, 2, 2, 0)
+        raw += b"\x00" * (-len(raw) % 32) + b"\x00" * 36
+        for label, body, expected in (
+            ("complete.GGUF", raw, 0),
+            ("magic-only.gguf", b"GGUF", 3),
+            ("unverified.gguf", b"GGUF" + struct.pack("<IQQ", 1, 1, 0), 2),
+        ):
+            model = sandbox / label
+            model.write_bytes(body)
+            completed = subprocess.run(
+                [sys.executable, "-m", "quantfit.cli", "verify", "--model", str(model), "--json"],
+                cwd=sandbox,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            document = json.loads(completed.stdout)
+            assert completed.returncode == document["exit_code"] == expected, completed.stdout + completed.stderr
+            assert document["result"]["quantization_quality_verified"] is False
+        if os.name == "nt":
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "quantfit.cli",
+                    "verify",
+                    "--model",
+                    str(sandbox / "complete.GGUF"),
+                    "--runtime",
+                    "--json",
+                ],
+                cwd=sandbox,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            assert (
+                completed.returncode == 2
+                and json.loads(completed.stdout)["result"]["runtime"]["status"] == "unverified"
+            )
         # Exact historical producer bytes, with disposable input copies removed
         # before relocated verification. Original native locators are never followed.
         producer = checkout / "validation/2026-10-09-phi4-public-candidate/producer"
@@ -529,6 +575,8 @@ def main() -> None:
             "test_replay_bundle.py",
             "test_repeatability.py",
             "test_evidence_fetch.py",
+            "test_verify.py",
+            "test_gguf_verification.py",
             "test_junit.py",
             "test_junit_gate_screen.py",
             "test_report.py",

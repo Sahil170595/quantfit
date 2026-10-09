@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.16.0"
+  },
+  "command": "verify",
+  "exit_code": 2,
+  "result": null,
+  "error": {
+    "kind": "RuntimeError",
+    "message": "verify --timeout-seconds requires --runtime"
+  }
+}

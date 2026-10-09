@@ -424,6 +424,11 @@ pending. See `docs/portable-evidence-bundles.md` for the supported four-role sco
 
 | Flag | Command | Observed scope | Evidence |
 |---|---|---|---|
+| `--model` / `--json` | verify | Local complete crafted GGUF profile/source CLI0/3/2, raw extent/type/budget adverse cases, legacy tuple compatibility; zero-filled bytes establish syntax only | `tests/test_verify.py`; `tests/test_gguf_verification.py`; `validation/2026-10-09-gguf-verification/` |
+| `--runtime` / `--timeout-seconds` | verify | Fake owned HTTP/server deadline/cancellation/metadata/hash/cleanup and preprovision platform/RAM refusal; Windows actual runtime refusal2. No local real native inference; existing hosted one-request4-token slot/installed consumers pending batch | `tests/test_gguf_verification.py`; `tools/ci_cpu_acceptance.py`; `validation/2026-10-09-gguf-verification/` |
+
+| Flag | Command | Observed scope | Evidence |
+|---|---|---|---|
 | `--out` / `--timeout-seconds` / `--json` | evidence fetch | Local source CLI over fake HTTP serving the twelve exact historical public files; independent cap/SHA, redirects/deadline, schema/false-marker and staged-output adverse checks. Original negative flags retained. No local real download qualification; Ubuntu/Windows installed wheel/sdist anonymous consumer pending hosted batch | `tests/test_evidence_fetch.py`; `validation/2026-10-09-evidence-fetch/` |
 
 | Flag | Command | Observed scope | Evidence |

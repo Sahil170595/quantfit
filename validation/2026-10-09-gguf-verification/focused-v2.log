@@ -1,0 +1,27 @@
+....................s.........F......................................... [ 25%]
+.........................s...s.......................................... [ 51%]
+........................................................................ [ 76%]
+....................................s............................        [100%]
+================================== FAILURES ===================================
+_______ test_valid_files_beyond_chosen_budgets_are_unverified[metadata] _______
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1418/test_valid_files_beyond_chosen1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000026041E2F7D0>
+budget = 'metadata'
+
+    @pytest.mark.parametrize("budget", ["directory", "metadata", "array"])
+    def test_valid_files_beyond_chosen_budgets_are_unverified(tmp_path, monkeypatch, budget):
+        import quantfit.gguf_structure as parser
+    
+        metadata = [("test.array", 9, struct.pack("<IQ", 0, 2) + b"\x01\x02")]
+        monkeypatch.setattr(
+            parser, {"directory": "MAX_DIRECTORY_BYTES", "metadata": "MAX_METADATA", "array": "MAX_ARRAY_ITEMS"}[budget], 1
+        )
+        result = verify_gguf(str(write(tmp_path, fixture_bytes(metadata=metadata))))
+>       assert result["exit_code"] == 2 and not result["passed"]
+E       assert (0 == 2)
+
+tests\test_gguf_verification.py:173: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_gguf_verification.py::test_valid_files_beyond_chosen_budgets_are_unverified[metadata]
+1 failed, 276 passed, 4 skipped in 20.45s

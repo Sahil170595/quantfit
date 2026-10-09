@@ -1,0 +1,326 @@
+{
+  "aggregate_payload_allowances": 0,
+  "matches": [
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/0/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "881b117639c1237202a847bc8aa449c66d4243d38d220dcca6bc50a6af5bbdc7"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/1/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "a857eedc1582088f597faaf9eca0795f223b7fd5a59c20a044f031ae4dd72fa6"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/2/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "b34a8106a892094af9635074269714de95e13bd75cee5204cd5166fcd9686964"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/3/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "bbb7a67e98303ec2b5b16f99af718d9f5b708aeebbd99b1a354bf65219f6f67f"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/4/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "6b3da7c1b7721eea0cf4061e881ab86075056cf8e79c5544e35a3019384e4ad1"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/5/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "c907ceafc83680a5cc7a38bd0465379211062a38fd3a6e3dba7d38efc0bcffb3"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/6/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "14dcb4767b1e12b307e60cd2815bf077730e9e5aaebab568641bdf95123892e6"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/7/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "ff096a6d3685915797846fddd8f519ac21bcd682dabbb55a7a8e03339ef15375"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/8/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "4fa11762142bfa554c90167bf000a80f674fe88b02b350c92e19b2780aec53a7"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/9/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "40bb375251c57ca4626ef88bae1b41342685382395a5b3a3cdf45d3831d2933d"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/10/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "d54d6b342d76e70082125271f7036f923d4b835c406e402b30617b811caf37f9"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/11/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "dbc9b1030c2b635b2f391914b85b4865704b1845ff5badbe79e49229c6bfd5c5"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/12/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "8e8075dbd430ae0f8c77110c26616acdd659dee179a6aa8ab47aff1420d7cdee"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/13/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "4d3f614c0e22b746094ce6bdb26f9e6d87d822b8af19d3a0da5a605f8ab471a6"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/14/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "2d24f81f557a78a97b9fb0c91f01f5dc90dc0d5a25a71c9c73cdb9ec4ca9e465"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/15/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "60fe3486b9ab6e76154059153271c53cd6f832de6b8004dc2c04c6e372a2755c"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/16/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "870a222dab406f5c9bdbae6374843a903cea69ea1db8ef252e284eb075ff0ecd"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/17/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "01d532257418678c949c76601b2409424366b8f83c86f9c94e8a81919f73b739"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/18/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "51d9ba02778cb91715c502d67a163e624bf0cd05e9eaa0d1b2fae45e985a488f"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/19/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "732606264971c858fc3e21ba7029dc6d097bec98bd258bccf67b7ff10a2e5bc6"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/20/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "7ff37549834c7d69f434941b5aa39c7d928577e9bc7b1cc3e69a345dba1000e0"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/21/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "bb6985eb3f1a93ac3938e14fdac0e5353d8226678ff49ee1e3ff7203f942a04f"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/22/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "c976eea161544bcd75f65d7f8be0aea0a643cbed04338b5861dff78ceb671c59"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/23/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "c976eea161544bcd75f65d7f8be0aea0a643cbed04338b5861dff78ceb671c59"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/24/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "f4552dabe65c52e0e260a47e937b46b657e8855d10159ac1e1c61ebebe6664dd"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/25/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "a11f673ff502c0944c210e1d32ecb69f63acdddc879b4264a3fb0d8a44c8c795"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/26/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "2d24f81f557a78a97b9fb0c91f01f5dc90dc0d5a25a71c9c73cdb9ec4ca9e465"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/27/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "2d24f81f557a78a97b9fb0c91f01f5dc90dc0d5a25a71c9c73cdb9ec4ca9e465"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/28/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "8debd548b4810e1e74d4cf11a877b5d294a9b25f3080a13acf582349fd07a16b"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/29/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "0dd0a395f9450a4ce7937df0275f82d0c324665b442b40f106ca7e38b87f4b53"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/30/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "2cd267bc1ad87f69cb623a445547d93bba97cb217297d2d379e879f344da7bfc"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/31/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "f161033a093956449a373685bfa9c296e40262877801783c8c4949aa374966e4"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/32/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "38edbe7c4cd6e45d3980e3ae8c5a6b3581b3aef28bd5643bf61fe6a9010433ac"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/33/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "51f07349a4dc5da71958f95522673856d7209d269387fd1b19f3bfbefbfb54c8"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/34/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "87f637a23a92fafae9889f24bd9952bec75dd92fe3c6f931d6dc62c91d446716"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/35/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "8a9424f0187eb18322d1203060cd3626c2df5cd2f46bd70c28c3e92d7bb8b4d4"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/36/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "10971ea9e3d028b98506072dd4884286cc3d738ab39a846b8726728847bde501"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/37/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "3d1f8d41185b25fa78de9ffea777c34198e70650b7672e6bad5700849f60bca3"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/38/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "863ae69f798442016c8d12c37f67c8e028e8513f083801831474e0fab71362ae"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/39/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "da0f9ed82ceb71f1ffe459240797f8f7b3a97b63736008ccb72f273688e35c5f"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/40/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "9000297154957c3b5c23e1df706ffff1785d04b1346e1bec0273ab031f0fb68b"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/41/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "757bf480daa78aba6abc6e7ff0fb43344bca8a30daffe76fa0dc7e3ff3d6fb71"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/42/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "ffbc38810c1e896c7b56ac83c1f06a02aa19e8f3073a62a4d3a78470b1fbb11c"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/43/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "bbea2ad94e6881ab2b0a121916cb7c40d1e4eb5c27b06e3a932f2b9429917f29"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/44/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "03f4a156913ca33ea53135837c4b1f275b1cf948106d52f159e6acd7e274fdd1"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/45/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "9657596e0e577ad06c7444ee562336ede74d3e69734475e0206b3f9492fdd31d"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/46/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "85d16bce4974812059f735e9bfafc0bda30a74df60a8f11ead46dac08c95f46e"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/47/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "dba0374978d41e582d95f52ade287947b3943f605eab1183d0fa6452c6285ec3"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/48/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "b938d22c67d510297e2dcdfc466e95058f229e3900df26e07d601d83a49af4c0"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/49/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "ec8a2856a28a4b4a2f2c81df194237e2a1776928df2c4b65ea2f0456b6264792"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/50/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "8e3e71ff5d42579fd090ece49b608f5e32f410ab14b64c5d87521499ad647ff3"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/51/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "b270278170cfeaa6607b1182a424f48ac2711a0b0822cd9a163ea6d183bb8499"
+    },
+    {
+      "file": "quickstart-final.json",
+      "pointer": "/commands/52/text",
+      "scope": "Exact public README command syntax in static inventory only",
+      "value_sha256": "279202d001a9f60eaa2c2e242e6eb92e43b85d9fd90f4ab37b41effac7ea43f6"
+    }
+  ],
+  "no_model_data": true,
+  "patterns": "prompt|completion|response|text|generation",
+  "schema_version": 1
+}
