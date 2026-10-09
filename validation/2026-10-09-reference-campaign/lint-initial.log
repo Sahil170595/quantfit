@@ -1,0 +1,79 @@
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> tests\test_reference_campaign.py:22:25
+   |
+20 |     payload["judge"]["card_xstest_accuracy_label"] = verify._measured_judge_label()
+21 |     zones = {
+22 |         "clear_unsafe": dict(n=12, baseline_refused=unsafe, quant_refused=unsafe - flips),
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+23 |         "clear_safe": dict(n=12, baseline_refused=0, quant_refused=0),
+24 |         "borderline": dict(n=16, baseline_refused=0, quant_refused=0),
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> tests\test_reference_campaign.py:23:23
+   |
+21 |     zones = {
+22 |         "clear_unsafe": dict(n=12, baseline_refused=unsafe, quant_refused=unsafe - flips),
+23 |         "clear_safe": dict(n=12, baseline_refused=0, quant_refused=0),
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+24 |         "borderline": dict(n=16, baseline_refused=0, quant_refused=0),
+25 |     }
+   |
+help: Rewrite as a literal
+
+C408 Unnecessary `dict()` call (rewrite as a literal)
+  --> tests\test_reference_campaign.py:24:23
+   |
+22 |         "clear_unsafe": dict(n=12, baseline_refused=unsafe, quant_refused=unsafe - flips),
+23 |         "clear_safe": dict(n=12, baseline_refused=0, quant_refused=0),
+24 |         "borderline": dict(n=16, baseline_refused=0, quant_refused=0),
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+25 |     }
+26 |     payload["drift"] = verify.SafetyDrift(40, 12, unsafe, unsafe - flips, flips, 28, 0, 0, 0, zones).to_dict()
+   |
+help: Rewrite as a literal
+
+C401 Unnecessary generator (rewrite as a set comprehension)
+   --> tools\ci_reference_campaign.py:133:24
+    |
+131 |             reasons.append("t0_disagreement")
+132 |     normalized = [_normalized(value) for value in values]
+133 |     differing = sorted(set(item for value in normalized[1:] for item in _differences(normalized[0], value)))
+    |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+134 |     if differing:
+135 |         reasons.append("full_report_repeatability_failed")
+    |
+help: Rewrite as a set comprehension
+
+FURB167 [*] Use of regular expression alias `re.I`
+   --> tools\ci_reference_campaign.py:170:78
+    |
+168 |     if isinstance(value, dict):
+169 |         for key, child in value.items():
+170 |             if re.search(r"prompt|completion|response|text|generation", key, re.I):
+    |                                                                              ^^^^
+171 |                 require(key == "completion_cache_requested" and child is False, "unexpected raw/private aggregate field")
+172 |             _aggregate(child)
+    |
+help: Replace with `re.IGNORECASE`
+    |
+169 |         for key, child in value.items():
+    -             if re.search(r"prompt|completion|response|text|generation", key, re.I):
+170 +             if re.search(r"prompt|completion|response|text|generation", key, re.IGNORECASE):
+171 |                 require(key == "completion_cache_requested" and child is False, "unexpected raw/private aggregate field")
+    |
+
+BLE001 Do not catch blind exception: `BaseException`
+   --> tools\ci_reference_campaign.py:301:12
+    |
+299 |         state["phase"] = "complete"
+300 |         exit_code = 0  # Successful evidence execution, even when measurement/reference eligibility is negative.
+301 |     except BaseException as exc:
+    |            ^^^^^^^^^^^^^
+302 |         state["status"] = "operational_failure"
+303 |         state["failure_type"] = type(exc).__name__  # Never include arbitrary exception/raw server text.
+    |
+
+Found 6 errors.
+[*] 1 fixable with the `--fix` option (4 hidden fixes can be enabled with the `--unsafe-fixes` option).

@@ -1,0 +1,15 @@
+{
+  "source_head": "1f58bddde0ce3e5e2c862acef39c79abf0636623",
+  "campaign_git_blob_sha256": "4c23bafb474ff7c71b4eea9575d51cccdc5e864b0c9af693d2f8da82f128cffd",
+  "owner": "independent domain reviewer",
+  "method": "Actual campaign controller with synthetic runtime/T0 facts and in-memory file storage; Path.write_bytes writes native-t0.json then raises KeyboardInterrupt.",
+  "observed_campaign_exit": 2,
+  "observed_campaign_status": "operational_failure",
+  "observed_native_t0_protocol_pass_retained": true,
+  "observed_assessment_registry_admission_retained": "pending_public_byte_verification",
+  "observed_uploadable_member_count": 9,
+  "finding": "Positive standalone T0 and pending reference eligibility survived terminal failure.",
+  "models_loaded": 0,
+  "scientific_go": false,
+  "limitations": "Synthetic controller proof, not a real native or hosted run. No reviewer resources were created."
+}
