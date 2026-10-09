@@ -1,0 +1,127 @@
+{
+  "correction": "tests-only3b extends exact CLI inventory and real JSON/prose/no-backend success/refusal cases; no production change or checker waiver",
+  "development_runs": [
+    {
+      "counts": {
+        "cases": 468,
+        "errors": 0,
+        "failures": 0,
+        "passed": 457,
+        "skipped": 11
+      },
+      "failures": [],
+      "observed_head": null,
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\focused-integration.xml",
+      "scope": "development working files; not an immutable-head qualification"
+    },
+    {
+      "counts": {
+        "cases": 318,
+        "errors": 0,
+        "failures": 0,
+        "passed": 307,
+        "skipped": 11
+      },
+      "failures": [],
+      "observed_head": null,
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\focused.xml",
+      "scope": "development working files; not an immutable-head qualification"
+    },
+    {
+      "counts": {
+        "cases": 266,
+        "errors": 0,
+        "failures": 0,
+        "passed": 261,
+        "skipped": 5
+      },
+      "failures": [],
+      "observed_head": null,
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\initial-green.xml",
+      "scope": "development working files; not an immutable-head qualification"
+    },
+    {
+      "counts": {
+        "cases": 1960,
+        "errors": 0,
+        "failures": 1,
+        "passed": 1919,
+        "skipped": 40
+      },
+      "failures": [
+        {
+          "case": "test_the_leaf_set_is_what_we_think_it_is",
+          "kind": "failure",
+          "message": "AssertionError: leaf command set changed: ['bundle replay-create', 'bundle replay-verify']\nassert {'audit', 'bu... ingest', ...} == {'audit', 'bu... 'check', ...}\n  \n  Extra items in the left set:\n  'bundle replay-create"
+        }
+      ],
+      "observed_head": "307e1c63bc24db29b41a7a8706c0cf75c25edcf0",
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\unit-initial.xml",
+      "scope": "frozen source"
+    }
+  ],
+  "initial_red": {
+    "artifacts": [
+      "red.log",
+      "red.xml"
+    ],
+    "cause": "new public replay bundle APIs absent before implementation",
+    "counts": {
+      "cases": 1,
+      "errors": 1,
+      "failures": 0,
+      "passed": 0,
+      "skipped": 0
+    },
+    "source_scope": "ef03 base with uncommitted new tests"
+  },
+  "lint_development": "one new local import ordering diagnostic corrected before source freeze; final exact path check passed",
+  "retained_recovery_files": [
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\focused-integration.log",
+      "sha256": "e2f89bd9a30c26cf52e196e214d861242528918108146e8564bc038812e41fbf",
+      "size_bytes": 601
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\focused-integration.xml",
+      "sha256": "cf12d57bd5ce622954a0f4d291b3ff4e319f5fc155ba5016fc2ba10bfa46e290",
+      "size_bytes": 61617
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\focused.log",
+      "sha256": "29539c65f0b0e86eb3e9ca949006caa518d7aebc778d5b05667b6d77d047bfa2",
+      "size_bytes": 438
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\focused.xml",
+      "sha256": "0eb933222847da6cc7e1280d2562213ce6894ba9c1dc9d7579bc33c82f9c4577",
+      "size_bytes": 44603
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\initial-green.log",
+      "sha256": "ce261b1ea007bb5ea0a49040aa55d248abac9e3b6f53939ba616b0c67e3e783f",
+      "size_bytes": 356
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\initial-green.xml",
+      "sha256": "24e9c942e821717938f2f846e76e344886b07274696ee8d2066ad0ea36ea85e7",
+      "size_bytes": 36692
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\lint.log",
+      "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+      "size_bytes": 20
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\unit-initial.log",
+      "sha256": "a8b5806ca474f18655cbcdc4df5819e4af79e53c5475ad59bf3b6d2759e28389",
+      "size_bytes": 3678
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\replicate-bundles-development\\unit-initial.xml",
+      "sha256": "4c4b62e9533716d388d17f3fcd3c70d15d976008c53ce93c7ac89fe1dad6e7a0",
+      "size_bytes": 250967
+    }
+  ],
+  "schema_version": 1
+}

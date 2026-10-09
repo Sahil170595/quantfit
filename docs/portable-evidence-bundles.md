@@ -52,7 +52,10 @@ drift is absent. Its `arms.report` may name a requested destination; that histor
 locator is never treated as an observed report or opened during verification.
 Its actual-run binding remains false. Calibration-only bundles and resolution without
 its report/calibration are refused. Three-report T0 evidence is outside this version's
-four-role interface; a disconnected T0 declaration is not accepted.
+schema-1 four-role interface; a disconnected T0 declaration is not accepted.
+The separate candidate schema-2 [three-report T0 handoff](replicate-bundles.md)
+uses `bundle replay-create` / `bundle replay-verify` and preserves the original
+producer bytes. It does not change the schema-1 interface described here.
 
 Exit 0 means format/relationship and declared-byte integrity checks succeeded. Exit 3
 means a member's length or SHA-256 differs from the manifest. Exit 2 means unsupported

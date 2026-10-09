@@ -417,6 +417,8 @@ pending. See `docs/portable-evidence-bundles.md` for the supported four-role sco
 |---|---|---|---|
 | `--bundle` | bundle verify | Offline relocated bundle; mismatched bytes exit 3, unsupported layout exit 2 | `validation/2026-10-08-portable-evidence-bundles/` |
 | `--gate` / `--resolution` / `--calibration-report` / `--report` / `--out` | bundle create | Supported aggregate roles only; actual reportless pre-run exit-5 refusal retained with actual-run match false | `validation/2026-10-08-portable-evidence-bundles/` |
+| `--reports` / `--t0` / `--out` | bundle replay-create | Three held original reports plus exact native T0 bytes; recorded ordered hashes/identities validated without opening producer labels. Historical Phi4 flags retained; synthetic disagreement and adverse filesystem/claim cases. No new inference or independent-host proof; installed qualification pending | `tests/test_replay_bundle.py`; `validation/2026-10-09-replicate-bundles/` |
+| `--bundle` | bundle replay-verify | Receiving-path T0 computed separately after relocation; negative T0 integrity exits 0, manifest mismatch 3, malformed evidence 2. POSIX FIFO cases pending hosted qualification | `tests/test_replay_bundle.py`; `validation/2026-10-09-replicate-bundles/` |
 
 **Offline resolution machinery (2026-10-05):** aggregate-only synthetic fixtures
 exercise the actual CLI and exact-byte scope matching. Evidence is
