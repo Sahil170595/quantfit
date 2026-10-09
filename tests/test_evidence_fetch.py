@@ -2,6 +2,7 @@
 
 import asyncio
 import copy
+import hashlib
 import json
 import os
 import subprocess
@@ -343,6 +344,9 @@ def test_unsupported_inventory_is_refused_before_network(tmp_path, monkeypatch, 
         "report-identity",
         "report-cache",
         "native-count",
+        "cold-thread",
+        "cold-tokens",
+        "cold-path",
     ],
 )
 def test_semantic_profiles_and_same_held_relationships_reject_forgery_independently_of_network_sha(fault):
@@ -353,7 +357,7 @@ def test_semantic_profiles_and_same_held_relationships_reject_forgery_independen
         else "manifest.json"
         if fault.startswith("registered") or fault in ("membership", "circular")
         else "native-cold-run.json"
-        if fault == "native-count"
+        if fault in ("native-count", "cold-thread", "cold-tokens", "cold-path")
         else "run-2/report.json"
     )
     path = evidence.PREFIX + name
@@ -380,9 +384,30 @@ def test_semantic_profiles_and_same_held_relationships_reject_forgery_independen
         value["baseline"]["engine"]["binary_sha256"] = "0" * 64
     elif fault == "report-cache":
         value["baseline"]["engine"]["baseline_cache"] = {"served": True}
+    elif fault == "cold-thread":
+        value["runs"][0]["final_report"]["arm_threads_observed"]["baseline"] = 3
+    elif fault == "cold-tokens":
+        value["requested"]["max_new_tokens"] = 65
+    elif fault == "cold-path":
+        value["runs"][0]["final_report"]["path"] = "unbound producer label"
     else:
         value["runs"][0]["native_exit_code"] = 0
     held[path] = json.dumps(value).encode()
+    if fault in ("cold-thread", "cold-tokens", "cold-path"):
+        # Rebind all companion byte hashes to isolate semantic identity checks
+        # from the independently trusted remote-byte fence.
+        campaign_path = evidence.PREFIX + "campaign.json"
+        campaign = json.loads(held[campaign_path])
+        for entry in campaign["public_files"]:
+            raw = held[evidence.PREFIX + entry["path"]]
+            entry.update(sha256=hashlib.sha256(raw).hexdigest(), size_bytes=len(raw))
+        held[campaign_path] = json.dumps(campaign).encode()
+        manifest_path = evidence.PREFIX + "manifest.json"
+        manifest = json.loads(held[manifest_path])
+        for entry in manifest["files"]:
+            raw = held[entry["path"]]
+            entry.update(sha256=hashlib.sha256(raw).hexdigest(), size_bytes=len(raw))
+        held[manifest_path] = json.dumps(manifest).encode()
     with pytest.raises(RuntimeError):
         evidence._validate_held(held, ["receiving-1", "receiving-2", "receiving-3"])
 

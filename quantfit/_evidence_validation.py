@@ -124,7 +124,9 @@ def validate_held(held: dict[str, bytes], receiving_paths: list[str]) -> tuple[d
     for i, report in enumerate(reports):
         source = assessment["source_reports"][i]
         require(
-            source["sha256"] == hashes[i] and source["size_bytes"] == len(buffers[i]),
+            source["sha256"] == hashes[i]
+            and source["size_bytes"] == len(buffers[i])
+            and source["path"] == original["reports"][i]["path"],
             "assessment source binding differs",
         )
         axes = _axes(report)
@@ -143,12 +145,18 @@ def validate_held(held: dict[str, bytes], receiving_paths: list[str]) -> tuple[d
             require(
                 binding["sha256"] == hashes[i]
                 and binding["size_bytes"] == len(buffers[i])
+                and binding["path"] == original["reports"][i]["path"]
+                and binding["arm_threads_observed"]
+                == {arm: getattr(report, arm).engine["threads"] for arm in ("baseline", "quantized")}
+                and binding["reported_env_device"] == decoded[f"run-{i + 1}/report.json"]["env"]["device"]
                 and binding["regression_detected"] is report.drift["regression_detected"]
                 and binding["unmeasurable_axes"] == report.drift["unmeasurable_axes"],
                 "cold source report facts differ",
             )
         require(
-            campaign["actual_default_tokens_in_all_reports"] == report.decode["max_new_tokens"],
+            campaign["actual_default_tokens_in_all_reports"]
+            == cold["requested"]["max_new_tokens"]
+            == report.decode["max_new_tokens"],
             "recorded token facts differ",
         )
         for name in ("baseline", "quantized"):
