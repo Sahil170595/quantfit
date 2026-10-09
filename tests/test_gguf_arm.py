@@ -275,6 +275,12 @@ def test_generate_completions_hermetic(stub_server, tmp_path, monkeypatch):
     assert "--jinja" in spawned["cmd"] and "--parallel" in spawned["cmd"]
     assert run.resolved_dtype == "F16" and run.artifact_sha256 == arm.sha256
     assert run.engine["name"] == "llama.cpp" and run.engine["device"] == "cpu"
+    command = spawned["cmd"]
+    assert command[command.index("--device") + 1] == "none"
+    assert command[command.index("--n-gpu-layers") + 1] == "0"
+    assert "--no-op-offload" in command
+    assert run.engine["offload_device"] == "none"
+    assert run.engine["n_gpu_layers"] == 0 and run.engine["op_offload"] is False
     from quantfit.backends.gguf import _sha256
 
     assert run.engine["binary_sha256"] == _sha256(fake_bin)  # the binary actually "run"

@@ -26,6 +26,37 @@ def inputs(tmp_path, *, unmeasurable=False):
     return report, Path(calibration), resolution, gate
 
 
+@pytest.mark.parametrize(
+    "change",
+    [None, {"n_gpu_layers": True}, {"n_gpu_layers": 1}, {"op_offload": True}, {"offload_device": "CUDA0"}, "partial"],
+)
+def test_explicit_cpu_controls_roundtrip_and_corruptions_fail(tmp_path, change):
+    report, _, _, _ = inputs(tmp_path)
+    data = json.loads(report.read_bytes())
+    for arm in ("baseline", "quantized"):
+        data[arm]["engine"] = {
+            "name": "llama.cpp",
+            "binary_sha256": "a" * 64,
+            "threads": 2,
+            "device": "cpu",
+            "offload_device": "none",
+            "n_gpu_layers": 0,
+            "op_offload": False,
+        }
+    if change == "partial":
+        del data["baseline"]["engine"]["op_offload"]
+    elif change:
+        data["baseline"]["engine"].update(change)
+    report.write_text(json.dumps(data), encoding="utf-8")
+    out = tmp_path / "bundle"
+    if change is None:
+        create_bundle(str(report), str(out))
+        assert verify_bundle(str(out))["integrity_verified"]
+    else:
+        with pytest.raises(BundleError, match="CPU offload controls"):
+            create_bundle(str(report), str(out))
+
+
 def test_exact_bytes_survive_move_and_original_failure_flags_are_only_declarations(tmp_path):
     report, calibration, resolution, gate = inputs(tmp_path)
     original = {

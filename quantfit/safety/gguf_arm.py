@@ -48,6 +48,10 @@ if TYPE_CHECKING:  # runtime import stays lazy
 
 HF_REF_PREFIX = "hf:"
 UNQUANTIZED_FILE_TYPES = ("F16", "BF16", "F32")
+# Pinned b9817 defaults to GPU auto/offloaded host ops. Both native arms must
+# explicitly disable them, including when QUANTFIT_LLAMACPP names a GPU build.
+CPU_OFFLOAD_CONTROLS = {"offload_device": "none", "n_gpu_layers": 0, "op_offload": False}
+CPU_OFFLOAD_ARGV = ("--device", "none", "--n-gpu-layers", "0", "--no-op-offload")
 
 _CTX_SIZE = 4096
 _READY_TIMEOUT_S = 900  # a 16 GB F16 load from disk can legitimately take minutes
@@ -220,6 +224,7 @@ def _identity(arm: ResolvedGguf, server: Path, threads: int) -> dict:
             "source": _binary_source(server),
             "threads": threads,
             "device": "cpu",
+            **CPU_OFFLOAD_CONTROLS,
         },
         "artifact_sha256": arm.sha256,
     }
@@ -249,6 +254,7 @@ def generate_completions(arm: ResolvedGguf, prompts: list[str], max_new_tokens: 
     proc = subprocess.Popen(
         [
             str(server),
+            *CPU_OFFLOAD_ARGV,
             "-m",
             str(arm.path),
             "--host",

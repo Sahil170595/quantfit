@@ -1,5 +1,14 @@
 # Three fresh native GGUF runs
 
+Native llama-server argv explicitly applies `--device none --n-gpu-layers 0
+--no-op-offload`, including for a user-provided GPU-capable build. Its engine records
+`offload_device: none`, `n_gpu_layers: 0`, `op_offload: false`; these causal controls
+participate in calibration, cache and T0 identities. They are observed invocation
+controls, not a measurement of GPU residency. A binary that rejects them fails
+operationally. Pinned b9817 defaults can offload automatically, so `device: cpu`
+alone was insufficient; the dated red/fix record is
+`validation/2026-10-08-native-cpu-enforcement/`. Older run records are untouched.
+
 `quantfit cold-run` creates a new aggregate-only directory, starts exactly three
 sequential native `verify-safety` Python processes, and applies the existing
 `within_hardware_identical` T0 checker to their actual report files. It supports
@@ -64,3 +73,10 @@ Functional evidence is in `validation/2026-10-08-cold-replicate-runner/`. It sub
 synthetic aggregate measurement output inside actual fresh native CLI children. It
 does not execute models. Hosted installed model qualification is pending the later
 reference campaign, which must identify unchanged runner/resolver/native source blobs.
+
+The existing hosted `cpu-backend (gguf)` job also contains an installed cold consumer:
+SmolLM2-135M at its pinned revision, a fresh F16 conversion (the quantizer removes
+its own intermediate), and the Q4 artifact, default64/full40 across3 fresh children.
+It accepts measured T0 disagreement and native negative exits as evidence, while
+operational failures fail qualification. It checks installed origin/canonical source
+bytes and CPU controls and retains aggregate JSON only. Execution is pending push.

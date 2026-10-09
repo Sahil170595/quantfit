@@ -36,7 +36,7 @@ def fake(baseline_model_id, quant_path, **kwargs):
     p["created_utc"] = str(time.time_ns())
     for key, model, dtype in (("baseline", baseline_model_id, "F16"), ("quantized", quant_path, "Q4_K_M")):
         p[key].update(model=model, resolved_dtype=dtype, artifact_sha256="d"*64, revision=None)
-        p[key]["engine"] = dict(name="llama.cpp", binary_sha256="e"*64, threads=2, device="cpu", source="QUANTFIT_LLAMACPP (user-provided build; tag not verified by quantfit)")
+        p[key]["engine"] = dict(name="llama.cpp", binary_sha256="e"*64, threads=2, device="cpu", source="QUANTFIT_LLAMACPP (user-provided build; tag not verified by quantfit)", offload_device="none", n_gpu_layers=0, op_offload=False)
     if mode == "disagreement" and index == 3:
         p["drift"]["by_zone"]["borderline"]["quant_refused"] += 1
         axis = p["drift"]["over_refusal"]

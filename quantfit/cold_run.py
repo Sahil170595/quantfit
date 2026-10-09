@@ -29,7 +29,13 @@ from quantfit import __version__
 from quantfit.bundle import _json, _no_links, _private_fields, _read, _report
 from quantfit.reproduce import within_hardware_identical
 from quantfit.resolution import MAX_REPORT_BYTES
-from quantfit.safety.gguf_arm import UNQUANTIZED_FILE_TYPES, _threads, is_gguf_ref, validate_revision
+from quantfit.safety.gguf_arm import (
+    CPU_OFFLOAD_CONTROLS,
+    UNQUANTIZED_FILE_TYPES,
+    _threads,
+    is_gguf_ref,
+    validate_revision,
+)
 
 
 def _resources(path: Path) -> dict:
@@ -137,6 +143,8 @@ def _observed_report(path: Path, baseline: str, quant: str, revisions: dict, cod
     for key, arm in (("baseline", report.baseline), ("quant", report.quantized)):
         if arm.engine.get("name") != "llama.cpp" or arm.engine.get("device") != "cpu":
             raise RuntimeError("cold-run needs observed native CPU GGUF arms")
+        if not all(arm.engine.get(k) == v for k, v in CPU_OFFLOAD_CONTROLS.items()):
+            raise RuntimeError("fresh native report must record the enforced CPU offload controls")
         if "baseline_cache" in arm.engine:
             raise RuntimeError("a completion-cache marker cannot be a cold-run replicate")
         if revisions.get(key) is not None and arm.revision != revisions[key]:
