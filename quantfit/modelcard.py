@@ -8,9 +8,9 @@ Wilson CIs and minimum detectable effect, the provenance chain (revision pins,
 resolved precisions, engine hashes), and the serve line for the engine the
 artifact was actually judged under.
 
-Nothing is resolved at render time — every value comes from the report — so the
-same report file always renders byte-identical output, and a fragment pasted on
-a card can be re-derived from the artifact it cites.
+No model is loaded at render time. The original measurement comes from the report;
+optional conditional resolution is recomputed from bound aggregate calibration.
+Identical input bytes render byte-identical output, re-derivable from the cited hashes.
 
 The fragment states bounds, never certifications: a no-detection result carries
 the n and MDE that bound it, and an axis with zero at-risk pairs is called out as
@@ -20,6 +20,7 @@ pass to someone skimming a card.
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 from quantfit.safety.cache import SERVED_ENGINE_KEY  # a constant; cache.py imports stdlib only
@@ -53,15 +54,23 @@ _AXES = (
 )
 
 
-def model_card_fragment(report_path: str) -> str:
+def model_card_fragment(report_path: str, *, calibration_report: str | None = None) -> str:
     """Render a schema-v2 drift report as a markdown model-card section.
 
     Wrong-schema and malformed reports are refused by `DriftReport.from_json`;
-    this adds no validation of its own beyond naming a field it cannot render.
+    An optional calibration is checked against the same report instance rendered
+    here. Its conditional resolution never replaces the original floor or verdict.
     """
-    report = DriftReport.from_json(report_path)
+    resolution = None
+    if calibration_report is None:
+        report = DriftReport.from_json(report_path)
+    else:
+        from quantfit.resolution import analyze_resolution_inputs
+
+        report, resolution = analyze_resolution_inputs(report_path, calibration_report)
+        _check_original_statistics(report)
     try:
-        lines = _render(report)
+        lines = _render(report, resolution)
     except (KeyError, TypeError, ValueError, IndexError) as exc:
         # The schema validates that judge/drift ARE objects, not what is inside
         # them: a report too thin OR too malformed to render (wrong-arity CI list,
@@ -71,7 +80,47 @@ def model_card_fragment(report_path: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _render(report: DriftReport) -> list[str]:
+def _check_original_statistics(report: DriftReport) -> None:
+    """Bound presentation must not republish an unsupported source verdict or floor."""
+    from quantfit.safety.verify import SafetyDrift
+
+    drift = report.drift
+    unsafe, safe = drift["refusal_robustness"], drift["over_refusal"]
+    expected = SafetyDrift(
+        n=drift["n_probes"],
+        unsafe_n=unsafe["expected_unsafe_n"],
+        unsafe_baseline_refused=unsafe["baseline_refused"],
+        unsafe_quant_refused=unsafe["quant_refused"],
+        harmful_compliance_regressions=unsafe["harmful_compliance_regressions"],
+        safe_n=safe["expected_safe_n"],
+        safe_baseline_refused=safe["baseline_refused"],
+        safe_quant_refused=safe["quant_refused"],
+        overrefusal_regressions=safe["overrefusal_regressions"],
+        by_zone=drift["by_zone"],
+    ).to_dict()
+    if drift.get("verdict") != expected["verdict"]:
+        raise ReportError("source verdict disagrees with validated flagged counts")
+    for _, key, _ in _AXES:
+        for field in ("flip_rate_wilson95", "mde_at_80pct_power"):
+            value, calculated = drift[key].get(field), expected[key][field]
+            values = value if field == "flip_rate_wilson95" else [value]
+            targets = calculated if field == "flip_rate_wilson95" else [calculated]
+            if not isinstance(values, (list, tuple)) or len(values) != len(targets):
+                raise ReportError(f"source {key}.{field} disagrees with validated flagged counts")
+            for number, target in zip(values, targets):
+                if target is None:
+                    valid = number is None
+                else:
+                    valid = (
+                        isinstance(number, (int, float))
+                        and not isinstance(number, bool)
+                        and math.isclose(number, target, rel_tol=1e-9, abs_tol=1e-12)
+                    )
+                if not valid:
+                    raise ReportError(f"source {key}.{field} disagrees with validated flagged counts")
+
+
+def _render(report: DriftReport, resolution: dict | None = None) -> list[str]:
     drift = report.drift
     lines = [
         "## Quantization safety drift (QSR v0)",
@@ -87,8 +136,50 @@ def _render(report: DriftReport) -> list[str]:
         lines += ["", *warning]
     lines += ["", *_provenance(report)]
     lines += ["", *_serve_block(report.quantized)]
-    footer = [*_caps_line(report.quantized), *_footer(drift)]
+    footer = [*_caps_line(report.quantized), *_footer(drift, calibrated=resolution is not None)]
+    if resolution is not None:
+        lines += ["", *_conditional_resolution(resolution)]
     return lines + ["", "---", "", *footer]
+
+
+def _conditional_resolution(analysis: dict) -> list[str]:
+    """Render validated primitives only; omit the analysis clock for byte determinism."""
+    lines = [
+        "### Conditional resolution from bound calibration",
+        "",
+        "The original verdict, flagged counts, Wilson intervals and perfect-judge floors above are unchanged.",
+        "The following MDEs use separate per-arm directional upper bounds; they are conditional estimates.",
+        "",
+        f"- Binding: {analysis['binding_status']}.",
+        f"- Report SHA256: `{analysis['inputs']['report_sha256']}`.",
+        f"- Calibration SHA256: `{analysis['inputs']['calibration_sha256']}`.",
+        f"- Scope fingerprint: `{analysis['binding_fingerprint']}`.",
+        (
+            f"- Baseline epsilon upper: `{analysis['eps_baseline_upper']:.6f}`; "
+            f"quantized epsilon upper: `{analysis['eps_quant_upper']:.6f}` (rates, not percentage points)."
+        ),
+        "- Declared human labels: **unverified**; conditional assumptions: **unverified**.",
+        "",
+        "| axis | at-risk pairs | conditional MDE @ 80% power |",
+        "|---|---|---|",
+    ]
+    for name, axis in analysis["axes"].items():
+        block = axis["resolution"]
+        if not axis["measurable"]:
+            value = "unmeasurable; no answer"
+        else:
+            value = f"{block['effective_mde'] * 100:.1f}pp"
+            if not axis["detectable_at_target_power"]:
+                value += " (sentinel: no effect size reaches target power)"
+        lines.append(f"| {name} | {axis['n_at_risk']} | {value} |")
+    lines += ["", "Conditional assumptions (not established by scope matching):", ""]
+    lines += [f"- A{i}: {statement}" for i, statement in enumerate(analysis["assumptions"], start=1)]
+    lines += [
+        "",
+        analysis["scope"],
+        "A zero-flip result means the detector did not fire; no passing positive control is inferred.",
+    ]
+    return lines
 
 
 def _axis_table(drift: dict) -> list[str]:
@@ -257,8 +348,15 @@ def _caps_line(quantized: ArmRun) -> list[str]:
     return [f"Scale cap for this measurement class (QSR v0 §7): {SPEC_CAPS[stratum]}."]
 
 
-def _footer(drift: dict) -> list[str]:
+def _footer(drift: dict, *, calibrated: bool = False) -> list[str]:
     n = drift["n_probes"]
+    if calibrated:
+        return [
+            f"Measured over {n} curated probes. Flagged flips are candidates until human-verified.",
+            "The original table's Wilson intervals cover sampling error only; its MDEs remain perfect-judge floors.",
+            "Calibration arithmetic and scope matching do not authenticate human labels or establish sensitivity.",
+            "The separate conditional MDEs depend on A1/A2/A3 above. This report does not certify safety.",
+        ]
     if drift["regression_detected"]:
         # A card with an observed flip must not hedge in no-detection language:
         # the flips are judge-flagged candidates until a human verifies them.

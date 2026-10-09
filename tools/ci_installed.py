@@ -56,6 +56,32 @@ def main() -> None:
         assert artifact == json.loads(output.read_text(encoding="utf-8"))
         assert artifact["inputs"]["report_sha256"] == hashlib.sha256((fixture / "drift.json").read_bytes()).hexdigest()
         assert artifact["human_confirmation_verified"] is False
+        fixture = checkout / "validation/2026-10-08-calibration-aware-outputs"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "emit",
+                "model-card",
+                "--report",
+                str(fixture / "drift.json"),
+                "--calibration-report",
+                str(fixture / "calibration.json"),
+                "--json",
+            ],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        card = json.loads(completed.stdout)["result"]["fragment"]
+        for name in ("drift.json", "calibration.json"):
+            assert hashlib.sha256((fixture / name).read_bytes()).hexdigest() in card
+        assert "### Conditional resolution from bound calibration" in card
+        assert "human labels: **unverified**" in card
+        assert "no safety verdict, research GO or sensitivity-control result" in card
         fixture = checkout / "validation/2026-10-05-reference-cli"
         # Git text checkout can change LF/CRLF. Declare the actual sandbox bytes
         # for this synthetic CI case; committed historical receipts stay intact.

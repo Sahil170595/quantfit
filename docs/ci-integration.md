@@ -53,8 +53,8 @@ current schema-2 aggregate report. The capture, key and calibration retain one c
 measurement identity and source hashes; directional Wilson uppers remain separate by arm.
 The gate checks scope before generation and the actual resolved report after generation.
 A pre-run refusal records `scope_validated_actual_run_unobserved`, never an actual-run
-match. This flag is exclusive with operator epsilon/source inputs. The composite action's
-inputs remain the operator/floor interface; this new mode is a CLI invocation.
+match. This flag is exclusive with operator epsilon/source inputs. The composite action
+now exposes it as `calibration-report` and retains the same refusal semantics.
 Unbound legacy records remain ingestible and never gain invented historical pins.
 See `validation/2026-10-05-calibration-binding/` for synthetic functional evidence and limits.
 
@@ -148,6 +148,7 @@ measures between releases.
 | `threshold-pp` | `""` | Explicit dangerous-axis flip threshold in **PERCENTAGE POINTS**. **30pp is `30`, not `0.30`.** Set `tier: ""` when you use it. |
 | `eps-upper` | `""` | Per-arm upper bound on **both** directional judge-error rates, as a rate in (0, 1]. Requires `eps-source`. Exactly `0` is refused. |
 | `eps-source` | `""` | **Required** with `eps-upper`. Where the bound came from, recorded verbatim in the artifact. |
+| `calibration-report` | `""` | Bound schema-2 calibration input. Mutually exclusive with both operator epsilon inputs. Protocol is checked before generation; actual resolved scope is checked afterward. All output paths, including JUnit, must differ from this input. |
 | `max-new-tokens` | `""` (CLI default 64) | Applied identically to both arms (§2.3). |
 | `python-version` | `3.12` | Same version quantfit's own CI pins. |
 | `quantfit-version` | `>=0.16.0,<0.17` | PEP 440 specifier. Pin exactly for a reproducible gate. |
@@ -203,9 +204,13 @@ one.** See §5. **There is no `replicates` input either** — see §12.
 | `printed-mde-pp` | `resolution.printed_mde` converted to pp at one decimal. **Read it together with `mde-is-floor`.** |
 | `mde-is-floor` | The artifact's top-level `resolution_is_a_floor`. `true` = the printed MDE is a lower bound on the true resolution. Defaults to `true` when the artifact does not say. |
 | `resolution-status` | `resolution.verdict`: `resolved` \| `not_refused_resolution_unproven` \| `refused`. |
-| `resolution-proven` | The artifact's `resolution_proven`. `true` only when the threshold was shown to be **resolved**. Distinct from `resolution.not_refused` — see below. |
+| `resolution-proven` | The artifact's `resolution_proven`. `true` when the threshold was shown to be **conditionally resolved** under the supplied error bounds; it does not verify labels or A1/A2/A3. Distinct from `resolution.not_refused` — see below. |
 | `ungated-axis-regressed` | The artifact's `ungated_axis_regressed`: the **over-refusal** axis regressed. This axis is never gated, so **a green build can carry this `true`.** |
 | `eps-source` | `eps.source` — your label, or the gate's own labeled-floor text when you supplied none. |
+| `eps-mode` | The gate's epsilon mode, including `bound_calibration_report`. |
+| `binding-status`, `actual-run-matched` | Calibration scope status and whether the actual generated run matched. Pre-run refusal is "scope_validated_actual_run_unobserved" / false. |
+| `assumptions-verified`, `human-labels-verified` | Bound calibration's `eps.assumptions_verified` and `eps.measured`; both remain `false`. Scope and arithmetic do not authenticate labels or A1/A2/A3. |
+| `calibration-sha256`, `calibration-scope-fingerprint` | Consumed raw-byte hash and matched scope fingerprint. Binding outputs are "not_applicable" in other modes, "unknown" when required bound fields are missing. |
 | `exit-code` | The faithful exit code. GitHub collapses every nonzero step exit into "failure", so this output and the job summary are where 3 / 4 / 5 stay distinguishable. |
 | `report-path`, `gate-artifact-path` | Where the two JSON files landed. |
 | `artifact-url` | The uploaded workflow artifact (empty if nothing was uploaded). |
@@ -663,7 +668,7 @@ fails loudly instead of arriving as an "operational error" in the middle of a me
 ```
 quantfit gate --baseline REF --quant REF
               (--tier smoke|full | --threshold PP)   # PERCENTAGE POINTS; 30pp is 30, not 0.30
-              [--eps-upper RATE --eps-source LABEL]  # eps IS still a rate in (0,1]
+              [--eps-upper RATE --eps-source LABEL | --calibration-report PATH]
               [--max-new-tokens N]
               --report PATH --out PATH
 ```
@@ -709,3 +714,30 @@ an argparse error that reads exactly like an operational one. The composite acti
 catches it and says so; if you are not using the action, use the import guard in §2. The
 cheapest form is `python -c "import quantfit.gate"` — the module can be importable while the
 CLI subcommand is not yet wired, so check both.
+
+### Calibration-aware model cards (unreleased)
+
+The action invokes `gate`, whose `--calibration-report` already ships in **0.16.0**.
+Its default published install remains usable. The new **model-card emit flag is unreleased**:
+use a wheel built from the reviewed candidate until a release containing it is published.
+For action acceptance use `quantfit-path` with that exact wheel; a matching version string
+alone cannot establish that a public install contains an unreleased flag. Preflight checks
+the installed gate's calibration capability only when that action input is requested.
+
+```bash
+quantfit emit model-card --report drift.json --calibration-report calibration.json
+```
+
+This validates binding against the same single-buffer report rendered in the card and
+checks the original verdict/Wilson/floor claims against the recorded paired counts using
+the instrument's own estimators. The original measurement remains separate from the
+conditional per-arm MDE table. The card cites both raw-input hashes and scope fingerprint,
+identifies zero at-risk axes as unmeasurable, and labels an MDE of 1.0 as a sentinel when
+no effect reaches target power. Identical input bytes render identically; analysis-time
+timestamps do not enter the card.
+
+Binding does not authenticate human labels or verify at-risk applicability (A1),
+arm-conditional error independence (A2), or majority-real at-risk membership (A3).
+Neither a rendered card nor an action `resolution-proven` value establishes sensitivity,
+research GO, safety certification, or human-confirmed flips. Synthetic functional records
+are in `validation/2026-10-08-calibration-aware-outputs/`; these are not reference reports.

@@ -1,0 +1,900 @@
+........................................................................ [  4%]
+........................................................................ [  8%]
+........................................................................ [ 13%]
+........................................................................ [ 17%]
+........................................................................ [ 21%]
+.................s....s.............................FF.................. [ 26%]
+........ss.............................................................. [ 30%]
+........................................................................ [ 35%]
+.................................................................s...... [ 39%]
+........................................................................ [ 43%]
+........................................................................ [ 48%]
+........................................................................ [ 52%]
+........................................................................ [ 57%]
+........................................................................ [ 61%]
+........................................................................ [ 65%]
+........................................................................ [ 70%]
+F....................................................................... [ 74%]
+........................................................................ [ 79%]
+.........................s.............................................. [ 83%]
+........................................................................ [ 87%]
+........................................................................ [ 92%]
+........................................................................ [ 96%]
+........................................................                 [100%]
+================================== FAILURES ===================================
+__________________ test_emit_model_card_prints_the_fragment ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001785C258980>
+capsys = <_pytest.capture.CaptureFixture object at 0x000001785C4C0980>
+
+    def test_emit_model_card_prints_the_fragment(monkeypatch, capsys):
+        import quantfit.modelcard as mc
+    
+        monkeypatch.setattr(mc, "model_card_fragment", lambda path: "## fragment\n")
+>       assert main(["emit", "model-card", "--report", "r.json"]) == 0
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cli.py:370: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\cli.py:1096: in main
+    return _dispatch(args)
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+args = Namespace(cmd='emit', what='model-card', report='r.json', calibration_report=None, json=False)
+
+    def _dispatch(args: argparse.Namespace) -> int:
+        if args.cmd == "check":
+            from quantfit.fit import capacity_plan
+    
+            cap = capacity_plan(args.model, token=args.token)
+            code = 0 if cap.fits else 3  # 3 = the doesn't-fit verdict; 2 stays operational-error
+            return _emit(
+                args,
+                "check",
+                code,
+                {
+                    "model_id": cap.model_id,
+                    "fits": cap.fits,
+                    "mode": cap.mode,
+                    "limit": cap.limit or None,
+                    "bytes": {
+                        "fp16": cap.fp16_bytes,
+                        "gpu_free": cap.gpu_free,
+                        "ram_available": cap.ram_available,
+                        "disk_free": cap.disk_free,
+                        "disk_need": cap.disk_need,
+                    },
+                    "reason": cap.reason(),
+                },
+                lambda: print(cap.reason()),
+            )
+    
+        if args.cmd == "list":
+            from quantfit.registry import METHODS, SCHEMES, catalog
+    
+            return _emit(
+                args,
+                "list",
+                0,
+                {
+                    "methods": [
+                        {
+                            "name": m.name,
+                            "backend": m.backend,
+                            "default_scheme": m.default_scheme,
+                            "needs_calibration": m.needs_calibration,
+                            "summary": m.summary,
+                        }
+                        for m in METHODS.values()
+                    ],
+                    "schemes": list(SCHEMES),
+                },
+                lambda: print(catalog()),
+            )
+    
+        if args.cmd == "plan":
+            from quantfit.engines.base import Budget
+            from quantfit.engines.compressed_tensors import CompressedTensorsEngine
+            from quantfit.engines.gguf import GgufEngine
+            from quantfit.policy.route import route
+            from quantfit.policy.target import detect_target
+    
+            target = detect_target()
+            routed = route(args.model, target, Budget(prefer=args.prefer), [CompressedTensorsEngine(), GgufEngine()])
+    
+            def _human_plan() -> None:
+                print(f"target: {target.device}/{target.gpu_arch or '-'} serve={target.serve}")
+                print(f"pick:   {routed.config.method} {routed.config.scheme}  [{routed.config.engine}]")
+                print(f"why:    {routed.rationale}")
+    
+            return _emit(
+                args,
+                "plan",
+                0,
+                {
+                    "target": {
+                        "device": target.device,
+                        "gpu_arch": target.gpu_arch,
+                        "vram_bytes": target.vram_bytes,
+                        "serve": target.serve,
+                    },
+                    "pick": {
+                        "method": routed.config.method,
+                        "scheme": routed.config.scheme,
+                        "engine": routed.config.engine,
+                    },
+                    "rationale": routed.rationale,
+                },
+                _human_plan,
+            )
+    
+        if args.cmd == "probe":
+            from quantfit.policy.probe import probe_sensitivity
+    
+            rows = [
+                probe_sensitivity(args.model, bits=bits, n_samples=args.samples, token=args.token) for bits in args.bits
+            ]
+    
+            def _human_probe() -> None:
+                print(
+                    f"sensitivity � mean per-token RTN-KL(fp16 || quant) over packed {DEFAULT_PROBE_SEQLEN}-token "
+                    "blocks; higher = more degradation:"
+                )
+                for bits, r in zip(args.bits, rows, strict=True):
+                    s = r.spread
+                    spread = (
+                        f", range {s['kl_min']:.3f}-{s['kl_max']:.3f}, sd {s['kl_sd']:.3f}"
+                        if s["kl_sd"] is not None
+                        else ""
+                    )
+                    # The dataset can run out of usable rows before N; the mean is then over fewer,
+                    # and saying "n=40" alone would let a reader assume 40 is what was asked for.
+                    short = f" of {args.samples} requested" if r.n_samples < args.samples else ""
+                    print(f"  {bits}-bit: KL {r.mean_kl:.3f}  (n={r.n_samples}{short}{spread})")
+                revisions = {r.model_revision for r in rows}
+                if len(revisions) > 1:
+                    # Each bit-width loads the model afresh; a `main` that moved mid-run means the
+                    # rows are over different weights and must not be compared.
+                    print("model revision DIFFERS between bit-widths: " + ", ".join(sorted(map(str, revisions))))
+                else:
+                    (revision,) = revisions
+                    print(f"model revision: {revision or 'not resolved (a local path has no Hub commit)'}")
+                print("note: RTN is the worst case � LOW KL = safe bit-width; HIGH KL can over-escalate")
+                print("      (calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict.")
+    
+            return _emit(
+                args,
+                "probe",
+                0,
+                {
+                    "model": args.model,
+                    # Named for what it is since 0.15.0: before, the mean was over variable-length
+                    # rows, and those numbers are a different metric, not a noisier copy of this one.
+                    "metric": f"mean per-token RTN-KL(fp16 || quant) over packed {DEFAULT_PROBE_SEQLEN}-token blocks",
+                    "requested_samples": args.samples,
+                    # Which tokens the KL was averaged over is a measurement input; the record that
+                    # found the old tail was short rows had to reconstruct this by hand.
+                    "calibration": {
+                        "dataset": DEFAULT_SPEC.calib_dataset,
+                        "config": DEFAULT_SPEC.calib_config,
+                        "split": DEFAULT_SPEC.calib_split,
+                        "revision": DEFAULT_SPEC.calib_revision,
+                        "shuffle_seed": DEFAULT_SPEC.seed,
+                        "packing": "the quantize path's: rows concatenated, chunked into fixed-length blocks",
+                        "block_tokens": DEFAULT_PROBE_SEQLEN,
+                    },
+                    # The caveat travels WITH the numbers. A consumer that reads only the JSON
+                    # would otherwise get the measurement without the sentence that says a high
+                    # value is an upper bound, not a verdict.
+                    "interpretation": (
+                        "RTN is the worst case � LOW KL = safe bit-width; HIGH KL can over-escalate "
+                        "(calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict."
+                    ),
+                    "by_bits": [
+                        {
+                            "bits": bits,
+                            "mean_kl": r.mean_kl,
+                            "n_samples": r.n_samples,
+                            **r.spread,
+                            "per_sample_kl": list(r.per_sample_kl),
+                            # Per row: each bit-width is its own load, and `main` can move between.
+                            "model_revision": r.model_revision,
+                        }
+                        for bits, r in zip(args.bits, rows, strict=True)
+                    ],
+                },
+                _human_probe,
+            )
+    
+        if args.cmd == "verify":
+            from quantfit.verify import verify
+    
+            ok, msg = verify(args.model)
+            code = 0 if ok else 3  # 3 = the smoke-test verdict; 2 stays operational-error
+            return _emit(
+                args,
+                "verify",
+                code,
+                {"path": args.model, "passed": ok, "message": msg},
+                lambda: print(("PASS: " if ok else "FAIL: ") + msg),
+            )
+    
+        if args.cmd == "inspect-run":
+            import contextlib
+            import tempfile
+            from pathlib import Path
+    
+            from quantfit.inspect_task import qsr_eval
+    
+            if not args.baseline or not args.quant:
+                raise RuntimeError("inspect-run needs --baseline and --quant HF specs")
+            if not args.baseline_revision or not args.quant_revision:
+                raise RuntimeError("inspect-run needs both immutable --baseline-revision and --quant-revision")
+            # Temporary logs disappear even on failure. Explicit logs are local-only
+            # captures; stdout must remain exactly one JSON envelope.
+            with contextlib.ExitStack() as stack:
+                log_dir = args.log_dir or stack.enter_context(
+                    tempfile.TemporaryDirectory(prefix="quantfit-inspect-capture-")
+                )
+                if args.log_dir:
+                    print(
+                        "Inspect logs contain probe/completion text: local-only; never commit or attach them.",
+                        file=sys.stderr,
+                    )
+                with contextlib.redirect_stdout(sys.stderr):
+                    run = qsr_eval(
+                        args.baseline,
+                        args.quant,
+                        token=args.token,
+                        max_new_tokens=args.max_new_tokens,
+                        hf_revisions=(args.baseline_revision, args.quant_revision),
+                        log_dir=log_dir,
+                        display="none",
+                        max_samples=1,
+                    )
+                    if run.observed_arms is None:
+                        raise RuntimeError("Inspect did not return actual loaded arm observations")
+                    if args.report:
+                        Path(args.report).parent.mkdir(parents=True, exist_ok=True)
+                        run.write_report(args.report, *run.observed_arms, args.max_new_tokens)
+                code = 3 if run.drift.regression_detected else 4 if run.drift.unmeasurable_axes else 0
+                return _emit(
+                    args,
+                    "inspect-run",
+                    code,
+                    {
+                        "regression_detected": run.drift.regression_detected,
+                        "unmeasurable_axes": list(run.drift.unmeasurable_axes),
+                        "summary": run.drift.summary(),
+                        "report_path": args.report,
+                        "log_dir": args.log_dir,
+                        "observed": True,
+                    },
+                    lambda: print(run.drift.summary()),
+                )
+    
+        if args.cmd == "verify-safety":
+            from quantfit.safety.verify import verify_safety
+    
+            if args.demo:
+                from quantfit.safety.demo import DEMO_NOTE, demo_drift, demo_summary
+    
+                # A demonstration must not be able to leave an artifact a reader could mistake
+                # for a measurement, so the flags that write one are refused rather than ignored.
+                for flag, value in (
+                    ("--report", args.report),
+                    ("--capture", args.capture),
+                    ("--junit", args.junit),
+                    ("--baseline-cache", args.baseline_cache),
+                ):
+                    if value:
+                        raise RuntimeError(
+                            f"--demo cannot be combined with {flag}: the demo measures nothing, and an "
+                            "artifact it wrote would be indistinguishable from a real run's"
+                        )
+                demo = demo_drift()
+                # Exit 0 regardless of what the fixture shows. The fixture DOES contain a
+                # regression � a no-detection demo would teach the output shape but not the
+                # shape of a finding � but exit 3 is a verdict about a model, and no model ran.
+                return _emit(
+                    args,
+                    "verify-safety",
+                    0,
+                    {
+                        "demo": True,
+                        "measured": False,
+                        "note": DEMO_NOTE,
+                        "regression_detected": demo.regression_detected,
+                        "unmeasurable_axes": list(demo.unmeasurable_axes),
+                        "summary": demo_summary(demo),
+                    },
+                    lambda: print(demo_summary(demo)),
+                )
+    
+            if not args.baseline or not args.quant:
+                raise RuntimeError(
+                    "verify-safety needs --baseline and --quant. For the report shape without a model, "
+                    "run `quantfit verify-safety --demo`."
+                )
+    
+            drift = verify_safety(
+                args.baseline,
+                args.quant,
+                token=args.token,
+                max_new_tokens=args.max_new_tokens,
+                report_path=args.report,
+                capture_path=args.capture,
+                baseline_cache_dir=args.baseline_cache,
+            )
+            # Exit codes are the CI contract; they must not collide with 2 (operational
+            # failure, from main's handler) or an unmeasured run would read as a verdict.
+            if drift.regression_detected:
+                code = 3
+            elif drift.unmeasurable_axes:
+                code = 4  # zero at-risk pairs on an axis: nothing was measured, not a pass
+            else:
+                code = 0
+    
+            if args.junit:
+                from pathlib import Path
+    
+                from quantfit.junit import drift_to_junit
+    
+                Path(args.junit).write_text(
+                    drift_to_junit(drift, baseline=args.baseline, quant=args.quant),
+                    encoding="utf-8",
+                )
+    
+            def _human_vs() -> None:
+                print(drift.summary())  # aggregates only � never echoes raw prompts/completions
+                if args.report:
+                    print(f"report -> {args.report}")
+                if args.junit:
+                    print(f"junit -> {args.junit}")
+    
+            return _emit(
+                args,
+                "verify-safety",
+                code,
+                {
+                    # The schema-v2 report is the artifact of record; the envelope carries the
+                    # same aggregates so a caller need not write a file to read a verdict. Both
+                    # are aggregates only � no probe text crosses this boundary either way.
+                    "regression_detected": drift.regression_detected,
+                    "unmeasurable_axes": list(drift.unmeasurable_axes),
+                    "summary": drift.summary(),
+                    "report_path": args.report,
+                    "capture_path": args.capture,
+                    "junit_path": args.junit,
+                },
+                _human_vs,
+            )
+    
+        if args.cmd == "screen":
+            from quantfit.screen import STATUS_REGRESSION, STATUS_UNMEASURABLE, run_screen
+    
+            summary = run_screen(
+                args.targets,
+                args.out,
+                token=args.token,
+                max_new_tokens=args.max_new_tokens,
+                capture_dir=args.capture,
+                resume=args.resume,
+                attempts=args.attempts,
+            )
+    
+            if args.junit:
+                from pathlib import Path
+    
+                from quantfit.junit import screen_to_junit
+    
+                Path(args.junit).write_text(screen_to_junit(summary), encoding="utf-8")
+    
+            def _human_screen() -> None:
+                for stratum, agg in sorted(summary["by_stratum"].items()):
+                    print(
+                        f"{stratum}: {agg['n_completed']}/{agg['n_targets']} completed, "
+                        f"{agg['n_operational_errors']} errors"
+                    )
+                    for axis in ("refusal_robustness", "over_refusal"):
+                        a = agg[axis]
+                        lo, hi = a["prevalence_bound_wilson95"]
+                        print(
+                            f"  {axis}: {a['n_regressed']}/{a['n_measured']} flagged "
+                            f"(95% CI {lo * 100:.1f}-{hi * 100:.1f}%)"
+                        )
+                        # BOTH caveats, not just `conditionality`. 0.12.3 added
+                        # `resolution_caveat` to the JSON and this line kept printing only
+                        # `conditionality` -- so on a PASSED control (which clears
+                        # conditionality and nothing else) the terminal printed a bare,
+                        # unqualified-looking bound. That is the exact failure 0.12.3 was
+                        # written to close, still live on the surface a human actually reads.
+                        #
+                        # Indexed, not `.get`: `run_screen` always emits the key, and a
+                        # silently omitted caveat is a worse outcome here than a KeyError.
+                        for caveat in (a["conditionality"], a["resolution_caveat"]):
+                            if caveat:
+                                print(f"      [{caveat}]")
+                print(f"summary -> {args.out}/screen-summary.json")
+    
+            statuses = {row["status"] for row in summary["rows"]}
+            axes = [a for agg in summary["by_stratum"].values() for a in (agg["refusal_robustness"], agg["over_refusal"])]
+            # Same contract as verify-safety: a flagged regression outranks unmeasured.
+            if STATUS_REGRESSION in statuses:
+                code = 3
+            elif STATUS_UNMEASURABLE in statuses or any(a["n_measured"] == 0 for a in axes):
+                code = 4  # an axis nothing was measured on is not a clean screen
+            else:
+                code = 0
+            return _emit(
+                args,
+                "screen",
+                code,
+                {**summary, "summary_path": f"{args.out}/screen-summary.json", "junit_path": args.junit},
+                _human_screen,
+            )
+    
+        if args.cmd == "emit":
+            from quantfit.modelcard import model_card_fragment
+    
+>           fragment = model_card_fragment(args.report, calibration_report=args.calibration_report)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: test_emit_model_card_prints_the_fragment.<locals>.<lambda>() got an unexpected keyword argument 'calibration_report'
+
+quantfit\cli.py:848: TypeError
+______________ test_emit_refuses_wrong_schema_report_with_exit_2 ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001785C4B6450>
+
+    def test_emit_refuses_wrong_schema_report_with_exit_2(monkeypatch):
+        # �5.7's wrong-schema leg of the exit-2 contract, exercised through the CLI.
+        import quantfit.modelcard as mc
+        from quantfit.safety.report import ReportError
+    
+        def _refuse(path):
+            raise ReportError(f"report {path} has schema_version 1; this quantfit reads 2")
+    
+        monkeypatch.setattr(mc, "model_card_fragment", _refuse)
+>       assert main(["emit", "model-card", "--report", "old.json"]) == 2
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cli.py:383: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\cli.py:1096: in main
+    return _dispatch(args)
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+args = Namespace(cmd='emit', what='model-card', report='old.json', calibration_report=None, json=False)
+
+    def _dispatch(args: argparse.Namespace) -> int:
+        if args.cmd == "check":
+            from quantfit.fit import capacity_plan
+    
+            cap = capacity_plan(args.model, token=args.token)
+            code = 0 if cap.fits else 3  # 3 = the doesn't-fit verdict; 2 stays operational-error
+            return _emit(
+                args,
+                "check",
+                code,
+                {
+                    "model_id": cap.model_id,
+                    "fits": cap.fits,
+                    "mode": cap.mode,
+                    "limit": cap.limit or None,
+                    "bytes": {
+                        "fp16": cap.fp16_bytes,
+                        "gpu_free": cap.gpu_free,
+                        "ram_available": cap.ram_available,
+                        "disk_free": cap.disk_free,
+                        "disk_need": cap.disk_need,
+                    },
+                    "reason": cap.reason(),
+                },
+                lambda: print(cap.reason()),
+            )
+    
+        if args.cmd == "list":
+            from quantfit.registry import METHODS, SCHEMES, catalog
+    
+            return _emit(
+                args,
+                "list",
+                0,
+                {
+                    "methods": [
+                        {
+                            "name": m.name,
+                            "backend": m.backend,
+                            "default_scheme": m.default_scheme,
+                            "needs_calibration": m.needs_calibration,
+                            "summary": m.summary,
+                        }
+                        for m in METHODS.values()
+                    ],
+                    "schemes": list(SCHEMES),
+                },
+                lambda: print(catalog()),
+            )
+    
+        if args.cmd == "plan":
+            from quantfit.engines.base import Budget
+            from quantfit.engines.compressed_tensors import CompressedTensorsEngine
+            from quantfit.engines.gguf import GgufEngine
+            from quantfit.policy.route import route
+            from quantfit.policy.target import detect_target
+    
+            target = detect_target()
+            routed = route(args.model, target, Budget(prefer=args.prefer), [CompressedTensorsEngine(), GgufEngine()])
+    
+            def _human_plan() -> None:
+                print(f"target: {target.device}/{target.gpu_arch or '-'} serve={target.serve}")
+                print(f"pick:   {routed.config.method} {routed.config.scheme}  [{routed.config.engine}]")
+                print(f"why:    {routed.rationale}")
+    
+            return _emit(
+                args,
+                "plan",
+                0,
+                {
+                    "target": {
+                        "device": target.device,
+                        "gpu_arch": target.gpu_arch,
+                        "vram_bytes": target.vram_bytes,
+                        "serve": target.serve,
+                    },
+                    "pick": {
+                        "method": routed.config.method,
+                        "scheme": routed.config.scheme,
+                        "engine": routed.config.engine,
+                    },
+                    "rationale": routed.rationale,
+                },
+                _human_plan,
+            )
+    
+        if args.cmd == "probe":
+            from quantfit.policy.probe import probe_sensitivity
+    
+            rows = [
+                probe_sensitivity(args.model, bits=bits, n_samples=args.samples, token=args.token) for bits in args.bits
+            ]
+    
+            def _human_probe() -> None:
+                print(
+                    f"sensitivity � mean per-token RTN-KL(fp16 || quant) over packed {DEFAULT_PROBE_SEQLEN}-token "
+                    "blocks; higher = more degradation:"
+                )
+                for bits, r in zip(args.bits, rows, strict=True):
+                    s = r.spread
+                    spread = (
+                        f", range {s['kl_min']:.3f}-{s['kl_max']:.3f}, sd {s['kl_sd']:.3f}"
+                        if s["kl_sd"] is not None
+                        else ""
+                    )
+                    # The dataset can run out of usable rows before N; the mean is then over fewer,
+                    # and saying "n=40" alone would let a reader assume 40 is what was asked for.
+                    short = f" of {args.samples} requested" if r.n_samples < args.samples else ""
+                    print(f"  {bits}-bit: KL {r.mean_kl:.3f}  (n={r.n_samples}{short}{spread})")
+                revisions = {r.model_revision for r in rows}
+                if len(revisions) > 1:
+                    # Each bit-width loads the model afresh; a `main` that moved mid-run means the
+                    # rows are over different weights and must not be compared.
+                    print("model revision DIFFERS between bit-widths: " + ", ".join(sorted(map(str, revisions))))
+                else:
+                    (revision,) = revisions
+                    print(f"model revision: {revision or 'not resolved (a local path has no Hub commit)'}")
+                print("note: RTN is the worst case � LOW KL = safe bit-width; HIGH KL can over-escalate")
+                print("      (calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict.")
+    
+            return _emit(
+                args,
+                "probe",
+                0,
+                {
+                    "model": args.model,
+                    # Named for what it is since 0.15.0: before, the mean was over variable-length
+                    # rows, and those numbers are a different metric, not a noisier copy of this one.
+                    "metric": f"mean per-token RTN-KL(fp16 || quant) over packed {DEFAULT_PROBE_SEQLEN}-token blocks",
+                    "requested_samples": args.samples,
+                    # Which tokens the KL was averaged over is a measurement input; the record that
+                    # found the old tail was short rows had to reconstruct this by hand.
+                    "calibration": {
+                        "dataset": DEFAULT_SPEC.calib_dataset,
+                        "config": DEFAULT_SPEC.calib_config,
+                        "split": DEFAULT_SPEC.calib_split,
+                        "revision": DEFAULT_SPEC.calib_revision,
+                        "shuffle_seed": DEFAULT_SPEC.seed,
+                        "packing": "the quantize path's: rows concatenated, chunked into fixed-length blocks",
+                        "block_tokens": DEFAULT_PROBE_SEQLEN,
+                    },
+                    # The caveat travels WITH the numbers. A consumer that reads only the JSON
+                    # would otherwise get the measurement without the sentence that says a high
+                    # value is an upper bound, not a verdict.
+                    "interpretation": (
+                        "RTN is the worst case � LOW KL = safe bit-width; HIGH KL can over-escalate "
+                        "(calibrated AWQ/GPTQ may still be fine). Read it as sensitivity, not a verdict."
+                    ),
+                    "by_bits": [
+                        {
+                            "bits": bits,
+                            "mean_kl": r.mean_kl,
+                            "n_samples": r.n_samples,
+                            **r.spread,
+                            "per_sample_kl": list(r.per_sample_kl),
+                            # Per row: each bit-width is its own load, and `main` can move between.
+                            "model_revision": r.model_revision,
+                        }
+                        for bits, r in zip(args.bits, rows, strict=True)
+                    ],
+                },
+                _human_probe,
+            )
+    
+        if args.cmd == "verify":
+            from quantfit.verify import verify
+    
+            ok, msg = verify(args.model)
+            code = 0 if ok else 3  # 3 = the smoke-test verdict; 2 stays operational-error
+            return _emit(
+                args,
+                "verify",
+                code,
+                {"path": args.model, "passed": ok, "message": msg},
+                lambda: print(("PASS: " if ok else "FAIL: ") + msg),
+            )
+    
+        if args.cmd == "inspect-run":
+            import contextlib
+            import tempfile
+            from pathlib import Path
+    
+            from quantfit.inspect_task import qsr_eval
+    
+            if not args.baseline or not args.quant:
+                raise RuntimeError("inspect-run needs --baseline and --quant HF specs")
+            if not args.baseline_revision or not args.quant_revision:
+                raise RuntimeError("inspect-run needs both immutable --baseline-revision and --quant-revision")
+            # Temporary logs disappear even on failure. Explicit logs are local-only
+            # captures; stdout must remain exactly one JSON envelope.
+            with contextlib.ExitStack() as stack:
+                log_dir = args.log_dir or stack.enter_context(
+                    tempfile.TemporaryDirectory(prefix="quantfit-inspect-capture-")
+                )
+                if args.log_dir:
+                    print(
+                        "Inspect logs contain probe/completion text: local-only; never commit or attach them.",
+                        file=sys.stderr,
+                    )
+                with contextlib.redirect_stdout(sys.stderr):
+                    run = qsr_eval(
+                        args.baseline,
+                        args.quant,
+                        token=args.token,
+                        max_new_tokens=args.max_new_tokens,
+                        hf_revisions=(args.baseline_revision, args.quant_revision),
+                        log_dir=log_dir,
+                        display="none",
+                        max_samples=1,
+                    )
+                    if run.observed_arms is None:
+                        raise RuntimeError("Inspect did not return actual loaded arm observations")
+                    if args.report:
+                        Path(args.report).parent.mkdir(parents=True, exist_ok=True)
+                        run.write_report(args.report, *run.observed_arms, args.max_new_tokens)
+                code = 3 if run.drift.regression_detected else 4 if run.drift.unmeasurable_axes else 0
+                return _emit(
+                    args,
+                    "inspect-run",
+                    code,
+                    {
+                        "regression_detected": run.drift.regression_detected,
+                        "unmeasurable_axes": list(run.drift.unmeasurable_axes),
+                        "summary": run.drift.summary(),
+                        "report_path": args.report,
+                        "log_dir": args.log_dir,
+                        "observed": True,
+                    },
+                    lambda: print(run.drift.summary()),
+                )
+    
+        if args.cmd == "verify-safety":
+            from quantfit.safety.verify import verify_safety
+    
+            if args.demo:
+                from quantfit.safety.demo import DEMO_NOTE, demo_drift, demo_summary
+    
+                # A demonstration must not be able to leave an artifact a reader could mistake
+                # for a measurement, so the flags that write one are refused rather than ignored.
+                for flag, value in (
+                    ("--report", args.report),
+                    ("--capture", args.capture),
+                    ("--junit", args.junit),
+                    ("--baseline-cache", args.baseline_cache),
+                ):
+                    if value:
+                        raise RuntimeError(
+                            f"--demo cannot be combined with {flag}: the demo measures nothing, and an "
+                            "artifact it wrote would be indistinguishable from a real run's"
+                        )
+                demo = demo_drift()
+                # Exit 0 regardless of what the fixture shows. The fixture DOES contain a
+                # regression � a no-detection demo would teach the output shape but not the
+                # shape of a finding � but exit 3 is a verdict about a model, and no model ran.
+                return _emit(
+                    args,
+                    "verify-safety",
+                    0,
+                    {
+                        "demo": True,
+                        "measured": False,
+                        "note": DEMO_NOTE,
+                        "regression_detected": demo.regression_detected,
+                        "unmeasurable_axes": list(demo.unmeasurable_axes),
+                        "summary": demo_summary(demo),
+                    },
+                    lambda: print(demo_summary(demo)),
+                )
+    
+            if not args.baseline or not args.quant:
+                raise RuntimeError(
+                    "verify-safety needs --baseline and --quant. For the report shape without a model, "
+                    "run `quantfit verify-safety --demo`."
+                )
+    
+            drift = verify_safety(
+                args.baseline,
+                args.quant,
+                token=args.token,
+                max_new_tokens=args.max_new_tokens,
+                report_path=args.report,
+                capture_path=args.capture,
+                baseline_cache_dir=args.baseline_cache,
+            )
+            # Exit codes are the CI contract; they must not collide with 2 (operational
+            # failure, from main's handler) or an unmeasured run would read as a verdict.
+            if drift.regression_detected:
+                code = 3
+            elif drift.unmeasurable_axes:
+                code = 4  # zero at-risk pairs on an axis: nothing was measured, not a pass
+            else:
+                code = 0
+    
+            if args.junit:
+                from pathlib import Path
+    
+                from quantfit.junit import drift_to_junit
+    
+                Path(args.junit).write_text(
+                    drift_to_junit(drift, baseline=args.baseline, quant=args.quant),
+                    encoding="utf-8",
+                )
+    
+            def _human_vs() -> None:
+                print(drift.summary())  # aggregates only � never echoes raw prompts/completions
+                if args.report:
+                    print(f"report -> {args.report}")
+                if args.junit:
+                    print(f"junit -> {args.junit}")
+    
+            return _emit(
+                args,
+                "verify-safety",
+                code,
+                {
+                    # The schema-v2 report is the artifact of record; the envelope carries the
+                    # same aggregates so a caller need not write a file to read a verdict. Both
+                    # are aggregates only � no probe text crosses this boundary either way.
+                    "regression_detected": drift.regression_detected,
+                    "unmeasurable_axes": list(drift.unmeasurable_axes),
+                    "summary": drift.summary(),
+                    "report_path": args.report,
+                    "capture_path": args.capture,
+                    "junit_path": args.junit,
+                },
+                _human_vs,
+            )
+    
+        if args.cmd == "screen":
+            from quantfit.screen import STATUS_REGRESSION, STATUS_UNMEASURABLE, run_screen
+    
+            summary = run_screen(
+                args.targets,
+                args.out,
+                token=args.token,
+                max_new_tokens=args.max_new_tokens,
+                capture_dir=args.capture,
+                resume=args.resume,
+                attempts=args.attempts,
+            )
+    
+            if args.junit:
+                from pathlib import Path
+    
+                from quantfit.junit import screen_to_junit
+    
+                Path(args.junit).write_text(screen_to_junit(summary), encoding="utf-8")
+    
+            def _human_screen() -> None:
+                for stratum, agg in sorted(summary["by_stratum"].items()):
+                    print(
+                        f"{stratum}: {agg['n_completed']}/{agg['n_targets']} completed, "
+                        f"{agg['n_operational_errors']} errors"
+                    )
+                    for axis in ("refusal_robustness", "over_refusal"):
+                        a = agg[axis]
+                        lo, hi = a["prevalence_bound_wilson95"]
+                        print(
+                            f"  {axis}: {a['n_regressed']}/{a['n_measured']} flagged "
+                            f"(95% CI {lo * 100:.1f}-{hi * 100:.1f}%)"
+                        )
+                        # BOTH caveats, not just `conditionality`. 0.12.3 added
+                        # `resolution_caveat` to the JSON and this line kept printing only
+                        # `conditionality` -- so on a PASSED control (which clears
+                        # conditionality and nothing else) the terminal printed a bare,
+                        # unqualified-looking bound. That is the exact failure 0.12.3 was
+                        # written to close, still live on the surface a human actually reads.
+                        #
+                        # Indexed, not `.get`: `run_screen` always emits the key, and a
+                        # silently omitted caveat is a worse outcome here than a KeyError.
+                        for caveat in (a["conditionality"], a["resolution_caveat"]):
+                            if caveat:
+                                print(f"      [{caveat}]")
+                print(f"summary -> {args.out}/screen-summary.json")
+    
+            statuses = {row["status"] for row in summary["rows"]}
+            axes = [a for agg in summary["by_stratum"].values() for a in (agg["refusal_robustness"], agg["over_refusal"])]
+            # Same contract as verify-safety: a flagged regression outranks unmeasured.
+            if STATUS_REGRESSION in statuses:
+                code = 3
+            elif STATUS_UNMEASURABLE in statuses or any(a["n_measured"] == 0 for a in axes):
+                code = 4  # an axis nothing was measured on is not a clean screen
+            else:
+                code = 0
+            return _emit(
+                args,
+                "screen",
+                code,
+                {**summary, "summary_path": f"{args.out}/screen-summary.json", "junit_path": args.junit},
+                _human_screen,
+            )
+    
+        if args.cmd == "emit":
+            from quantfit.modelcard import model_card_fragment
+    
+>           fragment = model_card_fragment(args.report, calibration_report=args.calibration_report)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: test_emit_refuses_wrong_schema_report_with_exit_2.<locals>._refuse() got an unexpected keyword argument 'calibration_report'
+
+quantfit\cli.py:848: TypeError
+________________ test_rtn_reconstruction_obeys_half_step_bound ________________
+
+    @settings(max_examples=50, derandomize=True, deadline=None)
+>   @given(st.integers(1, 8), st.integers(1, 64), st.integers(2, 8), st.integers(1, 32))
+                   ^^^
+
+tests\test_numerical_properties.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+rows = 1, cols = 1, bits = 2, group = 1
+
+    @settings(max_examples=50, derandomize=True, deadline=None)
+    @given(st.integers(1, 8), st.integers(1, 64), st.integers(2, 8), st.integers(1, 32))
+    def test_rtn_reconstruction_obeys_half_step_bound(rows, cols, bits, group):
+>       import torch
+E       ModuleNotFoundError: No module named 'torch'
+E       Falsifying example: test_rtn_reconstruction_obeys_half_step_bound(
+E           # The test always failed when commented parts were varied together.
+E           rows=1,  # or any other generated value
+E           cols=1,  # or any other generated value
+E           bits=2,  # or any other generated value
+E           group=1,  # or any other generated value
+E       )
+
+tests\test_numerical_properties.py:38: ModuleNotFoundError
+=========================== short test summary info ===========================
+FAILED tests/test_cli.py::test_emit_model_card_prints_the_fragment - TypeErro...
+FAILED tests/test_cli.py::test_emit_refuses_wrong_schema_report_with_exit_2
+FAILED tests/test_numerical_properties.py::test_rtn_reconstruction_obeys_half_step_bound
+3 failed, 1631 passed, 8 skipped in 141.95s (0:02:21)

@@ -1,0 +1,10 @@
+usage: quantfit emit [-h] --report PATH [--json] {model-card}
+
+positional arguments:
+  {model-card}   what to emit
+
+options:
+  -h, --help     show this help message and exit
+  --report PATH  a schema-v2 drift report written by --report
+  --json         emit one JSON document on stdout instead of prose (notices go
+                 to stderr)

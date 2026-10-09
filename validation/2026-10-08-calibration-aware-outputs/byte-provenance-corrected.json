@@ -1,0 +1,151 @@
+{
+  "attribute_scope": "validation/2026-10-08-calibration-aware-outputs/**/*.json -text",
+  "emitted_hash_checks": {
+    "actions": [
+      {
+        "calibration_input": "calibration.json",
+        "case": "pre-run",
+        "emitted_sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+        "matches": true
+      },
+      {
+        "calibration_input": "action-calibration.json",
+        "case": "observed",
+        "emitted_sha256": "74fe3227b0a61859819cc350c0ee5d4a90ab696477b7b76e1bfd0c0ec7bad788",
+        "matches": true
+      }
+    ],
+    "model_card": true,
+    "resolution": true,
+    "wide_action_report_json_matches_observed": true,
+    "wide_action_report_raw_bytes_match": true,
+    "wide_action_report_raw_sha256": "5720a3c878847f5c7c8daa1984d6891507ddad01b9b9c922eab0c3a1ac8afde7"
+  },
+  "implementation_changed": false,
+  "implementation_head": "8bdb0a6dd4cf54860f02c73e7891622f4edeb55e",
+  "input_bytes_or_emitted_hashes_regenerated": false,
+  "input_sha256": {
+    "action-calibration.json": "74fe3227b0a61859819cc350c0ee5d4a90ab696477b7b76e1bfd0c0ec7bad788",
+    "action-drift.json": "5720a3c878847f5c7c8daa1984d6891507ddad01b9b9c922eab0c3a1ac8afde7",
+    "calibration.json": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+    "drift.json": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa"
+  },
+  "json_byte_checks": [
+    {
+      "bytes": 3877,
+      "index_sha256": "74fe3227b0a61859819cc350c0ee5d4a90ab696477b7b76e1bfd0c0ec7bad788",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/action-calibration.json",
+      "working_sha256": "74fe3227b0a61859819cc350c0ee5d4a90ab696477b7b76e1bfd0c0ec7bad788"
+    },
+    {
+      "bytes": 2650,
+      "index_sha256": "5720a3c878847f5c7c8daa1984d6891507ddad01b9b9c922eab0c3a1ac8afde7",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/action-drift.json",
+      "working_sha256": "5720a3c878847f5c7c8daa1984d6891507ddad01b9b9c922eab0c3a1ac8afde7"
+    },
+    {
+      "bytes": 20780,
+      "index_sha256": "c8c6a89416bf2b3604c35544953472a61f0049df5cc3666a6ded50880c7d30c3",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/audit.json",
+      "working_sha256": "c8c6a89416bf2b3604c35544953472a61f0049df5cc3666a6ded50880c7d30c3"
+    },
+    {
+      "bytes": 20780,
+      "index_sha256": "171eed5eaf0925463efada14d351b23c8a00b97c7712ef01d1bf1eea71b1e9a1",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/byte-correction-audit.json",
+      "working_sha256": "171eed5eaf0925463efada14d351b23c8a00b97c7712ef01d1bf1eea71b1e9a1"
+    },
+    {
+      "bytes": 1855,
+      "index_sha256": "5f632dcedd207c323bd332908dc1ff33f9174cf0cb0f922a95b42ed5bb506d09",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/byte-provenance-failure.json",
+      "working_sha256": "5f632dcedd207c323bd332908dc1ff33f9174cf0cb0f922a95b42ed5bb506d09"
+    },
+    {
+      "bytes": 3842,
+      "index_sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/calibration.json",
+      "working_sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014"
+    },
+    {
+      "bytes": 2707,
+      "index_sha256": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/drift.json",
+      "working_sha256": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa"
+    },
+    {
+      "bytes": 2650,
+      "index_sha256": "5720a3c878847f5c7c8daa1984d6891507ddad01b9b9c922eab0c3a1ac8afde7",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/observed/drift.json",
+      "working_sha256": "5720a3c878847f5c7c8daa1984d6891507ddad01b9b9c922eab0c3a1ac8afde7"
+    },
+    {
+      "bytes": 13918,
+      "index_sha256": "cb938814bdf87cad7aa9033b12993ce1462d5bd16e9bc24159ed9bd9d81f68de",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/observed/gate.json",
+      "working_sha256": "cb938814bdf87cad7aa9033b12993ce1462d5bd16e9bc24159ed9bd9d81f68de"
+    },
+    {
+      "bytes": 578,
+      "index_sha256": "f6e66c35ef388b674ce6c343ddf6af0e955540c87cb969eda0d37b54e59a9b86",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/observed/outputs.json",
+      "working_sha256": "f6e66c35ef388b674ce6c343ddf6af0e955540c87cb969eda0d37b54e59a9b86"
+    },
+    {
+      "bytes": 11945,
+      "index_sha256": "63626d2ac42a87a9f081ee666abecd4e3e40dabe8096efa7734c07c8f62561e1",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/pre-run/gate.json",
+      "working_sha256": "63626d2ac42a87a9f081ee666abecd4e3e40dabe8096efa7734c07c8f62561e1"
+    },
+    {
+      "bytes": 610,
+      "index_sha256": "db9f94b374613a677cada5ab38f61b8f04257a737c18d52d0642db05df005e1c",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/pre-run/outputs.json",
+      "working_sha256": "db9f94b374613a677cada5ab38f61b8f04257a737c18d52d0642db05df005e1c"
+    },
+    {
+      "bytes": 2271,
+      "index_sha256": "042f927f3232f49befdaa8403084548aef6e9638211433c8c73a52c2929559f7",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/proof.json",
+      "working_sha256": "042f927f3232f49befdaa8403084548aef6e9638211433c8c73a52c2929559f7"
+    },
+    {
+      "bytes": 5076,
+      "index_sha256": "fd0570fafcdd297363f589fdd3f0337fa7a0e091d865a6ca186b539600815b01",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/resolution.json",
+      "working_sha256": "fd0570fafcdd297363f589fdd3f0337fa7a0e091d865a6ca186b539600815b01"
+    },
+    {
+      "bytes": 986,
+      "index_sha256": "914cc877769d9b053c153a822114c669d15150263719323c043b4a966fa7f586",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/root-public-preflight.json",
+      "working_sha256": "914cc877769d9b053c153a822114c669d15150263719323c043b4a966fa7f586"
+    },
+    {
+      "bytes": 4496,
+      "index_sha256": "dca230a03af0d4b2ce9bdf85af5ca9293beb48fda657bcaa8d41335e6da2ae92",
+      "matches": true,
+      "path": "validation/2026-10-08-calibration-aware-outputs/run.json",
+      "working_sha256": "dca230a03af0d4b2ce9bdf85af5ca9293beb48fda657bcaa8d41335e6da2ae92"
+    }
+  ],
+  "old_archives_renormalized": false,
+  "previous_evidence_head": "12e25521295251141cfb19d7b94908a7f94fbc92",
+  "status": "PASS",
+  "verification_target": "Git index immediately before correction commit; final handback independently verifies all committed JSON blobs"
+}
