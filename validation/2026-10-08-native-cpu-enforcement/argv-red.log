@@ -1,0 +1,47 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_____________________ test_generate_completions_hermetic ______________________
+
+stub_server = 63578
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1125/test_generate_completions_herm0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E53A99DC70>
+
+    def test_generate_completions_hermetic(stub_server, tmp_path, monkeypatch):
+        # Full arm flow with a fake binary + fake process, real HTTP against the stub:
+        # command shape, --jinja policy, and the ArmRun provenance all in one pass.
+        fake_bin = tmp_path / "llama-server.exe"
+        fake_bin.write_bytes(b"fake server binary")
+        spawned = {}
+    
+        class _FakeServerProc(_FakeProc):
+            def __init__(self, cmd, **kwargs):
+                super().__init__()
+                spawned["cmd"] = cmd
+    
+            def terminate(self):
+                self.returncode = 0
+    
+            def wait(self, timeout=None):
+                return 0
+    
+        monkeypatch.setattr(ga, "llama_server_bin", lambda: fake_bin)
+        monkeypatch.setattr(ga, "_free_port", lambda: stub_server)
+        monkeypatch.setattr(ga.subprocess, "Popen", _FakeServerProc)
+    
+        path = _write_gguf(tmp_path / "m.gguf", arch="llama", file_type=F16, chat_template="{{ m }}")
+        arm = ga._resolve(str(path), token=None)
+        completions, run = ga.generate_completions(arm, ["p1", "p2"], max_new_tokens=8)
+    
+        assert completions == ["chat:p1", "chat:p2"]
+        assert "--jinja" in spawned["cmd"] and "--parallel" in spawned["cmd"]
+        assert run.resolved_dtype == "F16" and run.artifact_sha256 == arm.sha256
+        assert run.engine["name"] == "llama.cpp" and run.engine["device"] == "cpu"
+        command = spawned["cmd"]
+>       assert command[command.index("--device") + 1] == "none"
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: '--device' is not in list
+
+tests\test_gguf_arm.py:279: ValueError
+=========================== short test summary info ===========================
+FAILED tests/test_gguf_arm.py::test_generate_completions_hermetic - ValueErro...
+1 failed, 27 deselected in 1.42s

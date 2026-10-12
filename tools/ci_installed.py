@@ -30,6 +30,32 @@ def main() -> None:
         subprocess.run([sys.executable, "-c", code], cwd=sandbox, env=env, check=True)
         for command in (["--help"], ["list"], ["verify-safety", "--demo", "--json"]):
             subprocess.run([sys.executable, "-m", "quantfit.cli", *command], cwd=sandbox, env=env, check=True)
+        # Installed capability/early refusal only. Actual installed GGUF generation and
+        # three-run T0 will be qualified by the hosted reference campaign against
+        # the recorded cold_run/gguf_arm/verify source hashes; these cases load no models.
+        for command in (
+            ["cold-run", "--baseline", "unsupported-HF", "--quant", "unsupported-HF", "--out", "unused-cold"],
+            [
+                "verify-safety",
+                "--baseline",
+                "unsupported-HF",
+                "--quant",
+                "unsupported-HF",
+                "--baseline-revision",
+                "a" * 40,
+            ],
+        ):
+            refused = subprocess.run(
+                [sys.executable, "-m", "quantfit.cli", *command, "--json"],
+                cwd=sandbox,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            assert refused.returncode == 2
+            assert json.loads(refused.stdout)["exit_code"] == 2
+        assert not (sandbox / "unused-cold").exists()
         fixture = checkout / "validation/2026-10-05-calibrated-resolution"
         output = sandbox / "resolution.json"
         completed = subprocess.run(

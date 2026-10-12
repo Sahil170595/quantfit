@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import socket
 import subprocess
 import tempfile
@@ -47,6 +48,10 @@ if TYPE_CHECKING:  # runtime import stays lazy
 
 HF_REF_PREFIX = "hf:"
 UNQUANTIZED_FILE_TYPES = ("F16", "BF16", "F32")
+# Pinned b9817 defaults to GPU auto/offloaded host ops. Both native arms must
+# explicitly disable them, including when QUANTFIT_LLAMACPP names a GPU build.
+CPU_OFFLOAD_CONTROLS = {"offload_device": "none", "n_gpu_layers": 0, "op_offload": False}
+CPU_OFFLOAD_ARGV = ("--device", "none", "--n-gpu-layers", "0", "--no-op-offload")
 
 _CTX_SIZE = 4096
 _READY_TIMEOUT_S = 900  # a 16 GB F16 load from disk can legitimately take minutes
@@ -73,10 +78,23 @@ class ResolvedGguf:
     name: str | None  # general.name
 
 
-def resolve_pair(baseline_ref: str, quant_ref: str, token: str | None) -> tuple[ResolvedGguf, ResolvedGguf]:
+def resolve_pair(
+    baseline_ref: str,
+    quant_ref: str,
+    token: str | None,
+    *,
+    baseline_revision: str | None = None,
+    quant_revision: str | None = None,
+) -> tuple[ResolvedGguf, ResolvedGguf]:
     """Resolve both arms and enforce the pairing mandates before any generation."""
-    baseline = _resolve(baseline_ref, token)
-    quant = _resolve(quant_ref, token)
+    validate_revision(baseline_ref, baseline_revision)
+    validate_revision(quant_ref, quant_revision)
+    baseline = (
+        _resolve(baseline_ref, token, revision=baseline_revision)
+        if baseline_revision
+        else _resolve(baseline_ref, token)
+    )
+    quant = _resolve(quant_ref, token, revision=quant_revision) if quant_revision else _resolve(quant_ref, token)
     if baseline.file_type not in UNQUANTIZED_FILE_TYPES:
         raise RuntimeError(
             f"baseline GGUF {baseline_ref} has file type {baseline.file_type} (read from its metadata); "
@@ -91,8 +109,8 @@ def resolve_pair(baseline_ref: str, quant_ref: str, token: str | None) -> tuple[
     return baseline, quant
 
 
-def _resolve(ref: str, token: str | None) -> ResolvedGguf:
-    path, revision = _fetch(ref, token)
+def _resolve(ref: str, token: str | None, *, revision: str | None = None) -> ResolvedGguf:
+    path, revision = _fetch(ref, token, revision=revision) if revision else _fetch(ref, token)
     meta = _read_meta(path)
     return ResolvedGguf(
         ref=ref,
@@ -106,8 +124,18 @@ def _resolve(ref: str, token: str | None) -> ResolvedGguf:
     )
 
 
-def _fetch(ref: str, token: str | None) -> tuple[Path, str | None]:
+def validate_revision(ref: str, revision: str | None) -> None:
+    """Requested pins are supported only for Hub GGUF files, never local/HF model labels."""
+    if revision is not None:
+        if not ref.startswith(HF_REF_PREFIX):
+            raise RuntimeError("immutable revision flags require a Hub GGUF ref (hf:<org>/<repo>/<file>.gguf)")
+        if not isinstance(revision, str) or not re.fullmatch(r"[0-9a-f]{40}", revision):
+            raise RuntimeError("GGUF revision must be a 40 lowercase hexadecimal immutable commit SHA")
+
+
+def _fetch(ref: str, token: str | None, *, revision: str | None = None) -> tuple[Path, str | None]:
     """A local *.gguf path as-is, or hf:<org>/<repo>/<file>.gguf via the Hub cache."""
+    validate_revision(ref, revision)
     if ref.startswith(HF_REF_PREFIX):
         rest = ref[len(HF_REF_PREFIX) :]
         parts = rest.split("/")
@@ -115,8 +143,12 @@ def _fetch(ref: str, token: str | None) -> tuple[Path, str | None]:
             raise RuntimeError(f"bad GGUF ref {ref!r}: expected hf:<org>/<repo>/<file>.gguf")
         from huggingface_hub import hf_hub_download
 
-        local = hf_hub_download("/".join(parts[:2]), "/".join(parts[2:]), token=token)
-        return Path(local), _snapshot_commit(Path(local))
+        kwargs = {"revision": revision} if revision else {}
+        local = hf_hub_download("/".join(parts[:2]), "/".join(parts[2:]), token=token, **kwargs)
+        observed = _snapshot_commit(Path(local))
+        if revision is not None and observed != revision:
+            raise RuntimeError("resolved snapshot does not match the requested immutable GGUF revision")
+        return Path(local), observed
     p = Path(ref)
     if not p.is_file():
         raise RuntimeError(f"GGUF file not found: {ref}")
@@ -127,7 +159,7 @@ def _snapshot_commit(path: Path) -> str | None:
     """The snapshot commit from the Hub cache layout (…/snapshots/<commit>/<file>)."""
     parts = path.parts
     for i, part in enumerate(parts[:-1]):
-        if part == "snapshots" and len(parts[i + 1]) == 40:
+        if part == "snapshots" and re.fullmatch(r"[0-9a-f]{40}", parts[i + 1]):
             return parts[i + 1]
     return None
 
@@ -192,6 +224,7 @@ def _identity(arm: ResolvedGguf, server: Path, threads: int) -> dict:
             "source": _binary_source(server),
             "threads": threads,
             "device": "cpu",
+            **CPU_OFFLOAD_CONTROLS,
         },
         "artifact_sha256": arm.sha256,
     }
@@ -221,6 +254,7 @@ def generate_completions(arm: ResolvedGguf, prompts: list[str], max_new_tokens: 
     proc = subprocess.Popen(
         [
             str(server),
+            *CPU_OFFLOAD_ARGV,
             "-m",
             str(arm.path),
             "--host",

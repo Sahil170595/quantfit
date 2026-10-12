@@ -1,0 +1,159 @@
+{
+  "source_commit": "e139a4708c896a03cbb259ac24571f9594b2c604",
+  "source_parents": [
+    "425bf92b96b8416caceda80bceb81744eee6243d",
+    "f684ddb0bb848b9e936718d3cd1a88a57c95ab9f"
+  ],
+  "actual_windows_head_now": "e139a4708c896a03cbb259ac24571f9594b2c604",
+  "source_files": {
+    "quantfit/cold_run.py": {
+      "consumed_working_sha256": "ee6edabd4efe7bfbce07da964117e00709555f9d70154534999a3f5d78dedb54",
+      "git_blob_sha256": "ee6edabd4efe7bfbce07da964117e00709555f9d70154534999a3f5d78dedb54",
+      "working_equals_source_git_blob": true,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/safety/gguf_arm.py": {
+      "consumed_working_sha256": "56a775e62734da89aa6ec649567ab7ed79bd89496f929ea03bdcd5f8aaea7128",
+      "git_blob_sha256": "809c8aac0bb02b528c2e0e7637d2911e89310c8d21ed59bbed3bc045419e7473",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/safety/verify.py": {
+      "consumed_working_sha256": "e1d695d8d4578decd98a4566028077a6f3886948072538745da6515822a595a0",
+      "git_blob_sha256": "2ab243ae83a5cbbc1eb726077111da29beea716ee50e48ee3c54c042cf27cf26",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/cli.py": {
+      "consumed_working_sha256": "48150a5f46ba734c0be2c4f8cbfedbba74363770eaf5353396210c46599b2c32",
+      "git_blob_sha256": "be6256f3d8fa41d9d66c268fc06d927e1035983e4512f305e92201ca508007c9",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/bundle.py": {
+      "consumed_working_sha256": "b9db58743855149b855ea64154872111d648f864ef2a5b45b83979ae139be690",
+      "git_blob_sha256": "b8ad02573d240e6d4a63bb81aa9999f97c3b918ea0697ac6d6e03a739d9b9abc",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/safety/calibration_binding.py": {
+      "consumed_working_sha256": "ce65836a824221f1eacec6b796a3aff9db4ab9ed53f58c7829ecbb3778a86b89",
+      "git_blob_sha256": "be4da238136d369297a9705279c8c987b6cd17150acac71c1202df69e99fb405",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tests/test_cold_run.py": {
+      "consumed_working_sha256": "ffb036406b9d1f8f2c5cbd74c5c3fc3361982a7a0bfe708e821bde438d3e39f1",
+      "git_blob_sha256": "ffb036406b9d1f8f2c5cbd74c5c3fc3361982a7a0bfe708e821bde438d3e39f1",
+      "working_equals_source_git_blob": true,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tests/test_gguf_arm.py": {
+      "consumed_working_sha256": "9c5e5dd8f3ff7428f747fd27d7fe9bf721d561de8f13a89badcd7b60a007f28c",
+      "git_blob_sha256": "02e83cfb422a4315f77fb0d082bfbbcd61595f01f35ade626ac1d1de7a5c45f2",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tests/test_bundle.py": {
+      "consumed_working_sha256": "d68a89ba6e12575920bcb3c57cfb7d53a81c98e2c5cc07f928e8dbb662858967",
+      "git_blob_sha256": "98e5ec35383153083d2cef58fb7833f749ac1697aa6e9ecc8ece87013599fd18",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tools/ci_cpu_acceptance.py": {
+      "consumed_working_sha256": "220ed5c1049048a09d5f5af6795f373a3f0b274dd94846102bfe1bdeeb45224e",
+      "git_blob_sha256": "9cfa7067236c8a04641f07c680df1e269407526358aadfb755c1930d15c673f8",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tools/ci_installed.py": {
+      "consumed_working_sha256": "f9cbb69527f22d7f108fed238b792e010afc12c82b53b63ae5733b87df32c56c",
+      "git_blob_sha256": "fc5f3bf81b92230289fc216bc0a6656bad056c24f8dbd3f4799b0d5ab144e299",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    ".github/workflows/validate.yml": {
+      "consumed_working_sha256": "8911b8a7ec5ca1040ad72182797b3c8a134d98d68e32767fb89ecfc84a41f825",
+      "git_blob_sha256": "8574cf26b28c0752ab8de51f0bf9c86323556f3df2537389b2b21ecfd8e1cb3b",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    }
+  },
+  "both_reviewed_parents_reachable": true,
+  "merge_conflict": "Only .gitattributes; retained all original scoped JSON rules and added this new record.",
+  "native_measurement_blobs_unchanged_from_cpu_source": [
+    "quantfit/cold_run.py",
+    "quantfit/safety/gguf_arm.py",
+    "quantfit/safety/verify.py",
+    "tools/ci_cpu_acceptance.py"
+  ],
+  "full_available_unit": {
+    "cases": 1746,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 29,
+    "passed": 1717
+  },
+  "numerical_properties_without_torch": {
+    "cases": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 2
+  },
+  "actual_wsl_combined": null,
+  "wsl_launch_failures_preserved": [
+    {
+      "artifact": "wsl.log",
+      "sha256": "e7368641aafe652c40ea22d624b0cd2ac2112625a8834d0d5ac4fa2c9dd05b5d",
+      "actual_exit": -1,
+      "test_process_started": false,
+      "decoded_error": "Failed to attach disk 'C:\\Users\\sahil\\AppData\\Local\\Packages\\CanonicalGroupLimited.Ubuntu_79rhkp1fndgsc\\LocalState\\ext4.vhdx' to WSL2: The process cannot access the file because it is being used by another process. \u0a0d\u0d00\nError code: Wsl/Service/CreateInstance/MountDisk/HCS/ERROR_SHARING_VIOLATION\u0a0d\u0d00\nIf this error was unexpected, please consider searching for existing issues or filing a new issue at https://github.com/microsoft/WSL/issues.\u0a0d\u0d00\n\u0a0d"
+    },
+    {
+      "artifact": "wsl-retry.log",
+      "sha256": "e7368641aafe652c40ea22d624b0cd2ac2112625a8834d0d5ac4fa2c9dd05b5d",
+      "actual_exit": -1,
+      "test_process_started": false,
+      "decoded_error": "Failed to attach disk 'C:\\Users\\sahil\\AppData\\Local\\Packages\\CanonicalGroupLimited.Ubuntu_79rhkp1fndgsc\\LocalState\\ext4.vhdx' to WSL2: The process cannot access the file because it is being used by another process. \u0a0d\u0d00\nError code: Wsl/Service/CreateInstance/MountDisk/HCS/ERROR_SHARING_VIOLATION\u0a0d\u0d00\nIf this error was unexpected, please consider searching for existing issues or filing a new issue at https://github.com/microsoft/WSL/issues.\u0a0d\u0d00\n\u0a0d"
+    }
+  ],
+  "combined_posix_gate": "UNRUN locally: two startup sharing violations, zero tests started. Root explicitly reassigned new combined POSIX cold-suite and real installed64/full40x3 consumer qualification to actual hosted Linux; pending publication. No more WSL launch retries, shared service shutdown, repair or disk dismount authorized/performed here.",
+  "prior_linux_evidence": "Historical b745 WSL17 is retained with unchanged native blobs; f684 bundle correction's Linux66pass1skip proves its own typed numeric path. Neither is relabelled as an actual new combined WSL run.",
+  "gates": {
+    "ruff_check": 0,
+    "ruff_exact_format": 0,
+    "mypy_exact_paths": 0,
+    "audit": 0
+  },
+  "post_record_audit": {
+    "artifact": "audit-final.json",
+    "actual_exit": 0
+  },
+  "ruff_warning": "Shared cache write Access denied warning; exact format command returned0 and104files formatted.",
+  "windows_host": {
+    "python": "3.12.13",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "ram_total_bytes": 68319571968
+  },
+  "installed_versions": {
+    "quantfit": "0.16.0",
+    "pytest": "9.0.3",
+    "ruff": "0.16.2",
+    "mypy": "1.20.2",
+    "scipy": "1.15.3",
+    "hypothesis": "6.152.5",
+    "psutil": "7.2.2",
+    "torch": "not installed",
+    "transformers": "not installed"
+  },
+  "provenance": "All combined final tests/gates consume immutable e139 source; actual working raw hashes and canonical Gitblob hashes are separately recorded, with explicit CRLF-to-LF equivalence. Prior source/CPU/bundle receipts are not relabelled or modified.",
+  "limitations": [
+    "No model execution/download or new package installation in this combined qualification.",
+    "Hosted installed cold/model execution, full Torch/coverage/mutation remain pending.",
+    "No human-label authentication, sensitivity, GPU/crosshardware or independent reproduction/GO.",
+    "QSRv1 remains unfrozen; public HF destination not created/uploaded."
+  ],
+  "lifecycle": "PRESERVE shared worktree/local ref under sequential review; approved env/prior blocked cache retained without cleanup retry. Local unit child processes completed; no model/server/task containers or new worktree/dependency copies. WSL service/disk are shared, not killed/unmounted here."
+}

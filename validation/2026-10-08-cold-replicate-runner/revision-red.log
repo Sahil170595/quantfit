@@ -1,0 +1,142 @@
+FFFFFFFFF                                                                [100%]
+================================== FAILURES ===================================
+____________ test_requested_hub_revision_is_consumed_and_observed _____________
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1119/test_requested_hub_revision_is0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002058F27D9A0>
+
+    def test_requested_hub_revision_is_consumed_and_observed(tmp_path, monkeypatch):
+        import huggingface_hub
+    
+        revision = "b" * 40
+        target = tmp_path / "snapshots" / revision / "model.gguf"
+        calls = []
+    
+        def download(repo, filename, **kwargs):
+            calls.append((repo, filename, kwargs))
+            return str(target)
+    
+        monkeypatch.setattr(huggingface_hub, "hf_hub_download", download)
+>       assert _fetch("hf:org/repo/model.gguf", None, revision=revision) == (target, revision)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: _fetch() got an unexpected keyword argument 'revision'
+
+tests\test_gguf_arm.py:86: TypeError
+_ test_requested_revision_refuses_unobserved_or_different_snapshot[cccccccccccccccccccccccccccccccccccccccc] _
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1119/test_requested_revision_refuse0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002058F862A20>
+returned = 'cccccccccccccccccccccccccccccccccccccccc'
+
+    @pytest.mark.parametrize("returned", ["c" * 40, "z" * 40, None])
+    def test_requested_revision_refuses_unobserved_or_different_snapshot(tmp_path, monkeypatch, returned):
+        import huggingface_hub
+    
+        path = tmp_path / "snapshots" / returned / "model.gguf" if returned else tmp_path / "model.gguf"
+        monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda *a, **k: str(path))
+        with pytest.raises(RuntimeError, match="resolved snapshot"):
+>           _fetch("hf:org/repo/model.gguf", None, revision="b" * 40)
+E           TypeError: _fetch() got an unexpected keyword argument 'revision'
+
+tests\test_gguf_arm.py:97: TypeError
+_ test_requested_revision_refuses_unobserved_or_different_snapshot[zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz] _
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1119/test_requested_revision_refuse1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002058F863380>
+returned = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'
+
+    @pytest.mark.parametrize("returned", ["c" * 40, "z" * 40, None])
+    def test_requested_revision_refuses_unobserved_or_different_snapshot(tmp_path, monkeypatch, returned):
+        import huggingface_hub
+    
+        path = tmp_path / "snapshots" / returned / "model.gguf" if returned else tmp_path / "model.gguf"
+        monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda *a, **k: str(path))
+        with pytest.raises(RuntimeError, match="resolved snapshot"):
+>           _fetch("hf:org/repo/model.gguf", None, revision="b" * 40)
+E           TypeError: _fetch() got an unexpected keyword argument 'revision'
+
+tests\test_gguf_arm.py:97: TypeError
+___ test_requested_revision_refuses_unobserved_or_different_snapshot[None] ____
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1119/test_requested_revision_refuse2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002058F863D10>
+returned = None
+
+    @pytest.mark.parametrize("returned", ["c" * 40, "z" * 40, None])
+    def test_requested_revision_refuses_unobserved_or_different_snapshot(tmp_path, monkeypatch, returned):
+        import huggingface_hub
+    
+        path = tmp_path / "snapshots" / returned / "model.gguf" if returned else tmp_path / "model.gguf"
+        monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda *a, **k: str(path))
+        with pytest.raises(RuntimeError, match="resolved snapshot"):
+>           _fetch("hf:org/repo/model.gguf", None, revision="b" * 40)
+E           TypeError: _fetch() got an unexpected keyword argument 'revision'
+
+tests\test_gguf_arm.py:97: TypeError
+___________ test_revision_must_be_immutable_lowercase_commit[main] ____________
+
+revision = 'main'
+
+    @pytest.mark.parametrize("revision", ["main", "b" * 39, "B" * 40, "z" * 40])
+    def test_revision_must_be_immutable_lowercase_commit(revision):
+        with pytest.raises(RuntimeError, match="40 lowercase hexadecimal"):
+>           _fetch("hf:org/repo/model.gguf", None, revision=revision)
+E           TypeError: _fetch() got an unexpected keyword argument 'revision'
+
+tests\test_gguf_arm.py:103: TypeError
+_ test_revision_must_be_immutable_lowercase_commit[bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb] _
+
+revision = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+
+    @pytest.mark.parametrize("revision", ["main", "b" * 39, "B" * 40, "z" * 40])
+    def test_revision_must_be_immutable_lowercase_commit(revision):
+        with pytest.raises(RuntimeError, match="40 lowercase hexadecimal"):
+>           _fetch("hf:org/repo/model.gguf", None, revision=revision)
+E           TypeError: _fetch() got an unexpected keyword argument 'revision'
+
+tests\test_gguf_arm.py:103: TypeError
+_ test_revision_must_be_immutable_lowercase_commit[BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB] _
+
+revision = 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
+
+    @pytest.mark.parametrize("revision", ["main", "b" * 39, "B" * 40, "z" * 40])
+    def test_revision_must_be_immutable_lowercase_commit(revision):
+        with pytest.raises(RuntimeError, match="40 lowercase hexadecimal"):
+>           _fetch("hf:org/repo/model.gguf", None, revision=revision)
+E           TypeError: _fetch() got an unexpected keyword argument 'revision'
+
+tests\test_gguf_arm.py:103: TypeError
+_ test_revision_must_be_immutable_lowercase_commit[zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz] _
+
+revision = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'
+
+    @pytest.mark.parametrize("revision", ["main", "b" * 39, "B" * 40, "z" * 40])
+    def test_revision_must_be_immutable_lowercase_commit(revision):
+        with pytest.raises(RuntimeError, match="40 lowercase hexadecimal"):
+>           _fetch("hf:org/repo/model.gguf", None, revision=revision)
+E           TypeError: _fetch() got an unexpected keyword argument 'revision'
+
+tests\test_gguf_arm.py:103: TypeError
+______________ test_local_revision_refused_before_any_probe_load ______________
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1119/test_local_revision_refused_be0')
+
+    def test_local_revision_refused_before_any_probe_load(tmp_path):
+        from quantfit.safety.verify import verify_safety
+    
+        with pytest.raises(RuntimeError, match="Hub GGUF"):
+>           _fetch(str(tmp_path / "local.gguf"), None, revision="b" * 40)
+E           TypeError: _fetch() got an unexpected keyword argument 'revision'
+
+tests\test_gguf_arm.py:110: TypeError
+=========================== short test summary info ===========================
+FAILED tests/test_gguf_arm.py::test_requested_hub_revision_is_consumed_and_observed
+FAILED tests/test_gguf_arm.py::test_requested_revision_refuses_unobserved_or_different_snapshot[cccccccccccccccccccccccccccccccccccccccc]
+FAILED tests/test_gguf_arm.py::test_requested_revision_refuses_unobserved_or_different_snapshot[zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz]
+FAILED tests/test_gguf_arm.py::test_requested_revision_refuses_unobserved_or_different_snapshot[None]
+FAILED tests/test_gguf_arm.py::test_revision_must_be_immutable_lowercase_commit[main]
+FAILED tests/test_gguf_arm.py::test_revision_must_be_immutable_lowercase_commit[bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb]
+FAILED tests/test_gguf_arm.py::test_revision_must_be_immutable_lowercase_commit[BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB]
+FAILED tests/test_gguf_arm.py::test_revision_must_be_immutable_lowercase_commit[zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz]
+FAILED tests/test_gguf_arm.py::test_local_revision_refused_before_any_probe_load
+9 failed, 19 deselected in 1.18s

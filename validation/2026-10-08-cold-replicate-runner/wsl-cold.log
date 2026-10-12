@@ -1,0 +1,59 @@
+.FF....                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_actual_three_fresh_children_preserve_negative_and_operational[regression-0-True] _
+
+tmp_path = PosixPath('/tmp/pytest-of-sahil_1/pytest-187/test_actual_three_fresh_childr0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x70598bd89af0>
+mode = 'regression', code = 0, t0 = True
+
+    @pytest.mark.skipif(os.name != "posix", reason="cold-run requires POSIX process-session containment")
+    @pytest.mark.parametrize(
+        "mode,code,t0",
+        [
+            ("regression", 0, True),
+            ("disagreement", 3, False),
+            ("operational", 2, None),
+            ("raw", 2, None),
+            ("cache", 2, None),
+        ],
+    )
+    def test_actual_three_fresh_children_preserve_negative_and_operational(tmp_path, monkeypatch, mode, code, t0):
+        from quantfit.cold_run import cold_run
+    
+        synthetic_children(tmp_path, monkeypatch, mode)
+        result = cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+>       assert result["exit_code"] == code
+E       assert 2 == 0
+
+tests/test_cold_run.py:88: AssertionError
+_ test_actual_three_fresh_children_preserve_negative_and_operational[disagreement-3-False] _
+
+tmp_path = PosixPath('/tmp/pytest-of-sahil_1/pytest-187/test_actual_three_fresh_childr1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x70598b2539e0>
+mode = 'disagreement', code = 3, t0 = False
+
+    @pytest.mark.skipif(os.name != "posix", reason="cold-run requires POSIX process-session containment")
+    @pytest.mark.parametrize(
+        "mode,code,t0",
+        [
+            ("regression", 0, True),
+            ("disagreement", 3, False),
+            ("operational", 2, None),
+            ("raw", 2, None),
+            ("cache", 2, None),
+        ],
+    )
+    def test_actual_three_fresh_children_preserve_negative_and_operational(tmp_path, monkeypatch, mode, code, t0):
+        from quantfit.cold_run import cold_run
+    
+        synthetic_children(tmp_path, monkeypatch, mode)
+        result = cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+>       assert result["exit_code"] == code
+E       assert 2 == 3
+
+tests/test_cold_run.py:88: AssertionError
+- generated xml file: /mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-cold-replicate-runner/wsl-cold.xml -
+=========================== short test summary info ============================
+FAILED tests/test_cold_run.py::test_actual_three_fresh_children_preserve_negative_and_operational[regression-0-True]
+FAILED tests/test_cold_run.py::test_actual_three_fresh_children_preserve_negative_and_operational[disagreement-3-False]
+2 failed, 5 passed in 13.39s

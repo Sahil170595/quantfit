@@ -285,9 +285,10 @@ _EXEMPTIONS: dict[str, _Exemption] = {
     "psutil": _Exemption(
         kind="LEAF_SINGLE_CALL",
         reason=(
-            "One call site and one API: psutil.virtual_memory().available at fit.py, asserted by "
+            "One stable API: psutil.virtual_memory().available at fit.py and the cold-run companion "
+            "resource observer, asserted by "
             "test_psutil_is_used_through_exactly_one_api. psutil is a leaf C extension with no plugin or "
-            "entry-point surface, and that call has been stable since 5.x. If the call set ever widens, the "
+            "entry-point surface, and that API has been stable since 5.x. If the API set ever widens, the "
             "premise test fails and this entry has to be re-argued."
         ),
     ),

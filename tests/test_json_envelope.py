@@ -119,7 +119,7 @@ def test_the_leaf_set_is_what_we_think_it_is():
     expected = {
         "check", "list", "plan", "probe", "verify", "verify-safety", "inspect-run", "screen", "emit",
         "calibrate sheet", "calibrate ingest", "gate", "t0", "reproduce", "audit", "quantize", "resolution",
-        "references list", "references verify", "bundle create", "bundle verify",
+        "references list", "references verify", "bundle create", "bundle verify", "cold-run",
     }  # fmt: skip
     assert leaves == expected, f"leaf command set changed: {sorted(leaves ^ expected)}"
 
@@ -159,6 +159,7 @@ _CASES = [
     ("t0-missing", ["t0", "--reports", "no-a.json", "no-b.json", "no-c.json", "--out", "unused-t0.json"], 2),
     ("bundle-create-missing", ["bundle", "create", "--report", "no-report.json", "--out", "unused-bundle"], 2),
     ("bundle-verify-missing", ["bundle", "verify", "--bundle", "no-bundle-xyz"], 2),
+    ("cold-run-unsupported", ["cold-run", "--baseline", "base", "--quant", "q", "--out", "unused-cold"], 2),
 ]
 
 

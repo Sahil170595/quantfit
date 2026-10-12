@@ -1,0 +1,295 @@
+{
+  "capture_requested": false,
+  "cold_run_schema_version": 1,
+  "completion_cache_requested": false,
+  "exit_code": 2,
+  "human_labels_authenticated": false,
+  "independent_execution_verified": false,
+  "preflight_observations": {
+    "cpu_observations": {
+      "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid tsc_known_freq pni pclmulqdq vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves avx_vnni vnmi umip waitpkg gfni vaes vpclmulqdq rdpid movdiri movdir64b fsrm md_clear serialize ibt flush_l1d arch_capabilities",
+      "model name": "13th Gen Intel(R) Core(TM) i9-13980HX"
+    },
+    "disk_free_bytes": 9993048064,
+    "gpu_capability_observed": null,
+    "gpu_driver_observed": null,
+    "gpu_toolkit_observed": null,
+    "kernel": "6.18.40.1-microsoft-standard-WSL2",
+    "logical_cpu_count": 32,
+    "machine": "x86_64",
+    "native_threads_observed": 16,
+    "observed_utc": "2026-10-09T03:10:13.935576+00:00",
+    "platform": "Linux",
+    "psutil": "5.9.8",
+    "python": "3.12.3",
+    "ram_available_bytes": 22274023424,
+    "ram_total_bytes": 33453654016
+  },
+  "requested": {
+    "baseline": "b.gguf",
+    "baseline_revision": null,
+    "max_new_tokens": 64,
+    "quant": "q.gguf",
+    "quant_revision": null,
+    "timeout_seconds": 1.0
+  },
+  "requested_runs": 3,
+  "runner": "three_fresh_native_GGUF_children",
+  "runs": [
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "verify-safety",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--report",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-cold-replicate-runner/timeout/run-1/report.json",
+        "--max-new-tokens",
+        "64"
+      ],
+      "cleanup": {
+        "direct_child_reaped": true,
+        "grandchild_reaping_verified": false,
+        "group_sigkill_sent": false,
+        "group_sigterm_sent": true,
+        "no_live_group_members_observed": true,
+        "observed_group_after_cleanup": [],
+        "observed_group_before_cleanup": [
+          {
+            "pid": 3016530,
+            "start_ticks": 26747392,
+            "state": "S"
+          },
+          {
+            "pid": 3016590,
+            "start_ticks": 26747444,
+            "state": "S"
+          }
+        ]
+      },
+      "elapsed_seconds": 1.0141312149935402,
+      "index": 1,
+      "native_exit_code": null,
+      "pid": 3016530,
+      "process_session_id": 3016530,
+      "report": null,
+      "resources_after": {
+        "cpu_observations": {
+          "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid tsc_known_freq pni pclmulqdq vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves avx_vnni vnmi umip waitpkg gfni vaes vpclmulqdq rdpid movdiri movdir64b fsrm md_clear serialize ibt flush_l1d arch_capabilities",
+          "model name": "13th Gen Intel(R) Core(TM) i9-13980HX"
+        },
+        "disk_free_bytes": 9993048064,
+        "gpu_capability_observed": null,
+        "gpu_driver_observed": null,
+        "gpu_toolkit_observed": null,
+        "kernel": "6.18.40.1-microsoft-standard-WSL2",
+        "logical_cpu_count": 32,
+        "machine": "x86_64",
+        "native_threads_observed": 16,
+        "observed_utc": "2026-10-09T03:10:14.985530+00:00",
+        "platform": "Linux",
+        "psutil": "5.9.8",
+        "python": "3.12.3",
+        "ram_available_bytes": 22156488704,
+        "ram_total_bytes": 33453654016
+      },
+      "resources_before": {
+        "cpu_observations": {
+          "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid tsc_known_freq pni pclmulqdq vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves avx_vnni vnmi umip waitpkg gfni vaes vpclmulqdq rdpid movdiri movdir64b fsrm md_clear serialize ibt flush_l1d arch_capabilities",
+          "model name": "13th Gen Intel(R) Core(TM) i9-13980HX"
+        },
+        "disk_free_bytes": 9993048064,
+        "gpu_capability_observed": null,
+        "gpu_driver_observed": null,
+        "gpu_toolkit_observed": null,
+        "kernel": "6.18.40.1-microsoft-standard-WSL2",
+        "logical_cpu_count": 32,
+        "machine": "x86_64",
+        "native_threads_observed": 16,
+        "observed_utc": "2026-10-09T03:10:13.955761+00:00",
+        "platform": "Linux",
+        "psutil": "5.9.8",
+        "python": "3.12.3",
+        "ram_available_bytes": 22273794048,
+        "ram_total_bytes": 33453654016
+      },
+      "status": "timeout"
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "verify-safety",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--report",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-cold-replicate-runner/timeout/run-2/report.json",
+        "--max-new-tokens",
+        "64"
+      ],
+      "cleanup": {
+        "direct_child_reaped": true,
+        "grandchild_reaping_verified": false,
+        "group_sigkill_sent": false,
+        "group_sigterm_sent": true,
+        "no_live_group_members_observed": true,
+        "observed_group_after_cleanup": [],
+        "observed_group_before_cleanup": [
+          {
+            "pid": 3016613,
+            "start_ticks": 26747497,
+            "state": "S"
+          },
+          {
+            "pid": 3016635,
+            "start_ticks": 26747548,
+            "state": "S"
+          }
+        ]
+      },
+      "elapsed_seconds": 1.026512835000176,
+      "index": 2,
+      "native_exit_code": null,
+      "pid": 3016613,
+      "process_session_id": 3016613,
+      "report": null,
+      "resources_after": {
+        "cpu_observations": {
+          "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid tsc_known_freq pni pclmulqdq vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves avx_vnni vnmi umip waitpkg gfni vaes vpclmulqdq rdpid movdiri movdir64b fsrm md_clear serialize ibt flush_l1d arch_capabilities",
+          "model name": "13th Gen Intel(R) Core(TM) i9-13980HX"
+        },
+        "disk_free_bytes": 9993048064,
+        "gpu_capability_observed": null,
+        "gpu_driver_observed": null,
+        "gpu_toolkit_observed": null,
+        "kernel": "6.18.40.1-microsoft-standard-WSL2",
+        "logical_cpu_count": 32,
+        "machine": "x86_64",
+        "native_threads_observed": 16,
+        "observed_utc": "2026-10-09T03:10:16.046062+00:00",
+        "platform": "Linux",
+        "psutil": "5.9.8",
+        "python": "3.12.3",
+        "ram_available_bytes": 22122917888,
+        "ram_total_bytes": 33453654016
+      },
+      "resources_before": {
+        "cpu_observations": {
+          "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid tsc_known_freq pni pclmulqdq vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves avx_vnni vnmi umip waitpkg gfni vaes vpclmulqdq rdpid movdiri movdir64b fsrm md_clear serialize ibt flush_l1d arch_capabilities",
+          "model name": "13th Gen Intel(R) Core(TM) i9-13980HX"
+        },
+        "disk_free_bytes": 9993048064,
+        "gpu_capability_observed": null,
+        "gpu_driver_observed": null,
+        "gpu_toolkit_observed": null,
+        "kernel": "6.18.40.1-microsoft-standard-WSL2",
+        "logical_cpu_count": 32,
+        "machine": "x86_64",
+        "native_threads_observed": 16,
+        "observed_utc": "2026-10-09T03:10:14.999748+00:00",
+        "platform": "Linux",
+        "psutil": "5.9.8",
+        "python": "3.12.3",
+        "ram_available_bytes": 22156488704,
+        "ram_total_bytes": 33453654016
+      },
+      "status": "timeout"
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-m",
+        "quantfit.cli",
+        "verify-safety",
+        "--baseline",
+        "b.gguf",
+        "--quant",
+        "q.gguf",
+        "--report",
+        "/mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-cold-replicate-runner/timeout/run-3/report.json",
+        "--max-new-tokens",
+        "64"
+      ],
+      "cleanup": {
+        "direct_child_reaped": true,
+        "grandchild_reaping_verified": false,
+        "group_sigkill_sent": false,
+        "group_sigterm_sent": true,
+        "no_live_group_members_observed": true,
+        "observed_group_after_cleanup": [],
+        "observed_group_before_cleanup": [
+          {
+            "pid": 3016639,
+            "start_ticks": 26747602,
+            "state": "S"
+          },
+          {
+            "pid": 3016652,
+            "start_ticks": 26747656,
+            "state": "S"
+          }
+        ]
+      },
+      "elapsed_seconds": 1.0202560870093293,
+      "index": 3,
+      "native_exit_code": null,
+      "pid": 3016639,
+      "process_session_id": 3016639,
+      "report": null,
+      "resources_after": {
+        "cpu_observations": {
+          "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid tsc_known_freq pni pclmulqdq vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves avx_vnni vnmi umip waitpkg gfni vaes vpclmulqdq rdpid movdiri movdir64b fsrm md_clear serialize ibt flush_l1d arch_capabilities",
+          "model name": "13th Gen Intel(R) Core(TM) i9-13980HX"
+        },
+        "disk_free_bytes": 9993048064,
+        "gpu_capability_observed": null,
+        "gpu_driver_observed": null,
+        "gpu_toolkit_observed": null,
+        "kernel": "6.18.40.1-microsoft-standard-WSL2",
+        "logical_cpu_count": 32,
+        "machine": "x86_64",
+        "native_threads_observed": 16,
+        "observed_utc": "2026-10-09T03:10:17.096433+00:00",
+        "platform": "Linux",
+        "psutil": "5.9.8",
+        "python": "3.12.3",
+        "ram_available_bytes": 22050119680,
+        "ram_total_bytes": 33453654016
+      },
+      "resources_before": {
+        "cpu_observations": {
+          "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid tsc_known_freq pni pclmulqdq vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves avx_vnni vnmi umip waitpkg gfni vaes vpclmulqdq rdpid movdiri movdir64b fsrm md_clear serialize ibt flush_l1d arch_capabilities",
+          "model name": "13th Gen Intel(R) Core(TM) i9-13980HX"
+        },
+        "disk_free_bytes": 9993048064,
+        "gpu_capability_observed": null,
+        "gpu_driver_observed": null,
+        "gpu_toolkit_observed": null,
+        "kernel": "6.18.40.1-microsoft-standard-WSL2",
+        "logical_cpu_count": 32,
+        "machine": "x86_64",
+        "native_threads_observed": 16,
+        "observed_utc": "2026-10-09T03:10:16.059968+00:00",
+        "platform": "Linux",
+        "psutil": "5.9.8",
+        "python": "3.12.3",
+        "ram_available_bytes": 22122917888,
+        "ram_total_bytes": 33453654016
+      },
+      "status": "timeout"
+    }
+  ],
+  "scientific_go": false,
+  "statement": "Observed fresh native processes and aggregate T0 only. Resource observations are companion facts, not report.env identity. Native measurement exits remain separate. No host authentication, human adjudication, sensitivity proof or scientific GO is established.",
+  "status": "native_operational_failure",
+  "t0": null,
+  "tool_version": "0.16.0",
+  "weight_cache_may_be_reused": true
+}

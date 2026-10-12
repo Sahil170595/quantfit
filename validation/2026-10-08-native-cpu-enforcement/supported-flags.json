@@ -1,0 +1,68 @@
+{
+  "kind": "read-only actual cached binary help/argv support; no model/GPU run",
+  "binary_path": "C:\\Users\\sahil\\.cache\\quantfit\\llamacpp-bin-b9817\\llama-server.exe",
+  "binary_sha256": "2ec097dcd655ecedb71555ed8914e8888efa9a07ae5be2625e9efc8a2d7f1c74",
+  "version_stdout": "",
+  "version_stderr": "version: 9817 (5397c3619)\nbuilt with Clang 20.1.8 for Windows x86_64",
+  "version_exit": 0,
+  "argv": [
+    "C:\\Users\\sahil\\.cache\\quantfit\\llamacpp-bin-b9817\\llama-server.exe",
+    "--device",
+    "none",
+    "--n-gpu-layers",
+    "0",
+    "--no-op-offload",
+    "--help"
+  ],
+  "actual_exit": 0,
+  "help_lines": [
+    "-dev,  --device <dev1,dev2,..>          comma-separated list of devices to use for offloading (none = don't",
+    "-ngl,  --gpu-layers, --n-gpu-layers N   max. number of layers to store in VRAM, either an exact number,",
+    "--op-offload, --no-op-offload           whether to offload host tensor operations to device (default: true)",
+    "--spec-draft-device, -devd, --device-draft <dev1,dev2,..>",
+    "--spec-draft-ngl, -ngld, --gpu-layers-draft, --n-gpu-layers-draft N"
+  ],
+  "official_pinned_source": {
+    "common.h": {
+      "url": "https://raw.githubusercontent.com/ggml-org/llama.cpp/5397c3619479ef544e340e4b933929d1783de78b/common/common.h",
+      "sha256": "3edd3327edac8b369bf82683ac683a10bf518c2d6e0c56cabba26e99e10051ca",
+      "observed_lines": [
+        {
+          "line": 464,
+          "content": "    int32_t n_gpu_layers       = -1;    // number of layers to store in VRAM, -1 is auto, <= -2 is all"
+        }
+      ]
+    },
+    "arg.cpp": {
+      "url": "https://raw.githubusercontent.com/ggml-org/llama.cpp/5397c3619479ef544e340e4b933929d1783de78b/common/arg.cpp",
+      "sha256": "07f6fa21437c8958280fe9acf66a68bfd698602d2b963040820237a5c3eff2bf",
+      "observed_lines": [
+        {
+          "line": 2386,
+          "content": "        \"comma-separated list of devices to use for offloading (none = don't offload)\\n\""
+        },
+        {
+          "line": 2443,
+          "content": "        {\"-ngl\", \"--gpu-layers\", \"--n-gpu-layers\"}, \"N\","
+        },
+        {
+          "line": 2602,
+          "content": "        {\"--no-op-offload\"},"
+        },
+        {
+          "line": 3683,
+          "content": "        \"comma-separated list of devices to use for offloading the draft model (none = don't offload)\\n\""
+        },
+        {
+          "line": 3691,
+          "content": "        {\"--spec-draft-ngl\", \"-ngld\", \"--gpu-layers-draft\", \"--n-gpu-layers-draft\"}, \"N\","
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "No weights loaded or generated; no GPU capable execution observed.",
+    "Cached executable bytes hashed, not newly verified against an archive.",
+    "CPU-only flags accepted by actual cached binary; execution residency requires later hosted model evidence."
+  ]
+}

@@ -1,0 +1,178 @@
+{
+  "source_commit": "b745506c49f017fc17ba6372629835d37fc535d7",
+  "actual_windows_head_now": "b745506c49f017fc17ba6372629835d37fc535d7",
+  "source_files": {
+    "quantfit/cold_run.py": {
+      "consumed_working_sha256": "ee6edabd4efe7bfbce07da964117e00709555f9d70154534999a3f5d78dedb54",
+      "git_blob_sha256": "ee6edabd4efe7bfbce07da964117e00709555f9d70154534999a3f5d78dedb54",
+      "working_equals_source_git_blob": true,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/safety/gguf_arm.py": {
+      "consumed_working_sha256": "56a775e62734da89aa6ec649567ab7ed79bd89496f929ea03bdcd5f8aaea7128",
+      "git_blob_sha256": "809c8aac0bb02b528c2e0e7637d2911e89310c8d21ed59bbed3bc045419e7473",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/safety/verify.py": {
+      "consumed_working_sha256": "e1d695d8d4578decd98a4566028077a6f3886948072538745da6515822a595a0",
+      "git_blob_sha256": "2ab243ae83a5cbbc1eb726077111da29beea716ee50e48ee3c54c042cf27cf26",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/cli.py": {
+      "consumed_working_sha256": "48150a5f46ba734c0be2c4f8cbfedbba74363770eaf5353396210c46599b2c32",
+      "git_blob_sha256": "be6256f3d8fa41d9d66c268fc06d927e1035983e4512f305e92201ca508007c9",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "quantfit/bundle.py": {
+      "consumed_working_sha256": "c6f58f811c65c7426a5307d0a68d5a3ac1fe4febd26e900a0b7d83caf3b390f5",
+      "git_blob_sha256": "c6f58f811c65c7426a5307d0a68d5a3ac1fe4febd26e900a0b7d83caf3b390f5",
+      "working_equals_source_git_blob": true,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tests/test_cold_run.py": {
+      "consumed_working_sha256": "ffb036406b9d1f8f2c5cbd74c5c3fc3361982a7a0bfe708e821bde438d3e39f1",
+      "git_blob_sha256": "ffb036406b9d1f8f2c5cbd74c5c3fc3361982a7a0bfe708e821bde438d3e39f1",
+      "working_equals_source_git_blob": true,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tests/test_gguf_arm.py": {
+      "consumed_working_sha256": "9c5e5dd8f3ff7428f747fd27d7fe9bf721d561de8f13a89badcd7b60a007f28c",
+      "git_blob_sha256": "02e83cfb422a4315f77fb0d082bfbbcd61595f01f35ade626ac1d1de7a5c45f2",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tests/test_bundle.py": {
+      "consumed_working_sha256": "a3363376ba67664fa2be1200a2a9e655636090ac822280b42b475338c1fb6e22",
+      "git_blob_sha256": "a3363376ba67664fa2be1200a2a9e655636090ac822280b42b475338c1fb6e22",
+      "working_equals_source_git_blob": true,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tools/ci_cpu_acceptance.py": {
+      "consumed_working_sha256": "220ed5c1049048a09d5f5af6795f373a3f0b274dd94846102bfe1bdeeb45224e",
+      "git_blob_sha256": "9cfa7067236c8a04641f07c680df1e269407526358aadfb755c1930d15c673f8",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    "tools/ci_installed.py": {
+      "consumed_working_sha256": "6d66f87e3d7f178ca0e8009e2e6de5496236a13b1ae3f4079b7dd71ba246ed21",
+      "git_blob_sha256": "6e4ff46ca0033806345c58ccafce7623b2350af8aa48c5be42b11b6a47470df0",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    },
+    ".github/workflows/validate.yml": {
+      "consumed_working_sha256": "8911b8a7ec5ca1040ad72182797b3c8a134d98d68e32767fb89ecfc84a41f825",
+      "git_blob_sha256": "8574cf26b28c0752ab8de51f0bf9c86323556f3df2537389b2b21ecfd8e1cb3b",
+      "working_equals_source_git_blob": false,
+      "crlf_to_lf_bytes_equal_source_git_blob": true
+    }
+  },
+  "suite_provenance": "Final full available unit and all final gates/WSL functional calls executed with immutable source HEAD b745. Actual consumed working bytes can differ from canonical Git blobs only by verified legacy CRLF-to-LF equivalence; both SHA256 values are retained. No implementation changes occurred during these runs.",
+  "windows_host": {
+    "python": "3.12.13",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "ram_total_bytes": 68319571968
+  },
+  "installed_versions": {
+    "quantfit": "0.16.0",
+    "pytest": "9.0.3",
+    "ruff": "0.16.2",
+    "mypy": "1.20.2",
+    "scipy": "1.15.3",
+    "hypothesis": "6.152.5",
+    "huggingface-hub": "1.31.0",
+    "psutil": "7.2.2",
+    "inspect-ai": "0.3.269",
+    "gguf": "0.19.0",
+    "torch": "not installed",
+    "transformers": "not installed"
+  },
+  "final_available_unit": {
+    "cases": 1731,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 29,
+    "passed": 1702
+  },
+  "actual_wsl": {
+    "cases": 17,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 17
+  },
+  "focused": {
+    "cases": 112,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 21,
+    "passed": 91
+  },
+  "argv_red": {
+    "cases": 1,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 0
+  },
+  "numerical_properties_without_torch": {
+    "cases": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 2
+  },
+  "gates": {
+    "ruff_check": 0,
+    "ruff_exact_format": 0,
+    "mypy_exact_paths": 0,
+    "audit": 0
+  },
+  "functional_cli_cases": 9,
+  "functional_fresh_native_children": 27,
+  "cpu_controls": {
+    "argv": [
+      "--device",
+      "none",
+      "--n-gpu-layers",
+      "0",
+      "--no-op-offload"
+    ],
+    "engine": {
+      "offload_device": "none",
+      "n_gpu_layers": 0,
+      "op_offload": false
+    },
+    "actual_cached_binary_help": "supported-flags.json",
+    "model_execution_observed_locally": false
+  },
+  "historical_proof": "Original cold-replicate-runner evidence and prior source85a unchanged. argv-red records the actual missing --device assertion before the CPU repair; it is a hermetic fake-process/local HTTP fixture, not observed GPU execution.",
+  "hosted_installed_cold_consumer": {
+    "status": "implemented; not executed locally; hosted qualification pending publication",
+    "path": "tools/ci_cpu_acceptance.py",
+    "backend": "gguf",
+    "source_model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+    "source_revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+    "max_new_tokens": 64,
+    "probe_count": 40,
+    "fresh_runs": 3,
+    "child_timeout_seconds": 600,
+    "source_binding": "Installed measurement module bytes must equal canonical HEAD Git blobs.",
+    "negative_results": "Native exits0/3/4 and T0 disagreement remain aggregate evidence; outer0/3 qualifies execution correctness. Operational2 fails and no partial directory uploads."
+  },
+  "parallel_hosted_blocker": "Quant2 PR121 installed wheel/sdist refusal independently reproduced by root as a one-ULP Windows/Linux derived MDE difference. Isolated Quant2 fix/review/replay is pending; no unrelated portability change is included here.",
+  "limitations": [
+    "No model, Hub download or llama-server executable ran.",
+    "Arm bytes/revisions/statistics are fixture declarations, not authenticated observations.",
+    "Direct children were waited/reaped. Grandchild reaping is not established.",
+    "No human adjudication, sensitivity, GPU, crosshardware or independent reproduction claim.",
+    "Hosted installed model/T0 campaign remains pending.",
+    "CPU offload controls are supported/applied in native argv and declared in bound provenance; local model execution/residency and GPU-capable behavior remain unobserved.",
+    "Full Torch numerical/coverage/mutation matrices and real installed hosted cold consumer remain pending. No model/Hub downloads, dependency installation, public HF creation/upload.",
+    "QSRv1 remains unfrozen; integrity/functional checks establish no scientific GO."
+  ],
+  "lifecycle": "PRESERVE shared worktree/ref and approved environment for sequential batch; prior blocked cleanup not retried. Actual fixture children waited/reaped, no live owned group members observed, transient shims removed; no new worktrees/dependency copies/models/containers."
+}

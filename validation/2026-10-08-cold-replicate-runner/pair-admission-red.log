@@ -1,0 +1,101 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_actual_three_fresh_children_preserve_negative_and_operational[different-binary-2-None] _
+
+tmp_path = PosixPath('/tmp/pytest-of-sahil_1/pytest-190/test_actual_three_fresh_childr0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x74a444e51700>
+mode = 'different-binary', code = 2, t0 = None
+
+    @pytest.mark.skipif(os.name != "posix", reason="cold-run requires POSIX process-session containment")
+    @pytest.mark.parametrize(
+        "mode,code,t0",
+        [
+            ("regression", 0, True),
+            ("null", 0, True),
+            ("unmeasured", 0, True),
+            ("disagreement", 3, False),
+            ("operational", 2, None),
+            ("raw", 2, None),
+            ("cache", 2, None),
+            ("different-binary", 2, None),
+            ("different-threads", 2, None),
+            ("quantized-baseline", 2, None),
+        ],
+    )
+    def test_actual_three_fresh_children_preserve_negative_and_operational(tmp_path, monkeypatch, mode, code, t0):
+        from quantfit.cold_run import cold_run
+    
+        synthetic_children(tmp_path, monkeypatch, mode)
+        result = cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+>       assert result["exit_code"] == code
+E       assert 0 == 2
+
+tests/test_cold_run.py:111: AssertionError
+_ test_actual_three_fresh_children_preserve_negative_and_operational[different-threads-2-None] _
+
+tmp_path = PosixPath('/tmp/pytest-of-sahil_1/pytest-190/test_actual_three_fresh_childr1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x74a444aaeff0>
+mode = 'different-threads', code = 2, t0 = None
+
+    @pytest.mark.skipif(os.name != "posix", reason="cold-run requires POSIX process-session containment")
+    @pytest.mark.parametrize(
+        "mode,code,t0",
+        [
+            ("regression", 0, True),
+            ("null", 0, True),
+            ("unmeasured", 0, True),
+            ("disagreement", 3, False),
+            ("operational", 2, None),
+            ("raw", 2, None),
+            ("cache", 2, None),
+            ("different-binary", 2, None),
+            ("different-threads", 2, None),
+            ("quantized-baseline", 2, None),
+        ],
+    )
+    def test_actual_three_fresh_children_preserve_negative_and_operational(tmp_path, monkeypatch, mode, code, t0):
+        from quantfit.cold_run import cold_run
+    
+        synthetic_children(tmp_path, monkeypatch, mode)
+        result = cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+>       assert result["exit_code"] == code
+E       assert 0 == 2
+
+tests/test_cold_run.py:111: AssertionError
+_ test_actual_three_fresh_children_preserve_negative_and_operational[quantized-baseline-2-None] _
+
+tmp_path = PosixPath('/tmp/pytest-of-sahil_1/pytest-190/test_actual_three_fresh_childr2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x74a444adb980>
+mode = 'quantized-baseline', code = 2, t0 = None
+
+    @pytest.mark.skipif(os.name != "posix", reason="cold-run requires POSIX process-session containment")
+    @pytest.mark.parametrize(
+        "mode,code,t0",
+        [
+            ("regression", 0, True),
+            ("null", 0, True),
+            ("unmeasured", 0, True),
+            ("disagreement", 3, False),
+            ("operational", 2, None),
+            ("raw", 2, None),
+            ("cache", 2, None),
+            ("different-binary", 2, None),
+            ("different-threads", 2, None),
+            ("quantized-baseline", 2, None),
+        ],
+    )
+    def test_actual_three_fresh_children_preserve_negative_and_operational(tmp_path, monkeypatch, mode, code, t0):
+        from quantfit.cold_run import cold_run
+    
+        synthetic_children(tmp_path, monkeypatch, mode)
+        result = cold_run("b.gguf", "q.gguf", str(tmp_path / "runs"), timeout_seconds=10)
+>       assert result["exit_code"] == code
+E       assert 0 == 2
+
+tests/test_cold_run.py:111: AssertionError
+- generated xml file: /mnt/c/tmp/qf-release-0.16.0-20261008/validation/2026-10-08-cold-replicate-runner/pair-admission-red.xml -
+=========================== short test summary info ============================
+FAILED tests/test_cold_run.py::test_actual_three_fresh_children_preserve_negative_and_operational[different-binary-2-None]
+FAILED tests/test_cold_run.py::test_actual_three_fresh_children_preserve_negative_and_operational[different-threads-2-None]
+FAILED tests/test_cold_run.py::test_actual_three_fresh_children_preserve_negative_and_operational[quantized-baseline-2-None]
+3 failed, 11 deselected in 7.35s
