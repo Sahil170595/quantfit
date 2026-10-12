@@ -15,6 +15,12 @@
 
 ## Unreleased
 
+## 0.17.0
+
+Released independently from PR #120: calibration-aware cards and gate action.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
 - `emit model-card --calibration-report` recomputes bound conditional resolution from
   the same validated report instance it renders. Original counts/verdict/floors remain
   distinct from per-arm error-aware MDEs; inconsistent source statistics are refused.
@@ -24,6 +30,8 @@
   semantics. Synthetic local records are in
   `validation/2026-10-08-calibration-aware-outputs/`; hosted candidate qualification is
   pending. These changes establish no human calibration, sensitivity result or GO.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37879011642); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
 
 ## 0.16.0
 
