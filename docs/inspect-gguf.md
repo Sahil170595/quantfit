@@ -58,5 +58,5 @@ hashes/served facts and a companion RAM/process receipt. Calibration binding and
 bundles recognize the exact new engine schema; integrity/binding cannot prove human
 labels, sensitivity, safety GO or independent reproduction. QSRv1 is unfrozen.
 The actual installed small pinned GGUF/full40/real80judge hosted consumer is configured
-in `tools/ci_inspect_gguf_acceptance.py`; local fixture proof and pending hosted model
+in `tools/ci_inspect_gguf_acceptance.py`; local fixture proof and actual hosted model
 qualification are recorded separately in `validation/2026-10-09-inspect-gguf/`.
