@@ -15,6 +15,17 @@
 
 ## Unreleased
 
+## 0.28.0 — Unreleased candidate
+
+- `quantfit/reproduce_junit.py:reproduction_to_junit` and `reproduce --junit PATH` render ten stable cases from the existing native decision. Unknown T0 skips, negative T0 fails, and only the native `reproduced` / 0 / `passed=true` result passes overall; void or unverified outcomes cannot produce an all-green suite.
+- Loose-report and portable-bundle input modes preserve JSON and exit semantics. Bounded operational-error XML carries no fabricated comparison or raw provider/path diagnostics.
+- JSON/XML are staged together and replaced atomically per file, with successful XML last. Consumed sources, both destinations and aliases are protected; publication faults exit 2 without claiming a transaction across the pair.
+- Existing installed consumers and cold-report hooks exercise XML with historical aggregates and labeled synthetic controls. No additional model run, hosted job or dependency is introduced.
+
+Exact-head review and local/hosted acceptance are recorded on the PR before readiness.
+Version 0.28.0 remains unpublished; native decisions and JUnit do not establish
+independent execution, authenticated labels, sensitivity, safety or scientific GO.
+
 ## 0.27.0 — Unreleased candidate
 
 - `quantfit/reproduce.py:compare_bundles` and existing `reproduce` bundle flags compare fixed first replicates from two verified three-report handoffs offline. Prepared T0 and path observations let the shared comparison consume held views without reopening producer files; loose-report behavior remains intact.
