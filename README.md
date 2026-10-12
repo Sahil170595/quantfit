@@ -41,10 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.24.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.24.0).
+This README documents [quantfit 0.25.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.25.0).
 All workflows below are available in this release.
 
-Install with `pip install "quantfit[inspect,gguf]==0.24.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.25.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -490,7 +490,7 @@ human-label truth, sensitivity or scientific GO.
 
 ## Retrieve public aggregate evidence
 
-Candidate public aggregate retrieval (unreleased; candidate checkout/wheel):
+Public aggregate retrieval, available since 0.25.0:
 
 ```bash
 quantfit evidence fetch --out public-evidence/ --timeout-seconds 120 --json

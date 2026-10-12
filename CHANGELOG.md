@@ -15,6 +15,22 @@
 
 ## Unreleased
 
+## 0.25.0
+
+Released independently from PR #129: pinned anonymous public evidence retrieval.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
+- Fixed immutable public aggregate retrieval API/CLI (`evidence fetch`) with
+  independent installed twelve-file byte pins, anonymous bounded raw streaming,
+  closed file-specific validation and exclusive atomic Linux/Windows publication.
+  Original bytes/producer labels and negative native outcomes remain separate
+  from receiving analysis; no new inference, registration, human authentication,
+  sensitivity or GO. Local fixture-transport evidence:
+  `validation/2026-10-09-evidence-fetch/`; actual installed download pending hosted.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37992671329); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
 ## 0.24.0
 
 Released independently from PR #128: full-report repeatability and JUnit.
