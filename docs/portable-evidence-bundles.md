@@ -69,5 +69,4 @@ and aggregate byte bounds remain implementation limits, not scientific eligibili
 rules. QSR v1 remains unfrozen.
 
 Synthetic local functional records and their limitations are in
-`validation/2026-10-08-portable-evidence-bundles/`. Hosted numerical/runtime and installed
-wheel/sdist qualification remain pending until the five-PR batch is pushed.
+`validation/2026-10-08-portable-evidence-bundles/`. The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37880847032); release publication separately qualifies the exact versioned distributions.
