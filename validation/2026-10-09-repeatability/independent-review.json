@@ -1,0 +1,26 @@
+{
+  "checks": [
+    "historical full/T0 PASS with native flags and exit3",
+    "canonical receiving alias plus different held bytes retains valid facts and refuses T0 exit2",
+    "negative judge runtime refused",
+    "negative baseline runtime refused",
+    "negative quantized runtime refused",
+    "strict int/float comparison and RFC6901 slash/tilde pointers",
+    "base d3aa campaign assess_reports dictionary exactly equals extracted current campaign with identical historical inputs/binary/threads"
+  ],
+  "final_docs_review": "Independent narrow c131/tree0e30 delta PASS, only llms/usage docs; product/tests/tools/workflows/dependencies unchanged; CLEANED no resources",
+  "final_source_head": "c131b3eb4fa06fe531ecb8ab68ed9c248222fd75",
+  "independent_agent_checks": 35,
+  "independent_agent_scope": "Exact424held/in-memory: runtime15adverse, synthetics0/3/4/refusal2, strict1ULP/types/null/order/pointers, canonical/simulated-hardlink changing3SHA refusal, actualCLI JSON/prose3+parser2 boundary, output/input/closedbundle denial, relocated five bundle members held exactly once, base/current campaign parity and17 original assessment nonlocator facts unchanged",
+  "new_files_or_inference": false,
+  "product_review_head": "424babb3f6b185c8ff563f5cafce023653eb4202",
+  "reviewer_harness_correction": "Reviewer referenced nonexistent assessment reasons key, corrected to actual blocking_reasons; not a product defect.",
+  "root_readonly_checks": 7,
+  "schema_version": 1,
+  "source_doc_delta_only": [
+    ".claude/skills/quantfit/SKILL.md",
+    "docs/repeatability.md",
+    "llms.txt"
+  ],
+  "status": "PASS"
+}

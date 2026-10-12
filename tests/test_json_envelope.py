@@ -120,7 +120,7 @@ def test_the_leaf_set_is_what_we_think_it_is():
         "check", "list", "plan", "probe", "verify", "verify-safety", "inspect-run", "screen", "emit",
         "calibrate sheet", "calibrate ingest", "gate", "t0", "reproduce", "audit", "quantize", "resolution",
         "references list", "references verify", "bundle create", "bundle verify",
-        "bundle replay-create", "bundle replay-verify", "cold-run",
+        "bundle replay-create", "bundle replay-verify", "cold-run", "repeatability",
     }  # fmt: skip
     assert leaves == expected, f"leaf command set changed: {sorted(leaves ^ expected)}"
 
@@ -151,6 +151,8 @@ def test_json_is_not_a_flag_on_the_parent_of_a_subcommand():
 # Heavy commands are covered on their ERROR path where that path is reachable without a
 # backend — which is also the path a caller most needs to be able to parse.
 _CASES = [
+    ("repeatability-missing-reports", ["repeatability", "--reports", "no-a.json", "no-b.json", "no-c.json"], 2),
+    ("repeatability-missing-bundle", ["repeatability", "--bundle", "no-replay-bundle-xyz"], 2),
     ("list", ["list"], 0),
     ("audit", ["audit"], None),  # 0 or 3 depending on the tree; both are verdicts
     ("verify-safety-demo", ["verify-safety", "--demo"], 0),
@@ -266,6 +268,48 @@ def test_replay_bundle_real_stream_contract_without_backends(tmp_path, disagreem
     assert checked["exit_code"] == process.returncode == 0 and "error" not in checked
     assert checked["result"]["receiving_t0"]["protocol_pass"] is (not disagreement)
     assert checked["result"]["scientific_claims_verified"] is False
+
+
+@pytest.mark.parametrize("unsafe,flips,code", [(12, 0, 0), (12, 1, 3), (0, 0, 4), (12, 0, 2)])
+def test_repeatability_actual_json_and_prose_without_backends(tmp_path, unsafe, flips, code):
+    from test_repeatability import reports
+
+    paths = reports(tmp_path, unsafe=unsafe, flips=flips)
+    if code == 2:
+        value = json.loads(Path(paths[1]).read_bytes())
+        value["env"]["python"] = "explicitly synthetic different environment"
+        Path(paths[1]).write_text(json.dumps(value), encoding="utf-8")
+    blocked = tmp_path / "blocked"
+    blocked.mkdir()
+    output, junit = tmp_path / "analysis.json", tmp_path / "analysis.xml"
+    process = _run(
+        "repeatability",
+        "--reports",
+        *paths,
+        "--out",
+        str(output),
+        "--junit",
+        str(junit),
+        "--json",
+        block_backends=blocked,
+    )
+    document = json.loads(process.stdout)
+    assert document["command"] == "repeatability" and document["exit_code"] == process.returncode == code
+    assert "error" not in document and document["result"]["evidence_valid"] is True
+    assert json.loads(output.read_bytes()) == document["result"] and junit.exists()
+    prose = _run("repeatability", "--reports", *paths, block_backends=blocked)
+    assert prose.returncode == code and b"Full report agreement:" in prose.stdout
+    with pytest.raises(json.JSONDecodeError):
+        json.loads(prose.stdout)
+
+
+def test_repeatability_input_modes_preserve_existing_argparse_boundary(tmp_path):
+    blocked = tmp_path / "blocked"
+    blocked.mkdir()
+    for argv in ([], ["--reports", "a", "b"], ["--reports", "a", "b", "c", "--bundle", "d"]):
+        process = _run("repeatability", "--json", *argv, block_backends=blocked)
+        assert process.returncode == 2 and process.stdout == b""
+        assert b"usage:" in process.stderr
 
 
 def test_a_verdict_failure_is_not_reported_as_an_error(monkeypatch, capsys):

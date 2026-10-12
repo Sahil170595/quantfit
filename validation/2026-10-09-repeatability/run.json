@@ -1,0 +1,232 @@
+{
+  "base_head": "d3aaec52ea7c2e18f014e1bbebbb6a54195d135c",
+  "environment": {
+    "cpu_identifier": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "installed_versions": {
+      "gguf": "0.19.0",
+      "huggingface-hub": "1.31.0",
+      "inspect-ai": "0.3.269",
+      "mypy": "1.20.2",
+      "numpy": "2.4.6",
+      "psutil": "7.2.2",
+      "pytest": "9.0.3",
+      "ruff": "0.16.2",
+      "scipy": "1.15.3",
+      "torch": null
+    },
+    "logical_cpu_count": 32,
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.12.13",
+    "total_ram_bytes": 68319571968
+  },
+  "functional": {
+    "actual_cli_invocations": 7,
+    "artifact": "functional.json",
+    "dangerous": "0/12: detector did not fire",
+    "historical_direct_and_relocated_exit": 3,
+    "over_refusal": "2/20 unconfirmed flags per run",
+    "synthetic_exits": [
+      0,
+      3,
+      4,
+      2
+    ]
+  },
+  "functional_observed_head": "424babb3f6b185c8ff563f5cafce023653eb4202",
+  "gates": {
+    "agent_docs": {
+      "cases": 7,
+      "declared_suite_counts": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 7
+      },
+      "errors": 0,
+      "failures": 0,
+      "passed": 7,
+      "skipped": 0,
+      "suite_seconds": 0.363
+    },
+    "audit": "PASS0findings before and after metadata; audit-postmetadata.json final artifact",
+    "mypy": "PASS strict spec.py/engines/base.py, two configured source files only",
+    "quickstart": {
+      "commands_executed": 0,
+      "commands_parsed": 50,
+      "scope": "--no-run static source CLI syntax"
+    },
+    "rtn": "deselected, Torch absent; hosted full numerical lane pending",
+    "ruff_check": "PASS exact CI quantfit/tests/tools",
+    "ruff_format": "PASS118files exact CI paths",
+    "scipy_properties": {
+      "cases": 2,
+      "declared_suite_counts": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 2
+      },
+      "errors": 0,
+      "failures": 0,
+      "passed": 2,
+      "skipped": 0,
+      "suite_seconds": 6.642
+    },
+    "unit": {
+      "cases": 2035,
+      "declared_suite_counts": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 42,
+        "tests": 2035
+      },
+      "errors": 0,
+      "failures": 0,
+      "passed": 1993,
+      "skipped": 42,
+      "suite_seconds": 227.105
+    }
+  },
+  "limitations": [
+    "No new model/judge/Hub execution; actual historical aggregate consumption and explicitly synthetic policy fixtures only.",
+    "No producer/source authentication, human adjudication, physical independence, sensitivity or scientific GO.",
+    "Installed wheel/sdist, Linux filesystem and full Torch numerical qualification await hosted batch.",
+    "JSON/JUnit replacements individually atomic, not a two-file transaction."
+  ],
+  "recorded_utc": "2026-10-09 19:24:59 UTC",
+  "resource_receipt": {
+    "new_dependency_model_container_worktree_copies": 0,
+    "owner": "root sequential Quantfit feature batch",
+    "reason": "Root-owned checkout and pre-existing sparse environment still consumed; earlier cleanup blocked by policy, no retry.",
+    "status": "PRESERVE",
+    "task_owned_processes_remaining": 0,
+    "worktree": "C:\\tmp\\qf-release-0.16.0-20261008"
+  },
+  "schema_version": 1,
+  "source_association": "Final whole unit observed immutablec131. Product/tests identical to reviewed424/61c9; 61c9\u2192424changes two doc boundary lines, 424\u2192c131only llms/usage docs. Functional and35 independent agent plus7root checks observed immutable424.",
+  "source_files": [
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "664d5a39eb136e9c4aedee3f976b232a6adba8d5482b1a785960f55835b9fc85",
+      "path": ".claude/skills/quantfit/SKILL.md",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "00191f1876c3f8df2509c347e90dfb6310632bbf9d4b350fd3d61d199389ae56"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "e73bddf0bdb683d3fe18de76e3781c277fb477d9f92bacc958bc53ba0c245011",
+      "path": ".gitattributes",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "435e034826c7bc7e269f781fd2a7dd827bea40bb984e5e7a0c6eaaf6c38f17c7"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "f0358826bd6afb98ea0990664904ffbbc5c87c93278252a3598ef04791c77006",
+      "path": "CHANGELOG.md",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "15443f318b76d89768262d5b2c6088b6e33a17ea0991cacd1ad014f0a13ba82a"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "503d30bf2436257d18d8728fe696afcf85b3ca647d9d5f603e94002063417d97",
+      "path": "README.md",
+      "working_exactly_equals_git_blob": true,
+      "working_sha256": "503d30bf2436257d18d8728fe696afcf85b3ca647d9d5f603e94002063417d97"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "6174769471b486fa049e451674878e3e4269c5c288178b906e6848eca7b044c7",
+      "path": "docs/cli-reference.md",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "3f35b2c7e4b09fa590ff05aeebdc1e38c4b49128d57d306729a4a678a8be1db5"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "bff90afac453e80134ccbd1034e90ba519f1bed14e68a05efda9ea44716d0a13",
+      "path": "docs/repeatability.md",
+      "working_exactly_equals_git_blob": true,
+      "working_sha256": "bff90afac453e80134ccbd1034e90ba519f1bed14e68a05efda9ea44716d0a13"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "45d2324516aa4cfb0bc52108b6233b8bab40f86a4cb716d451171a57ff835f48",
+      "path": "docs/validation-matrix.md",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "109588df497f35a87c5372c788a7989b132264f41a5cb4f11f913096a9c7ab2c"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "db13ab5e0e9a876a1e3110a9fd983ace41abc0c117658c4b3eadd91863cd22e2",
+      "path": "llms.txt",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "299182588d9ec40f1ced4a4afdc15bbb406ed00a2ee9372da8bf370eb23e42a6"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "1e84b8dae1fec87ba181c7a19958e069cff14199e04087a8696a5cd99f8f5ba9",
+      "path": "quantfit/cli.py",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "4a3fa8f5b9bbfd2ccdbbfa66bf2b82302835e42bf34fc99ac06097f3ceb5711d"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "c0a83ee910ae8384ef64e0ef814dfc018b2af2c737337775e874a321f0c84dd0",
+      "path": "quantfit/repeatability.py",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "6a29c7bc5df1e82d4928357b108a4e2160dc1e5cb854f46627560db880cfe23d"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "3bb4d21781513e5c71bd6cd6e1339780caee11e349418df5d92a6e91db52a221",
+      "path": "quantfit/repeatability_junit.py",
+      "working_exactly_equals_git_blob": true,
+      "working_sha256": "3bb4d21781513e5c71bd6cd6e1339780caee11e349418df5d92a6e91db52a221"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "d0161b72f1a7b59a914fd6bb88253f0d82ecb1561b9af4aee61223eaf43fc8c5",
+      "path": "quantfit/report_comparison.py",
+      "working_exactly_equals_git_blob": true,
+      "working_sha256": "d0161b72f1a7b59a914fd6bb88253f0d82ecb1561b9af4aee61223eaf43fc8c5"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "09946d40d61700d733b6c17dc0e224535386dc09fbd3daab2d58879fcf771136",
+      "path": "tests/test_json_envelope.py",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "80892b6113c60ba08b5ad0ffb1186e85bf46fd9b9f26b72f6afa6485891b751f"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "8d9fe500dd6f79fa5e47062547c0466c14fcdf71a6c9bc5ccc151472fbd5a07b",
+      "path": "tests/test_repeatability.py",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "dfd9cd6d5f8765d8d475211be3446ba77a3508a4ed8e36d1db481547f47d17ce"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "36d62ea5bac7e5dfedc9f179502ff136b9320f78b9f91d680d846c9930311079",
+      "path": "tools/ci_installed.py",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "5c8ba8ce638fa1e5af433f1c136863c100da84b3cb153c79168d5eb47400ef86"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "267bc75688f1dfc5ecc83ef87cb6467cfc37421df09547523c85943d26349068",
+      "path": "tools/ci_reference_campaign.py",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "562fa46df9ee127b2c4ff5653653fdb38d83bbf1cc12b67f4342d32e11ba8e0b"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "a98e576cd49cef18a35bb0a75cbd84e8fee32bdbc9eb598a221beea2ec159d0e",
+      "path": "tools/quickstart_check.py",
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "8292946f50806d5f84f2a9957fa4ead807ace78b55de3c5f4c46ee782340968d"
+    }
+  ],
+  "source_head": "c131b3eb4fa06fe531ecb8ab68ed9c248222fd75",
+  "source_tree": "0e301878c83be311315cfea10edc6118c628cdd2",
+  "unit_started_head": "c131b3eb4fa06fe531ecb8ab68ed9c248222fd75",
+  "utc_source": "clock tool"
+}

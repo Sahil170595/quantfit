@@ -386,6 +386,16 @@ def _build_parser() -> argparse.ArgumentParser:
         "--out", required=True, metavar="PATH", help="separate resolution artifact; must not overwrite either input"
     )
 
+    prep = sub.add_parser(
+        "repeatability",
+        help="offline full-report agreement, native T0 and original negative flags (0/3/4; refusal 2)",
+    )
+    sources = prep.add_mutually_exclusive_group(required=True)
+    sources.add_argument("--reports", nargs=3, metavar="REPORT", help="exactly three saved aggregate reports")
+    sources.add_argument("--bundle", metavar="DIR", help="verified schema-2 three-report replay bundle")
+    prep.add_argument("--out", metavar="PATH", help="write the separate repeatability JSON")
+    prep.add_argument("--junit", metavar="PATH", help="write eight comparison/native-axis JUnit cases")
+
     pt0 = sub.add_parser(
         "t0",
         help="check at least three uncached same-environment replicate reports "
@@ -1008,6 +1018,28 @@ def _dispatch(args: argparse.Namespace) -> int:
             {**decision, "decision_path": args.out, "report_path": args.report, "junit_path": args.junit},
             _human_gate,
         )
+
+    if args.cmd == "repeatability":
+        from quantfit.repeatability import analyze_replicates, encode_result, publish_outputs, validate_outputs
+        from quantfit.repeatability_junit import repeatability_to_junit
+
+        validate_outputs(args.reports, args.bundle, [args.out, args.junit])
+        result = analyze_replicates(args.reports, bundle_path=args.bundle)
+        outputs = []
+        if args.out:
+            outputs.append((args.out, encode_result(result)))
+        if args.junit:
+            outputs.append((args.junit, repeatability_to_junit(result).encode("utf-8")))
+        publish_outputs(args.reports, args.bundle, outputs)
+
+        def human_repeatability():
+            print("Full report agreement: " + ("PASS" if result["full_report_repeatability"]["pass"] else "DIFFERENT"))
+            print(f"Native T0: {result['native_t0']['status']} (exit {result['native_t0']['exit_code']})")
+            for run in result["runs"]:
+                print(f"{run['path']}: {run['verdict']} (native exit {run['native_exit_code']})")
+            print(result["scope"])
+
+        return _emit(args, "repeatability", result["exit_code"], result, human_repeatability)
 
     if args.cmd == "bundle":
         from quantfit.bundle import create_bundle, create_replay_bundle, verify_bundle, verify_replay_bundle

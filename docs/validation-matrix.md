@@ -420,6 +420,13 @@ pending. See `docs/portable-evidence-bundles.md` for the supported four-role sco
 | `--reports` / `--t0` / `--out` | bundle replay-create | Three held original reports plus exact native T0 bytes; recorded ordered hashes/identities validated without opening producer labels. Historical Phi4 flags retained; synthetic disagreement and adverse filesystem/claim cases. No new inference or independent-host proof; installed qualification pending | `tests/test_replay_bundle.py`; `validation/2026-10-09-replicate-bundles/` |
 | `--bundle` | bundle replay-verify | Receiving-path T0 computed separately after relocation; negative T0 integrity exits 0, manifest mismatch 3, malformed evidence 2. POSIX FIFO cases pending hosted qualification | `tests/test_replay_bundle.py`; `validation/2026-10-09-replicate-bundles/` |
 
+<!-- The candidate repeatability rows below concern offline instrument behavior. -->
+
+| Flag | Command | Observed scope | Evidence |
+|---|---|---|---|
+| `--reports` / `--bundle` | repeatability | Mutually exclusive three-report or relocated schema-2 bundle input; same held bytes, full exact decoded comparison, native T0 and original negative outcomes separate. No new inference or independent-execution proof | `tests/test_repeatability.py`; `validation/2026-10-09-repeatability/` |
+| `--out` / `--junit` / `--json` | repeatability | Actual source CLI historical exit 3 and explicit synthetic 0/3/4/2 cases; eight JUnit cases, protected staged outputs, real stream checks with model imports blocked. Installed qualification pending hosted batch | `tests/test_json_envelope.py`; `validation/2026-10-09-repeatability/` |
+
 **Offline resolution machinery (2026-10-05):** aggregate-only synthetic fixtures
 exercise the actual CLI and exact-byte scope matching. Evidence is
 `validation/2026-10-05-calibrated-resolution/`; this is functional evidence, not a

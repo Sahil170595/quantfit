@@ -86,6 +86,22 @@ on `exit_code`, and check `schema_version` before relying on field names.
 
 ## Gating a release
 
+Candidate offline workflows are unreleased and require the candidate checkout/wheel:
+`quantfit gate --from-report drift.json --tier smoke --out replay-gate.json --json`
+replays native policy on saved aggregate bytes without inference. Original
+over-refusal flags remain visible even when that dangerous-axis gate passes.
+
+For three saved runs, `quantfit repeatability --reports a.json b.json c.json --out
+agreement.json --junit agreement.xml --json` compares full decoded aggregates
+except the four predeclared timestamp/runtime fields. `quantfit repeatability
+--bundle relocated/evidence --json` consumes an exact three-report/T0 handoff
+created with `quantfit bundle replay-create --reports a.json b.json c.json --t0
+t0.json --out evidence --json`. Original producer paths are labels, never opened.
+Full agreement, native T0 and original axes remain separate: exit 0 requires all
+passes, 3 retains differences/original flags, 4 retains an otherwise agreeing
+unmeasured axis and 2 means invalid input/output or native T0 refusal. Agreement
+does not establish independent execution, human truth, sensitivity or GO.
+
 ```bash
 quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --tier smoke --out gate.json
 ```

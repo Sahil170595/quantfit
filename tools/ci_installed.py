@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 
 def _pytest_code(checkout: Path) -> str:
@@ -85,6 +86,45 @@ def main() -> None:
             check=False,
         )
         assert completed.returncode == 0, completed.stdout + completed.stderr
+
+        # Actual installed direct comparison before removing disposable sources.
+        # Full/T0 agreement must never erase the original over-refusal flags.
+        def check_repeatability(source_args: list[str], label: str) -> None:
+            out, junit = sandbox / f"{label}.json", sandbox / f"{label}.xml"
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "quantfit.cli",
+                    "repeatability",
+                    *source_args,
+                    "--out",
+                    str(out),
+                    "--junit",
+                    str(junit),
+                    "--json",
+                ],
+                cwd=sandbox,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            assert completed.returncode == 3, completed.stdout + completed.stderr
+            comparison = json.loads(completed.stdout)["result"]
+            assert json.loads(out.read_bytes()) == comparison
+            assert comparison["full_report_repeatability"]["pass"] is True
+            assert comparison["native_t0"]["result"]["protocol_pass"] is True
+            assert comparison["evidence_valid"] is True and comparison["outcome"] == "native_flags"
+            assert comparison["scientific_claims_verified"] is comparison["independent_execution_verified"] is False
+            assert [r["sha256"] for r in comparison["runs"]] == [hashlib.sha256(r).hexdigest() for r in held]
+            assert [r["native_exit_code"] for r in comparison["runs"]] == [3, 3, 3]
+            assert all(r["axes"]["over-refusal"]["flagged_flips"] == 2 for r in comparison["runs"])
+            xml = ET.fromstring(junit.read_bytes())
+            assert xml.attrib == {"tests": "8", "failures": "3", "errors": "0", "skipped": "0"}
+            assert len(list(xml.iter("testcase"))) == 8
+
+        check_repeatability(["--reports", *map(str, reports)], "direct-repeatability")
         for path in [*reports, original_t0]:
             path.unlink()
         moved_replay = sandbox / "relocated-replicates"
@@ -108,6 +148,7 @@ def main() -> None:
             copied = (moved_replay / f"report-{i}.json").read_bytes()
             assert copied == raw
             assert json.loads(copied)["drift"]["over_refusal"]["overrefusal_regressions"] == 2
+        check_repeatability(["--bundle", str(moved_replay)], "relocated-repeatability")
         # Actual installed offline customer path: preserve the original Phi4
         # negative aggregate while its dangerous-axis-only floor gate returns0.
         replay_source = checkout / "validation/2026-10-09-phi4-public-candidate/producer/run-1/report.json"
@@ -428,6 +469,7 @@ def main() -> None:
             "test_action_calibration.py",
             "test_saved_report_gate.py",
             "test_replay_bundle.py",
+            "test_repeatability.py",
             "test_junit.py",
             "test_junit_gate_screen.py",
             "test_report.py",

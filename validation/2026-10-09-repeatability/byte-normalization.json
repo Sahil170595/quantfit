@@ -1,0 +1,206 @@
+{
+  "changes": [
+    {
+      "canonical_git_sha256": "7b250f88b42211589717e3548646056eb8cf1771ab1ad4fd75a8fb469061a2e7",
+      "canonical_git_size_bytes": 98,
+      "observed_raw_sha256": "d9a883328ab45f1fbeb07bdd0fa65204296c461297bc45e3ebef47f4f02d733c",
+      "observed_raw_size_bytes": 100,
+      "only_crlf_to_lf_changed": true,
+      "path": "agent-docs.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\agent-docs.log"
+    },
+    {
+      "canonical_git_sha256": "c9806cd6db1bccaa6b568fff2559766588a568435ac72c348a2b5ca18fb498a0",
+      "canonical_git_size_bytes": 1316,
+      "observed_raw_sha256": "b0c899abec76be1be8e20a545082313d52a9bb2b0dd356ae92728dc11a2934e4",
+      "observed_raw_size_bytes": 1339,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v2.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\focused-v2.log"
+    },
+    {
+      "canonical_git_sha256": "ccd347684bd166bd93f9acc88884983b8b28f002d87ac4d917216a3d496a4747",
+      "canonical_git_size_bytes": 19027,
+      "observed_raw_sha256": "4a8ddceb637b46487092e319f8debdd5c7d181baf3bbbfcdc9bac427c134f5c2",
+      "observed_raw_size_bytes": 19041,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v2.xml",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\focused-v2.xml"
+    },
+    {
+      "canonical_git_sha256": "2a0f4647af186a303ded4c2e361bcc2364d0b20386e56e0e28fc5b075812e556",
+      "canonical_git_size_bytes": 96,
+      "observed_raw_sha256": "4b862d42d7886db9be21b3793e195766fbd2a21098a5fe3066a1dda293643d32",
+      "observed_raw_size_bytes": 100,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v3.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\focused-v3.log"
+    },
+    {
+      "canonical_git_sha256": "15d4f925cf87fe66abb65606de8a598798ebfcc0fd4437c54a45f17b2375acc4",
+      "canonical_git_size_bytes": 2617,
+      "observed_raw_sha256": "99c6a590b7b6fdbf53b169cfb1ba8d8ede6c0e50383d6013f05044c3af72cee8",
+      "observed_raw_size_bytes": 2664,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v4.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\focused-v4.log"
+    },
+    {
+      "canonical_git_sha256": "56e4383407b32768f8708bee2ed5af89760ce5d4c5deeba005365130f093f96a",
+      "canonical_git_size_bytes": 22819,
+      "observed_raw_sha256": "6f9436468239d1737192364dccd23039251c088c4c68132ad029ab8506bfa7ca",
+      "observed_raw_size_bytes": 22856,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v4.xml",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\focused-v4.xml"
+    },
+    {
+      "canonical_git_sha256": "36e4655043a81f36f5f8b7d6e74842c64f1ee75952446c2d72b0087b93270ea5",
+      "canonical_git_size_bytes": 1608,
+      "observed_raw_sha256": "6d9aef0e3081cfdb2ff16a23ef0c8f4df9305ee576f3513abfece4f85500a243",
+      "observed_raw_size_bytes": 1631,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v5.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\focused-v5.log"
+    },
+    {
+      "canonical_git_sha256": "3fbda8ba56722089353d1611a1e53334d2f7669b237748e1ef9e89d9a1fcc214",
+      "canonical_git_size_bytes": 22108,
+      "observed_raw_sha256": "7bff030af37b6510c6c60a5edd0def1a59a3a57325f303735e8a789f2a4bb492",
+      "observed_raw_size_bytes": 22121,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v5.xml",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\focused-v5.xml"
+    },
+    {
+      "canonical_git_sha256": "c5a4909ec8a84e44730b4256783b14051126fb075707f5b49a7464277251ff97",
+      "canonical_git_size_bytes": 28,
+      "observed_raw_sha256": "06f2af46de0501838a138d689fc2583da4e1f7991e6ccad07c5bd163de5d6038",
+      "observed_raw_size_bytes": 29,
+      "only_crlf_to_lf_changed": true,
+      "path": "format-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\format-final.log"
+    },
+    {
+      "canonical_git_sha256": "92e0b089e2ffae3a088fe1747a9a870246ee7f19c0ac488476f37bdb410319b0",
+      "canonical_git_size_bytes": 112,
+      "observed_raw_sha256": "7947e816a507885d8e8bac14734d95bd7eecb502b5203bcdec0544b43f06594e",
+      "observed_raw_size_bytes": 113,
+      "only_crlf_to_lf_changed": true,
+      "path": "functional.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\functional.log"
+    },
+    {
+      "canonical_git_sha256": "7927014f55129b34b6afb9c34fc1254a489f43a79087ccd330c0ac4f72ea4514",
+      "canonical_git_size_bytes": 771,
+      "observed_raw_sha256": "6d49766c8bdd038bc4d9301d310a7c7167c2a6a09f9bcb3e25b0e074f099f909",
+      "observed_raw_size_bytes": 777,
+      "only_crlf_to_lf_changed": true,
+      "path": "historical-prose.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\historical-prose.log"
+    },
+    {
+      "canonical_git_sha256": "b0200ac16d66ee1a27deda896bffa43e68da92cd5244f6639de260ef0cf6f495",
+      "canonical_git_size_bytes": 99,
+      "observed_raw_sha256": "93b585796bc27fc8784e378ff63d6760ba44dfbee1f7aa63734df9bd16055df7",
+      "observed_raw_size_bytes": 101,
+      "only_crlf_to_lf_changed": true,
+      "path": "initial-green.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\initial-green.log"
+    },
+    {
+      "canonical_git_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "canonical_git_size_bytes": 19,
+      "observed_raw_sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+      "observed_raw_size_bytes": 20,
+      "only_crlf_to_lf_changed": true,
+      "path": "lint-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\lint-final.log"
+    },
+    {
+      "canonical_git_sha256": "c2f051c7ed60a4b262e463dafd27e66ad9009ff5b296ceb2dd964d6bd8a496e6",
+      "canonical_git_size_bytes": 98,
+      "observed_raw_sha256": "51b2f99402f3446f0d5c0b181b9ee9c5dd7ee9b3ec81ffabb67f036ac28e4b41",
+      "observed_raw_size_bytes": 100,
+      "only_crlf_to_lf_changed": true,
+      "path": "parser-boundary.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\parser-boundary.log"
+    },
+    {
+      "canonical_git_sha256": "a9d6aedf6409d921dd842d59a42bffb1e091ff589d95a2894314a536beec61f7",
+      "canonical_git_size_bytes": 112,
+      "observed_raw_sha256": "774627247225f329fe00b019788d1441fdfea3722b72cb962db4c0d9de6d2858",
+      "observed_raw_size_bytes": 114,
+      "only_crlf_to_lf_changed": true,
+      "path": "properties-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\properties-final.log"
+    },
+    {
+      "canonical_git_sha256": "7ed6d2bf769a59e09b6b2890bee3cbcfe11d4942814a4e39fee2a7fa66640454",
+      "canonical_git_size_bytes": 9122,
+      "observed_raw_sha256": "ed7229db2636951b741f1670cff38f08bada23c5e799c33074aec9d33447a282",
+      "observed_raw_size_bytes": 9223,
+      "only_crlf_to_lf_changed": true,
+      "path": "quickstart-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\quickstart-final.log"
+    },
+    {
+      "canonical_git_sha256": "f936a84daba86485007243812f1633475fed96a22a2e803a169cae2585024f1c",
+      "canonical_git_size_bytes": 973,
+      "observed_raw_sha256": "b8cc9c9558f29073512c6f027c25212d6c6fa1ee03707ab77c411074db529bb1",
+      "observed_raw_size_bytes": 989,
+      "only_crlf_to_lf_changed": true,
+      "path": "red.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\red.log"
+    },
+    {
+      "canonical_git_sha256": "a3c5b02ab9cac8a5321b255a8eaa5190a97b51b114418e47f7e480a523c33e64",
+      "canonical_git_size_bytes": 979,
+      "observed_raw_sha256": "131fb28080e35bc27c4c974a752c7906ca4b76a2163264b6fc8863b9451cee6e",
+      "observed_raw_size_bytes": 987,
+      "only_crlf_to_lf_changed": true,
+      "path": "red.xml",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\red.xml"
+    },
+    {
+      "canonical_git_sha256": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8",
+      "canonical_git_size_bytes": 43,
+      "observed_raw_sha256": "0c37c4158c91ef55c724ba017bf6465f26018199badb08e3ff13f98acdf056c2",
+      "observed_raw_size_bytes": 44,
+      "only_crlf_to_lf_changed": true,
+      "path": "types-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\types-final.log"
+    },
+    {
+      "canonical_git_sha256": "79377f822d552edbf220f1d53520284c6be6f997612b909b8f6561d0d26856c0",
+      "canonical_git_size_bytes": 3470,
+      "observed_raw_sha256": "0e41f488b616a3509c52e2fb3fc1faa2dccda7fb3faf79a2909a2fb502aeb35a",
+      "observed_raw_size_bytes": 3519,
+      "only_crlf_to_lf_changed": true,
+      "path": "unit-before-agent-docs.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\unit-before-agent-docs.log"
+    },
+    {
+      "canonical_git_sha256": "822de780871e94893b868d2df7311a3a129456dbc47aef6ebfb3ce70be9c222d",
+      "canonical_git_size_bytes": 261026,
+      "observed_raw_sha256": "a4abc417023dcca590d741cee92849c0ae1df64b26bd04ea34a2ad3389ff952c",
+      "observed_raw_size_bytes": 261039,
+      "only_crlf_to_lf_changed": true,
+      "path": "unit-before-agent-docs.xml",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\unit-before-agent-docs.xml"
+    },
+    {
+      "canonical_git_sha256": "fadf4442ca9dbc5489f53b04939ba6095be19f46d1bc0824ff4b3303e117b031",
+      "canonical_git_size_bytes": 2365,
+      "observed_raw_sha256": "f80e628a6897525abce6edd09a504ccf5d5d28b6af109073bde39181ff5491fe",
+      "observed_raw_size_bytes": 2395,
+      "only_crlf_to_lf_changed": true,
+      "path": "unit-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\repeatability-development\\unit-final.log"
+    }
+  ],
+  "evidence_head": "0698d314a636e5533fc43da4acd40b2c68330bc0",
+  "schema_version": 1,
+  "scope": "Git text normalization only; original Windows bytes preserved, no product, test, result or scientific decision changed.",
+  "source_head": "c131b3eb4fa06fe531ecb8ab68ed9c248222fd75"
+}

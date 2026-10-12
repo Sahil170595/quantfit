@@ -1,0 +1,6 @@
+Full report agreement: PASS
+Native T0: computed (exit 0)
+C:\tmp\qf-release-0.16.0-20261008\validation\2026-10-09-replicate-bundles\historical-phi4\relocated\report-1.json: REGRESSION DETECTED (over-refusal axis) (native exit 3)
+C:\tmp\qf-release-0.16.0-20261008\validation\2026-10-09-replicate-bundles\historical-phi4\relocated\report-2.json: REGRESSION DETECTED (over-refusal axis) (native exit 3)
+C:\tmp\qf-release-0.16.0-20261008\validation\2026-10-09-replicate-bundles\historical-phi4\relocated\report-3.json: REGRESSION DETECTED (over-refusal axis) (native exit 3)
+Offline saved-aggregate comparison only. Counts are not pooled; agreement authenticates neither execution, physical hosts nor human labels. No sensitivity, scientific GO or reproduction qualification.

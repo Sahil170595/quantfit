@@ -41,10 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.23.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.23.0).
+This README documents [quantfit 0.24.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.24.0).
 All workflows below are available in this release.
 
-Install with `pip install "quantfit[inspect,gguf]==0.23.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.24.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -471,6 +471,22 @@ relocation, without reopening producer locations. An intact negative T0 still
 exits 0 while `protocol_pass` stays false. It does not establish full-payload
 repeatability, independent execution, human-label truth or scientific GO.
 See [the three-report handoff contract](docs/replicate-bundles.md).
+
+Offline comparison, available since 0.24.0, keeps full-report agreement, native T0 and original
+per-run outcomes separate:
+
+```bash
+quantfit repeatability --reports run-1.json run-2.json run-3.json --out agreement.json --junit agreement.xml --json
+quantfit repeatability --bundle relocated/replicate-evidence/ --out agreement.json --junit agreement.xml --json
+```
+
+Only the four timestamp/runtime fields declared in
+[the comparison contract](docs/repeatability.md) are ignored. All remaining
+decoded types and values are exact. Exit 0 requires agreement and all original
+native runs to pass; repeated original flags still exit 3, an otherwise agreeing
+unmeasured axis exits 4, and native T0 refusal or malformed evidence exits 2.
+No counts are pooled and agreement does not establish independent execution,
+human-label truth, sensitivity or scientific GO.
 
 ## Fresh native cold replicates
 

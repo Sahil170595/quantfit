@@ -1,0 +1,167 @@
+{
+  "additional_invocation_defect": "initial Ruff format command named two nonexistent tool files; exact CI paths subsequently passed",
+  "causes": {
+    "focused-v2.xml": "test called existing native API with invalid positional out_path; corrected keyword",
+    "focused-v3.xml": "command named nonexistent test file, zero tests executed; invocation defect",
+    "focused-v4.xml": "new test wrongly required JSON for argparse-rejected syntax",
+    "focused-v5.xml": "new test wrongly assumed trailing --json could not satisfy an incomplete positional nargs value; test now puts selected flag before malformed arguments",
+    "red.xml": "TDD collection import: new module absent before implementation",
+    "unit-before-agent-docs.xml": "source61c9/424 whole-unit failed existing retrieval inventory because llms.txt omitted repeatability; docs-only candidate entries corrected without test changes"
+  },
+  "checker_or_policy_waivers": 0,
+  "runs": [
+    {
+      "artifact": "red.xml",
+      "counts": {
+        "cases": 1,
+        "declared_suite_counts": {
+          "errors": 1,
+          "failures": 0,
+          "skipped": 0,
+          "tests": 1
+        },
+        "errors": 1,
+        "failures": 0,
+        "passed": 0,
+        "skipped": 0,
+        "suite_seconds": 0.271
+      },
+      "immutable_started_head": null,
+      "scope": "working-source development, not immutable-head qualification"
+    },
+    {
+      "artifact": "initial-green.xml",
+      "counts": {
+        "cases": 51,
+        "declared_suite_counts": {
+          "errors": 0,
+          "failures": 0,
+          "skipped": 0,
+          "tests": 51
+        },
+        "errors": 0,
+        "failures": 0,
+        "passed": 51,
+        "skipped": 0,
+        "suite_seconds": 2.326
+      },
+      "immutable_started_head": null,
+      "scope": "working-source development, not immutable-head qualification"
+    },
+    {
+      "artifact": "focused-v2.xml",
+      "counts": {
+        "cases": 130,
+        "declared_suite_counts": {
+          "errors": 0,
+          "failures": 1,
+          "skipped": 2,
+          "tests": 130
+        },
+        "errors": 0,
+        "failures": 1,
+        "passed": 127,
+        "skipped": 2,
+        "suite_seconds": 36.159
+      },
+      "immutable_started_head": null,
+      "scope": "working-source development, not immutable-head qualification"
+    },
+    {
+      "artifact": "focused-v3.xml",
+      "counts": {
+        "cases": 0,
+        "declared_suite_counts": {
+          "errors": 0,
+          "failures": 0,
+          "skipped": 0,
+          "tests": 0
+        },
+        "errors": 0,
+        "failures": 0,
+        "passed": 0,
+        "skipped": 0,
+        "suite_seconds": 0.003
+      },
+      "immutable_started_head": null,
+      "scope": "working-source development, not immutable-head qualification"
+    },
+    {
+      "artifact": "focused-v4.xml",
+      "counts": {
+        "cases": 148,
+        "declared_suite_counts": {
+          "errors": 0,
+          "failures": 1,
+          "skipped": 2,
+          "tests": 148
+        },
+        "errors": 0,
+        "failures": 1,
+        "passed": 145,
+        "skipped": 2,
+        "suite_seconds": 66.96
+      },
+      "immutable_started_head": null,
+      "scope": "working-source development, not immutable-head qualification"
+    },
+    {
+      "artifact": "focused-v5.xml",
+      "counts": {
+        "cases": 148,
+        "declared_suite_counts": {
+          "errors": 0,
+          "failures": 1,
+          "skipped": 2,
+          "tests": 148
+        },
+        "errors": 0,
+        "failures": 1,
+        "passed": 145,
+        "skipped": 2,
+        "suite_seconds": 68.239
+      },
+      "immutable_started_head": null,
+      "scope": "working-source development, not immutable-head qualification"
+    },
+    {
+      "artifact": "parser-boundary.xml",
+      "counts": {
+        "cases": 1,
+        "declared_suite_counts": {
+          "errors": 0,
+          "failures": 0,
+          "skipped": 0,
+          "tests": 1
+        },
+        "errors": 0,
+        "failures": 0,
+        "passed": 1,
+        "skipped": 0,
+        "suite_seconds": 2.086
+      },
+      "immutable_started_head": null,
+      "scope": "working-source development, not immutable-head qualification"
+    },
+    {
+      "artifact": "unit-before-agent-docs.xml",
+      "counts": {
+        "cases": 2035,
+        "declared_suite_counts": {
+          "errors": 0,
+          "failures": 1,
+          "skipped": 42,
+          "tests": 2035
+        },
+        "errors": 0,
+        "failures": 1,
+        "passed": 1992,
+        "skipped": 42,
+        "suite_seconds": 263.511
+      },
+      "immutable_started_head": "61c9de4754098ea7bc1042775f9f044f193a9ef5",
+      "scope": "whole unit started61c9, then only two doc lines424; product/tests frozen unchanged, failed llms inventory"
+    }
+  ],
+  "schema_version": 1
+}

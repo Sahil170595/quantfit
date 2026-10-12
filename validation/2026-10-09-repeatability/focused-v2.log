@@ -1,0 +1,23 @@
+.........................F.......s...........s.......................... [ 55%]
+..........................................................               [100%]
+================================== FAILURES ===================================
+______ test_relocated_bundle_uses_verified_held_bytes_without_reopening _______
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1361/test_relocated_bundle_uses_ver0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000015E340CDAC0>
+
+    def test_relocated_bundle_uses_verified_held_bytes_without_reopening(tmp_path, monkeypatch):
+        import quantfit.repeatability as module
+        import quantfit.replay_bundle as bundle
+        from quantfit.bundle import create_replay_bundle
+        from quantfit.reproduce import within_hardware_identical
+    
+        paths = reports(tmp_path)
+        t0 = tmp_path / "t0.json"
+>       within_hardware_identical(paths, str(t0))
+E       TypeError: within_hardware_identical() takes 1 positional argument but 2 were given
+
+tests\test_repeatability.py:228: TypeError
+=========================== short test summary info ===========================
+FAILED tests/test_repeatability.py::test_relocated_bundle_uses_verified_held_bytes_without_reopening
+1 failed, 127 passed, 2 skipped in 36.39s

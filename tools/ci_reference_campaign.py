@@ -24,6 +24,15 @@ import zipfile
 from pathlib import Path
 
 from quantfit.bundle import _json, _read, _report
+from quantfit.report_comparison import (
+    ALLOWED_VOLATILE_PATHS as _VOLATILE_PATHS,
+)
+from quantfit.report_comparison import (
+    differences as _differences,
+)
+from quantfit.report_comparison import (
+    normalized as _normalized,
+)
 from quantfit.reproduce import ReproduceError, within_hardware_identical
 from quantfit.resolution import MAX_REPORT_BYTES, _axes
 from quantfit.safety import verify
@@ -44,7 +53,7 @@ PAIR = {
         "sha256": "88c00229914083cd112853aab84ed51b87bdf6b9ce42f532d8c85c7c63b1730a",
     },
 }
-ALLOWED_VOLATILE_PATHS = ["/created_utc", "/judge_runtime_s", "/baseline/runtime_s", "/quantized/runtime_s"]
+ALLOWED_VOLATILE_PATHS = list(_VOLATILE_PATHS)
 PUBLIC_FILES = ["campaign.json", "assessment.json", "native-cold-run.json", "native-t0.json"] + [
     f"run-{i}/{name}" for i in range(1, 4) for name in ("report.json", "model-card.md")
 ]
@@ -61,38 +70,6 @@ class CampaignError(RuntimeError):
 def require(condition, message):
     if not condition:
         raise CampaignError(message)
-
-
-def _normalized(value):
-    result = copy.deepcopy(value)
-    del result["created_utc"], result["judge_runtime_s"]
-    for arm in ("baseline", "quantized"):
-        del result[arm]["runtime_s"]
-    return result
-
-
-def _differences(first, other, path=""):
-    if type(first) is not type(other):
-        return [path]
-    if isinstance(first, dict):
-        missing = set(first) ^ set(other)
-        return sorted(
-            [path + "/" + key for key in missing]
-            + [
-                item
-                for key in set(first) & set(other)
-                for item in _differences(first[key], other[key], path + "/" + key)
-            ]
-        )
-    if isinstance(first, list):
-        if len(first) != len(other):
-            return [path]
-        return [
-            item
-            for i, (left, right) in enumerate(zip(first, other))
-            for item in _differences(left, right, path + "/" + str(i))
-        ]
-    return [] if first == other else [path]
 
 
 def assess_reports(paths: list[Path], *, binary_sha256: str, threads: int) -> dict:
