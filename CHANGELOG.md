@@ -15,6 +15,19 @@
 
 ## Unreleased
 
+## 0.29.0 — Unreleased candidate
+
+- `quantfit/reference_assessment.py:assess_candidate` and `references assess` check a verified three-report handoff against an explicit bounded target offline, using held report/target bytes and separate receiving provenance. Original reports/T0 and historical versions remain unchanged.
+- A package-owned pure core shares the existing native campaign T0, full-payload comparison, axes and statistics; the CI adapter preserves its existing assessment wire and source-byte protection. Only the four declared volatile fields are ignored.
+- Native axis exits, unconfirmed flags, Wilson intervals and perfect-judge MDE floors remain visible. Known blockers exit 3; missing target facts/unsupported profiles/no measured axes exit 4; readiness for publication review alone exits 0. Malformed/private/integrity/unsafe inputs exit 2.
+- Weight sizes are explicit declarations; missing sizes cannot qualify, and the fixed QSR baseline cap does not prove actual weights or RAM fit. Checked atomic receiving output protects all input members, target and aliases.
+- Existing installed consumers cover original Phi4's blocked result and labeled synthetic positive/unknown cases. No new job, model run, dependency, upload or adjudication ingestion is introduced.
+
+Exact-head independent review and local/hosted acceptance are recorded on the PR
+before readiness. Version 0.29.0 is unpublished; even ready-for-review results leave
+registration, human/weight/physical/execution authentication, sensitivity and
+scientific GO unestablished.
+
 ## 0.28.0 — Unreleased candidate
 
 - `quantfit/reproduce_junit.py:reproduction_to_junit` and `reproduce --junit PATH` render ten stable cases from the existing native decision. Unknown T0 skips, negative T0 fails, and only the native `reproduced` / 0 / `passed=true` result passes overall; void or unverified outcomes cannot produce an all-green suite.

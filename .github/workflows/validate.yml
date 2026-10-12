@@ -289,6 +289,7 @@ jobs:
           ruff format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture
           mypy --strict quantfit/spec.py quantfit/engines/base.py
           mypy --strict --follow-imports=silent quantfit/reproduce_junit.py
+          mypy --strict --follow-imports=silent quantfit/reference_assessment.py
           quantfit audit
       - name: Verify and run actionlint
         run: |

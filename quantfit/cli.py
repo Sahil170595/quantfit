@@ -448,6 +448,15 @@ def _build_parser() -> argparse.ArgumentParser:
         )
     rverify.add_argument("--slug", required=True, help="registered reference slug")
     rverify.add_argument("--report", required=True, metavar="PATH", help="local artifact bytes to verify")
+    rassess = rsub.add_parser(
+        "assess",
+        help="offline receiving publication-review assessment (0 ready, 3 blocked, 4 unestablished, 2 malformed)",
+    )
+    rassess.add_argument("--bundle", required=True, metavar="DIR", help="schema-2 three-report replay bundle")
+    rassess.add_argument(
+        "--target", required=True, metavar="PATH", help="closed schema-1 target declaration JSON, at most 64 KiB"
+    )
+    rassess.add_argument("--out", metavar="PATH", help="separate receiving assessment JSON")
 
     pbundle = sub.add_parser(
         "bundle", help="offline portable aggregate evidence; integrity success is no scientific GO"
@@ -1314,6 +1323,11 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "references":
         from quantfit.reference_cli import list_references, verify_reference
 
+        if args.references_cmd == "assess":
+            from quantfit.reference_assessment import assess_candidate
+
+            result = assess_candidate(args.bundle, args.target, out_path=args.out)
+            return _emit(args, "references assess", result["exit_code"], result, lambda: print(result["outcome"]))
         if args.references_cmd == "list":
             result = list_references(args.registry)
             code = 0
