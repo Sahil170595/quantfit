@@ -1,16 +1,5 @@
 # quantfit
 
-## Release and source scope
-
-This README documents [quantfit 0.21.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.21.0).
-All workflows below are available in this release.
-
-Install with `pip install "quantfit[inspect,gguf]==0.21.0"`.
-
-Installed CPU/provider qualification establishes neither GPU execution, human-label
-authentication, sensitivity nor scientific GO.
-
-
 [![PyPI](https://img.shields.io/pypi/v/quantfit.svg)](https://pypi.org/project/quantfit/)
 [![Python](https://img.shields.io/pypi/pyversions/quantfit.svg)](https://pypi.org/project/quantfit/)
 [![License](https://img.shields.io/pypi/l/quantfit.svg)](https://github.com/Sahil170595/quantfit/blob/main/LICENSE)
@@ -52,22 +41,13 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-The published release is [0.16.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.16.0).
-This README also covers the open review stack
-[#120](https://github.com/Sahil170595/quantfit/pull/120) through
-[#124](https://github.com/Sahil170595/quantfit/pull/124):
-calibration-aware cards/action outputs, portable evidence bundles, fresh native
-cold replicates, managed GGUF Inspect and the bounded public campaign.
-These additions require the reviewed source; installing 0.16.0 does not add them.
-For the exact reviewed source, including Inspect and the GGUF recipes:
+This README documents [quantfit 0.21.1](https://github.com/Sahil170595/quantfit/releases/tag/v0.21.1).
+All workflows below are available in this release.
 
-```bash
-pip install "quantfit[inspect,gguf] @ git+https://github.com/Sahil170595/quantfit.git@9d59739645e5c0021aec8288b480ed2e9c5bea30"
-```
+Install with `pip install "quantfit[inspect,gguf]==0.21.1"`.
 
-Inspect is pinned to `inspect-ai==0.3.269`; the provider uses that qualified API.
-The core runtime includes Torch. GGUF generation uses native CPU inference;
-CPU qualification does not establish GPU execution or cross-hardware parity.
+Installed CPU/provider qualification establishes neither GPU execution, human-label
+authentication, sensitivity nor scientific GO.
 
 ## What it has found
 
