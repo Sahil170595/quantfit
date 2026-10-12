@@ -1,0 +1,16 @@
+verdict=UNRESOLVABLE
+printed-mde-pp=100.0
+resolution-status=refused
+mde-is-floor=false
+resolution-proven=false
+ungated-axis-regressed=unknown
+eps-mode=bound_calibration_report
+binding-status=scope_validated_actual_run_unobserved
+actual-run-matched=false
+assumptions-verified=false
+human-labels-verified=false
+calibration-sha256=c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014
+calibration-scope-fingerprint=f0612bfade2a9c35bc0146a171985e7ce99369ff0ca57b9d32b195bd39eb8313
+eps-source<<QF_7c86a2a7f6e19abe5b52da5988c74812
+bound calibration report SHA256 c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014; scope f0612bfade2a9c35bc0146a171985e7ce99369ff0ca57b9d32b195bd39eb8313; label truth not authenticated
+QF_7c86a2a7f6e19abe5b52da5988c74812

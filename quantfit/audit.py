@@ -1931,7 +1931,7 @@ SCHEMA_CLAIMS: tuple[SchemaClaim, ...] = (
     ),
     SchemaClaim(
         id="gate_decision",
-        modules=("quantfit/gate.py",),
+        modules=("quantfit/gate.py", "quantfit/safety/calibrated_gate.py"),
         docs=("docs/ci-integration.md",),
         sections=("Outputs", "Reconciling this document with the CLI"),
     ),

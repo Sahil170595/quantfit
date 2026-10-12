@@ -1,0 +1,15 @@
+{
+  "actual-run-matched": "false",
+  "assumptions-verified": "false",
+  "binding-status": "scope_validated_actual_run_unobserved",
+  "calibration-scope-fingerprint": "f0612bfade2a9c35bc0146a171985e7ce99369ff0ca57b9d32b195bd39eb8313",
+  "calibration-sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+  "eps-mode": "bound_calibration_report",
+  "human-labels-verified": "false",
+  "mde-is-floor": "false",
+  "printed-mde-pp": "100.0",
+  "resolution-proven": "false",
+  "resolution-status": "refused",
+  "ungated-axis-regressed": "unknown",
+  "verdict": "UNRESOLVABLE"
+}

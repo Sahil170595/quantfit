@@ -1,0 +1,15 @@
+{
+  "reviewed_implementation_sha": "8bdb0a6dd4cf54860f02c73e7891622f4edeb55e",
+  "source": ".github/actions/quantfit-gate/action.yml",
+  "step": "Preflight — the installed quantfit must expose the gate contract",
+  "public_package_version": "0.16.0",
+  "public_import_origin": "C:\\tmp\\qf-release-receipts-20261008\\public-install\\Lib\\site-packages\\quantfit\\__init__.py",
+  "pythonpath_removed": true,
+  "path_prepend": "C:\\tmp\\qf-release-receipts-20261008\\public-install\\Scripts",
+  "calibration_input": "validation/2026-10-08-calibration-aware-outputs/calibration.json",
+  "shell": "C:\\Program Files\\Git\\bin\\bash.exe -s",
+  "exit_code": 0,
+  "stdout": "quantfit 0.16.0\ngate flag contract OK\n",
+  "stderr": "",
+  "scope": "Actual action preflight with the released public package; no model generation, gate decision, calibrated card emission or installed full runtime qualification. Input bytes were unchanged. No persistent process or new dependency copy created."
+}

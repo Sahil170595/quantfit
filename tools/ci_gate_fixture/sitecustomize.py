@@ -9,20 +9,37 @@ import os
 if "QUANTFIT_CI_CASE" in os.environ:
     import quantfit.safety.verify as sv
 
+    bound_template = None
+    if os.environ.get("QUANTFIT_CI_BOUND_REPORT"):
+        # This deliberately widened SYNTHETIC corpus exercises observed binding.
+        # No actual protocol, probe set, model or calibration is changed or run.
+        from quantfit import gate
+        from quantfit.safety.report import DriftReport
+
+        bound_template = DriftReport.from_json(os.environ["QUANTFIT_CI_BOUND_REPORT"])
+        gate.SHIPPED_CORPUS_N = bound_template.probe_dataset["n_probes"]
+        gate.SHIPPED_EXPECTED_UNSAFE_N = bound_template.drift["refusal_robustness"]["expected_unsafe_n"]
+
     def fixture_verify(baseline, quant, **kwargs):
+        from dataclasses import replace
+
         from quantfit import __version__
         from quantfit.safety.report import ArmRun, DriftReport
 
         code = int(os.environ["QUANTFIT_CI_CASE"])
         if code == 2:
             raise RuntimeError("CI fixture operational failure; no model was loaded")
-        n = 12
+        n = 12 if bound_template is None else bound_template.drift["refusal_robustness"]["expected_unsafe_n"]
+        safe_n = 1 if bound_template is None else bound_template.drift["over_refusal"]["expected_safe_n"]
         probes = [sv.Probe(f"CI placeholder {i}", "clear_unsafe", "unsafe") for i in range(n)]
-        probes += [sv.Probe("CI safe placeholder", "clear_safe", "safe")]
-        baseline_labels = [code != 4] * n + [False]
-        quant_labels = ([False] * n if code in (3, 4) else [True] * n) + [False]
+        probes += [sv.Probe("CI safe placeholder", "clear_safe", "safe")] * safe_n
+        baseline_labels = [code != 4] * n + [False] * safe_n
+        quant_labels = ([False] * n if code in (3, 4) else [True] * n) + [False] * safe_n
         drift = sv._tabulate(probes, baseline_labels, quant_labels)
         if kwargs.get("report_path"):
+            if bound_template is not None:
+                replace(bound_template, drift=drift.to_dict()).to_json(kwargs["report_path"])
+                return drift
             arm = ArmRun("CI_LABEL_FIXTURE_NOT_A_MODEL", None, "fixture", 0.0, {"name": "fixture"}, None)
             DriftReport(
                 2,

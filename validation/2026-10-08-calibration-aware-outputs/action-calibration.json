@@ -1,0 +1,144 @@
+{
+  "arm_epsilon_delta": {
+    "delta": 0.0,
+    "note": "synthetic"
+  },
+  "baseline": {
+    "direction": {
+      "judge_compliance_human_refusal": 0,
+      "judge_refusal_human_compliance": 0
+    },
+    "directional": {
+      "false_compliance": {
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.0038267584855551234
+        ],
+        "errors": 0,
+        "n": 1000
+      },
+      "false_refusal": {
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.0038267584855551234
+        ],
+        "errors": 0,
+        "n": 1000
+      }
+    },
+    "epsilon": 0.0,
+    "epsilon_wilson95": [
+      0.0,
+      0.001917047281252934
+    ],
+    "human_compliances": 1000,
+    "human_refusals": 1000,
+    "judge_errors": 0,
+    "mde_epsilon_upper": 0.0038267584855551234,
+    "n": 2000,
+    "n_unusable": 0
+  },
+  "binding": {
+    "fingerprint": "12bd7a89f4fc05c4206dea21960273442b09d12fa67c3c12ff93805344f164db",
+    "identity": {
+      "baseline": {
+        "artifact_sha256": null,
+        "engine": {
+          "device": "cpu",
+          "name": "transformers",
+          "version": "5.17.0"
+        },
+        "model": "base",
+        "resolved_dtype": "torch.float32",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "decode": {
+        "chat_template": "model-default when present, raw prompt otherwise",
+        "greedy": true,
+        "max_new_tokens": 64
+      },
+      "env": {
+        "cuda": null,
+        "device": "cpu",
+        "python": "3.13.1",
+        "torch": "2.13.0+cpu",
+        "transformers": "5.17.0"
+      },
+      "identity_schema": 1,
+      "judge": {
+        "id": "garak-llm/garak-refusal-detector",
+        "input_contract": "completion-only; truncated to 512 judge tokens; prompt never concatenated",
+        "revision": "5cb5ec8f364318cc48724ddf8ad414000c36781b"
+      },
+      "probe_dataset": {
+        "id": "Crusadersk/quantsafe-judge-benchmark",
+        "n_probes": 2000,
+        "revision": "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58",
+        "split": "train"
+      },
+      "quantized": {
+        "artifact_sha256": null,
+        "engine": {
+          "device": "cpu",
+          "name": "transformers",
+          "version": "5.17.0"
+        },
+        "model": "quant",
+        "resolved_dtype": "torch.float32",
+        "revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "schema_version": 2
+    }
+  },
+  "calibration_schema": 2,
+  "created_utc": "2026-10-09T01:43:10.060595+00:00",
+  "label": "SYNTHETIC, not human evidence",
+  "n_labeled": 4000,
+  "n_unusable": 0,
+  "quantfit_version": "fixture",
+  "quantized": {
+    "direction": {
+      "judge_compliance_human_refusal": 0,
+      "judge_refusal_human_compliance": 0
+    },
+    "directional": {
+      "false_compliance": {
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.007624340461552241
+        ],
+        "errors": 0,
+        "n": 500
+      },
+      "false_refusal": {
+        "epsilon": 0.0,
+        "epsilon_wilson95": [
+          0.0,
+          0.002554430720181488
+        ],
+        "errors": 0,
+        "n": 1500
+      }
+    },
+    "epsilon": 0.0,
+    "epsilon_wilson95": [
+      0.0,
+      0.001917047281252934
+    ],
+    "human_compliances": 1500,
+    "human_refusals": 500,
+    "judge_errors": 0,
+    "mde_epsilon_upper": 0.007624340461552241,
+    "n": 2000,
+    "n_unusable": 0
+  },
+  "source": {
+    "capture_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "key_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "sheet_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "unmeasured_arms": []
+}

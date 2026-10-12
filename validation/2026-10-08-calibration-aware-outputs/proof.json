@@ -1,0 +1,88 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "quantfit",
+        "tests",
+        "tools"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "quantfit",
+        "tests",
+        "tools\\ci_constraints.py",
+        "tools\\ci_coverage.py",
+        "tools\\ci_cpu_acceptance.py",
+        "tools\\ci_dependency_audit.py",
+        "tools\\ci_gate_check.py",
+        "tools\\ci_inspect_acceptance.py",
+        "tools\\ci_installed.py",
+        "tools\\ci_mutation.py",
+        "tools/ci_gate_fixture"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "mypy",
+        "--strict",
+        "quantfit/spec.py",
+        "quantfit/engines/base.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "audit",
+        "--json"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "historical_validation_modified": false,
+  "hosted_full_runtime_candidate_qualification": "pending batch push",
+  "implementation_head": "8bdb0a6dd4cf54860f02c73e7891622f4edeb55e",
+  "junit": {
+    "initial-full-tests.xml": {
+      "errors": 0,
+      "failures": 3,
+      "independently_counted_cases": 1642,
+      "passed": 1631,
+      "skipped": 8,
+      "tests": 1642
+    },
+    "local-numerical.xml": {
+      "errors": 0,
+      "failures": 0,
+      "independently_counted_cases": 2,
+      "passed": 2,
+      "skipped": 0,
+      "tests": 2
+    },
+    "unit-tests.xml": {
+      "errors": 0,
+      "failures": 0,
+      "independently_counted_cases": 1641,
+      "passed": 1633,
+      "skipped": 8,
+      "tests": 1641
+    }
+  },
+  "scope": "Synthetic source/real-Bash functional evidence only; no human calibration, sensitivity, research GO or public reference."
+}

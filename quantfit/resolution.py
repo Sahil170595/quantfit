@@ -151,15 +151,15 @@ def _write(target: Path, artifact: dict) -> None:
             temporary.unlink(missing_ok=True)
 
 
-def analyze_resolution(report_path: str, calibration_path: str, out_path: str | None = None) -> dict:
-    """Return a separate, aggregate-only artifact using validated per-arm bounds.
+def analyze_resolution_inputs(report_path: str, calibration_path: str) -> tuple[DriftReport, dict]:
+    """Return the exact validated report instance and its conditional analysis.
 
     Matching scope and recomputed calibration counts do not authenticate the
     declared human labels or verify the conditional error model's assumptions.
-    Exit 0 means this analysis ran, including an unmeasurable axis; it is no gate.
+    Consumers rendering counts must use this same single-buffer report instance,
+    rather than rereading a path that may have changed since scope validation.
     """
     try:
-        target = _check_output(out_path, (report_path, calibration_path)) if out_path is not None else None
         report, report_sha256 = _report(report_path)
         axes = _axes(report)
         calibration = load_bound_calibration(calibration_path, report=report)
@@ -191,10 +191,20 @@ def analyze_resolution(report_path: str, calibration_path: str, out_path: str | 
             ],
             "scope": "Conditional resolution of recorded flagged counts; no safety verdict, research GO or sensitivity-control result.",
         }
-        if target is not None:
-            _write(target, artifact)
-        return artifact
+        return report, artifact
     except (OSError, RuntimeError) as exc:
         if isinstance(exc, ResolutionError):
             raise
+        raise ResolutionError(str(exc)) from exc
+
+
+def analyze_resolution(report_path: str, calibration_path: str, out_path: str | None = None) -> dict:
+    """Analyze aggregates; exit 0 is successful analysis, including unmeasurable axes, not a gate."""
+    try:
+        target = _check_output(out_path, (report_path, calibration_path)) if out_path is not None else None
+        _, artifact = analyze_resolution_inputs(report_path, calibration_path)
+        if target is not None:
+            _write(target, artifact)
+        return artifact
+    except OSError as exc:
         raise ResolutionError(str(exc)) from exc

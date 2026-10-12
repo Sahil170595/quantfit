@@ -273,6 +273,11 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     pe.add_argument("what", choices=("model-card",), help="what to emit")
     pe.add_argument("--report", required=True, metavar="PATH", help="a schema-v2 drift report written by --report")
+    pe.add_argument(
+        "--calibration-report",
+        metavar="PATH",
+        help="bound schema-2 calibration for separately labeled conditional resolution; no human-label authentication",
+    )
 
     pca = sub.add_parser(
         "calibrate",
@@ -840,7 +845,11 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "emit":
         from quantfit.modelcard import model_card_fragment
 
-        fragment = model_card_fragment(args.report)
+        fragment = (
+            model_card_fragment(args.report, calibration_report=args.calibration_report)
+            if args.calibration_report is not None
+            else model_card_fragment(args.report)
+        )
         return _emit(
             args,
             "emit",
