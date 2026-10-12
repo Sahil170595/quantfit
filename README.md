@@ -41,10 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.24.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.24.0).
+This README documents [quantfit 0.25.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.25.0).
 All workflows below are available in this release.
 
-Install with `pip install "quantfit[inspect,gguf]==0.24.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.25.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -487,6 +487,22 @@ native runs to pass; repeated original flags still exit 3, an otherwise agreeing
 unmeasured axis exits 4, and native T0 refusal or malformed evidence exits 2.
 No counts are pooled and agreement does not establish independent execution,
 human-label truth, sensitivity or scientific GO.
+
+## Retrieve public aggregate evidence
+
+Public aggregate retrieval, available since 0.25.0:
+
+```bash
+quantfit evidence fetch --out public-evidence/ --timeout-seconds 120 --json
+```
+
+The installed package pins twelve original files at one immutable public dataset
+commit, downloads anonymously with bounded raw bytes/deadline, and publishes only
+a new directory on supported Linux/Windows filesystems. The original negative
+Phi4 flags remain visible in separate receiving analysis: fetch integrity 0
+coexists with native analysis 3. No inference, registration, authenticated human
+labels, independent execution, sensitivity or scientific GO is established.
+See [the fixed snapshot and API contract](docs/public-evidence-fetch.md).
 
 ## Fresh native cold replicates
 

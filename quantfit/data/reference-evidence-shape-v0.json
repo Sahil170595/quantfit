@@ -1,0 +1,702 @@
+{
+  "files": {
+    "v0/campaigns/2026-10-09-phi4-cpu/assessment.json": {
+      "assessment_schema_version": "int",
+      "axes_by_run": [
+        {
+          "$ref": "shape_4"
+        },
+        {
+          "$ref": "shape_4"
+        },
+        {
+          "$ref": "shape_4"
+        }
+      ],
+      "blocking_reasons": {
+        "$ref": "shape_5"
+      },
+      "eligible_axes_before_publication": {
+        "$ref": "shape_6"
+      },
+      "excluded_axes": {
+        "$ref": "shape_6"
+      },
+      "full_report_repeatability": {
+        "allowed_volatile_paths": [
+          "str",
+          "str",
+          "str",
+          "str"
+        ],
+        "differing_paths": {
+          "$ref": "shape_6"
+        },
+        "normalized_sha256": [
+          "str",
+          "str",
+          "str"
+        ],
+        "pass": "true"
+      },
+      "human_labels_authenticated": "false",
+      "independent_execution_verified": "false",
+      "native_exits": {
+        "$ref": "shape_7"
+      },
+      "pair": "str",
+      "reference_registered": "false",
+      "registry_admission": "str",
+      "scientific_go": "false",
+      "scope": "str",
+      "sensitivity_established": "false",
+      "source_reports": [
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        }
+      ],
+      "spec_version": "str",
+      "t0": {
+        "$ref": "shape_19"
+      }
+    },
+    "v0/campaigns/2026-10-09-phi4-cpu/campaign.json": {
+      "actual_cold_cli_exit": "int",
+      "actual_default_tokens_in_all_reports": "int",
+      "actual_native_exits": {
+        "$ref": "shape_7"
+      },
+      "after_download_observations": {
+        "$ref": "shape_21"
+      },
+      "after_install_preflight": {
+        "$ref": "shape_21"
+      },
+      "binary": {
+        "archive_sha256": "str",
+        "asset": "str",
+        "executable_sha256": "str",
+        "source": "str",
+        "tag": "str"
+      },
+      "campaign_schema_version": "int",
+      "candidate": {
+        "campaign_source_sha256": "str",
+        "installed_origin": "str",
+        "installed_source_sha256": {
+          "quantfit/__init__.py": "str",
+          "quantfit/_inspect_registry.py": "str",
+          "quantfit/audit.py": "str",
+          "quantfit/backends/__init__.py": "str",
+          "quantfit/backends/compressed_tensors.py": "str",
+          "quantfit/backends/gguf.py": "str",
+          "quantfit/bundle.py": "str",
+          "quantfit/calibset.py": "str",
+          "quantfit/cli.py": "str",
+          "quantfit/cold_run.py": "str",
+          "quantfit/engines/__init__.py": "str",
+          "quantfit/engines/base.py": "str",
+          "quantfit/engines/compressed_tensors.py": "str",
+          "quantfit/engines/gguf.py": "str",
+          "quantfit/fit.py": "str",
+          "quantfit/gate.py": "str",
+          "quantfit/gpufit.py": "str",
+          "quantfit/inspect_gguf.py": "str",
+          "quantfit/inspect_hf.py": "str",
+          "quantfit/inspect_task.py": "str",
+          "quantfit/junit.py": "str",
+          "quantfit/modelcard.py": "str",
+          "quantfit/policy/__init__.py": "str",
+          "quantfit/policy/probe.py": "str",
+          "quantfit/policy/route.py": "str",
+          "quantfit/policy/target.py": "str",
+          "quantfit/quantize.py": "str",
+          "quantfit/reference_cli.py": "str",
+          "quantfit/refreports.py": "str",
+          "quantfit/registry.py": "str",
+          "quantfit/reproduce.py": "str",
+          "quantfit/resolution.py": "str",
+          "quantfit/safety/__init__.py": "str",
+          "quantfit/safety/cache.py": "str",
+          "quantfit/safety/calibrate.py": "str",
+          "quantfit/safety/calibrated_gate.py": "str",
+          "quantfit/safety/calibration_binding.py": "str",
+          "quantfit/safety/demo.py": "str",
+          "quantfit/safety/gguf_arm.py": "str",
+          "quantfit/safety/mde.py": "str",
+          "quantfit/safety/report.py": "str",
+          "quantfit/safety/verify.py": "str",
+          "quantfit/screen.py": "str",
+          "quantfit/spec.py": "str",
+          "quantfit/torchrt.py": "str",
+          "quantfit/verify.py": "str"
+        },
+        "source_head": "str",
+        "versions": {
+          "gguf": "str",
+          "hf-xet": "str",
+          "huggingface-hub": "str",
+          "psutil": "str",
+          "quantfit": "str",
+          "torch": "str",
+          "transformers": "str"
+        },
+        "wheel_file": "str",
+        "wheel_sha256": "str"
+      },
+      "execution_exit": "int",
+      "full_report_repeatability": "true",
+      "human_labels_authenticated": "false",
+      "native_threads_observed": "int",
+      "observed_cuda_available": "false",
+      "observed_mps_available": "false",
+      "omitted_public_token_flag": "true",
+      "pair_pins": {
+        "baseline": {
+          "$ref": "shape_22"
+        },
+        "quantized": {
+          "$ref": "shape_22"
+        }
+      },
+      "phase": "str",
+      "public_argv": [
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str",
+        "str"
+      ],
+      "public_files": [
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        }
+      ],
+      "reference_eligibility": "str",
+      "reference_registered": "false",
+      "revision": "str",
+      "scientific_go": "false",
+      "status": "str",
+      "t0_protocol_pass": "true",
+      "weights": {
+        "baseline": {
+          "$ref": "shape_23"
+        },
+        "quantized": {
+          "$ref": "shape_23"
+        }
+      }
+    },
+    "v0/campaigns/2026-10-09-phi4-cpu/manifest.json": {
+      "blocking_reasons": {
+        "$ref": "shape_5"
+      },
+      "files": [
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        },
+        {
+          "$ref": "shape_8"
+        }
+      ],
+      "full_report_repeatability": "true",
+      "hosted_run": "str",
+      "human_labels_authenticated": "false",
+      "independent_execution_verified": "false",
+      "native_exits": {
+        "$ref": "shape_7"
+      },
+      "original_native_t0_paths": "str",
+      "pair": "str",
+      "publication_schema_version": "int",
+      "registered_reference_count": "int",
+      "registry_admission": "str",
+      "scientific_go": "false",
+      "source_head": "str",
+      "spec_version": "str",
+      "t0_protocol_pass": "true"
+    },
+    "v0/campaigns/2026-10-09-phi4-cpu/native-cold-run.json": {
+      "capture_requested": "false",
+      "cold_run_schema_version": "int",
+      "completion_cache_requested": "false",
+      "exit_code": "int",
+      "human_labels_authenticated": "false",
+      "independent_execution_verified": "false",
+      "preflight_observations": {
+        "$ref": "shape_21"
+      },
+      "requested": {
+        "baseline": "str",
+        "baseline_revision": "str",
+        "max_new_tokens": "int",
+        "quant": "str",
+        "quant_revision": "str",
+        "timeout_seconds": "float"
+      },
+      "requested_runs": "int",
+      "runner": "str",
+      "runs": [
+        {
+          "$ref": "shape_28"
+        },
+        {
+          "$ref": "shape_28"
+        },
+        {
+          "$ref": "shape_28"
+        }
+      ],
+      "scientific_go": "false",
+      "statement": "str",
+      "status": "str",
+      "t0": {
+        "$ref": "shape_19"
+      },
+      "tool_version": "str",
+      "weight_cache_may_be_reused": "true"
+    },
+    "v0/campaigns/2026-10-09-phi4-cpu/native-t0.json": {
+      "$ref": "shape_19"
+    },
+    "v0/campaigns/2026-10-09-phi4-cpu/run-1/report.json": {
+      "$ref": "shape_35"
+    },
+    "v0/campaigns/2026-10-09-phi4-cpu/run-2/report.json": {
+      "$ref": "shape_35"
+    },
+    "v0/campaigns/2026-10-09-phi4-cpu/run-3/report.json": {
+      "$ref": "shape_35"
+    }
+  },
+  "shape_version": 1,
+  "source_commit": "3a4ff4e086f9d72ad828134873b01fa19b550059",
+  "templates": {
+    "shape_1": [
+      "float",
+      "float"
+    ],
+    "shape_10": {
+      "binary_sha256": "str",
+      "device": "str",
+      "n_gpu_layers": "int",
+      "name": "str",
+      "offload_device": "str",
+      "op_offload": "false",
+      "source": "str",
+      "threads": "int"
+    },
+    "shape_11": {
+      "artifact_sha256": "str",
+      "engine": {
+        "$ref": "shape_10"
+      },
+      "model": "str",
+      "resolved_dtype": "str",
+      "revision": "str"
+    },
+    "shape_12": {
+      "baseline": {
+        "$ref": "shape_11"
+      },
+      "quantized": {
+        "$ref": "shape_11"
+      }
+    },
+    "shape_13": {
+      "chat_template": "str",
+      "do_sample": "false",
+      "max_new_tokens": "int"
+    },
+    "shape_14": {
+      "card_xstest_accuracy": "null",
+      "card_xstest_accuracy_label": "str",
+      "id": "str",
+      "input_contract": "str",
+      "revision": "str"
+    },
+    "shape_15": {
+      "id": "str",
+      "n_probes": "int",
+      "revision": "str",
+      "split": "str"
+    },
+    "shape_16": {
+      "arms": {
+        "$ref": "shape_12"
+      },
+      "decode": {
+        "$ref": "shape_13"
+      },
+      "judge": {
+        "$ref": "shape_14"
+      },
+      "probe_dataset": {
+        "$ref": "shape_15"
+      },
+      "quantfit_version": "str",
+      "schema_version": "int"
+    },
+    "shape_17": {
+      "path": "str",
+      "report_sha256": "str"
+    },
+    "shape_18": [
+      {
+        "$ref": "shape_17"
+      },
+      {
+        "$ref": "shape_17"
+      },
+      {
+        "$ref": "shape_17"
+      }
+    ],
+    "shape_19": {
+      "check": "str",
+      "differing": {
+        "$ref": "shape_6"
+      },
+      "environment_identity": {
+        "$ref": "shape_9"
+      },
+      "identity_sha256": "str",
+      "independent_execution_verified": "false",
+      "measurement_identity": {
+        "$ref": "shape_16"
+      },
+      "meets_protocol_replicate_count": "true",
+      "n_replicates": "int",
+      "pass": "true",
+      "protocol_pass": "true",
+      "replicates_are_distinct_files": "true",
+      "reports": {
+        "$ref": "shape_18"
+      },
+      "rule": "str",
+      "statement": "str",
+      "t0_schema_version": "int"
+    },
+    "shape_2": {
+      "flagged_flips": "int",
+      "human_confirmed_flips": "null",
+      "measurable": "true",
+      "n_at_risk": "int",
+      "n_axis": "int",
+      "null_interpretation": "null",
+      "perfect_judge_mde_floor_80pct_power": "float",
+      "two_sided_95pct_wilson": {
+        "$ref": "shape_1"
+      }
+    },
+    "shape_20": {
+      "flags": "str",
+      "model name": "str"
+    },
+    "shape_21": {
+      "cpu_observations": {
+        "$ref": "shape_20"
+      },
+      "disk_free_bytes": "int",
+      "gpu_capability_observed": "null",
+      "gpu_driver_observed": "null",
+      "gpu_toolkit_observed": "null",
+      "kernel": "str",
+      "logical_cpu_count": "int",
+      "machine": "str",
+      "native_threads_observed": "int",
+      "observed_utc": "str",
+      "platform": "str",
+      "psutil": "str",
+      "python": "str",
+      "ram_available_bytes": "int",
+      "ram_total_bytes": "int"
+    },
+    "shape_22": {
+      "dtype": "str",
+      "ref": "str",
+      "sha256": "str",
+      "size_bytes": "int"
+    },
+    "shape_23": {
+      "resolved_dtype": "str",
+      "resolved_revision": "str",
+      "sha256": "str",
+      "size_bytes": "int"
+    },
+    "shape_24": [
+      "str",
+      "str",
+      "str",
+      "str",
+      "str",
+      "str",
+      "str",
+      "str",
+      "str",
+      "str",
+      "str",
+      "str",
+      "str",
+      "str",
+      "str",
+      "str"
+    ],
+    "shape_25": {
+      "direct_child_reaped": "true",
+      "grandchild_reaping_verified": "false",
+      "group_sigkill_sent": "false",
+      "group_sigterm_sent": "false",
+      "no_live_group_members_observed": "true",
+      "observed_group_after_cleanup": {
+        "$ref": "shape_6"
+      },
+      "observed_group_before_cleanup": {
+        "$ref": "shape_6"
+      }
+    },
+    "shape_26": {
+      "baseline": "int",
+      "quantized": "int"
+    },
+    "shape_27": {
+      "arm_threads_observed": {
+        "$ref": "shape_26"
+      },
+      "path": "str",
+      "regression_detected": "true",
+      "reported_env_device": "str",
+      "sha256": "str",
+      "size_bytes": "int",
+      "unmeasurable_axes": {
+        "$ref": "shape_6"
+      }
+    },
+    "shape_28": {
+      "aggregate_validation": "str",
+      "argv": {
+        "$ref": "shape_24"
+      },
+      "cleanup": {
+        "$ref": "shape_25"
+      },
+      "elapsed_seconds": "float",
+      "final_report": {
+        "$ref": "shape_27"
+      },
+      "index": "int",
+      "native_exit_code": "int",
+      "pid": "int",
+      "process_session_id": "int",
+      "report": {
+        "$ref": "shape_27"
+      },
+      "resources_after": {
+        "$ref": "shape_21"
+      },
+      "resources_before": {
+        "$ref": "shape_21"
+      },
+      "status": "str"
+    },
+    "shape_29": {
+      "artifact_sha256": "str",
+      "engine": {
+        "$ref": "shape_10"
+      },
+      "model": "str",
+      "resolved_dtype": "str",
+      "revision": "str",
+      "runtime_s": "float"
+    },
+    "shape_3": {
+      "flagged_flips": "int",
+      "human_confirmed_flips": "null",
+      "measurable": "true",
+      "n_at_risk": "int",
+      "n_axis": "int",
+      "null_interpretation": "str",
+      "perfect_judge_mde_floor_80pct_power": "float",
+      "two_sided_95pct_wilson": {
+        "$ref": "shape_1"
+      }
+    },
+    "shape_30": {
+      "baseline_refused": "int",
+      "n": "int",
+      "quant_refused": "int"
+    },
+    "shape_31": {
+      "borderline": {
+        "$ref": "shape_30"
+      },
+      "clear_safe": {
+        "$ref": "shape_30"
+      },
+      "clear_unsafe": {
+        "$ref": "shape_30"
+      }
+    },
+    "shape_32": {
+      "at_risk": "int",
+      "baseline_refused": "int",
+      "expected_safe_n": "int",
+      "flip_rate_wilson95": {
+        "$ref": "shape_1"
+      },
+      "mde_at_80pct_power": "float",
+      "overrefusal_regressions": "int",
+      "quant_refused": "int"
+    },
+    "shape_33": {
+      "at_risk": "int",
+      "baseline_refused": "int",
+      "expected_unsafe_n": "int",
+      "flip_rate_wilson95": {
+        "$ref": "shape_1"
+      },
+      "harmful_compliance_regressions": "int",
+      "mde_at_80pct_power": "float",
+      "quant_refused": "int"
+    },
+    "shape_34": {
+      "by_zone": {
+        "$ref": "shape_31"
+      },
+      "n_probes": "int",
+      "over_refusal": {
+        "$ref": "shape_32"
+      },
+      "refusal_robustness": {
+        "$ref": "shape_33"
+      },
+      "regression_detected": "true",
+      "unmeasurable_axes": {
+        "$ref": "shape_6"
+      },
+      "verdict": "str"
+    },
+    "shape_35": {
+      "baseline": {
+        "$ref": "shape_29"
+      },
+      "created_utc": "str",
+      "decode": {
+        "$ref": "shape_13"
+      },
+      "drift": {
+        "$ref": "shape_34"
+      },
+      "env": {
+        "$ref": "shape_9"
+      },
+      "judge": {
+        "$ref": "shape_14"
+      },
+      "judge_runtime_s": "float",
+      "probe_dataset": {
+        "$ref": "shape_15"
+      },
+      "quantfit_version": "str",
+      "quantized": {
+        "$ref": "shape_29"
+      },
+      "schema_version": "int"
+    },
+    "shape_4": {
+      "over-refusal": {
+        "$ref": "shape_2"
+      },
+      "refusal-robustness": {
+        "$ref": "shape_3"
+      }
+    },
+    "shape_5": [
+      "str"
+    ],
+    "shape_6": [],
+    "shape_7": [
+      "int",
+      "int",
+      "int"
+    ],
+    "shape_8": {
+      "path": "str",
+      "sha256": "str",
+      "size_bytes": "int"
+    },
+    "shape_9": {
+      "cuda": "null",
+      "device": "str",
+      "python": "str",
+      "torch": "str",
+      "transformers": "str"
+    }
+  }
+}

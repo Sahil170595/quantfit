@@ -1,0 +1,19 @@
+{
+  "authorization_absent": true,
+  "downloaded_body_bytes": 0,
+  "external_network_calls": 1,
+  "httpx": "0.28.1",
+  "local_files_written": 0,
+  "location_path": "/api/resolve-cache/datasets/Crusadersk/quantfit-reference-reports/3a4ff4e086f9d72ad828134873b01fa19b550059/README.md",
+  "member": "README.md",
+  "method": "HEAD",
+  "observed_utc": "2026-10-09 19:42 UTC",
+  "observer": "root read-only SDK preflight",
+  "public_query_parameters_omitted": true,
+  "repo": "Crusadersk/quantfit-reference-reports",
+  "revision": "3a4ff4e086f9d72ad828134873b01fa19b550059",
+  "schema_version": 1,
+  "scope": "Actual supported API/header/redirect observation only; no public aggregate GET/download qualification.",
+  "sdk": "1.31.0",
+  "status_code": 307
+}

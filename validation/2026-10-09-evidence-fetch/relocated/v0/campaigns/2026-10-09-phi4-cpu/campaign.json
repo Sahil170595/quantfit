@@ -1,0 +1,229 @@
+{
+  "actual_cold_cli_exit": 0,
+  "actual_default_tokens_in_all_reports": 64,
+  "actual_native_exits": [
+    3,
+    3,
+    3
+  ],
+  "after_download_observations": {
+    "cpu_observations": {
+      "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm",
+      "model name": "AMD EPYC 9V74 80-Core Processor"
+    },
+    "disk_free_bytes": 80604823552,
+    "gpu_capability_observed": null,
+    "gpu_driver_observed": null,
+    "gpu_toolkit_observed": null,
+    "kernel": "6.17.0-1022-azure",
+    "logical_cpu_count": 4,
+    "machine": "x86_64",
+    "native_threads_observed": 2,
+    "observed_utc": "2026-10-09T06:00:15.965882+00:00",
+    "platform": "Linux",
+    "psutil": "7.2.2",
+    "python": "3.12.15",
+    "ram_available_bytes": 14812233728,
+    "ram_total_bytes": 16766414848
+  },
+  "after_install_preflight": {
+    "cpu_observations": {
+      "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves user_shstk avx512_bf16 clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm",
+      "model name": "AMD EPYC 9V74 80-Core Processor"
+    },
+    "disk_free_bytes": 90782617600,
+    "gpu_capability_observed": null,
+    "gpu_driver_observed": null,
+    "gpu_toolkit_observed": null,
+    "kernel": "6.17.0-1022-azure",
+    "logical_cpu_count": 4,
+    "machine": "x86_64",
+    "native_threads_observed": 2,
+    "observed_utc": "2026-10-09T05:58:52.352116+00:00",
+    "platform": "Linux",
+    "psutil": "7.2.2",
+    "python": "3.12.15",
+    "ram_available_bytes": 15440764928,
+    "ram_total_bytes": 16766414848
+  },
+  "binary": {
+    "archive_sha256": "0c141bb5b5a81c85decc0d2164b3a3251ea809dbd6660dcc7e6f420204ace0f0",
+    "asset": "llama-b9817-bin-ubuntu-x64.tar.gz",
+    "executable_sha256": "a7ca52ff7d600e044610876f091b85f6fd272a4f5c99e7477d934c953e83cfa9",
+    "source": "provisioned from pinned release archive b9817 (archive SHA256-verified when provisioned)",
+    "tag": "b9817"
+  },
+  "campaign_schema_version": 1,
+  "candidate": {
+    "campaign_source_sha256": "483ea8dcf3d9ae05bbe323215ec2ef692c24830a6f2b0c77309c8e76fa7473c2",
+    "installed_origin": "/home/runner/work/_temp/quantfit-reference/lib/python3.12/site-packages/quantfit/__init__.py",
+    "installed_source_sha256": {
+      "quantfit/__init__.py": "0227c7d00310172c7d79ca339da30c835feab09fdc7ec1ae1b03678f73a1836c",
+      "quantfit/_inspect_registry.py": "86ed3069aa2fbd23e0e5b121d202de3b44b69e1a132e407e63527e55e641e98f",
+      "quantfit/audit.py": "bc496a65a466248a2264b0735c2f674e9c0bdda81b1c2c3fc91fb28209d4e739",
+      "quantfit/backends/__init__.py": "988fe1d433ffccf38a5d42cb12ddd66423d0f6d9d52908a6c72f4d2f322f7f72",
+      "quantfit/backends/compressed_tensors.py": "983015cac294cbeabd4a030d6f9465590d06c977abe97b05c16498642c241ec8",
+      "quantfit/backends/gguf.py": "59c58d8e5c822d15b0f136e605d7e9d585fe170f4917999ce89bd0021b82a03a",
+      "quantfit/bundle.py": "68d92316557c234eee446ff7cdae1c7d695f3c21e88873ab2c31637d4212eaaf",
+      "quantfit/calibset.py": "ec4e75a78b078b93a46a83b98c7261cb1fd591f0dec0e32bfe299565fc9f8137",
+      "quantfit/cli.py": "2afd3598695c51267e679199d68ad08a80da40ae08dffe642362dcae033379e1",
+      "quantfit/cold_run.py": "ee6edabd4efe7bfbce07da964117e00709555f9d70154534999a3f5d78dedb54",
+      "quantfit/engines/__init__.py": "9cd1b6b19e9c804639ca509ac48558d343ef1e09130fa08e43c6630fb5ff1173",
+      "quantfit/engines/base.py": "5a707a7828db4ae1c0c0526f377f8b2aa57b1893cf9573128998901e188fb77d",
+      "quantfit/engines/compressed_tensors.py": "9b874c66ac469cb3a81a42b094d1ac20cf27a3d07c861afd2b2503a0b9edb95e",
+      "quantfit/engines/gguf.py": "beb4da2238e7ac708639a06e22dd8cd420ab4f115f6dd1a0594dacd97fe146e4",
+      "quantfit/fit.py": "1ca1ee5a398870f0268c7d30bd23b13464f3f9104484f686cef99b7ee5a71026",
+      "quantfit/gate.py": "025d7306e556a0b34befb2589c001c87e80ad93c2e2ab6ce675380dbd2722db7",
+      "quantfit/gpufit.py": "20cc3db9e845b7fd1e9b2ff774c8383b55343191f246e017078d872c7b003053",
+      "quantfit/inspect_gguf.py": "1f50878f74e30d6f2a9a372219e5b124a4a4c79112e4795a752f766ff6bf4d95",
+      "quantfit/inspect_hf.py": "2afa5c7af8f6f0447ef05bfa7fdc415fc065ea833e158a1b9de04e38e00f96c5",
+      "quantfit/inspect_task.py": "fcc4dd7a48d3b45dce169aad46f3ce85fd796f49e8749ee94601b18934681960",
+      "quantfit/junit.py": "7ba24281815ea606b01cb71a0817b8b4f2f82b4e8ae64a7e2f8989a6d7e96a3c",
+      "quantfit/modelcard.py": "0d8ef2fa5e92a0efe2aebc231bf4235f1dc9d8f1d7c3a80307eac246388ae1bc",
+      "quantfit/policy/__init__.py": "6156a582ca96ca53cd23f0f2fbc6075c4df20690a618a99497c7dee88fcdae2d",
+      "quantfit/policy/probe.py": "4453af95aab0a63fdb3937fa1ec87d7d3c7520e8630b2de2f8d7fe2e8be642de",
+      "quantfit/policy/route.py": "54e7347c5dde3b05378550ed786d350c73cb52c9776533cbfe584b4b39925570",
+      "quantfit/policy/target.py": "803950fbf8a357a4abc52b31b336ce070453b9109f64ce9c38abe32bd73030c0",
+      "quantfit/quantize.py": "81af5554d07f44cb6d9ebeb509d1cb36ebc83a81263b05b7c9fc9cd73dc7fd75",
+      "quantfit/reference_cli.py": "b42eaa10ee6e633dd0225e45cab2717124c5a694e29f340d902b748bd9c93570",
+      "quantfit/refreports.py": "943bfce3c9c34eadb1f443ce6c219e08cb21d7185aa3f1d293bf1a95d3db5c9d",
+      "quantfit/registry.py": "c2436e4f236b18f9884105c1fa0b0b1221100cb47799a26bcf69c97ab69c1754",
+      "quantfit/reproduce.py": "b3460cb6958fff8e09d8f68d3cbfe15bf6f21d76a5e4fc0bef38bc48559a4783",
+      "quantfit/resolution.py": "3dd6e309d2bb333c7a3dbc0cd7615dc08d838dc1f52f6cfea318acad7f712a47",
+      "quantfit/safety/__init__.py": "f788cc4e08fd36e9055a72f0521106a286287414edd720e2ef697152f366a806",
+      "quantfit/safety/cache.py": "54b94f012e73c9e6cdc59d32322ef40854a5dab1257506e0d27fe15c9323d8da",
+      "quantfit/safety/calibrate.py": "d15384e930d68ff56c283649dee7fb4eca1fc277536349a3104a422367962789",
+      "quantfit/safety/calibrated_gate.py": "6fb44a8664e776def14b36f1d78747316984621e38f0fb950bda432ba27a7812",
+      "quantfit/safety/calibration_binding.py": "a53ecc4b14fb549bd40f57866b5c5dfa968f8ea9338aa8badadac81a39371e9f",
+      "quantfit/safety/demo.py": "30ddf34a17e8a51ee6b8223269d70e152dfc77ce2f565cd39838a7c4d698f39d",
+      "quantfit/safety/gguf_arm.py": "4fa15b3182904f0941981880eeb9e025d01053181ba00504d69c83c2694ea2cf",
+      "quantfit/safety/mde.py": "1ee614ef01716a4a7db4ab2af631feb14b8ceedadd59dafd098af7f1a61f513a",
+      "quantfit/safety/report.py": "82525987adea4b64a86fbac1f4694305c7dc738c6e3b6ab0faedac5d959d4ba1",
+      "quantfit/safety/verify.py": "2ab243ae83a5cbbc1eb726077111da29beea716ee50e48ee3c54c042cf27cf26",
+      "quantfit/screen.py": "5dee20ce744bfce50face4cf579fdaae1649ca87fa6f11101b878b996caa6fff",
+      "quantfit/spec.py": "a7f075b3b23964ac1cd2aa001fcf09f696ba059d53ab097860f45a670e9bd853",
+      "quantfit/torchrt.py": "931310fa8a6cbd953e314d9eb5a9b17419ae7edff99084499d30dcfcb97373ff",
+      "quantfit/verify.py": "7bb3536672a9d9bcf1342b0e8536bbef9e88bf3e74412a5c93adfb468b9cad89"
+    },
+    "source_head": "2997c9304f4c0de02f2299fe7c42f1693539bf6d",
+    "versions": {
+      "gguf": "0.19.0",
+      "hf-xet": "1.6.0",
+      "huggingface-hub": "1.31.0",
+      "psutil": "7.2.2",
+      "quantfit": "0.16.0",
+      "torch": "2.13.0+cpu",
+      "transformers": "5.17.0"
+    },
+    "wheel_file": "quantfit-0.16.0-py3-none-any.whl",
+    "wheel_sha256": "b8dd6337191e5c8ea8119d4446ca72e0374ed51dff8e8defd46edc937543e86b"
+  },
+  "execution_exit": 0,
+  "full_report_repeatability": true,
+  "human_labels_authenticated": false,
+  "native_threads_observed": 2,
+  "observed_cuda_available": false,
+  "observed_mps_available": false,
+  "omitted_public_token_flag": true,
+  "pair_pins": {
+    "baseline": {
+      "dtype": "BF16",
+      "ref": "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf",
+      "sha256": "1a179f22f1efe409c6517805400c4f07f93fe1f5783e47231d35f933565dff20",
+      "size_bytes": 7680694240
+    },
+    "quantized": {
+      "dtype": "Q4_K_M",
+      "ref": "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf",
+      "sha256": "88c00229914083cd112853aab84ed51b87bdf6b9ce42f532d8c85c7c63b1730a",
+      "size_bytes": 2491874272
+    }
+  },
+  "phase": "complete",
+  "public_argv": [
+    "/home/runner/work/_temp/quantfit-reference/bin/python",
+    "-m",
+    "quantfit.cli",
+    "cold-run",
+    "--baseline",
+    "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf",
+    "--quant",
+    "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf",
+    "--baseline-revision",
+    "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+    "--quant-revision",
+    "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+    "--out",
+    "/home/runner/work/quantfit/quantfit/campaign/native",
+    "--timeout-seconds",
+    "3600",
+    "--json"
+  ],
+  "public_files": [
+    {
+      "path": "assessment.json",
+      "sha256": "16d85ae68349cd8fb5012a7cd24964c7f07eaf80c115f77533b3d521eae063fd",
+      "size_bytes": 9006
+    },
+    {
+      "path": "native-cold-run.json",
+      "sha256": "4608d254c376fa6fe2978a0521e560b9bd1b4f2d167197ed7d5bdc3c95039c41",
+      "size_bytes": 22783
+    },
+    {
+      "path": "native-t0.json",
+      "sha256": "3b4424e1c985245ad81cb0dbbbfe14a31f5efcd1f88970785dfa6d65af22fd91",
+      "size_bytes": 4567
+    },
+    {
+      "path": "run-1/report.json",
+      "sha256": "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+      "size_bytes": 3762
+    },
+    {
+      "path": "run-1/model-card.md",
+      "sha256": "512cd09286ab271b737a663b09735e4f10259d93ad070497fd94517150bc8c44",
+      "size_bytes": 4007
+    },
+    {
+      "path": "run-2/report.json",
+      "sha256": "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+      "size_bytes": 3759
+    },
+    {
+      "path": "run-2/model-card.md",
+      "sha256": "b7068c2417cd1dd4d7eeb2046b1cede4f1ab8315377ab05ff10b4aaa19fb7629",
+      "size_bytes": 4007
+    },
+    {
+      "path": "run-3/report.json",
+      "sha256": "4f8d91c0a026bb0003d49d9d307cb563a91b5dc624484a5e8ea719d8f963a8f8",
+      "size_bytes": 3761
+    },
+    {
+      "path": "run-3/model-card.md",
+      "sha256": "d8a3cdb124ed720fad086301bce3a00133eb92c7f2df944a77144b4a29da07ad",
+      "size_bytes": 4007
+    }
+  ],
+  "reference_eligibility": "blocked",
+  "reference_registered": false,
+  "revision": "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+  "scientific_go": false,
+  "status": "measured_candidate",
+  "t0_protocol_pass": true,
+  "weights": {
+    "baseline": {
+      "resolved_dtype": "BF16",
+      "resolved_revision": "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+      "sha256": "1a179f22f1efe409c6517805400c4f07f93fe1f5783e47231d35f933565dff20",
+      "size_bytes": 7680694240
+    },
+    "quantized": {
+      "resolved_dtype": "Q4_K_M",
+      "resolved_revision": "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+      "sha256": "88c00229914083cd112853aab84ed51b87bdf6b9ce42f532d8c85c7c63b1730a",
+      "size_bytes": 2491874272
+    }
+  }
+}

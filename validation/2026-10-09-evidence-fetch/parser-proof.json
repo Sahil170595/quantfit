@@ -1,0 +1,47 @@
+{
+  "actual_parser_cli_invocations": 3,
+  "cases": [
+    {
+      "argv": [
+        "evidence",
+        "fetch",
+        "--json"
+      ],
+      "exit_code": 2,
+      "stderr_usage": true,
+      "stdout_bytes": 0
+    },
+    {
+      "argv": [
+        "evidence",
+        "fetch",
+        "--out",
+        "unused-parser-evidence",
+        "--timeout-seconds",
+        "bad",
+        "--json"
+      ],
+      "exit_code": 2,
+      "stderr_usage": true,
+      "stdout_bytes": 0
+    },
+    {
+      "argv": [
+        "evidence",
+        "fetch",
+        "--out",
+        "unused-parser-evidence",
+        "--unknown",
+        "--json"
+      ],
+      "exit_code": 2,
+      "stderr_usage": true,
+      "stdout_bytes": 0
+    }
+  ],
+  "external_network_calls": 0,
+  "new_inference_performed": false,
+  "schema_version": 1,
+  "scope": "Actual post-freeze parser boundary observations; no production/test change or model/backend dispatch.",
+  "source_head": "c751f9d1c73a5484438f728d84c9302cc6f319f1"
+}

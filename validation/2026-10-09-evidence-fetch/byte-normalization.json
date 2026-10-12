@@ -1,0 +1,196 @@
+{
+  "changes": [
+    {
+      "canonical_git_sha256": "03d07df53dfcc3962c2d494f87a41b4a07540b40c6c2df070dbfdb6fb7eb602c",
+      "canonical_git_size_bytes": 190,
+      "observed_raw_sha256": "ca03a2d6200bdb83aa9e4fed9ecf4db04b3e80ad841ab1e05700ded13036ff34",
+      "observed_raw_size_bytes": 193,
+      "only_crlf_to_lf_changed": true,
+      "path": "companion-binding-green.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\companion-binding-green.log"
+    },
+    {
+      "canonical_git_sha256": "01651032cebf4d1fc5a933f3a689383d26998e2a29dab8d8acf67ffb8c9897a1",
+      "canonical_git_size_bytes": 11447,
+      "observed_raw_sha256": "1cf2cb04ada4cf903103e6047c333824653d163018cfa28d527e217f5b734f28",
+      "observed_raw_size_bytes": 11685,
+      "only_crlf_to_lf_changed": true,
+      "path": "companion-binding-isolated-red.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\companion-binding-isolated-red.log"
+    },
+    {
+      "canonical_git_sha256": "ae0f1038293b639849aeac1870c8c1ef9750009395e6d97ce2b00fc52a3d1042",
+      "canonical_git_size_bytes": 13683,
+      "observed_raw_sha256": "1c7bff6f20a65a677dee728dbfbac1a2d40345e72e5e53a6cdb3e00ad254e6b9",
+      "observed_raw_size_bytes": 13905,
+      "only_crlf_to_lf_changed": true,
+      "path": "companion-binding-isolated-red.xml",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\companion-binding-isolated-red.xml"
+    },
+    {
+      "canonical_git_sha256": "a64c6e623ae2586bbb0524a304f68975a2d4cd8ea420dec2ffa72cd67b5767e1",
+      "canonical_git_size_bytes": 12698,
+      "observed_raw_sha256": "37ebe904aef57b1739597d7c7b68d0a166f1dfe17b1dbca16575b2dd30fda6ec",
+      "observed_raw_size_bytes": 12960,
+      "only_crlf_to_lf_changed": true,
+      "path": "companion-binding-isolated-v2.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\companion-binding-isolated-v2.log"
+    },
+    {
+      "canonical_git_sha256": "b601329bbffd14a764b7ca35a0b5eeedb1241e541c476a074cd6af2f8c082676",
+      "canonical_git_size_bytes": 14874,
+      "observed_raw_sha256": "ac76f23ff906acd0c35c7fc0637b95b894bd3b29a0ff22e54160c32193856fa8",
+      "observed_raw_size_bytes": 15120,
+      "only_crlf_to_lf_changed": true,
+      "path": "companion-binding-isolated-v2.xml",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\companion-binding-isolated-v2.xml"
+    },
+    {
+      "canonical_git_sha256": "a1b77d556fc3c0f470a6bfc974a547170982e85af1c361e36894f8416759ce3f",
+      "canonical_git_size_bytes": 114,
+      "observed_raw_sha256": "86d44f139438683434832af0a53775b99b0eb4aafdeb7b5850d799e9f78dcc96",
+      "observed_raw_size_bytes": 116,
+      "only_crlf_to_lf_changed": true,
+      "path": "companion-binding-red.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\companion-binding-red.log"
+    },
+    {
+      "canonical_git_sha256": "4de375b0140b6e2e8dc679b7396f742e83f065c06c6f891bf81dfa0d29c7f3ce",
+      "canonical_git_size_bytes": 190,
+      "observed_raw_sha256": "ef4a3614aff194d2d725cd8eb90bb0727aceda89b3f56b01e5a29f70393d3fe0",
+      "observed_raw_size_bytes": 193,
+      "only_crlf_to_lf_changed": true,
+      "path": "feature-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\feature-final.log"
+    },
+    {
+      "canonical_git_sha256": "aa0dcfcfa945f23f4886c0f8942208d2b73a8dc0c84adba9e1137eda99176af8",
+      "canonical_git_size_bytes": 179,
+      "observed_raw_sha256": "100b8aa1143640dc9cab3c7709d5ee77982be4d9057487663a49eff28f8a7284",
+      "observed_raw_size_bytes": 182,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v2.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\focused-v2.log"
+    },
+    {
+      "canonical_git_sha256": "cadd450a55b93b6e46a5526bfb8f5e90025f827fd1b3d43a104e5f888e2d3d3b",
+      "canonical_git_size_bytes": 282,
+      "observed_raw_sha256": "88112d814962e38b087581275790a80fa2bffc464fda4ec45737f745511988b5",
+      "observed_raw_size_bytes": 286,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v3.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\focused-v3.log"
+    },
+    {
+      "canonical_git_sha256": "88905fb193a80092cfb6ed95d29205edfb525d228d1466a6200be82c08f179f5",
+      "canonical_git_size_bytes": 190,
+      "observed_raw_sha256": "13e80189b343b4d23869b5416d895e909bcf5fd5ca22503b3fbe72ec222402f3",
+      "observed_raw_size_bytes": 193,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v4.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\focused-v4.log"
+    },
+    {
+      "canonical_git_sha256": "a7b33b14dcd88b8016b9d74d605d0ba45f7a54081064355a3e9ec7c9a8735a9e",
+      "canonical_git_size_bytes": 28,
+      "observed_raw_sha256": "39efff4101bb4bdef1c60dc45950840fd45dce00f138049a679cd94b647c29e6",
+      "observed_raw_size_bytes": 29,
+      "only_crlf_to_lf_changed": true,
+      "path": "format-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\format-final.log"
+    },
+    {
+      "canonical_git_sha256": "73a0e575371829c7708766f019ea493e8c025b03447255702c438fa98f030b26",
+      "canonical_git_size_bytes": 65,
+      "observed_raw_sha256": "cad07841dcfc0884ccf64aa45afb9ef386bd442470f87b75d08461b46ccb6b58",
+      "observed_raw_size_bytes": 66,
+      "only_crlf_to_lf_changed": true,
+      "path": "functional-existing-target-prose.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\functional-existing-target-prose.log"
+    },
+    {
+      "canonical_git_sha256": "43486beddff03079bc0ca6d8bd96d9f5590af4feb7335f48e5d42855b3f7f936",
+      "canonical_git_size_bytes": 124,
+      "observed_raw_sha256": "5ff794b08b22dea981f6745665f4e5005bd89a999419a7056b60260c0ebb0dd6",
+      "observed_raw_size_bytes": 125,
+      "only_crlf_to_lf_changed": true,
+      "path": "functional.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\functional.log"
+    },
+    {
+      "canonical_git_sha256": "8130a313bb20cd989abea89bfaba2faab5b728d39ddf2c075029f3f0b987e08a",
+      "canonical_git_size_bytes": 99,
+      "observed_raw_sha256": "9a0bd5a3b287e8b01fcf8d52019857213f787e10f78a60c54910bdc1d57bcb6c",
+      "observed_raw_size_bytes": 101,
+      "only_crlf_to_lf_changed": true,
+      "path": "initial-green.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\initial-green.log"
+    },
+    {
+      "canonical_git_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "canonical_git_size_bytes": 19,
+      "observed_raw_sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+      "observed_raw_size_bytes": 20,
+      "only_crlf_to_lf_changed": true,
+      "path": "lint-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\lint-final.log"
+    },
+    {
+      "canonical_git_sha256": "6904fd00876cdb5231b6d4b5fc323743d38cbe77ab7c842e51ce5ae808a404fd",
+      "canonical_git_size_bytes": 112,
+      "observed_raw_sha256": "137bc2d123c872e1ca56893bffc3680f7767f395ebe24ba3a00bfce71bd81791",
+      "observed_raw_size_bytes": 114,
+      "only_crlf_to_lf_changed": true,
+      "path": "properties-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\properties-final.log"
+    },
+    {
+      "canonical_git_sha256": "1d356f7dd1e09b2c3a0d5e9b036ce7d2c08ce2c84e8677095dd1756a03b8307c",
+      "canonical_git_size_bytes": 9289,
+      "observed_raw_sha256": "dc1f51fb5c4038bd4ae972ac94af8a0acc084f0328a06f46dbacd5ef14ce0b9f",
+      "observed_raw_size_bytes": 9392,
+      "only_crlf_to_lf_changed": true,
+      "path": "quickstart-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\quickstart-final.log"
+    },
+    {
+      "canonical_git_sha256": "4ffac3dfc42c7271f9a947385920bad4a0566545f53780b2944ec93ace6bf614",
+      "canonical_git_size_bytes": 1006,
+      "observed_raw_sha256": "a97ecbf7290bbc1b38eb3374d97dc6eac3283e7de208aa286895deb49e15a49f",
+      "observed_raw_size_bytes": 1022,
+      "only_crlf_to_lf_changed": true,
+      "path": "red.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\red.log"
+    },
+    {
+      "canonical_git_sha256": "a35b258b5a4b25013a19d93628274ed0f2390d133eb2ed79e486471ad736f567",
+      "canonical_git_size_bytes": 1012,
+      "observed_raw_sha256": "f9e22ba2a4b88296bc2cee0e5c1cda5d7ce54dc0a4b59f2b90264023318bfb7d",
+      "observed_raw_size_bytes": 1020,
+      "only_crlf_to_lf_changed": true,
+      "path": "red.xml",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\red.xml"
+    },
+    {
+      "canonical_git_sha256": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8",
+      "canonical_git_size_bytes": 43,
+      "observed_raw_sha256": "0c37c4158c91ef55c724ba017bf6465f26018199badb08e3ff13f98acdf056c2",
+      "observed_raw_size_bytes": 44,
+      "only_crlf_to_lf_changed": true,
+      "path": "types-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\types-final.log"
+    },
+    {
+      "canonical_git_sha256": "73eb3ad8f166a39789b085d6f846f8526d298a49a7f62cf0c79a45f551f46860",
+      "canonical_git_size_bytes": 2445,
+      "observed_raw_sha256": "d09aebabb3f6c1a479caafb00a66479b1dde6c718bddd5d63a2fcf5ccfe826f8",
+      "observed_raw_size_bytes": 2476,
+      "only_crlf_to_lf_changed": true,
+      "path": "unit-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\evidence-fetch-windows-receipts\\unit-final.log"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Observed Windows receipts preserved independently; manifest binds canonical Git/index bytes. No production/test/result/decision changes.",
+  "source_head": "c751f9d1c73a5484438f728d84c9302cc6f319f1"
+}

@@ -214,6 +214,7 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     "t0": (REQ_ARTIFACT,),
     # Full held aggregate comparison plus native T0; no inference/network.
     "repeatability": (REQ_ARTIFACT,),
+    "evidence": (REQ_NETWORK,),
     # Pure local JSON comparison — of TWO drift reports that must already exist
     # (quantfit/reproduce.py: --reference and --candidate are both read from disk).
     "reproduce": (REQ_ARTIFACT,),

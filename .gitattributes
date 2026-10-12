@@ -16,3 +16,5 @@ validation/2026-10-09-cli-readme/** -text
 validation/2026-10-09-saved-report-gate/**/*.json -text
 validation/2026-10-09-replicate-bundles/**/*.json -text
 validation/2026-10-09-repeatability/**/*.json -text
+validation/2026-10-09-evidence-fetch/**/*.json -text
+quantfit/data/reference-evidence-shape-v0.json -text

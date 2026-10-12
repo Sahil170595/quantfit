@@ -1,0 +1,61 @@
+"""Trusted fixed public evidence inventory; downloaded manifests cannot authorize it."""
+
+PREFIX = "v0/campaigns/2026-10-09-phi4-cpu/"
+INVENTORY = (
+    ("README.md", 3634, "44dba650aa8513448a69c48a0bb8961d68a8e5929cfe34caa20dba51ec0910ba"),
+    (
+        "v0/campaigns/2026-10-09-phi4-cpu/assessment.json",
+        9006,
+        "16d85ae68349cd8fb5012a7cd24964c7f07eaf80c115f77533b3d521eae063fd",
+    ),
+    (
+        "v0/campaigns/2026-10-09-phi4-cpu/campaign.json",
+        12383,
+        "497bc1718583e2d42583d01932e330ce05b276c3caa19f6ce069fdbb87908fba",
+    ),
+    (
+        "v0/campaigns/2026-10-09-phi4-cpu/manifest.json",
+        2714,
+        "4c0d6449a2690fc9be622f1c3c84d3159b8d8d5a23ce117d98a415c9d36dd653",
+    ),
+    (
+        "v0/campaigns/2026-10-09-phi4-cpu/native-cold-run.json",
+        22783,
+        "4608d254c376fa6fe2978a0521e560b9bd1b4f2d167197ed7d5bdc3c95039c41",
+    ),
+    (
+        "v0/campaigns/2026-10-09-phi4-cpu/native-t0.json",
+        4567,
+        "3b4424e1c985245ad81cb0dbbbfe14a31f5efcd1f88970785dfa6d65af22fd91",
+    ),
+    (
+        "v0/campaigns/2026-10-09-phi4-cpu/run-1/model-card.md",
+        4007,
+        "512cd09286ab271b737a663b09735e4f10259d93ad070497fd94517150bc8c44",
+    ),
+    (
+        "v0/campaigns/2026-10-09-phi4-cpu/run-1/report.json",
+        3762,
+        "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+    ),
+    (
+        "v0/campaigns/2026-10-09-phi4-cpu/run-2/model-card.md",
+        4007,
+        "b7068c2417cd1dd4d7eeb2046b1cede4f1ab8315377ab05ff10b4aaa19fb7629",
+    ),
+    (
+        "v0/campaigns/2026-10-09-phi4-cpu/run-2/report.json",
+        3759,
+        "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+    ),
+    (
+        "v0/campaigns/2026-10-09-phi4-cpu/run-3/model-card.md",
+        4007,
+        "d8a3cdb124ed720fad086301bce3a00133eb92c7f2df944a77144b4a29da07ad",
+    ),
+    (
+        "v0/campaigns/2026-10-09-phi4-cpu/run-3/report.json",
+        3761,
+        "4f8d91c0a026bb0003d49d9d307cb563a91b5dc624484a5e8ea719d8f963a8f8",
+    ),
+)
