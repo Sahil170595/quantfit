@@ -327,6 +327,91 @@ def main() -> None:
         assert (
             check_reproduction(synthetic_bundles[0], synthetic_bundles[2], "synthetic-breach", 3)["outcome"] == "breach"
         )
+        # Explicit target declarations over the already-held historical metadata.
+        # These are declared weight sizes, not measurements from report file sizes.
+        historical = json.loads(held[0])
+        target = {
+            "target_schema_version": 1,
+            "pair_slug": "gguf-phi4-mini-unsloth",
+            "spec_version": "v0",
+            "profile": "native-gguf-cpu-full40-greedy64-v0",
+            "arms": {
+                name: {
+                    **{
+                        key: historical[name][key] for key in ("model", "revision", "resolved_dtype", "artifact_sha256")
+                    },
+                    "size_bytes": 7_680_694_240 if name == "baseline" else 2_491_874_272,
+                }
+                for name in ("baseline", "quantized")
+            },
+            "engine": {
+                key: historical["baseline"]["engine"][key]
+                for key in (
+                    "name",
+                    "device",
+                    "binary_sha256",
+                    "threads",
+                    "offload_device",
+                    "n_gpu_layers",
+                    "op_offload",
+                )
+            },
+            "judge": {key: historical["judge"][key] for key in ("id", "revision", "input_contract")},
+            "probe_dataset": historical["probe_dataset"],
+            "decode": historical["decode"],
+        }
+        for label, bundle, expected in (
+            ("historical-phi4", moved_replay, 3),
+            ("synthetic-positive", synthetic_bundles[0], 0),
+            ("synthetic-unknown-size", synthetic_bundles[0], 4),
+        ):
+            declared = json.loads(json.dumps(target))
+            if expected == 4:
+                declared["arms"]["baseline"]["size_bytes"] = None
+            target_path, receiving = sandbox / f"{label}-target.json", sandbox / f"{label}-receiving.json"
+            target_path.write_text(json.dumps(declared), encoding="utf-8")
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "quantfit.cli",
+                    "references",
+                    "assess",
+                    "--bundle",
+                    str(bundle),
+                    "--target",
+                    str(target_path),
+                    "--out",
+                    str(receiving),
+                    "--json",
+                ],
+                cwd=sandbox,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            assert completed.returncode == expected, completed.stdout + completed.stderr
+            assessed = json.loads(completed.stdout)["result"]
+            assert assessed == json.loads(receiving.read_bytes())
+            assert assessed["target_sha256"] == hashlib.sha256(target_path.read_bytes()).hexdigest()
+            assert (
+                assessed["reference_registered"]
+                is assessed["weight_sizes_authenticated"]
+                is assessed["scientific_go"]
+                is False
+            )
+            if expected == 3:
+                assert assessed["native_exits"] == [3, 3, 3]
+                assert assessed["axes_by_run"][0]["over-refusal"]["flagged_flips"] == 2
+                assert assessed["axes_by_run"][0]["over-refusal"]["n_at_risk"] == 20
+                assert (
+                    assessed["axes_by_run"][0]["refusal-robustness"]["null_interpretation"]
+                    == "the detector did not fire"
+                )
+                assert assessed["original_t0"] == json.loads(held_t0)
+            elif expected == 4:
+                assert assessed["target"]["arms"]["baseline"]["size_bytes"] is None
         # Actual anonymous public aggregate download in this existing installed
         # wheel/sdist consumer. No model, campaign or additional CI job is created.
         public = sandbox / "public-evidence"
@@ -707,6 +792,7 @@ def main() -> None:
             "test_replay_bundle.py",
             "test_reproduce_bundles.py",
             "test_reproduce_junit.py",
+            "test_reference_assessment.py",
             "test_repeatability.py",
             "test_evidence_fetch.py",
             "test_verify.py",

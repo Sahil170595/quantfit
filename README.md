@@ -42,9 +42,10 @@ Exits 4 and 5 are not passes.
 ## Release and source scope
 
 This README documents [quantfit 0.26.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.26.0).
-The branch prepares **0.28.0**, an unpublished candidate adding reproduction JUnit
-to the portable-bundle input mode introduced in the 0.27.0 candidate. Both features
-require candidate source or wheels; the released workflows remain available in 0.26.0.
+The branch prepares **0.29.0**, an unpublished candidate adding offline reference
+candidate assessment to the 0.27.0 bundle comparison and 0.28.0 reproduction JUnit
+candidates. These features require candidate source or wheels; released workflows
+remain available in 0.26.0.
 
 Install with `pip install "quantfit[inspect,gguf]==0.26.0"`.
 
@@ -620,6 +621,22 @@ selects an external registry without registering or publishing it. See
 [bounded campaign](docs/reference-campaign-v0.md), and
 [CLI reference](docs/cli-reference.md). No new T4 reproduction, sensitivity,
 human-adjudication, cross-hardware or QSR v1 freeze follows from a publication.
+
+The 0.29.0 candidate checks a portable three-report handoff against an explicit
+pinned target, without loading models, fetching artifacts or registering a report:
+
+```bash
+quantfit references assess --bundle candidate-handoff --target target.json --out receiving-assessment.json --json
+```
+
+The receiving assessment preserves original reports/T0 and reports native exits,
+full-payload agreement, measured/excluded axes and blockers separately. Exit 0 means
+ready for publication review; 3 means known blockers, 4 means required facts or
+measured axes are unestablished, and 2 means malformed or unsafe input. Known
+blockers take precedence over missing facts. Target weight sizes are declarations:
+missing sizes cannot qualify, and passing the fixed declared cap does not prove
+weight authenticity or RAM fit. The public Phi4 reports remain blocked by their
+fresh unconfirmed flags. See the [target contract](docs/cli-reference.md#reference-candidate-assessment).
 
 ## License
 
