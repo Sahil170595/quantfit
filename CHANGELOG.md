@@ -15,6 +15,21 @@
 
 ## Unreleased
 
+## 0.20.0
+
+Released independently from PR #123: observed Inspect GGUF provider.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
+- Optional public Inspect GGUF provider/CLI observations with actual weight/binary
+  hashes, immutable Hub pins, applied CPU controls and owned cancellable server
+  lifecycle. Managed paired runs require80native calls/full40probes before one
+  pinned judge batch, close both resident models before judging and enforce a
+  conservative RAM estimate. Local synthetic evidence and pending hosted installed
+  model qualification: `validation/2026-10-09-inspect-gguf/`; no safety/reproduction GO.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37887088728); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
 ## 0.19.0
 
 Released independently from PR #122: three fresh native GGUF replicates.

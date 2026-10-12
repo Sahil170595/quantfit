@@ -1,0 +1,14 @@
+{
+  "source_head_observed": "f72d1d964ffd22240dde57106cd2fc08d499041a",
+  "scope": "actual evidence-driver invocation failure after successful synthetic public SDK and resolution, no production defect",
+  "actual_exit": 2,
+  "cause": "driver passed unsupported --resolution-report; bundle create supported flag is --resolution",
+  "driver_sha256": "7e94970a1320935374a78943c397399635b0359c3ef66e578addc4173a8be1ac",
+  "preserved_initial_member_sha256": {
+    "synthetic-drift.json": "2864a7049a2272bf5769595d8242685cc9d9926b5afae5a5db60bb978f8ca347",
+    "synthetic-cli.json": "3966ae4acf97e2f4f76973ac841752a6f883a6d42a11dd85cb6d779257e1a791",
+    "synthetic-calibration.json": "6d841ffe5269e2457897e7a4ccbf0b6b8a3b52c0a7f91f840adfdf6901e600f8",
+    "synthetic-resolution.json": "7d56920570b6c1157ea3f690d4e912af07b62a4fd748fe5bda28b16c99888e14",
+    "resolution-cli.json": "a356556f33bee6150594234bd4a5622a0675cc5c5d6821851cec3a5c1bfbf41e"
+  }
+}

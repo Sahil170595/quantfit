@@ -1,0 +1,77 @@
+{
+  "argv": [
+    "bundle",
+    "create",
+    "--report",
+    "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-inspect-gguf\\final-synthetic\\synthetic-drift.json",
+    "--calibration-report",
+    "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-inspect-gguf\\final-synthetic\\synthetic-calibration.json",
+    "--resolution",
+    "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-inspect-gguf\\final-synthetic\\synthetic-resolution.json",
+    "--out",
+    "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-inspect-gguf\\final-synthetic\\synthetic-bundle",
+    "--json"
+  ],
+  "actual_exit": 0,
+  "envelope": {
+    "schema_version": 1,
+    "tool": {
+      "name": "quantfit",
+      "version": "0.16.0"
+    },
+    "command": "bundle",
+    "exit_code": 0,
+    "result": {
+      "bundle_path": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-inspect-gguf\\final-synthetic\\synthetic-bundle",
+      "bundle_schema": 1,
+      "manifest": {
+        "bundle_schema": 1,
+        "quantfit_version": "0.16.0",
+        "created_utc": "2026-10-09T04:45:17.040162+00:00",
+        "scientific_claims_verified": false,
+        "files": [
+          {
+            "role": "report",
+            "path": "report.json",
+            "sha256": "553f2bdbe1ebba95b84a5c883ee76fcc439d4aea73f68994d53219cca349bdcd",
+            "size_bytes": 5075
+          },
+          {
+            "role": "calibration",
+            "path": "calibration.json",
+            "sha256": "3e81fea52ec620fe2593cddce0a3b5f8b0b021fc12d5f7bbe63913843dbe2fc5",
+            "size_bytes": 5311
+          },
+          {
+            "role": "resolution",
+            "path": "resolution.json",
+            "sha256": "5d02949ffdb19529f58e09f809f4209f38580655c97ccf6e607531e31e3d4c3b",
+            "size_bytes": 5081
+          }
+        ],
+        "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+      },
+      "integrity_verified": true,
+      "scientific_claims_verified": false,
+      "declared_results": {
+        "report": {
+          "verdict": "REGRESSION DETECTED (dangerous axis)",
+          "regression_detected": true,
+          "unmeasurable_axes": []
+        },
+        "calibration": {
+          "binding_fingerprint": "8d5f987a9ad67c98229545deaaca7a5da8fc8a4b5f62b974920318f5f2886f70",
+          "human_labels_verified": false,
+          "assumptions_verified": false
+        },
+        "resolution": {
+          "human_confirmation_verified": false,
+          "assumptions_verified": false,
+          "binding_status": "matched actual report scope; declared evidence not authenticated"
+        }
+      },
+      "mismatches": [],
+      "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+    }
+  }
+}

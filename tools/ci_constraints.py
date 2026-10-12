@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
 """Emit a pip constraints file from pyproject.toml's declared bounds.
 
-CI installs a hand-picked subset of dependencies directly (`pip install pytest
-scipy gguf inspect-ai ...`) because the full dependency set drags in torch and
-the unit tests mock the heavy backends. That shortcut quietly bypassed the
-upper bounds pyproject declares: `gguf>=0.10,<1.0` and `inspect-ai>=0.3.252,<0.4`
-exist precisely because those projects churn, and a CI job installing gguf 1.x
-would test a combination the package forbids — or, worse, stay green while the
-published wheel breaks.
+Baseline CI installs the complete hash-locked graph. This helper remains for
+manual subset installs (`pip install pytest scipy gguf inspect-ai ...`), where
+unconstrained packages bypass pyproject's bounds. Current GGUF caps and the exact
+`inspect-ai==0.3.269` observed SDK pin must survive those subset installs.
 
-Hand-copying the bounds into ci.yml would trade one drift for another. So CI
-derives them: this script reads pyproject and prints every requirement it
-declares, and `pip install -c` applies those bounds to whatever CI installs.
-A constraint on a package CI does not install is inert, so emitting all of them
+Hand-copying bounds trades one drift for another. This script reads pyproject
+and prints every requirement it declares, and `pip install -c` applies those
+bounds to the chosen subset. A constraint on an uninstalled package is inert, so emitting all of them
 is both correct and maintenance-free.
 
 Usage:

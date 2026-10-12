@@ -25,7 +25,9 @@ def main() -> None:
         code = (
             "import pathlib, quantfit, importlib.metadata as m; "
             f"assert not pathlib.Path(quantfit.__file__).resolve().is_relative_to(pathlib.Path({str(checkout)!r})); "
-            "assert quantfit.__version__ == m.version('quantfit'); print(quantfit.__file__)"
+            "assert quantfit.__version__ == m.version('quantfit'); "
+            "assert [(e.name,e.value) for e in m.distribution('quantfit').entry_points if e.group=='inspect_ai'] "
+            "== [('quantfit','quantfit._inspect_registry')]; print(quantfit.__file__)"
         )
         subprocess.run([sys.executable, "-c", code], cwd=sandbox, env=env, check=True)
         for command in (["--help"], ["list"], ["verify-safety", "--demo", "--json"]):

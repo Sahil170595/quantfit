@@ -341,8 +341,8 @@ def _log_tail(log_name: str) -> str:
         return "(no server log captured)"
 
 
-def _complete(port: int, prompt: str, chat: bool, max_new_tokens: int) -> str:
-    """One greedy completion; the chat endpoint applies the model's own template (--jinja)."""
+def completion_request(port: int, prompt: str, chat: bool, max_new_tokens: int) -> urllib.request.Request:
+    """Shared native request policy; callers own transport/lifecycle, never formatting."""
     if chat:
         url = f"http://127.0.0.1:{port}/v1/chat/completions"
         body = {
@@ -354,11 +354,16 @@ def _complete(port: int, prompt: str, chat: bool, max_new_tokens: int) -> str:
     else:
         url = f"http://127.0.0.1:{port}/completion"
         body = {"prompt": prompt, "temperature": 0, "n_predict": max_new_tokens, "cache_prompt": False}
-    req = urllib.request.Request(
+    return urllib.request.Request(
         url,
         data=json.dumps(body).encode("utf-8"),
         headers={"Content-Type": "application/json"},
     )
+
+
+def _complete(port: int, prompt: str, chat: bool, max_new_tokens: int) -> str:
+    """One greedy completion; the chat endpoint applies the model's own template (--jinja)."""
+    req = completion_request(port, prompt, chat, max_new_tokens)
     try:
         with urllib.request.urlopen(req, timeout=_REQUEST_TIMEOUT_S) as resp:
             payload = json.loads(resp.read().decode("utf-8"))

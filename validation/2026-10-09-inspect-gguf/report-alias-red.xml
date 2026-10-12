@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.536" timestamp="2026-10-09T00:39:49.700961-04:00" hostname="SahilKadadekar"><testcase classname="tests.test_inspect_cli" name="test_gguf_report_alias_refuses_before_contact[direct]" time="0.070"><failure message="Failed: model contact forbidden for aliased report">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000002279A205670&gt;
+capsys = &lt;_pytest.capture.CaptureFixture object at 0x000002279A205490&gt;
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1147/test_gguf_report_alias_refuses0')
+alias = 'direct'
+
+    @pytest.mark.parametrize("alias", ["direct", "relative", "hardlink", "symlink"])
+    def test_gguf_report_alias_refuses_before_contact(monkeypatch, capsys, tmp_path, alias):
+        import quantfit.inspect_task as task
+    
+        base, quant = tmp_path / "base.gguf", tmp_path / "quant.gguf"
+        base.write_bytes(b"synthetic immutable weights")
+        quant.write_bytes(b"synthetic quant weights")
+        out = base
+        if alias == "relative":
+            monkeypatch.chdir(tmp_path)
+            out = __import__("pathlib").Path("base.gguf")
+        elif alias == "hardlink":
+            out = tmp_path / "alias.json"
+            os.link(base, out)
+        elif alias == "symlink":
+            out = tmp_path / "alias.json"
+            try:
+                out.symlink_to(base)
+            except OSError:
+                pytest.skip("Symlink privilege unavailable; hosted Linux exercises report alias")
+        monkeypatch.setattr(task, "qsr_eval", lambda *a, **kw: pytest.fail("model contact forbidden for aliased report"))
+&gt;       assert main(["inspect-run", "--baseline", f"quantfit_gguf/{base}", "--quant", f"quantfit_gguf/{quant}",
+                     "--report", str(out), "--json"]) == 2
+
+tests\test_inspect_cli.py:115: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\cli.py:1189: in main
+    return _dispatch(args)
+           ^^^^^^^^^^^^^^^
+quantfit\cli.py:691: in _dispatch
+    run = qsr_eval(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+a = ('quantfit_gguf/C:\\Users\\sahil\\AppData\\Local\\Temp\\pytest-of-sahil\\pytest-1147\\test_gguf_report_alias_refuses0\...guf/C:\\Users\\sahil\\AppData\\Local\\Temp\\pytest-of-sahil\\pytest-1147\\test_gguf_report_alias_refuses0\\quant.gguf')
+kw = {'display': 'none', 'gguf_revisions': (None, None), 'log_dir': 'C:\\Users\\sahil\\AppData\\Local\\Temp\\quantfit-inspect-capture-_8zji7mw', 'max_new_tokens': 64, ...}
+
+&gt;   monkeypatch.setattr(task, "qsr_eval", lambda *a, **kw: pytest.fail("model contact forbidden for aliased report"))
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: model contact forbidden for aliased report
+
+tests\test_inspect_cli.py:114: Failed</failure></testcase></testsuite></testsuites>

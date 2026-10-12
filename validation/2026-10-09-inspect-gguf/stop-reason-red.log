@@ -1,0 +1,23 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+____________ test_missing_stop_metadata_is_unknown_not_clean_stop _____________
+
+fixture = (<module 'quantfit.inspect_gguf' from 'C:\\tmp\\qf-release-0.16.0-20261008\\quantfit\\inspect_gguf.py'>, <function get...], WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1139/test_missing_stop_metadata_is_0/server'))
+
+    def test_missing_stop_metadata_is_unknown_not_clean_stop(fixture):
+        from inspect_ai.model import GenerateConfig
+    
+        _, get_model, arms, _, _ = fixture
+        model = get_model(f"quantfit_gguf/{arms[0].ref}", memoize=False)
+        try:
+            output = asyncio.run(model.generate("synthetic", config=GenerateConfig(temperature=0, max_tokens=64)))
+>           assert output.stop_reason == "unknown"
+E           AssertionError: assert 'stop' == 'unknown'
+E             
+E             - unknown
+E             + stop
+
+tests\test_inspect_gguf.py:85: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_inspect_gguf.py::test_missing_stop_metadata_is_unknown_not_clean_stop
+1 failed in 4.16s

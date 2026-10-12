@@ -64,5 +64,8 @@ human-confirmed safety, GPU behavior nor generation parity with verify-safety.
 Committed local evidence is in `validation/2026-10-05-inspect-cli/`; the hosted
 `cpu-inspect` job independently qualifies the installed candidate wheel.
 
+The Linux `quantfit_gguf` extension and its two-resident memory/process contract
+are described in [Inspect GGUF](inspect-gguf.md); HF is the existing provider path.
+
 Primary source: [official Inspect model documentation](https://inspect.aisi.org.uk/models.html)
 and [the exact official wheel](https://files.pythonhosted.org/packages/a2/85/216d937d1fd6d3f93f4f63d46defc9e8b11fa94ecafd83b80511cd4c7e71/inspect_ai-0.3.269-py3-none-any.whl).

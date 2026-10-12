@@ -1,0 +1,73 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_actual_public_inspect_full_fixture_batch_closes_before_judge[omitted] __
+
+fixture = (<module 'quantfit.inspect_gguf' from 'C:\\tmp\\qf-release-0.16.0-20261008\\quantfit\\inspect_gguf.py'>, <function get...], WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1144/test_actual_public_inspect_ful0/server'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000023B07E21BE0>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1144/test_actual_public_inspect_ful0')
+pin_mode = 'omitted'
+
+    @pytest.mark.parametrize("pin_mode", ["explicit", "omitted"])
+    def test_actual_public_inspect_full_fixture_batch_closes_before_judge(fixture, monkeypatch, tmp_path, pin_mode):
+        import quantfit.inspect_task as task
+        from quantfit.safety import verify
+        from quantfit.safety.report import DriftReport
+    
+        ext, _, arms, servers, _ = fixture
+        probes = [
+            verify.Probe(f"synthetic {i}", "clear_unsafe" if i < 20 else "clear_safe", "unsafe" if i < 20 else "safe")
+            for i in range(40)
+        ]
+        monkeypatch.setattr(verify, "_load_probes", lambda token: probes)
+        batches = []
+    
+        def judge(outputs, token):
+            assert len(servers) == 2 and all(s.closed for s in servers)
+            batches.append(len(outputs))
+            return [True] * len(outputs), 0.1
+    
+        monkeypatch.setattr(verify, "_classify_refusals", judge)
+        import quantfit.safety.report as report_module
+    
+        monkeypatch.setattr(
+            report_module,
+            "environment_fingerprint",
+            lambda: {
+                "device": "cpu",
+                "python": "synthetic",
+                "torch": "synthetic",
+                "transformers": "synthetic",
+                "cuda": None,
+            },
+        )
+>       run = task.qsr_eval(
+            *(f"quantfit_gguf/{a.ref}" for a in arms),
+            **({"gguf_revisions": (None, None)} if pin_mode == "explicit" else {}),
+            max_new_tokens=64,
+            log_dir=str(tmp_path / "private"),
+            display="none",
+            max_samples=1,
+        )
+
+tests\test_inspect_gguf.py:199: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\inspect_task.py:2053: in qsr_eval
+    return _eval_task(api, task_obj, passthrough, baseline, quantized, token)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quantfit\inspect_task.py:2102: in _eval_task
+    flags, judge_runtime_s = verify_mod._classify_refusals(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+outputs = ['synthetic base', 'synthetic base', 'synthetic base', 'synthetic base', 'synthetic base', 'synthetic base', ...]
+token = None
+
+    def judge(outputs, token):
+>       assert len(servers) == 2 and all(s.closed for s in servers)
+E       assert (2 == 2 and False)
+E        +  where 2 = len([<test_inspect_gguf.fixture.<locals>.Server object at 0x0000023B0CE7B380>, <test_inspect_gguf.fixture.<locals>.Server object at 0x0000023B0CE7BD40>])
+E        +  and   False = all(<generator object test_actual_public_inspect_full_fixture_batch_closes_before_judge.<locals>.judge.<locals>.<genexpr> at 0x0000023B0B256800>)
+
+tests\test_inspect_gguf.py:181: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_inspect_gguf.py::test_actual_public_inspect_full_fixture_batch_closes_before_judge[omitted]
+1 failed, 41 deselected in 8.44s

@@ -1083,6 +1083,70 @@ def test_report_refuses_arms_the_run_did_not_measure(tmp_path, monkeypatch):
     assert not out.exists()
 
 
+@pytest.mark.parametrize("alias", ["direct", "hardlink", "symlink"])
+def test_library_report_refuses_resolved_protected_inputs(tmp_path, monkeypatch, alias):
+    import os
+
+    from quantfit.safety import verify
+
+    source = tmp_path / "synthetic-loaded-weight.gguf"
+    source.write_bytes(b"synthetic measured input")
+    out = source
+    if alias == "hardlink":
+        out = tmp_path / "report.json"
+        os.link(source, out)
+    elif alias == "symlink":
+        out = tmp_path / "report.json"
+        try:
+            out.symlink_to(source)
+        except OSError:
+            pytest.skip("Symlink privilege unavailable; hosted Linux exercises resolved input alias")
+    monkeypatch.setattr(
+        verify, "_write_report", lambda *a, **kw: pytest.fail("assembler must never contact input alias")
+    )
+    with pytest.raises(InspectTaskError, match="overwrite"):
+        write_drift_report(
+            str(out), _outcomes(), _arm(BASELINE_SPEC), _arm(QUANTIZED_SPEC), protected_inputs=(str(source),)
+        )
+    assert source.read_bytes() == b"synthetic measured input"
+    assert not list(tmp_path.glob(".quantfit-inspect-report-*.tmp"))
+
+
+def test_existing_unrelated_report_can_be_atomically_replaced(tmp_path, monkeypatch):
+    _stub_env(monkeypatch)
+    source, report = tmp_path / "loaded.gguf", tmp_path / "report.json"
+    source.write_bytes(b"synthetic weights")
+    report.write_bytes(b"old report")
+    write_drift_report(
+        str(report), _outcomes(), _arm(BASELINE_SPEC), _arm(QUANTIZED_SPEC), protected_inputs=(str(source),)
+    )
+    assert source.read_bytes() == b"synthetic weights"
+    assert __import__("json").loads(report.read_bytes())["schema_version"] == 2
+
+
+def test_report_alias_introduced_during_assembly_is_refused(tmp_path, monkeypatch):
+    import os
+
+    from quantfit.safety import verify
+
+    _stub_env(monkeypatch)
+    source, report = tmp_path / "loaded.gguf", tmp_path / "report.json"
+    source.write_bytes(b"synthetic weights")
+    original = verify._write_report
+
+    def alias(*args, **kwargs):
+        original(*args, **kwargs)
+        os.link(source, report)
+
+    monkeypatch.setattr(verify, "_write_report", alias)
+    with pytest.raises(InspectTaskError, match="overwrite"):
+        write_drift_report(
+            str(report), _outcomes(), _arm(BASELINE_SPEC), _arm(QUANTIZED_SPEC), protected_inputs=(str(source),)
+        )
+    assert source.read_bytes() == report.read_bytes() == b"synthetic weights"
+    assert not list(tmp_path.glob(".quantfit-inspect-report-*.tmp"))
+
+
 def test_report_carries_no_completion_text(tmp_path, monkeypatch):
     # A DriftReport never persists generated text; the Inspect eval log does, and the
     # module says so. This asserts the report side of that split.

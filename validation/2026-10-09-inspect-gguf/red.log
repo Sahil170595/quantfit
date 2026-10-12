@@ -1,0 +1,186 @@
+EEEEEEEEEEEEE                                                            [100%]
+=================================== ERRORS ====================================
+_ ERROR at setup of test_public_provider_reuses_one_server_and_reports_actual_calls _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F363C3E0>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_public_provider_reuses_on0')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+_ ERROR at setup of test_public_source_or_runtime_override_refuses_before_server[kwargs0] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6A0FD40>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_public_source_or_runtime_0')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+_ ERROR at setup of test_public_source_or_runtime_override_refuses_before_server[kwargs1] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6A0D520>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_public_source_or_runtime_1')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+_ ERROR at setup of test_public_source_or_runtime_override_refuses_before_server[kwargs2] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6A0E060>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_public_source_or_runtime_2')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+_ ERROR at setup of test_public_source_or_runtime_override_refuses_before_server[kwargs3] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6A0EBA0>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_public_source_or_runtime_3')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+__ ERROR at setup of test_provider_rejects_ignored_generation_knobs[kwargs0] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6A0F710>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_provider_rejects_ignored_0')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+__ ERROR at setup of test_provider_rejects_ignored_generation_knobs[kwargs1] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6A44050>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_provider_rejects_ignored_1')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+__ ERROR at setup of test_provider_rejects_ignored_generation_knobs[kwargs2] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6A44B30>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_provider_rejects_ignored_2')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+__ ERROR at setup of test_provider_rejects_ignored_generation_knobs[kwargs3] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6A45610>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_provider_rejects_ignored_3')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+__ ERROR at setup of test_provider_rejects_ignored_generation_knobs[kwargs4] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6A46120>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_provider_rejects_ignored_4')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+_____ ERROR at setup of test_pair_ram_admission_happens_before_any_server _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6A46C30>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_pair_ram_admission_happen0')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+_ ERROR at setup of test_observer_detects_source_substitution_and_closes_both _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6A479B0>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_observer_detects_source_s0')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+_ ERROR at setup of test_actual_public_inspect_full_fixture_batch_closes_before_judge _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B1F6AA4440>
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1134/test_actual_public_inspect_ful0')
+
+    @pytest.fixture
+    def fixture(monkeypatch, tmp_path):
+        from inspect_ai.model import get_model
+    
+>       import quantfit.inspect_gguf as extension
+E       ModuleNotFoundError: No module named 'quantfit.inspect_gguf'
+
+tests\test_inspect_gguf.py:17: ModuleNotFoundError
+=========================== short test summary info ===========================
+ERROR tests/test_inspect_gguf.py::test_public_provider_reuses_one_server_and_reports_actual_calls
+ERROR tests/test_inspect_gguf.py::test_public_source_or_runtime_override_refuses_before_server[kwargs0]
+ERROR tests/test_inspect_gguf.py::test_public_source_or_runtime_override_refuses_before_server[kwargs1]
+ERROR tests/test_inspect_gguf.py::test_public_source_or_runtime_override_refuses_before_server[kwargs2]
+ERROR tests/test_inspect_gguf.py::test_public_source_or_runtime_override_refuses_before_server[kwargs3]
+ERROR tests/test_inspect_gguf.py::test_provider_rejects_ignored_generation_knobs[kwargs0]
+ERROR tests/test_inspect_gguf.py::test_provider_rejects_ignored_generation_knobs[kwargs1]
+ERROR tests/test_inspect_gguf.py::test_provider_rejects_ignored_generation_knobs[kwargs2]
+ERROR tests/test_inspect_gguf.py::test_provider_rejects_ignored_generation_knobs[kwargs3]
+ERROR tests/test_inspect_gguf.py::test_provider_rejects_ignored_generation_knobs[kwargs4]
+ERROR tests/test_inspect_gguf.py::test_pair_ram_admission_happens_before_any_server
+ERROR tests/test_inspect_gguf.py::test_observer_detects_source_substitution_and_closes_both
+ERROR tests/test_inspect_gguf.py::test_actual_public_inspect_full_fixture_batch_closes_before_judge
+13 errors in 3.38s

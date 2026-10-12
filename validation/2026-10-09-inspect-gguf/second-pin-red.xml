@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="5.128" timestamp="2026-10-09T00:49:56.076056-04:00" hostname="SahilKadadekar"><testcase classname="tests.test_inspect_gguf" name="test_invalid_second_hub_pin_refuses_before_even_local_baseline_load[None]" time="4.770"><failure message="Failed: even baseline weight resolution forbidden">fixture = (&lt;module 'quantfit.inspect_gguf' from 'C:\\tmp\\qf-release-0.16.0-20261008\\quantfit\\inspect_gguf.py'&gt;, &lt;function get...], WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1151/test_invalid_second_hub_pin_re0/server'))
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x000001C658222C60&gt;
+revision = None
+
+    @pytest.mark.parametrize("revision", [None, "main", "a" * 39])
+    def test_invalid_second_hub_pin_refuses_before_even_local_baseline_load(fixture, monkeypatch, revision):
+        import quantfit.inspect_task as task
+        from quantfit.safety import verify
+    
+        ext, _, arms, servers, _ = fixture
+        monkeypatch.setattr(ext.ga, "_resolve", lambda *a, **kw: pytest.fail("even baseline weight resolution forbidden"))
+        monkeypatch.setattr(verify, "_load_probes", lambda *a, **kw: pytest.fail("dataset load forbidden"))
+        with pytest.raises((InspectTaskError, ValueError), match="immutable|revision"):
+&gt;           task.qsr_eval(f"quantfit_gguf/{arms[0].path}", "quantfit_gguf/hf:org/repo/quant.gguf",
+                          gguf_revisions=(None, revision))
+
+tests\test_inspect_gguf.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\inspect_task.py:2063: in qsr_eval
+    observer = GgufRunObserver((baseline, quantized), gguf_revisions, api["get_model"], token)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quantfit\inspect_gguf.py:265: in __init__
+    self.models.append(get_model(spec, revision=revision, api_key=token, memoize=False))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tools\ci\.venv\Lib\site-packages\inspect_ai\model\_model.py:2388: in get_model
+    modelapi_instance = modelapi_type(
+tools\ci\.venv\Lib\site-packages\inspect_ai\model\_registry.py:56: in model_wrapper
+    model = model_type(*args, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quantfit\inspect_gguf.py:204: in __init__
+    self.arm = ga._resolve(model_name, api_key, **({"revision": revision} if revision else {}))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+a = ('C:\\Users\\sahil\\AppData\\Local\\Temp\\pytest-of-sahil\\pytest-1151\\test_invalid_second_hub_pin_re0\\base.gguf', None)
+kw = {}
+
+&gt;   monkeypatch.setattr(ext.ga, "_resolve", lambda *a, **kw: pytest.fail("even baseline weight resolution forbidden"))
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: even baseline weight resolution forbidden
+
+tests\test_inspect_gguf.py:166: Failed</failure></testcase></testsuite></testsuites>

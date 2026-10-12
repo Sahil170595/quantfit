@@ -146,12 +146,16 @@ def _build_parser() -> argparse.ArgumentParser:
     pinspect = sub.add_parser(
         "inspect-run",
         parents=[tok],
-        help="observed HF Inspect paired run (same 0/2/3/4 exits as verify-safety)",
+        help="observed HF or owned GGUF Inspect paired run (same 0/2/3/4 exits as verify-safety)",
     )
-    pinspect.add_argument("--baseline", default=None, help="Inspect HF spec: hf/org/repo")
-    pinspect.add_argument("--quant", default=None, help="Inspect HF spec: hf/org/repo")
-    pinspect.add_argument("--baseline-revision", default=None, help="immutable baseline HF commit SHA")
-    pinspect.add_argument("--quant-revision", default=None, help="immutable quantized HF commit SHA")
+    pinspect.add_argument(
+        "--baseline", default=None, help="hf/org/repo or quantfit_gguf/<path or hf:org/repo/file.gguf>"
+    )
+    pinspect.add_argument("--quant", default=None, help="matching provider; GGUF baseline must be unquantized")
+    pinspect.add_argument(
+        "--baseline-revision", default=None, help="immutable baseline Hub commit; omit for local GGUF"
+    )
+    pinspect.add_argument("--quant-revision", default=None, help="immutable quantized Hub commit; omit for local GGUF")
     pinspect.add_argument("--max-new-tokens", type=int, default=64)
     pinspect.add_argument("--report", default=None, metavar="PATH", help="write aggregate-only schema-v2 report")
     pinspect.add_argument(
@@ -664,12 +668,16 @@ def _dispatch(args: argparse.Namespace) -> int:
         import tempfile
         from pathlib import Path
 
-        from quantfit.inspect_task import qsr_eval
+        from quantfit.inspect_task import check_report_output, local_gguf_inputs, qsr_eval
 
         if not args.baseline or not args.quant:
-            raise RuntimeError("inspect-run needs --baseline and --quant HF specs")
-        if not args.baseline_revision or not args.quant_revision:
+            raise RuntimeError("inspect-run needs --baseline and --quant Inspect HF or quantfit_gguf specs")
+        gguf = args.baseline.startswith("quantfit_gguf/") or args.quant.startswith("quantfit_gguf/")
+        if gguf and args.report:
+            check_report_output(args.report, local_gguf_inputs((args.baseline, args.quant)))
+        if not gguf and (not args.baseline_revision or not args.quant_revision):
             raise RuntimeError("inspect-run needs both immutable --baseline-revision and --quant-revision")
+        observations = {"gguf_revisions" if gguf else "hf_revisions": (args.baseline_revision, args.quant_revision)}
         # Temporary logs disappear even on failure. Explicit logs are local-only
         # captures; stdout must remain exactly one JSON envelope.
         with contextlib.ExitStack() as stack:
@@ -687,7 +695,7 @@ def _dispatch(args: argparse.Namespace) -> int:
                     args.quant,
                     token=args.token,
                     max_new_tokens=args.max_new_tokens,
-                    hf_revisions=(args.baseline_revision, args.quant_revision),
+                    **observations,
                     log_dir=log_dir,
                     display="none",
                     max_samples=1,
@@ -709,6 +717,7 @@ def _dispatch(args: argparse.Namespace) -> int:
                     "report_path": args.report,
                     "log_dir": args.log_dir,
                     "observed": True,
+                    "observation_receipt": getattr(run, "observation_receipt", None),
                 },
                 lambda: print(run.drift.summary()),
             )

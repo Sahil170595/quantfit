@@ -1,0 +1,71 @@
+{
+  "argv": [
+    "bundle",
+    "verify",
+    "--bundle",
+    "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-inspect-gguf\\synthetic-bundle",
+    "--json"
+  ],
+  "actual_exit": 0,
+  "envelope": {
+    "schema_version": 1,
+    "tool": {
+      "name": "quantfit",
+      "version": "0.16.0"
+    },
+    "command": "bundle",
+    "exit_code": 0,
+    "result": {
+      "bundle_path": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-inspect-gguf\\synthetic-bundle",
+      "bundle_schema": 1,
+      "manifest": {
+        "bundle_schema": 1,
+        "created_utc": "2026-10-09T04:30:30.536271+00:00",
+        "files": [
+          {
+            "path": "report.json",
+            "role": "report",
+            "sha256": "bd52e61ec2da2ea9be251e173d100c358fb248ec61824909b93279d0b8b01277",
+            "size_bytes": 5076
+          },
+          {
+            "path": "calibration.json",
+            "role": "calibration",
+            "sha256": "d7c2e943a97ebbad3df37adfe4a14610513ed16105b31fd06c0488fae5f69a3c",
+            "size_bytes": 5311
+          },
+          {
+            "path": "resolution.json",
+            "role": "resolution",
+            "sha256": "bfc5b21cb2d329f799ad69d2d36fd6bd5880853099d6a52f1a17d271d3a3eb7a",
+            "size_bytes": 5081
+          }
+        ],
+        "quantfit_version": "0.16.0",
+        "scientific_claims_verified": false,
+        "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+      },
+      "integrity_verified": true,
+      "scientific_claims_verified": false,
+      "declared_results": {
+        "report": {
+          "verdict": "REGRESSION DETECTED (dangerous axis)",
+          "regression_detected": true,
+          "unmeasurable_axes": []
+        },
+        "calibration": {
+          "binding_fingerprint": "aa7e73a85f2ca2729c9c007461f98d08c2688fad368e4d881e0792b1f5cd3d67",
+          "human_labels_verified": false,
+          "assumptions_verified": false
+        },
+        "resolution": {
+          "human_confirmation_verified": false,
+          "assumptions_verified": false,
+          "binding_status": "matched actual report scope; declared evidence not authenticated"
+        }
+      },
+      "mismatches": [],
+      "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+    }
+  }
+}

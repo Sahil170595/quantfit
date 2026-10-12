@@ -47,6 +47,23 @@ _ENGINE_OUTPUTS = {
     "weight_runtime_scope",
     "revision_observation",
 }
+_INSPECT_GGUF_CAUSAL = {
+    "name",
+    "inspect_ai_version",
+    "binary_sha256",
+    "source",
+    "threads",
+    "device",
+    "offload_device",
+    "n_gpu_layers",
+    "op_offload",
+    "served_model_verified",
+    "served_build",
+    "served_template_sha256",
+    "native_context_size",
+    "total_slots",
+    "model_args",
+}
 
 
 class CalibrationBindingError(RuntimeError):
@@ -174,6 +191,46 @@ def engine_causal_identity(engine: dict, *, n_probes: int | None = None, observe
                 "Inspect HF observed generate_calls must equal probe count",
             )
         causal = {key: engine[key] for key in _INSPECT_CAUSAL}
+    elif name == "inspect_ai:quantfit_gguf":
+        _require(
+            _INSPECT_GGUF_CAUSAL <= set(engine) <= _INSPECT_GGUF_CAUSAL | _ENGINE_OUTPUTS,
+            "Inspect GGUF engine has missing/unsupported metadata",
+        )
+        _require(engine["inspect_ai_version"] == "0.3.269", "unsupported observed Inspect version")
+        for key in ("binary_sha256", "served_template_sha256"):
+            _require(
+                isinstance(engine[key], str) and bool(_SHA256.fullmatch(engine[key])),
+                f"Inspect GGUF {key} must be actual SHA256",
+            )
+        _require(_count(engine["threads"], "engine.threads") > 0, "GGUF threads must be positive")
+        _require(
+            engine["device"] == "cpu"
+            and engine["offload_device"] == "none"
+            and type(engine["n_gpu_layers"]) is int
+            and engine["n_gpu_layers"] == 0
+            and engine["op_offload"] is False
+            and engine["served_model_verified"] is True,
+            "Inspect GGUF requires observed CPU controls/served source",
+        )
+        for key, value in (("native_context_size", 4096), ("total_slots", 1)):
+            _require(type(engine[key]) is int and engine[key] == value, "Inspect GGUF native policy differs")
+        for key in ("source", "served_build"):
+            _text(engine[key], f"engine.{key}")
+        _require(
+            isinstance(engine["model_args"], dict) and not engine["model_args"],
+            "Inspect GGUF does not admit model argument overrides",
+        )
+        if observed:
+            _require(
+                type(n_probes) is int
+                and n_probes > 0
+                and type(engine.get("generate_calls")) is int
+                and engine["generate_calls"] == n_probes,
+                "Inspect GGUF actual calls must match probe count",
+            )
+        else:
+            _require(set(engine) == _INSPECT_GGUF_CAUSAL, "stored GGUF identity contains only causal facts")
+        causal = {key: engine[key] for key in _INSPECT_GGUF_CAUSAL}
     elif name == "llama.cpp":
         digest = engine.get("binary_sha256")
         _require(
@@ -202,6 +259,16 @@ def _arm_identity(arm: ArmRun, *, n_probes: int | None = None, observed: bool = 
     dtype = _text(arm.resolved_dtype, "arm.resolved_dtype")
     _require(dtype.strip().lower() != "auto", "arm precision must be observed, not auto")
     engine = engine_causal_identity(arm.engine, n_probes=n_probes, observed=observed)
+    if engine["name"] == "inspect_ai:quantfit_gguf":
+        _require(
+            arm.model.startswith("quantfit_gguf/") and arm.artifact_sha256 is not None,
+            "Inspect GGUF requires the actual artifact hash and provider ref",
+        )
+        from quantfit.safety.gguf_arm import validate_revision
+
+        ref = arm.model[len("quantfit_gguf/") :]
+        validate_revision(ref, arm.revision)
+        _require(not ref.startswith("hf:") or arm.revision is not None, "Hub GGUF needs actual immutable revision")
     if engine["name"] == "inspect_ai:hf":
         _require(arm.model == f"hf/{engine['source_repo']}", "Inspect HF source repo contradicts model")
         _require(
