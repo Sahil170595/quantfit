@@ -8,6 +8,7 @@ import importlib.metadata
 import json
 import os
 import shlex
+import shutil
 import struct
 import subprocess
 import sys
@@ -195,6 +196,116 @@ def main() -> None:
             assert copied == raw
             assert json.loads(copied)["drift"]["over_refusal"]["overrefusal_regressions"] == 2
         check_repeatability(["--bundle", str(moved_replay)], "relocated-repeatability")
+
+        def check_reproduction(reference: Path, candidate: Path, label: str, expected: int) -> dict:
+            out = sandbox / f"{label}-comparison.json"
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "quantfit.cli",
+                    "reproduce",
+                    "--reference-bundle",
+                    str(reference),
+                    "--candidate-bundle",
+                    str(candidate),
+                    "--out",
+                    str(out),
+                    "--json",
+                ],
+                cwd=sandbox,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            assert completed.returncode == expected, completed.stdout + completed.stderr
+            result = json.loads(completed.stdout)["result"]
+            assert json.loads(out.read_bytes()) == {key: value for key, value in result.items() if key != "record_path"}
+            for side in ("reference", "candidate"):
+                evidence = result["bundle_evidence"][side]
+                assert evidence["selected_role"] == "replicate-1" and evidence["selected_member"] == "report-1.json"
+                assert evidence["producer_locations_verified"] is evidence["independent_execution_verified"] is False
+                assert evidence["scientific_claims_verified"] is False
+                assert [binding["role"] for binding in evidence["report_bindings"]] == [
+                    f"replicate-{i}" for i in range(1, 4)
+                ]
+                assert (
+                    result["preconditions"]["T0_within_hardware_byte_identity"][side]["bound_to_comparison_report"]
+                    is True
+                )
+            return result
+
+        copied_replay = sandbox / "copied-relocated-replicates"
+        shutil.copytree(moved_replay, copied_replay)
+        reproduced = check_reproduction(moved_replay, copied_replay, "copied-historical-phi4", 4)
+        assert reproduced["void_reasons"] == ["P1_identical_input_files"]
+        for side in ("reference", "candidate"):
+            evidence = reproduced["bundle_evidence"][side]
+            assert evidence["original_t0"] == json.loads(held_t0)
+            assert evidence["receiving_t0"]["protocol_pass"] is True
+            assert evidence["selected_report_sha256"] == hashlib.sha256(held[0]).hexdigest()
+            assert reproduced["reports"][side]["drift_identity"]["over_refusal"]["overrefusal_regressions"] == 2
+
+        # Explicitly synthetic controls exercise positive/breach routing, not new
+        # inference, independent execution, human truth or scientific qualification.
+        import quantfit
+        from quantfit.safety.verify import SafetyDrift
+
+        assert not Path(quantfit.__file__).resolve().is_relative_to(checkout), "source-shadowed synthetic arithmetic"
+        synthetic_bundles = []
+        for index, (label, flips) in enumerate(
+            (("synthetic-reference", 0), ("synthetic-clean", 0), ("synthetic-breach", 1))
+        ):
+            control_reports = []
+            for replicate, raw in enumerate(held, 1):
+                value = json.loads(raw)
+                zones = {
+                    "clear_unsafe": {"n": 12, "baseline_refused": 12, "quant_refused": 12 - flips},
+                    "clear_safe": {"n": 12, "baseline_refused": 0, "quant_refused": 0},
+                    "borderline": {"n": 16, "baseline_refused": 0, "quant_refused": 0},
+                }
+                value["drift"] = SafetyDrift(40, 12, 12, 12 - flips, flips, 28, 0, 0, 0, zones).to_dict()
+                value["judge_runtime_s"] = float(index * 10 + replicate)
+                path = sandbox / f"{label}-{replicate}.json"
+                path.write_text(json.dumps(value), encoding="utf-8")
+                control_reports.append(path)
+            control_t0, control_bundle = sandbox / f"{label}-t0.json", sandbox / f"{label}-bundle"
+            for command in (
+                ["t0", "--reports", *map(str, control_reports), "--out", str(control_t0), "--json"],
+                [
+                    "bundle",
+                    "replay-create",
+                    "--reports",
+                    *map(str, control_reports),
+                    "--t0",
+                    str(control_t0),
+                    "--out",
+                    str(control_bundle),
+                    "--json",
+                ],
+            ):
+                completed = subprocess.run(
+                    [sys.executable, "-m", "quantfit.cli", *command],
+                    cwd=sandbox,
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                assert completed.returncode == 0, completed.stdout + completed.stderr
+            for path in [*control_reports, control_t0]:
+                path.unlink()
+            relocated_control = sandbox / f"{label}-relocated"
+            control_bundle.rename(relocated_control)
+            synthetic_bundles.append(relocated_control)
+        assert (
+            check_reproduction(synthetic_bundles[0], synthetic_bundles[1], "synthetic-clean", 0)["outcome"]
+            == "reproduced"
+        )
+        assert (
+            check_reproduction(synthetic_bundles[0], synthetic_bundles[2], "synthetic-breach", 3)["outcome"] == "breach"
+        )
         # Actual anonymous public aggregate download in this existing installed
         # wheel/sdist consumer. No model, campaign or additional CI job is created.
         public = sandbox / "public-evidence"
@@ -573,6 +684,7 @@ def main() -> None:
             "test_action_calibration.py",
             "test_saved_report_gate.py",
             "test_replay_bundle.py",
+            "test_reproduce_bundles.py",
             "test_repeatability.py",
             "test_evidence_fetch.py",
             "test_verify.py",

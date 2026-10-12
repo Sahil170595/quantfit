@@ -12,6 +12,7 @@ import importlib.metadata
 import json
 import os
 import platform
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -75,6 +76,7 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
     import quantfit.cold_run as cold
     import quantfit.safety.gguf_arm as arm_module
     import quantfit.safety.verify as native
+    from quantfit import reproduce
 
     checkout = Path(__file__).resolve().parents[1]
     assert not Path(quantfit.__file__).resolve().is_relative_to(checkout), "candidate is source-shadowed"
@@ -115,8 +117,23 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
         assert report["env"]["device"] == "cpu"
         for arm in ("baseline", "quantized"):
             assert all(report[arm]["engine"][k] == v for k, v in arm_module.CPU_OFFLOAD_CONTROLS.items())
+    # Offline handoff of the actual three reports, after existing inference ends.
+    # An exact copied candidate retains native P1 void even when T0 is negative.
+    from quantfit.bundle import create_replay_bundle
+    from quantfit.reproduce import compare_bundles
+
+    with tempfile.TemporaryDirectory(prefix="quantfit-cold-reproduce-", dir=output.parent) as name:
+        reference, candidate = Path(name) / "reference", Path(name) / "candidate"
+        create_replay_bundle([run["report"]["path"] for run in result["runs"]], str(output / "t0.json"), str(reference))
+        shutil.copytree(reference, candidate)
+        comparison = compare_bundles(str(reference), str(candidate))
+        assert comparison["exit_code"] == 4 and "P1_identical_input_files" in comparison["void_reasons"]
+        assert (
+            comparison["bundle_evidence"]["reference"]["receiving_t0"]["protocol_pass"] is result["t0"]["protocol_pass"]
+        )
+        assert comparison["bundle_evidence"]["candidate"]["independent_execution_verified"] is False
     hashes = {}
-    for module in (cold, arm_module, native):
+    for module in (cold, arm_module, native, reproduce):
         installed = Path(module.__file__)
         relative = installed.relative_to(Path(quantfit.__file__).parent.parent).as_posix()
         canonical = subprocess.run(
@@ -129,6 +146,7 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
         "actual_exit": completed.returncode,
         "native_exits": [r["native_exit_code"] for r in result["runs"]],
         "t0_protocol_pass": result["t0"]["protocol_pass"],
+        "offline_copied_bundle_comparison": comparison,
         "runtime_s": time.monotonic() - started,
         "source_git_blob_sha256": hashes,
         "installed_origin": str(quantfit.__file__),
