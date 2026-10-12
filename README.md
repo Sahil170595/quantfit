@@ -41,10 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.22.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.22.0).
+This README documents [quantfit 0.23.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.23.0).
 All workflows below are available in this release.
 
-Install with `pip install "quantfit[inspect,gguf]==0.22.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.23.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -458,7 +458,7 @@ means a byte mismatch and exit 2 means unsafe/unsupported input. Original gate
 no-answer/refusal states survive bundling. Integrity is not producer authenticity,
 statistical validity or a safety GO. See [the bundle contract](docs/portable-evidence-bundles.md).
 
-Candidate three-report T0 handoff (unreleased; needs the candidate checkout/wheel):
+Three-report T0 handoff, available since 0.23.0:
 
 ```bash
 quantfit bundle replay-create --reports run-1.json run-2.json run-3.json --t0 native-t0.json --out replicate-evidence/ --json

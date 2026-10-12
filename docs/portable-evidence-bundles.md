@@ -53,7 +53,7 @@ locator is never treated as an observed report or opened during verification.
 Its actual-run binding remains false. Calibration-only bundles and resolution without
 its report/calibration are refused. Three-report T0 evidence is outside this version's
 schema-1 four-role interface; a disconnected T0 declaration is not accepted.
-The separate candidate schema-2 [three-report T0 handoff](replicate-bundles.md)
+The separate schema-2 [three-report T0 handoff](replicate-bundles.md)
 uses `bundle replay-create` / `bundle replay-verify` and preserves the original
 producer bytes. It does not change the schema-1 interface described here.
 
