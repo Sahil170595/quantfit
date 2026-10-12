@@ -1,9 +1,8 @@
 # Fetch the approved public aggregate snapshot
 
-Candidate `evidence fetch` downloads the fixed public dataset
+`evidence fetch`, available since quantfit 0.25.0, downloads the fixed public dataset
 `Crusadersk/quantfit-reference-reports` at immutable commit
-`3a4ff4e086f9d72ad828134873b01fa19b550059`. It is unreleased and requires the
-candidate checkout/wheel. There is no repository, endpoint, revision or manifest
+`3a4ff4e086f9d72ad828134873b01fa19b550059`. Install quantfit 0.25.0 or newer. There is no repository, endpoint, revision or manifest
 override. The installed package owns twelve independent path/size/SHA256 pins;
 the downloaded publication manifest cannot authorize itself or new members.
 
@@ -70,4 +69,4 @@ Local fake-HTTP source CLI/adverse evidence is in
 `validation/2026-10-09-evidence-fetch/`. Actual anonymous download/installed shape
 loading will be qualified through the existing Ubuntu/Windows wheel/sdist
 consumer, without another CI job, model download or measurement campaign.
-These hosted results remain pending until the feature batch is pushed.
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37992671329); release publication separately qualifies the exact versioned distributions.

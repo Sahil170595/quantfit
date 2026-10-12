@@ -1,10 +1,9 @@
 # Portable three-report T0 handoff
 
-The candidate `bundle replay-create` and `bundle replay-verify` commands transfer
+The `bundle replay-create` and `bundle replay-verify` commands, available since 0.23.0, transfer
 exactly three saved aggregate reports and their original native T0 artifact. They
 run offline; no model, judge, cache, network fetch or producer location is used.
-These commands are unreleased and need the candidate checkout/wheel; public
-0.16.0 does not provide them.
+Install quantfit 0.23.0 or newer for these commands.
 
 ```bash
 quantfit bundle replay-create --reports run-1.json run-2.json run-3.json --t0 native-t0.json --out replicate-evidence --json
@@ -58,5 +57,4 @@ scientific GO or cross-hardware reproduction. Replicates are not pooled and are
 not independent reference reports. The preserved historical Phi4 example has
 two unconfirmed over-refusal flags per run; dangerous 0/12 means **the detector
 did not fire**. Local actual handoff and synthetic adverse records are in
-`validation/2026-10-09-replicate-bundles/`; installed wheel/sdist and POSIX FIFO
-qualification remain pending until the hosted batch runs.
+`validation/2026-10-09-replicate-bundles/`; The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37992670289); release publication separately qualifies the exact versioned distributions.

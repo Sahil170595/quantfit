@@ -15,13 +15,11 @@
 
 ## Unreleased
 
-- Bounded GGUF structure API/CLI verification replaces magic-only acceptance,
-  with separate optional native CPU usability, one capped request and required
-  owned cleanup. Held metadata/extent checks, explicit outside-profile refusals,
-  original Inspect aliases and legacy Transformers/tuple behavior are retained.
-  No weight-quality, safety or GO claim. Local crafted/fake lifecycle evidence:
-  `validation/2026-10-09-gguf-verification/`; actual installed/native qualification
-  is pending the existing hosted consumers.
+## 0.25.0
+
+Released independently from PR #129: pinned anonymous public evidence retrieval.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
 
 - Fixed immutable public aggregate retrieval API/CLI (`evidence fetch`) with
   independent installed twelve-file byte pins, anonymous bounded raw streaming,
@@ -31,12 +29,28 @@
   sensitivity or GO. Local fixture-transport evidence:
   `validation/2026-10-09-evidence-fetch/`; actual installed download pending hosted.
 
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37992671329); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
+## 0.24.0
+
+Released independently from PR #128: full-report repeatability and JUnit.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
 - Offline three-report full-payload comparison API/CLI (`repeatability`) with
   fixed volatile fields, strict decoded types/values, unambiguous difference
   pointers, separate native T0 and original per-run axes, and eight-case JUnit.
   Agreement retains negative flags and unmeasured axes; it establishes neither
   independent execution, human truth, sensitivity nor GO. Evidence:
   `validation/2026-10-09-repeatability/`.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37992670430); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
+## 0.23.0
+
+Released independently from PR #127: portable three-report T0 bundles.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
 
 - Portable three-report T0 handoff API/CLI (`bundle replay-create` /
   `bundle replay-verify`): exact original aggregate/T0 bytes, ordered hash and
@@ -45,11 +59,37 @@
   unchanged. Integrity establishes neither independent execution, full-payload
   repeatability nor scientific GO. Evidence: `validation/2026-10-09-replicate-bundles/`.
 
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37992670289); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
+## 0.22.0
+
+Released independently from PR #126: saved-report native gate replay.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
 - Offline saved-report gate API/CLI (`gate --from-report`) with exact-byte report
   binding, native policy/refusal precedence, recorded-arm JUnit, portable replay
   bundles and optional composite-action routing. No new inference; bound calibration
   matches recorded scope without authenticating labels or the producing host.
   Functional evidence and limitations: `validation/2026-10-09-saved-report-gate/`.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37992671976); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
+## 0.21.1
+
+Released independently from PR #125: CLI README workflows and evidence limits.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
+- CLI README recipes, installation extras and command-specific exits now match the independently reviewed workflows and retain all scientific limitations.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37897321420); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
+## 0.21.0
+
+Released independently from PR #124: public Phi4 CPU aggregate candidate.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
 
 - Actual pinned Phi4 BF16/Q4_K_M hosted CPU campaign: three fresh uncached
   full40 native runs with the public token flag omitted and actual default64
@@ -63,12 +103,28 @@
   `validation/2026-10-09-phi4-public-candidate/`; campaign source/failure-staging
   evidence: `validation/2026-10-09-reference-campaign/`.
 
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37895657460); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
+## 0.20.0
+
+Released independently from PR #123: observed Inspect GGUF provider.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
 - Optional public Inspect GGUF provider/CLI observations with actual weight/binary
   hashes, immutable Hub pins, applied CPU controls and owned cancellable server
   lifecycle. Managed paired runs require80native calls/full40probes before one
   pinned judge batch, close both resident models before judging and enforce a
   conservative RAM estimate. Local synthetic evidence and pending hosted installed
   model qualification: `validation/2026-10-09-inspect-gguf/`; no safety/reproduction GO.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37887088728); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
+## 0.19.0
+
+Released independently from PR #122: three fresh native GGUF replicates.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
 
 - Native GGUF server argv explicitly disables device/layer/host-operation offload,
   with causal controls recorded in the engine identity. A cached b9817 help/argv check
@@ -83,12 +139,29 @@
   orchestration evidence: `validation/2026-10-08-cold-replicate-runner/`. Hosted installed
   model evidence is pending; no independent-host, human-label, sensitivity or GO claim.
 
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37881704501); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
+## 0.18.0
+
+Released independently from PR #121: portable aggregate evidence bundles.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
 - Offline `bundle create`/`bundle verify` preserve exact aggregate bytes, conditional
   flags, negative gate decisions and reportless pre-run refusals after relocation.
   Fixed role paths and same-buffer validators refuse raw payloads and substitutions;
   integrity never authenticates scientific or human-label claims. Synthetic functional
   records are in `validation/2026-10-08-portable-evidence-bundles/`; hosted qualification
   is pending.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37880847032); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
+## 0.17.0
+
+Released independently from PR #120: calibration-aware cards and gate action.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
 - `emit model-card --calibration-report` recomputes bound conditional resolution from
   the same validated report instance it renders. Original counts/verdict/floors remain
   distinct from per-arm error-aware MDEs; inconsistent source statistics are refused.
@@ -98,6 +171,8 @@
   semantics. Synthetic local records are in
   `validation/2026-10-08-calibration-aware-outputs/`; hosted candidate qualification is
   pending. These changes establish no human calibration, sensitivity result or GO.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37879011642); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
 
 ## 0.16.0
 

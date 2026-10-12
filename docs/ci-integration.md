@@ -8,9 +8,8 @@ is `quantfit/gate.py` (the decision, the exit codes, the tier table),
 `quantfit/safety/cache.py` (the baseline cache). Where this document and the code
 disagree, that is a defect in one of them — report it, do not paper over it.
 
-The unreleased [saved-report gate](saved-report-gate.md) adds offline policy replay
-and optional action `from-report`. Install the exact candidate through `quantfit-path`;
-published 0.16 remains the default live-gate route. Replay reuses existing aggregates,
+The [saved-report gate](saved-report-gate.md), available since 0.22.0, adds offline
+policy replay and optional action `from-report`. Candidate tests use `quantfit-path`. Replay reuses existing aggregates,
 records their SHA256 and never reruns inference or authenticates the producing host.
 
 This document is for the person shipping a quantized artifact who wants their release
@@ -90,12 +89,12 @@ jobs:
       - uses: actions/checkout@v7
 
       - id: gate
-        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.16.0
+        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.25.0
         with:
           baseline: Qwen/Qwen2.5-1.5B-Instruct
           quant: ./out/qwen2.5-1.5b-awq
           tier: smoke                    # 30pp — gates >=30pp only, and says so
-          quantfit-version: "==0.16.0"    # the instrument version is part of the measurement
+          quantfit-version: "==0.25.0"    # the instrument version is part of the measurement
           hf-token: ${{ secrets.HF_TOKEN }}
 
       # Runs only on exit 0 — the action fails the job on 2/3/4/5.
@@ -136,7 +135,7 @@ checkout to happen first, and takes no `@ref`:
           quantfit-path: "."     # install the checked-out source instead of PyPI
 ```
 
-Two independent pins, and you want both: `@v0.16.0` pins the *action*, `quantfit-version`
+Two independent pins, and you want both: `@v0.25.0` pins the *action*, `quantfit-version`
 pins the *instrument*. A floating action ref with a pinned instrument is a supply-chain
 hole; a pinned action ref with a floating instrument silently changes what your gate
 measures between releases.
@@ -156,7 +155,7 @@ measures between releases.
 | `calibration-report` | `""` | Bound schema-2 calibration input. Mutually exclusive with both operator epsilon inputs. Protocol is checked before generation; actual resolved scope is checked afterward. All output paths, including JUnit, must differ from this input. |
 | `max-new-tokens` | `""` (CLI default 64) | Applied identically to both arms (§2.3). |
 | `python-version` | `3.12` | Same version quantfit's own CI pins. |
-| `quantfit-version` | `>=0.16.0,<0.17` | PEP 440 specifier. Pin exactly for a reproducible gate. |
+| `quantfit-version` | `>=0.25.0,<0.26` | PEP 440 specifier. Pin exactly for a reproducible gate. |
 | `quantfit-path` | `""` | Install from a local path instead of PyPI; overrides `quantfit-version`. |
 | `report` | `quantfit-gate/drift.json` | Schema-v2 drift report (`quantfit gate --report`). |
 | `gate-out` | `quantfit-gate/gate.json` | Gate decision artifact, schema 1 (`quantfit gate --out`). Written on refusals too. |
@@ -720,13 +719,12 @@ catches it and says so; if you are not using the action, use the import guard in
 cheapest form is `python -c "import quantfit.gate"` — the module can be importable while the
 CLI subcommand is not yet wired, so check both.
 
-### Calibration-aware model cards (unreleased)
+### Calibration-aware model cards
 
 The action invokes `gate`, whose `--calibration-report` already ships in **0.16.0**.
-Its default published install remains usable. The new **model-card emit flag is unreleased**:
-use a wheel built from the reviewed candidate until a release containing it is published.
-For action acceptance use `quantfit-path` with that exact wheel; a matching version string
-alone cannot establish that a public install contains an unreleased flag. Preflight checks
+The model-card emit flag and calibration-aware action are available since quantfit 0.17.0.
+For candidate acceptance use `quantfit-path` with the exact wheel; a version string alone
+does not establish installed behavior. Preflight checks
 the installed gate's calibration capability only when that action input is requested.
 
 ```bash

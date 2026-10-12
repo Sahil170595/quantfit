@@ -71,12 +71,11 @@ remains unfrozen.
 
 Functional evidence is in `validation/2026-10-08-cold-replicate-runner/`. It substitutes
 synthetic aggregate measurement output inside actual fresh native CLI children. It
-does not execute models. Hosted installed model qualification is pending the later
-reference campaign, which must identify unchanged runner/resolver/native source blobs.
+does not execute models. The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37881704501); release publication separately qualifies the exact versioned distributions.
 
 The existing hosted `cpu-backend (gguf)` job also contains an installed cold consumer:
 SmolLM2-135M at its pinned revision, a fresh F16 conversion (the quantizer removes
 its own intermediate), and the Q4 artifact, default64/full40 across3 fresh children.
 It accepts measured T0 disagreement and native negative exits as evidence, while
 operational failures fail qualification. It checks installed origin/canonical source
-bytes and CPU controls and retains aggregate JSON only. Execution is pending push.
+bytes and CPU controls and retains aggregate JSON only. The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37881704501); release publication separately qualifies the exact versioned distributions.
