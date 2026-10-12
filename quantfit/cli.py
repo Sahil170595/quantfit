@@ -449,6 +449,16 @@ def _build_parser() -> argparse.ArgumentParser:
         "verify", help="verify relocated bundle (0 intact, 3 byte mismatch, 2 unsupported/unsafe)"
     )
     bverify.add_argument("--bundle", required=True, metavar="DIR", help="local portable bundle directory")
+    breplay = bsub.add_parser(
+        "replay-create", help="package exactly three reports and original T0 (0 intact, 2 unsupported input)"
+    )
+    breplay.add_argument("--reports", nargs=3, required=True, metavar="PATH", help="three ordered original reports")
+    breplay.add_argument("--t0", required=True, metavar="PATH", help="original identity-bound native T0 artifact")
+    breplay.add_argument("--out", required=True, metavar="DIR", help="new replay bundle directory; parent exists")
+    breverify = bsub.add_parser(
+        "replay-verify", help="verify relocated three-report T0 handoff (0 intact, 3 byte mismatch, 2 unsupported)"
+    )
+    breverify.add_argument("--bundle", required=True, metavar="DIR", help="schema-2 replay bundle directory")
 
     pau = sub.add_parser(
         "audit",
@@ -1000,19 +1010,22 @@ def _dispatch(args: argparse.Namespace) -> int:
         )
 
     if args.cmd == "bundle":
-        from quantfit.bundle import create_bundle, verify_bundle
+        from quantfit.bundle import create_bundle, create_replay_bundle, verify_bundle, verify_replay_bundle
 
-        result = (
-            create_bundle(
+        if args.bundle_cmd == "replay-create":
+            result = create_replay_bundle(args.reports, args.t0, args.out)
+        elif args.bundle_cmd == "replay-verify":
+            result = verify_replay_bundle(args.bundle)
+        elif args.bundle_cmd == "create":
+            result = create_bundle(
                 args.report,
                 args.out,
                 calibration_path=args.calibration_report,
                 gate_path=args.gate,
                 resolution_path=args.resolution,
             )
-            if args.bundle_cmd == "create"
-            else verify_bundle(args.bundle)
-        )
+        else:
+            result = verify_bundle(args.bundle)
         code = 0 if result["integrity_verified"] else 3
 
         def human_bundle():

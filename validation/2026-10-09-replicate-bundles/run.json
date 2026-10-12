@@ -1,0 +1,276 @@
+{
+  "base_head": "ef03db2ebf02eef6f356b3ccb66b9e1d08a801fd",
+  "environment": {
+    "cpu_identifier": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "installed_versions": {
+      "gguf": "0.19.0",
+      "huggingface-hub": "1.31.0",
+      "inspect-ai": "0.3.269",
+      "mypy": "1.20.2",
+      "numpy": "2.4.6",
+      "psutil": "7.2.2",
+      "pytest": "9.0.3",
+      "ruff": "0.16.2",
+      "scipy": "1.15.3",
+      "torch": null
+    },
+    "logical_cpu_count": 32,
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.12.13",
+    "total_ram_bytes": 68319571968
+  },
+  "functional": {
+    "actual_cli_invocations": 4,
+    "artifact": "functional.json",
+    "disposable_producers_removed": true,
+    "exact_native_base_dictionary_comparisons": 2,
+    "historical_flags_per_report": {
+      "dangerous": 0,
+      "dangerous_at_risk": 12,
+      "human_confirmed": false,
+      "over_refusal": 2,
+      "over_refusal_at_risk": 20
+    },
+    "relocated_bundles": 2,
+    "t0_outcomes": [
+      {
+        "case": "historical-phi4",
+        "original_t0_sha256": "3b4424e1c985245ad81cb0dbbbfe14a31f5efcd1f88970785dfa6d65af22fd91",
+        "protocol_pass": true,
+        "report_sha256": [
+          "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+          "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+          "4f8d91c0a026bb0003d49d9d307cb563a91b5dc624484a5e8ea719d8f963a8f8"
+        ],
+        "synthetic": false
+      },
+      {
+        "case": "synthetic-disagreement",
+        "original_t0_sha256": "ade3fac3357dfcb96d8377a6313132061078a5c849f41c0ff9beb725cd8808ac",
+        "protocol_pass": false,
+        "report_sha256": [
+          "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+          "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+          "defa7d6003ad723d6ad96b85fc81ae9e9c74b9d04a21ad4aaadb2d9868b05636"
+        ],
+        "synthetic": true
+      }
+    ]
+  },
+  "functional_product_head": "307e1c63bc24db29b41a7a8706c0cf75c25edcf0",
+  "gates": {
+    "audit": {
+      "artifact": "audit-final.json",
+      "counts": {
+        "errors": 0,
+        "findings": 0,
+        "warnings": 0
+      },
+      "exit_code": 0,
+      "head": "3b766ce6a5511a0332fdb4cd664d3fecd55ee59a",
+      "scope": "after dated metadata additions; production unchanged"
+    },
+    "envelope_corrected": {
+      "counts": {
+        "cases": 103,
+        "errors": 0,
+        "failures": 0,
+        "passed": 97,
+        "skipped": 6,
+        "suite_seconds": 60.435
+      },
+      "scope": "307 plus uncommitted test-only correction later frozen unchanged3b"
+    },
+    "focused_product": {
+      "counts": {
+        "cases": 68,
+        "errors": 0,
+        "failures": 0,
+        "passed": 62,
+        "skipped": 6,
+        "suite_seconds": 5.634
+      },
+      "scope": "prefreeze working source; final whole-unit3b covers these tests"
+    },
+    "mypy": {
+      "artifact": "types-final.log",
+      "exit_code": 0,
+      "head": "307e1c63bc24db29b41a7a8706c0cf75c25edcf0",
+      "source_files": 2
+    },
+    "quickstart": {
+      "artifact": "quickstart-final.json",
+      "commands_executed": 0,
+      "commands_parsed": 48,
+      "head": "307e1c63bc24db29b41a7a8706c0cf75c25edcf0",
+      "scope": "source CLI static syntax, --no-run; no installed wheel proof"
+    },
+    "ruff_check": {
+      "artifact": "lint-final.log",
+      "exit_code": 0,
+      "scope": "same code/files later frozen3b"
+    },
+    "ruff_format": {
+      "artifact": "format-final.log",
+      "exit_code": 0,
+      "files": 114,
+      "scope": "same code/files later frozen3b"
+    },
+    "scipy_properties": {
+      "counts": {
+        "cases": 2,
+        "errors": 0,
+        "failures": 0,
+        "passed": 2,
+        "skipped": 0,
+        "suite_seconds": 2.636
+      },
+      "head": "307e1c63bc24db29b41a7a8706c0cf75c25edcf0",
+      "rtn": "deselected; Torch absent"
+    },
+    "unit": {
+      "cases": 1966,
+      "errors": 0,
+      "failures": 0,
+      "passed": 1926,
+      "skipped": 40,
+      "suite_seconds": 206.037
+    }
+  },
+  "independent_review": {
+    "artifact": "independent-review.json",
+    "no_new_execution_claim": true,
+    "product307": "PASS14 adversarial cases plus actual historical/synthetic and old native parity",
+    "root": "PASS8 independent challenges",
+    "tests3b": "PASS sole inventory/envelope test delta"
+  },
+  "limitations": [
+    "No new model/judge/Hub run; historical Phi4 and explicitly synthetic disagreement only.",
+    "Dangerous0/12 means the detector did not fire; over-refusal flags remain unconfirmed.",
+    "Producer paths are unverified labels. Byte integrity and T0 do not establish full-payload repeatability, independence, host authenticity, human truth, sensitivity or scientific GO.",
+    "Windows symlink and POSIX FIFO cases skipped locally; real installed-wheel/sdist and Linux checks pending hosted batch.",
+    "Full numerical/RTN hosted qualification pending; no Torch installed or new runtime/dependency copies."
+  ],
+  "recorded_utc": "2026-10-09 17:41:34 UTC",
+  "resource_receipt": {
+    "dependency_copy": "tools/ci/.venv (pre-existing)",
+    "development_evidence": "C:/tmp/qf-next-pr-receipts-20261008/replicate-bundles-development",
+    "new_dependency_model_container_or_worktree_copies": 0,
+    "owner": "root shared sequential feature batch",
+    "reason": "root-owned shared checkout and approved sparse environment remain consumed; blocked prior cleanup unchanged and not retried",
+    "status": "PRESERVE",
+    "task_owned_processes_remaining": 0,
+    "worktree": "C:\\tmp\\qf-release-0.16.0-20261008"
+  },
+  "schema_version": 1,
+  "source_association": "307 to3b changes only envelope tests; final full unit observed immutable3b; actual functional/model-free handoff observed immutable307. Prior properties/types/docs syntax have unchanged causal blobs.",
+  "source_files": [
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "628971778752526740cf479bcd8239ff5a304e7c7119ea6c08aa0ad5de02db96",
+      "path": ".gitattributes",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "5d30424b3eefc181fd1a63828d4a51d0f4471015366bfa59e7a6046fb83d5ffb"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "013a9377b502522e6a23179d9594bee755c087caca677c22803fac72873d92fc",
+      "path": "CHANGELOG.md",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "c224ce632485b0035676b36dde2010f662534d27b83704e799640e45a5fcad6e"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "655c2d3a12e791a79519bf2ed880c0f209df2282035a7929e1421e6452719a78",
+      "path": "README.md",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": true,
+      "working_sha256": "655c2d3a12e791a79519bf2ed880c0f209df2282035a7929e1421e6452719a78"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "0b9aad8606cea411a5ecd0cc83dd6a91d3ac00edec0d6fe4b1c170b3a515df7c",
+      "path": "docs/portable-evidence-bundles.md",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "a460414ed915d13be6b4127dc79179db0f22684d83ef044bcb5a0d06fe39bbd6"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "5b0ce44561536756152e1186aebe964ec2545e9af083e8cf1e20fff06d69325a",
+      "path": "docs/replicate-bundles.md",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": true,
+      "working_sha256": "5b0ce44561536756152e1186aebe964ec2545e9af083e8cf1e20fff06d69325a"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "93593ffb83be2a66f8f0037cd49a759ceecaaa4e64c0a969d97f8d280e665c86",
+      "path": "docs/validation-matrix.md",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "b1e05452c98a4643801887cede04cb85ea8222c0a2ec3833bb2a0bb9a1c83fcf"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "198e6c0e9bf27ff16264bb21e0918d8835dc672cbec190870cc94403cd609abc",
+      "path": "quantfit/bundle.py",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "6aec8bda42cf6fe304f8731056ca392500f35216f38bceb8e1b9431b41060e9c"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "d22983efd91a5554f04f0ae15cdd3f437927c5246433cfa8f925fe16e421c3c5",
+      "path": "quantfit/cli.py",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "2904f07285ef072c93e366f2c45607c4f71747995c17cb06d397137a2364f38d"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "b591ba4a9f3b3769aad6a1aab05fb52773f2564bd56d14fe6c3bfc78de552310",
+      "path": "quantfit/replay_bundle.py",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": true,
+      "working_sha256": "b591ba4a9f3b3769aad6a1aab05fb52773f2564bd56d14fe6c3bfc78de552310"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "dc600ea3ee3cbdfa30b3b146f0337b835aad6c54f64bc9c4ab9ac7a85bd783a5",
+      "path": "quantfit/reproduce.py",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "54c2b074747a2464325d1f37ee447fd5f121a9f6118fc3c34b8553deb7d63286"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "abe0050fc395a8facb4095356ae724d3c008c1caad21a10800198d5e07d08168",
+      "path": "tests/test_json_envelope.py",
+      "product307_equals_tested_head": false,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "fbc67cf63cb98b1c03f9760cb0ad23b855932c6f5b3d0b0f8227c7681945fbc2"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "6b3305fca492b9c85587a15f07fe13867d353dde4e35a1e8635c6cc996ebca57",
+      "path": "tests/test_replay_bundle.py",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": true,
+      "working_sha256": "6b3305fca492b9c85587a15f07fe13867d353dde4e35a1e8635c6cc996ebca57"
+    },
+    {
+      "crlf_to_lf_equals_git_blob": true,
+      "git_blob_sha256": "7d1f7b607935feb74751a60a9eefc22311e408300bbd6cc2ddb29b88910ed01b",
+      "path": "tools/ci_installed.py",
+      "product307_equals_tested_head": true,
+      "working_exactly_equals_git_blob": false,
+      "working_sha256": "48889a7b4f7d4491c72ea69c518f8608602fa50058c458b6f54a837ba85540aa"
+    }
+  ],
+  "tested_head": "3b766ce6a5511a0332fdb4cd664d3fecd55ee59a",
+  "tested_tree": "7b79d7af42c23e97a105cc896d146eb275a7e177",
+  "utc_source": "clock tool"
+}
