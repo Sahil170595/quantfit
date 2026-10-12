@@ -86,9 +86,16 @@ on `exit_code`, and check `schema_version` before relying on field names.
 
 ## Gating a release
 
-Candidate workflows are unreleased and require the candidate checkout/wheel:
+The following workflows are available in quantfit 0.26.0:
 
-For the fixed public aggregate snapshot, candidate `quantfit evidence fetch --out
+`quantfit verify --model model.gguf --json` now checks bounded GGUF structure.
+Use `quantfit verify --model model.gguf --runtime --timeout-seconds 120 --json`
+only when explicitly requesting native CPU usability on Linux/proc. Structure
+and runtime remain separate; 0 means the requested profile/check passed, 3 means
+invalid supported binary and 2 means unverified/unsupported/operational failure.
+Do not restate either result as weight quality, refusal safety or scientific GO.
+
+For the fixed public aggregate snapshot, `quantfit evidence fetch --out
 public-evidence --timeout-seconds 120 --json` performs an anonymous bounded network
 fetch using twelve independent installed byte pins. It requires a new directory
 on Linux/Windows and preserves original negative flags: integrity 0 coexists with

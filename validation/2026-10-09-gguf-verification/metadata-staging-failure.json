@@ -1,0 +1,14 @@
+{
+  "affected_paths": [
+    "complete.GGUF",
+    "magic-only.gguf",
+    "version1.gguf"
+  ],
+  "cause": "Global model-file Git ignore excluded three tiny crafted inputs; canonical generator failed on missing staged complete.GGUF blob. PowerShell continued to an evidence-only commit without a manifest.",
+  "correction": "Explicitly stage only those three generated tiny zero-filled/invalid fixture paths. Global model ignore unchanged. Recompute canonical receipt/membership from staged Git blobs; dependent Git mutations use separately checked calls.",
+  "first_evidence_head": "1601ad0cb279bbf548d892374941529ac3120a86",
+  "schema_version": 1,
+  "scientific_or_product_results_changed": false,
+  "scope": "Evidence staging/orchestration defect only; required whole-unit and exact frozen source/reviews unchanged.",
+  "source_head": "60ee5a10922d9f8eaaf06d477348ae2060e5b510"
+}

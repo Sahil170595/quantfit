@@ -1,0 +1,187 @@
+{
+  "changes": [
+    {
+      "canonical_git_sha256": "c37f0fa74f50da8da2c05b70ed94a24ec47616159d1287647b68fbd3a355b820",
+      "canonical_git_size_bytes": 282,
+      "observed_raw_sha256": "dbbc1935083f24608ba735d5727d019f3f44bea3f8ca2deff06f2676411abe36",
+      "observed_raw_size_bytes": 286,
+      "only_crlf_to_lf_changed": true,
+      "path": "cli-integration.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\cli-integration.log"
+    },
+    {
+      "canonical_git_sha256": "645a8d8dc1821a10c2bb0406f28f4c3dab130fe579c3bbaecb55189abcb92f99",
+      "canonical_git_size_bytes": 73,
+      "observed_raw_sha256": "1ab8095962442c9399a3cf0ce85a9f77b2e411796444c97a2cb2e1b42d1731bc",
+      "observed_raw_size_bytes": 74,
+      "only_crlf_to_lf_changed": true,
+      "path": "complete-prose.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\complete-prose.log"
+    },
+    {
+      "canonical_git_sha256": "b278752ed0e278dd6de435b7ee2f9f215aaa016a3f8a643e93f78da5d30c7f80",
+      "canonical_git_size_bytes": 110,
+      "observed_raw_sha256": "3e96434e233c721e936b6ea51a797449d9eb9c206894f2e27d1b1e03c7022f87",
+      "observed_raw_size_bytes": 112,
+      "only_crlf_to_lf_changed": true,
+      "path": "feature-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\feature-final.log"
+    },
+    {
+      "canonical_git_sha256": "f5c3e8f1f68967483601ff48dd833af73b6246c84110a7d905f61f8ea3f0a157",
+      "canonical_git_size_bytes": 1617,
+      "observed_raw_sha256": "9e2db80177c417a4948d66435e8859bc52abaf5d9286ee3e5658a37546271c59",
+      "observed_raw_size_bytes": 1644,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v2.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\focused-v2.log"
+    },
+    {
+      "canonical_git_sha256": "2bcf34e6752b04d7adc5039871b970548578a4ce02b2db49d3f0de3ca8623ee7",
+      "canonical_git_size_bytes": 41638,
+      "observed_raw_sha256": "6b5cd69b62e3483dbd01bb5844805d32af0b6a3237995d4406cca032f5cc53b8",
+      "observed_raw_size_bytes": 41654,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v2.xml",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\focused-v2.xml"
+    },
+    {
+      "canonical_git_sha256": "ad344222d469532edccf2bbe39575875d619708059e8ea4ca312b7194541df22",
+      "canonical_git_size_bytes": 352,
+      "observed_raw_sha256": "97e00c49d92d5ecc8d2ce4c76e53472c98f79e3fe60e78d7a16d705313099657",
+      "observed_raw_size_bytes": 357,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v3.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\focused-v3.log"
+    },
+    {
+      "canonical_git_sha256": "748ec0c464866263f6dec72776a7156725035f1c906a431d72d0bb112f61b5d4",
+      "canonical_git_size_bytes": 432,
+      "observed_raw_sha256": "4847394ff690b4ad69d64675000c3871cd519330fb1bb0d5601336fe4a5bcde6",
+      "observed_raw_size_bytes": 438,
+      "only_crlf_to_lf_changed": true,
+      "path": "focused-v4.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\focused-v4.log"
+    },
+    {
+      "canonical_git_sha256": "e8a753af63ae08bac9cbbfb14aaed366e221bfb2644e4888525d063ecd9b2f20",
+      "canonical_git_size_bytes": 28,
+      "observed_raw_sha256": "1e0311e2c5809d1ba3d03cc182a9619b92594026d3b1d39d5d9bc83abc663ea5",
+      "observed_raw_size_bytes": 29,
+      "only_crlf_to_lf_changed": true,
+      "path": "format-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\format-final.log"
+    },
+    {
+      "canonical_git_sha256": "0a455cde6267e6f4bc7c6b5fcbf4321e988e5b34f298fd06d0239e14abc61b74",
+      "canonical_git_size_bytes": 141,
+      "observed_raw_sha256": "e9850dfb032bba0e2c6d88e867851dd0b6165ae78b0a5befc6f3f5f3886438d0",
+      "observed_raw_size_bytes": 142,
+      "only_crlf_to_lf_changed": true,
+      "path": "functional.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\functional.log"
+    },
+    {
+      "canonical_git_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "canonical_git_size_bytes": 19,
+      "observed_raw_sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+      "observed_raw_size_bytes": 20,
+      "only_crlf_to_lf_changed": true,
+      "path": "lint-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\lint-final.log"
+    },
+    {
+      "canonical_git_sha256": "a26bb2667e0ea6d30b2bdbe638411540d1f2c965d40226bdf05440ca573a2191",
+      "canonical_git_size_bytes": 610,
+      "observed_raw_sha256": "51a79ce5951142136f76b21416c956f2c0ff200f083099ba16957edab370bedf",
+      "observed_raw_size_bytes": 629,
+      "only_crlf_to_lf_changed": true,
+      "path": "lint-prefreeze.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\lint-prefreeze.log"
+    },
+    {
+      "canonical_git_sha256": "11dfa51b09fad5f355fee56258c867704600324548485e0968039bd2e76d09e0",
+      "canonical_git_size_bytes": 201,
+      "observed_raw_sha256": "ffb75f3d8b9502bb101711dc2af3f3edd54e24ba2132670ef6e0ffcd1396c3e6",
+      "observed_raw_size_bytes": 204,
+      "only_crlf_to_lf_changed": true,
+      "path": "parser-refusal.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\parser-refusal.log"
+    },
+    {
+      "canonical_git_sha256": "6a4574f05378740aa4757c27a8ac4b19df6271dc5abea7ae12826a6c7c99fec2",
+      "canonical_git_size_bytes": 112,
+      "observed_raw_sha256": "438512ed4950c57fe73559c640e044b3f25e80e830b1f27aabc9d58688a26410",
+      "observed_raw_size_bytes": 114,
+      "only_crlf_to_lf_changed": true,
+      "path": "properties-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\properties-final.log"
+    },
+    {
+      "canonical_git_sha256": "884d5fac2da1dab47d25424ecd530c0b06aa54614f53abf22d9ffc18ec8d9478",
+      "canonical_git_size_bytes": 9678,
+      "observed_raw_sha256": "48db442221047c8ca7a09e96d8cbc31f20173b843d49bab4a95363c5f3aa665a",
+      "observed_raw_size_bytes": 9785,
+      "only_crlf_to_lf_changed": true,
+      "path": "quickstart-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\quickstart-final.log"
+    },
+    {
+      "canonical_git_sha256": "b70f75ff81b5ff03e080c9b7ff1a45d0d5c10692f08489180c2a802a68a7612f",
+      "canonical_git_size_bytes": 973,
+      "observed_raw_sha256": "4892898e91231087da361ef29aff3d8c3997405a48ab4da1ddad330b5f5d795c",
+      "observed_raw_size_bytes": 989,
+      "only_crlf_to_lf_changed": true,
+      "path": "red.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\red.log"
+    },
+    {
+      "canonical_git_sha256": "dbcdc5e449d4110c05d4be883886e3746aa68647ec513a9345b31eeb0524a497",
+      "canonical_git_size_bytes": 979,
+      "observed_raw_sha256": "73760e681cb8ba6890e8bd3ec879e406c1b468abb8483eb8e5bf4ad08f363d61",
+      "observed_raw_size_bytes": 987,
+      "only_crlf_to_lf_changed": true,
+      "path": "red.xml",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\red.xml"
+    },
+    {
+      "canonical_git_sha256": "04b9c18c8d05577bab5b3ecb7168227fd3bca91b6eb028e277c513a7d6e68f2c",
+      "canonical_git_size_bytes": 110,
+      "observed_raw_sha256": "7c7ff9837cc325b92fe8fe868717db7a5a1bdf3754abed4fd991aa6001b008e7",
+      "observed_raw_size_bytes": 112,
+      "only_crlf_to_lf_changed": true,
+      "path": "shared-first.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\shared-first.log"
+    },
+    {
+      "canonical_git_sha256": "1c922650718cdb7161c4f4aa96c1b3df098837e45786dd67b152acf68d88f861",
+      "canonical_git_size_bytes": 110,
+      "observed_raw_sha256": "d69add86dda05c020eeaea4daf2e7cafeaf8fb2e6afbf3cd278a2fc4305dfdc0",
+      "observed_raw_size_bytes": 112,
+      "only_crlf_to_lf_changed": true,
+      "path": "structure-first.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\structure-first.log"
+    },
+    {
+      "canonical_git_sha256": "f9b031e5c45aa702cd4fef028d465551cb20a2c4698e0913c7b00766b20ac4d8",
+      "canonical_git_size_bytes": 43,
+      "observed_raw_sha256": "0c37c4158c91ef55c724ba017bf6465f26018199badb08e3ff13f98acdf056c2",
+      "observed_raw_size_bytes": 44,
+      "only_crlf_to_lf_changed": true,
+      "path": "types-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\types-final.log"
+    },
+    {
+      "canonical_git_sha256": "477c1985157b45ffef6a6d8059feceaedab64456f2f2472cd8dbbdf5bbd57df5",
+      "canonical_git_size_bytes": 2525,
+      "observed_raw_sha256": "964f7f19e8047ea487759d4d3666bde85fee00ca82573a56a304c1805c2548e9",
+      "observed_raw_size_bytes": 2557,
+      "only_crlf_to_lf_changed": true,
+      "path": "unit-final.log",
+      "preserved_original_path": "C:\\tmp\\qf-next-pr-receipts-20261008\\gguf-verification-windows-receipts\\unit-final.log"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Canonical Git receipt normalization only; original observed Windows bytes independently preserved, no code/test/result change.",
+  "source_head": "60ee5a10922d9f8eaaf06d477348ae2060e5b510"
+}

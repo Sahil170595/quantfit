@@ -1,8 +1,8 @@
 """Smoke-verify a quantized artifact: does it actually load and generate?
 
 compressed-tensors outputs load via transformers and generate a few tokens.
-GGUF files are checked structurally (magic) — full GGUF inference needs a
-llama.cpp runtime, out of scope for a quick verify.
+GGUF files use bounded structure validation. Optional native usability is exposed
+separately by verify_gguf; the legacy tuple API keeps its Transformers behavior.
 """
 
 from __future__ import annotations
@@ -13,25 +13,36 @@ _PROMPT = "The capital of France is"
 _GGUF_MAGIC = b"GGUF"
 
 
+def gguf_path(path: str) -> Path | None:
+    """Choose one explicit GGUF/symlink or unambiguous directory member."""
+    p = Path(path)
+    if p.is_dir():
+        selected = None
+        for child in p.iterdir():
+            if child.suffix.lower() == ".gguf" and child.is_file():
+                if selected is not None:
+                    raise RuntimeError("multiple GGUF files; choose an explicit member")
+                selected = child
+        return selected
+    return p if p.suffix.lower() == ".gguf" else None
+
+
 def verify(path: str, max_new_tokens: int = 8) -> tuple[bool, str]:
     """Return (ok, message) for a quantized output dir or .gguf file."""
     p = Path(path)
-    gguf = None
-    if p.is_dir():
-        gguf = next(iter(p.glob("*.gguf")), None)
-    elif p.suffix == ".gguf":
-        gguf = p
+    gguf = gguf_path(path)
     if gguf is not None:
         return _verify_gguf(gguf)
     return _verify_transformers(str(p), max_new_tokens)
 
 
 def _verify_gguf(path: Path) -> tuple[bool, str]:
-    with open(path, "rb") as fh:
-        magic = fh.read(4)
-    ok = magic == _GGUF_MAGIC
-    note = "OK" if ok else f"BAD (got {magic!r})"
-    return ok, f"GGUF magic {note}; run with llama.cpp / Ollama to generate."
+    from quantfit.gguf_verify import verify_gguf
+
+    result = verify_gguf(str(path))
+    if result["exit_code"] == 2:
+        raise RuntimeError(result["message"])
+    return result["passed"], result["message"]
 
 
 def _verify_transformers(path: str, max_new_tokens: int) -> tuple[bool, str]:

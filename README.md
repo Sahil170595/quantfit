@@ -41,10 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.25.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.25.0).
+This README documents [quantfit 0.26.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.26.0).
 All workflows below are available in this release.
 
-Install with `pip install "quantfit[inspect,gguf]==0.25.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.26.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -441,6 +441,23 @@ nor a model card authenticates human labels or establishes the statistical
 assumptions. Without calibration, `emit model-card --report drift.json` retains
 floor-only wording. See [CLI reference](docs/cli-reference.md) and
 [synthetic functional evidence](validation/2026-10-05-calibrated-resolution/README.md).
+
+## Verify GGUF structure and usability
+
+GGUF verification, available since 0.26.0, separates bounded structure from optional native
+CPU usability:
+
+```bash
+quantfit verify --model model.GGUF --json
+quantfit verify --model model.gguf --runtime --timeout-seconds 120 --json
+```
+
+Four magic bytes are insufficient. Structure checks declared metadata/tensor
+encodings and complete aligned extents without loading weights. Optional native
+usability requires Linux/proc, conservative RAM admission, one bounded request
+and verified owned cleanup. Exit 0 applies to the requested check, invalid binary
+3 and unverified/unsupported/operational states 2. Neither check establishes
+quantization quality or safety. See [the API and profile](docs/gguf-verification.md).
 
 ## Portable aggregate evidence
 

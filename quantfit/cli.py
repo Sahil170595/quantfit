@@ -138,10 +138,17 @@ def _build_parser() -> argparse.ArgumentParser:
 
     pv = sub.add_parser(
         "verify",
-        help="smoke-load a quantized artifact + generate (GGUF: structural magic check only) "
+        help="smoke-load a quantized artifact (GGUF: bounded structure; optional native CPU usability) "
         "(exit 0 = pass, 3 = fail, 2 = operational error)",
     )
     pv.add_argument("--model", required=True, help="path to a quantized output dir or .gguf")
+    pv.add_argument("--runtime", action="store_true", help="GGUF-only native CPU load/one request; Linux/proc required")
+    pv.add_argument(
+        "--timeout-seconds",
+        type=float,
+        default=None,
+        help="with --runtime only: finite load/request deadline (0,1800], default120",
+    )
 
     pinspect = sub.add_parser(
         "inspect-run",
@@ -688,7 +695,29 @@ def _dispatch(args: argparse.Namespace) -> int:
         )
 
     if args.cmd == "verify":
-        from quantfit.verify import verify
+        from quantfit.verify import gguf_path, verify
+
+        if args.timeout_seconds is not None and not args.runtime:
+            raise RuntimeError("verify --timeout-seconds requires --runtime")
+        selected = gguf_path(args.model)
+        if selected is not None or args.runtime:
+            from quantfit.gguf_verify import verify_gguf
+
+            result = verify_gguf(
+                str(selected) if selected is not None else args.model,
+                runtime=args.runtime,
+                timeout_seconds=120 if args.timeout_seconds is None else args.timeout_seconds,
+            )
+            return _emit(
+                args,
+                "verify",
+                result["exit_code"],
+                result,
+                lambda: print(
+                    ("PASS: " if result["passed"] else "FAIL: " if result["exit_code"] == 3 else "UNVERIFIED: ")
+                    + result["message"]
+                ),
+            )
 
         ok, msg = verify(args.model)
         code = 0 if ok else 3  # 3 = the smoke-test verdict; 2 stays operational-error

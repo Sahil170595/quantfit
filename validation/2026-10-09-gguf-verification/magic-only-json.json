@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.16.0"
+  },
+  "command": "verify",
+  "exit_code": 3,
+  "result": {
+    "verify_schema_version": 1,
+    "path": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-gguf-verification\\magic-only.gguf",
+    "exit_code": 3,
+    "passed": false,
+    "structure": {
+      "status": "fail"
+    },
+    "runtime": {
+      "requested": false,
+      "status": "not_requested"
+    },
+    "quantization_quality_verified": false,
+    "scientific_go": false,
+    "scope": "GGUF structure/usability only; tensor contents, quantization quality, safety and scientific GO are not established.",
+    "message": "GGUF structure FAIL: truncated GGUF declaration"
+  }
+}

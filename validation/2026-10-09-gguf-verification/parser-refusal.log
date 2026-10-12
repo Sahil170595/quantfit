@@ -1,0 +1,3 @@
+usage: quantfit verify [-h] --model MODEL [--runtime]
+                       [--timeout-seconds TIMEOUT_SECONDS] [--json]
+quantfit verify: error: argument --timeout-seconds: invalid float value: 'bad'

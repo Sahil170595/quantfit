@@ -15,6 +15,22 @@
 
 ## Unreleased
 
+## 0.26.0
+
+Released independently from PR #130: bounded GGUF structure and native usability.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
+- Bounded GGUF structure API/CLI verification replaces magic-only acceptance,
+  with separate optional native CPU usability, one capped request and required
+  owned cleanup. Held metadata/extent checks, explicit outside-profile refusals,
+  original Inspect aliases and legacy Transformers/tuple behavior are retained.
+  No weight-quality, safety or GO claim. Local crafted/fake lifecycle evidence:
+  `validation/2026-10-09-gguf-verification/`; actual installed/native qualification
+  is pending the existing hosted consumers.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37992670442); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
 ## 0.25.0
 
 Released independently from PR #129: pinned anonymous public evidence retrieval.
