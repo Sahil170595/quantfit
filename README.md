@@ -41,10 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.25.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.25.0).
+This README documents [quantfit 0.26.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.26.0).
 All workflows below are available in this release.
 
-Install with `pip install "quantfit[inspect,gguf]==0.25.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.26.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -444,7 +444,7 @@ floor-only wording. See [CLI reference](docs/cli-reference.md) and
 
 ## Verify GGUF structure and usability
 
-Candidate GGUF verification separates bounded structure from optional native
+GGUF verification, available since 0.26.0, separates bounded structure from optional native
 CPU usability:
 
 ```bash

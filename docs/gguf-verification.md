@@ -1,8 +1,7 @@
 # Bounded GGUF structure and optional native usability
 
-Candidate `verify` replaces the old four-byte magic check with bounded binary
-validation. Its optional native CPU request is a separate question. The candidate
-checkout/wheel is required; no version or scientific milestone is implied.
+`verify`, available since quantfit 0.26.0, replaces the old four-byte magic check with bounded binary
+validation. Its optional native CPU request is a separate question. Install quantfit 0.26.0 or newer; no scientific milestone is implied.
 
 ```bash
 quantfit verify --model model.GGUF --json
@@ -84,7 +83,7 @@ The existing hosted Smol F16/Q4 qualification replaces its one four-token native
 slot with this helper, keeping its observed Q4_K_M scheme assertion. It adds no
 model, generation, download or CI job. Existing Inspect aliases, error identity
 and ordinary behavior remain covered. Actual Linux/native and installed
-Ubuntu/Windows wheel/sdist results await the hosted feature batch. Local crafted
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37992670442); release publication separately qualifies the exact versioned distributions. Local crafted
 binary/source-CLI and fake HTTP/server evidence is in
 `validation/2026-10-09-gguf-verification/`. None establishes model quality,
 refusal safety, sensitivity or scientific GO.
