@@ -1,8 +1,7 @@
 # Saved-report policy replay
 
-This unreleased interface evaluates a saved schema-v2 aggregate without models,
-judge execution, downloads or completion caches. A public 0.16 install does not
-advertise `--from-report`; install a reviewed candidate for this opt-in path.
+Available since quantfit 0.22.0, this interface evaluates a saved schema-v2 aggregate
+without models, judge execution, downloads or completion caches.
 
 ```bash
 quantfit gate --from-report drift.json --threshold 30 --out gate.json --report copied-drift.json --junit gate.xml
