@@ -1,5 +1,9 @@
 # CLI reference — every command, every flag
 
+The published instrument is 0.26.0. This checkout prepares the unpublished 0.27.0
+candidate with portable-bundle inputs to `reproduce`; use candidate source or wheels
+for those flags. Software versions do not establish roadmap or scientific GO.
+
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,
 deadline/cleanup and 0/3/2 semantics are in [GGUF verification](gguf-verification.md).
@@ -395,6 +399,47 @@ is majority-real, or that judge errors are arm-independent; the artifact carries
 these assumptions explicitly. No sample size fixes correlated judge error.
 
 ## Reproduction and reporting
+
+The 0.27.0 candidate adds a bundle input mode to the existing command:
+
+```bash
+quantfit reproduce --reference-bundle reference-handoff --candidate-bundle candidate-handoff --out comparison.json --json
+```
+
+Use exactly both `--reference-bundle DIR` and `--candidate-bundle DIR`. They accept
+schema-2 three-report T0 handoffs made by `bundle replay-create`, not generic
+aggregate bundles. Either bundle flag mixed with `--reference`, `--candidate`,
+`--t0-reference` or `--t0-candidate` is an operational error before any input I/O.
+`--out PATH` and `--json` retain their existing command envelope and native exits.
+
+Both sides must verify their ordered held members and original T0. Selection is
+fixed to `replicate-1` / `report-1.json`; it is recorded, not chosen for a favorable
+result. Positive T0 identity, membership and protocol prerequisites come from held
+buffers, without reopening producer paths. Original native bytes are never rewritten.
+Valid negative T0 remains void/4; malformed/forged bindings or I/O failures exit 2.
+
+Each side's `bundle_evidence` records its receiving bundle path, selected role/member
+and report SHA, ordered role/path/report-SHA bindings, parsed manifest, original T0
+and separate receiving T0. The manifest is a parsed declaration, not an invented
+original-byte digest. Producer paths are labels. Producer-location, execution
+independence and scientific-claim verification remain false.
+
+The library API is
+`quantfit.reproduce.compare_bundles(reference_bundle_path, candidate_bundle_path, out_path=None)`.
+The shared comparison performs no path I/O; loose-report inputs below retain their
+existing loader/T0 behavior. This is the current native tolerance/projection-based
+reproduction policy, not a new full-payload repeatability protocol. P1 retains its
+selected-byte SHA rule: exact selected report copies remain void/4 after relocation.
+Reproduced outcomes exit 0, known breach/denominator-drift/unverified outcomes 3,
+and void outcomes 4. None establishes authenticated human labels, sensitivity,
+physical hosts, independent generation, safety or scientific GO.
+
+Output preflight and checked atomic publication protect both closed directories and
+all member paths, including manifests and hardlink aliases. An output cannot replace
+consumed evidence or appear inside either bundle. Both original native T0/report
+bytes and historical producer versions remain intact.
+
+### Loose report inputs
 
 ```bash
 quantfit t0 --reports ref-a.json ref-b.json ref-c.json --out replicates-ref.json --json
