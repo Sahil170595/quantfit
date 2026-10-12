@@ -421,6 +421,7 @@ def _build_parser() -> argparse.ArgumentParser:
     pr.add_argument("--reference-bundle", metavar="DIR", help="verified reference schema-2 replay bundle")
     pr.add_argument("--candidate-bundle", metavar="DIR", help="verified candidate schema-2 replay bundle")
     pr.add_argument("--out", default=None, metavar="PATH", help="write the comparison record JSON")
+    pr.add_argument("--junit", metavar="PATH", help="write ten native reproduction JUnit cases")
     pr.add_argument(
         "--t0-reference",
         nargs="+",
@@ -1197,7 +1198,16 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "reproduce":
         from pathlib import Path
 
-        from quantfit.reproduce import ReproduceError, compare, compare_bundles, within_hardware_identical
+        from quantfit.reproduce import (
+            T0_SCHEMA_VERSION,
+            ReproduceError,
+            _prepare_reproduction_outputs,
+            _publish_reproduction_outputs,
+            compare,
+            compare_bundles,
+            within_hardware_identical,
+        )
+        from quantfit.reproduce_junit import _operational_error_to_junit, reproduction_to_junit
 
         bundle_mode = args.reference_bundle is not None or args.candidate_bundle is not None
         if bundle_mode:
@@ -1210,7 +1220,16 @@ def _dispatch(args: argparse.Namespace) -> int:
         elif args.reference is None or args.candidate is None:
             raise ReproduceError("supply both --reference and --candidate, or both replay bundle inputs")
 
+        sources = (
+            []
+            if bundle_mode
+            else [args.reference, args.candidate, *(args.t0_reference or []), *(args.t0_candidate or [])]
+        )
+        bundles = [args.reference_bundle, args.candidate_bundle] if bundle_mode else []
+        output_paths = [path for path in (args.out, args.junit) if path is not None]
+
         def _t0_input(paths):
+            nonlocal plan
             if not paths:
                 return None
             if len(paths) > 1:
@@ -1222,20 +1241,67 @@ def _dispatch(args: argparse.Namespace) -> int:
             except (OSError, ValueError, UnicodeError) as exc:
                 raise ReproduceError(f"unreadable T0 artifact {paths[0]}: {exc}") from exc
             if isinstance(value, bool) or (isinstance(value, dict) and isinstance(value.get("pass"), bool)):
+                # Match native _t0_side's actual positive-source consumption. A
+                # negative, legacy or sub-protocol locator remains just a label.
+                if (
+                    isinstance(value, dict)
+                    and value["pass"] is True
+                    and value.get("meets_protocol_replicate_count") is True
+                    and value.get("t0_schema_version") == T0_SCHEMA_VERSION
+                    and "measurement_identity" in value
+                ):
+                    reports = value.get("reports")
+                    if isinstance(reports, list) and all(
+                        isinstance(report, dict) and isinstance(report.get("path"), str) for report in reports
+                    ):
+                        plan = None  # Newly discovered sources revoke stale fallback authority immediately.
+                        sources.extend(report["path"] for report in reports)
                 return value
             raise ReproduceError("one T0 input must be a standalone artifact; otherwise supply replicate report paths")
 
-        if bundle_mode:
-            decision = compare_bundles(args.reference_bundle, args.candidate_bundle, args.out)
-        else:
-            t0_ref = _t0_input(args.t0_reference)
-            t0_cand = _t0_input(args.t0_candidate)
-            decision = compare(args.reference, args.candidate, args.out, t0_reference=t0_ref, t0_candidate=t0_cand)
+        plan = None
+        try:
+            if output_paths:
+                plan = _prepare_reproduction_outputs(sources, bundles, output_paths)
+            if bundle_mode:
+                decision = compare_bundles(args.reference_bundle, args.candidate_bundle)
+            else:
+                t0_ref = _t0_input(args.t0_reference)
+                t0_cand = _t0_input(args.t0_candidate)
+                if output_paths:
+                    # Revoke the earlier plan before discovering/protecting
+                    # nested consumed sources. An unsafe new alias must never
+                    # receive even the operational-error XML fallback.
+                    plan = None
+                    plan = _prepare_reproduction_outputs(sources, bundles, output_paths)
+                decision = compare(args.reference, args.candidate, None, t0_reference=t0_ref, t0_candidate=t0_cand)
+            outputs = []
+            if args.out:
+                outputs.append(
+                    (plan.targets[0], (json.dumps(decision, indent=2, sort_keys=True) + "\n").encode("utf-8"))
+                )
+            if args.junit:
+                outputs.append((plan.targets[-1], reproduction_to_junit(decision).encode("utf-8")))
+            if plan is not None:
+                _publish_reproduction_outputs(plan, outputs)
+        except (RuntimeError, OSError, ImportError):
+            if args.junit and plan is not None:
+                try:
+                    # All sources and BOTH outputs are rechecked. This is an
+                    # error receipt, not an invented native comparison result.
+                    _publish_reproduction_outputs(
+                        plan, [(plan.targets[-1], _operational_error_to_junit().encode("utf-8"))]
+                    )
+                except (RuntimeError, OSError, ImportError):
+                    pass  # Unsafe/unwritable XML cannot replace evidence; main still returns 2.
+            raise
 
         def _human_reproduce() -> None:
             print(decision["headline"])
             if args.out:
                 print(f"comparison record -> {args.out}")
+            if args.junit:
+                print(f"junit -> {args.junit}")
 
         return _emit(
             args,

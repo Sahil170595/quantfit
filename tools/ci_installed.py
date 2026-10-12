@@ -199,6 +199,7 @@ def main() -> None:
 
         def check_reproduction(reference: Path, candidate: Path, label: str, expected: int) -> dict:
             out = sandbox / f"{label}-comparison.json"
+            junit = sandbox / f"{label}-comparison.xml"
             completed = subprocess.run(
                 [
                     sys.executable,
@@ -211,6 +212,8 @@ def main() -> None:
                     str(candidate),
                     "--out",
                     str(out),
+                    "--junit",
+                    str(junit),
                     "--json",
                 ],
                 cwd=sandbox,
@@ -222,6 +225,24 @@ def main() -> None:
             assert completed.returncode == expected, completed.stdout + completed.stderr
             result = json.loads(completed.stdout)["result"]
             assert json.loads(out.read_bytes()) == {key: value for key, value in result.items() if key != "record_path"}
+            xml = ET.fromstring(junit.read_bytes())
+            cases = list(xml.iter("testcase"))
+            assert len(cases) == 10 and [case.get("name") for case in cases] == [
+                "reference-t0",
+                "candidate-t0",
+                "P0",
+                "P1",
+                "T1",
+                "T2",
+                "T3",
+                "T4",
+                "T5",
+                "overall",
+            ]
+            assert xml.get("tests") == "10" and xml.get("errors") == "0"
+            assert (cases[-1].find("failure") is None) is (expected == 0)
+            assert xml.get("failures") == str(sum(case.find("failure") is not None for case in cases))
+            assert str(reference) not in junit.read_text(encoding="utf-8")
             for side in ("reference", "candidate"):
                 evidence = result["bundle_evidence"][side]
                 assert evidence["selected_role"] == "replicate-1" and evidence["selected_member"] == "report-1.json"
@@ -685,6 +706,7 @@ def main() -> None:
             "test_saved_report_gate.py",
             "test_replay_bundle.py",
             "test_reproduce_bundles.py",
+            "test_reproduce_junit.py",
             "test_repeatability.py",
             "test_evidence_fetch.py",
             "test_verify.py",
