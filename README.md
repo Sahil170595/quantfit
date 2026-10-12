@@ -41,10 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.21.1](https://github.com/Sahil170595/quantfit/releases/tag/v0.21.1).
+This README documents [quantfit 0.22.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.22.0).
 All workflows below are available in this release.
 
-Install with `pip install "quantfit[inspect,gguf]==0.21.1"`.
+Install with `pip install "quantfit[inspect,gguf]==0.22.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -303,8 +303,8 @@ promise resolution it does not have:
 quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --tier smoke --out gate.json
 ```
 
-**Re-evaluate a saved report offline (unreleased candidate).** A new policy threshold
-does not require rerunning the models. Install the candidate first, then:
+**Re-evaluate a saved report offline (available since 0.22.0).** A new policy
+threshold does not require rerunning the models:
 
 ```bash
 quantfit gate --from-report drift.json --tier smoke --report replay-drift.json --out replay-gate.json --junit replay.xml
