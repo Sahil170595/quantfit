@@ -1,0 +1,144 @@
+{
+  "qualified_source_head": "97d79d6b7c9511b308c8211bbb9356813d46892d",
+  "reviewed_source_package_base": "9d59739645e5c0021aec8288b480ed2e9c5bea30",
+  "implementation_unchanged_from_hosted_qualified_feature": true,
+  "scope": "README-only fixes; full local available suite at ad95062, then final affected documentation tests/audit/parser and supported numerical properties at 97d79d6. Sparse local environment deliberately lacks Torch; full installed/runtime/numerical gates run on hosted CI. No local model downloads/new dependencies/worktrees.",
+  "initial_environment_failure_receipt": "local-gates.json",
+  "initial_environment_failure": "Root mistakenly included Torch-only RTN property in sparse environment. Original properties.xml/log retain 2 pass and 1 ModuleNotFoundError failure; no product/test change or tolerance weakening.",
+  "gates": [
+    {
+      "name": "supported-properties",
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_numerical_properties.py::test_rejection_threshold_is_minimal_and_controls_size",
+        "tests/test_numerical_properties.py::test_wilson_interval_contains_estimate_and_is_complement_symmetric",
+        "-q",
+        "--junitxml=C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-cli-readme\\supported-properties.xml"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "final-docs-tests",
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_quickstart.py",
+        "tests/test_audit.py",
+        "-q",
+        "--junitxml=C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-cli-readme\\final-docs-tests.xml"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "final-lint",
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "quantfit",
+        "tests",
+        "tools"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "final-format",
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "quantfit",
+        "tests",
+        "C:/tmp/qf-release-0.16.0-20261008/tools/ci_constraints.py",
+        "C:/tmp/qf-release-0.16.0-20261008/tools/ci_coverage.py",
+        "C:/tmp/qf-release-0.16.0-20261008/tools/ci_cpu_acceptance.py",
+        "C:/tmp/qf-release-0.16.0-20261008/tools/ci_dependency_audit.py",
+        "C:/tmp/qf-release-0.16.0-20261008/tools/ci_gate_check.py",
+        "C:/tmp/qf-release-0.16.0-20261008/tools/ci_inspect_acceptance.py",
+        "C:/tmp/qf-release-0.16.0-20261008/tools/ci_inspect_gguf_acceptance.py",
+        "C:/tmp/qf-release-0.16.0-20261008/tools/ci_installed.py",
+        "C:/tmp/qf-release-0.16.0-20261008/tools/ci_mutation.py",
+        "C:/tmp/qf-release-0.16.0-20261008/tools/ci_reference_campaign.py",
+        "tools/ci_gate_fixture"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "final-mypy",
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "mypy",
+        "--strict",
+        "quantfit/spec.py",
+        "quantfit/engines/base.py"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "final-audit",
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "audit",
+        "--json"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "final-quickstart-syntax",
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "tools/quickstart_check.py",
+        "--readme",
+        "README.md",
+        "--quantfit-bin",
+        "C:/tmp/qf-release-0.16.0-20261008/tools/ci/.venv/Scripts/python.exe -m quantfit.cli",
+        "--no-run",
+        "--min-commands",
+        "20",
+        "--json",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-09-cli-readme\\final-quickstart-syntax.json"
+      ],
+      "exit": 0
+    },
+    {
+      "name": "fenced-parser",
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "C:\\tmp\\qf-readme-draft-20261009\\parse-fenced-examples.py"
+      ],
+      "exit": 0
+    }
+  ],
+  "readme_sha256": "a13e6c778ef09412f1d74b907e4a5ff5ee1d479b935bb73088c2fc57e75ba7f8",
+  "full_available_unit_at_ad95062": {
+    "cases": 1850,
+    "skipped": 32,
+    "failed": 0,
+    "errors": 0,
+    "passed": 1818
+  },
+  "supported_properties": {
+    "cases": 2,
+    "skipped": 0,
+    "failed": 0,
+    "errors": 0,
+    "passed": 2
+  },
+  "final_affected_docs_tests": {
+    "cases": 144,
+    "skipped": 0,
+    "failed": 0,
+    "errors": 0,
+    "passed": 144
+  },
+  "hosted_final_head": "PENDING"
+}

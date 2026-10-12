@@ -1,0 +1,181 @@
+{
+  "readme_source_head": "97d79d6b7c9511b308c8211bbb9356813d46892d",
+  "files": [
+    {
+      "path": "validation/2026-10-09-cli-readme/actual-phi4-offline.py",
+      "sha256": "7b2eac67172d850dd6b2cae021561d7a407c2e0c5be885fdbb4390cbdbc4c388",
+      "size_bytes": 2672
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/fenced-parser.json",
+      "sha256": "0aba5a2499a6ec3d061d9b263b537926c9d71af52f2f22c6e2d4e485999dbfad",
+      "size_bytes": 8115
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/fenced-parser.log",
+      "sha256": "8283518d1e0bcd76371b003c8cd9a710d42e1befcf88047a01ce48991cd3c39b",
+      "size_bytes": 32
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/final-audit.log",
+      "sha256": "3bb4d4df5b32823d8ffccc3749acd0f16b596559ffec2c59f9df569b21e9e247",
+      "size_bytes": 22091
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/final-docs-tests.log",
+      "sha256": "09cb4122315ba5f69e2c5937bb87169bcde9a2c6b065114d5173eee82556416d",
+      "size_bytes": 184
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/final-docs-tests.xml",
+      "sha256": "b8ac6791921dc85f57950555b51c0c9524a8ca9cb1565115813cfe6982a037fb",
+      "size_bytes": 16632
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/final-format.log",
+      "sha256": "c9572de1182ff9a0c4f57870e5328e649df7ba707cfc802e2cb7ff048643cb93",
+      "size_bytes": 28
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/final-lint.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "size_bytes": 19
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/final-local-gates.json",
+      "sha256": "33f4d1210da4b42ae10e71b13133bd1df8b92985e294d1d241215df0d5c1de90",
+      "size_bytes": 5082
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/final-mypy.log",
+      "sha256": "0c37c4158c91ef55c724ba017bf6465f26018199badb08e3ff13f98acdf056c2",
+      "size_bytes": 44
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/final-quickstart-syntax.json",
+      "sha256": "a52f75575d9ebaea53f6a7ccc66544502895e57c10c323c3237afe149a8b0487",
+      "size_bytes": 26904
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/final-quickstart-syntax.log",
+      "sha256": "f7e2b32535400b913044f840809d638c01ba6b480dd1f54929503d04c3ece6d6",
+      "size_bytes": 8181
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/independent-review.json",
+      "sha256": "dc95486ad8eeea6251f35a829b487f78763f4e19149041acb8943c84e2b23ed5",
+      "size_bytes": 731
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/local-gates.json",
+      "sha256": "90c9c6f3069c61fe58af45c6c182ecce41f0bd9d7f7c06c8e77d1db94e548cd5",
+      "size_bytes": 1581
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/offline-0-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/offline-0-stdout.txt",
+      "sha256": "f68da8d113811fd76939e5a46a18b41aee33807e09034243ba7528f773e7e04e",
+      "size_bytes": 4062
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/offline-1-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/offline-1-stdout.txt",
+      "sha256": "dcc856be91a5231f95f4efa9792e8c212f2fb1d421833c8cd56105b80f6929fc",
+      "size_bytes": 1421
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/offline-2-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/offline-2-stdout.txt",
+      "sha256": "ebdae5efbee10b5d1fdaff0c39d1454b0b464a5010f587b243aa3562682da8db",
+      "size_bytes": 1421
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/offline-3-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/offline-3-stdout.txt",
+      "sha256": "98746b6ea89aa370c287558ecf73af63a2fa3c310cfde2092e215662786a31ba",
+      "size_bytes": 5172
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/offline-4-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/offline-4-stdout.txt",
+      "sha256": "d73f1d3090da10034d059a5e4e2b321b05fd97c5e41cc9afa529619792838148",
+      "size_bytes": 1314
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/offline-functional.json",
+      "sha256": "b78ebc224f718c4f3bed7cdb2509d2baf5fc77f08a7e5ed81b6ff3bf4330be5e",
+      "size_bytes": 2810
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/parse-fenced-examples.py",
+      "sha256": "000442ceea84f83dd0829153d50c12c5f9cabe9ec020d721c69a720d91227fe1",
+      "size_bytes": 1568
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/properties.log",
+      "sha256": "76c5b5e02c6770dc742a88614abc5236f25db377aa24fe08718eeebb8a55668a",
+      "size_bytes": 1548
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/properties.xml",
+      "sha256": "96be2db4938a42ade44b8db152e36db612f416dad564ffb32d8533225d9b32ab",
+      "size_bytes": 4255
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/README.md",
+      "sha256": "6f6f3fd2a479e78fdd9fb67825e1f2099ebe8437ad0fe78209a66e5ac283738b",
+      "size_bytes": 3012
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/run-corrected-gates.py",
+      "sha256": "36ddbba38db5d1ef4d6711be17067134ea13ce4319f596f39f7b813ddd8fa22d",
+      "size_bytes": 4218
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/run-final-gates.py",
+      "sha256": "3e948fef575c88d240bf0bf44da22f5adb673a17e4fe9744e3ff283e684383c4",
+      "size_bytes": 3211
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/supported-properties.log",
+      "sha256": "3268a71329388ec819ddae82a8feed1893beb5641e8ab31e17daa58eb59c6ef6",
+      "size_bytes": 100
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/supported-properties.xml",
+      "sha256": "8f69dcab18b92f025020349f731267d088adf4cf3a2e168f02f68e2e96a57fca",
+      "size_bytes": 1705
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/unit.log",
+      "sha256": "d5918e30e300f5f974c58c0c3acbfdf6c17a36cbe7781869671a34aedb355ddd",
+      "size_bytes": 2152
+    },
+    {
+      "path": "validation/2026-10-09-cli-readme/unit.xml",
+      "sha256": "c0b0fb66176b921d12176d4cdf667c9896a89a78b4701d4820f4085117c6fc85",
+      "size_bytes": 233919
+    }
+  ],
+  "scope": "Exact original file bytes before Git staging; receipt excludes its own circular hash."
+}

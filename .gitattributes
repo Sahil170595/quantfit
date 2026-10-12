@@ -10,3 +10,6 @@ validation/2026-10-09-reference-campaign/**/*.json -text
 validation/2026-10-09-phi4-public-candidate/**/*.json -text
 validation/2026-10-09-phi4-public-candidate/producer/** -text
 validation/2026-10-09-phi4-public-candidate/public-dataset-card.md -text
+
+# Preserve exact README validation receipts.
+validation/2026-10-09-cli-readme/** -text

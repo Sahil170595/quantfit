@@ -15,6 +15,16 @@
 
 ## Unreleased
 
+## 0.21.1
+
+Released independently from PR #125: CLI README workflows and evidence limits.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
+- CLI README recipes, installation extras and command-specific exits now match the independently reviewed workflows and retain all scientific limitations.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37897321420); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
 ## 0.21.0
 
 Released independently from PR #124: public Phi4 CPU aggregate candidate.

@@ -1,0 +1,404 @@
+{
+  "readme_sha256": "a13e6c778ef09412f1d74b907e4a5ff5ee1d479b935bb73088c2fc57e75ba7f8",
+  "scope": "Full argparse parsing of fenced quantfit examples only; no command callbacks/models/network. Inline bare command names are excluded.",
+  "parsed": 29,
+  "failures": [],
+  "examples": [
+    {
+      "line": 19,
+      "argv": [
+        "quantfit",
+        "--version"
+      ],
+      "parser_exit": 0,
+      "output": "quantfit 0.16.0\n"
+    },
+    {
+      "line": 20,
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--demo"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 27,
+      "argv": [
+        "quantfit",
+        "check",
+        "--model",
+        "Qwen/Qwen2.5-7B-Instruct"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 28,
+      "argv": [
+        "quantfit",
+        "plan",
+        "--model",
+        "Qwen/Qwen2.5-7B-Instruct"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 29,
+      "argv": [
+        "quantfit",
+        "quantize",
+        "--model",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--method",
+        "awq",
+        "--out",
+        "./out"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 30,
+      "argv": [
+        "quantfit",
+        "probe",
+        "--model",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--bits",
+        "4",
+        "8"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 31,
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--baseline",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--quant",
+        "./out"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 143,
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--baseline",
+        "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf",
+        "--quant",
+        "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf",
+        "--baseline-revision",
+        "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+        "--quant-revision",
+        "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+        "--report",
+        "drift.json",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 182,
+      "argv": [
+        "quantfit",
+        "reproduce",
+        "--reference",
+        "ref.json",
+        "--candidate",
+        "t4.json",
+        "--out",
+        "record.json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 199,
+      "argv": [
+        "quantfit",
+        "audit"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 200,
+      "argv": [
+        "quantfit",
+        "audit",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 201,
+      "argv": [
+        "quantfit",
+        "audit",
+        "--json-out",
+        "out.json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 202,
+      "argv": [
+        "quantfit",
+        "audit",
+        "--root",
+        "/path/to/quantfit"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 223,
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--demo"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 248,
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--baseline",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--quant",
+        "./out",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 249,
+      "argv": [
+        "quantfit",
+        "check",
+        "--model",
+        "Qwen/Qwen2.5-7B-Instruct",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 291,
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--baseline",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--quant",
+        "./out",
+        "--junit",
+        "drift.xml"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 312,
+      "argv": [
+        "quantfit",
+        "gate",
+        "--baseline",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--quant",
+        "./out",
+        "--tier",
+        "smoke",
+        "--out",
+        "gate.json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 349,
+      "argv": [
+        "quantfit",
+        "inspect-run",
+        "--baseline",
+        "quantfit_gguf/./baseline.gguf",
+        "--quant",
+        "quantfit_gguf/./quant.gguf",
+        "--report",
+        "inspect-drift.json",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 425,
+      "argv": [
+        "quantfit",
+        "resolution",
+        "--report",
+        "drift.json",
+        "--calibration-report",
+        "calibration.json",
+        "--out",
+        "resolution.json",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 426,
+      "argv": [
+        "quantfit",
+        "emit",
+        "model-card",
+        "--report",
+        "drift.json",
+        "--calibration-report",
+        "calibration.json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 441,
+      "argv": [
+        "quantfit",
+        "bundle",
+        "create",
+        "--report",
+        "drift.json",
+        "--out",
+        "evidence/",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 442,
+      "argv": [
+        "quantfit",
+        "bundle",
+        "verify",
+        "--bundle",
+        "evidence/",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 444,
+      "argv": [
+        "quantfit",
+        "bundle",
+        "create",
+        "--report",
+        "drift.json",
+        "--calibration-report",
+        "calibration.json",
+        "--resolution",
+        "resolution.json",
+        "--out",
+        "calibrated-evidence/",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 459,
+      "argv": [
+        "quantfit",
+        "cold-run",
+        "--baseline",
+        "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf",
+        "--quant",
+        "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf",
+        "--baseline-revision",
+        "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+        "--quant-revision",
+        "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+        "--out",
+        "cold-runs/",
+        "--timeout-seconds",
+        "3600",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 480,
+      "argv": [
+        "quantfit",
+        "t0",
+        "--reports",
+        "cold-runs/run-1/report.json",
+        "cold-runs/run-2/report.json",
+        "cold-runs/run-3/report.json",
+        "--out",
+        "relocated-t0.json",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 507,
+      "argv": [
+        "quantfit",
+        "references",
+        "list",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 508,
+      "argv": [
+        "quantfit",
+        "references",
+        "verify",
+        "--slug",
+        "NAME",
+        "--report",
+        "report.json",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    },
+    {
+      "line": 509,
+      "argv": [
+        "quantfit",
+        "verify",
+        "--model",
+        "./out",
+        "--json"
+      ],
+      "parser_exit": 0,
+      "output": ""
+    }
+  ]
+}

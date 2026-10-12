@@ -1,0 +1,1047 @@
+{
+  "schema": "quantfit-quickstart-check/1",
+  "readme": "C:\\tmp\\qf-release-0.16.0-20261008\\README.md",
+  "quantfit_bin": [
+    "C:/tmp/qf-release-0.16.0-20261008/tools/ci/.venv/Scripts/python.exe",
+    "-m",
+    "quantfit.cli"
+  ],
+  "sandbox_env": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1",
+    "HF_HUB_DISABLE_TELEMETRY": "1",
+    "CUDA_VISIBLE_DEVICES": "-1",
+    "NO_COLOR": "1",
+    "PYTHONIOENCODING": "utf-8"
+  },
+  "n_commands": 45,
+  "by_category": {
+    "a:clean-venv": 7,
+    "b:network": 4,
+    "c:gpu": 7,
+    "d:long-download": 4,
+    "e:not-runnable": 23
+  },
+  "commands": [
+    {
+      "text": "pip install quantfit",
+      "argv": [
+        "pip",
+        "install",
+        "quantfit"
+      ],
+      "line": 17,
+      "source": "fenced",
+      "block": 1,
+      "category": "b:network",
+      "requirements": [
+        "network"
+      ],
+      "reasons": [
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit --version                                                     # confirm the install",
+      "argv": [
+        "quantfit",
+        "--version"
+      ],
+      "line": 19,
+      "source": "fenced",
+      "block": 1,
+      "category": "a:clean-venv",
+      "requirements": [],
+      "reasons": [
+        "no subcommand: argparse only",
+        "no network, no GPU, no input artifact"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit verify-safety --demo                                          # fixture statistics in ~1s; no model ran",
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--demo"
+      ],
+      "line": 20,
+      "source": "fenced",
+      "block": 1,
+      "category": "a:clean-venv",
+      "requirements": [],
+      "reasons": [
+        "--demo: bundled fixtures only, no model, no network, no weights",
+        "no network, no GPU, no input artifact"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit check        --model Qwen/Qwen2.5-7B-Instruct                 # will it fit? (no download)",
+      "argv": [
+        "quantfit",
+        "check",
+        "--model",
+        "Qwen/Qwen2.5-7B-Instruct"
+      ],
+      "line": 27,
+      "source": "fenced",
+      "block": 2,
+      "category": "b:network",
+      "requirements": [
+        "network"
+      ],
+      "reasons": [
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit plan         --model Qwen/Qwen2.5-7B-Instruct                 # what config would it pick? + why",
+      "argv": [
+        "quantfit",
+        "plan",
+        "--model",
+        "Qwen/Qwen2.5-7B-Instruct"
+      ],
+      "line": 28,
+      "source": "fenced",
+      "block": 2,
+      "category": "a:clean-venv",
+      "requirements": [],
+      "reasons": [
+        "no network, no GPU, no input artifact"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit quantize     --model Qwen/Qwen2.5-1.5B-Instruct --method awq --out ./out",
+      "argv": [
+        "quantfit",
+        "quantize",
+        "--model",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--method",
+        "awq",
+        "--out",
+        "./out"
+      ],
+      "line": 29,
+      "source": "fenced",
+      "block": 2,
+      "category": "c:gpu",
+      "requirements": [
+        "download",
+        "gpu",
+        "network"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "loads weights through torch / llm-compressor",
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit probe        --model Qwen/Qwen2.5-1.5B-Instruct --bits 4 8    # per-bit-width quant sensitivity",
+      "argv": [
+        "quantfit",
+        "probe",
+        "--model",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--bits",
+        "4",
+        "8"
+      ],
+      "line": 30,
+      "source": "fenced",
+      "block": 2,
+      "category": "c:gpu",
+      "requirements": [
+        "download",
+        "gpu",
+        "network"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "loads weights through torch / llm-compressor",
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out  # did quantization break refusals?",
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--baseline",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--quant",
+        "./out"
+      ],
+      "line": 31,
+      "source": "fenced",
+      "block": 2,
+      "category": "c:gpu",
+      "requirements": [
+        "download",
+        "gpu",
+        "network"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "loads weights through torch / llm-compressor",
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "pip install \"quantfit[inspect,gguf] @ git+https://github.com/Sahil170595/quantfit.git@9d59739645e5c0021aec8288b480ed2e9c5bea30\"",
+      "argv": [
+        "pip",
+        "install",
+        "quantfit[inspect,gguf] @ git+https://github.com/Sahil170595/quantfit.git@9d59739645e5c0021aec8288b480ed2e9c5bea30"
+      ],
+      "line": 54,
+      "source": "fenced",
+      "block": 3,
+      "category": "b:network",
+      "requirements": [
+        "network"
+      ],
+      "reasons": [
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit verify-safety --baseline hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf --quant hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf --baseline-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 --quant-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 --report drift.json --json",
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--baseline",
+        "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf",
+        "--quant",
+        "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf",
+        "--baseline-revision",
+        "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+        "--quant-revision",
+        "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+        "--report",
+        "drift.json",
+        "--json"
+      ],
+      "line": 143,
+      "source": "fenced",
+      "block": 5,
+      "category": "d:long-download",
+      "requirements": [
+        "download",
+        "network"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "reaches the network (Hub metadata or a package index)",
+        "both arms are GGUF: runs on CPU under one pinned llama.cpp binary, so no GPU"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit screen --targets targets.json --out reports/",
+      "argv": [
+        "quantfit",
+        "screen",
+        "--targets",
+        "targets.json",
+        "--out",
+        "reports/"
+      ],
+      "line": 167,
+      "source": "inline",
+      "block": null,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact",
+        "download",
+        "gpu",
+        "network"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have",
+        "materializes multi-GB weights",
+        "loads weights through torch / llm-compressor",
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit emit model-card --report drift.json",
+      "argv": [
+        "quantfit",
+        "emit",
+        "model-card",
+        "--report",
+        "drift.json"
+      ],
+      "line": 172,
+      "source": "inline",
+      "block": null,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit reproduce",
+      "argv": [
+        "quantfit",
+        "reproduce"
+      ],
+      "line": 177,
+      "source": "inline",
+      "block": null,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit reproduce --reference ref.json --candidate t4.json --out record.json",
+      "argv": [
+        "quantfit",
+        "reproduce",
+        "--reference",
+        "ref.json",
+        "--candidate",
+        "t4.json",
+        "--out",
+        "record.json"
+      ],
+      "line": 182,
+      "source": "fenced",
+      "block": 6,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit audit",
+      "argv": [
+        "quantfit",
+        "audit"
+      ],
+      "line": 194,
+      "source": "inline",
+      "block": null,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit audit                    # exit 0 = clean, 3 = drift found, 2 = operational",
+      "argv": [
+        "quantfit",
+        "audit"
+      ],
+      "line": 199,
+      "source": "fenced",
+      "block": 7,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit audit --json             # the findings as data, on stdout",
+      "argv": [
+        "quantfit",
+        "audit",
+        "--json"
+      ],
+      "line": 200,
+      "source": "fenced",
+      "block": 7,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit audit --json-out out.json        # ...or written to a file",
+      "argv": [
+        "quantfit",
+        "audit",
+        "--json-out",
+        "out.json"
+      ],
+      "line": 201,
+      "source": "fenced",
+      "block": 7,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit audit --root /path/to/quantfit   # run it from another directory",
+      "argv": [
+        "quantfit",
+        "audit",
+        "--root",
+        "/path/to/quantfit"
+      ],
+      "line": 202,
+      "source": "fenced",
+      "block": 7,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit list",
+      "argv": [
+        "quantfit",
+        "list"
+      ],
+      "line": 212,
+      "source": "inline",
+      "block": null,
+      "category": "a:clean-venv",
+      "requirements": [],
+      "reasons": [
+        "no network, no GPU, no input artifact"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit calibrate sheet",
+      "argv": [
+        "quantfit",
+        "calibrate",
+        "sheet"
+      ],
+      "line": 213,
+      "source": "inline",
+      "block": null,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit calibrate ingest",
+      "argv": [
+        "quantfit",
+        "calibrate",
+        "ingest"
+      ],
+      "line": 213,
+      "source": "inline",
+      "block": null,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit verify-safety --demo",
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--demo"
+      ],
+      "line": 218,
+      "source": "inline",
+      "block": null,
+      "category": "a:clean-venv",
+      "requirements": [],
+      "reasons": [
+        "--demo: bundled fixtures only, no model, no network, no weights",
+        "no network, no GPU, no input artifact"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit verify-safety --demo",
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--demo"
+      ],
+      "line": 223,
+      "source": "fenced",
+      "block": 8,
+      "category": "a:clean-venv",
+      "requirements": [],
+      "reasons": [
+        "--demo: bundled fixtures only, no model, no network, no weights",
+        "no network, no GPU, no input artifact"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --json",
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--baseline",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--quant",
+        "./out",
+        "--json"
+      ],
+      "line": 248,
+      "source": "fenced",
+      "block": 10,
+      "category": "c:gpu",
+      "requirements": [
+        "download",
+        "gpu",
+        "network"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "loads weights through torch / llm-compressor",
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit check --model Qwen/Qwen2.5-7B-Instruct --json",
+      "argv": [
+        "quantfit",
+        "check",
+        "--model",
+        "Qwen/Qwen2.5-7B-Instruct",
+        "--json"
+      ],
+      "line": 249,
+      "source": "fenced",
+      "block": 10,
+      "category": "b:network",
+      "requirements": [
+        "network"
+      ],
+      "reasons": [
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit audit",
+      "argv": [
+        "quantfit",
+        "audit"
+      ],
+      "line": 275,
+      "source": "inline",
+      "block": null,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit audit",
+      "argv": [
+        "quantfit",
+        "audit"
+      ],
+      "line": 283,
+      "source": "inline",
+      "block": null,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit verify-safety --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --junit drift.xml",
+      "argv": [
+        "quantfit",
+        "verify-safety",
+        "--baseline",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--quant",
+        "./out",
+        "--junit",
+        "drift.xml"
+      ],
+      "line": 291,
+      "source": "fenced",
+      "block": 12,
+      "category": "c:gpu",
+      "requirements": [
+        "download",
+        "gpu",
+        "network"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "loads weights through torch / llm-compressor",
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit gate",
+      "argv": [
+        "quantfit",
+        "gate"
+      ],
+      "line": 308,
+      "source": "inline",
+      "block": null,
+      "category": "c:gpu",
+      "requirements": [
+        "download",
+        "gpu",
+        "network"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "loads weights through torch / llm-compressor",
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --tier smoke --out gate.json",
+      "argv": [
+        "quantfit",
+        "gate",
+        "--baseline",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "--quant",
+        "./out",
+        "--tier",
+        "smoke",
+        "--out",
+        "gate.json"
+      ],
+      "line": 312,
+      "source": "fenced",
+      "block": 13,
+      "category": "c:gpu",
+      "requirements": [
+        "download",
+        "gpu",
+        "network"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "loads weights through torch / llm-compressor",
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit inspect-run",
+      "argv": [
+        "quantfit",
+        "inspect-run"
+      ],
+      "line": 337,
+      "source": "inline",
+      "block": null,
+      "category": "d:long-download",
+      "requirements": [
+        "download",
+        "network"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit inspect-run --baseline quantfit_gguf/./baseline.gguf --quant quantfit_gguf/./quant.gguf --report inspect-drift.json --json",
+      "argv": [
+        "quantfit",
+        "inspect-run",
+        "--baseline",
+        "quantfit_gguf/./baseline.gguf",
+        "--quant",
+        "quantfit_gguf/./quant.gguf",
+        "--report",
+        "inspect-drift.json",
+        "--json"
+      ],
+      "line": 349,
+      "source": "fenced",
+      "block": 14,
+      "category": "d:long-download",
+      "requirements": [
+        "download",
+        "network"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit plan --model <id>",
+      "argv": [
+        "quantfit",
+        "plan",
+        "--model",
+        "<id>"
+      ],
+      "line": 407,
+      "source": "inline",
+      "block": null,
+      "category": "e:not-runnable",
+      "requirements": [
+        "placeholder"
+      ],
+      "reasons": [
+        "contains a <placeholder> and cannot be run verbatim"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit probe --model <id>",
+      "argv": [
+        "quantfit",
+        "probe",
+        "--model",
+        "<id>"
+      ],
+      "line": 408,
+      "source": "inline",
+      "block": null,
+      "category": "e:not-runnable",
+      "requirements": [
+        "download",
+        "gpu",
+        "network",
+        "placeholder"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "loads weights through torch / llm-compressor",
+        "reaches the network (Hub metadata or a package index)",
+        "contains a <placeholder> and cannot be run verbatim"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit resolution --report drift.json --calibration-report calibration.json --out resolution.json --json",
+      "argv": [
+        "quantfit",
+        "resolution",
+        "--report",
+        "drift.json",
+        "--calibration-report",
+        "calibration.json",
+        "--out",
+        "resolution.json",
+        "--json"
+      ],
+      "line": 425,
+      "source": "fenced",
+      "block": 15,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit emit model-card --report drift.json --calibration-report calibration.json",
+      "argv": [
+        "quantfit",
+        "emit",
+        "model-card",
+        "--report",
+        "drift.json",
+        "--calibration-report",
+        "calibration.json"
+      ],
+      "line": 426,
+      "source": "fenced",
+      "block": 15,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit bundle create --report drift.json --out evidence/ --json",
+      "argv": [
+        "quantfit",
+        "bundle",
+        "create",
+        "--report",
+        "drift.json",
+        "--out",
+        "evidence/",
+        "--json"
+      ],
+      "line": 441,
+      "source": "fenced",
+      "block": 16,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit bundle verify --bundle evidence/ --json",
+      "argv": [
+        "quantfit",
+        "bundle",
+        "verify",
+        "--bundle",
+        "evidence/",
+        "--json"
+      ],
+      "line": 442,
+      "source": "fenced",
+      "block": 16,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit bundle create --report drift.json --calibration-report calibration.json --resolution resolution.json --out calibrated-evidence/ --json",
+      "argv": [
+        "quantfit",
+        "bundle",
+        "create",
+        "--report",
+        "drift.json",
+        "--calibration-report",
+        "calibration.json",
+        "--resolution",
+        "resolution.json",
+        "--out",
+        "calibrated-evidence/",
+        "--json"
+      ],
+      "line": 444,
+      "source": "fenced",
+      "block": 16,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit cold-run --baseline hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf --quant hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf --baseline-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 --quant-revision 78eb92a46fc37e6b524df991ed9aca9bc6aa7b80 --out cold-runs/ --timeout-seconds 3600 --json",
+      "argv": [
+        "quantfit",
+        "cold-run",
+        "--baseline",
+        "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct.BF16.gguf",
+        "--quant",
+        "hf:unsloth/Phi-4-mini-instruct-GGUF/Phi-4-mini-instruct-Q4_K_M.gguf",
+        "--baseline-revision",
+        "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+        "--quant-revision",
+        "78eb92a46fc37e6b524df991ed9aca9bc6aa7b80",
+        "--out",
+        "cold-runs/",
+        "--timeout-seconds",
+        "3600",
+        "--json"
+      ],
+      "line": 459,
+      "source": "fenced",
+      "block": 17,
+      "category": "d:long-download",
+      "requirements": [
+        "download",
+        "network"
+      ],
+      "reasons": [
+        "materializes multi-GB weights",
+        "reaches the network (Hub metadata or a package index)"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit t0 --reports cold-runs/run-1/report.json cold-runs/run-2/report.json cold-runs/run-3/report.json --out relocated-t0.json --json",
+      "argv": [
+        "quantfit",
+        "t0",
+        "--reports",
+        "cold-runs/run-1/report.json",
+        "cold-runs/run-2/report.json",
+        "cold-runs/run-3/report.json",
+        "--out",
+        "relocated-t0.json",
+        "--json"
+      ],
+      "line": 480,
+      "source": "fenced",
+      "block": 18,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit references list --json",
+      "argv": [
+        "quantfit",
+        "references",
+        "list",
+        "--json"
+      ],
+      "line": 507,
+      "source": "fenced",
+      "block": 19,
+      "category": "a:clean-venv",
+      "requirements": [],
+      "reasons": [
+        "no network, no GPU, no input artifact"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit references verify --slug NAME --report report.json --json",
+      "argv": [
+        "quantfit",
+        "references",
+        "verify",
+        "--slug",
+        "NAME",
+        "--report",
+        "report.json",
+        "--json"
+      ],
+      "line": 508,
+      "source": "fenced",
+      "block": 19,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have",
+        "external registry or verification needs local input artifacts"
+      ],
+      "run": false
+    },
+    {
+      "text": "quantfit verify --model ./out --json",
+      "argv": [
+        "quantfit",
+        "verify",
+        "--model",
+        "./out",
+        "--json"
+      ],
+      "line": 509,
+      "source": "fenced",
+      "block": 19,
+      "category": "e:not-runnable",
+      "requirements": [
+        "artifact",
+        "gpu"
+      ],
+      "reasons": [
+        "consumes an artifact a clean venv does not have",
+        "loads weights through torch / llm-compressor"
+      ],
+      "run": false
+    }
+  ],
+  "runs": [],
+  "findings": [],
+  "undocumented_subcommands": [],
+  "executed": false,
+  "verdict": "PASS",
+  "exit_code": 0,
+  "why": {
+    "n_commands": 45,
+    "n_runnable": 7,
+    "n_errors": 0,
+    "n_failed_runs": 0,
+    "short_of_required_runnable": false,
+    "require_runnable": 0,
+    "short_of_min_commands": false,
+    "min_commands": 20
+  }
+}

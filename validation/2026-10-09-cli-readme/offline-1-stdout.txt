@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.16.0"
+  },
+  "command": "bundle",
+  "exit_code": 0,
+  "result": {
+    "bundle_path": "C:\\tmp\\qf-readme-draft-20261009\\actual-phi4-offline-final\\evidence",
+    "bundle_schema": 1,
+    "manifest": {
+      "bundle_schema": 1,
+      "quantfit_version": "0.16.0",
+      "created_utc": "2026-10-09T06:57:31.200073+00:00",
+      "scientific_claims_verified": false,
+      "files": [
+        {
+          "role": "report",
+          "path": "report.json",
+          "sha256": "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+          "size_bytes": 3762
+        }
+      ],
+      "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+    },
+    "integrity_verified": true,
+    "scientific_claims_verified": false,
+    "declared_results": {
+      "report": {
+        "verdict": "REGRESSION DETECTED (over-refusal axis)",
+        "regression_detected": true,
+        "unmeasurable_axes": []
+      }
+    },
+    "mismatches": [],
+    "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+  }
+}

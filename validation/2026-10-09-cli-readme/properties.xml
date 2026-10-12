@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="3" time="4.184" timestamp="2026-10-09T02:58:27.626344-04:00" hostname="SahilKadadekar"><properties><property name="hypothesis-statistics-tests/test_numerical_properties.py::test_rejection_threshold_is_minimal_and_controls_size" value="dGVzdHMvdGVzdF9udW1lcmljYWxfcHJvcGVydGllcy5weTo6dGVzdF9yZWplY3Rpb25fdGhyZXNob2xkX2lzX21pbmltYWxfYW5kX2NvbnRyb2xzX3NpemU6CgogIC0gZHVyaW5nIGdlbmVyYXRlIHBoYXNlICgwLjM2IHNlY29uZHMpOgogICAgLSBUeXBpY2FsIHJ1bnRpbWVzOiB+IDAtMTMgbXMsIG9mIHdoaWNoIDwgMW1zIGluIGRhdGEgZ2VuZXJhdGlvbgogICAgLSAxMDAgcGFzc2luZyBleGFtcGxlcywgMCBmYWlsaW5nIGV4YW1wbGVzLCAwIGludmFsaWQgZXhhbXBsZXMKCiAgLSBTdG9wcGVkIGJlY2F1c2Ugc2V0dGluZ3MubWF4X2V4YW1wbGVzPTEwMA==" /><property name="hypothesis-statistics-tests/test_numerical_properties.py::test_wilson_interval_contains_estimate_and_is_complement_symmetric" value="dGVzdHMvdGVzdF9udW1lcmljYWxfcHJvcGVydGllcy5weTo6dGVzdF93aWxzb25faW50ZXJ2YWxfY29udGFpbnNfZXN0aW1hdGVfYW5kX2lzX2NvbXBsZW1lbnRfc3ltbWV0cmljOgoKICAtIGR1cmluZyBnZW5lcmF0ZSBwaGFzZSAoMC4wOCBzZWNvbmRzKToKICAgIC0gVHlwaWNhbCBydW50aW1lczogPCAxbXMsIG9mIHdoaWNoIDwgMW1zIGluIGRhdGEgZ2VuZXJhdGlvbgogICAgLSAxMDAgcGFzc2luZyBleGFtcGxlcywgMCBmYWlsaW5nIGV4YW1wbGVzLCAwIGludmFsaWQgZXhhbXBsZXMKCiAgLSBTdG9wcGVkIGJlY2F1c2Ugc2V0dGluZ3MubWF4X2V4YW1wbGVzPTEwMA==" /><property name="hypothesis-statistics-tests/test_numerical_properties.py::test_rtn_reconstruction_obeys_half_step_bound" value="dGVzdHMvdGVzdF9udW1lcmljYWxfcHJvcGVydGllcy5weTo6dGVzdF9ydG5fcmVjb25zdHJ1Y3Rpb25fb2JleXNfaGFsZl9zdGVwX2JvdW5kOgoKICAtIGR1cmluZyBnZW5lcmF0ZSBwaGFzZSAoMC40MCBzZWNvbmRzKToKICAgIC0gVHlwaWNhbCBydW50aW1lczogfiA1LTMxOCBtcywgb2Ygd2hpY2ggfiAwLTMgbXMgaW4gZGF0YSBnZW5lcmF0aW9uCiAgICAtIDAgcGFzc2luZyBleGFtcGxlcywgMTAgZmFpbGluZyBleGFtcGxlcywgMCBpbnZhbGlkIGV4YW1wbGVzCiAgICAtIEZvdW5kIDEgZGlzdGluY3QgZXJyb3IgaW4gdGhpcyBwaGFzZQoKICAtIGR1cmluZyBzaHJpbmsgcGhhc2UgKDEuODggc2Vjb25kcyk6CiAgICAtIFR5cGljYWwgcnVudGltZXM6IH4gNC0xMSBtcywgb2Ygd2hpY2ggPCAxbXMgaW4gZGF0YSBnZW5lcmF0aW9uCiAgICAtIDAgcGFzc2luZyBleGFtcGxlcywgMTkzIGZhaWxpbmcgZXhhbXBsZXMsIDMgaW52YWxpZCBleGFtcGxlcwogICAgLSBUcmllZCAxOTYgc2hyaW5rcyBvZiB3aGljaCAwIHdlcmUgc3VjY2Vzc2Z1bAoKICAtIFN0b3BwZWQgYmVjYXVzZSBub3RoaW5nIGxlZnQgdG8gZG8=" /></properties><testcase classname="tests.test_numerical_properties" name="test_rejection_threshold_is_minimal_and_controls_size" time="0.360" /><testcase classname="tests.test_numerical_properties" name="test_wilson_interval_contains_estimate_and_is_complement_symmetric" time="0.079" /><testcase classname="tests.test_numerical_properties" name="test_rtn_reconstruction_obeys_half_step_bound" time="2.311"><failure message="ModuleNotFoundError: No module named 'torch'&#10;Falsifying example: test_rtn_reconstruction_obeys_half_step_bound(&#10;    # The test always failed when commented parts were varied together.&#10;    rows=1,  # or any other generated value&#10;    cols=1,  # or any other generated value&#10;    bits=2,  # or any other generated value&#10;    group=1,  # or any other generated value&#10;)">@settings(max_examples=50, derandomize=True, deadline=None)
+&gt;   @given(st.integers(1, 8), st.integers(1, 64), st.integers(2, 8), st.integers(1, 32))
+                   ^^^
+
+tests\test_numerical_properties.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+rows = 1, cols = 1, bits = 2, group = 1
+
+    @settings(max_examples=50, derandomize=True, deadline=None)
+    @given(st.integers(1, 8), st.integers(1, 64), st.integers(2, 8), st.integers(1, 32))
+    def test_rtn_reconstruction_obeys_half_step_bound(rows, cols, bits, group):
+&gt;       import torch
+E       ModuleNotFoundError: No module named 'torch'
+E       Falsifying example: test_rtn_reconstruction_obeys_half_step_bound(
+E           # The test always failed when commented parts were varied together.
+E           rows=1,  # or any other generated value
+E           cols=1,  # or any other generated value
+E           bits=2,  # or any other generated value
+E           group=1,  # or any other generated value
+E       )
+
+tests\test_numerical_properties.py:38: ModuleNotFoundError</failure></testcase></testsuite></testsuites>
