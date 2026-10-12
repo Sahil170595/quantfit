@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-Candidate `quantfit repeatability` compares three saved full aggregates directly
+`quantfit repeatability`, available since 0.24.0, compares three saved full aggregates directly
 or through a portable replay bundle, with separate native T0/original outcomes.
 The typed API, JSON/JUnit, strict comparison and exit contract are in
 [Offline replicate agreement](repeatability.md).

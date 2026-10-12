@@ -1,9 +1,9 @@
 # Offline replicate agreement
 
-The candidate `repeatability` command compares exactly three saved schema-v2
+The `repeatability` command, available since 0.24.0, compares exactly three saved schema-v2
 aggregate reports, directly or from a schema-2 replay bundle. It runs offline
 without model packages, inference, a judge, network or producer-path access.
-It is unreleased and requires the candidate checkout/wheel.
+Install quantfit 0.24.0 or newer.
 
 ```bash
 quantfit repeatability --reports run-1.json run-2.json run-3.json --out agreement.json --junit agreement.xml --json
@@ -59,5 +59,4 @@ are staged first and each replacement is atomic; publication is not a
 transaction across both outputs. Failed staging removes owned temporary files.
 
 Local historical, explicitly synthetic, adverse and real source-CLI records are
-in `validation/2026-10-09-repeatability/`. Installed wheel/sdist, Linux-only
-filesystem tests and the Torch numerical lane await the hosted batch.
+in `validation/2026-10-09-repeatability/`. The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37992670430); release publication separately qualifies the exact versioned distributions.
