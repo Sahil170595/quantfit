@@ -1,0 +1,14 @@
+{
+  "implementation_head": "af498a2b55340c95e9ee845274946e25f13c9f87",
+  "platform": "Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "source_sha256": "ed1afb2fbc213b1c98face4d5297d7ed36aabe3a2260853a6b4a7b9642b82985",
+  "actual_posix_fifo": true,
+  "blocked_before_regular_file_validation": true,
+  "invocation": "Existing Ubuntu WSL python3 -B: tempfile.TemporaryDirectory; os.mkfifo(aggregate.json); child imports quantfit.bundle._read from reviewed worktree and reads FIFO with no writer; subprocess.run(timeout=2).",
+  "outcome": {
+    "timeout_seconds": 2,
+    "child_killed_and_reaped": true
+  },
+  "scope": "Real unsupported FIFO input at reviewed implementation; no models or external services. Temporary FIFO removed and child reaped. No dependency copy, container or persistent process created."
+}

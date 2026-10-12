@@ -1,0 +1,136 @@
+................s.FF...                                                  [100%]
+================================== FAILURES ===================================
+_________ test_actual_pre_run_refusal_without_report_relocates[False] _________
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2230: in _parse_known_args
+    raise ArgumentError(None, _('the following arguments are required: %s') %
+E   argparse.ArgumentError: the following arguments are required: --report
+
+During handling of the above exception, another exception occurred:
+tests\test_bundle.py:185: in test_actual_pre_run_refusal_without_report_relocates
+    assert main(command) == 0
+           ^^^^^^^^^^^^^
+quantfit\cli.py:1139: in main
+    args = _build_parser().parse_args(argv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1904: in parse_args
+    args, argv = self.parse_known_args(args, namespace)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2165: in _parse_known_args
+    positionals_end_index = consume_positionals(start_index)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2141: in consume_positionals
+    take_action(action, args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2018: in take_action
+    action(self, namespace, argument_values, option_string)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1272: in __call__
+    subnamespace, arg_strings = parser.parse_known_args(arg_strings, None)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2165: in _parse_known_args
+    positionals_end_index = consume_positionals(start_index)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2141: in consume_positionals
+    take_action(action, args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2018: in take_action
+    action(self, namespace, argument_values, option_string)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1272: in __call__
+    subnamespace, arg_strings = parser.parse_known_args(arg_strings, None)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1945: in _parse_known_args2
+    self.error(str(err))
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2650: in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2637: in exit
+    _sys.exit(status)
+E   SystemExit: 2
+---------------------------- Captured stderr call -----------------------------
+usage: quantfit bundle create [-h] --report PATH --out DIR
+                              [--calibration-report PATH] [--gate PATH]
+                              [--resolution PATH] [--json]
+quantfit bundle create: error: the following arguments are required: --report
+_________ test_actual_pre_run_refusal_without_report_relocates[True] __________
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2230: in _parse_known_args
+    raise ArgumentError(None, _('the following arguments are required: %s') %
+E   argparse.ArgumentError: the following arguments are required: --report
+
+During handling of the above exception, another exception occurred:
+tests\test_bundle.py:185: in test_actual_pre_run_refusal_without_report_relocates
+    assert main(command) == 0
+           ^^^^^^^^^^^^^
+quantfit\cli.py:1139: in main
+    args = _build_parser().parse_args(argv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1904: in parse_args
+    args, argv = self.parse_known_args(args, namespace)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2165: in _parse_known_args
+    positionals_end_index = consume_positionals(start_index)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2141: in consume_positionals
+    take_action(action, args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2018: in take_action
+    action(self, namespace, argument_values, option_string)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1272: in __call__
+    subnamespace, arg_strings = parser.parse_known_args(arg_strings, None)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2165: in _parse_known_args
+    positionals_end_index = consume_positionals(start_index)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2141: in consume_positionals
+    take_action(action, args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2018: in take_action
+    action(self, namespace, argument_values, option_string)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1272: in __call__
+    subnamespace, arg_strings = parser.parse_known_args(arg_strings, None)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1945: in _parse_known_args2
+    self.error(str(err))
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2650: in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2637: in exit
+    _sys.exit(status)
+E   SystemExit: 2
+---------------------------- Captured stderr call -----------------------------
+usage: quantfit bundle create [-h] --report PATH --out DIR
+                              [--calibration-report PATH] [--gate PATH]
+                              [--resolution PATH] [--json]
+quantfit bundle create: error: the following arguments are required: --report
+=========================== short test summary info ===========================
+FAILED tests/test_bundle.py::test_actual_pre_run_refusal_without_report_relocates[False]
+FAILED tests/test_bundle.py::test_actual_pre_run_refusal_without_report_relocates[True]
+2 failed, 20 passed, 1 skipped in 2.66s

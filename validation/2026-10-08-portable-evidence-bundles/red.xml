@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="1" tests="23" time="2.283" timestamp="2026-10-08T22:14:47.760638-04:00" hostname="SahilKadadekar"><testcase classname="tests.test_bundle" name="test_exact_bytes_survive_move_and_original_failure_flags_are_only_declarations" time="0.160" /><testcase classname="tests.test_bundle" name="test_unmeasurable_axes_are_retained_not_reinterpreted_as_a_pass" time="0.035" /><testcase classname="tests.test_bundle" name="test_tampered_bytes_are_integrity_mismatch_and_cli_exits_three" time="0.075" /><testcase classname="tests.test_bundle" name="test_noncanonical_manifest_paths_fail_closed[../report.json]" time="0.072" /><testcase classname="tests.test_bundle" name="test_noncanonical_manifest_paths_fail_closed[/report.json]" time="0.059" /><testcase classname="tests.test_bundle" name="test_noncanonical_manifest_paths_fail_closed[C:/report.json]" time="0.050" /><testcase classname="tests.test_bundle" name="test_noncanonical_manifest_paths_fail_closed[C:report.json]" time="0.060" /><testcase classname="tests.test_bundle" name="test_noncanonical_manifest_paths_fail_closed[\\\\host\\share]" time="0.050" /><testcase classname="tests.test_bundle" name="test_noncanonical_manifest_paths_fail_closed[x\\report.json]" time="0.054" /><testcase classname="tests.test_bundle" name="test_noncanonical_manifest_paths_fail_closed[./report.json]" time="0.057" /><testcase classname="tests.test_bundle" name="test_renamed_private_capture_cache_or_labels_are_not_a_report[payload0]" time="0.012" /><testcase classname="tests.test_bundle" name="test_renamed_private_capture_cache_or_labels_are_not_a_report[payload1]" time="0.011" /><testcase classname="tests.test_bundle" name="test_renamed_private_capture_cache_or_labels_are_not_a_report[payload2]" time="0.011" /><testcase classname="tests.test_bundle" name="test_nested_raw_payload_and_unlisted_files_are_refused" time="0.074" /><testcase classname="tests.test_bundle" name="test_calibration_and_resolution_must_match_consumed_report_bytes" time="0.048" /><testcase classname="tests.test_bundle" name="test_create_refuses_existing_output_and_input_alias_without_modification" time="0.031" /><testcase classname="tests.test_bundle" name="test_symlink_sources_and_bundle_members_are_refused" time="0.029"><skipped type="pytest.skip" message="Symlink privilege unavailable; hosted Linux exercises this case">C:\tmp\qf-release-0.16.0-20261008\tests\test_bundle.py:154: Symlink privilege unavailable; hosted Linux exercises this case</skipped></testcase><testcase classname="tests.test_bundle" name="test_cli_create_reports_integrity_and_no_science_upgrade" time="0.052" /><testcase classname="tests.test_bundle" name="test_actual_pre_run_refusal_without_report_relocates[False]" time="0.025"><failure message="SystemExit: 2">C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2230: in _parse_known_args
+    raise ArgumentError(None, _('the following arguments are required: %s') %
+E   argparse.ArgumentError: the following arguments are required: --report
+
+During handling of the above exception, another exception occurred:
+tests\test_bundle.py:185: in test_actual_pre_run_refusal_without_report_relocates
+    assert main(command) == 0
+           ^^^^^^^^^^^^^
+quantfit\cli.py:1139: in main
+    args = _build_parser().parse_args(argv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1904: in parse_args
+    args, argv = self.parse_known_args(args, namespace)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2165: in _parse_known_args
+    positionals_end_index = consume_positionals(start_index)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2141: in consume_positionals
+    take_action(action, args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2018: in take_action
+    action(self, namespace, argument_values, option_string)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1272: in __call__
+    subnamespace, arg_strings = parser.parse_known_args(arg_strings, None)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2165: in _parse_known_args
+    positionals_end_index = consume_positionals(start_index)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2141: in consume_positionals
+    take_action(action, args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2018: in take_action
+    action(self, namespace, argument_values, option_string)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1272: in __call__
+    subnamespace, arg_strings = parser.parse_known_args(arg_strings, None)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1945: in _parse_known_args2
+    self.error(str(err))
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2650: in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2637: in exit
+    _sys.exit(status)
+E   SystemExit: 2</failure></testcase><testcase classname="tests.test_bundle" name="test_actual_pre_run_refusal_without_report_relocates[True]" time="0.048"><failure message="SystemExit: 2">C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2230: in _parse_known_args
+    raise ArgumentError(None, _('the following arguments are required: %s') %
+E   argparse.ArgumentError: the following arguments are required: --report
+
+During handling of the above exception, another exception occurred:
+tests\test_bundle.py:185: in test_actual_pre_run_refusal_without_report_relocates
+    assert main(command) == 0
+           ^^^^^^^^^^^^^
+quantfit\cli.py:1139: in main
+    args = _build_parser().parse_args(argv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1904: in parse_args
+    args, argv = self.parse_known_args(args, namespace)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2165: in _parse_known_args
+    positionals_end_index = consume_positionals(start_index)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2141: in consume_positionals
+    take_action(action, args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2018: in take_action
+    action(self, namespace, argument_values, option_string)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1272: in __call__
+    subnamespace, arg_strings = parser.parse_known_args(arg_strings, None)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1943: in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2165: in _parse_known_args
+    positionals_end_index = consume_positionals(start_index)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2141: in consume_positionals
+    take_action(action, args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2018: in take_action
+    action(self, namespace, argument_values, option_string)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1272: in __call__
+    subnamespace, arg_strings = parser.parse_known_args(arg_strings, None)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1914: in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:1945: in _parse_known_args2
+    self.error(str(err))
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2650: in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+C:\Users\sahil\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\argparse.py:2637: in exit
+    _sys.exit(status)
+E   SystemExit: 2</failure></testcase><testcase classname="tests.test_bundle" name="test_create_requires_report_or_real_pre_run_gate" time="0.011" /><testcase classname="tests.test_bundle" name="test_source_substitution_after_consumption_cannot_replace_copied_bytes" time="0.081" /><testcase classname="tests.test_bundle" name="test_duplicate_manifest_roles_and_nonfinite_json_are_refused" time="0.059" /></testsuite></testsuites>

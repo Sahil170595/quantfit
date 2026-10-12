@@ -15,6 +15,21 @@
 
 ## Unreleased
 
+## 0.18.0
+
+Released independently from PR #121: portable aggregate evidence bundles.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
+- Offline `bundle create`/`bundle verify` preserve exact aggregate bytes, conditional
+  flags, negative gate decisions and reportless pre-run refusals after relocation.
+  Fixed role paths and same-buffer validators refuse raw payloads and substitutions;
+  integrity never authenticates scientific or human-label claims. Synthetic functional
+  records are in `validation/2026-10-08-portable-evidence-bundles/`; hosted qualification
+  is pending.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37880847032); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
 ## 0.17.0
 
 Released independently from PR #120: calibration-aware cards and gate action.

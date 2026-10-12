@@ -1,0 +1,28 @@
+FFFF                                                                     [100%]
+================================== FAILURES ===================================
+___ test_bound_gate_rejects_corrupted_scientific_wording[definition-False] ____
+tests\test_bundle.py:362: in test_bound_gate_rejects_corrupted_scientific_wording
+    with pytest.raises(BundleError, match="conditional epsilon"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE <class 'quantfit.bundle.BundleError'>
+____ test_bound_gate_rejects_corrupted_scientific_wording[definition-True] ____
+tests\test_bundle.py:362: in test_bound_gate_rejects_corrupted_scientific_wording
+    with pytest.raises(BundleError, match="conditional epsilon"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE <class 'quantfit.bundle.BundleError'>
+____ test_bound_gate_rejects_corrupted_scientific_wording[statement-False] ____
+tests\test_bundle.py:362: in test_bound_gate_rejects_corrupted_scientific_wording
+    with pytest.raises(BundleError, match="conditional epsilon"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE <class 'quantfit.bundle.BundleError'>
+____ test_bound_gate_rejects_corrupted_scientific_wording[statement-True] _____
+tests\test_bundle.py:362: in test_bound_gate_rejects_corrupted_scientific_wording
+    with pytest.raises(BundleError, match="conditional epsilon"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE <class 'quantfit.bundle.BundleError'>
+=========================== short test summary info ===========================
+FAILED tests/test_bundle.py::test_bound_gate_rejects_corrupted_scientific_wording[definition-False]
+FAILED tests/test_bundle.py::test_bound_gate_rejects_corrupted_scientific_wording[definition-True]
+FAILED tests/test_bundle.py::test_bound_gate_rejects_corrupted_scientific_wording[statement-False]
+FAILED tests/test_bundle.py::test_bound_gate_rejects_corrupted_scientific_wording[statement-True]
+4 failed, 45 deselected in 2.84s

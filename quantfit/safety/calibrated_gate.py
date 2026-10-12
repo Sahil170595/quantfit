@@ -17,6 +17,14 @@ ASSUMPTIONS_STATEMENT = (
     "At-risk applicability (A1), arm-conditional independence (A2), and majority-real at-risk probes (A3) "
     "remain unverified; resolution is conditional on them."
 )
+PREFLIGHT_STATEMENT = (
+    "Calibration scope and aggregate arithmetic validated; actual arm weights/environment not yet "
+    "observed. Binding never authenticates human labels, sensitivity, or a GO. " + ASSUMPTIONS_STATEMENT
+)
+OBSERVED_STATEMENT = (
+    "Calibration scope matched the actual resolved run and aggregate arithmetic was checked. "
+    "Label truth and sensitivity remain unverified; no GO is inferred. " + ASSUMPTIONS_STATEMENT
+)
 
 
 def validate_output_paths(path, report_path, out_path):
@@ -66,8 +74,7 @@ def prepare_calibration(path, baseline, quant, max_new_tokens, n_probes):
         "definition": EPS_DEFINITION,
         "mode": EPS_MODE_BOUND,
         "resolution_is_a_floor": False,
-        "statement": "Calibration scope and aggregate arithmetic validated; actual arm weights/environment not yet "
-        "observed. Binding never authenticates human labels, sensitivity, or a GO. " + ASSUMPTIONS_STATEMENT,
+        "statement": PREFLIGHT_STATEMENT,
     }
     return bound, eps
 
@@ -98,8 +105,5 @@ def verify_bound_run(bound, eps, baseline, quant, *, token, max_new_tokens, repo
             observed.to_json(report_path)
     eps["binding_status"] = "actual_run_matched"
     eps["actual_run_matched"] = True
-    eps["statement"] = (
-        "Calibration scope matched the actual resolved run and aggregate arithmetic was checked. "
-        "Label truth and sensitivity remain unverified; no GO is inferred. " + ASSUMPTIONS_STATEMENT
-    )
+    eps["statement"] = OBSERVED_STATEMENT
     return drift

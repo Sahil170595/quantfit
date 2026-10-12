@@ -1,0 +1,27 @@
+{
+  "canonical_epsilon_definition_unchanged": true,
+  "canonical_pre_and_observed_statement_strings_unchanged": true,
+  "canonical_preflight_epsilon_payload_unchanged": true,
+  "corruption_cases": [
+    {
+      "error": "gate conditional epsilon does not match validated calibration",
+      "field": "definition",
+      "refused": true,
+      "scientific_claims_verified": false
+    },
+    {
+      "error": "gate conditional epsilon does not match validated calibration",
+      "field": "statement",
+      "refused": true,
+      "scientific_claims_verified": false
+    }
+  ],
+  "fifo_initial_receipt_failure": "First WSL probe completed its four CLI checks, then failed when native WSL git read the Windows-absolute worktree gitdir. Corrected receipt obtains the exact head with Windows git and passes it explicitly; no worktree/dependency changes.",
+  "observed_statement_comparison_scope": "Only exact string equality to historical widened synthetic output; no admission of that patched-corpus gate as a production bundle. Full observed corruption regression is in unit test with explicitly patched synthetic corpus.",
+  "original_calibration_sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+  "original_native_gate_sha256": "63626d2ac42a87a9f081ee666abecd4e3e40dabe8096efa7734c07c8f62561e1",
+  "original_native_pre_run_gate_accepted": true,
+  "scientific_claims_verified": false,
+  "source_head": "0b4df9c3a8e97a35c84034c76df2e96b9b50e03a",
+  "synthetic": true
+}

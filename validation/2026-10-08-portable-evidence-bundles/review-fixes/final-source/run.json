@@ -1,0 +1,223 @@
+{
+  "assumptions_verified": false,
+  "commands": [
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "resolution",
+        "--report",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\drift.json",
+        "--calibration-report",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\calibration.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\resolution.json",
+        "--json"
+      ],
+      "cwd": "C:\\tmp\\qf-release-0.16.0-20261008",
+      "exit_code": 0,
+      "expected": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "gate",
+        "--baseline",
+        "base",
+        "--quant",
+        "quant",
+        "--threshold",
+        "0.01",
+        "--calibration-report",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\calibration.json",
+        "--report",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\unobserved-report.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\gate.json",
+        "--json"
+      ],
+      "cwd": "C:\\tmp\\qf-release-0.16.0-20261008",
+      "exit_code": 5,
+      "expected": 5
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "create",
+        "--report",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\drift.json",
+        "--calibration-report",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\calibration.json",
+        "--resolution",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\resolution.json",
+        "--gate",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\gate.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\original-bundle",
+        "--json"
+      ],
+      "cwd": "C:\\tmp\\qf-release-0.16.0-20261008",
+      "exit_code": 0,
+      "expected": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "verify",
+        "--bundle",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\relocated",
+        "--json"
+      ],
+      "cwd": "C:\\tmp\\qf-release-0.16.0-20261008",
+      "exit_code": 0,
+      "expected": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "create",
+        "--gate",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\gate.json",
+        "--calibration-report",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\calibration.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\gate-only-original",
+        "--json"
+      ],
+      "cwd": "C:\\tmp\\qf-release-0.16.0-20261008",
+      "exit_code": 0,
+      "expected": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "verify",
+        "--bundle",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\gate-only-relocated",
+        "--json"
+      ],
+      "cwd": "C:\\tmp\\qf-release-0.16.0-20261008",
+      "exit_code": 0,
+      "expected": 0
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "verify",
+        "--bundle",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\tampered",
+        "--json"
+      ],
+      "cwd": "C:\\tmp\\qf-release-0.16.0-20261008",
+      "exit_code": 3,
+      "expected": 3
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "verify",
+        "--bundle",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\unsafe-layout",
+        "--json"
+      ],
+      "cwd": "C:\\tmp\\qf-release-0.16.0-20261008",
+      "exit_code": 2,
+      "expected": 2
+    },
+    {
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "create",
+        "--report",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\renamed-raw.json",
+        "--out",
+        "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\review-fixes\\final-source\\refused",
+        "--json"
+      ],
+      "cwd": "C:\\tmp\\qf-release-0.16.0-20261008",
+      "exit_code": 2,
+      "expected": 2
+    }
+  ],
+  "created_utc": "2026-10-09T02:40:08.263117+00:00",
+  "hardware": {
+    "executable": "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+    "logical_cpus": 32,
+    "machine": "AMD64",
+    "physical_cpus": 24,
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python": "3.12.13",
+    "ram_bytes": 68319571968
+  },
+  "human_labels_authenticated": false,
+  "installed_versions": {
+    "hypothesis": "6.152.5",
+    "inspect-ai": "0.3.269",
+    "mypy": "1.20.2",
+    "pytest": "9.0.3",
+    "ruff": "0.16.2",
+    "scipy": "1.15.3"
+  },
+  "limitations": [
+    "Fixture-derived aggregates; no generation or human adjudication occurred.",
+    "No sensitivity control, T0, cross-hardware, safety verdict, GO or independent reproduction.",
+    "Hosted full numerical/runtime and installed wheel/sdist gates remain pending.",
+    "Manifest declarations have no authenticated origin or signature."
+  ],
+  "missing_optional_packages": [
+    "torch",
+    "transformers"
+  ],
+  "models_loaded": false,
+  "relocated_member_bytes": [
+    {
+      "path": "relocated\\report.json",
+      "sha256": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa",
+      "size_bytes": 2707
+    },
+    {
+      "path": "relocated\\calibration.json",
+      "sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+      "size_bytes": 3842
+    },
+    {
+      "path": "relocated\\gate.json",
+      "sha256": "e63483e1cdfe623706a36447efb08cd4e12b4d6805aec030ed21615831e95cca",
+      "size_bytes": 12647
+    },
+    {
+      "path": "relocated\\resolution.json",
+      "sha256": "d576ecc322c59163bc86aa3ae7e0eab2edce1da553484b21aa51a87345c4e694",
+      "size_bytes": 5076
+    }
+  ],
+  "scientific_claims_verified": false,
+  "source_fixture_directory": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-calibration-aware-outputs",
+  "source_head": "177f534f7dd0bfd7f5dc3da15a5c51ffb2d35393",
+  "synthetic": true
+}

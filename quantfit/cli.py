@@ -403,6 +403,27 @@ def _build_parser() -> argparse.ArgumentParser:
     rverify.add_argument("--slug", required=True, help="registered reference slug")
     rverify.add_argument("--report", required=True, metavar="PATH", help="local artifact bytes to verify")
 
+    pbundle = sub.add_parser(
+        "bundle", help="offline portable aggregate evidence; integrity success is no scientific GO"
+    )
+    bsub = pbundle.add_subparsers(dest="bundle_cmd", required=True)
+    bcreate = bsub.add_parser("create", help="create a new exact-byte aggregate bundle (0 done, 2 unsupported input)")
+    bcreate.add_argument(
+        "--report", default=None, metavar="PATH", help="aggregate schema-2 report; omitted only for pre-run refusal"
+    )
+    bcreate.add_argument("--out", required=True, metavar="DIR", help="new bundle directory; parent must exist")
+    bcreate.add_argument("--calibration-report", metavar="PATH", help="optional bound schema-2 aggregate calibration")
+    bcreate.add_argument(
+        "--gate", metavar="PATH", help="optional aggregate gate decision; original no-answer states survive"
+    )
+    bcreate.add_argument(
+        "--resolution", metavar="PATH", help="optional conditional analysis; requires calibration input"
+    )
+    bverify = bsub.add_parser(
+        "verify", help="verify relocated bundle (0 intact, 3 byte mismatch, 2 unsupported/unsafe)"
+    )
+    bverify.add_argument("--bundle", required=True, metavar="DIR", help="local portable bundle directory")
+
     pau = sub.add_parser(
         "audit",
         help="docs=code parity: do the docs still describe the code? "
@@ -904,6 +925,28 @@ def _dispatch(args: argparse.Namespace) -> int:
             {**decision, "decision_path": args.out, "report_path": args.report, "junit_path": args.junit},
             _human_gate,
         )
+
+    if args.cmd == "bundle":
+        from quantfit.bundle import create_bundle, verify_bundle
+
+        result = (
+            create_bundle(
+                args.report,
+                args.out,
+                calibration_path=args.calibration_report,
+                gate_path=args.gate,
+                resolution_path=args.resolution,
+            )
+            if args.bundle_cmd == "create"
+            else verify_bundle(args.bundle)
+        )
+        code = 0 if result["integrity_verified"] else 3
+
+        def human_bundle():
+            print("Bundle integrity: " + ("MATCH" if result["integrity_verified"] else "MISMATCH"))
+            print(result["scope"])
+
+        return _emit(args, "bundle", code, result, human_bundle)
 
     if args.cmd == "resolution":
         from quantfit.resolution import analyze_resolution

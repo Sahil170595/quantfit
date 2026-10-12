@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from quantfit import __version__
-from quantfit.safety.calibration_binding import load_bound_calibration
+from quantfit.safety.calibration_binding import load_bound_calibration, load_bound_calibration_bytes
 from quantfit.safety.mde import mde_block, power_at
 from quantfit.safety.report import ArmRun, DriftReport
 
@@ -50,6 +50,14 @@ def _report(path: str) -> tuple[DriftReport, str]:
     try:
         with Path(path).open("rb") as stream:
             data = stream.read(MAX_REPORT_BYTES + 1)
+    except OSError as exc:
+        raise ResolutionError(f"unreadable drift report {path}: {exc}") from exc
+    return parse_report_bytes(data), hashlib.sha256(data).hexdigest()
+
+
+def parse_report_bytes(data: bytes) -> DriftReport:
+    """Strict schema-v2 parsing of one bounded byte buffer, shared by offline consumers."""
+    try:
         _require(len(data) <= MAX_REPORT_BYTES, "report exceeds the 8 MiB input limit")
         payload = json.loads(data, object_pairs_hook=_pairs, parse_constant=_nonfinite, parse_float=_float)
         _require(isinstance(payload, dict), "report must be an object")
@@ -57,9 +65,9 @@ def _report(path: str) -> tuple[DriftReport, str]:
         report = DriftReport(
             baseline=ArmRun(**payload.pop("baseline")), quantized=ArmRun(**payload.pop("quantized")), **payload
         )
-    except (OSError, UnicodeError, ValueError, TypeError, KeyError, RuntimeError) as exc:
-        raise ResolutionError(f"unreadable drift report {path}: {exc}") from exc
-    return report, hashlib.sha256(data).hexdigest()
+    except (UnicodeError, ValueError, TypeError, KeyError, RuntimeError, RecursionError) as exc:
+        raise ResolutionError(f"unreadable drift report buffer: {exc}") from exc
+    return report
 
 
 def _count(value, name: str) -> int:
@@ -161,41 +169,57 @@ def analyze_resolution_inputs(report_path: str, calibration_path: str) -> tuple[
     """
     try:
         report, report_sha256 = _report(report_path)
-        axes = _axes(report)
         calibration = load_bound_calibration(calibration_path, report=report)
-        for axis in axes.values():
-            block = mde_block(
-                axis["n_at_risk"], calibration.eps_baseline_upper, calibration.eps_quant_upper, calibration.eps_source
-            )
-            axis["resolution"] = block
-            axis["detectable_at_target_power"] = (
-                axis["measurable"]
-                and power_at(1.0, axis["n_at_risk"], block["false_flip_rate_bound"], block["alpha"]) >= block["power"]
-            )
-        artifact = {
-            "resolution_schema": 1,
-            "quantfit_version": __version__,
-            "created_utc": datetime.now(timezone.utc).isoformat(),
-            "inputs": {"report_sha256": report_sha256, "calibration_sha256": calibration.source_sha256},
-            "binding_fingerprint": calibration.fingerprint,
-            "binding_status": "matched actual report scope; declared evidence not authenticated",
-            "eps_baseline_upper": calibration.eps_baseline_upper,
-            "eps_quant_upper": calibration.eps_quant_upper,
-            "axes": axes,
-            "human_confirmation_verified": False,
-            "assumptions_verified": False,
-            "assumptions": [
-                "Directional calibration bounds apply to this at-risk subpopulation.",
-                "Judge errors on the two arms are independent given true labels.",
-                "The at-risk set is majority-real (the true baseline appropriate-label rate is at least one half).",
-            ],
-            "scope": "Conditional resolution of recorded flagged counts; no safety verdict, research GO or sensitivity-control result.",
-        }
-        return report, artifact
+        return report, _analysis(report, report_sha256, calibration)
     except (OSError, RuntimeError) as exc:
         if isinstance(exc, ResolutionError):
             raise
         raise ResolutionError(str(exc)) from exc
+
+
+def analyze_resolution_bytes(report_data: bytes, calibration_data: bytes) -> tuple[DriftReport, dict]:
+    """Analyze exactly the supplied buffers; hash, scope validation and rendering share bytes."""
+    try:
+        report = parse_report_bytes(report_data)
+        calibration = load_bound_calibration_bytes(calibration_data, report=report)
+        return report, _analysis(report, hashlib.sha256(report_data).hexdigest(), calibration)
+    except RuntimeError as exc:
+        if isinstance(exc, ResolutionError):
+            raise
+        raise ResolutionError(str(exc)) from exc
+
+
+def _analysis(report: DriftReport, report_sha256: str, calibration) -> dict:
+    axes = _axes(report)
+    for axis in axes.values():
+        block = mde_block(
+            axis["n_at_risk"], calibration.eps_baseline_upper, calibration.eps_quant_upper, calibration.eps_source
+        )
+        axis["resolution"] = block
+        axis["detectable_at_target_power"] = (
+            axis["measurable"]
+            and power_at(1.0, axis["n_at_risk"], block["false_flip_rate_bound"], block["alpha"]) >= block["power"]
+        )
+    artifact = {
+        "resolution_schema": 1,
+        "quantfit_version": __version__,
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "inputs": {"report_sha256": report_sha256, "calibration_sha256": calibration.source_sha256},
+        "binding_fingerprint": calibration.fingerprint,
+        "binding_status": "matched actual report scope; declared evidence not authenticated",
+        "eps_baseline_upper": calibration.eps_baseline_upper,
+        "eps_quant_upper": calibration.eps_quant_upper,
+        "axes": axes,
+        "human_confirmation_verified": False,
+        "assumptions_verified": False,
+        "assumptions": [
+            "Directional calibration bounds apply to this at-risk subpopulation.",
+            "Judge errors on the two arms are independent given true labels.",
+            "The at-risk set is majority-real (the true baseline appropriate-label rate is at least one half).",
+        ],
+        "scope": "Conditional resolution of recorded flagged counts; no safety verdict, research GO or sensitivity-control result.",
+    }
+    return artifact
 
 
 def analyze_resolution(report_path: str, calibration_path: str, out_path: str | None = None) -> dict:

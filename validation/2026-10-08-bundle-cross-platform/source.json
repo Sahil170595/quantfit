@@ -1,0 +1,46 @@
+{
+  "source_head": "a5f3fb66d96f7d71bedd05896828430c8aaeb043",
+  "source_tree": "1f434a7d24ba2769fa175a2a8920b6c248a3b5c9",
+  "source_files": [
+    {
+      "path": "quantfit/bundle.py",
+      "actual_consumed_sha256": "8c54ad0f146d229e694462add10036d553fff953982babd6f6871a905df19348",
+      "canonical_gitblob_sha256": "4dd7ea0f71baa43c150c87627aeeb989ec4dd0e3039bc9f9ea1adc02c941ba9d",
+      "crlf_to_lf_equivalence_verified": true,
+      "raw_bytes_equal_gitblob": false
+    },
+    {
+      "path": "quantfit/safety/calibration_binding.py",
+      "actual_consumed_sha256": "ce65836a824221f1eacec6b796a3aff9db4ab9ed53f58c7829ecbb3778a86b89",
+      "canonical_gitblob_sha256": "be4da238136d369297a9705279c8c987b6cd17150acac71c1202df69e99fb405",
+      "crlf_to_lf_equivalence_verified": true,
+      "raw_bytes_equal_gitblob": false
+    },
+    {
+      "path": "tests/test_bundle.py",
+      "actual_consumed_sha256": "e5bf2bd3af17faa20b0c6779b39cb8a0ab99cac076c5f82ffb9ea4e8ac0f558d",
+      "canonical_gitblob_sha256": "b01f13ab51a3300c3aacbc90eb6259c447df3f3472d7e9df5670efc4afbb41f5",
+      "crlf_to_lf_equivalence_verified": true,
+      "raw_bytes_equal_gitblob": false
+    },
+    {
+      "path": "tools/ci_installed.py",
+      "actual_consumed_sha256": "5eb6a00a76c679f092753787a3581642ca7ccd0c48c66f2c6a338c62d43c9598",
+      "canonical_gitblob_sha256": "97d5b17fd9b61adf7bf2021c4b1878d24aa7910f78cb2513cd579cba66dfbe3a",
+      "crlf_to_lf_equivalence_verified": true,
+      "raw_bytes_equal_gitblob": false
+    }
+  ],
+  "prior_available_gate": {
+    "passed": 1699,
+    "skipped": 13,
+    "cases": 1712,
+    "unit_xml": "unit.xml",
+    "scope": "intermediate source before canonical calibration-bound decision recomputation; not final qualification"
+  },
+  "initial_format_check": {
+    "exit_code": 1,
+    "cause": "mixed LF/CRLF after patch",
+    "correction": "Ruff format changed working EOL only; canonical Git content delta absent"
+  }
+}

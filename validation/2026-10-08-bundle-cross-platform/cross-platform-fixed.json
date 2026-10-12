@@ -1,0 +1,152 @@
+{
+  "observed_utc": "2026-10-09T03:43:13.629213+00:00",
+  "runs": [
+    {
+      "platform": "Windows",
+      "argv": [
+        "C:\\tmp\\qf-release-0.16.0-20261008\\tools\\ci\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "create",
+        "--report",
+        "C:\\tmp\\qf-bundle-roundoff-20261008/validation/2026-10-08-calibration-aware-outputs/drift.json",
+        "--calibration-report",
+        "C:\\tmp\\qf-bundle-roundoff-20261008/validation/2026-10-08-calibration-aware-outputs/calibration.json",
+        "--resolution",
+        "C:\\tmp\\qf-bundle-roundoff-20261008/validation/2026-10-08-calibration-aware-outputs/resolution.json",
+        "--gate",
+        "C:\\tmp\\qf-bundle-roundoff-20261008/validation/2026-10-08-calibration-aware-outputs/pre-run/gate.json",
+        "--out",
+        "C:\\tmp\\qf-bundle-roundoff-20261008/validation/2026-10-08-bundle-cross-platform/bundle-windows",
+        "--json"
+      ],
+      "exit_code": 0,
+      "source_head": "a5f3fb66d96f7d71bedd05896828430c8aaeb043",
+      "members_verified": [
+        {
+          "role": "report",
+          "path": "report.json",
+          "sha256": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa",
+          "size_bytes": 2707
+        },
+        {
+          "role": "calibration",
+          "path": "calibration.json",
+          "sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+          "size_bytes": 3842
+        },
+        {
+          "role": "gate",
+          "path": "gate.json",
+          "sha256": "63626d2ac42a87a9f081ee666abecd4e3e40dabe8096efa7734c07c8f62561e1",
+          "size_bytes": 11945
+        },
+        {
+          "role": "resolution",
+          "path": "resolution.json",
+          "sha256": "fd0570fafcdd297363f589fdd3f0337fa7a0e091d865a6ca186b539600815b01",
+          "size_bytes": 5076
+        }
+      ],
+      "declared_results": {
+        "report": {
+          "verdict": "REGRESSION DETECTED (both axes)",
+          "regression_detected": true,
+          "unmeasurable_axes": []
+        },
+        "calibration": {
+          "binding_fingerprint": "f0612bfade2a9c35bc0146a171985e7ce99369ff0ca57b9d32b195bd39eb8313",
+          "human_labels_verified": false,
+          "assumptions_verified": false
+        },
+        "resolution": {
+          "human_confirmation_verified": false,
+          "assumptions_verified": false,
+          "binding_status": "matched actual report scope; declared evidence not authenticated"
+        },
+        "gate": {
+          "exit_code": 5,
+          "verdict": "UNRESOLVABLE",
+          "resolution_is_a_floor": false,
+          "actual_run_matched": false,
+          "assumptions_verified": false,
+          "human_labels_verified": false,
+          "unmeasurable_axes": []
+        }
+      },
+      "stderr": "",
+      "scope": "actual CLI from source checkout with synthetic aggregate inputs; no installed/model/host authentication proof"
+    },
+    {
+      "platform": "Linux",
+      "argv": [
+        "wsl.exe",
+        "-d",
+        "Ubuntu",
+        "--",
+        "python3",
+        "-B",
+        "-c",
+        "import sys;sys.path.insert(0,'/mnt/c/tmp/qf-bundle-roundoff-20261008');from quantfit.cli import main;sys.exit(main(['bundle', 'create', '--report', '/mnt/c/tmp/qf-bundle-roundoff-20261008/validation/2026-10-08-calibration-aware-outputs/drift.json', '--calibration-report', '/mnt/c/tmp/qf-bundle-roundoff-20261008/validation/2026-10-08-calibration-aware-outputs/calibration.json', '--resolution', '/mnt/c/tmp/qf-bundle-roundoff-20261008/validation/2026-10-08-calibration-aware-outputs/resolution.json', '--gate', '/mnt/c/tmp/qf-bundle-roundoff-20261008/validation/2026-10-08-calibration-aware-outputs/pre-run/gate.json', '--out', '/mnt/c/tmp/qf-bundle-roundoff-20261008/validation/2026-10-08-bundle-cross-platform/bundle-linux', '--json']))"
+      ],
+      "exit_code": 0,
+      "source_head": "a5f3fb66d96f7d71bedd05896828430c8aaeb043",
+      "members_verified": [
+        {
+          "role": "report",
+          "path": "report.json",
+          "sha256": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa",
+          "size_bytes": 2707
+        },
+        {
+          "role": "calibration",
+          "path": "calibration.json",
+          "sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+          "size_bytes": 3842
+        },
+        {
+          "role": "gate",
+          "path": "gate.json",
+          "sha256": "63626d2ac42a87a9f081ee666abecd4e3e40dabe8096efa7734c07c8f62561e1",
+          "size_bytes": 11945
+        },
+        {
+          "role": "resolution",
+          "path": "resolution.json",
+          "sha256": "fd0570fafcdd297363f589fdd3f0337fa7a0e091d865a6ca186b539600815b01",
+          "size_bytes": 5076
+        }
+      ],
+      "declared_results": {
+        "report": {
+          "verdict": "REGRESSION DETECTED (both axes)",
+          "regression_detected": true,
+          "unmeasurable_axes": []
+        },
+        "calibration": {
+          "binding_fingerprint": "f0612bfade2a9c35bc0146a171985e7ce99369ff0ca57b9d32b195bd39eb8313",
+          "human_labels_verified": false,
+          "assumptions_verified": false
+        },
+        "resolution": {
+          "human_confirmation_verified": false,
+          "assumptions_verified": false,
+          "binding_status": "matched actual report scope; declared evidence not authenticated"
+        },
+        "gate": {
+          "exit_code": 5,
+          "verdict": "UNRESOLVABLE",
+          "resolution_is_a_floor": false,
+          "actual_run_matched": false,
+          "assumptions_verified": false,
+          "human_labels_verified": false,
+          "unmeasurable_axes": []
+        }
+      },
+      "stderr": "",
+      "scope": "actual CLI from source checkout with synthetic aggregate inputs; no installed/model/host authentication proof"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+wsl: Failed to start the systemd user session for 'sahil_1'. See journalctl for more details.
+................................s..................................      [100%]
+- generated xml file: /mnt/c/tmp/qf-bundle-roundoff-20261008/validation/2026-10-08-bundle-cross-platform/linux-bundle.xml -
+66 passed, 1 skipped in 8.44s

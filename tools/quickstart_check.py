@@ -217,6 +217,8 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     "reproduce": (REQ_ARTIFACT,),
     # Offline drift/calibration reads (quantfit/resolution.py: analyze_resolution).
     "resolution": (REQ_ARTIFACT,),
+    # Offline aggregate input/bundle files (quantfit/bundle.py; no models/network).
+    "bundle": (REQ_ARTIFACT,),
     # Bundled listing is pure local metadata (quantfit/reference_cli.py).
     "references": (),
     # Pure local, no network, no GPU — but it audits a SOURCE CHECKOUT: `--root`

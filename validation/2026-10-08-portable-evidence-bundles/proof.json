@@ -1,0 +1,153 @@
+{
+  "check_exit_codes": {
+    "audit": 0,
+    "available_scipy_properties": 0,
+    "mypy_exact_ci_paths": 0,
+    "ruff_check": 0,
+    "ruff_format": 0
+  },
+  "core_git_blob_sha256_unchanged_from_8848efb": {
+    "quantfit/bundle.py": "ed1afb2fbc213b1c98face4d5297d7ed36aabe3a2260853a6b4a7b9642b82985",
+    "quantfit/cli.py": "7d4b014dc55b50ab6628587aa07a58d4837281970163467db6a928f74c13aa87",
+    "quantfit/resolution.py": "3dd6e309d2bb333c7a3dbc0cd7615dc08d838dc1f52f6cfea318acad7f712a47",
+    "quantfit/safety/calibration_binding.py": "4d6a35b050ed4017c096b62ba677b750e025611d6cfcd025e1438b3736f684f3",
+    "tools/ci_installed.py": "b12e43008965a7c5d935a74bf0f3013946e3c940600da6bb08f102b5f16d00a9"
+  },
+  "counts_from_individual_junit_cases": {
+    "initial-unit-tests.xml": {
+      "errors": 0,
+      "failures": 4,
+      "passed": 1669,
+      "skipped": [
+        {
+          "class": "",
+          "name": "tests.test_judge_known_failure_modes",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "",
+          "name": "tests.test_probe",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_symlink_sources_and_bundle_members_are_refused",
+          "reason": "Symlink privilege unavailable; hosted Linux exercises this case"
+        },
+        {
+          "class": "tests.test_calibset",
+          "name": "test_the_probe_batch_is_the_packed_blocks_as_tensors",
+          "reason": "could not import 'torch': No module named 'torch'"
+        },
+        {
+          "class": "tests.test_ci_constraints",
+          "name": "test_the_inherited_cap_is_still_what_the_installed_parent_declares",
+          "reason": "no parent that imposes an inherited cap is installed here (CI's unit job)"
+        },
+        {
+          "class": "tests.test_dependencies",
+          "name": "test_parent_bounded_premises_hold_against_installed_metadata",
+          "reason": "no exemption chain link is installed here (CI's unit job installs with --no-deps)"
+        },
+        {
+          "class": "tests.test_dependencies",
+          "name": "test_floors_that_cannot_bind_are_recorded_not_discovered",
+          "reason": "no exemption chain parent is installed here (CI's unit job installs with --no-deps)"
+        },
+        {
+          "class": "tests.test_inspect_task",
+          "name": "test_missing_inspect_ai_is_an_operational_error_naming_the_install",
+          "reason": "inspect_ai is installed; the absent-dependency refusal is unreachable"
+        },
+        {
+          "class": "tests.test_report",
+          "name": "test_environment_fingerprint_is_resolved",
+          "reason": "fingerprint resolves the live torch env"
+        }
+      ],
+      "suite_total": 1682,
+      "total_cases": 1682
+    },
+    "local-numerical.xml": {
+      "errors": 0,
+      "failures": 0,
+      "passed": 2,
+      "skipped": [],
+      "suite_total": 2,
+      "total_cases": 2
+    },
+    "red.xml": {
+      "errors": 0,
+      "failures": 2,
+      "passed": 20,
+      "skipped": [
+        {
+          "class": "tests.test_bundle",
+          "name": "test_symlink_sources_and_bundle_members_are_refused",
+          "reason": "Symlink privilege unavailable; hosted Linux exercises this case"
+        }
+      ],
+      "suite_total": 23,
+      "total_cases": 23
+    },
+    "unit-tests.xml": {
+      "errors": 0,
+      "failures": 0,
+      "passed": 1678,
+      "skipped": [
+        {
+          "class": "",
+          "name": "tests.test_judge_known_failure_modes",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "",
+          "name": "tests.test_probe",
+          "reason": "collection skipped"
+        },
+        {
+          "class": "tests.test_bundle",
+          "name": "test_symlink_sources_and_bundle_members_are_refused",
+          "reason": "Symlink privilege unavailable; hosted Linux exercises this case"
+        },
+        {
+          "class": "tests.test_calibset",
+          "name": "test_the_probe_batch_is_the_packed_blocks_as_tensors",
+          "reason": "could not import 'torch': No module named 'torch'"
+        },
+        {
+          "class": "tests.test_ci_constraints",
+          "name": "test_the_inherited_cap_is_still_what_the_installed_parent_declares",
+          "reason": "no parent that imposes an inherited cap is installed here (CI's unit job)"
+        },
+        {
+          "class": "tests.test_dependencies",
+          "name": "test_parent_bounded_premises_hold_against_installed_metadata",
+          "reason": "no exemption chain link is installed here (CI's unit job installs with --no-deps)"
+        },
+        {
+          "class": "tests.test_dependencies",
+          "name": "test_floors_that_cannot_bind_are_recorded_not_discovered",
+          "reason": "no exemption chain parent is installed here (CI's unit job installs with --no-deps)"
+        },
+        {
+          "class": "tests.test_inspect_task",
+          "name": "test_missing_inspect_ai_is_an_operational_error_naming_the_install",
+          "reason": "inspect_ai is installed; the absent-dependency refusal is unreachable"
+        },
+        {
+          "class": "tests.test_report",
+          "name": "test_environment_fingerprint_is_resolved",
+          "reason": "fingerprint resolves the live torch env"
+        }
+      ],
+      "suite_total": 1687,
+      "total_cases": 1687
+    }
+  },
+  "full_hosted_graph_qualified": false,
+  "installed_candidate_qualified_locally": false,
+  "note": "CLI argv/exits/hardware are in final-source/run.json; unit/scipy/linters/audit preserve actual outputs.",
+  "scientific_claims_verified": false,
+  "source_head": "af498a2b55340c95e9ee845274946e25f13c9f87"
+}

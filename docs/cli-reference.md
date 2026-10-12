@@ -1,5 +1,10 @@
 # CLI reference — every command, every flag
 
+`quantfit bundle create` and `quantfit bundle verify` package and check portable
+aggregate evidence offline. Their role/flag/exit-code contract and worked commands are
+in [Portable aggregate evidence bundles](portable-evidence-bundles.md). Integrity never
+authenticates scientific claims or human labels.
+
 The README shows the path most people want. This is the complete surface, because a flag
 that exists and appears in no example is a flag nobody finds: the parity auditor counts
 those, and it counted 21 before this file existed.

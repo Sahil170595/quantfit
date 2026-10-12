@@ -1,0 +1,21 @@
+{
+  "bundle_schema": 1,
+  "created_utc": "2026-10-09T02:40:05.768004+00:00",
+  "files": [
+    {
+      "path": "calibration.json",
+      "role": "calibration",
+      "sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+      "size_bytes": 3842
+    },
+    {
+      "path": "gate.json",
+      "role": "gate",
+      "sha256": "e63483e1cdfe623706a36447efb08cd4e12b4d6805aec030ed21615831e95cca",
+      "size_bytes": 12647
+    }
+  ],
+  "quantfit_version": "0.16.0",
+  "scientific_claims_verified": false,
+  "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+}

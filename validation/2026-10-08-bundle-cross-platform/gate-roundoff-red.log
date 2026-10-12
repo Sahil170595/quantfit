@@ -1,0 +1,116 @@
+FFFF                                                                     [100%]
+================================== FAILURES ===================================
+_____ test_recomputed_gate_statistics_accept_adjacent_float_bytes[path0] ______
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1130/test_recomputed_gate_statistic0')
+path = ('eps', 'baseline_upper')
+
+    @pytest.mark.parametrize("path", [("eps", "baseline_upper"), ("mde_block", "perfect_judge_mde")])
+    def test_recomputed_gate_statistics_accept_adjacent_float_bytes(tmp_path, path):
+        report, calibration, _, gate = inputs(tmp_path)
+        supplied = json.loads(gate.read_bytes())
+        supplied[path[0]][path[1]] = math.nextafter(supplied[path[0]][path[1]], -math.inf)
+        raw = json.dumps(supplied).encode()
+        gate.write_bytes(raw)
+        out = tmp_path / "bundle"
+>       result = create_bundle(str(report), str(out), calibration_path=str(calibration), gate_path=str(gate))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bundle.py:208: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\bundle.py:528: in create_bundle
+    declarations = _validate(data)
+                   ^^^^^^^^^^^^^^^
+quantfit\bundle.py:486: in _validate
+    declarations["gate"] = _validate_gate(payloads["gate"], report, calibration)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quantfit\bundle.py:303: in _validate_gate
+    _require(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'gate conditional epsilon does not match validated calibration'
+
+    def _require(condition: bool, message: str) -> None:
+        if not condition:
+>           raise BundleError(message)
+E           quantfit.bundle.BundleError: gate conditional epsilon does not match validated calibration
+
+quantfit\bundle.py:77: BundleError
+_____ test_recomputed_gate_statistics_accept_adjacent_float_bytes[path1] ______
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1130/test_recomputed_gate_statistic1')
+path = ('mde_block', 'perfect_judge_mde')
+
+    @pytest.mark.parametrize("path", [("eps", "baseline_upper"), ("mde_block", "perfect_judge_mde")])
+    def test_recomputed_gate_statistics_accept_adjacent_float_bytes(tmp_path, path):
+        report, calibration, _, gate = inputs(tmp_path)
+        supplied = json.loads(gate.read_bytes())
+        supplied[path[0]][path[1]] = math.nextafter(supplied[path[0]][path[1]], -math.inf)
+        raw = json.dumps(supplied).encode()
+        gate.write_bytes(raw)
+        out = tmp_path / "bundle"
+>       result = create_bundle(str(report), str(out), calibration_path=str(calibration), gate_path=str(gate))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_bundle.py:208: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+quantfit\bundle.py:528: in create_bundle
+    declarations = _validate(data)
+                   ^^^^^^^^^^^^^^^
+quantfit\bundle.py:486: in _validate
+    declarations["gate"] = _validate_gate(payloads["gate"], report, calibration)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+quantfit\bundle.py:429: in _validate_gate
+    _require(value == expected, "gate aggregate fields do not match its existing decision contract")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+condition = False
+message = 'gate aggregate fields do not match its existing decision contract'
+
+    def _require(condition: bool, message: str) -> None:
+        if not condition:
+>           raise BundleError(message)
+E           quantfit.bundle.BundleError: gate aggregate fields do not match its existing decision contract
+
+quantfit\bundle.py:77: BundleError
+_________ test_gate_derived_count_and_boolean_types_stay_exact[path0] _________
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1130/test_gate_derived_count_and_bo0')
+path = ('resolution', 'not_refused')
+
+    @pytest.mark.parametrize("path", [("resolution", "not_refused"), ("mde_block", "n_at_risk")])
+    def test_gate_derived_count_and_boolean_types_stay_exact(tmp_path, path):
+        report, calibration, _, gate = inputs(tmp_path)
+        supplied = json.loads(gate.read_bytes())
+        old = supplied[path[0]][path[1]]
+        supplied[path[0]][path[1]] = int(old) if type(old) is bool else float(old)
+        gate.write_text(json.dumps(supplied), encoding="utf-8")
+>       with pytest.raises(BundleError, match="gate"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'quantfit.bundle.BundleError'>
+
+tests\test_bundle.py:221: Failed
+_________ test_gate_derived_count_and_boolean_types_stay_exact[path1] _________
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1130/test_gate_derived_count_and_bo1')
+path = ('mde_block', 'n_at_risk')
+
+    @pytest.mark.parametrize("path", [("resolution", "not_refused"), ("mde_block", "n_at_risk")])
+    def test_gate_derived_count_and_boolean_types_stay_exact(tmp_path, path):
+        report, calibration, _, gate = inputs(tmp_path)
+        supplied = json.loads(gate.read_bytes())
+        old = supplied[path[0]][path[1]]
+        supplied[path[0]][path[1]] = int(old) if type(old) is bool else float(old)
+        gate.write_text(json.dumps(supplied), encoding="utf-8")
+>       with pytest.raises(BundleError, match="gate"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'quantfit.bundle.BundleError'>
+
+tests\test_bundle.py:221: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_bundle.py::test_recomputed_gate_statistics_accept_adjacent_float_bytes[path0]
+FAILED tests/test_bundle.py::test_recomputed_gate_statistics_accept_adjacent_float_bytes[path1]
+FAILED tests/test_bundle.py::test_gate_derived_count_and_boolean_types_stay_exact[path0]
+FAILED tests/test_bundle.py::test_gate_derived_count_and_boolean_types_stay_exact[path1]
+4 failed, 63 deselected in 1.35s

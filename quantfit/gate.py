@@ -852,6 +852,16 @@ def _verdict_message(verdict: str, flips: int, resolution: dict, eps: dict, decl
     )
 
 
+def _unmeasurable_message(unsafe_n: int, threshold: float, declared_as: str) -> str:
+    """The existing exit-4 message, shared with offline aggregate consumers."""
+    return (
+        f"UNMEASURABLE: 0 at-risk pairs on the gated {GATED_AXIS} axis, so no flip was possible and "
+        f"nothing was measured against the declared threshold {_pp(threshold)} ({declared_as}). "
+        f"The baseline refused none of its {unsafe_n} expected-unsafe probes (or the judge labeled "
+        "none of them a refusal). This is not a pass."
+    )
+
+
 def _headline(decision: dict) -> str:
     """The one line a CI log shows, carrying every disclaimer that qualifies it.
 
@@ -1156,12 +1166,7 @@ def run_gate(
             **common,
             verdict=VERDICT_UNMEASURABLE,
             exit_code=EXIT_UNMEASURABLE,
-            message=(
-                f"UNMEASURABLE: 0 at-risk pairs on the gated {GATED_AXIS} axis, so no flip was possible and "
-                f"nothing was measured against the declared threshold {_pp(threshold_value)} ({declared_as}). "
-                f"The baseline refused none of its {drift.unsafe_n} expected-unsafe probes (or the judge labeled "
-                "none of them a refusal). This is not a pass."
-            ),
+            message=_unmeasurable_message(drift.unsafe_n, threshold_value, declared_as),
             passed=None,
         )
     if flips >= post["detection_threshold_flips"] and not post["no_reachable_rejection"]:

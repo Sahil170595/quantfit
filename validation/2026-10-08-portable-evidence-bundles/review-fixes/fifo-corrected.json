@@ -1,0 +1,140 @@
+{
+  "all_children_completed_and_reaped": true,
+  "bundle_source_sha256": "6a19d7ed318919539dec5e1bb3064a20042d7cf6b039d4767fbd7764f7c9bad2",
+  "cases": [
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "create",
+        "--report",
+        "/tmp/quantfit-owned-fifo-s5h07ixm/source/source.json",
+        "--out",
+        "/tmp/quantfit-owned-fifo-s5h07ixm/source/refused",
+        "--json"
+      ],
+      "elapsed_seconds": 0.6094429150107317,
+      "exit_code": 2,
+      "response": {
+        "command": "bundle",
+        "error": {
+          "kind": "BundleError",
+          "message": "member must be a regular file: /tmp/quantfit-owned-fifo-s5h07ixm/source/source.json"
+        },
+        "exit_code": 2,
+        "result": null,
+        "schema_version": 1,
+        "tool": {
+          "name": "quantfit",
+          "version": "0.16.0"
+        }
+      },
+      "role": "source",
+      "timeout_seconds": 5
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "verify",
+        "--bundle",
+        "/tmp/quantfit-owned-fifo-s5h07ixm/member/bundle",
+        "--json"
+      ],
+      "elapsed_seconds": 0.6197634729905985,
+      "exit_code": 2,
+      "response": {
+        "command": "bundle",
+        "error": {
+          "kind": "BundleError",
+          "message": "member must be a regular file: /tmp/quantfit-owned-fifo-s5h07ixm/member/bundle/report.json"
+        },
+        "exit_code": 2,
+        "result": null,
+        "schema_version": 1,
+        "tool": {
+          "name": "quantfit",
+          "version": "0.16.0"
+        }
+      },
+      "role": "member",
+      "timeout_seconds": 5
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "-m",
+        "quantfit.cli",
+        "bundle",
+        "verify",
+        "--bundle",
+        "/tmp/quantfit-owned-fifo-s5h07ixm/manifest/bundle",
+        "--json"
+      ],
+      "elapsed_seconds": 0.5989725639810786,
+      "exit_code": 2,
+      "response": {
+        "command": "bundle",
+        "error": {
+          "kind": "BundleError",
+          "message": "member must be a regular file: /tmp/quantfit-owned-fifo-s5h07ixm/manifest/bundle/manifest.json"
+        },
+        "exit_code": 2,
+        "result": null,
+        "schema_version": 1,
+        "tool": {
+          "name": "quantfit",
+          "version": "0.16.0"
+        }
+      },
+      "role": "manifest",
+      "timeout_seconds": 5
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "-c",
+        "\nimport os, sys\nfrom pathlib import Path\nimport quantfit.bundle as bundle\nfrom quantfit.cli import main\noriginal = os.open\ndef substitute(path, flags):\n    Path(path).unlink()\n    os.mkfifo(path)\n    return original(path, flags)\nbundle.os.open = substitute\nraise SystemExit(main(sys.argv[1:]))\n",
+        "bundle",
+        "create",
+        "--report",
+        "/tmp/quantfit-owned-fifo-s5h07ixm/replacement/source.json",
+        "--out",
+        "/tmp/quantfit-owned-fifo-s5h07ixm/replacement/refused",
+        "--json"
+      ],
+      "elapsed_seconds": 0.6311801310512237,
+      "exit_code": 2,
+      "response": {
+        "command": "bundle",
+        "error": {
+          "kind": "BundleError",
+          "message": "member must be a regular file: /tmp/quantfit-owned-fifo-s5h07ixm/replacement/source.json"
+        },
+        "exit_code": 2,
+        "result": null,
+        "schema_version": 1,
+        "tool": {
+          "name": "quantfit",
+          "version": "0.16.0"
+        }
+      },
+      "role": "replacement",
+      "timeout_seconds": 5
+    }
+  ],
+  "no_new_dependencies": true,
+  "owned_temp_directory_removed": true,
+  "platform": "Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "scientific_claims_verified": false,
+  "source_head_supplied_by_windows_git": "177f534f7dd0bfd7f5dc3da15a5c51ffb2d35393"
+}

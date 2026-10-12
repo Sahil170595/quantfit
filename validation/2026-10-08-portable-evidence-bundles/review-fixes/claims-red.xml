@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="2.462" timestamp="2026-10-08T22:30:57.188637-04:00" hostname="SahilKadadekar"><testcase classname="tests.test_bundle" name="test_bound_gate_rejects_corrupted_scientific_wording[definition-False]" time="0.074"><failure message="Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;">tests\test_bundle.py:362: in test_bound_gate_rejects_corrupted_scientific_wording
+    with pytest.raises(BundleError, match="conditional epsilon"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;</failure></testcase><testcase classname="tests.test_bundle" name="test_bound_gate_rejects_corrupted_scientific_wording[definition-True]" time="0.827"><failure message="Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;">tests\test_bundle.py:362: in test_bound_gate_rejects_corrupted_scientific_wording
+    with pytest.raises(BundleError, match="conditional epsilon"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;</failure></testcase><testcase classname="tests.test_bundle" name="test_bound_gate_rejects_corrupted_scientific_wording[statement-False]" time="0.069"><failure message="Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;">tests\test_bundle.py:362: in test_bound_gate_rejects_corrupted_scientific_wording
+    with pytest.raises(BundleError, match="conditional epsilon"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;</failure></testcase><testcase classname="tests.test_bundle" name="test_bound_gate_rejects_corrupted_scientific_wording[statement-True]" time="0.926"><failure message="Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;">tests\test_bundle.py:362: in test_bound_gate_rejects_corrupted_scientific_wording
+    with pytest.raises(BundleError, match="conditional epsilon"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE &lt;class 'quantfit.bundle.BundleError'&gt;</failure></testcase></testsuite></testsuites>

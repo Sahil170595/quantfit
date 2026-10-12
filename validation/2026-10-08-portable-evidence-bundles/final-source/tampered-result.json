@@ -1,0 +1,59 @@
+{
+  "command": "bundle",
+  "exit_code": 3,
+  "result": {
+    "bundle_path": "C:\\tmp\\qf-release-0.16.0-20261008\\validation\\2026-10-08-portable-evidence-bundles\\final-source\\tampered",
+    "bundle_schema": 1,
+    "declared_results": {},
+    "integrity_verified": false,
+    "manifest": {
+      "bundle_schema": 1,
+      "created_utc": "2026-10-09T02:25:49.046199+00:00",
+      "files": [
+        {
+          "path": "report.json",
+          "role": "report",
+          "sha256": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa",
+          "size_bytes": 2707
+        },
+        {
+          "path": "calibration.json",
+          "role": "calibration",
+          "sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+          "size_bytes": 3842
+        },
+        {
+          "path": "gate.json",
+          "role": "gate",
+          "sha256": "49a5888c48edf4548a7d32a9f1d3c8402e8349c003c6cd9ad310227680d4dd5e",
+          "size_bytes": 12633
+        },
+        {
+          "path": "resolution.json",
+          "role": "resolution",
+          "sha256": "5f21e4ad3d59a6d05047d2daabfaf522effec27cafc70863d13228a93af2c29a",
+          "size_bytes": 5076
+        }
+      ],
+      "quantfit_version": "0.16.0",
+      "scientific_claims_verified": false,
+      "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+    },
+    "mismatches": [
+      {
+        "actual_bytes": 2708,
+        "actual_sha256": "8a1d107895bdb143d0d84acc96b4c6d5cc7f9cfb5c337d56ed2f2a741df0e2a5",
+        "expected_bytes": 2707,
+        "expected_sha256": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa",
+        "role": "report"
+      }
+    ],
+    "scientific_claims_verified": false,
+    "scope": "Offline aggregate format, relationship and exact-byte integrity checks only; no scientific GO, safety certification, human-label authentication, sensitivity result or independent reproduction."
+  },
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.16.0"
+  }
+}

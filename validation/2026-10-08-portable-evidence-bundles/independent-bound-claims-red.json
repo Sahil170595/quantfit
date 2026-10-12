@@ -1,0 +1,27 @@
+{
+  "reviewed_implementation": "af498a2b55340c95e9ee845274946e25f13c9f87",
+  "source_commit": "61eb4e1b36a4231231291d7f7012b8916694f02a",
+  "source_prefix": "validation/2026-10-08-calibration-aware-outputs/",
+  "source_sha256": {
+    "calibration.json": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+    "pre-run/gate.json": "63626d2ac42a87a9f081ee666abecd4e3e40dabe8096efa7734c07c8f62561e1"
+  },
+  "method": "In-memory quantfit.bundle._validate using exact git blobs; no bundle creation or file mutation.",
+  "invocation": "Existing tools/ci/.venv/Scripts/python.exe -B -; read source files via git show, call _validate on original calibration/gate buffers, then mutate eps.definition or eps.statement plus its corresponding headline substring and call _validate again.",
+  "original_accepted": true,
+  "red_cases": [
+    {
+      "mutation": "eps.definition",
+      "value": "marginal error rate, not separate directional upper bounds",
+      "accepted": true
+    },
+    {
+      "mutation": "eps.statement and corresponding headline substring",
+      "value": "Human labels and all A1/A2/A3 assumptions are verified; calibrated measurement is certified.",
+      "accepted": true
+    }
+  ],
+  "observed_result": "Original UNRESOLVABLE exit5 and false label/assumption flags retained despite acceptance of contradictory gate-owned statements.",
+  "resources_created": false,
+  "scope": "Synthetic negative validator reproduction by the independent reviewer; the edited strings are false claims under test, not instrument findings."
+}

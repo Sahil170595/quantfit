@@ -1,0 +1,128 @@
+.........F.............................................................. [  4%]
+.....................................................................s.. [  8%]
+........................................................................ [ 12%]
+........................................................................ [ 17%]
+........................................................................ [ 21%]
+............................................................s....s...... [ 25%]
+...................................................ss................... [ 30%]
+........................................................................ [ 34%]
+........................................................................ [ 38%]
+....................................s................................... [ 42%]
+........................................................................ [ 47%]
+....................................................................F... [ 51%]
+........................................................................ [ 55%]
+........................................................................ [ 60%]
+........................................................................ [ 64%]
+........................................................................ [ 68%]
+............F...................................................F....... [ 72%]
+........................................................................ [ 77%]
+.................................................................s...... [ 81%]
+........................................................................ [ 85%]
+........................................................................ [ 90%]
+........................................................................ [ 94%]
+........................................................................ [ 98%]
+........................                                                 [100%]
+================================== FAILURES ===================================
+___________________ test_every_command_appears_in_llms_txt ____________________
+
+    def test_every_command_appears_in_llms_txt():
+        """Completeness, which the parity auditor cannot check.
+    
+        The auditor verifies that what `llms.txt` says is true. It cannot verify that what
+        `llms.txt` omits was not important � and a command an assistant never sees is a command
+        it will either not suggest or guess the spelling of.
+        """
+        text = _LLMS.read_text(encoding="utf-8")
+        missing = [name for name in sorted(_top_level_commands()) if f"quantfit {name}" not in text]
+>       assert not missing, f"llms.txt never shows an invocation of: {missing}"
+E       AssertionError: llms.txt never shows an invocation of: ['bundle']
+E       assert not ['bundle']
+
+tests\test_agent_surfaces.py:47: AssertionError
+__________________ test_the_leaf_set_is_what_we_think_it_is ___________________
+
+    def test_the_leaf_set_is_what_we_think_it_is():
+        """A floor, so the walk above cannot pass by finding nothing."""
+        leaves = {" ".join(p) for p in _leaf_commands()}
+        expected = {
+            "check", "list", "plan", "probe", "verify", "verify-safety", "inspect-run", "screen", "emit",
+            "calibrate sheet", "calibrate ingest", "gate", "t0", "reproduce", "audit", "quantize", "resolution",
+            "references list", "references verify",
+        }  # fmt: skip
+>       assert leaves == expected, f"leaf command set changed: {sorted(leaves ^ expected)}"
+E       AssertionError: leaf command set changed: ['bundle create', 'bundle verify']
+E       assert {'audit', 'bu... 'check', ...} == {'audit', 'ca..., 'gate', ...}
+E         
+E         Extra items in the left set:
+E         'bundle verify'
+E         'bundle create'
+E         Use -v to get more diff
+
+tests\test_json_envelope.py:124: AssertionError
+___________ test_every_cli_flag_has_a_row_in_the_validation_matrix ____________
+
+    def test_every_cli_flag_has_a_row_in_the_validation_matrix():
+        """docs/validation-matrix.md section 3 stakes itself on flag-level completeness
+        ("enumerated from _build_parser()"), and three flags shipped without rows: --resume and
+        --attempts in 0.10.0, --baseline-cache in 0.13.0. Nothing noticed, because the
+        enumeration was done by hand once and never again. Now it is done on every run.
+    
+        A flag counts as covered if it appears in the FIRST cell of any section-3 row, so
+        `--tier smoke` / `--tier full` cover --tier and `--version` / `-V` covers --version.
+        """
+        import argparse
+    
+        from quantfit.cli import _build_parser
+    
+        flags: set[str] = set()
+    
+        def walk(parser):
+            for action in parser._actions:
+                if isinstance(action, argparse._SubParsersAction):
+                    for sub in action.choices.values():
+                        walk(sub)
+                else:
+                    flags.update(o for o in action.option_strings if o.startswith("--") and o != "--help")
+    
+        walk(_build_parser())
+    
+        doc = (_ROOT / "docs" / "validation-matrix.md").read_text(encoding="utf-8")
+        section = doc[doc.index("## 3. Major flags") : doc.index("## 4.")]
+        first_cells = [line.split("|")[1] for line in section.splitlines() if line.startswith("| `")]
+        covered = {flag for cell in first_cells for flag in re.findall(r"--[a-z0-9][a-z0-9-]*", cell)}
+    
+        missing = sorted(flags - covered)
+>       assert not missing, f"CLI flags with no row in validation-matrix section 3: {missing}"
+E       AssertionError: CLI flags with no row in validation-matrix section 3: ['--bundle', '--gate', '--resolution']
+E       assert not ['--bundle', '--gate', '--resolution']
+
+tests\test_meta.py:151: AssertionError
+___________ test_every_shipped_subcommand_has_a_classification_rule ___________
+
+    def test_every_shipped_subcommand_has_a_classification_rule():
+        """A quantfit subcommand with no entry lands in REQ_UNCLASSIFIED, whose reason reads
+        "no classification rule covers this program or subcommand" � true, but it is a hole in
+        the classifier reported as a fact about the README. `reproduce` and `audit` sat in it.
+    
+        Read from the shipped parser, so wiring a new subcommand into the CLI without deciding
+        what it needs fails here rather than being silently filed as not-runnable.
+        """
+        from quantfit.cli import _build_parser
+    
+        shipped = set(_subparser_map(_build_parser()))
+        assert shipped, "the shipped parser exposes no subcommands; this reader is stale"
+        missing = sorted(shipped - set(qs.SUBCOMMAND_REQUIREMENTS))
+>       assert not missing, (
+            f"{missing} are shipped subcommands with no entry in SUBCOMMAND_REQUIREMENTS, so they are classified "
+            "'unclassified' rather than by what they actually need. Add an entry with a cited reason."
+        )
+E       AssertionError: ['bundle'] are shipped subcommands with no entry in SUBCOMMAND_REQUIREMENTS, so they are classified 'unclassified' rather than by what they actually need. Add an entry with a cited reason.
+E       assert not ['bundle']
+
+tests\test_quickstart.py:408: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_agent_surfaces.py::test_every_command_appears_in_llms_txt
+FAILED tests/test_json_envelope.py::test_the_leaf_set_is_what_we_think_it_is
+FAILED tests/test_meta.py::test_every_cli_flag_has_a_row_in_the_validation_matrix
+FAILED tests/test_quickstart.py::test_every_shipped_subcommand_has_a_classification_rule
+4 failed, 1669 passed, 9 skipped in 115.21s (0:01:55)
