@@ -2,10 +2,10 @@
 
 ## Release and source scope
 
-This README documents [quantfit 0.20.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.20.0).
+This README documents [quantfit 0.21.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.21.0).
 All workflows below are available in this release.
 
-Install with `pip install "quantfit[inspect,gguf]==0.20.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.21.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.

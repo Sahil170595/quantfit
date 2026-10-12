@@ -1,0 +1,13 @@
+{
+  "observed_metadata_head": "da7247e90e54d7a5cb2a9b036949b9603c2c74e1",
+  "check": "check-final-bytes.py",
+  "exit": 1,
+  "failure": "The broad raw-key regex matches text inside the metadata word context. The checker refused the exact focused_run_context run-provenance sentence before emitting its byte-check artifact.",
+  "affected_record": "final-local-receipts.json",
+  "rejected_key": "focused_run_context",
+  "shell_outcome": "The shell continued the metadata commit; no successful byte-check was claimed. This failure and the narrow checker correction are committed before branch publication.",
+  "correction": "Admit only this exact file/root key/static provenance sentence with an explicit metadata explanation; producer raw-field admission remains limited to false cache-request metadata.",
+  "native_or_scientific_rule_changed": false,
+  "historical_qualification_outputs_changed": false,
+  "scientific_go": false
+}

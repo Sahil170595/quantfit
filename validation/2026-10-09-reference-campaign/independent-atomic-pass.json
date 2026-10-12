@@ -1,0 +1,26 @@
+{
+  "source_head": "65005c59604a64bc6dc1ffad6b8aceb710c7aded",
+  "source_tree": "7d50f913eb0670a0b1e5c04361023aca7386c4b9",
+  "controller_canonical_git_blob_sha256": "483ea8dcf3d9ae05bbe323215ec2ef692c24830a6f2b0c77309c8e76fa7473c2",
+  "reviewer": "/root/cf_next_contract_audit",
+  "verdict": "consequential_domain_pass",
+  "actual_probe_scope": "Independent actual-main synthetic memory probes; no model execution or new resources.",
+  "probes": [
+    "report and card partial stream errors",
+    "short-write return",
+    "close/flush failure",
+    "post-replacement interruptions at assessment, native T0 and campaign",
+    "persistent stream writes",
+    "persistent replacement failure"
+  ],
+  "observed": {
+    "no_incomplete_final_or_temporary_files": true,
+    "retained_source_bytes_exact": true,
+    "qualification_withheld_or_cleared": true,
+    "private_original_native_t0_unchanged": true,
+    "scientific_default_pin_candidate_analysis_unchanged": true,
+    "native_workflow_runtime_agents_blobs_unchanged_from_1f": true
+  },
+  "actual_hosted_campaign_or_publication_verified": false,
+  "scientific_go": false
+}

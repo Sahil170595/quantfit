@@ -1,0 +1,57 @@
+{
+  "cases": {
+    "axis-limited": {
+      "eligible_axes_before_publication": [
+        "over-refusal"
+      ],
+      "full_report_repeatability": true,
+      "native_exits_from_synthetic_counts": [
+        4,
+        4,
+        4
+      ],
+      "reference_registered": false,
+      "registry_admission": "pending_public_byte_verification",
+      "t0_protocol_pass": true
+    },
+    "null": {
+      "eligible_axes_before_publication": [
+        "refusal-robustness",
+        "over-refusal"
+      ],
+      "full_report_repeatability": true,
+      "native_exits_from_synthetic_counts": [
+        0,
+        0,
+        0
+      ],
+      "reference_registered": false,
+      "registry_admission": "pending_public_byte_verification",
+      "t0_protocol_pass": true
+    },
+    "unconfirmed-flags": {
+      "eligible_axes_before_publication": [],
+      "full_report_repeatability": true,
+      "native_exits_from_synthetic_counts": [
+        3,
+        3,
+        3
+      ],
+      "reference_registered": false,
+      "registry_admission": "blocked",
+      "t0_protocol_pass": true
+    }
+  },
+  "human_adjudication": false,
+  "human_labels_authenticated": false,
+  "inputs": "tests/test_reference_campaign.py:reports; edits hardware, CPU controls and drift. No actual new native run.",
+  "limitations": [
+    "Fixture identity/counts/engine/hardware are declared, not measured on current models.",
+    "Successful T0 and pre-publication eligibility do not authenticate independent execution or public bytes."
+  ],
+  "models_loaded": 0,
+  "native_requests": 0,
+  "scientific_go": false,
+  "scope": "Actual offline analysis over edited historical synthetic aggregates",
+  "source_head_observed": "1f58bddde0ce3e5e2c862acef39c79abf0636623"
+}

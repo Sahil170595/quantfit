@@ -1,0 +1,97 @@
+{
+  "full_available_unit": {
+    "cases": 1839,
+    "errors": 0,
+    "failed": 0,
+    "passed": 1807,
+    "skipped": 32
+  },
+  "historical_failed_test_premise": {
+    "cases": 17,
+    "errors": 0,
+    "failed": 1,
+    "file": "focused.xml",
+    "finding": "Existing T0 already binds quantfit_version; the corrected fixture tests a genuinely omitted engine observation without weakening T0.",
+    "passed": 16,
+    "skipped": 0
+  },
+  "human_labels_authenticated": false,
+  "independent_count_method": "XML testcase classification matched independently parsed pytest summary",
+  "limitations": [
+    "Only local unit/SciPy/aggregate fixtures qualified; no new native model, hosted resource or public-byte proof.",
+    "Linux/process and complete Torch numerical/installed candidate qualification remain hosted-only.",
+    "Global WSL resources preserved; no launch/repair attempt."
+  ],
+  "local_models_loaded": 0,
+  "new_installs_or_worktrees": false,
+  "numerical_properties": {
+    "cases": 2,
+    "errors": 0,
+    "failed": 0,
+    "passed": 2,
+    "skipped": 0
+  },
+  "observed_gate_exits": {
+    "audit": 0,
+    "exact_format": 0,
+    "exact_lint": 0,
+    "exact_mypy": 0,
+    "properties": 0,
+    "unit": 0
+  },
+  "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "python": "3.12.13",
+  "qualification_source_head_observed": "1f58bddde0ce3e5e2c862acef39c79abf0636623",
+  "ram_total_bytes": 68319571968,
+  "scaffold_measurement_status": "Actual hosted candidate measurement and public dataset publication NOT YET RUN",
+  "scientific_go": false,
+  "source_hashes": {
+    ".gitattributes": {
+      "canonical_git_blob_sha256": "b6514d1ae7661df18f26a96583304d0df5667f301f957c41f6faebc25b914374",
+      "consumed_working_sha256": "8faa55ada18866286609db1ed992c1b99e1d681bbead319326ab9613bdd31056",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "1f58bddde0ce3e5e2c862acef39c79abf0636623:.gitattributes",
+      "raw_equal": false
+    },
+    ".github/workflows/ci.yml": {
+      "canonical_git_blob_sha256": "13bee57158626ee61d2ebeaa06f2db9c962083b4e7f91a7a178af33550248bf2",
+      "consumed_working_sha256": "6b7fe901fd9c59fc83efa85b61659774a689303a05ba895abc076097b9f92a09",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "1f58bddde0ce3e5e2c862acef39c79abf0636623:.github/workflows/ci.yml",
+      "raw_equal": false
+    },
+    "docs/reference-campaign-v0.md": {
+      "canonical_git_blob_sha256": "aab3c1950e191f3a29f4afaad1bff4cce5b48ef67bea9dba712bce3d16f186cc",
+      "consumed_working_sha256": "aab3c1950e191f3a29f4afaad1bff4cce5b48ef67bea9dba712bce3d16f186cc",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "1f58bddde0ce3e5e2c862acef39c79abf0636623:docs/reference-campaign-v0.md",
+      "raw_equal": true
+    },
+    "tests/test_reference_campaign.py": {
+      "canonical_git_blob_sha256": "1cebcda1c04cc3b867658ec7618e473f24e0043422e6b6ad3c295c3eb3373870",
+      "consumed_working_sha256": "1cebcda1c04cc3b867658ec7618e473f24e0043422e6b6ad3c295c3eb3373870",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "1f58bddde0ce3e5e2c862acef39c79abf0636623:tests/test_reference_campaign.py",
+      "raw_equal": true
+    },
+    "tools/ci_reference_campaign.py": {
+      "canonical_git_blob_sha256": "4c23bafb474ff7c71b4eea9575d51cccdc5e864b0c9af693d2f8da82f128cffd",
+      "consumed_working_sha256": "4c23bafb474ff7c71b4eea9575d51cccdc5e864b0c9af693d2f8da82f128cffd",
+      "exact_crlf_to_lf_equivalence": true,
+      "git_blob_ref": "1f58bddde0ce3e5e2c862acef39c79abf0636623:tools/ci_reference_campaign.py",
+      "raw_equal": true
+    }
+  },
+  "system": "Windows",
+  "tree_observed": "9d7b42b0442cc00a406eb6998f37f4afde38d6af",
+  "versions": {
+    "huggingface-hub": "1.31.0",
+    "hypothesis": "6.152.5",
+    "inspect-ai": "0.3.269",
+    "mypy": "1.20.2",
+    "psutil": "7.2.2",
+    "pytest": "9.0.3",
+    "ruff": "0.16.2",
+    "scipy": "1.15.3"
+  }
+}

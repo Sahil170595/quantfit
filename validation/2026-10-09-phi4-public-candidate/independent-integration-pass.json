@@ -1,0 +1,21 @@
+{
+  "source_head": "d15a436f9da2c106def5c265c5fea30c88887ec2",
+  "source_tree": "e9c5ec564a2aef0599bcca0969e553ac62ba3820",
+  "reviewer": "/root",
+  "verdict": "independent_integration_pass",
+  "observed": {
+    "public_immutable_bytes_verified": 12,
+    "original_producer_blobs_verified": 10,
+    "initial_declared_evidence_members_verified": 17,
+    "original_installed_candidate_modules_verified": 46,
+    "sole_package_delta_registry_status_only_ast_verified": true,
+    "pre_registered_rules_unchanged": true,
+    "original_and_relocated_t0_distinct": true,
+    "registry_empty": true,
+    "fresh_flags_unconfirmed": true
+  },
+  "public_commit": "3a4ff4e086f9d72ad828134873b01fa19b550059",
+  "actual_measurement_source": "2997c9304f4c0de02f2299fe7c42f1693539bf6d",
+  "scientific_go": false,
+  "scope": "Independent exact-source/aggregate/public-byte review, not a second model execution or authentication of human labels. No remaining actionable finding. Final PR checks pending."
+}

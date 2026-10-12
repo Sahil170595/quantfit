@@ -1,0 +1,7 @@
+{
+  "controller_source_exact_git_blob": "72c32123bc4d92dd081401d52f91ec614e06e3a9:tools/ci_reference_campaign.py",
+  "controller_consumed_sha256": "3f9cb64d25c3fc1fbb4125e79f4845a020dabc153414c500ee0910631a6a101a",
+  "new_test_consumed_sha256": "02606ac11a3494274b4aa980e8e0ec41f7a0bb2458e0df718e10f673878beecf",
+  "actual_exit": 1,
+  "scope": "Synthetic actual-main real partial stream writes: report then card separately. No models/native execution."
+}

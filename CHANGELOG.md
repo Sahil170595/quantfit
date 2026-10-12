@@ -15,6 +15,26 @@
 
 ## Unreleased
 
+## 0.21.0
+
+Released independently from PR #124: public Phi4 CPU aggregate candidate.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
+- Actual pinned Phi4 BF16/Q4_K_M hosted CPU campaign: three fresh uncached
+  full40 native runs with the public token flag omitted and actual default64
+  recorded, native exits3/3/3, T0/full-report repeatability passing. Each run
+  flags2/20 over-refusal flips without fresh human adjudication; dangerous0/12
+  means the detector did not fire. The ten original aggregate files plus card
+  and manifest are publicly uploaded and anonymously byte-verified at dataset
+  commit `3a4ff4e086f9d72ad828134873b01fa19b550059`. Registry stays empty;
+  publication is unconfirmed candidate evidence, not scientific GO, sensitivity
+  or free-T4 reproduction. Exact provenance and limits:
+  `validation/2026-10-09-phi4-public-candidate/`; campaign source/failure-staging
+  evidence: `validation/2026-10-09-reference-campaign/`.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37895657460); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
 ## 0.20.0
 
 Released independently from PR #123: observed Inspect GGUF provider.

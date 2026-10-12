@@ -1,0 +1,105 @@
+{
+  "broad_raw_field_key_hits": [],
+  "files": [
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/audit.json",
+      "sha256": "25ba4abfa4c6b43b9ae7b8c3af8f6873455e577176d622fa11a699a201c3f8fa",
+      "size_bytes": 22795
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/independent-staging-red.json",
+      "sha256": "78b2af466977329416cda5dc5ece475092430995ae1f46058ba4ebf050e85858",
+      "size_bytes": 908
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/local-receipts.json",
+      "sha256": "63443a708cc74b0a233089a925ce232933fd4d7ec1cbab66b36e84ad5ec36c1b",
+      "size_bytes": 3945
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/axis-limited/assessment.json",
+      "sha256": "7cecaf1069f81c1ce94417403c30fdea69a401b2effab89e861039e86e2f0f6b",
+      "size_bytes": 9285
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/axis-limited/report-0.json",
+      "sha256": "cec855b7fdcd4b7d1b32cd8d2d216d643e7c5f605f68e0a4ab5014b40a4c3060",
+      "size_bytes": 3193
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/axis-limited/report-1.json",
+      "sha256": "efd2f0221c02fe93a1b8ca4fa95590b3c480eca84293204815a343dcefd18bbd",
+      "size_bytes": 3193
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/axis-limited/report-2.json",
+      "sha256": "897db5e313315d97df88fa00c90ee600fe9ace837bac5270e3e12309d6fbc455",
+      "size_bytes": 3193
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/null/assessment.json",
+      "sha256": "95add66f5a18e802e2ed4c0e71565a930f7318577c7a7d1d13c3c51b17b3763e",
+      "size_bytes": 9304
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/null/report-0.json",
+      "sha256": "f72aa82e679649c98f53af20ec4b4ec77a482c90dc08c19570a2410f94c4bca6",
+      "size_bytes": 3214
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/null/report-1.json",
+      "sha256": "bc000bf7bdea5e042fdf2c34d183377858d74e6d0f3f6e3df52796ff18cf67ae",
+      "size_bytes": 3214
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/null/report-2.json",
+      "sha256": "f42fcb7c6e97aea71e8b559092883a001339940febd7c8a08d7b6d6dc2337db1",
+      "size_bytes": 3214
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/unconfirmed-flags/assessment.json",
+      "sha256": "7ddbbc14cd186f2c03cd26e3d4d22b7a7644d58278863bf3e04b7a02d08d55f7",
+      "size_bytes": 9339
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/unconfirmed-flags/report-0.json",
+      "sha256": "2c7f43f0cc943564810760a6a80f6b2345153220e03c544c623e3b7c67bd2096",
+      "size_bytes": 3188
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/unconfirmed-flags/report-1.json",
+      "sha256": "61a0ebf4bddf62d6081e97d897640b4c0895b71dfe9033532fde8f5884f9c871",
+      "size_bytes": 3188
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic/unconfirmed-flags/report-2.json",
+      "sha256": "bcaeb1d60555c16ad2da4d20ca5c88b0dbb8882aee1d045759f8a9b2d488f095",
+      "size_bytes": 3188
+    },
+    {
+      "git_index_bytes_equal": true,
+      "path": "validation/2026-10-09-reference-campaign/synthetic-run.json",
+      "sha256": "de1af35dfd665d6412963613bee3242ce515c520aa87b6ddbbb064c0c8243bb3",
+      "size_bytes": 1732
+    }
+  ],
+  "files_checked": 16,
+  "referenced_report_hashes_checked": 9,
+  "scientific_claims_verified": false,
+  "scope": "Only this new local qualification record; original model measurements and publication pending."
+}

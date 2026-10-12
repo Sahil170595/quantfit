@@ -20,10 +20,66 @@ jobs:
   drift:
     if: github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/drift.yml
+  reference-campaign:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/qsr-v0-publication'
+    needs: validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      HF_HUB_DISABLE_IMPLICIT_TOKEN: '1'
+      OMP_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.23'
+          enable-cache: false
+      - name: Install the locked CPU runtime
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-reference
+        run: |
+          uv sync --directory tools/ci --locked --no-default-groups --group runtime --group tooling --python python
+          echo "$UV_PROJECT_ENVIRONMENT/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: candidate-dist
+          path: dist
+      - name: Three real Phi4 CPU cold runs, including the shipped token default
+        run: |
+          python -m pip install --no-deps --no-build-isolation dist/*.whl
+          cd "$RUNNER_TEMP"
+          unset PYTHONPATH
+          python "$GITHUB_WORKSPACE/tools/ci_reference_campaign.py" \
+            --wheel "$GITHUB_WORKSPACE"/dist/*.whl \
+            --out "$GITHUB_WORKSPACE/campaign"
+      - name: Retain only explicitly staged aggregate evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: qsr-v0-phi4-campaign
+          path: |
+            campaign/publication/campaign.json
+            campaign/publication/assessment.json
+            campaign/publication/native-cold-run.json
+            campaign/publication/native-t0.json
+            campaign/publication/run-1/report.json
+            campaign/publication/run-1/model-card.md
+            campaign/publication/run-2/report.json
+            campaign/publication/run-2/model-card.md
+            campaign/publication/run-3/report.json
+            campaign/publication/run-3/model-card.md
+          retention-days: 3
+          if-no-files-found: error
   required:
     name: CI required
     if: always()
-    needs: [validation, drift]
+    needs: [validation, drift, reference-campaign]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -31,6 +87,9 @@ jobs:
           RESULT: ${{ needs.validation.result }}
           DRIFT: ${{ needs.drift.result }}
           EXPECT_DRIFT: ${{ github.event_name == 'workflow_dispatch' }}
+          CAMPAIGN: ${{ needs.reference-campaign.result }}
+          EXPECT_CAMPAIGN: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/qsr-v0-publication' }}
         run: |
           test "$RESULT" = success
           if [ "$EXPECT_DRIFT" = true ]; then test "$DRIFT" = success; else test "$DRIFT" = skipped; fi
+          if [ "$EXPECT_CAMPAIGN" = true ]; then test "$CAMPAIGN" = success; else test "$CAMPAIGN" = skipped; fi

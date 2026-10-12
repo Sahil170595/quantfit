@@ -1,0 +1,18 @@
+....F............                                                        [100%]
+================================== FAILURES ===================================
+______ test_non_drift_causal_field_is_not_stripped_even_if_t0_ignores_it ______
+
+tmp_path = WindowsPath('C:/Users/sahil/AppData/Local/Temp/pytest-of-sahil/pytest-1157/test_non_drift_causal_field_is0')
+
+    def test_non_drift_causal_field_is_not_stripped_even_if_t0_ignores_it(tmp_path):
+        paths = reports(tmp_path)
+        edit(paths[2], lambda value: value.update(quantfit_version="different-source-version"))
+        result = assess(paths)
+>       assert result["t0"]["protocol_pass"] is True
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+tests\test_reference_campaign.py:96: TypeError
+=========================== short test summary info ===========================
+FAILED tests/test_reference_campaign.py::test_non_drift_causal_field_is_not_stripped_even_if_t0_ignores_it
+1 failed, 16 passed in 1.84s

@@ -1,0 +1,75 @@
+{
+  "blocking_reasons": [
+    "fresh_flags_without_human_adjudication"
+  ],
+  "full_report_repeatability_pass": true,
+  "human_labels_authenticated": false,
+  "independent_execution_verified": false,
+  "independently_matched_installed_package_git_modules": 46,
+  "measured_source_head": "2997c9304f4c0de02f2299fe7c42f1693539bf6d",
+  "native_exits": [
+    3,
+    3,
+    3
+  ],
+  "original_native_t0_bytes_unchanged": true,
+  "original_native_t0_sha256": "3b4424e1c985245ad81cb0dbbbfe14a31f5efcd1f88970785dfa6d65af22fd91",
+  "producer_files": [
+    {
+      "path": "campaign.json",
+      "sha256": "497bc1718583e2d42583d01932e330ce05b276c3caa19f6ce069fdbb87908fba",
+      "size_bytes": 12383
+    },
+    {
+      "path": "assessment.json",
+      "sha256": "16d85ae68349cd8fb5012a7cd24964c7f07eaf80c115f77533b3d521eae063fd",
+      "size_bytes": 9006
+    },
+    {
+      "path": "native-cold-run.json",
+      "sha256": "4608d254c376fa6fe2978a0521e560b9bd1b4f2d167197ed7d5bdc3c95039c41",
+      "size_bytes": 22783
+    },
+    {
+      "path": "native-t0.json",
+      "sha256": "3b4424e1c985245ad81cb0dbbbfe14a31f5efcd1f88970785dfa6d65af22fd91",
+      "size_bytes": 4567
+    },
+    {
+      "path": "run-1/report.json",
+      "sha256": "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+      "size_bytes": 3762
+    },
+    {
+      "path": "run-1/model-card.md",
+      "sha256": "512cd09286ab271b737a663b09735e4f10259d93ad070497fd94517150bc8c44",
+      "size_bytes": 4007
+    },
+    {
+      "path": "run-2/report.json",
+      "sha256": "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+      "size_bytes": 3759
+    },
+    {
+      "path": "run-2/model-card.md",
+      "sha256": "b7068c2417cd1dd4d7eeb2046b1cede4f1ab8315377ab05ff10b4aaa19fb7629",
+      "size_bytes": 4007
+    },
+    {
+      "path": "run-3/report.json",
+      "sha256": "4f8d91c0a026bb0003d49d9d307cb563a91b5dc624484a5e8ea719d8f963a8f8",
+      "size_bytes": 3761
+    },
+    {
+      "path": "run-3/model-card.md",
+      "sha256": "d8a3cdb124ed720fad086301bce3a00133eb92c7f2df944a77144b4a29da07ad",
+      "size_bytes": 4007
+    }
+  ],
+  "reference_registered": false,
+  "relocated_t0_pass": true,
+  "relocated_t0_sha256": "829bbb6606f9e7ef8eb35160a4ef7fe0d594e0f0bf19c22d7ea0c67a1755c7e4",
+  "run": "https://github.com/Sahil170595/quantfit/actions/runs/37890682118",
+  "scientific_go": false,
+  "scope": "Actual hosted aggregate sources copied byte-for-byte; local existing validators recheck those bytes after relocation. This is not another model execution or independent hardware reproduction. Original producer locators are historical, not rewritten."
+}

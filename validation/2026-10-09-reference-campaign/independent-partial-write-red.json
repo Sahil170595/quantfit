@@ -1,0 +1,14 @@
+{
+  "source_head": "72c32123bc4d92dd081401d52f91ec614e06e3a9",
+  "campaign_git_blob_sha256": "3f9cb64d25c3fc1fbb4125e79f4845a020dabc153414c500ee0910631a6a101a",
+  "owner": "independent domain reviewer",
+  "method": "Actual campaign main fixture: public run-1/report.json writes half of validated source then raises OSError.",
+  "observed_exit": 2,
+  "observed_status": "operational_failure",
+  "observed_reference_eligibility": "blocked",
+  "invalid_partial_report_retained_and_listed_in_public_files": true,
+  "retained_report_sha_differs_from_validated_source": true,
+  "models_loaded": 0,
+  "scientific_go": false,
+  "limitations": "Synthetic filesystem fault, no actual hosted/model run or new reviewer resources."
+}
