@@ -15,6 +15,27 @@
 
 ## Unreleased
 
+## 0.19.0
+
+Released independently from PR #122: three fresh native GGUF replicates.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
+- Native GGUF server argv explicitly disables device/layer/host-operation offload,
+  with causal controls recorded in the engine identity. A cached b9817 help/argv check
+  and synthetic red/fix records are in `validation/2026-10-08-native-cpu-enforcement/`;
+  no GPU execution is claimed. Hosted installed cold consumer added to existing GGUF
+  qualification (pending execution); older validation records remain unchanged.
+
+- POSIX `cold-run` starts three fresh uncached native GGUF children, preserves native
+  negative/operational outcomes separately from existing T0, and records companion
+  hardware/process/hash facts. Hub GGUF revision flags pass immutable pins to the
+  downloader and check actual snapshot resolution; local pins are refused. Synthetic
+  orchestration evidence: `validation/2026-10-08-cold-replicate-runner/`. Hosted installed
+  model evidence is pending; no independent-host, human-label, sensitivity or GO claim.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37881704501); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
 ## 0.18.0
 
 Released independently from PR #121: portable aggregate evidence bundles.
