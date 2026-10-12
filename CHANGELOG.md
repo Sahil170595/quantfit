@@ -15,12 +15,11 @@
 
 ## Unreleased
 
-- Optional public Inspect GGUF provider/CLI observations with actual weight/binary
-  hashes, immutable Hub pins, applied CPU controls and owned cancellable server
-  lifecycle. Managed paired runs require80native calls/full40probes before one
-  pinned judge batch, close both resident models before judging and enforce a
-  conservative RAM estimate. Local synthetic evidence and pending hosted installed
-  model qualification: `validation/2026-10-09-inspect-gguf/`; no safety/reproduction GO.
+## 0.19.0
+
+Released independently from PR #122: three fresh native GGUF replicates.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
 
 - Native GGUF server argv explicitly disables device/layer/host-operation offload,
   with causal controls recorded in the engine identity. A cached b9817 help/argv check
@@ -35,12 +34,29 @@
   orchestration evidence: `validation/2026-10-08-cold-replicate-runner/`. Hosted installed
   model evidence is pending; no independent-host, human-label, sensitivity or GO claim.
 
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37881704501); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
+## 0.18.0
+
+Released independently from PR #121: portable aggregate evidence bundles.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
 - Offline `bundle create`/`bundle verify` preserve exact aggregate bytes, conditional
   flags, negative gate decisions and reportless pre-run refusals after relocation.
   Fixed role paths and same-buffer validators refuse raw payloads and substitutions;
   integrity never authenticates scientific or human-label claims. Synthetic functional
   records are in `validation/2026-10-08-portable-evidence-bundles/`; hosted qualification
   is pending.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37880847032); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
+## 0.17.0
+
+Released independently from PR #120: calibration-aware cards and gate action.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
 - `emit model-card --calibration-report` recomputes bound conditional resolution from
   the same validated report instance it renders. Original counts/verdict/floors remain
   distinct from per-arm error-aware MDEs; inconsistent source statistics are refused.
@@ -50,6 +66,8 @@
   semantics. Synthetic local records are in
   `validation/2026-10-08-calibration-aware-outputs/`; hosted candidate qualification is
   pending. These changes establish no human calibration, sensitivity result or GO.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37879011642); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
 
 ## 0.16.0
 

@@ -1,5 +1,16 @@
 # quantfit
 
+## Release and source scope
+
+This README documents [quantfit 0.19.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.19.0).
+All workflows below are available in this release.
+
+Install with `pip install "quantfit[inspect,gguf]==0.19.0"`.
+
+Installed CPU/provider qualification establishes neither GPU execution, human-label
+authentication, sensitivity nor scientific GO.
+
+
 [![PyPI](https://img.shields.io/pypi/v/quantfit.svg)](https://pypi.org/project/quantfit/)
 [![Python](https://img.shields.io/pypi/pyversions/quantfit.svg)](https://pypi.org/project/quantfit/)
 [![License](https://img.shields.io/pypi/l/quantfit.svg)](https://github.com/Sahil170595/quantfit/blob/main/LICENSE)
