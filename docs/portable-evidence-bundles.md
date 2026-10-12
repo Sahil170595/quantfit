@@ -53,7 +53,7 @@ locator is never treated as an observed report or opened during verification.
 Its actual-run binding remains false. Calibration-only bundles and resolution without
 its report/calibration are refused. Three-report T0 evidence is outside this version's
 schema-1 four-role interface; a disconnected T0 declaration is not accepted.
-The separate candidate schema-2 [three-report T0 handoff](replicate-bundles.md)
+The separate schema-2 [three-report T0 handoff](replicate-bundles.md)
 uses `bundle replay-create` / `bundle replay-verify` and preserves the original
 producer bytes. It does not change the schema-1 interface described here.
 
@@ -72,5 +72,4 @@ and aggregate byte bounds remain implementation limits, not scientific eligibili
 rules. QSR v1 remains unfrozen.
 
 Synthetic local functional records and their limitations are in
-`validation/2026-10-08-portable-evidence-bundles/`. Hosted numerical/runtime and installed
-wheel/sdist qualification remain pending until the five-PR batch is pushed.
+`validation/2026-10-08-portable-evidence-bundles/`. The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37880847032); release publication separately qualifies the exact versioned distributions.
