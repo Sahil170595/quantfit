@@ -15,6 +15,20 @@
 
 ## Unreleased
 
+## 0.22.0
+
+Released independently from PR #126: saved-report native gate replay.
+
+Original introduction notes follow; the linked completed source acceptance supersedes their historical pending-qualification wording.
+
+- Offline saved-report gate API/CLI (`gate --from-report`) with exact-byte report
+  binding, native policy/refusal precedence, recorded-arm JUnit, portable replay
+  bundles and optional composite-action routing. No new inference; bound calibration
+  matches recorded scope without authenticating labels or the producing host.
+  Functional evidence and limitations: `validation/2026-10-09-saved-report-gate/`.
+
+The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37992671976); release publication separately qualifies the exact versioned distributions. Historical producer versions and run records remain unchanged. No QSR v1 freeze or new scientific GO is claimed.
+
 ## 0.21.1
 
 Released independently from PR #125: CLI README workflows and evidence limits.

@@ -13,3 +13,4 @@ validation/2026-10-09-phi4-public-candidate/public-dataset-card.md -text
 
 # Preserve exact README validation receipts.
 validation/2026-10-09-cli-readme/** -text
+validation/2026-10-09-saved-report-gate/**/*.json -text

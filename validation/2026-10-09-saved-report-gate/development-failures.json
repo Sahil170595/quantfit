@@ -1,0 +1,256 @@
+{
+  "corrections": [
+    "_write restored during dedicated-module extraction; native legacy behavior checked against base Git blob",
+    "new assertion corrected to actual existing underlying over-refusal verdict wording",
+    "missing --from-report validation-matrix row added in docs-only edc6970"
+  ],
+  "development_runs": [
+    {
+      "artifact": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-final.xml",
+      "counts": {
+        "cases": 288,
+        "errors": 0,
+        "failures": 0,
+        "passed": 281,
+        "skipped": 7,
+        "suite_seconds": 9.118
+      },
+      "failure_causes": {},
+      "observed_source_head": null,
+      "scope": "development working files; exact source state not separately captured"
+    },
+    {
+      "artifact": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-v2.xml",
+      "counts": {
+        "cases": 285,
+        "errors": 0,
+        "failures": 98,
+        "passed": 181,
+        "skipped": 6,
+        "suite_seconds": 6.35
+      },
+      "failure_causes": {
+        "AssertionError: assert 2 == 5\n +  where 2 = main(['gate', '--from-report', 'C:\\\\Users\\\\sahil\\\\AppData\\\\Local\\\\Temp\\\\pytest-of-sahil\\\\pytest-1344\\\\test_cli_junit_uses_recorded_a0\\\\source.json', '--threshold', '0.01', '--report', ...])": 1,
+        "missing _write during module extraction": 97
+      },
+      "observed_source_head": null,
+      "scope": "development working files; exact source state not separately captured"
+    },
+    {
+      "artifact": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-v3.xml",
+      "counts": {
+        "cases": 285,
+        "errors": 0,
+        "failures": 0,
+        "passed": 278,
+        "skipped": 7,
+        "suite_seconds": 7.999
+      },
+      "failure_causes": {},
+      "observed_source_head": null,
+      "scope": "development working files; exact source state not separately captured"
+    },
+    {
+      "artifact": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-v4.xml",
+      "counts": {
+        "cases": 288,
+        "errors": 0,
+        "failures": 0,
+        "passed": 281,
+        "skipped": 7,
+        "suite_seconds": 9.1
+      },
+      "failure_causes": {},
+      "observed_source_head": null,
+      "scope": "development working files; exact source state not separately captured"
+    },
+    {
+      "artifact": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused.xml",
+      "counts": {
+        "cases": 288,
+        "errors": 0,
+        "failures": 0,
+        "passed": 281,
+        "skipped": 7,
+        "suite_seconds": 8.926
+      },
+      "failure_causes": {},
+      "observed_source_head": null,
+      "scope": "development working files; exact source state not separately captured"
+    },
+    {
+      "artifact": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\initial-green.xml",
+      "counts": {
+        "cases": 221,
+        "errors": 0,
+        "failures": 1,
+        "passed": 213,
+        "skipped": 7,
+        "suite_seconds": 5.493
+      },
+      "failure_causes": {
+        "incorrect expected headline in new test": 1
+      },
+      "observed_source_head": null,
+      "scope": "development working files; exact source state not separately captured"
+    },
+    {
+      "artifact": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\properties.xml",
+      "counts": {
+        "cases": 2,
+        "errors": 0,
+        "failures": 0,
+        "passed": 2,
+        "skipped": 0,
+        "suite_seconds": 1.735
+      },
+      "failure_causes": {},
+      "observed_source_head": null,
+      "scope": "development working files; exact source state not separately captured"
+    },
+    {
+      "artifact": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\unit.xml",
+      "counts": {
+        "cases": 1892,
+        "errors": 0,
+        "failures": 1,
+        "passed": 1857,
+        "skipped": 34,
+        "suite_seconds": 88.124
+      },
+      "failure_causes": {
+        "missing validation-matrix --from-report row": 1
+      },
+      "observed_source_head": "150eaa4b8c3b81de5c68c4ba8438d2b113d85f4c",
+      "scope": "immutable source150"
+    }
+  ],
+  "initial_red": {
+    "artifacts": [
+      "red.log",
+      "red.xml"
+    ],
+    "cause": "evaluate_report public API absent before implementation",
+    "outcome": "collection error; not a passed test run",
+    "source_scope": "base95c8 with uncommitted new tests"
+  },
+  "preserved_files": [
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\audit.json",
+      "sha256": "c337a8033300ea4d130fd8fdd88c2db06d8faea5e6c11c08a70fc1bca9b8ca97",
+      "size_bytes": 22207
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-final.log",
+      "sha256": "0c2181e6faaec0baac9d112128883a0f7ca9d3c670f64eef0f9f29fe25836065",
+      "size_bytes": 356
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-final.xml",
+      "sha256": "b4ba6df05b982676a1a0623c91d1bff459b6b9619c316add0885259c98db4233",
+      "size_bytes": 37841
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-v2.log",
+      "sha256": "695fadb47157af9948c69b8ad9e898cc12504b96b03f4630c2f3dc5680a398e2",
+      "size_bytes": 234551
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-v2.xml",
+      "sha256": "b43a89fb4d883547aac80dc440409e6ff75a60f02a488c292d4662b0c694b68a",
+      "size_bytes": 263833
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-v3.log",
+      "sha256": "00688c2746bda843017ae48bc21f3ac7bf43cc70793dc4af31f6070125a055ac",
+      "size_bytes": 356
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-v3.xml",
+      "sha256": "dc04aa89c44b3ce0480121f776d7f850c2d223459c57c3e299ec7f9fd0123fab",
+      "size_bytes": 37445
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-v4.log",
+      "sha256": "0c2181e6faaec0baac9d112128883a0f7ca9d3c670f64eef0f9f29fe25836065",
+      "size_bytes": 356
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused-v4.xml",
+      "sha256": "6fe87175f6365c462ce54fe1c9ea49bef1aecfeb6443d4bd90141d0e0859d5fb",
+      "size_bytes": 37841
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused.log",
+      "sha256": "63842ed5fe8d953dbb06833646623309aead10db5bf80997e47323d468d2eeb4",
+      "size_bytes": 356
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\focused.xml",
+      "sha256": "8ee050e99bacd3ddf50b64d76c06f0090b75078c66b7a93999bb7b98fadc88c1",
+      "size_bytes": 37841
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\format.log",
+      "sha256": "359fa1efc2055ff90b69c449162c4d8227c628d7fe68d364d387774747a30d70",
+      "size_bytes": 29
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\initial-green.log",
+      "sha256": "2ac68baea459b862ae758e5bd0dd9791e6ffd6970c7074fd94cf902a343db129",
+      "size_bytes": 3057
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\initial-green.xml",
+      "sha256": "29dc23a09b8d4348aa57a3c4c754963bac2e0ae05633ec1c7fadf1611fa59928",
+      "size_bytes": 32650
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\lint-initial.log",
+      "sha256": "67f16f49615bcfb56ad039bffdadf0f22bf33187c6789856ea585815e2894630",
+      "size_bytes": 5286
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\lint.log",
+      "sha256": "a4443afdcfb6d7363adb285762515ccf7cf50473b1a05c20c1a50f6bed4d26b0",
+      "size_bytes": 20
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\properties.log",
+      "sha256": "5890fdbf45bbee5ea9e32573bd3609c66e1a026f0f64e4502eee1c7714490f44",
+      "size_bytes": 114
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\properties.xml",
+      "sha256": "3c49dd7bc9b5217fd2be84e3a2a4260ec4bc6947f76a68b885e57f50229c9ca6",
+      "size_bytes": 1701
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\quickstart.log",
+      "sha256": "d45958c37900f4098cf163ca7fd2d3c11dc1ea3caa398615d0263537572c75a3",
+      "size_bytes": 191
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\types.log",
+      "sha256": "0c37c4158c91ef55c724ba017bf6465f26018199badb08e3ff13f98acdf056c2",
+      "size_bytes": 44
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\unit.log",
+      "sha256": "9abbba098d133f3df19c743c9de81258faf584a72b6e673212ebb554f237a77a",
+      "size_bytes": 4423
+    },
+    {
+      "path": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development\\unit.xml",
+      "sha256": "b2b3c99247c94cfd82f74643736d831f8526b7429cc7163f853e48b3c271a63c",
+      "size_bytes": 241755
+    }
+  ],
+  "quickstart_initial": {
+    "artifact": "quickstart.log",
+    "cause": "quantfit executable absent from sparse environment PATH",
+    "outcome": "failed; rerun through supported --quantfit-bin source CLI argument succeeded"
+  },
+  "recovery_directory": "C:\\tmp\\qf-next-pr-receipts-20261008\\saved-report-gate-development",
+  "schema_version": 1
+}

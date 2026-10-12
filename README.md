@@ -41,10 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.21.1](https://github.com/Sahil170595/quantfit/releases/tag/v0.21.1).
+This README documents [quantfit 0.22.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.22.0).
 All workflows below are available in this release.
 
-Install with `pip install "quantfit[inspect,gguf]==0.21.1"`.
+Install with `pip install "quantfit[inspect,gguf]==0.22.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -302,6 +302,22 @@ promise resolution it does not have:
 ```bash
 quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out --tier smoke --out gate.json
 ```
+
+**Re-evaluate a saved report offline (available since 0.22.0).** A new policy
+threshold does not require rerunning the models:
+
+```bash
+quantfit gate --from-report drift.json --tier smoke --report replay-drift.json --out replay-gate.json --junit replay.xml
+```
+
+The saved report's validated counts, original verdict and exact bytes remain intact.
+Replay records its input SHA256 and performs no inference or judge execution. Native
+best-case policy refusal still precedes count evaluation; `pre_run` identifies that
+policy phase and does not claim the saved measurement happened later. A dangerous-axis
+gate can pass while the original report flags over-refusal; both results stay visible.
+Live arms, token, token-limit and baseline-cache options are refused in this mode.
+An optional matching `--calibration-report` provides conditional bounds with labels
+and assumptions unverified. See [the offline API/action contract](docs/saved-report-gate.md).
 
 You declare the resolution you need; the gate proves it can deliver it — once
 **before any model loads** (best-case at-risk pairs) and again at the run's

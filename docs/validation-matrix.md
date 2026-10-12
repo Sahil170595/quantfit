@@ -491,6 +491,14 @@ only required argument that command has.
 
 ---
 
+**2026-10-09 addition — saved-report policy replay.** This is an offline consumer,
+not fresh model execution or a new scientific result. Hosted installed/action
+qualification remains pending for this candidate.
+
+| Flag | Command | What has actually run | Evidence |
+|---|---|---|---|
+| `--from-report` | gate | Local source CLI replay of preserved real Phi4 aggregates: dangerous-axis gate0 alongside the original2/20 over-refusal flags; bound synthetic policy refusal5 with matched recorded scope; exact report copies and relocated bundle checks. Synthetic adverse tests cover all decision states, alias/corruption rejection and real Bash action routing. No new inference, authenticated labels, sensitivity or GO | `validation/2026-10-09-saved-report-gate/functional.json`; `tests/test_saved_report_gate.py` |
+
 ## 4. Advertised-but-unevidenced claims found while writing this
 
 These are docs=code findings, not command rows. Each is a claim on a shipped surface

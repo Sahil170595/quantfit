@@ -16,13 +16,23 @@ if code == 2:
 else:
     decision = json.loads((root / "gate.json").read_text())
     assert decision["exit_code"] == code
+    replay = os.environ.get("REPLAY", "none") != "none"
+    if replay:
+        source = Path(os.environ["REPLAY_SOURCE"])
+        assert (root / "drift.json").read_bytes() == source.read_bytes()
+        assert decision["source_evidence"]["report_sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
+        assert decision["source_evidence"]["inference_performed"] is False
+        if os.environ["REPLAY"] == "phi4":
+            assert decision["ungated_axis_regressed"] is True and decision["over_refusal"]["flips"] == 2
+            assert "REGRESSION DETECTED" in decision["underlying_run_verdict"]
     if os.environ.get("CALIBRATED") == "1":
         assert code in (0, 5)
+        observed_scope = code == 0 or replay
         assert os.environ["ACTION_BINDING"] == (
-            "actual_run_matched" if code == 0 else "scope_validated_actual_run_unobserved"
+            "actual_run_matched" if observed_scope else "scope_validated_actual_run_unobserved"
         )
-        assert os.environ["ACTION_MATCHED"] == ("true" if code == 0 else "false")
-        assert decision["eps"]["actual_run_matched"] is (code == 0)
+        assert os.environ["ACTION_MATCHED"] == ("true" if observed_scope else "false")
+        assert decision["eps"]["actual_run_matched"] is observed_scope
         assert os.environ["ACTION_ASSUMPTIONS"] == os.environ["ACTION_HUMAN"] == "false"
         calibration = Path(os.environ["CALIBRATION_FILE"])
         assert os.environ["ACTION_CALIBRATION_HASH"] == hashlib.sha256(calibration.read_bytes()).hexdigest()
@@ -43,6 +53,6 @@ else:
     if code != 5:
         report = json.loads((root / "drift.json").read_text())
         assert report["schema_version"] == 2
-        if os.environ.get("CALIBRATED") != "1":
+        if os.environ.get("CALIBRATED") != "1" and not replay:
             assert report["baseline"]["engine"]["name"] == "fixture"
 print(f"consumer action faithfully propagated CLI exit {code}: {expected_outcome}; fixtures, not sensitivity")
