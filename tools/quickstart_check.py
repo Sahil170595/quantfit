@@ -205,6 +205,7 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     "gate": (REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),
     # Plus a target manifest that a clean venv does not have.
     "screen": (REQ_ARTIFACT, REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),
+    "screen-summary": (REQ_ARTIFACT,),  # Strict offline saved manifest/report evidence only.
     # Pure local rendering — but of a drift report that must already exist.
     "emit": (REQ_ARTIFACT,),
     # Pure local — but of a capture / labeling sheet that must already exist.

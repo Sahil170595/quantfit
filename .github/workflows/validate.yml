@@ -291,6 +291,7 @@ jobs:
           mypy --strict --follow-imports=silent quantfit/reproduce_junit.py
           mypy --strict --follow-imports=silent quantfit/reference_assessment.py
           mypy --strict --follow-imports=silent quantfit/reference_replay.py
+          mypy --strict --follow-imports=silent quantfit/saved_screen.py
           quantfit audit
       - name: Verify and run actionlint
         run: |

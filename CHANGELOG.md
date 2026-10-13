@@ -15,6 +15,19 @@
 
 ## Unreleased
 
+## 0.31.0 — Unreleased candidate
+
+- `quantfit/saved_screen.py:summarize_screen` and `screen-summary` add bounded offline receiving summaries of a held target manifest and its named aggregate reports, without inference, resolution or network access.
+- Native statistics, derived flags, target references, backend/stratum and pinned protocol compatibility are checked before counting. Duplicate bytes or known complete paired identities cannot inflate target populations; unknown identities do not become proof of independent targets.
+- All declared targets remain visible, including missing-evidence rows and explicit JUnit skips. Per-axis/per-stratum bounds reuse native Wilson aggregation with measured-target denominators; zero-at-risk evidence is excluded only on its affected axis.
+- Human confirmations remain unestablished and raw sensitivity-control status remains declaration-only. Effective detection-sensitivity conditionality and perfect-judge resolution caveats remain attached, including for declared controls marked pass.
+- Malformed/incompatible/duplicate/IO failure exits 2; valid flagged results exit 3 before missing/required-unmeasured evidence exits 4. Complete supported no-detection alone exits 0, with caveats. Protected JSON/XML outputs are staged before per-file atomic replacement, leaving producer artifacts unchanged.
+- Existing installed consumers exercise saved aggregates and labeled adverse controls; no new job, dependency, model download or generation is introduced. Historical contradictory verdicts are refused rather than rewritten.
+
+Exact-head source/local/hosted acceptance is recorded on the PR before readiness.
+Version 0.31.0 remains unpublished; receiving analysis does not authenticate human
+labels, actual weights, physical hosts, independence, sensitivity or scientific GO.
+
 ## 0.30.0 — Unreleased candidate
 
 - `quantfit/reference_replay.py:rerun_candidate` and `evidence rerun` bind three fresh native GGUF children to a held original handoff/target. Original/fresh assessments, native exits, reproduction comparison and execution observations remain separate.

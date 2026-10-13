@@ -275,9 +275,20 @@ def screen_to_junit(summary: dict) -> str:
                 "skipped",
                 {"message": f"{name}: not measured — an axis had zero at-risk pairs"},
             )
+        elif status == "missing_evidence":
+            ET.SubElement(case, "skipped", {"message": f"{name}: saved aggregate evidence is missing"})
+
+    if summary.get("saved_screen_summary_schema_version") == 1:
+        from quantfit.screen import CONDITIONALITY_LABEL, RESOLUTION_LABEL
+
+        out = ET.SubElement(suite, "system-out")
+        out.text = f"{CONDITIONALITY_LABEL}. {RESOLUTION_LABEL}. No human confirmation or scientific GO."
 
     cases = list(suite.iter("testcase"))
     errors = sum(1 for c in cases if c.find("error") is not None)
-    xml = _finalise(suite, SCREEN_SUITE_NAME)
+    xml = _finalise(
+        suite,
+        "quantfit.screen-summary" if summary.get("saved_screen_summary_schema_version") == 1 else SCREEN_SUITE_NAME,
+    )
     # _finalise writes errors="0"; a screen is the one surface that can carry real errors.
     return xml.replace('errors="0"', f'errors="{errors}"') if errors else xml
