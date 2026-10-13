@@ -15,6 +15,18 @@
 
 ## Unreleased
 
+## 0.30.0 — Unreleased candidate
+
+- `quantfit/reference_replay.py:rerun_candidate` and `evidence rerun` bind three fresh native GGUF children to a held original handoff/target. Original/fresh assessments, native exits, reproduction comparison and execution observations remain separate.
+- Resolved weight SHA/size, actual executable hash and applied controls are guarded before each native server starts and rechecked afterward, using the existing resolver/child/cleanup primitives. Cached executable lookup does not substitute for checking actual bytes.
+- Immutable Hub GGUF pins are required; local SHA-bound assets keep their unknown Hub lineage. No Transformer-to-GGUF revision fabrication, arbitrary commands, capture/completion-cache serving or moving-reference fallback is introduced.
+- New closed aggregate output is staged with its manifest last, protecting original evidence, target, resolved assets and aliases. Provenance/cleanup/operational failures exit 2; fresh T0/payload disagreement exits 3; other reproduction exits remain native. Negative/failed observations are retained without promoting safety or publication readiness.
+- The existing hosted Smol hook exercises one fresh rerun with its current assets; installed controls use explicit mocked lifecycle cases. Exact-head native qualification is recorded on the PR. No additional model download/copy, hosted job, dependency or actual Phi4 rerun is claimed.
+
+Exact-head source/local/hosted acceptance is recorded on the PR before readiness.
+Version 0.30.0 remains unpublished; execution observations do not authenticate
+human labels, physical hosts, independent execution, sensitivity or scientific GO.
+
 ## 0.29.0 — Unreleased candidate
 
 - `quantfit/reference_assessment.py:assess_candidate` and `references assess` check a verified three-report handoff against an explicit bounded target offline, using held report/target bytes and separate receiving provenance. Original reports/T0 and historical versions remain unchanged.

@@ -37,6 +37,7 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -242,36 +243,51 @@ def arm_identity(arm: ResolvedGguf) -> dict:
     return _identity(arm, llama_server_bin(), _threads())
 
 
-def generate_completions(arm: ResolvedGguf, prompts: list[str], max_new_tokens: int) -> tuple[list[str], ArmRun]:
+def generate_completions(
+    arm: ResolvedGguf,
+    prompts: list[str],
+    max_new_tokens: int,
+    *,
+    _execution_guard: Callable[[ResolvedGguf, Path, int], None] | None = None,
+) -> tuple[list[str], ArmRun]:
     """Greedy completions for every prompt from one llama-server instance, then ArmRun provenance."""
     from quantfit.safety.report import ArmRun
 
+    if _execution_guard is not None and (type(max_new_tokens) is not int or max_new_tokens != 64):
+        raise RuntimeError("execution_recipe_mismatch")
     started = time.perf_counter()
     server = llama_server_bin()
     threads = _threads()
+    if _execution_guard is not None:
+        _execution_guard(arm, server, threads)
     port = _free_port()
     log_fd, log_name = tempfile.mkstemp(prefix="quantfit-llama-server-", suffix=".log")
-    proc = subprocess.Popen(
-        [
-            str(server),
-            *CPU_OFFLOAD_ARGV,
-            "-m",
-            str(arm.path),
-            "--host",
-            "127.0.0.1",
-            "--port",
-            str(port),
-            "--threads",
-            str(threads),
-            "--ctx-size",
-            str(_CTX_SIZE),
-            "--parallel",
-            "1",
-            *(["--jinja"] if arm.chat_template else []),
-        ],
-        stdout=log_fd,
-        stderr=subprocess.STDOUT,
-    )
+    try:
+        proc = subprocess.Popen(
+            [
+                str(server),
+                *CPU_OFFLOAD_ARGV,
+                "-m",
+                str(arm.path),
+                "--host",
+                "127.0.0.1",
+                "--port",
+                str(port),
+                "--threads",
+                str(threads),
+                "--ctx-size",
+                str(_CTX_SIZE),
+                "--parallel",
+                "1",
+                *(["--jinja"] if arm.chat_template else []),
+            ],
+            stdout=log_fd,
+            stderr=subprocess.STDOUT,
+        )
+    except BaseException:
+        os.close(log_fd)
+        Path(log_name).unlink(missing_ok=True)
+        raise
     completions: list[str] = []
     try:
         _wait_ready(port, proc, log_name)
@@ -287,6 +303,8 @@ def generate_completions(arm: ResolvedGguf, prompts: list[str], max_new_tokens: 
         os.close(log_fd)
         Path(log_name).unlink(missing_ok=True)
 
+    if _execution_guard is not None:
+        _execution_guard(arm, server, threads)
     run = ArmRun(**_identity(arm, server, threads), runtime_s=round(time.perf_counter() - started, 2))
     return completions, run
 

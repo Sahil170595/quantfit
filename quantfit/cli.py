@@ -231,6 +231,8 @@ def _build_parser() -> argparse.ArgumentParser:
     pvs.add_argument("--baseline-cache", default=None, metavar="DIR", help=_BASELINE_CACHE_HELP)
     pvs.add_argument("--baseline-revision", default=None, help="immutable 40-hex commit; Hub GGUF refs only")
     pvs.add_argument("--quant-revision", default=None, help="immutable 40-hex commit; Hub GGUF refs only")
+    pvs.add_argument("--_execution-recipe", default=None, help=argparse.SUPPRESS)
+    pvs.add_argument("--_execution-recipe-sha256", default=None, help=argparse.SUPPRESS)
 
     pcold = sub.add_parser("cold-run", help="three fresh uncached native GGUF children + T0; POSIX only")
     pcold.add_argument("--baseline", required=True, help="unquantized GGUF path or hf: GGUF ref")
@@ -494,6 +496,13 @@ def _build_parser() -> argparse.ArgumentParser:
     efetch = esub.add_parser("fetch", help="bounded anonymous fixed twelve-file retrieval; no model inference")
     efetch.add_argument("--out", required=True, metavar="DIR", help="new receiving directory; parent must exist")
     efetch.add_argument("--timeout-seconds", type=float, default=120, help="whole network deadline, finite (0,600]")
+    ererun = esub.add_parser(
+        "rerun", help="one frozen three-child native GGUF rerun; aggregate receipts remain separate"
+    )
+    ererun.add_argument("--bundle", required=True, metavar="DIR", help="original schema-2 replay bundle")
+    ererun.add_argument("--target", required=True, metavar="PATH", help="bounded complete target JSON file")
+    ererun.add_argument("--out", required=True, metavar="NEW_DIR", help="new closed aggregate directory; parent exists")
+    ererun.add_argument("--timeout-seconds", type=float, default=3600, help="per-child deadline, finite (0,3600]")
 
     pau = sub.add_parser(
         "audit",
@@ -835,6 +844,8 @@ def _dispatch(args: argparse.Namespace) -> int:
                 ("--baseline-cache", args.baseline_cache),
                 ("--baseline-revision", args.baseline_revision),
                 ("--quant-revision", args.quant_revision),
+                ("--_execution-recipe", args._execution_recipe),
+                ("--_execution-recipe-sha256", args._execution_recipe_sha256),
             ):
                 if value:
                     raise RuntimeError(
@@ -871,6 +882,12 @@ def _dispatch(args: argparse.Namespace) -> int:
             revisions["baseline_revision"] = args.baseline_revision
         if args.quant_revision is not None:
             revisions["quant_revision"] = args.quant_revision
+        if args._execution_recipe is not None or args._execution_recipe_sha256 is not None:
+            from quantfit.reference_replay import _load_execution_guard
+
+            if args.capture or args.baseline_cache or args.demo or args.max_new_tokens != 64:
+                raise RuntimeError("execution_recipe_mismatch")
+            revisions["_execution_guard"] = _load_execution_guard(args._execution_recipe, args._execution_recipe_sha256)
         drift = verify_safety(
             args.baseline,
             args.quant,
@@ -1089,6 +1106,11 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _emit(args, "repeatability", result["exit_code"], result, human_repeatability)
 
     if args.cmd == "evidence":
+        if args.evidence_cmd == "rerun":
+            from quantfit.reference_replay import rerun_candidate
+
+            result = rerun_candidate(args.bundle, args.target, args.out, timeout_seconds=args.timeout_seconds)
+            return _emit(args, "evidence rerun", result["exit_code"], result, lambda: print(result["status"]))
         from quantfit.evidence import fetch_evidence
 
         result = fetch_evidence(args.out, timeout_seconds=args.timeout_seconds)

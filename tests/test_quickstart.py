@@ -799,6 +799,13 @@ def test_readme_bundled_reference_listing_remains_clean_venv(real_commands):
     assert calls == [command.argv[1:] for command in commands]
 
 
+def test_native_evidence_rerun_requires_artifacts_and_is_not_executed():
+    item = _classify("quantfit evidence rerun --bundle handoff --target target.json --out new")
+    assert not item.runnable and qs.REQ_ARTIFACT in item.requirements and qs.REQ_DOWNLOAD in item.requirements
+    calls: list[tuple[str, ...]] = []
+    assert qs.run_clean_venv([item], fake_runner(calls)) == [] and calls == []
+
+
 def test_every_category_a_command_is_a_real_cli_command(real_commands, real_surface):
     """The gate clause's own precondition: what we RUN must be what the CLI defines."""
     runnable = [c for c in (qs.classify(command) for command in real_commands) if c.runnable]
