@@ -290,6 +290,7 @@ jobs:
           mypy --strict quantfit/spec.py quantfit/engines/base.py
           mypy --strict --follow-imports=silent quantfit/reproduce_junit.py
           mypy --strict --follow-imports=silent quantfit/reference_assessment.py
+          mypy --strict --follow-imports=silent quantfit/reference_replay.py
           quantfit audit
       - name: Verify and run actionlint
         run: |

@@ -345,6 +345,36 @@ def assess_report_buffers(
     }
 
 
+def _assess_bundle_held(
+    bundle_path: str, target_bytes: bytes, verified: dict[str, Any], held: dict[str, bytes]
+) -> dict[str, object]:
+    """Receiving provenance and assessment from already held inputs only."""
+    buffers = tuple(held[f"replicate-{i}"] for i in range(1, 4))
+    labels = tuple(str(Path(bundle_path) / ROLES[f"replicate-{i}"]) for i in range(1, 4))
+    result = assess_report_buffers(
+        (buffers[0], buffers[1], buffers[2]), target_bytes, source_labels=(labels[0], labels[1], labels[2])
+    )
+    result.update(
+        bundle_path=bundle_path,
+        manifest=verified["manifest"],
+        original_t0=verified["original_t0"],
+        original_t0_sha256=hashlib.sha256(held["t0"]).hexdigest(),
+        receiving_t0=result["t0"],
+        report_bindings=[
+            {
+                "role": f"replicate-{i}",
+                "member": ROLES[f"replicate-{i}"],
+                "receiving_path": labels[i - 1],
+                "report_sha256": hashlib.sha256(buffers[i - 1]).hexdigest(),
+                "size_bytes": len(buffers[i - 1]),
+                "producer_path": verified["original_t0"]["reports"][i - 1]["path"],
+            }
+            for i in range(1, 4)
+        ],
+    )
+    return result
+
+
 def assess_candidate(bundle_path: str, target: str, *, out_path: str | None = None) -> dict[str, object]:
     """Read target once and verify one closed replay bundle once; publish a separate receiving result."""
     phase = "unsafe_output"
@@ -358,29 +388,7 @@ def assess_candidate(bundle_path: str, target: str, *, out_path: str | None = No
         phase = "invalid_bundle"
         verified, held = _verified_bundle(bundle_path)
         _require(verified["integrity_verified"] is True, "invalid_bundle")
-        buffers = tuple(held[f"replicate-{i}"] for i in range(1, 4))
-        labels = tuple(str(Path(bundle_path) / ROLES[f"replicate-{i}"]) for i in range(1, 4))
-        result = assess_report_buffers(
-            (buffers[0], buffers[1], buffers[2]), target_bytes, source_labels=(labels[0], labels[1], labels[2])
-        )
-        result.update(
-            bundle_path=bundle_path,
-            manifest=verified["manifest"],
-            original_t0=verified["original_t0"],
-            original_t0_sha256=hashlib.sha256(held["t0"]).hexdigest(),
-            receiving_t0=result["t0"],
-            report_bindings=[
-                {
-                    "role": f"replicate-{i}",
-                    "member": ROLES[f"replicate-{i}"],
-                    "receiving_path": labels[i - 1],
-                    "report_sha256": hashlib.sha256(buffers[i - 1]).hexdigest(),
-                    "size_bytes": len(buffers[i - 1]),
-                    "producer_path": verified["original_t0"]["reports"][i - 1]["path"],
-                }
-                for i in range(1, 4)
-            ],
-        )
+        result = _assess_bundle_held(bundle_path, target_bytes, verified, held)
         if out_path is not None:
             phase = "assessment_output_failure"
             raw = (json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")

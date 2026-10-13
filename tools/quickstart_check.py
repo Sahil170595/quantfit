@@ -582,6 +582,10 @@ def _refine(subcommand: str, argv: Sequence[str], reqs: set[str]) -> list[str]:
     """
     extra: list[str] = []
 
+    if subcommand == "evidence" and "rerun" in argv:
+        reqs.update((REQ_ARTIFACT, REQ_DOWNLOAD))
+        extra.append("native rerun needs a saved bundle, a frozen target and resolved native assets")
+
     if subcommand == "references" and (
         "verify" in argv
         or "assess" in argv

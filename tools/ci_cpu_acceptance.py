@@ -120,6 +120,7 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
             assert all(report[arm]["engine"][k] == v for k, v in arm_module.CPU_OFFLOAD_CONTROLS.items())
     # Offline handoff of the actual three reports, after existing inference ends.
     # An exact copied candidate retains native P1 void even when T0 is negative.
+    from quantfit import reference_assessment, reference_replay
     from quantfit.bundle import create_replay_bundle
     from quantfit.reproduce import compare_bundles
     from quantfit.reproduce_junit import reproduction_to_junit
@@ -139,8 +140,72 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
         assert xml.get("tests") == "10" and xml.get("errors") == "0"
         assert list(xml.iter("testcase"))[-1].find("failure") is not None
         assert str(reference) not in comparison_xml
+        # Exactly one fresh three-child replay, using the SAME existing local GGUF assets.
+        # These converted files have no resolved Hub GGUF revision; never borrow MODEL's Transformer pin.
+        report = json.loads(Path(result["runs"][0]["report"]["path"]).read_bytes())
+        target = {
+            "target_schema_version": 1,
+            "pair_slug": "installed-smol-local-control",
+            "spec_version": "v0",
+            "profile": "native-gguf-cpu-full40-greedy64-v0",
+            "arms": {
+                arm: {
+                    **{key: report[arm][key] for key in ("model", "revision", "resolved_dtype", "artifact_sha256")},
+                    "size_bytes": path.stat().st_size,
+                }
+                for arm, path in (("baseline", baseline), ("quantized", quant))
+            },
+            "engine": {
+                key: report["baseline"]["engine"][key]
+                for key in (
+                    "name",
+                    "device",
+                    "binary_sha256",
+                    "threads",
+                    "offload_device",
+                    "n_gpu_layers",
+                    "op_offload",
+                )
+            },
+            "judge": {key: report["judge"][key] for key in ("id", "revision", "input_contract")},
+            "probe_dataset": report["probe_dataset"],
+            "decode": report["decode"],
+        }
+        assert all(arm["revision"] is None for arm in target["arms"].values())
+        target_path = Path(name) / "target.json"
+        target_path.write_text(json.dumps(target), encoding="utf-8")
+        replay_command = [
+            sys.executable,
+            "-m",
+            "quantfit.cli",
+            "evidence",
+            "rerun",
+            "--bundle",
+            str(reference),
+            "--target",
+            str(target_path),
+            "--out",
+            str(output.parent / "reference-rerun"),
+            "--timeout-seconds",
+            "600",
+            "--json",
+        ]
+        rerun = subprocess.run(
+            replay_command, cwd=baseline.parent, env=env, capture_output=True, text=True, check=False, timeout=2100
+        )
+        replay_result = json.loads(rerun.stdout)["result"]
+        assert rerun.returncode == replay_result["exit_code"] in (0, 3, 4), "fresh native replay qualification failure"
+        assert len(replay_result["cold_run"]["runs"]) == 3 and replay_result["reference_replay_schema_version"] == 1
+        assert replay_result["reference_assessment"]["target"]["arms"]["baseline"]["revision"] is None
+        assert "target_facts_unestablished" in replay_result["fresh_assessment"]["unknown_reasons"]
+        for run in replay_result["cold_run"]["runs"]:
+            assert run["cleanup"]["direct_child_reaped"] and run["cleanup"]["no_live_group_members_observed"]
+        for source in replay_result["fresh_assessment"]["source_reports"]:
+            actual = json.loads(Path(source["path"]).read_bytes())
+            assert actual["decode"]["max_new_tokens"] == 64 and actual["probe_dataset"]["n_probes"] == 40
+        assert replay_result["independent_execution_verified"] is replay_result["scientific_go"] is False
     hashes = {}
-    for module in (cold, arm_module, native, reproduce, reproduce_junit):
+    for module in (cold, arm_module, native, reproduce, reproduce_junit, reference_assessment, reference_replay):
         installed = Path(module.__file__)
         relative = installed.relative_to(Path(quantfit.__file__).parent.parent).as_posix()
         canonical = subprocess.run(
@@ -155,6 +220,8 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
         "t0_protocol_pass": result["t0"]["protocol_pass"],
         "offline_copied_bundle_comparison": comparison,
         "offline_copied_bundle_junit": comparison_xml,
+        "fresh_three_child_replay": replay_result,
+        "fresh_replay_argv": replay_command,
         "runtime_s": time.monotonic() - started,
         "source_git_blob_sha256": hashes,
         "installed_origin": str(quantfit.__file__),

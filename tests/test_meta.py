@@ -137,7 +137,7 @@ def test_every_cli_flag_has_a_row_in_the_validation_matrix():
             if isinstance(action, argparse._SubParsersAction):
                 for sub in action.choices.values():
                     walk(sub)
-            else:
+            elif action.help != argparse.SUPPRESS:
                 flags.update(o for o in action.option_strings if o.startswith("--") and o != "--help")
 
     walk(_build_parser())

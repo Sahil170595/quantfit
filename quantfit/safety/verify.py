@@ -83,12 +83,15 @@ from __future__ import annotations
 
 import math
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from quantfit.torchrt import free_gpu, pick_device
 
 if TYPE_CHECKING:  # runtime import stays lazy (torch-adjacent module)
+    from quantfit.safety.gguf_arm import ResolvedGguf
     from quantfit.safety.report import ArmRun, DriftReport
 
 # --- Verified external API constants (see module docstring for provenance) -------
@@ -346,6 +349,7 @@ def verify_safety(
     baseline_cache_dir: str | None = None,
     baseline_revision: str | None = None,
     quant_revision: str | None = None,
+    _execution_guard: Callable[[ResolvedGguf, Path, int], None] | None = None,
 ) -> SafetyDrift:
     """Compare refusal behavior of the unquantized baseline vs a quantized artifact.
 
@@ -379,6 +383,15 @@ def verify_safety(
 
     validate_revision(baseline_model_id, baseline_revision)
     validate_revision(quant_path, quant_revision)
+    if _execution_guard is not None and (
+        capture_path
+        or baseline_cache_dir
+        or type(max_new_tokens) is not int
+        or max_new_tokens != 64
+        or not is_gguf_ref(baseline_model_id)
+        or not is_gguf_ref(quant_path)
+    ):
+        raise RuntimeError("execution_recipe_mismatch")
 
     baseline_gguf = is_gguf_ref(baseline_model_id)
     quant_gguf = is_gguf_ref(quant_path)
@@ -402,6 +415,8 @@ def verify_safety(
         )
 
     probes = _load_probes(token)
+    if _execution_guard is not None and len(probes) != 40:
+        raise RuntimeError("execution_recipe_mismatch")
     prompts = [p.prompt for p in probes]
 
     if baseline_gguf:
@@ -441,13 +456,17 @@ def verify_safety(
             baseline_arm = ArmRun(**stored_arm)
             print(f"baseline served from cache {fingerprint[:12]} (generation skipped; budgets assume no hit)")
         else:
-            baseline_completions, baseline_arm = gguf_arm.generate_completions(baseline_res, prompts, max_new_tokens)
+            guards = {"_execution_guard": _execution_guard} if _execution_guard is not None else {}
+            baseline_completions, baseline_arm = gguf_arm.generate_completions(
+                baseline_res, prompts, max_new_tokens, **guards
+            )
             if baseline_cache_dir:
                 # store() re-derives the key and cross-checks the arm it is handed against
                 # the identity the key was built from — the pre-generation identity must equal
                 # the post-generation provenance, or nothing is written.
                 cache.store(baseline_cache_dir, cache_inputs, baseline_completions, baseline_arm)
-        quant_completions, quant_arm = gguf_arm.generate_completions(quant_res, prompts, max_new_tokens)
+        guards = {"_execution_guard": _execution_guard} if _execution_guard is not None else {}
+        quant_completions, quant_arm = gguf_arm.generate_completions(quant_res, prompts, max_new_tokens, **guards)
     else:
         # One causal LM resident at a time; freed before the next loads.
         baseline_completions, baseline_arm = _generate_completions(baseline_model_id, prompts, max_new_tokens, token)

@@ -42,10 +42,10 @@ Exits 4 and 5 are not passes.
 ## Release and source scope
 
 This README documents [quantfit 0.26.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.26.0).
-The branch prepares **0.29.0**, an unpublished candidate adding offline reference
-candidate assessment to the 0.27.0 bundle comparison and 0.28.0 reproduction JUnit
-candidates. These features require candidate source or wheels; released workflows
-remain available in 0.26.0.
+The branch prepares **0.30.0**, an unpublished candidate adding recipe-bound native
+reruns to the 0.27.0 bundle comparison, 0.28.0 reproduction JUnit and 0.29.0 reference
+assessment candidates. These features require candidate source or wheels; released
+workflows remain available in 0.26.0.
 
 Install with `pip install "quantfit[inspect,gguf]==0.26.0"`.
 
@@ -587,6 +587,22 @@ T0 validates aggregate agreement and identity, not human confirmation, detection
 sensitivity, independent hardware or cross-hardware tolerance. Reference admission
 also requires full report repeatability, permitting only the protocol's explicit
 timestamp/runtime differences. See [the cold-run contract](docs/cold-replicate-runner.md).
+
+The 0.30.0 candidate reruns a saved three-report recipe on the qualified Linux
+native path, holding its original handoff and target before starting fresh children:
+
+```bash
+quantfit evidence rerun --bundle reference-handoff --target target.json --out rerun-evidence --timeout-seconds 3600 --json
+```
+
+Resolved weight hashes/sizes, executable hash and applied controls are checked
+before each native server starts and rechecked afterward. Hub GGUF references require
+immutable revisions; local SHA-bound files retain unknown Hub lineage. Original and
+fresh native exits, assessments and reproduction comparison remain separate, so
+matching flagged results never become a model pass. Valid negative/failed execution
+observations are retained; cleanup or provenance failure cannot qualify success.
+The new aggregate directory is staged with its manifest last, protecting original
+evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
 
 ## Public campaigns and offline reference artifacts
 

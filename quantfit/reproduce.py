@@ -2427,10 +2427,19 @@ def _publish_bundle_comparison(bundle_paths: tuple[str, str], out_path: str, art
 
 def _bundle_comparison_side(bundle_path: str, side: str) -> tuple[_View, tuple[bool | None, dict], dict]:
     """Derive report selection, native T0 and all bindings from verified held member bytes."""
-    from quantfit.bundle import _report
-    from quantfit.replay_bundle import ROLES, _verified_bundle
+    from quantfit.replay_bundle import _verified_bundle
 
     verified, held = _verified_bundle(bundle_path)
+    return _bundle_comparison_held(verified, held, side)
+
+
+def _bundle_comparison_held(
+    verified: dict, held: dict[str, bytes], side: str
+) -> tuple[_View, tuple[bool | None, dict], dict]:
+    """Pure receiving selection from already verified bytes; no path reopening."""
+    from quantfit.bundle import _report
+    from quantfit.replay_bundle import ROLES
+
     if not verified["integrity_verified"]:
         raise ReproduceError(f"{side} replay bundle bytes differ from their manifest")
     root = Path(verified["bundle_path"])
