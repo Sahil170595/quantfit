@@ -12,6 +12,7 @@ from quantfit.bundle import create_replay_bundle
 from quantfit.reproduce import within_hardware_identical
 from quantfit.safety import gguf_arm
 from quantfit.safety.verify import SafetyDrift
+from quantfit.safety.verify import verify_safety as _NATIVE_VERIFY_SAFETY
 
 
 def setup_recipe(tmp_path, monkeypatch, *, negative=None):
@@ -435,7 +436,7 @@ def test_guarded_native_decode_refuses_before_any_probe_or_model_load(monkeypatc
 
     monkeypatch.setattr(verify, "_load_probes", lambda *a: pytest.fail("probes loaded"))
     with pytest.raises(RuntimeError, match="execution_recipe_mismatch"):
-        verify.verify_safety("b.gguf", "q.gguf", max_new_tokens=max_tokens, _execution_guard=lambda *a: None)
+        _NATIVE_VERIFY_SAFETY("b.gguf", "q.gguf", max_new_tokens=max_tokens, _execution_guard=lambda *a: None)
 
 
 def test_guarded_arm_decode_refuses_before_executable_or_port_resolution(tmp_path, monkeypatch):
