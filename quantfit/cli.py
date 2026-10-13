@@ -295,6 +295,14 @@ def _build_parser() -> argparse.ArgumentParser:
         "emit",
         help="render an artifact from a drift report (exit 0 = emitted, 2 = unreadable/wrong-schema report)",
     )
+    psaved = sub.add_parser(
+        "screen-summary",
+        help="offline saved native screen aggregates (0 conditional no-detection, 3 flags, 4 incomplete, 2 refusal)",
+    )
+    psaved.add_argument("--targets", required=True, metavar="PATH", help="bounded schema-1 target manifest")
+    psaved.add_argument("--reports-dir", required=True, metavar="DIR", help="closed saved aggregate directory")
+    psaved.add_argument("--out", default=None, metavar="PATH", help="separate receiving JSON output")
+    psaved.add_argument("--junit", default=None, metavar="PATH", help="receiving XML; missing evidence is skipped")
     pe.add_argument("what", choices=("model-card",), help="what to emit")
     pe.add_argument("--report", required=True, metavar="PATH", help="a schema-v2 drift report written by --report")
     pe.add_argument(
@@ -552,6 +560,11 @@ def _add_json_flag(parser: argparse.ArgumentParser) -> None:
 
 
 def _dispatch(args: argparse.Namespace) -> int:
+    if args.cmd == "screen-summary":
+        from quantfit.saved_screen import summarize_screen
+
+        result = summarize_screen(args.targets, args.reports_dir, out_path=args.out, junit_path=args.junit)
+        return _emit(args, "screen-summary", result["exit_code"], result, lambda: print(result["outcome"]))
     if args.cmd == "check":
         from quantfit.fit import capacity_plan
 

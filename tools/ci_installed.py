@@ -794,6 +794,7 @@ def main() -> None:
             "test_reproduce_junit.py",
             "test_reference_assessment.py",
             "test_reference_replay.py",
+            "test_saved_screen.py",
             "test_repeatability.py",
             "test_evidence_fetch.py",
             "test_verify.py",
