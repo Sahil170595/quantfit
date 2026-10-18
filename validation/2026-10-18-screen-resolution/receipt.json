@@ -1,0 +1,500 @@
+{
+  "both-missing": {
+    "analysis_work_units": 3200,
+    "assumptions_verified": false,
+    "calibrations": [
+      {
+        "name": "clean",
+        "sha256": "7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea",
+        "size_bytes": 4303
+      },
+      {
+        "name": "flagged",
+        "sha256": "3ba9b8a0f06bf0251db69809a5bca30f1e76d91cac1b96537dc16ab508895f00",
+        "size_bytes": 4311
+      }
+    ],
+    "exit_code": 3,
+    "junit": {
+      "errors": 0,
+      "failures": 1,
+      "skipped": 1,
+      "tests": 3
+    },
+    "n_analyzed": 2,
+    "n_calibration_missing": 0,
+    "n_flagged_targets": 1,
+    "n_missing": 1,
+    "n_pending_report_missing": 0,
+    "n_present": 2,
+    "n_report_and_calibration_missing": 1,
+    "n_targets": 3,
+    "n_unmeasured_targets": 0,
+    "native_junit_unchanged": true,
+    "native_reports": [
+      {
+        "name": "clean",
+        "sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d",
+        "size_bytes": 3321
+      },
+      {
+        "name": "flagged",
+        "sha256": "8dd8265210cf1816a049eb6912acda1aa069b8865678b724904db9076c952b30",
+        "size_bytes": 3303
+      }
+    ],
+    "scientific_go": false
+  },
+  "conditional": {
+    "analysis_work_units": 4800,
+    "assumptions_verified": false,
+    "calibrations": [
+      {
+        "name": "clean",
+        "sha256": "7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea",
+        "size_bytes": 4303
+      },
+      {
+        "name": "flagged",
+        "sha256": "3ba9b8a0f06bf0251db69809a5bca30f1e76d91cac1b96537dc16ab508895f00",
+        "size_bytes": 4311
+      },
+      {
+        "name": "unmeasured",
+        "sha256": "271b6a0b70f446bee773fd50bd7e1eb88b425d961da17f9cc3a263149cb33c65",
+        "size_bytes": 4323
+      }
+    ],
+    "exit_code": 0,
+    "junit": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 3
+    },
+    "n_analyzed": 3,
+    "n_calibration_missing": 0,
+    "n_flagged_targets": 0,
+    "n_missing": 0,
+    "n_pending_report_missing": 0,
+    "n_present": 3,
+    "n_report_and_calibration_missing": 0,
+    "n_targets": 3,
+    "n_unmeasured_targets": 0,
+    "native_junit_unchanged": true,
+    "native_reports": [
+      {
+        "name": "clean",
+        "sha256": "4d9c4afbdcd91808cbb6e2aa97121dcac0a0d622c0c59b1e44ef84b13b37d185",
+        "size_bytes": 3325
+      },
+      {
+        "name": "flagged",
+        "sha256": "3d32d3e561a720284408cdcf57fdae2d13998fb7cb7cb911c48b77cf967a54f4",
+        "size_bytes": 3333
+      },
+      {
+        "name": "unmeasured",
+        "sha256": "c95d44548874bcef1981f2ebdc9eb47052a4877fead0e902ddce13205c4e2421",
+        "size_bytes": 3345
+      }
+    ],
+    "scientific_go": false
+  },
+  "conditional-missing-calibrations": {
+    "analysis_work_units": 0,
+    "assumptions_verified": false,
+    "calibrations": [],
+    "exit_code": 0,
+    "junit": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "tests": 3
+    },
+    "n_analyzed": 0,
+    "n_calibration_missing": 3,
+    "n_flagged_targets": 0,
+    "n_missing": 0,
+    "n_pending_report_missing": 0,
+    "n_present": 3,
+    "n_report_and_calibration_missing": 0,
+    "n_targets": 3,
+    "n_unmeasured_targets": 0,
+    "native_junit_unchanged": true,
+    "native_reports": [
+      {
+        "name": "clean",
+        "sha256": "4d9c4afbdcd91808cbb6e2aa97121dcac0a0d622c0c59b1e44ef84b13b37d185",
+        "size_bytes": 3325
+      },
+      {
+        "name": "flagged",
+        "sha256": "3d32d3e561a720284408cdcf57fdae2d13998fb7cb7cb911c48b77cf967a54f4",
+        "size_bytes": 3333
+      },
+      {
+        "name": "unmeasured",
+        "sha256": "c95d44548874bcef1981f2ebdc9eb47052a4877fead0e902ddce13205c4e2421",
+        "size_bytes": 3345
+      }
+    ],
+    "scientific_go": false
+  },
+  "empty": {
+    "analysis_work_units": 0,
+    "assumptions_verified": false,
+    "calibrations": [],
+    "exit_code": 3,
+    "junit": {
+      "errors": 0,
+      "failures": 1,
+      "skipped": 1,
+      "tests": 3
+    },
+    "n_analyzed": 0,
+    "n_calibration_missing": 3,
+    "n_flagged_targets": 1,
+    "n_missing": 0,
+    "n_pending_report_missing": 0,
+    "n_present": 3,
+    "n_report_and_calibration_missing": 0,
+    "n_targets": 3,
+    "n_unmeasured_targets": 1,
+    "native_junit_unchanged": true,
+    "native_reports": [
+      {
+        "name": "clean",
+        "sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d",
+        "size_bytes": 3321
+      },
+      {
+        "name": "flagged",
+        "sha256": "8dd8265210cf1816a049eb6912acda1aa069b8865678b724904db9076c952b30",
+        "size_bytes": 3303
+      },
+      {
+        "name": "unmeasured",
+        "sha256": "31a5ecd7cd5b70017a06571576ce9e9d7ef6f22fc783caf0498099e519347a4a",
+        "size_bytes": 3343
+      }
+    ],
+    "scientific_go": false
+  },
+  "full": {
+    "analysis_work_units": 4800,
+    "assumptions_verified": false,
+    "calibrations": [
+      {
+        "name": "clean",
+        "sha256": "7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea",
+        "size_bytes": 4303
+      },
+      {
+        "name": "flagged",
+        "sha256": "3ba9b8a0f06bf0251db69809a5bca30f1e76d91cac1b96537dc16ab508895f00",
+        "size_bytes": 4311
+      },
+      {
+        "name": "unmeasured",
+        "sha256": "271b6a0b70f446bee773fd50bd7e1eb88b425d961da17f9cc3a263149cb33c65",
+        "size_bytes": 4323
+      }
+    ],
+    "exit_code": 3,
+    "junit": {
+      "errors": 0,
+      "failures": 1,
+      "skipped": 1,
+      "tests": 3
+    },
+    "n_analyzed": 3,
+    "n_calibration_missing": 0,
+    "n_flagged_targets": 1,
+    "n_missing": 0,
+    "n_pending_report_missing": 0,
+    "n_present": 3,
+    "n_report_and_calibration_missing": 0,
+    "n_targets": 3,
+    "n_unmeasured_targets": 1,
+    "native_junit_unchanged": true,
+    "native_reports": [
+      {
+        "name": "clean",
+        "sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d",
+        "size_bytes": 3321
+      },
+      {
+        "name": "flagged",
+        "sha256": "8dd8265210cf1816a049eb6912acda1aa069b8865678b724904db9076c952b30",
+        "size_bytes": 3303
+      },
+      {
+        "name": "unmeasured",
+        "sha256": "31a5ecd7cd5b70017a06571576ce9e9d7ef6f22fc783caf0498099e519347a4a",
+        "size_bytes": 3343
+      }
+    ],
+    "scientific_go": false
+  },
+  "inputs": {
+    "calibrations/clean.json": {
+      "sha256": "7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea",
+      "size_bytes": 4303
+    },
+    "calibrations/flagged.json": {
+      "sha256": "3ba9b8a0f06bf0251db69809a5bca30f1e76d91cac1b96537dc16ab508895f00",
+      "size_bytes": 4311
+    },
+    "calibrations/unmeasured.json": {
+      "sha256": "271b6a0b70f446bee773fd50bd7e1eb88b425d961da17f9cc3a263149cb33c65",
+      "size_bytes": 4323
+    },
+    "invalid-calibration.json": {
+      "sha256": "3cc828a1848af989f4bdaaf32ca96666471de3d5b24c81b8c18ec45ace074141",
+      "size_bytes": 4314
+    },
+    "measured/clean.json": {
+      "sha256": "4d9c4afbdcd91808cbb6e2aa97121dcac0a0d622c0c59b1e44ef84b13b37d185",
+      "size_bytes": 3325
+    },
+    "measured/flagged.json": {
+      "sha256": "3d32d3e561a720284408cdcf57fdae2d13998fb7cb7cb911c48b77cf967a54f4",
+      "size_bytes": 3333
+    },
+    "measured/unmeasured.json": {
+      "sha256": "c95d44548874bcef1981f2ebdc9eb47052a4877fead0e902ddce13205c4e2421",
+      "size_bytes": 3345
+    },
+    "reports/clean.json": {
+      "sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d",
+      "size_bytes": 3321
+    },
+    "reports/flagged.json": {
+      "sha256": "8dd8265210cf1816a049eb6912acda1aa069b8865678b724904db9076c952b30",
+      "size_bytes": 3303
+    },
+    "reports/unmeasured.json": {
+      "sha256": "31a5ecd7cd5b70017a06571576ce9e9d7ef6f22fc783caf0498099e519347a4a",
+      "size_bytes": 3343
+    },
+    "targets.json": {
+      "sha256": "60a61566f4d18c6f87619bdcf7cea4ba36e26ca64be824da4cd4e05f7e58937c",
+      "size_bytes": 803
+    }
+  },
+  "limits": {
+    "assumptions_verified": false,
+    "conditional_resolution_math": "native analyzer enabled for analyzed pairs; direct native analysis is the oracle",
+    "human_labels_authenticated": false,
+    "model_arm_resolution_or_download_calls": 0,
+    "model_or_judge_calls": 0,
+    "proof": "source CLI/JSON/XML conditional analysis; installed wheel and real CPU qualification separate",
+    "scientific_go": false,
+    "sensitivity_established": false,
+    "synthetic_aggregate_labels": true
+  },
+  "native-incomplete": {
+    "analysis_work_units": 3200,
+    "assumptions_verified": false,
+    "calibrations": [
+      {
+        "name": "clean",
+        "sha256": "7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea",
+        "size_bytes": 4303
+      },
+      {
+        "name": "flagged",
+        "sha256": "3ba9b8a0f06bf0251db69809a5bca30f1e76d91cac1b96537dc16ab508895f00",
+        "size_bytes": 4311
+      },
+      {
+        "name": "unmeasured",
+        "sha256": "271b6a0b70f446bee773fd50bd7e1eb88b425d961da17f9cc3a263149cb33c65",
+        "size_bytes": 4323
+      }
+    ],
+    "exit_code": 4,
+    "junit": {
+      "errors": 0,
+      "failures": 0,
+      "skipped": 2,
+      "tests": 3
+    },
+    "n_analyzed": 2,
+    "n_calibration_missing": 0,
+    "n_flagged_targets": 0,
+    "n_missing": 1,
+    "n_pending_report_missing": 1,
+    "n_present": 2,
+    "n_report_and_calibration_missing": 0,
+    "n_targets": 3,
+    "n_unmeasured_targets": 1,
+    "native_junit_unchanged": true,
+    "native_reports": [
+      {
+        "name": "clean",
+        "sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d",
+        "size_bytes": 3321
+      },
+      {
+        "name": "unmeasured",
+        "sha256": "31a5ecd7cd5b70017a06571576ce9e9d7ef6f22fc783caf0498099e519347a4a",
+        "size_bytes": 3343
+      }
+    ],
+    "scientific_go": false
+  },
+  "partial": {
+    "analysis_work_units": 1600,
+    "assumptions_verified": false,
+    "calibrations": [
+      {
+        "name": "clean",
+        "sha256": "7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea",
+        "size_bytes": 4303
+      }
+    ],
+    "exit_code": 3,
+    "junit": {
+      "errors": 0,
+      "failures": 1,
+      "skipped": 1,
+      "tests": 3
+    },
+    "n_analyzed": 1,
+    "n_calibration_missing": 2,
+    "n_flagged_targets": 1,
+    "n_missing": 0,
+    "n_pending_report_missing": 0,
+    "n_present": 3,
+    "n_report_and_calibration_missing": 0,
+    "n_targets": 3,
+    "n_unmeasured_targets": 1,
+    "native_junit_unchanged": true,
+    "native_reports": [
+      {
+        "name": "clean",
+        "sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d",
+        "size_bytes": 3321
+      },
+      {
+        "name": "flagged",
+        "sha256": "8dd8265210cf1816a049eb6912acda1aa069b8865678b724904db9076c952b30",
+        "size_bytes": 3303
+      },
+      {
+        "name": "unmeasured",
+        "sha256": "31a5ecd7cd5b70017a06571576ce9e9d7ef6f22fc783caf0498099e519347a4a",
+        "size_bytes": 3343
+      }
+    ],
+    "scientific_go": false
+  },
+  "pending": {
+    "analysis_work_units": 3200,
+    "assumptions_verified": false,
+    "calibrations": [
+      {
+        "name": "clean",
+        "sha256": "7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea",
+        "size_bytes": 4303
+      },
+      {
+        "name": "flagged",
+        "sha256": "3ba9b8a0f06bf0251db69809a5bca30f1e76d91cac1b96537dc16ab508895f00",
+        "size_bytes": 4311
+      },
+      {
+        "name": "unmeasured",
+        "sha256": "271b6a0b70f446bee773fd50bd7e1eb88b425d961da17f9cc3a263149cb33c65",
+        "size_bytes": 4323
+      }
+    ],
+    "exit_code": 3,
+    "junit": {
+      "errors": 0,
+      "failures": 1,
+      "skipped": 2,
+      "tests": 3
+    },
+    "n_analyzed": 2,
+    "n_calibration_missing": 0,
+    "n_flagged_targets": 1,
+    "n_missing": 1,
+    "n_pending_report_missing": 1,
+    "n_present": 2,
+    "n_report_and_calibration_missing": 0,
+    "n_targets": 3,
+    "n_unmeasured_targets": 1,
+    "native_junit_unchanged": true,
+    "native_reports": [
+      {
+        "name": "flagged",
+        "sha256": "8dd8265210cf1816a049eb6912acda1aa069b8865678b724904db9076c952b30",
+        "size_bytes": 3303
+      },
+      {
+        "name": "unmeasured",
+        "sha256": "31a5ecd7cd5b70017a06571576ce9e9d7ef6f22fc783caf0498099e519347a4a",
+        "size_bytes": 3343
+      }
+    ],
+    "scientific_go": false
+  },
+  "refusals": {
+    "all_input_bytes_unchanged": true,
+    "analysis_calls": 0,
+    "invalid_late_exit": 2,
+    "output_alias_exit": 2
+  },
+  "runtime": {
+    "dependencies": {
+      "huggingface_hub": "1.31.0",
+      "pytest": "9.0.3",
+      "torch": null,
+      "transformers": null
+    },
+    "distribution_version": "0.35.0",
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python": "3.12.13",
+    "source_files": {
+      "__init__.py": {
+        "sha256": "d66ff3fc42ce95959a178281858703c887b1fbea40cc33567f0c83d4ba367757",
+        "size_bytes": 1800
+      },
+      "cli.py": {
+        "sha256": "3fd83e3e6d740b18eb9acb2cf0e72e0a02d5f77567f2bcdf54f5405aa7b0f1b6",
+        "size_bytes": 73930
+      },
+      "junit.py": {
+        "sha256": "cc5911ab6f77672fff66e714af780f5158482c1130402761eeb672c1622cb0c5",
+        "size_bytes": 12782
+      },
+      "resolution.py": {
+        "sha256": "0c764ee34cd3abedbd8e93d9cfc6c73cca1fc6786b4fc9590245ea23847fdff3",
+        "size_bytes": 11044
+      },
+      "safety/calibration_binding.py": {
+        "sha256": "188b66cc98dd88249cd69bc8e5d6824fcb4380904987420b2a63b7124310895f",
+        "size_bytes": 25166
+      },
+      "safety/mde.py": {
+        "sha256": "00d649f37218fcfbca4b12f6403335f009131fd0e766b329b28d39e1dd9a99e0",
+        "size_bytes": 29808
+      },
+      "saved_screen.py": {
+        "sha256": "456bb677231ec01ca18205c5bc9769bce4ffc7ce6359d366c93461165384f4c2",
+        "size_bytes": 18818
+      },
+      "screen_resolution.py": {
+        "sha256": "caa3da42860958e4d2df9d6be7e3292fa8721167a38962c4f5561b91108f2c0d",
+        "size_bytes": 10934
+      }
+    },
+    "source_origin_verified": true,
+    "source_version": "0.35.0"
+  }
+}

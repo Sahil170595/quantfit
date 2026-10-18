@@ -35,9 +35,34 @@ The protocol pins are judge `garak-llm/garak-refusal-detector` at
 `5cb5ec8f364318cc48724ddf8ad414000c36781b`, completion-only input; dataset
 `Crusadersk/quantsafe-judge-benchmark` at
 `c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58`, split train, 40 probes; greedy
-decode, cap64, model-default template when present and raw prompt otherwise.
+decode, cap 64, model-default template when present and raw prompt otherwise.
 
 ## Reproduction
+
+Recorded on 2026-10-18 UTC against the independently reviewed source
+`57dade3327caedfbc55ad1860e94ca00ceaf8359`, with source and editable distribution
+version 0.35.0. The eight raw application-file bindings in `receipt.json` describe
+the actual Windows source buffers used by this historical run. They are not a
+requirement that future versions or normalized Linux source files match them.
+
+| Host / dependency | Recorded value |
+| --- | --- |
+| Machine | ASUS ROG Strix G814JZ_G814JZ; Intel Core i9-13980HX, 24 cores / 32 logical processors |
+| Physical RAM | 68,319,563,776 bytes |
+| OS | Windows 11, build 26300, AMD64 |
+| Python | 3.12.13 |
+| quantfit source / editable distribution | 0.35.0 / 0.35.0 |
+| huggingface_hub / pytest | 1.31.0 / 9.0.3 |
+| torch / transformers | absent / absent; recorded as null |
+
+The exact recorded invocation, from external directory
+`C:/tmp/sequential-delivery-20261017`, was:
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:PYTHONPATH = 'C:/tmp/qf-screen-resolution-delivery-20261018'
+& C:/tmp/sequential-delivery-20261017/qf-unit-env/Scripts/python.exe C:/tmp/qf-screen-resolution-consumers-20261018/validation/2026-10-18-screen-resolution/run_validation.py --out C:/tmp/sequential-delivery-20261017/qf035-screen-resolution-validation-final --expected-source C:/tmp/qf-screen-resolution-delivery-20261018
+```
 
 From the candidate checkout, with an output directory that does not exist:
 
@@ -67,6 +92,55 @@ preflights all actual scope matches, individual probe bounds and the combined
 `sum(n_probes**2) <= 4096**2` work budget before the first math call. Orphan stored
 bindings remain pending, with no actual-report match or resolution claim and zero
 analysis work. Missing calibration is an annotation state, not a new gate failure.
+
+## Recorded outcomes and literal bindings
+
+Every native exit equals its annotated exit. Every native XML file is byte-equal
+to its corresponding annotated XML. Coverage columns below are mutually exclusive
+target counts, not pooled observations or statistical estimates.
+
+| Case | Native / annotated exit | Analyzed / calibration missing / pending report / both missing | Work units | JUnit tests / failures / skips / errors |
+| --- | --- | --- | --- | --- |
+| `full` | 3 / 3 | 3 / 0 / 0 / 0 | 4800 | 3 / 1 / 1 / 0 |
+| `partial` | 3 / 3 | 1 / 2 / 0 / 0 | 1600 | 3 / 1 / 1 / 0 |
+| `empty` | 3 / 3 | 0 / 3 / 0 / 0 | 0 | 3 / 1 / 1 / 0 |
+| `pending` | 3 / 3 | 2 / 0 / 1 / 0 | 3200 | 3 / 1 / 2 / 0 |
+| `both-missing` | 3 / 3 | 2 / 0 / 0 / 1 | 3200 | 3 / 1 / 1 / 0 |
+| `conditional` | 0 / 0 | 3 / 0 / 0 / 0 | 4800 | 3 / 0 / 0 / 0 |
+| `conditional-missing-calibrations` | 0 / 0 | 0 / 3 / 0 / 0 | 0 | 3 / 0 / 0 / 0 |
+| `native-incomplete` | 4 / 4 | 2 / 0 / 1 / 0 | 3200 | 3 / 0 / 2 / 0 |
+
+`invalid-late-refusal.json` and `output-alias-refusal.json` both record operational
+exit 2 with zero analysis calls. The invalid calibration deliberately changes the
+aggregate label total to 79 while the two arms still declare 40 each. No earlier
+valid target is analyzed first, and no refused output destination is created.
+The alias case leaves the original calibration bytes unchanged.
+
+Each positive case retains the actual annotated CLI envelope, annotated JSON/XML,
+and native JSON/XML. All raw inputs are retained once under `inputs/`; temporary
+case-directory copies are omitted. The 31 source consumers include the historical
+literal-binding regression. It verifies the original 803 bytes, all raw input
+digests/sizes, native receiving bindings, calibration member/digest/fingerprint
+bindings, original analysis inputs and native counts, exclusive coverage/work
+counts, and unchanged native/JUnit outcomes. It does not recompute historical MDE
+values with a future package or compare historical source hashes to that package.
+
+Before handback every committed JSON/XML Git blob is compared directly with the
+working bytes, without newline normalization. `.gitattributes` disabled text
+conversion before the first input was added. No earlier validation package is
+edited. `receipt.json` binds the 11 literal input files and the eight actual source
+buffers; `checks.json` records the independent count/privacy checks.
+
+For these constructed one-direction observations, the second native-count method
+uses unsafe baseline refusals as the dangerous at-risk denominator and unsafe
+baseline minus quantized refusals as flips. It derives safe at-risk counts from
+zone population minus baseline refusals and over-refusal flips from quantized
+minus baseline safe-zone refusals. This is valid for this construction only;
+marginal zone counts do not identify paired flips in general. Calibration checks
+separately sum the two directional error counts and label totals, and use the
+existing Wilson primitive on each directional denominator to verify the stored
+upper bounds. Those checks validate arithmetic, not label truth or applicability.
+The aggregate-key walk covers 39 JSON files and finds zero forbidden keys.
 
 ## What this does not establish
 

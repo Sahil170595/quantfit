@@ -303,3 +303,110 @@ def test_installed_guard_and_cpu_seams_select_annotation_once_without_new_native
     assert installed.count('"test_ci_screen_resolution.py"') == 1 and "--rootdir" in installed
     cpu = (ROOT / "tools/ci_cpu_acceptance.py").read_text(encoding="utf-8")
     assert cpu.count("screen_resolution_accept_cpu(") == 1 and '"screen_resolution": screen_resolution' in cpu
+
+
+def test_committed_resolution_inputs_native_verdicts_and_calibration_bindings_are_literal():
+    data = ROOT / "validation/2026-10-18-screen-resolution"
+    raw_inputs = {p.relative_to(data / "inputs").as_posix(): p.read_bytes() for p in (data / "inputs").rglob("*.json")}
+    manifest = raw_inputs["targets.json"]
+    original_manifest, original_reports = consumer.original_inputs(ROOT)
+    assert manifest == original_manifest and len(manifest) == 803
+    names = [target["name"] for target in json.loads(manifest)["targets"]]
+    reports = {name: raw_inputs[f"reports/{name}.json"] for name in names}
+    assert reports == original_reports
+    measured = {name: raw_inputs[f"measured/{name}.json"] for name in names}
+    calibrations = {name: raw_inputs[f"calibrations/{name}.json"] for name in names}
+    receipt = json.loads((data / "receipt.json").read_bytes())
+    assert receipt["inputs"] == {name: consumer.binding(raw) for name, raw in raw_inputs.items()}
+    cases = {
+        "full": (reports, calibrations, 3, 1, 1),
+        "partial": (reports, {"clean": calibrations["clean"]}, 3, 1, 1),
+        "empty": (reports, {}, 3, 1, 1),
+        "pending": ({name: raw for name, raw in reports.items() if name != "clean"}, calibrations, 3, 1, 2),
+        "both-missing": (
+            {name: raw for name, raw in reports.items() if name != "unmeasured"},
+            {name: raw for name, raw in calibrations.items() if name != "unmeasured"},
+            3,
+            1,
+            1,
+        ),
+        "conditional": (measured, calibrations, 0, 0, 0),
+        "conditional-missing-calibrations": (measured, {}, 0, 0, 0),
+        "native-incomplete": ({name: raw for name, raw in reports.items() if name != "flagged"}, calibrations, 4, 0, 2),
+    }
+    for name, (native, bound, code, failures, skipped) in cases.items():
+        compact = receipt[name]
+        document = json.loads((data / f"{name}-cli.json").read_bytes())
+        result = json.loads((data / f"{name}.json").read_bytes())
+        default = json.loads((data / f"{name}-native.json").read_bytes())
+        assert document["result"] == result and document["exit_code"] == result["exit_code"] == code
+        assert consumer.native_projection(result) == consumer.native_projection(default)
+        assert result["manifest"]["sha256"] == consumer.binding(manifest)["sha256"]
+        assert result["manifest"]["size_bytes"] == len(manifest)
+        for key, value in consumer.expected_native(manifest, native).items():
+            assert compact[key] == value
+        assert compact["native_reports"] == [
+            {"name": target, **consumer.binding(raw)} for target, raw in native.items()
+        ]
+        assert compact["calibrations"] == [{"name": target, **consumer.binding(raw)} for target, raw in bound.items()]
+        block = result["conditional_resolution"]
+        assert [row["name"] for row in block["rows"]] == names
+        statuses = {}
+        work = 0
+        saved = {row["name"]: row for row in result["report_bindings"]}
+        for row in block["rows"]:
+            target = row["name"]
+            report, calibration = native.get(target), bound.get(target)
+            raw_binding = consumer.binding(report) if report is not None else {"sha256": None, "size_bytes": None}
+            assert {key: saved[target][key] for key in raw_binding} == raw_binding
+            assert row["native_report_sha256"] == raw_binding["sha256"]
+            assert row["calibration"] == {
+                "member": f"{target}.json",
+                "status": "present" if calibration is not None else "missing",
+                **(consumer.binding(calibration) if calibration is not None else {"sha256": None, "size_bytes": None}),
+            }
+            assert row["binding_fingerprint"] == (
+                json.loads(calibration)["binding"]["fingerprint"] if calibration is not None else None
+            )
+            status = (
+                "analyzed"
+                if report is not None and calibration is not None
+                else "calibration_missing"
+                if report is not None
+                else "pending_report_missing"
+                if calibration is not None
+                else "report_and_calibration_missing"
+            )
+            assert row["status"] == status
+            statuses[status] = statuses.get(status, 0) + 1
+            if status != "analyzed":
+                assert row["analysis"] is None
+                continue
+            analysis = row["analysis"]
+            assert analysis["inputs"] == {
+                "report_sha256": consumer.binding(report)["sha256"],
+                "calibration_sha256": consumer.binding(calibration)["sha256"],
+            }
+            assert analysis["binding_fingerprint"] == row["binding_fingerprint"]
+            assert analysis["human_confirmation_verified"] is analysis["assumptions_verified"] is False
+            drift = json.loads(report)["drift"]
+            for axis, flip in consumer.AXES.items():
+                observed = analysis["axes"][axis.replace("_", "-")]
+                assert (
+                    observed["n_at_risk"] == drift[axis]["at_risk"] and observed["flagged_flips"] == drift[axis][flip]
+                )
+            work += json.loads(report)["probe_dataset"]["n_probes"] ** 2
+        assert block["analysis_work_units"] == compact["analysis_work_units"] == work
+        for status in ("analyzed", "calibration_missing", "pending_report_missing", "report_and_calibration_missing"):
+            assert block["coverage"][f"n_{status}"] == compact[f"n_{status}"] == statuses.get(status, 0)
+        assert (data / f"{name}-native.xml").read_bytes() == (data / f"{name}.xml").read_bytes()
+        assert (
+            consumer.junit_counts(data / f"{name}.xml")
+            == compact["junit"]
+            == {"tests": 3, "failures": failures, "skipped": skipped, "errors": 0}
+        )
+    for name in ("invalid-late-refusal", "output-alias-refusal"):
+        assert json.loads((data / f"{name}.json").read_bytes())["exit_code"] == 2
+    # These hashes bind the historical run, never the installed package of a future release.
+    assert len(receipt["runtime"]["source_files"]) == 8
+    assert receipt["runtime"]["source_version"] == receipt["runtime"]["distribution_version"] == "0.35.0"
