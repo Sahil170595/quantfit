@@ -44,7 +44,7 @@ To see real output in about a second, with no model, no network and no weights:
 
 ## Honest limits
 
-Candidate workflows (unreleased; require the candidate checkout/wheel):
+Additional released workflows (see the versioned README install pin):
 
 - `quantfit verify --model model.gguf --json` validates supported bounded GGUF structure; `quantfit verify --model model.gguf --runtime --timeout-seconds 120 --json` separately asks for one native CPU usability request with owned cleanup on Linux/proc. Valid structure0 does not establish meaningful weights, quantization quality or safety; invalid binary3 and unverified/operational2 are distinct. See [the profile](https://github.com/Sahil170595/quantfit/blob/main/docs/gguf-verification.md).
 
