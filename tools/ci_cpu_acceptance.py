@@ -133,6 +133,11 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
         Path(result["runs"][0]["report"]["path"]),
         output.parent / "screen-comparison",
     )
+    from ci_screen_resolution import accept_cpu as screen_resolution_accept_cpu
+
+    screen_resolution = screen_resolution_accept_cpu(
+        Path(result["runs"][0]["report"]["path"]), output.parent / "screen-resolution"
+    )
     # Offline handoff of the actual three reports, after existing inference ends.
     # An exact copied candidate retains native P1 void even when T0 is negative.
     from quantfit import reference_assessment, reference_replay
@@ -235,6 +240,7 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
         "strict_screen_resume": screen_resume,
         "screen_bundle": screen_bundle,
         "screen_comparison": screen_comparison,
+        "screen_resolution": screen_resolution,
         "t0_protocol_pass": result["t0"]["protocol_pass"],
         "offline_copied_bundle_comparison": comparison,
         "offline_copied_bundle_junit": comparison_xml,
