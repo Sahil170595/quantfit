@@ -133,7 +133,7 @@ def test_late_bad_calibration_refuses_before_earlier_analysis_or_output_mutation
     assert last.read_bytes() == original
 
 
-@pytest.mark.parametrize("mutation", ["model", "backend", "device"])
+@pytest.mark.parametrize("mutation", ["model", "backend", "device", "baseline_dtype"])
 def test_pending_calibration_known_target_mismatch_refuses_without_analysis(tmp_path, monkeypatch, mutation):
     from quantfit.safety.calibration_binding import identity_fingerprint
 
@@ -146,10 +146,16 @@ def test_pending_calibration_known_target_mismatch_refuses_without_analysis(tmp_
     elif mutation == "backend":
         for arm in ("baseline", "quantized"):
             identity[arm]["engine"] = {"name": "transformers", "version": "5.17.0", "device": "cpu"}
-    else:
+    elif mutation == "device":
         identity["baseline"]["engine"]["device"] = "cuda"
+    else:
+        identity["baseline"]["resolved_dtype"] = "Q4_K_M"
     payload["binding"]["fingerprint"] = identity_fingerprint(identity)
     path.write_text(json.dumps(payload), encoding="utf-8")
+    if mutation == "baseline_dtype":
+        from quantfit.safety.calibration_binding import load_bound_calibration_bytes
+
+        assert load_bound_calibration_bytes(path.read_bytes()).identity["baseline"]["resolved_dtype"] == "Q4_K_M"
     calls = trap_analysis(monkeypatch)
     with pytest.raises(SavedScreenError):
         summary(manifest, reports, calibrations)
