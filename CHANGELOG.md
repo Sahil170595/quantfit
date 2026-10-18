@@ -15,7 +15,7 @@
 
 ## Unreleased
 
-## 0.30.0 — Unreleased candidate
+## 0.30.0 — 2026-10-17
 
 - `quantfit/reference_replay.py:rerun_candidate` and `evidence rerun` bind three fresh native GGUF children to a held original handoff/target. Original/fresh assessments, native exits, reproduction comparison and execution observations remain separate.
 - Resolved weight SHA/size, actual executable hash and applied controls are guarded before each native server starts and rechecked afterward, using the existing resolver/child/cleanup primitives. Cached executable lookup does not substitute for checking actual bytes.
@@ -23,11 +23,14 @@
 - New closed aggregate output is staged with its manifest last, protecting original evidence, target, resolved assets and aliases. Provenance/cleanup/operational failures exit 2; fresh T0/payload disagreement exits 3; other reproduction exits remain native. Negative/failed observations are retained without promoting safety or publication readiness.
 - The existing hosted Smol hook exercises one fresh rerun with its current assets; installed controls use explicit mocked lifecycle cases. Exact-head native qualification is recorded on the PR. No additional model download/copy, hosted job, dependency or actual Phi4 rerun is claimed.
 
-Exact-head source/local/hosted acceptance is recorded on the PR before readiness.
-Version 0.30.0 remains unpublished; execution observations do not authenticate
+Released independently from PR #134: recipe-bound native reruns.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/38326197544); publication separately qualifies the exact versioned distributions.
+
+Execution observations do not authenticate
 human labels, physical hosts, independent execution, sensitivity or scientific GO.
 
-## 0.29.0 — Unreleased candidate
+## 0.29.0 — 2026-10-17
 
 - `quantfit/reference_assessment.py:assess_candidate` and `references assess` check a verified three-report handoff against an explicit bounded target offline, using held report/target bytes and separate receiving provenance. Original reports/T0 and historical versions remain unchanged.
 - A package-owned pure core shares the existing native campaign T0, full-payload comparison, axes and statistics; the CI adapter preserves its existing assessment wire and source-byte protection. Only the four declared volatile fields are ignored.
@@ -35,32 +38,40 @@ human labels, physical hosts, independent execution, sensitivity or scientific G
 - Weight sizes are explicit declarations; missing sizes cannot qualify, and the fixed QSR baseline cap does not prove actual weights or RAM fit. Checked atomic receiving output protects all input members, target and aliases.
 - Existing installed consumers cover original Phi4's blocked result and labeled synthetic positive/unknown cases. No new job, model run, dependency, upload or adjudication ingestion is introduced.
 
-Exact-head independent review and local/hosted acceptance are recorded on the PR
-before readiness. Version 0.29.0 is unpublished; even ready-for-review results leave
+Released independently from PR #133: reference-candidate assessment.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/38321818458); publication separately qualifies the exact versioned distributions.
+
+Even ready-for-review results leave
 registration, human/weight/physical/execution authentication, sensitivity and
 scientific GO unestablished.
 
-## 0.28.0 — Unreleased candidate
+## 0.28.0 — 2026-10-17
 
 - `quantfit/reproduce_junit.py:reproduction_to_junit` and `reproduce --junit PATH` render ten stable cases from the existing native decision. Unknown T0 skips, negative T0 fails, and only the native `reproduced` / 0 / `passed=true` result passes overall; void or unverified outcomes cannot produce an all-green suite.
 - Loose-report and portable-bundle input modes preserve JSON and exit semantics. Bounded operational-error XML carries no fabricated comparison or raw provider/path diagnostics.
 - JSON/XML are staged together and replaced atomically per file, with successful XML last. Consumed sources, both destinations and aliases are protected; publication faults exit 2 without claiming a transaction across the pair.
 - Existing installed consumers and cold-report hooks exercise XML with historical aggregates and labeled synthetic controls. No additional model run, hosted job or dependency is introduced.
 
-Exact-head review and local/hosted acceptance are recorded on the PR before readiness.
-Version 0.28.0 remains unpublished; native decisions and JUnit do not establish
+Released independently from PR #132: reproduction JUnit.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/38315559074); publication separately qualifies the exact versioned distributions.
+
+Native decisions and JUnit do not establish
 independent execution, authenticated labels, sensitivity, safety or scientific GO.
 
-## 0.27.0 — Unreleased candidate
+## 0.27.0 — 2026-10-17
 
 - `quantfit/reproduce.py:compare_bundles` and existing `reproduce` bundle flags compare fixed first replicates from two verified three-report handoffs offline. Prepared T0 and path observations let the shared comparison consume held views without reopening producer files; loose-report behavior remains intact.
 - Per-side selection, ordered bindings, parsed manifest and original/receiving T0 are retained. Existing native tolerance criteria and exits are preserved: copied selected reports and valid negative T0 remain void/4, without claiming independent execution or scientific qualification.
 - Atomic output preflight/publication protects both closed bundles and all members/aliases. Source substitution, private layouts, forged T0, mixed modes and publication faults have targeted adverse coverage.
 - Existing installed consumers exercise relocated historical Phi4 bundles and explicit synthetic controls. The existing native cold job reuses its already-produced reports for offline copied-bundle void checks; no extra model run or job is introduced.
 
-Exact-head local, independent and hosted acceptance is recorded on the PR before
-readiness. Version 0.27.0 requires candidate source or wheels until publication;
-native model/human/sensitivity/safety/scientific GO and producer authenticity remain
+Released independently from PR #131: portable-bundle reproduction.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/38312561095); publication separately qualifies the exact versioned distributions.
+
+Native model/human/sensitivity/safety/scientific GO and producer authenticity remain
 separate. Historical validation and public reference reports are unchanged.
 
 ## 0.26.0
