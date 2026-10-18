@@ -117,7 +117,7 @@ def test_the_leaf_set_is_what_we_think_it_is():
     """A floor, so the walk above cannot pass by finding nothing."""
     leaves = {" ".join(p) for p in _leaf_commands()}
     expected = {
-        "check", "list", "plan", "probe", "verify", "verify-safety", "inspect-run", "screen", "screen-summary", "emit",
+        "check", "list", "plan", "probe", "verify", "verify-safety", "inspect-run", "screen", "screen-summary", "screen-compare", "emit",
         "calibrate sheet", "calibrate ingest", "gate", "t0", "reproduce", "audit", "quantize", "resolution",
         "references list", "references verify", "references assess", "bundle create", "bundle verify",
         "bundle replay-create", "bundle replay-verify", "bundle screen-create", "bundle screen-verify",
@@ -152,6 +152,17 @@ def test_json_is_not_a_flag_on_the_parent_of_a_subcommand():
 # Heavy commands are covered on their ERROR path where that path is reachable without a
 # backend — which is also the path a caller most needs to be able to parse.
 _CASES = [
+    (
+        "screen-compare-missing",
+        [
+            "screen-compare",
+            "--reference-bundle",
+            "no-reference-screen-xyz",
+            "--candidate-bundle",
+            "no-candidate-screen-xyz",
+        ],
+        2,
+    ),
     ("verify-runtime-deadline-exclusive", ["verify", "--model", "missing.gguf", "--timeout-seconds", "1"], 2),
     ("evidence-invalid-deadline", ["evidence", "fetch", "--out", "unused-evidence", "--timeout-seconds", "0"], 2),
     ("repeatability-missing-reports", ["repeatability", "--reports", "no-a.json", "no-b.json", "no-c.json"], 2),

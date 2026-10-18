@@ -15,6 +15,13 @@
 
 ## Unreleased
 
+## 0.34.0 — Unreleased
+
+- `screen-compare` and `quantfit.screen_compare.compare_screen_bundles` compare original screen observations offline over exact matching target-manifest bytes. Per-axis counts, raw bindings, missing/unmeasured evidence, known protocol/identity contradictions and native flags remain explicit; qualified transitions describe declarations only.
+- Unknown precision/identity metadata remains unavailable. Matching recorded hashes or pins does not establish actual same weights, execution independence or causal change. No pooled probe counts or new significance claim is introduced.
+- Any original flag on either side retains exit 3, including apparent clearance; otherwise incomplete/incompatible evidence exits 4 before conditional complete no-flag 0. Invalid evidence/output exits 2. Protected JSON/XML publication reuses per-file atomic replacement; two axis cases per target and overall preserve native failures before skips.
+- Shared held-byte capture charges both logical transports, bounded at 64 MiB per side, even for aliases. Existing installed and CPU lanes exercise receiving behavior without extra inference. See `docs/screen-comparison.md` and the synthetic `validation/2026-10-18-screen-comparison/` record for scope.
+
 ## 0.33.0 — Unreleased
 
 - `bundle screen-create` / `bundle screen-verify` and `quantfit.screen_bundle` preserve original target/native-report bytes, explicit missing targets and optional ignored producer-summary bytes in a closed portable handoff. Receiving summaries reuse strict native validation offline; producer locators never trigger asset access.

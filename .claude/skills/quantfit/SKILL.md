@@ -60,6 +60,18 @@ input exits 2. Full transport is bounded at 64 MiB, including both manifests.
 Treat bundles as private handoffs; hashes establish byte binding, not execution
 authenticity, calibrated sensitivity, human confirmations or scientific GO.
 
+The unreleased **0.34.0 candidate** adds `quantfit screen-compare
+--reference-bundle reference-screen --candidate-bundle candidate-screen --out
+comparison.json --junit comparison.xml --json`. Exact target-manifest bytes must
+match. Retain per-axis native denominators/flags and missing, unmeasured or
+incompatible evidence. A qualified declared-target transition does not establish
+same actual weights, causal clearance or independent execution. Any original flag
+on either side exits 3, including apparent clearance; otherwise incomplete or
+incompatible exits 4 before conditional complete no-flag 0. Invalid evidence or
+output exits 2. JUnit has two axis cases per target plus overall; native flags fail
+before incomplete cases skip. Never treat these observations as human confirmations,
+calibrated sensitivity or scientific GO.
+
 ## The command that matters
 
 For an existing report and bound calibration aggregate, use
