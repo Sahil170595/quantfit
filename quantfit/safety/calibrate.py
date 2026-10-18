@@ -253,16 +253,23 @@ def _read_capture(path: str, *, data: bytes | None = None) -> tuple[dict, list[d
 # --- sheet -------------------------------------------------------------------------
 
 
-def _read_sheet(path: str, *, data: bytes | None = None) -> list[dict]:
+def _read_sheet(path: str, *, data: bytes | None = None, max_records: int | None = None) -> list[dict]:
     """Read a labeling sheet as rows carrying their 1-based line number (refusals name it).
 
     `utf-8-sig`, not `utf-8`: Excel and several other spreadsheets write a BOM on
     save, and a labeler's hours must not be unreadable over three leading bytes.
     """
+    _require(
+        max_records is None or type(max_records) is int and max_records > 0,
+        "labeling sheet record limit must be a positive integer",
+    )
     try:
         snapshot = data if data is not None else _artifact_bytes(path, "labeling sheet")
         with io.StringIO(snapshot.decode("utf-8-sig"), newline="") as handle:
-            table = list(csv.reader(handle))
+            table = []
+            for number, record in enumerate(csv.reader(handle), start=1):
+                _require(max_records is None or number <= max_records, "labeling sheet exceeds its record limit")
+                table.append(record)
     except UnicodeError as exc:
         raise CalibrationError(f"unreadable labeling sheet {path}: {exc}") from exc
 
@@ -492,10 +499,12 @@ def _read_key(path: str, *, data: bytes | None = None) -> dict:
 # --- ingest ------------------------------------------------------------------------
 
 
-def _join(sheet_path: str, key_path: str, ids: dict, *, data: bytes | None = None) -> dict[str, dict]:
+def _join(
+    sheet_path: str, key_path: str, ids: dict, *, data: bytes | None = None, max_records: int | None = None
+) -> dict[str, dict]:
     """Validate every sheet row and join it to the key; refusals name row, id and fault."""
     joined: dict[str, dict] = {}
-    for row in _read_sheet(sheet_path, data=data):
+    for row in _read_sheet(sheet_path, data=data, max_records=max_records):
         row_id = row["id"]
         where = f"labeling sheet {sheet_path} row {row['line']}"
         _require(bool(row_id), f"{where} has an empty id column")
