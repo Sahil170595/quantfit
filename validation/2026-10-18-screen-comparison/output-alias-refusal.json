@@ -1,0 +1,14 @@
+{
+  "command": "screen-compare",
+  "error": {
+    "kind": "ScreenComparisonError",
+    "message": "unsafe_output"
+  },
+  "exit_code": 2,
+  "result": null,
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.34.0"
+  }
+}

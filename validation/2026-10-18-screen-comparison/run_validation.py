@@ -76,8 +76,12 @@ def main() -> None:
             name: consumer.make_bundle(Path("build") / name, manifest, reports) for name, reports in variants.items()
         }
         bundles["byte-different-targets"] = consumer.make_bundle(
-            Path("build/byte-different-targets"), manifest + b" ", measured
+            Path("build/byte-different-targets"), (here / "inputs/byte-different-targets.json").read_bytes(), measured
         )
+        outer_dir = output / "bundle-manifests"
+        outer_dir.mkdir()
+        for name, bundle in bundles.items():
+            (outer_dir / f"{name}.json").write_bytes((bundle / "manifest.json").read_bytes())
         before = {path: path.read_bytes() for root in bundles.values() for path in root.rglob("*") if path.is_file()}
         for label, reference, candidate, code in (
             ("conditional-copy", "measured", "measured", 0),
