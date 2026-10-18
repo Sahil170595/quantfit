@@ -30,9 +30,9 @@ registry is empty. `quantfit references verify --slug NAME --report report.json 
 checks bytes; optional `--registry registry.json` selects explicit external entries.
 A match does not establish publication, human adjudication or measurement validity.
 
-For saved screen aggregates, the unpublished 0.31.0 candidate adds
+For saved screen aggregates, quantfit 0.31.0 or later provides
 `quantfit screen-summary --targets targets.json --reports-dir screen-reports --out receiving.json --junit receiving.xml --json`.
-Use candidate source/wheels. This reads and validates held native reports offline;
+This reads and validates held native reports offline;
 it never runs inference or retries missing files. All targets remain visible,
 including missing-evidence rows and XML skips. Bounds count measured targets per
 axis and stratum; duplicate known pairs cannot inflate the population. Producer

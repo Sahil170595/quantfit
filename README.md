@@ -41,13 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.26.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.26.0).
-The branch prepares **0.31.0**, an unpublished candidate adding strict saved-screen
-summaries to the 0.27.0 bundle comparison, 0.28.0 reproduction JUnit, 0.29.0 reference
-assessment and 0.30.0 native-rerun candidates. These features require candidate source or wheels; released
-workflows remain available in 0.26.0.
+This README documents [quantfit 0.31.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.31.0), including strict saved-screen summaries. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.26.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.31.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -185,7 +181,7 @@ replicate runs and cannot be derived from two reports, so pass them explicitly
 with `--t0-reference` and `--t0-candidate`; without that evidence the outcome is
 never the gate pass.
 
-The unpublished 0.27.0 candidate also consumes relocated three-report replay
+Quantfit 0.27.0 also consumes relocated three-report replay
 bundles without reopening producer report paths:
 
 ```bash
@@ -202,7 +198,7 @@ independent execution or scientific claims. See the
 [CLI input contract](docs/cli-reference.md#reproduction-and-reporting) and
 [three-report handoff](docs/replicate-bundles.md).
 
-The 0.28.0 candidate adds `--junit PATH` to either reproduction input mode:
+Quantfit 0.28.0 adds `--junit PATH` to either reproduction input mode:
 
 ```bash
 quantfit reproduce --reference-bundle reference-handoff --candidate-bundle candidate-handoff --out comparison.json --junit reproduction.xml --json
@@ -588,7 +584,7 @@ sensitivity, independent hardware or cross-hardware tolerance. Reference admissi
 also requires full report repeatability, permitting only the protocol's explicit
 timestamp/runtime differences. See [the cold-run contract](docs/cold-replicate-runner.md).
 
-The 0.30.0 candidate reruns a saved three-report recipe on the qualified Linux
+Quantfit 0.30.0 reruns a saved three-report recipe on the qualified Linux
 native path, holding its original handoff and target before starting fresh children:
 
 ```bash
@@ -606,7 +602,7 @@ evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#rec
 
 ## Summarize saved screen reports
 
-The 0.31.0 candidate rebuilds a receiving summary from an explicit target manifest
+Quantfit 0.31.0 rebuilds a receiving summary from an explicit target manifest
 and its saved aggregate reports, without starting inference or contacting the Hub:
 
 ```bash
@@ -665,7 +661,7 @@ selects an external registry without registering or publishing it. See
 [CLI reference](docs/cli-reference.md). No new T4 reproduction, sensitivity,
 human-adjudication, cross-hardware or QSR v1 freeze follows from a publication.
 
-The 0.29.0 candidate checks a portable three-report handoff against an explicit
+Quantfit 0.29.0 checks a portable three-report handoff against an explicit
 pinned target, without loading models, fetching artifacts or registering a report:
 
 ```bash
