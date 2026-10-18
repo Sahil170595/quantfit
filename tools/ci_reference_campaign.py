@@ -13,7 +13,6 @@ import hashlib
 import importlib.metadata
 import io
 import json
-import math
 import os
 import re
 import signal
@@ -23,18 +22,10 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-from quantfit.bundle import _json, _read, _report
-from quantfit.report_comparison import (
-    ALLOWED_VOLATILE_PATHS as _VOLATILE_PATHS,
-)
-from quantfit.report_comparison import (
-    differences as _differences,
-)
-from quantfit.report_comparison import (
-    normalized as _normalized,
-)
-from quantfit.reproduce import ReproduceError, within_hardware_identical
-from quantfit.resolution import MAX_REPORT_BYTES, _axes
+from quantfit.bundle import _json, _read
+from quantfit.reference_assessment import ReferenceAssessmentError, assess_report_buffers
+from quantfit.report_comparison import ALLOWED_VOLATILE_PATHS as _VOLATILE_PATHS
+from quantfit.resolution import MAX_REPORT_BYTES
 from quantfit.safety import verify
 from quantfit.safety.gguf_arm import CPU_OFFLOAD_CONTROLS
 
@@ -73,105 +64,68 @@ def require(condition, message):
 
 
 def assess_reports(paths: list[Path], *, binary_sha256: str, threads: int) -> dict:
-    """Reuse native aggregate/T0 validators; compare complete payloads without causal slack."""
+    """Acquire/recheck held bytes around the package core; retain the original campaign wire."""
     require(len(paths) == 3, "reference campaign needs exactly three report sources")
     require(type(threads) is int and threads > 0, "actual native thread count required")
+    labels = tuple(str(path.resolve()) for path in paths)
     buffers = [_read(path, MAX_REPORT_BYTES) for path in paths]
-    reports = [_report(raw) for raw in buffers]
-    values = [_json(raw) for raw in buffers]
-    axes, exits = [], []
-    for report in reports:
-        require(
-            all(
-                type(value) in (int, float) and math.isfinite(value) and value >= 0
-                for value in (report.judge_runtime_s, report.baseline.runtime_s, report.quantized.runtime_s)
-            ),
-            "reported runtimes must be finite nonnegative observations",
-        )
-        require(report.env.get("device") == "cpu", "native campaign reported device must be cpu")
-        require(
-            report.probe_dataset
-            == {
-                "id": verify.PROBE_DATASET_ID,
-                "revision": verify.PROBE_DATASET_REVISION,
-                "split": verify.PROBE_SPLIT,
-                "n_probes": 40,
-            },
-            "campaign needs actual pinned full40 dataset",
-        )
-        require(
-            report.judge.get("id") == verify.JUDGE_MODEL_ID and report.judge.get("revision") == verify.JUDGE_REVISION,
-            "campaign judge pins differ",
-        )
-        require(
-            report.judge.get("card_xstest_accuracy_label") == verify._measured_judge_label(),
-            "current judge label required",
-        )
-        require(
-            report.decode.get("max_new_tokens") == 64 and report.decode.get("do_sample") is False,
-            "campaign must preserve shipped greedy64",
-        )
-        for name, arm in (("baseline", report.baseline), ("quantized", report.quantized)):
-            expected = PAIR[name]
-            require(
-                arm.model == expected["ref"] and arm.revision == PHI4_REVISION, "actual immutable arm identity differs"
-            )
-            require(
-                arm.artifact_sha256 == expected["sha256"] and arm.resolved_dtype == expected["dtype"],
-                "actual arm bytes/precision differ",
-            )
-            require(
-                arm.engine.get("name") == "llama.cpp" and arm.engine.get("device") == "cpu",
-                "native CPU engine required",
-            )
-            require(
-                arm.engine.get("binary_sha256") == binary_sha256
-                and type(arm.engine.get("threads")) is int
-                and arm.engine["threads"] == threads,
-                "actual same-binary/thread contract differs",
-            )
-            require(
-                all(type(arm.engine.get(k)) is type(v) and arm.engine[k] == v for k, v in CPU_OFFLOAD_CONTROLS.items()),
-                "actual applied CPU controls required",
-            )
-            require("baseline_cache" not in arm.engine, "completion-cache report cannot qualify")
-        block = _axes(report)
-        for name, axis in block.items():
-            field = "refusal_robustness" if name == "refusal-robustness" else "over_refusal"
-            axis["two_sided_95pct_wilson"] = report.drift[field]["flip_rate_wilson95"]
-            axis["perfect_judge_mde_floor_80pct_power"] = report.drift[field]["mde_at_80pct_power"]
-            axis["human_confirmed_flips"] = None
-            axis["null_interpretation"] = (
-                "nothing was measured on this axis"
-                if not axis["measurable"]
-                else "the detector did not fire"
-                if axis["flagged_flips"] == 0
-                else None
-            )
-        axes.append(block)
-        exits.append(3 if report.drift["regression_detected"] else 4 if report.drift["unmeasurable_axes"] else 0)
-    t0 = None
-    reasons = []
+    target = {
+        "target_schema_version": 1,
+        "pair_slug": "gguf-phi4-mini-unsloth",
+        "spec_version": "v0",
+        "profile": "native-gguf-cpu-full40-greedy64-v0",
+        "arms": {
+            name: {
+                "model": arm["ref"],
+                "revision": PHI4_REVISION,
+                "resolved_dtype": arm["dtype"],
+                "artifact_sha256": arm["sha256"],
+                "size_bytes": arm["size_bytes"],
+            }
+            for name, arm in PAIR.items()
+        },
+        "engine": {
+            "name": "llama.cpp",
+            "device": "cpu",
+            "binary_sha256": binary_sha256,
+            "threads": threads,
+            **CPU_OFFLOAD_CONTROLS,
+        },
+        "judge": {
+            "id": verify.JUDGE_MODEL_ID,
+            "revision": verify.JUDGE_REVISION,
+            "input_contract": verify.JUDGE_INPUT_CONTRACT,
+        },
+        "probe_dataset": {
+            "id": verify.PROBE_DATASET_ID,
+            "revision": verify.PROBE_DATASET_REVISION,
+            "split": verify.PROBE_SPLIT,
+            "n_probes": 40,
+        },
+        "decode": {"max_new_tokens": 64, "do_sample": False, "chat_template": verify.DECODE_CHAT_TEMPLATE_POLICY},
+    }
     try:
-        t0 = within_hardware_identical([str(path) for path in paths])
-    except ReproduceError:
-        reasons.append("t0_operational_refusal")
+        result = assess_report_buffers(
+            (buffers[0], buffers[1], buffers[2]),
+            json.dumps(target).encode(),
+            source_labels=(labels[0], labels[1], labels[2]),
+        )
+    except ReferenceAssessmentError:
+        raise CampaignError("unsupported campaign aggregates") from None
+    require(
+        not {"reported_target_facts_mismatch", "reported_native_profile_mismatch"} & set(result["blocking_reasons"]),
+        "actual campaign instrument/arm/native scope differs",
+    )
+    require(
+        all(_json(raw)["judge"].get("card_xstest_accuracy_label") == verify._measured_judge_label() for raw in buffers),
+        "current judge label required",
+    )
     hashes = [sha(raw) for raw in buffers]
-    require([sha(_read(path, MAX_REPORT_BYTES)) for path in paths] == hashes, "report bytes changed during T0")
-    if t0 is not None:
-        require([item["report_sha256"] for item in t0["reports"]] == hashes, "T0 consumed report bytes changed")
-        if t0["protocol_pass"] is not True:
-            reasons.append("t0_disagreement")
-    normalized = [_normalized(value) for value in values]
-    differing = sorted({item for value in normalized[1:] for item in _differences(normalized[0], value)})
-    if differing:
-        reasons.append("full_report_repeatability_failed")
-    if any(axis["flagged_flips"] for run in axes for axis in run.values()):
-        reasons.append("fresh_flags_without_human_adjudication")
-    excluded = [name for name in axes[0] if not all(run[name]["measurable"] for run in axes)]
-    eligible = [name for name in axes[0] if name not in excluded] if not reasons else []
-    if not eligible and not reasons:
+    require([sha(_read(path, MAX_REPORT_BYTES)) for path in paths] == hashes, "report bytes changed during assessment")
+    reasons = list(result["blocking_reasons"])
+    if "no_measured_axis" in result["unknown_reasons"]:
         reasons.append("no_measured_axis")
+    require(not set(result["unknown_reasons"]) - {"no_measured_axis"}, "campaign target facts unavailable")
     return {
         "assessment_schema_version": 1,
         "spec_version": "v0",
@@ -180,17 +134,12 @@ def assess_reports(paths: list[Path], *, binary_sha256: str, threads: int) -> di
             {"path": str(path), "sha256": digest, "size_bytes": len(raw)}
             for path, digest, raw in zip(paths, hashes, buffers)
         ],
-        "native_exits": exits,
-        "t0": t0,
-        "full_report_repeatability": {
-            "pass": not differing,
-            "allowed_volatile_paths": ALLOWED_VOLATILE_PATHS,
-            "differing_paths": differing,
-            "normalized_sha256": [sha(json.dumps(v, sort_keys=True, allow_nan=False).encode()) for v in normalized],
-        },
-        "axes_by_run": axes,
-        "excluded_axes": excluded,
-        "eligible_axes_before_publication": eligible,
+        "native_exits": result["native_exits"],
+        "t0": result["t0"],
+        "full_report_repeatability": result["full_report_repeatability"],
+        "axes_by_run": result["axes_by_run"],
+        "excluded_axes": result["excluded_axes"],
+        "eligible_axes_before_publication": result["eligible_axes_before_publication"] if not reasons else [],
         "blocking_reasons": reasons,
         "registry_admission": "blocked" if reasons else "pending_public_byte_verification",
         "reference_registered": False,

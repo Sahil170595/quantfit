@@ -777,6 +777,28 @@ def test_every_readme_command_exists_in_the_shipped_cli(real_commands, real_surf
     assert findings == [], "\n".join(f"L{f.line} {f.kind}: {f.detail} | {f.command}" for f in findings)
 
 
+def test_readme_reference_assessment_needs_artifacts_and_is_not_executed(real_commands):
+    (command,) = [command for command in real_commands if command.argv[1:3] == ("references", "assess")]
+    assert "--bundle" in command.argv and "--target" in command.argv
+    item = qs.classify(command)
+    assert item.category == qs.CAT_NOT_RUNNABLE
+    assert item.requirements == (qs.REQ_ARTIFACT,)
+    calls: list[tuple[str, ...]] = []
+    assert qs.run_clean_venv([item], fake_runner(calls)) == []
+    assert calls == []
+
+
+def test_readme_bundled_reference_listing_remains_clean_venv(real_commands):
+    commands = [command for command in real_commands if command.argv[1:3] == ("references", "list")]
+    assert commands
+    items = [qs.classify(command) for command in commands]
+    assert all(item.runnable and item.requirements == () for item in items)
+    calls: list[tuple[str, ...]] = []
+    results = qs.run_clean_venv(items, fake_runner(calls))
+    assert len(results) == len(commands) and all(result.ok for result in results)
+    assert calls == [command.argv[1:] for command in commands]
+
+
 def test_every_category_a_command_is_a_real_cli_command(real_commands, real_surface):
     """The gate clause's own precondition: what we RUN must be what the CLI defines."""
     runnable = [c for c in (qs.classify(command) for command in real_commands) if c.runnable]

@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.28.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.28.0), including reproduction JUnit. The workflows below are available in this version.
+This README documents [quantfit 0.29.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.29.0), including reference-candidate assessment. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.28.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.29.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -617,6 +617,22 @@ selects an external registry without registering or publishing it. See
 [bounded campaign](docs/reference-campaign-v0.md), and
 [CLI reference](docs/cli-reference.md). No new T4 reproduction, sensitivity,
 human-adjudication, cross-hardware or QSR v1 freeze follows from a publication.
+
+Quantfit 0.29.0 checks a portable three-report handoff against an explicit
+pinned target, without loading models, fetching artifacts or registering a report:
+
+```bash
+quantfit references assess --bundle candidate-handoff --target target.json --out receiving-assessment.json --json
+```
+
+The receiving assessment preserves original reports/T0 and reports native exits,
+full-payload agreement, measured/excluded axes and blockers separately. Exit 0 means
+ready for publication review; 3 means known blockers, 4 means required facts or
+measured axes are unestablished, and 2 means malformed or unsafe input. Known
+blockers take precedence over missing facts. Target weight sizes are declarations:
+missing sizes cannot qualify, and passing the fixed declared cap does not prove
+weight authenticity or RAM fit. The public Phi4 reports remain blocked by their
+fresh unconfirmed flags. See the [target contract](docs/cli-reference.md#reference-candidate-assessment).
 
 ## License
 

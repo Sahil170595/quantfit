@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.28.0. The workflows below are available in this version.
+This reference documents quantfit 0.29.0. The workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -90,6 +90,67 @@ measurement validity, human adjudication or reproduction. No model or judge load
 authenticated. `declared_reference_citable` preserves the library's narrower
 pin-present flag; list entries expose `declared_spec_validity` rather than a
 measurement validity verdict. Each entry carries its own publication disclaimer.
+
+### Reference candidate assessment
+
+Quantfit 0.29.0 adds offline candidate-specific publication preconditions:
+
+```bash
+quantfit references assess --bundle candidate-handoff --target target.json --out receiving-assessment.json --json
+```
+
+The API is `quantfit.reference_assessment.assess_candidate(bundle_path, target, out_path=None)`;
+`target` is a JSON file path, and `out_path` is keyword-only. The target is read
+once up to 64 KiB and SHA-bound. The schema-2 three-report replay bundle is verified
+once, then assessment consumes its ordered held bytes. Producer paths remain labels;
+the core performs no path, network or model I/O. Native reports and original T0 are
+preserved, with separate receiving T0 and a new `receiving_assessment_schema_version: 1`
+result. CI campaign assessment keeps its existing schema and wire.
+
+The target is a closed JSON object: every listed key is required, and extra keys
+are refused. Evidence leaves can be explicitly `null` to state an unavailable fact;
+they are never filled from reports. Pins are lowercase 40-hex revisions and 64-hex
+digests; positive integer facts reject booleans.
+
+| Target field | Required declaration |
+|---|---|
+| `target_schema_version` | Exact integer `1` |
+| `pair_slug` | Bounded nonempty pair label |
+| `spec_version` / `profile` | Supported qualification is `v0` / `native-gguf-cpu-full40-greedy64-v0` |
+| `arms.baseline` / `arms.quantized` | Each has `model`, `revision`, `resolved_dtype`, `artifact_sha256`, `size_bytes` |
+| `engine` | `name`, `device`, `binary_sha256`, `threads`, `offload_device`, `n_gpu_layers`, `op_offload`; supported controls are `llama.cpp`, `cpu`, positive threads, `none`, `0`, `false` |
+| `judge` | `id`, `revision`, `input_contract`, matching the shipped pinned instrument |
+| `probe_dataset` | `id`, `revision`, `split`, `n_probes`; the pinned full40 population is required |
+| `decode` | `max_new_tokens`, `do_sample`, `chat_template`; shipped greedy64 is required |
+
+The reported baseline must be unquantized `F16`, `BF16` or `F32` under [QSR v0 §3.2](../spec/qsr-v0.md); the quantized arm may also be unquantized for a control.
+
+The fixed QSR v0 baseline cap is **16,500,000,000 decimal bytes**. Both weight sizes
+are supplied declarations; native reports contain no weight-size field, and bundle
+member sizes describe JSON files. Missing sizes cannot establish readiness. A
+declared cap comparison does not authenticate actual weights, memory use or RAM fit.
+
+Assessment retains native 0/3/4 exits, per-run axes, Wilson intervals, perfect-judge
+MDE floors, full-report differences and eligible/excluded axes. Only the four
+declared volatile fields are stripped for full-payload agreement. Native exit 4
+excludes an unmeasured axis; another measured axis can remain eligible. Fresh
+unadjudicated flags block readiness, and human-confirmed counts remain unknown.
+Dangerous-axis `0/n` means **the detector did not fire**, until sensitivity is established.
+
+Exit **0** means ready for publication review with complete declarations and at
+least one qualifying measured axis. **3** means a known target/cap, T0, payload or
+fresh-flag blocker. **4** means no known blocker but missing required facts,
+unsupported profile/spec or no measured axis. Known blockers outrank missing facts.
+**2** means malformed/private input, failed byte integrity, forged bindings or
+unsafe I/O. Error categories omit raw paths, payloads and provider diagnostics.
+
+The separate receiving output is checked and atomically replaced, protecting the
+target, closed bundle, every member and aliases. It never changes producer evidence,
+uploads data or adds a registry entry. Registration, human-label authentication,
+weight/size/physical-host authentication, independent execution, sensitivity and
+scientific GO remain unverified even at exit 0. The public Phi4 candidate stays
+blocked with its original **2/20 unconfirmed over-refusal flags** and dangerous-axis
+**0/12 detector did not fire** result.
 
 ## Quantize
 

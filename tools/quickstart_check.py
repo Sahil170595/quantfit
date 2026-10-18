@@ -583,10 +583,12 @@ def _refine(subcommand: str, argv: Sequence[str], reqs: set[str]) -> list[str]:
     extra: list[str] = []
 
     if subcommand == "references" and (
-        "verify" in argv or any(arg == "--registry" or arg.startswith("--registry=") for arg in argv)
+        "verify" in argv
+        or "assess" in argv
+        or any(arg == "--registry" or arg.startswith("--registry=") for arg in argv)
     ):
         reqs.add(REQ_ARTIFACT)
-        extra.append("external registry or verification needs local input artifacts")
+        extra.append("external registry, verification or assessment needs local input artifacts")
 
     if subcommand == "verify-safety" and "--demo" in argv:
         # `--demo` runs the real tabulation over bundled FIXTURES: no model, no network,

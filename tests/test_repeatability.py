@@ -104,27 +104,31 @@ def test_shared_diff_helper_has_unambiguous_rfc6901_pointers():
 def test_campaign_extraction_preserves_historical_policy_results():
     import importlib.util
 
-    from quantfit.report_comparison import differences, normalized
-
     spec = importlib.util.spec_from_file_location(
         "reference_campaign", SOURCE.parents[2] / "tools/ci_reference_campaign.py"
     )
     campaign = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(campaign)
     values = [json.loads((SOURCE / f"run-{i}/report.json").read_bytes()) for i in range(1, 4)]
-    assert campaign.ALLOWED_VOLATILE_PATHS == [
+    paths = [SOURCE / f"run-{i}/report.json" for i in range(1, 4)]
+    actual = campaign.assess_reports(
+        paths,
+        binary_sha256=values[0]["baseline"]["engine"]["binary_sha256"],
+        threads=values[0]["baseline"]["engine"]["threads"],
+    )
+    expected = json.loads((SOURCE / "assessment.json").read_bytes())
+    # Receiving locators differ from the committed producer run. Every hash,
+    # statistic, native outcome, repeatability field and eligibility claim stays exact.
+    for path, source, t0_source in zip(paths, expected["source_reports"], expected["t0"]["reports"], strict=True):
+        source["path"] = str(path)
+        t0_source["path"] = str(path.resolve())
+    assert actual == expected
+    assert actual["full_report_repeatability"]["allowed_volatile_paths"] == [
         "/created_utc",
         "/judge_runtime_s",
         "/baseline/runtime_s",
         "/quantized/runtime_s",
     ]
-    assert all(campaign._normalized(value) == normalized(value) for value in values)
-    assert all(
-        campaign._differences(normalized(values[0]), normalized(value))
-        == differences(normalized(values[0]), normalized(value))
-        == []
-        for value in values[1:]
-    )
 
 
 def test_formatting_is_not_identity_and_only_four_runtime_fields_are_ignored(tmp_path):

@@ -11,6 +11,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from quantfit.reproduce import within_hardware_identical
 from quantfit.safety import verify
 from quantfit.safety.gguf_arm import CPU_OFFLOAD_CONTROLS
 from tools import ci_reference_campaign as campaign
@@ -140,14 +141,14 @@ def test_invalid_campaign_claims_refuse_before_any_publication(tmp_path, field):
 
 def test_t0_source_substitution_refuses_before_assessment_publication(tmp_path, monkeypatch):
     paths = reports(tmp_path)
-    real = campaign.within_hardware_identical
+    real = campaign.assess_report_buffers
 
-    def substituted(items):
-        result = real(items)
+    def substituted(buffers, target, *, source_labels):
+        result = real(buffers, target, source_labels=source_labels)
         edit(paths[0], lambda value: value.update(created_utc="changed-after-validation"))
         return result
 
-    monkeypatch.setattr(campaign, "within_hardware_identical", substituted)
+    monkeypatch.setattr(campaign, "assess_report_buffers", substituted)
     with pytest.raises(RuntimeError, match="bytes changed"):
         assess(paths)
 
@@ -292,7 +293,7 @@ def test_campaign_terminal_staging_is_aggregate_and_fail_closed(tmp_path, monkey
             output = directory / "report.json"
             shutil.copyfile(path, output)
             outputs.append(output)
-        t0 = campaign.within_hardware_identical([str(path) for path in outputs])
+        t0 = within_hardware_identical([str(path) for path in outputs])
         result = {
             "status": "t0_agreement",
             "requested": {"max_new_tokens": 64},
