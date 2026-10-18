@@ -1,8 +1,7 @@
 # CLI reference — every command, every flag
 
-The published instrument is 0.26.0. This checkout prepares the unpublished 0.29.0
-candidate with reference assessment, reproduction JUnit and portable-bundle inputs; use candidate source or wheels
-for those flags. Software versions do not establish roadmap or scientific GO.
+This reference documents quantfit 0.29.0. The workflows below are available in this version.
+Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,
@@ -94,7 +93,7 @@ measurement validity verdict. Each entry carries its own publication disclaimer.
 
 ### Reference candidate assessment
 
-The 0.29.0 candidate adds offline candidate-specific publication preconditions:
+Quantfit 0.29.0 adds offline candidate-specific publication preconditions:
 
 ```bash
 quantfit references assess --bundle candidate-handoff --target target.json --out receiving-assessment.json --json
@@ -461,7 +460,7 @@ these assumptions explicitly. No sample size fixes correlated judge error.
 
 ## Reproduction and reporting
 
-The 0.27.0 candidate adds a bundle input mode to the existing command:
+Quantfit 0.27.0 adds a bundle input mode to the existing command:
 
 ```bash
 quantfit reproduce --reference-bundle reference-handoff --candidate-bundle candidate-handoff --out comparison.json --json
@@ -502,7 +501,7 @@ bytes and historical producer versions remain intact.
 
 ### Reproduction JUnit
 
-The 0.28.0 candidate adds `--junit PATH` in both loose-report and bundle input
+Quantfit 0.28.0 adds `--junit PATH` in both loose-report and bundle input
 modes. The library renderer is
 `quantfit.reproduce_junit.reproduction_to_junit(decision)`, accepting a mapping
 and returning XML. It reports the native decision without recalculating tolerance.
