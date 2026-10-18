@@ -116,6 +116,18 @@ def test_partial_and_orphan_calibrations_retain_explicit_exclusive_coverage(
     assert (tmp_path / "native.xml").read_bytes() == (tmp_path / "annotated.xml").read_bytes()
 
 
+def test_valid_calibration_label_is_not_reflected_as_authenticated_or_private_evidence(tmp_path, originals):
+    manifest_raw, reports_raw, calibrations_raw = originals
+    value = json.loads(calibrations_raw["clean"])
+    value["label"] = "PRIVATE_SENTINEL_DO_NOT_REFLECT; synthetic unverified label"
+    calibrations_raw["clean"] = encode(value)
+    manifest, reports, calibrations = consumer.stage(tmp_path / "inputs", manifest_raw, reports_raw, calibrations_raw)
+    default, _ = consumer.invoke(manifest, reports)
+    annotated, stderr = consumer.invoke(manifest, reports, calibrations)
+    consumer.check(annotated, default, manifest_raw, reports_raw, calibrations_raw)
+    assert "PRIVATE_SENTINEL_DO_NOT_REFLECT" not in json.dumps(annotated) + stderr
+
+
 @pytest.mark.parametrize("mutation", ["corrupt", "counts", "scope", "fingerprint", "unknown", "oversize"])
 def test_invalid_late_calibration_refuses_before_any_earlier_analysis(tmp_path, originals, mutation):
     manifest_raw, reports_raw, calibrations_raw = originals
@@ -225,7 +237,7 @@ def scaled_native(raw, n):
     return encode(report)
 
 
-@pytest.mark.parametrize("n,population", [(4097, 1), (3000, 2)])
+@pytest.mark.parametrize("n,population", [(4097, 1), (4096, 2)])
 def test_report_and_cumulative_quadratic_analysis_bounds_are_preflighted_without_math(
     tmp_path, originals, n, population
 ):
@@ -238,13 +250,41 @@ def test_report_and_cumulative_quadratic_analysis_bounds_are_preflighted_without
         tmp_path / "inputs", encode(manifest), reports_raw, calibrations_raw
     )
     default, _ = consumer.invoke(targets, reports)
-    assert default["exit_code"] == 0
+    # The existing native bundle reader already applies the 4096-probe cap.
+    assert default["exit_code"] == (2 if n > 4096 else 0)
+    empty = tmp_path / "empty-calibrations"
+    empty.mkdir()
+    absent, _ = consumer.invoke(targets, reports, empty)
+    if n <= 4096:
+        compact = consumer.check(absent, default, encode(manifest), reports_raw, {})
+        assert compact["analysis_work_units"] == 0 and compact["n_calibration_missing"] == population
+    else:
+        assert absent["exit_code"] == 2
     with patch(
         "quantfit.resolution.analyze_resolution_bytes", side_effect=AssertionError("math before budget")
     ) as analysis:
         document, _ = consumer.invoke(targets, reports, calibrations)
     analysis.assert_not_called()
     assert document["exit_code"] == 2
+
+
+def test_large_valid_stored_orphan_remains_pending_without_applying_an_analysis_cap(tmp_path, originals):
+    manifest_raw, reports_raw, _ = originals
+    payload = json.loads(manifest_raw)
+    payload["targets"] = payload["targets"][:1]
+    manifest_raw = encode(payload)
+    calibrations_raw = {"clean": consumer.calibration_bytes(scaled_native(reports_raw["clean"], 4097))}
+    manifest, reports, calibrations = consumer.stage(tmp_path / "inputs", manifest_raw, {}, calibrations_raw)
+    default, _ = consumer.invoke(manifest, reports)
+    with patch(
+        "quantfit.resolution.analyze_resolution_bytes", side_effect=AssertionError("orphan analysis")
+    ) as analysis:
+        document, _ = consumer.invoke(manifest, reports, calibrations)
+    analysis.assert_not_called()
+    compact = consumer.check(document, default, manifest_raw, {}, calibrations_raw)
+    assert (
+        compact["n_pending_report_missing"] == 1 and compact["analysis_work_units"] == 0 and compact["exit_code"] == 4
+    )
 
 
 @pytest.mark.parametrize("name,code", [("clean", 0), ("flagged", 3), ("unmeasured", 4)])
