@@ -7,8 +7,8 @@ candidate source or built wheel; published 0.31.0 does not provide this command.
 quantfit screen-compare --reference-bundle reference-screen --candidate-bundle candidate-screen --out comparison.json --junit comparison.xml --json
 ```
 
-The Python API is `quantfit.screen_compare.compare_screen_bundles(reference_bundle_path,
-candidate_bundle_path, *, out_path=None, junit_path=None)`. It returns a schema-1
+The Python API is `quantfit.screen_compare.compare_screen_bundles(reference_bundle,
+candidate_bundle, *, out_path=None, junit_path=None)`. It returns a schema-1
 `quantfit.screen-comparison` dictionary. `ScreenComparisonError` is a categorical
 operational refusal, mapped to CLI exit 2. JSON and JUnit outputs are optional.
 
@@ -24,8 +24,8 @@ Rows retain the original target order and both receiving report bindings. Each a
 keeps its own original at-risk denominator, flagged flips, Wilson interval, MDE and
 measured/missing state; no probe counts are pooled across targets. The complete
 receiving summaries and their sensitivity-control caveats remain attached.
-`identical_report_bytes` records an exact copied observation, without treating the
-copy as independent execution.
+`identical_report_bytes` records byte-identical report content, without establishing
+independent execution or how that content was produced.
 
 Known stratum protocol declarations are compared strictly, including declared
 engine/environment and pinned judge/probe/decode context. A missing context is
