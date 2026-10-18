@@ -297,3 +297,90 @@ def test_installed_guard_and_existing_cpu_seams_are_single_offline_calls():
     assert installed.count('"test_ci_screen_compare.py"') == 1 and "--rootdir" in installed
     cpu = (ROOT / "tools/ci_cpu_acceptance.py").read_text(encoding="utf-8")
     assert cpu.count("screen_compare_accept_cpu(") == 1 and '"screen_comparison": screen_comparison' in cpu
+
+
+def test_committed_comparison_originals_outer_manifests_and_receiving_bindings_are_literal():
+    data = ROOT / "validation/2026-10-18-screen-comparison"
+    manifest = (data / "inputs/targets.json").read_bytes()
+    old_manifest, old_reports = consumer.original_inputs(ROOT)
+    assert manifest == old_manifest and len(manifest) == 803
+    names = [target["name"] for target in json.loads(manifest)["targets"]]
+    original = {name: (data / "inputs/original" / f"{name}.json").read_bytes() for name in names}
+    assert original == old_reports
+    measured = {name: (data / "inputs/measured" / f"{name}.json").read_bytes() for name in names}
+    variants = {
+        "original": original,
+        "measured": measured,
+        "introduced": {**measured, "clean": (data / "inputs/new-flag/clean.json").read_bytes()},
+        "missing": {name: raw for name, raw in measured.items() if name != "flagged"},
+        "known-identity": {**measured, "clean": (data / "inputs/known-identity/clean.json").read_bytes()},
+        "unknown-identity": {**measured, "clean": (data / "inputs/unknown-identity/clean.json").read_bytes()},
+        "byte-different-targets": measured,
+    }
+    receipt = json.loads((data / "receipt.json").read_bytes())
+    assert receipt["inputs"]["targets"] == consumer.binding(manifest)
+    outers = {}
+    for name, reports in variants.items():
+        raw = (data / "bundle-manifests" / f"{name}.json").read_bytes()
+        outer = json.loads(raw)
+        outers[name] = raw
+        target_raw = (
+            (data / "inputs/byte-different-targets.json").read_bytes() if name == "byte-different-targets" else manifest
+        )
+        assert target_raw == manifest + b" " if name == "byte-different-targets" else target_raw == manifest
+        assert outer["targets"] == {"path": "targets.json", **consumer.binding(target_raw)}
+        members = {"manifest.json": raw, "targets.json": target_raw}
+        for entry, target in zip(outer["reports"], names, strict=True):
+            source = reports.get(target)
+            assert entry == {
+                "name": target,
+                "path": f"reports/{target}.json",
+                "status": "present" if source is not None else "missing",
+                **(consumer.binding(source) if source is not None else {"sha256": None, "size_bytes": None}),
+            }
+            if source is not None:
+                members[entry["path"]] = source
+        assert receipt["bundles"][name] == [
+            {"path": path, **consumer.binding(value)} for path, value in sorted(members.items())
+        ]
+        if name != "byte-different-targets":
+            assert receipt["inputs"]["variants"][name] == [
+                {"name": target, **consumer.binding(source)} for target, source in reports.items()
+            ]
+    for name, code, failures, skipped in (
+        ("conditional-copy", 0, 0, 0),
+        ("introduced-flag", 3, 2, 0),
+        ("apparent-clearance", 3, 2, 2),
+        ("original-copy", 3, 2, 2),
+        ("missing-evidence", 4, 0, 3),
+        ("known-identity", 4, 0, 3),
+        ("unknown-identity", 0, 0, 0),
+    ):
+        compact = receipt[name]
+        document = json.loads((data / f"{name}-cli.json").read_bytes())
+        result = json.loads((data / f"{name}.json").read_bytes())
+        assert document["result"] == result and document["exit_code"] == result["exit_code"] == code
+        for side in ("reference", "candidate"):
+            variant = compact[f"{side}_bundle"]
+            assert result["inputs"][side]["bundle_manifest_sha256"] == consumer.binding(outers[variant])["sha256"]
+            assert result["inputs"][side]["transport_bytes"] == sum(
+                entry["size_bytes"] for entry in receipt["bundles"][variant]
+            )
+            assert result["inputs"][side] == compact["inputs"][side]
+            saved = {entry["name"]: entry for entry in result["screens"][side]["report_bindings"]}
+            for row in result["rows"]:
+                source = variants[variant].get(row["name"])
+                expected = consumer.binding(source) if source is not None else {"sha256": None, "size_bytes": None}
+                for entry in (row["bindings"][side], saved[row["name"]]):
+                    assert {key: entry[key] for key in expected} == expected
+                for axis in consumer.AXES:
+                    assert row["axes"][axis][side] == consumer.native_axis(source, axis)
+        assert (
+            consumer.check_junit(data / f"{name}.xml", document)
+            == compact["junit"]
+            == {"tests": 7, "failures": failures, "skipped": skipped, "errors": 0}
+        )
+    for name in ("target-bytes-refusal", "output-alias-refusal"):
+        assert json.loads((data / f"{name}.json").read_bytes())["exit_code"] == 2
+    # Recorded source hashes are historical provenance, never a future-current package assertion.
+    assert len(receipt["runtime"]["source_files"]) == 8 and receipt["runtime"]["source_version"] == "0.34.0"

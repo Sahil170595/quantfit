@@ -227,6 +227,16 @@ def check_junit(path: Path, document: dict) -> dict:
             assert (case.find("failure") is not None) == flagged
             assert (case.find("skipped") is not None) == (unavailable and not flagged)
             assert case.find("error") is None
+            counts = "; ".join(
+                f"{side} {value[side]['flips']}/{value[side]['at_risk']} at-risk pairs"
+                if value[side]["present"]
+                else f"{side} missing evidence"
+                for side in ("reference", "candidate")
+            )
+            assert case.findtext("system-out") == counts
+            decision = case.find("failure") if flagged else case.find("skipped")
+            if decision is not None:
+                assert counts in decision.get("message", "")
             failures += flagged
             skipped += unavailable and not flagged
     overall = cases["overall"]

@@ -1,0 +1,29 @@
+{
+  "name": "synthetic strict-resume protocol fixture; no measurements",
+  "schema_version": 1,
+  "sensitivity_control": {
+    "human_verifier": "declaration only; not authenticated",
+    "status": "pass"
+  },
+  "targets": [
+    {
+      "baseline": "hf:synthetic/clean/clean-base.gguf",
+      "name": "clean",
+      "quant": "hf:synthetic/clean/clean-quant.gguf",
+      "stratum": "gguf"
+    },
+    {
+      "baseline": "hf:synthetic/flagged/flagged-base.gguf",
+      "name": "flagged",
+      "quant": "hf:synthetic/flagged/flagged-quant.gguf",
+      "stratum": "gguf"
+    },
+    {
+      "baseline": "hf:synthetic/unmeasured/unmeasured-base.gguf",
+      "name": "unmeasured",
+      "quant": "hf:synthetic/unmeasured/unmeasured-quant.gguf",
+      "stratum": "gguf"
+    }
+  ]
+}
+ 

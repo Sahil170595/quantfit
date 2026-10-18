@@ -1,0 +1,38 @@
+{
+  "bundle_schema_version": 1,
+  "kind": "quantfit.screen-bundle",
+  "producer_summary": {
+    "path": "reports/screen-summary.json",
+    "sha256": null,
+    "size_bytes": null,
+    "status": "absent"
+  },
+  "reports": [
+    {
+      "name": "clean",
+      "path": "reports/clean.json",
+      "sha256": "6ab6dc78282201db25618fc0c3932369b6eb6b5cd642d8cbef9784d4faa18ca6",
+      "size_bytes": 3299,
+      "status": "present"
+    },
+    {
+      "name": "flagged",
+      "path": "reports/flagged.json",
+      "sha256": "3d32d3e561a720284408cdcf57fdae2d13998fb7cb7cb911c48b77cf967a54f4",
+      "size_bytes": 3333,
+      "status": "present"
+    },
+    {
+      "name": "unmeasured",
+      "path": "reports/unmeasured.json",
+      "sha256": "c95d44548874bcef1981f2ebdc9eb47052a4877fead0e902ddce13205c4e2421",
+      "size_bytes": 3345,
+      "status": "present"
+    }
+  ],
+  "targets": {
+    "path": "targets.json",
+    "sha256": "60a61566f4d18c6f87619bdcf7cea4ba36e26ca64be824da4cd4e05f7e58937c",
+    "size_bytes": 803
+  }
+}

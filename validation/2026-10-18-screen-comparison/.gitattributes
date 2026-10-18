@@ -1,3 +1,5 @@
 # Original and receiving bytes are recorded literally across operating systems.
 *.json -text whitespace=cr-at-eol
 *.xml -text whitespace=cr-at-eol
+# Intentional extra space proves exact-manifest-byte admission without rewriting evidence.
+inputs/byte-different-targets.json -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
