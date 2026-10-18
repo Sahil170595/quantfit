@@ -497,6 +497,16 @@ def _build_parser() -> argparse.ArgumentParser:
         "replay-verify", help="verify relocated three-report T0 handoff (0 intact, 3 byte mismatch, 2 unsupported)"
     )
     breverify.add_argument("--bundle", required=True, metavar="DIR", help="schema-2 replay bundle directory")
+    bscreen = bsub.add_parser(
+        "screen-create", help="package original screen population (0 content verified, 2 unsupported input)"
+    )
+    bscreen.add_argument("--targets", required=True, metavar="PATH", help="original screen target manifest")
+    bscreen.add_argument("--reports-dir", required=True, metavar="DIR", help="closed native report directory")
+    bscreen.add_argument("--out", required=True, metavar="DIR", help="new bundle directory; parent must exist")
+    bscreen_verify = bsub.add_parser(
+        "screen-verify", help="receive relocated screen evidence (0 content verified, 2 invalid/unsafe input)"
+    )
+    bscreen_verify.add_argument("--bundle", required=True, metavar="DIR", help="closed screen bundle directory")
 
     pevidence = sub.add_parser("evidence", help="approved immutable public aggregates (integrity 0; refusal 2)")
     esub = pevidence.add_subparsers(dest="evidence_cmd", required=True)
@@ -1141,6 +1151,21 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _emit(args, "evidence", 0, result, human_evidence)
 
     if args.cmd == "bundle":
+        if args.bundle_cmd in {"screen-create", "screen-verify"}:
+            from quantfit.screen_bundle import create_screen_bundle, verify_screen_bundle
+
+            if args.bundle_cmd == "screen-create":
+                result = create_screen_bundle(args.targets, args.reports_dir, args.out)
+            else:
+                result = verify_screen_bundle(args.bundle)
+
+            def human_screen_bundle():
+                print("Screen bundle content: VERIFIED")
+                print(f"Original receiving screen exit: {result['receiving_summary']['exit_code']}")
+                print(result["scope"])
+
+            return _emit(args, "bundle " + args.bundle_cmd, 0, result, human_screen_bundle)
+
         from quantfit.bundle import create_bundle, create_replay_bundle, verify_bundle, verify_replay_bundle
 
         if args.bundle_cmd == "replay-create":

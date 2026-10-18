@@ -1,7 +1,7 @@
 # CLI reference — every command, every flag
 
 This reference covers published quantfit 0.31.0 and explicitly marked unreleased
-0.32.0 candidate workflows. Candidate behavior requires that source or built wheel.
+0.33.0 candidate workflows, including the 0.32.0 strict-resume interface. Candidate behavior requires that source or built wheel.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -69,6 +69,14 @@ published last. Preflight and publication protect the original target/bundle/mem
 resolved weights/executable and aliases; interrupted or cleanup-uncertain work cannot
 qualify success. Registration, authenticated human labels/weights/physical hosts,
 independent execution, sensitivity and scientific GO remain separate and unverified.
+
+The **0.33.0 candidate** adds `bundle screen-create --targets PATH --reports-dir DIR
+--out NEWDIR --json` and `bundle screen-verify --bundle DIR --json`. These package
+original bytes for the complete screen population and rebuild its strict receiving
+summary offline after relocation. Content verification exits 0 independently of
+nested screen flags/incompleteness (3/4); invalid, unsafe or mismatched evidence
+exits 2. See [Screen evidence bundles](screen-bundles.md) for the API, exact closed
+inventory, full transport limits, publication and claim boundaries.
 
 `quantfit bundle create` and `quantfit bundle verify` package and check portable
 aggregate evidence offline. Their role/flag/exit-code contract and worked commands are

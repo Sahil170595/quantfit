@@ -15,6 +15,12 @@
 
 ## Unreleased
 
+## 0.33.0 — Unreleased
+
+- `bundle screen-create` / `bundle screen-verify` and `quantfit.screen_bundle` preserve original target/native-report bytes, explicit missing targets and optional ignored producer-summary bytes in a closed portable handoff. Receiving summaries reuse strict native validation offline; producer locators never trigger asset access.
+- Both manifests and every member count toward a 64 MiB transport bound. Exclusive new directories publish the outer manifest last; ownership and byte checks constrain failure cleanup. This is not atomic directory publication or a hostile-filesystem transaction.
+- Valid content verification exits 0 separately from nested screen flags or incompleteness (3/4); malformed, mismatched or unsafe evidence exits 2. Byte binding does not authenticate execution, human labels, sensitivity or scientific GO. See `docs/screen-bundles.md` and `validation/2026-10-18-screen-bundle/` for command evidence and limits.
+
 ## 0.32.0 — Unreleased
 
 - `screen --resume` preflights held present native reports against the complete target manifest before model contact or output mutation. Malformed, incompatible, private or duplicate evidence refuses instead of silently triggering regeneration.
