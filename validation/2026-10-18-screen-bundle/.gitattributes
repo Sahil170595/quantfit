@@ -1,0 +1,3 @@
+# Preserve the exact producer bytes authenticated by aggregate receiving receipts.
+*.json -text whitespace=cr-at-eol
+*.xml -text whitespace=cr-at-eol
