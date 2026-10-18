@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.30.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.30.0), including recipe-bound native reruns. The workflows below are available in this version.
+This README documents [quantfit 0.31.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.31.0), including strict saved-screen summaries. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.30.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.31.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -599,6 +599,33 @@ matching flagged results never become a model pass. Valid negative/failed execut
 observations are retained; cleanup or provenance failure cannot qualify success.
 The new aggregate directory is staged with its manifest last, protecting original
 evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
+
+## Summarize saved screen reports
+
+Quantfit 0.31.0 rebuilds a receiving summary from an explicit target manifest
+and its saved aggregate reports, without starting inference or contacting the Hub:
+
+```bash
+quantfit screen-summary --targets screens/targets-0.5.json --reports-dir screen-reports --out receiving-screen.json --junit receiving-screen.xml --json
+```
+
+The input directory permits declared reports and the fixed producer summary;
+that summary's bytes are bound, but its claims are ignored. Other entries are refused.
+Reports must match their declared targets and a compatible pinned measurement
+protocol within each stratum. Original statistics and derived flags are validated;
+duplicate artifacts or known paired identities cannot inflate the population.
+Every declared target remains visible. Missing reports are `missing_evidence` rows
+and JUnit skips; they are not fabricated native failures or re-run automatically.
+Bounds use measured targets per axis and stratum, excluding zero-at-risk targets
+only on the affected axis.
+
+Malformed, incompatible, duplicate or unsafe inputs exit **2**. Valid flags exit
+**3**, taking precedence over missing or unmeasured evidence (**4**). Only complete
+supported no-detection evidence exits **0**, with sensitivity and resolution caveats
+still attached. A recorded control declaration does not authenticate a fresh
+sensitivity result; flags remain unconfirmed. JSON and XML are staged and replaced
+atomically per file, outside the protected report directory. Original producer
+reports and summaries remain unchanged. See the [saved-screen contract](docs/cli-reference.md#summarize-a-saved-screen).
 
 ## Public campaigns and offline reference artifacts
 

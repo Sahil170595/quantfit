@@ -466,6 +466,9 @@ def test_both_buffers_are_staged_before_any_success_is_published(tmp_path, monke
         def __enter__(self):
             return self
 
+        def fileno(self):
+            return self.stream.fileno()
+
         def write(self, raw):
             if self.fail and fault in ("partial", "short", "interrupt"):
                 self.stream.write(raw[: len(raw) // 2])

@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.30.0. The workflows below are available in this version.
+This reference documents quantfit 0.31.0. The workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -423,6 +423,63 @@ On the first full 15-target screen **six targets were lost** to
 every one succeeded on a later attempt - a network hiccup had become a permanent hole in
 the prevalence bound. Retry is opt-in because the default must not silently triple a
 screen's wall clock.
+
+## Summarize a saved screen
+
+Quantfit 0.31.0 adds a strictly offline receiving analysis:
+
+```bash
+quantfit screen-summary --targets screens/targets-0.5.json --reports-dir screen-reports --out receiving-screen.json --junit receiving-screen.xml --json
+```
+
+`quantfit.saved_screen.summarize_screen(manifest_path, reports_dir, out_path=None, junit_path=None)`
+returns the receiving result; output arguments are keyword-only and optional.
+`--targets` and `--reports-dir` are required paths. `--out` writes receiving JSON,
+`--junit` writes XML, and `--json` prints the usual CLI envelope. No token,
+generation, resolver, network, retry or resume path is used.
+
+The existing schema-1 target manifest is held once, bounded to 1 MiB and 256
+case-insensitively unique target names. The closed report directory permits its
+named `<target>.json` reports and the optional fixed producer `screen-summary.json`.
+That producer summary is held, privacy-checked and byte-bound under `ignored_members`;
+its counts, status, confirmations and control claims never enter the receiving
+analysis. Other entries, subdirectories, captures and caches are refused. Each
+member is bounded to 8 MiB and all members together to 64 MiB. Duplicate JSON keys,
+non-finite literals, private fields, symbolic links/junctions and non-regular
+members are refused. Report statistics and derived flags are checked with native
+validators before exact baseline/quant references and backend-to-stratum bindings
+are counted. Judge/probe pins, input/decode and causal engine/environment context
+must be compatible within each stratum. Different supported strata remain separate.
+Duplicate report bytes or a shared complete pair of known weight hashes/snapshot
+pins cannot become separate population entries. Missing identities remain unknown;
+they do not prove unique weights or independent targets.
+
+The `saved_screen_summary_schema_version: 1` result carries manifest/report byte
+bindings, all declared target rows, coverage and per-axis/per-stratum aggregates.
+Missing reports remain `missing_evidence`, with an explicit JUnit skip. An axis
+with zero at-risk pairs contributes no numerator or denominator on that axis; the
+other axis still counts. Prevalence denominators count measured targets, not pooled
+probes. Original per-report at-risk counts, flips, Wilson intervals and perfect-judge
+MDE floors remain visible. Every human confirmation remains unestablished; no
+adjudication is ingested.
+
+The manifest's sensitivity-control status is a declaration only. Even `pass`
+does not clear effective detection-sensitivity conditionality or the unconditional
+resolution caveat. A dangerous-axis `0/n` means the detector did not fire. Recorded
+pins and integrity do not authenticate actual weights, physical hosts, independent
+execution, human labels or scientific GO.
+
+Malformed/incompatible/duplicate evidence or operational/IO failure exits **2**.
+Otherwise any preserved valid regression flag exits **3**, before missing evidence
+or any required unmeasured axis (**4**). Complete supported no-detection evidence
+alone exits **0**, retaining those caveats. JUnit preserves flagged failures and
+missing/unmeasured skips rather than turning incomplete coverage green.
+
+Both receiving output buffers are staged before per-file atomic replacement. The
+manifest, report directory, members and same-file aliases are protected, and outputs
+must be distinct and outside the input report directory. JSON/XML publication is
+not a transaction across two paths. Producer reports and summaries are not edited;
+contradictory historical verdicts are refused rather than silently repaired.
 
 ## Gate a release
 

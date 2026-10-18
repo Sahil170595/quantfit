@@ -117,7 +117,7 @@ def test_the_leaf_set_is_what_we_think_it_is():
     """A floor, so the walk above cannot pass by finding nothing."""
     leaves = {" ".join(p) for p in _leaf_commands()}
     expected = {
-        "check", "list", "plan", "probe", "verify", "verify-safety", "inspect-run", "screen", "emit",
+        "check", "list", "plan", "probe", "verify", "verify-safety", "inspect-run", "screen", "screen-summary", "emit",
         "calibrate sheet", "calibrate ingest", "gate", "t0", "reproduce", "audit", "quantize", "resolution",
         "references list", "references verify", "references assess", "bundle create", "bundle verify",
         "bundle replay-create", "bundle replay-verify", "cold-run", "repeatability", "evidence fetch", "evidence rerun",

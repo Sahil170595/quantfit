@@ -322,6 +322,9 @@ def test_failed_atomic_output_preserves_existing_result(tmp_path, monkeypatch, f
         def __enter__(self):
             return self
 
+        def fileno(self):
+            return self.stream.fileno()
+
         def write(self, raw):
             if fault == "interrupt":
                 self.stream.write(raw)

@@ -806,6 +806,13 @@ def test_native_evidence_rerun_requires_artifacts_and_is_not_executed():
     assert qs.run_clean_venv([item], fake_runner(calls)) == [] and calls == []
 
 
+def test_saved_screen_summary_requires_artifacts_and_is_not_executed():
+    item = _classify("quantfit screen-summary --targets targets.json --reports-dir reports --out receiving.json")
+    assert not item.runnable and item.requirements == (qs.REQ_ARTIFACT,)
+    calls: list[tuple[str, ...]] = []
+    assert qs.run_clean_venv([item], fake_runner(calls)) == [] and calls == []
+
+
 def test_every_category_a_command_is_a_real_cli_command(real_commands, real_surface):
     """The gate clause's own precondition: what we RUN must be what the CLI defines."""
     runnable = [c for c in (qs.classify(command) for command in real_commands) if c.runnable]

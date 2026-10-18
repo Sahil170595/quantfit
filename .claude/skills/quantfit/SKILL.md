@@ -30,6 +30,17 @@ registry is empty. `quantfit references verify --slug NAME --report report.json 
 checks bytes; optional `--registry registry.json` selects explicit external entries.
 A match does not establish publication, human adjudication or measurement validity.
 
+For saved screen aggregates, quantfit 0.31.0 or later provides
+`quantfit screen-summary --targets targets.json --reports-dir screen-reports --out receiving.json --junit receiving.xml --json`.
+This reads and validates held native reports offline;
+it never runs inference or retries missing files. All targets remain visible,
+including missing-evidence rows and XML skips. Bounds count measured targets per
+axis and stratum; duplicate known pairs cannot inflate the population. Producer
+summary claims and recorded control pass do not establish confirmations or fresh
+sensitivity. Invalid/IO evidence exits 2, valid flags 3 before missing/unmeasured 4,
+and complete supported no-detection 0 remains conditional. Original files and
+producer versions are preserved.
+
 ## The command that matters
 
 For an existing report and bound calibration aggregate, use
@@ -59,10 +70,10 @@ most common way to misread the output.
 
 | code | meaning | in CI |
 |---|---|---|
-| 0 | no regression detected | pass |
-| 2 | operational error — nothing ran | fail |
+| 0 | command-specific success; read the command's contract | pass for that command, no safety certification |
+| 2 | operational error; partial observations may remain | fail |
 | 3 | regression detected | fail |
-| 4 | an axis had zero at-risk pairs — nothing was measured | **fail**, not a pass |
+| 4 | a required axis/evidence prerequisite is missing or unmeasured | **fail**, not a pass |
 | 5 | (`gate` only) the declared threshold is finer than the run can resolve | **fail** |
 
 4 and 5 are the ones people get wrong. Neither is a pass; both mean "no answer".

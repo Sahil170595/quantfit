@@ -412,6 +412,7 @@ import os
 import re
 import stat
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -2373,31 +2374,69 @@ def _prepare_reproduction_outputs(
     return plan
 
 
-def _publish_reproduction_outputs(plan: _ReproductionOutputs, outputs: list[tuple[Path, bytes]]) -> None:
+@dataclass
+class _OutputStage:
+    path: Path
+    target: Path
+    raw: bytes
+    identity: tuple[int, int]
+    pending: bool = True
+
+
+def _stage_owned(stage: _OutputStage) -> bool:
+    from quantfit.bundle import _no_links
+
+    try:
+        info = stage.path.lstat()
+    except FileNotFoundError:
+        return False
+    if not stat.S_ISREG(info.st_mode) or (info.st_dev, info.st_ino) != stage.identity:
+        return False
+    _no_links(stage.path)
+    return True
+
+
+def _publish_reproduction_outputs(
+    plan: _ReproductionOutputs, outputs: list[tuple[Path, bytes]], *, recheck: Callable[[], object] | None = None
+) -> None:
     """Stage all complete buffers first; each replacement is atomic, not a pair transaction."""
-    temporary: list[tuple[Path, Path]] = []
+    from quantfit.bundle import _read
+
+    temporary: list[_OutputStage] = []
     try:
         _validate_reproduction_outputs(plan)
+        if recheck is not None:
+            recheck()
         for target, raw in outputs:
             if target not in plan.targets:
                 raise ReproduceError("comparison publication target was not prepared")
             with tempfile.NamedTemporaryFile(dir=target.parent, prefix=".reproduce-", delete=False) as stream:
                 path = Path(stream.name)
-                temporary.append((path, target))
+                info = os.fstat(stream.fileno())
+                temporary.append(_OutputStage(path, target, raw, (info.st_dev, info.st_ino)))
                 if stream.write(raw) != len(raw):
                     raise ReproduceError("incomplete reproduction comparison output write")
                 stream.flush()
         _validate_reproduction_outputs(plan)
-        for path, target in temporary:
+        if recheck is not None:
+            recheck()
+        for stage in temporary:
             _validate_reproduction_outputs(plan)
-            os.replace(path, target)
+            if recheck is not None:
+                recheck()
+            if not _stage_owned(stage) or _read(stage.path, len(stage.raw)) != stage.raw:
+                raise ReproduceError("temporary publication bytes or ownership changed")
+            _validate_reproduction_outputs(_ReproductionOutputs(plan.sources, plan.roots, (stage.path,)))
+            os.replace(stage.path, stage.target)
+            stage.pending = False
     except (OSError, RuntimeError, TypeError, ValueError) as exc:
         if isinstance(exc, ReproduceError):
             raise
         raise ReproduceError(f"cannot publish reproduction comparison: {exc}") from exc
     finally:
-        for path, _ in temporary:
-            path.unlink(missing_ok=True)
+        for stage in temporary:
+            if stage.pending and _stage_owned(stage):
+                stage.path.unlink(missing_ok=True)
 
 
 def _bundle_output_plan(bundle_paths: tuple[str, str], out_path: str) -> _ReproductionOutputs:

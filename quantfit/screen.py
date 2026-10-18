@@ -194,13 +194,18 @@ def load_manifest(path: str) -> tuple[str, list[Target], dict]:
         payload = json.loads(Path(path).read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise ScreenError(f"unreadable target manifest {path}: {exc}") from exc
-    _require(isinstance(payload, dict), f"target manifest {path} is not a JSON object")
+    return _manifest_from_payload(payload, label=path)
+
+
+def _manifest_from_payload(payload: dict, *, label: str = "held") -> tuple[str, list[Target], dict]:
+    """Shared structural manifest parser; no locator or filesystem access."""
+    _require(isinstance(payload, dict), f"target manifest {label} is not a JSON object")
     unknown = sorted(set(payload) - _MANIFEST_FIELDS)
     _require(not unknown, f"target manifest has unknown top-level keys {unknown}; allowed: {sorted(_MANIFEST_FIELDS)}")
     got = payload.get("schema_version")
     _require(
         got == MANIFEST_SCHEMA_VERSION,
-        f"target manifest {path} has schema_version {got!r}; this quantfit reads {MANIFEST_SCHEMA_VERSION}",
+        f"target manifest {label} has schema_version {got!r}; this quantfit reads {MANIFEST_SCHEMA_VERSION}",
     )
     name = payload.get("name")
     _require(isinstance(name, str) and bool(name), "manifest name must be a non-empty string")
