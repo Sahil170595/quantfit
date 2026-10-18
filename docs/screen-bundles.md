@@ -30,7 +30,8 @@ saved-screen receiver. Native arithmetic, privacy, references, protocol, paired
 identity/duplicate checks and per-axis measured-target denominators remain in force.
 The resulting `quantfit.screen-bundle-verification` record includes the outer manifest,
 its digest, transport byte count, limits and the rebuilt receiving summary. Fixed
-receiving labels avoid disclosing producer filesystem paths. It follows no model,
+receiving source labels do not add the producer manifest/report-directory paths;
+declared model/provenance paths may remain. It follows no model,
 capture, calibration or binary locator from the reports and performs no inference,
 asset resolution or network call. Copying bytes does not demonstrate independent runs.
 
@@ -38,8 +39,10 @@ The complete transport is at most 64 MiB, counting the outer manifest, target ma
 and every member occurrence, including the ignored original summary. The outer
 manifest is at most 256 KiB, target manifest 1 MiB, each report/summary 8 MiB, and the
 population at most 256 targets. Declared sizes are charged before large member reads;
-unexpected entries, links/reparse points, nonregular members, unsafe aliases and
-malformed/mismatched content are refused. A hard link does not reduce the byte budget.
+unexpected entries, symbolic links/reparse points, nonregular members, unsafe output aliases and
+malformed/mismatched content are refused. Read-only regular hard-linked inputs are
+supported; a hard link does not reduce the byte budget or bypass duplicate-evidence
+validation. Output publication never replaces an existing member or destination.
 
 The destination parent must exist. Creation exclusively creates a new final directory
 after source validation and writes the outer manifest last as its ready marker.

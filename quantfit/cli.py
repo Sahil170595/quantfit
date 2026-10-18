@@ -1161,7 +1161,7 @@ def _dispatch(args: argparse.Namespace) -> int:
 
             def human_screen_bundle():
                 print("Screen bundle content: VERIFIED")
-                print(f"Original receiving screen exit: {result['receiving_summary']['exit_code']}")
+                print(f"Rebuilt receiving screen exit: {result['receiving_summary']['exit_code']}")
                 print(result["scope"])
 
             return _emit(args, "bundle " + args.bundle_cmd, 0, result, human_screen_bundle)
