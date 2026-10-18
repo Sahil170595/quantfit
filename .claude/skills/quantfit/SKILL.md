@@ -72,6 +72,16 @@ output exits 2. JUnit has two axis cases per target plus overall; native flags f
 before incomplete cases skip. Never treat these observations as human confirmations,
 calibrated sensitivity or scientific GO.
 
+The unreleased **0.35.0 candidate** adds optional `--calibrations-dir calibrations`
+to `screen-summary`. Read the appended `conditional_resolution` rows and coverage
+separately from the unchanged native verdict/JUnit. Target-named aggregate schema-2
+calibrations are validated and scope-matched from held bytes before the existing
+conditional resolution calculator runs. Missing calibrations remain explicit; a valid
+stored calibration without its report is pending and proves no actual report match.
+Malformed/incompatible evidence refuses 2. No annotation clears native flags,
+authenticates labels/assumptions, establishes sensitivity or supplies scientific GO.
+Do not claim this candidate option from published 0.31.0.
+
 ## The command that matters
 
 For an existing report and bound calibration aggregate, use

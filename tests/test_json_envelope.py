@@ -153,6 +153,19 @@ def test_json_is_not_a_flag_on_the_parent_of_a_subcommand():
 # backend — which is also the path a caller most needs to be able to parse.
 _CASES = [
     (
+        "screen-summary-calibration-missing",
+        [
+            "screen-summary",
+            "--targets",
+            "no-targets-xyz.json",
+            "--reports-dir",
+            "no-reports-xyz",
+            "--calibrations-dir",
+            "no-calibrations-xyz",
+        ],
+        2,
+    ),
+    (
         "screen-compare-missing",
         [
             "screen-compare",

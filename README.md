@@ -45,9 +45,10 @@ This README documents [quantfit 0.31.0](https://github.com/Sahil170595/quantfit/
 
 Install with `pip install "quantfit[inspect,gguf]==0.31.0"`.
 
-This branch also documents the **unreleased 0.34.0 candidate**, which includes strict
+This branch also documents the **unreleased 0.35.0 candidate**, which includes strict
 screen resume validation (0.32.0), portable screen evidence (0.33.0) and screen
-observation comparison (0.34.0). Candidate commands below require that source or its
+observation comparison (0.34.0) and conditional saved-screen resolution (0.35.0).
+Candidate commands below require that source or its
 built wheel; the published install above retains 0.31.0 behavior.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
@@ -604,6 +605,25 @@ matching flagged results never become a model pass. Valid negative/failed execut
 observations are retained; cleanup or provenance failure cannot qualify success.
 The new aggregate directory is staged with its manifest last, protecting original
 evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
+
+## Add conditional resolution to a saved screen (0.35.0 candidate)
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --out receiving.json --junit receiving.xml --json
+```
+
+The optional directory contains aggregate bound-schema-2 calibrations named
+`<target>.json`. Each analyzed pair reuses the existing conditional resolution
+calculator over held original bytes. Missing calibrations and valid stored
+calibrations whose native report is missing remain explicit; they do not qualify
+missing reports or change the native verdict/JUnit. Malformed or incompatible
+supplied calibrations refuse 2.
+
+Read `conditional_resolution` for per-target analysis, original hashes, stored
+fingerprints and coverage. Native flags, measured-target prevalence, control
+declarations and sensitivity caveats remain unchanged. Calibrations do not
+authenticate human labels or statistical assumptions, and do not establish
+scientific GO. See [the conditional screen-resolution contract](docs/screen-resolution.md).
 
 ## Compare screen observations (0.34.0 candidate)
 
