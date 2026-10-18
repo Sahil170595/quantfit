@@ -280,12 +280,26 @@ def run_screen(
     capture_dir: str | None = None,
     resume: bool = False,
     attempts: int = 1,
+    junit_path: str | None = None,
 ) -> dict:
     """Run every target in the manifest sequentially; aggregate per-stratum, per-axis bounds.
 
     Writes one schema-v2 DriftReport per completed target plus the screen summary
     (`<out_dir>/screen-summary.json`), and returns that summary.
     """
+    if resume:
+        from quantfit.screen_resume import run_resumed_screen
+
+        return run_resumed_screen(
+            manifest_path,
+            out_dir,
+            token=token,
+            max_new_tokens=max_new_tokens,
+            capture_dir=capture_dir,
+            attempts=attempts,
+            junit_path=junit_path,
+        )
+    _require(junit_path is None, "junit_path requires strict resume")
     from datetime import datetime, timezone
 
     # Resolved from the module at call time: the heavy verify path stays lazy for
@@ -313,23 +327,6 @@ def run_screen(
     summary = _summary(manifest_name, manifest_path, targets, rows, control, created_utc, max_new_tokens)
     for target in targets:
         report_path = out / f"{target.name}.json"
-
-        if resume and report_path.is_file():
-            # A measured target is not re-measured. Its report IS the measurement, and
-            # on a machine that cannot hold the whole manifest at once re-running it also
-            # re-downloads the pair. The row is rebuilt from the report on disk, so a
-            # resumed summary is identical to the one an uninterrupted run would write.
-            try:
-                prior = json.loads(report_path.read_text(encoding="utf-8"))
-                rows.append(_drift_row(target, prior["drift"], report_path.name))
-                summary = _summary(manifest_name, manifest_path, targets, rows, control, created_utc, max_new_tokens)
-                _write_summary(out / SUMMARY_FILENAME, summary)
-                print(f"resume: {target.name} already measured")
-                continue
-            except (OSError, KeyError, json.JSONDecodeError) as exc:
-                # A truncated or foreign file is not a measurement. Re-run rather than
-                # trust it: resuming onto a corrupt artifact would publish it silently.
-                print(f"resume: {target.name} report unreadable ({type(exc).__name__}), re-running")
 
         for attempt in range(1, max(1, attempts) + 1):
             try:
