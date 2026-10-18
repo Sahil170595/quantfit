@@ -163,7 +163,8 @@ def main() -> None:
         records["limits"] = {
             "synthetic_aggregate_labels": True,
             "model_or_judge_calls": 0,
-            "resolution_or_download_calls": 0,
+            "model_arm_resolution_or_download_calls": 0,
+            "conditional_resolution_math": "native analyzer enabled for analyzed pairs; direct native analysis is the oracle",
             "human_labels_authenticated": False,
             "assumptions_verified": False,
             "sensitivity_established": False,
