@@ -188,7 +188,7 @@ def test_create_destination_admission_preserves_all_original_bytes(tmp_path, ori
 
 
 @pytest.mark.parametrize("operation", ["create", "verify"])
-def test_outside_hardlink_refuses_without_mutating_either_alias(tmp_path, originals, operation):
+def test_readonly_input_hardlink_preserves_exact_receiving_and_outside_bytes(tmp_path, originals, operation):
     manifest_raw, reports = originals
     manifest, directory = consumer.stage(tmp_path / "producer", manifest_raw, reports)
     bundle = tmp_path / "bundle"
@@ -201,9 +201,44 @@ def test_outside_hardlink_refuses_without_mutating_either_alias(tmp_path, origin
     os.link(original, outside)
     raw = original.read_bytes()
     document = consumer.verify(bundle) if operation == "verify" else consumer.create(manifest, directory, bundle)
-    assert document["exit_code"] == 2 and outside.read_bytes() == original.read_bytes() == raw
-    if operation == "create":
-        assert not bundle.exists()
+    assert document["exit_code"] == 0 and outside.read_bytes() == original.read_bytes() == raw
+    assert consumer.check(document, bundle, manifest_raw, reports)["receiving_exit_code"] == 3
+
+
+def test_duplicate_native_evidence_refuses_even_when_each_declared_ref_matches(tmp_path, originals):
+    manifest_raw, reports = originals
+    declaration = json.loads(manifest_raw)
+    declaration["targets"][1] = {**declaration["targets"][0], "name": "flagged"}
+    altered = dict(reports)
+    altered["flagged"] = reports["clean"]
+    manifest, directory = consumer.stage(tmp_path / "producer", json.dumps(declaration).encode(), altered)
+    before = snapshot(manifest.parent)
+    out = tmp_path / "bundle"
+    assert consumer.create(manifest, directory, out)["exit_code"] == 2
+    assert not out.exists() and all(path.read_bytes() == raw for path, raw in before.items())
+
+
+def test_foreign_hardlinked_output_member_refuses_exclusive_write_and_preserves_input(tmp_path, originals, monkeypatch):
+    import quantfit.screen_bundle_publication as publication
+
+    manifest_raw, reports = originals
+    manifest, directory = consumer.stage(tmp_path / "producer", manifest_raw, reports)
+    original = directory / "clean.json"
+    bundle = tmp_path / "bundle"
+    destination = bundle / "reports/clean.json"
+    write_member = publication._write_member
+
+    def insert_foreign_member(path, raw, owned):
+        if path == destination:
+            os.link(original, destination)
+        return write_member(path, raw, owned)
+
+    monkeypatch.setattr(publication, "_write_member", insert_foreign_member)
+    document = consumer.create(manifest, directory, bundle)
+    assert document["exit_code"] == 2
+    assert original.read_bytes() == destination.read_bytes() == reports["clean"]
+    assert original.stat().st_ino == destination.stat().st_ino
+    assert not (bundle / "manifest.json").exists()
 
 
 def test_symbolic_report_link_refuses(tmp_path, originals):

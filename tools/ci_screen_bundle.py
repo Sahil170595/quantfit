@@ -49,7 +49,8 @@ def invoke(argv: list[str]) -> tuple[dict, str]:
     with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
         code = main(["bundle", *argv, "--json"])
     result = json.loads(stdout.getvalue())
-    assert result["command"] == "bundle" and result["exit_code"] == code
+    assert result["exit_code"] == code
+    assert result["command"] == (f"bundle {argv[0]}" if code == 0 else "bundle")
     return result, stderr.getvalue()
 
 
@@ -105,6 +106,7 @@ def check(
 
     assert document["exit_code"] == 0
     result = document["result"]
+    assert result["bundle_schema_version"] == 1
     assert result["kind"] == "quantfit.screen-bundle-verification" and result["status"] == "verified_content"
     assert (
         result["exit_code"] == 0
@@ -112,6 +114,13 @@ def check(
         and result["scientific_go"] is False
     )
     assert isinstance(result["scope"], str) and result["scope"]
+    assert result["limits"] == {
+        "transport_bytes": 64 * 1024 * 1024,
+        "outer_manifest_bytes": 256 * 1024,
+        "targets_bytes": 1024 * 1024,
+        "report_bytes": 8 * 1024 * 1024,
+        "max_targets": 256,
+    }
     outer_raw = (bundle / "manifest.json").read_bytes()
     outer = json.loads(outer_raw)
     assert result["manifest_sha256"] == binding(outer_raw)["sha256"] and result["bundle_manifest"] == outer
