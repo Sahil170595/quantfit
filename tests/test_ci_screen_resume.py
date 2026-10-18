@@ -184,3 +184,34 @@ def test_installed_and_existing_cpu_seams_are_single_offline_calls():
     assert cpu.count("screen_resume_accept_cpu(") == 1
     assert 'Path(result["runs"][0]["report"]["path"])' in cpu
     assert '"strict_screen_resume": screen_resume' in cpu
+
+
+def test_committed_validation_original_bytes_match_both_cli_receipts():
+    artifact = ROOT / "validation/2026-10-18-screen-resume"
+    original_manifest = (artifact / "inputs/manifest.json").read_bytes()
+    manifest = json.loads(original_manifest)
+    originals = {
+        target["name"]: (artifact / "inputs/reports" / f"{target['name']}.json").read_bytes()
+        for target in manifest["targets"]
+    }
+    receipt = json.loads((artifact / "receipt.json").read_bytes())
+    assert consumer.binding(original_manifest) == {
+        "sha256": "60a61566f4d18c6f87619bdcf7cea4ba36e26ca64be824da4cd4e05f7e58937c",
+        "size_bytes": 803,
+    }
+    for filename, case in (("all-present.json", "all_present"), ("missing-one.json", "missing_one")):
+        document = json.loads((artifact / filename).read_bytes())
+        native_receipt = document["result"]["resume_receipt"]
+        assert document["exit_code"] == native_receipt["exit_code"] == receipt[case]["exit_code"] == 3
+        assert native_receipt["manifest"] == receipt[case]["manifest"] == consumer.binding(original_manifest)
+        assert len(native_receipt["targets"]) == len(receipt[case]["reports"]) == len(originals) == 3
+        for row, projection in zip(native_receipt["targets"], receipt[case]["reports"], strict=True):
+            assert row["name"] == projection["name"]
+            binding = consumer.binding(originals[row["name"]])
+            assert {key: row[key] for key in binding} == {key: projection[key] for key in binding} == binding
+    assert consumer.check_junit(artifact / "screen.xml", originals) == {
+        "tests": 3,
+        "failures": 1,
+        "skipped": 1,
+        "errors": 0,
+    }
