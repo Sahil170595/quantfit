@@ -800,6 +800,7 @@ def main() -> None:
             "test_saved_screen.py",
             "test_ci_screen_resume.py",
             "test_ci_screen_bundle.py",
+            "test_ci_screen_compare.py",
             "test_repeatability.py",
             "test_evidence_fetch.py",
             "test_verify.py",
