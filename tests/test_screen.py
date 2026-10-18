@@ -519,40 +519,29 @@ def test_capture_is_off_by_default(tmp_path, monkeypatch):
 
 def test_resume_skips_targets_that_already_have_a_report(tmp_path, monkeypatch):
     """A measured target is not re-measured: the report IS the measurement."""
-    entries = [_entry("g0"), _entry("g1")]
-    out = tmp_path / "out"
+    from test_screen_resume import native_corpus
 
-    calls = _install(monkeypatch, {"g0-quant": _clean(), "g1-quant": _clean()})
-    first = run_screen(_manifest(tmp_path, entries), str(out))
-    assert len(calls) == 2
-
-    # The fake never wrote the reports the real verify_safety writes via report_path, and
-    # resume keys on those files existing - so stand them up as a completed run would.
-    for name in ("g0", "g1"):
-        (out / f"{name}.json").write_text(json.dumps({"drift": _clean().to_dict()}), encoding="utf-8")
-
-    calls2 = _install(monkeypatch, {"g0-quant": _clean(), "g1-quant": _clean()})
-    second = run_screen(_manifest(tmp_path, entries), str(out), resume=True)
-
-    assert calls2 == [], "resume re-ran a target that already had a report"
-    # the resumed summary must be the one an uninterrupted run would have written
-    assert [r["name"] for r in second["rows"]] == [r["name"] for r in first["rows"]]
-    assert [r["status"] for r in second["rows"]] == [r["status"] for r in first["rows"]]
-    assert second["all_targets_attempted"] is True
+    manifest, out = native_corpus(tmp_path, [("g0", "gguf", 0, 0, None), ("g1", "gguf", 0, 0, None)])
+    calls = _install(monkeypatch, {})
+    summary = run_screen(str(manifest), str(out), resume=True)
+    assert calls == []
+    assert [row["name"] for row in summary["rows"]] == ["g0", "g1"]
+    assert [row["status"] for row in summary["rows"]] == ["no_regression", "no_regression"]
+    assert summary["all_targets_attempted"] is True
 
 
-def test_resume_reruns_a_target_whose_report_is_corrupt(tmp_path, monkeypatch):
-    """Resuming onto a truncated artifact would publish it. Re-run instead of trusting."""
+def test_resume_refuses_a_target_whose_report_is_corrupt(tmp_path, monkeypatch):
+    """A present invalid native artifact is preserved for diagnosis, never overwritten."""
     entries = [_entry("g0")]
     out = tmp_path / "out"
     out.mkdir()
     (out / "g0.json").write_text("{ this is not json", encoding="utf-8")
 
     calls = _install(monkeypatch, {"g0-quant": _clean()})
-    summary = run_screen(_manifest(tmp_path, entries), str(out), resume=True)
-
-    assert len(calls) == 1, "a corrupt report was trusted instead of re-run"
-    assert summary["rows"][0]["status"] != STATUS_ERROR
+    with pytest.raises(ScreenError):
+        run_screen(_manifest(tmp_path, entries), str(out), resume=True)
+    assert calls == []
+    assert (out / "g0.json").read_bytes() == b"{ this is not json"
 
 
 def test_attempts_retries_a_transient_failure_then_succeeds(tmp_path, monkeypatch):
