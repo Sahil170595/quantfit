@@ -802,6 +802,7 @@ def main() -> None:
             "test_ci_screen_bundle.py",
             "test_ci_screen_compare.py",
             "test_ci_screen_resolution.py",
+            "test_ci_label_reconciliation.py",
             "test_repeatability.py",
             "test_evidence_fetch.py",
             "test_verify.py",
