@@ -21,7 +21,7 @@ from quantfit.reproduce import (
     _validate_reproduction_outputs,
 )
 from quantfit.safety.calibration_binding import MAX_CALIBRATION_BYTES, BoundCalibration, load_bound_calibration_bytes
-from quantfit.safety.gguf_arm import is_gguf_ref
+from quantfit.safety.gguf_arm import UNQUANTIZED_FILE_TYPES, is_gguf_ref
 from quantfit.screen import Target
 
 MAX_TOTAL_CALIBRATION_BYTES = 64 * 1024 * 1024
@@ -90,6 +90,11 @@ def _target_binding(target: Target, calibration: BoundCalibration) -> None:
         device = identity["engine"].get("device")
         saved._require(
             device is None or (device == "cpu" if target.stratum == "gguf" else device in ("cpu", "cuda")),
+            "calibration_target_mismatch",
+        )
+    if target.stratum == "gguf":
+        saved._require(
+            calibration.identity["baseline"]["resolved_dtype"] in UNQUANTIZED_FILE_TYPES,
             "calibration_target_mismatch",
         )
 
