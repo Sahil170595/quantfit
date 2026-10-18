@@ -118,6 +118,11 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
         assert report["env"]["device"] == "cpu"
         for arm in ("baseline", "quantized"):
             assert all(report[arm]["engine"][k] == v for k, v in arm_module.CPU_OFFLOAD_CONTROLS.items())
+    from ci_screen_resume import accept_cpu as screen_resume_accept_cpu
+
+    screen_resume = screen_resume_accept_cpu(
+        Path(result["runs"][0]["report"]["path"]), output.parent / "strict-screen-resume"
+    )
     # Offline handoff of the actual three reports, after existing inference ends.
     # An exact copied candidate retains native P1 void even when T0 is negative.
     from quantfit import reference_assessment, reference_replay
@@ -217,6 +222,7 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
         "argv": command,
         "actual_exit": completed.returncode,
         "native_exits": [r["native_exit_code"] for r in result["runs"]],
+        "strict_screen_resume": screen_resume,
         "t0_protocol_pass": result["t0"]["protocol_pass"],
         "offline_copied_bundle_comparison": comparison,
         "offline_copied_bundle_junit": comparison_xml,
