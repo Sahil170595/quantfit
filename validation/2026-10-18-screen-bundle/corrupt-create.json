@@ -1,0 +1,14 @@
+{
+  "command": "bundle",
+  "error": {
+    "kind": "ScreenBundleError",
+    "message": "invalid_screen_bundle_input"
+  },
+  "exit_code": 2,
+  "result": null,
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.33.0"
+  }
+}

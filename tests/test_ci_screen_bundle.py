@@ -296,3 +296,90 @@ def test_installed_and_existing_cpu_seams_are_single_offline_calls():
     cpu = (ROOT / "tools/ci_cpu_acceptance.py").read_text(encoding="utf-8")
     assert cpu.count("screen_bundle_accept_cpu(") == 1
     assert '"screen_bundle": screen_bundle' in cpu
+
+
+def test_committed_originals_bundle_members_and_receiving_bindings_are_literal():
+    artifact = ROOT / "validation/2026-10-18-screen-bundle"
+    manifest = (artifact / "inputs/targets.json").read_bytes()
+    assert manifest == (ROOT / "validation/2026-10-18-screen-resume/inputs/manifest.json").read_bytes()
+    assert consumer.binding(manifest) == {
+        "sha256": "60a61566f4d18c6f87619bdcf7cea4ba36e26ca64be824da4cd4e05f7e58937c",
+        "size_bytes": 803,
+    }
+    targets = json.loads(manifest)["targets"]
+    originals = {
+        target["name"]: (artifact / "inputs/reports" / f"{target['name']}.json").read_bytes() for target in targets
+    }
+    for name, raw in originals.items():
+        assert raw == (ROOT / "validation/2026-10-18-screen-resume/inputs/reports" / f"{name}.json").read_bytes()
+    producer = (artifact / "inputs/reports/screen-summary.json").read_bytes()
+    receipt = json.loads((artifact / "receipt.json").read_bytes())
+    assert receipt["inputs"]["targets"] == consumer.binding(manifest)
+    assert receipt["inputs"]["producer_summary"] == consumer.binding(producer)
+    for row in receipt["inputs"]["reports"]:
+        assert {key: row[key] for key in ("sha256", "size_bytes")} == consumer.binding(originals[row["name"]])
+    for directory, documents, compact_keys, missing, code in (
+        ("bundle", ("create.json", "verify.json"), ("create", "relocated_verify"), (), 3),
+        (
+            "missing-bundle",
+            ("missing-create.json", "missing-verify.json"),
+            ("missing_create", "missing_verify"),
+            ("flagged",),
+            4,
+        ),
+    ):
+        bundle = artifact / directory
+        outer_raw = (bundle / "manifest.json").read_bytes()
+        outer = json.loads(outer_raw)
+        assert (bundle / "targets.json").read_bytes() == manifest
+        assert outer["targets"] == {"path": "targets.json", **consumer.binding(manifest)}
+        expected_paths = {"manifest.json", "targets.json"}
+        assert [row["name"] for row in outer["reports"]] == [target["name"] for target in targets]
+        for row in outer["reports"]:
+            name = row["name"]
+            assert row["path"] == f"reports/{name}.json"
+            if name in missing:
+                assert row["status"] == "missing" and row["sha256"] is row["size_bytes"] is None
+                assert not (bundle / row["path"]).exists()
+            else:
+                assert row["status"] == "present" and (bundle / row["path"]).read_bytes() == originals[name]
+                assert {key: row[key] for key in ("sha256", "size_bytes")} == consumer.binding(originals[name])
+                expected_paths.add(row["path"])
+        if not missing:
+            expected_paths.add("reports/screen-summary.json")
+            assert (bundle / "reports/screen-summary.json").read_bytes() == producer
+            assert outer["producer_summary"] == {
+                "path": "reports/screen-summary.json",
+                "status": "present",
+                **consumer.binding(producer),
+            }
+        else:
+            assert outer["producer_summary"] == {
+                "path": "reports/screen-summary.json",
+                "status": "absent",
+                "sha256": None,
+                "size_bytes": None,
+            }
+        actual_paths = {path.relative_to(bundle).as_posix() for path in bundle.rglob("*") if path.is_file()}
+        assert actual_paths == expected_paths
+        total = sum((bundle / path).stat().st_size for path in actual_paths)
+        for filename, compact_key in zip(documents, compact_keys, strict=True):
+            document = json.loads((artifact / filename).read_bytes())
+            result = document["result"]
+            assert document["exit_code"] == 0 and result["bundle_manifest"] == outer
+            assert result["manifest_sha256"] == consumer.binding(outer_raw)["sha256"]
+            assert result["transport_bytes"] == receipt[compact_key]["transport_bytes"] == total
+            receiving = result["receiving_summary"]
+            assert receiving["exit_code"] == receipt[compact_key]["receiving_exit_code"] == code
+            assert {key: receiving["manifest"][key] for key in ("sha256", "size_bytes")} == consumer.binding(manifest)
+            assert len(receiving["report_bindings"]) == len(targets)
+            for row in receiving["report_bindings"]:
+                expected = (
+                    {"sha256": None, "size_bytes": None}
+                    if row["name"] in missing
+                    else consumer.binding(originals[row["name"]])
+                )
+                assert {key: row[key] for key in ("sha256", "size_bytes")} == expected
+                assert row["status"] == ("missing_evidence" if row["name"] in missing else "validated")
+    assert json.loads((artifact / "tampered-verify.json").read_bytes())["exit_code"] == 2
+    assert json.loads((artifact / "corrupt-create.json").read_bytes())["exit_code"] == 2
