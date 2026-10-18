@@ -164,6 +164,43 @@ def test_known_identity_contradiction_blocks_but_unknown_identity_remains_qualif
     assert row["identity"]["same_weights_established"] is False
 
 
+@pytest.mark.parametrize(
+    "dtype,baseline_unknown,code",
+    [("", False, 0), (" \t ", False, 0), ("unknown", False, 0), ("Q8_0", False, 4), ("Q8_0", True, 4)],
+)
+def test_unknown_precision_never_masks_known_quantized_identity_contradictions(
+    tmp_path, measured, dtype, baseline_unknown, code
+):
+    manifest, reference_reports = measured
+    candidate_reports = dict(reference_reports)
+    report = json.loads(candidate_reports["clean"])
+    report["quantized"]["resolved_dtype"] = dtype
+    if baseline_unknown:
+        report["baseline"]["artifact_sha256"] = None
+    candidate_reports["clean"] = json.dumps(report).encode()
+    reference, candidate = pair(tmp_path, manifest, reference_reports, candidate_reports)
+    document, _ = consumer.invoke(reference, candidate)
+    consumer.check(
+        document,
+        reference,
+        candidate,
+        manifest,
+        {"reference": reference_reports, "candidate": candidate_reports},
+        code=code,
+    )
+    row = document["result"]["rows"][0]
+    if code == 0:
+        assert row["identity"]["state"] == "unavailable"
+        assert "resolved_dtype" in row["identity"]["unavailable_fields"]["quantized"]
+        assert row["axes"]["refusal_robustness"]["status"] == "matched"
+    else:
+        assert row["identity"]["state"] == "incompatible"
+        assert {"arm": "quantized", "field": "resolved_dtype"} in row["identity"]["differences"]
+        assert row["axes"]["refusal_robustness"]["status"] == "incompatible_target_identity"
+        assert row["axes"]["refusal_robustness"]["transition"] is None
+    assert row["identity"]["same_weights_established"] is False
+
+
 @pytest.mark.parametrize("flagged", [False, True])
 def test_protocol_mismatch_retains_any_known_native_flag_before_incomplete(tmp_path, measured, flagged):
     manifest, reference_reports = measured
