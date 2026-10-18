@@ -4,6 +4,7 @@ import csv
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 from unittest.mock import patch
 
@@ -247,3 +248,69 @@ def test_csv_record_budget_counts_header_and_blank_records_while_preserving_mult
     refused, stderr = consumer.invoke(first, second, key, tmp_path / "refused.json")
     assert refused["exit_code"] == 2
     consumer.assert_private_not_reflected(refused, stderr, key.read_bytes())
+
+
+def test_committed_aggregate_record_preserves_matrices_hash_links_and_private_provenance_limits():
+    data = ROOT / "validation/2026-10-18-label-reconciliation"
+    receipt = json.loads((data / "receipt.json").read_bytes())
+    directed = {"baseline": [[2, 1, 0], [0, 1, 2], [1, 0, 2]], "quantized": [[0, 1, 2], [2, 0, 1], [1, 2, 0]]}
+    diagonal = [[3, 0, 0], [0, 3, 0], [0, 0, 3]]
+    unusable = [[0, 0, 0], [0, 0, 0], [0, 0, 9]]
+    cases = {
+        "directed": directed,
+        "bom-reordered": directed,
+        "unbound-v2": directed,
+        "legacy-v1": directed,
+        "swapped": {arm: [list(row) for row in zip(*matrix, strict=True)] for arm, matrix in directed.items()},
+        "agreement": dict.fromkeys(consumer.ARMS, diagonal),
+        "self-control": dict.fromkeys(consumer.ARMS, diagonal),
+        "all-unusable": dict.fromkeys(consumer.ARMS, unusable),
+    }
+    for name, matrices in cases.items():
+        document = json.loads((data / f"{name}-cli.json").read_bytes())
+        result = json.loads((data / f"{name}.json").read_bytes())
+        compact = receipt[name]
+        assert document["result"] == result and document["exit_code"] == compact["exit_code"] == 0
+        assert result["kind"] == "quantfit.label-reconciliation" and result["label_reconciliation_schema_version"] == 1
+        assert result["n_pairs"] == compact["n_pairs"] == 9 and result["n_rows"] == compact["n_rows"] == 18
+        assert result["label_order"] == ["refusal", "compliance", "unusable"]
+        assert result["inputs"] == compact["inputs"] and result["arms"] == compact["arms"]
+        assert result["identical_sheet_bytes"] is (name in {"agreement", "self-control", "all-unusable"})
+        assert set(result["inputs"]) == {"sheet_a", "sheet_b", "key"}
+        for bound in result["inputs"].values():
+            assert set(bound) == {"sha256", "size_bytes"} and re.fullmatch("[0-9a-f]{64}", bound["sha256"])
+            assert type(bound["size_bytes"]) is int and bound["size_bytes"] > 0
+        for arm, matrix in matrices.items():
+            counts = result["arms"][arm]
+            assert counts["matrix"] == matrix and counts["n_rows"] == sum(map(sum, matrix)) == 9
+            usable = sum(matrix[i][j] for i in range(2) for j in range(2))
+            agreement = matrix[0][0] + matrix[1][1]
+            assert counts["n_both_usable"] == usable and counts["n_usable_agreement"] == agreement
+            assert counts["n_usable_disagreement"] == usable - agreement
+            assert counts["n_one_unusable"] == sum(matrix[2][j] + matrix[j][2] for j in range(2))
+            assert counts["n_both_unusable"] == matrix[2][2]
+            assert counts["usable_agreement_rate"] == (agreement / usable if usable else None)
+        for field in (
+            "rater_identity_verified",
+            "human_labels_authenticated",
+            "independence_verified",
+            "consensus_calibration",
+            "scientific_go",
+        ):
+            assert result[field] is False
+    for name in ("missing-id", "changed-value", "invalid-legacy-population", "record-budget", "output-alias"):
+        refused = json.loads((data / f"{name}-refusal.json").read_bytes())
+        assert refused["exit_code"] == receipt[name]["exit_code"] == 2 and refused["result"] is None
+        assert receipt[name]["private_bytes_unchanged"] is True
+    assert receipt["invalid-legacy-population"]["sdk_key_parse_calls"] == 0
+    assert receipt["limits"]["private_inputs_published"] is receipt["limits"]["per_row_identifiers_published"] is False
+    assert receipt["limits"]["private_provenance_limit"] and "Fresh" in receipt["limits"]["reproduction"]
+    # The private input buffers are intentionally absent: hashes identify this local run, not their contents.
+    assert (
+        not list(data.rglob("*.labels.csv"))
+        and not list(data.rglob("*.labelkey.json"))
+        and not list(data.rglob("*.capture.jsonl"))
+    )
+    # Recorded source bindings are historical, never compared to the future installed package.
+    assert len(receipt["runtime"]["source_files"]) == 6
+    assert receipt["runtime"]["source_version"] == receipt["runtime"]["distribution_version"] == "0.36.0"

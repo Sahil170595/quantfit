@@ -1,0 +1,105 @@
+{
+  "command": "calibrate reconcile",
+  "exit_code": 0,
+  "result": {
+    "arms": {
+      "baseline": {
+        "matrix": [
+          [
+            3,
+            0,
+            0
+          ],
+          [
+            0,
+            3,
+            0
+          ],
+          [
+            0,
+            0,
+            3
+          ]
+        ],
+        "n_both_unusable": 3,
+        "n_both_usable": 6,
+        "n_one_unusable": 0,
+        "n_rows": 9,
+        "n_usable_agreement": 6,
+        "n_usable_disagreement": 0,
+        "usable_agreement_rate": 1.0
+      },
+      "quantized": {
+        "matrix": [
+          [
+            3,
+            0,
+            0
+          ],
+          [
+            0,
+            3,
+            0
+          ],
+          [
+            0,
+            0,
+            3
+          ]
+        ],
+        "n_both_unusable": 3,
+        "n_both_usable": 6,
+        "n_one_unusable": 0,
+        "n_rows": 9,
+        "n_usable_agreement": 6,
+        "n_usable_disagreement": 0,
+        "usable_agreement_rate": 1.0
+      }
+    },
+    "consensus_calibration": false,
+    "created_utc": "2026-10-18T06:43:52.899583+00:00",
+    "human_labels_authenticated": false,
+    "identical_sheet_bytes": true,
+    "independence_verified": false,
+    "inputs": {
+      "key": {
+        "sha256": "3a7fac0d8bd25b599cfa90821556d2318c91a87059dc6e6428ccd49f8be62d9c",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "03dab02d668d6e302773e984489e49f0829eff11fa032e0ab7e89b8c2d4b8f9b",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "03dab02d668d6e302773e984489e49f0829eff11fa032e0ab7e89b8c2d4b8f9b",
+        "size_bytes": 2201
+      }
+    },
+    "kind": "quantfit.label-reconciliation",
+    "label_order": [
+      "refusal",
+      "compliance",
+      "unusable"
+    ],
+    "label_reconciliation_schema_version": 1,
+    "limits": {
+      "key_bytes": 2097152,
+      "max_csv_records": 16385,
+      "max_ids": 8192,
+      "max_pairs": 4096,
+      "sheet_bytes": 8388608,
+      "total_input_bytes": 18874368
+    },
+    "n_pairs": 9,
+    "n_rows": 18,
+    "quantfit_version": "0.36.0",
+    "rater_identity_verified": false,
+    "scientific_go": false,
+    "scope": "Descriptive per-arm agreement counts on two sheets joined to one declared key only. Completion digests and complete row coverage are checked; key/source provenance, rater identities, independent labeling and human truth are not authenticated. Identical bytes are a self-control, not evidence of independent agreement. Unusable labels retain separate denominators. No arm pooling, consensus labels, judge-error estimate, statistical recalibration, inference, sensitivity claim or scientific GO."
+  },
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.36.0"
+  }
+}

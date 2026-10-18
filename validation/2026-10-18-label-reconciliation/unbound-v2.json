@@ -1,0 +1,96 @@
+{
+  "arms": {
+    "baseline": {
+      "matrix": [
+        [
+          2,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ]
+      ],
+      "n_both_unusable": 2,
+      "n_both_usable": 4,
+      "n_one_unusable": 3,
+      "n_rows": 9,
+      "n_usable_agreement": 3,
+      "n_usable_disagreement": 1,
+      "usable_agreement_rate": 0.75
+    },
+    "quantized": {
+      "matrix": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          0,
+          1
+        ],
+        [
+          1,
+          2,
+          0
+        ]
+      ],
+      "n_both_unusable": 0,
+      "n_both_usable": 3,
+      "n_one_unusable": 6,
+      "n_rows": 9,
+      "n_usable_agreement": 0,
+      "n_usable_disagreement": 3,
+      "usable_agreement_rate": 0.0
+    }
+  },
+  "consensus_calibration": false,
+  "created_utc": "2026-10-18T06:43:53.089988+00:00",
+  "human_labels_authenticated": false,
+  "identical_sheet_bytes": false,
+  "independence_verified": false,
+  "inputs": {
+    "key": {
+      "sha256": "e4d96191ba8a18960d39a8ab2b81fbb5e740cca2eb490ed78e951644397e1a94",
+      "size_bytes": 4135
+    },
+    "sheet_a": {
+      "sha256": "28e7e98beaa0c040ca94ae24e45f6767d26caa203b041e50729fa6de84a5e1f7",
+      "size_bytes": 2201
+    },
+    "sheet_b": {
+      "sha256": "f6a978406f42399fe3026882556bb6151d4f006ebb96e0a5b760acad47812ebf",
+      "size_bytes": 2199
+    }
+  },
+  "kind": "quantfit.label-reconciliation",
+  "label_order": [
+    "refusal",
+    "compliance",
+    "unusable"
+  ],
+  "label_reconciliation_schema_version": 1,
+  "limits": {
+    "key_bytes": 2097152,
+    "max_csv_records": 16385,
+    "max_ids": 8192,
+    "max_pairs": 4096,
+    "sheet_bytes": 8388608,
+    "total_input_bytes": 18874368
+  },
+  "n_pairs": 9,
+  "n_rows": 18,
+  "quantfit_version": "0.36.0",
+  "rater_identity_verified": false,
+  "scientific_go": false,
+  "scope": "Descriptive per-arm agreement counts on two sheets joined to one declared key only. Completion digests and complete row coverage are checked; key/source provenance, rater identities, independent labeling and human truth are not authenticated. Identical bytes are a self-control, not evidence of independent agreement. Unusable labels retain separate denominators. No arm pooling, consensus labels, judge-error estimate, statistical recalibration, inference, sensitivity claim or scientific GO."
+}

@@ -1,0 +1,773 @@
+{
+  "agreement": {
+    "arms": {
+      "baseline": {
+        "matrix": [
+          [
+            3,
+            0,
+            0
+          ],
+          [
+            0,
+            3,
+            0
+          ],
+          [
+            0,
+            0,
+            3
+          ]
+        ],
+        "n_both_unusable": 3,
+        "n_both_usable": 6,
+        "n_one_unusable": 0,
+        "n_rows": 9,
+        "n_usable_agreement": 6,
+        "n_usable_disagreement": 0,
+        "usable_agreement_rate": 1.0
+      },
+      "quantized": {
+        "matrix": [
+          [
+            3,
+            0,
+            0
+          ],
+          [
+            0,
+            3,
+            0
+          ],
+          [
+            0,
+            0,
+            3
+          ]
+        ],
+        "n_both_unusable": 3,
+        "n_both_usable": 6,
+        "n_one_unusable": 0,
+        "n_rows": 9,
+        "n_usable_agreement": 6,
+        "n_usable_disagreement": 0,
+        "usable_agreement_rate": 1.0
+      }
+    },
+    "consensus_calibration": false,
+    "exit_code": 0,
+    "human_labels_authenticated": false,
+    "identical_sheet_bytes": true,
+    "independence_verified": false,
+    "inputs": {
+      "key": {
+        "sha256": "62eccefa0192884618b3299d70a093b27969d7e73a2089b004411114fb809d3c",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "fb39eb66286dd306980e03a12f4e946e613069861378e164307676ca35fc4f8d",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "fb39eb66286dd306980e03a12f4e946e613069861378e164307676ca35fc4f8d",
+        "size_bytes": 2201
+      }
+    },
+    "n_pairs": 9,
+    "n_rows": 18,
+    "scientific_go": false
+  },
+  "all-unusable": {
+    "arms": {
+      "baseline": {
+        "matrix": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            9
+          ]
+        ],
+        "n_both_unusable": 9,
+        "n_both_usable": 0,
+        "n_one_unusable": 0,
+        "n_rows": 9,
+        "n_usable_agreement": 0,
+        "n_usable_disagreement": 0,
+        "usable_agreement_rate": null
+      },
+      "quantized": {
+        "matrix": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            9
+          ]
+        ],
+        "n_both_unusable": 9,
+        "n_both_usable": 0,
+        "n_one_unusable": 0,
+        "n_rows": 9,
+        "n_usable_agreement": 0,
+        "n_usable_disagreement": 0,
+        "usable_agreement_rate": null
+      }
+    },
+    "consensus_calibration": false,
+    "exit_code": 0,
+    "human_labels_authenticated": false,
+    "identical_sheet_bytes": true,
+    "independence_verified": false,
+    "inputs": {
+      "key": {
+        "sha256": "9a73eb78abcd8882a94aa5efff89e49a52ac5b34a5a282050987e72402105a96",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "5a5c8393808ef33c6a99c29fb5a43cf975fb67a817be54f9cf7e0dfbb995ffa0",
+        "size_bytes": 2195
+      },
+      "sheet_b": {
+        "sha256": "5a5c8393808ef33c6a99c29fb5a43cf975fb67a817be54f9cf7e0dfbb995ffa0",
+        "size_bytes": 2195
+      }
+    },
+    "n_pairs": 9,
+    "n_rows": 18,
+    "scientific_go": false
+  },
+  "bom-reordered": {
+    "arms": {
+      "baseline": {
+        "matrix": [
+          [
+            2,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            1,
+            0,
+            2
+          ]
+        ],
+        "n_both_unusable": 2,
+        "n_both_usable": 4,
+        "n_one_unusable": 3,
+        "n_rows": 9,
+        "n_usable_agreement": 3,
+        "n_usable_disagreement": 1,
+        "usable_agreement_rate": 0.75
+      },
+      "quantized": {
+        "matrix": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            2,
+            0,
+            1
+          ],
+          [
+            1,
+            2,
+            0
+          ]
+        ],
+        "n_both_unusable": 0,
+        "n_both_usable": 3,
+        "n_one_unusable": 6,
+        "n_rows": 9,
+        "n_usable_agreement": 0,
+        "n_usable_disagreement": 3,
+        "usable_agreement_rate": 0.0
+      }
+    },
+    "consensus_calibration": false,
+    "exit_code": 0,
+    "human_labels_authenticated": false,
+    "identical_sheet_bytes": false,
+    "independence_verified": false,
+    "inputs": {
+      "key": {
+        "sha256": "967560d45421560ac809f9bef6c87e312a33758389d143f08fe042c3adb73298",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "e9bbe682744ae13cd6748cd4261a198d47a4a3450d30b0136b2fedccf25ea037",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "fda3d286c458da800e30051faa2b2cd3a460fcebf9e371facb6c4cdfc770479d",
+        "size_bytes": 2202
+      }
+    },
+    "n_pairs": 9,
+    "n_rows": 18,
+    "scientific_go": false
+  },
+  "changed-value": {
+    "exit_code": 2,
+    "inputs": {
+      "key": {
+        "sha256": "a2593c473277972fe44a5ce60236e74a2bff546983f3cded22ecd327663a6806",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "c7344d73cf86ef9b8e3942e670614b12e27f52cc6422ba2a8a4d4c1a6ce41d95",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "e7dc993ffb2d597871d50e0df496fa03e9d212db5a94fd7070f6c062965cdfd3",
+        "size_bytes": 2207
+      }
+    },
+    "private_bytes_unchanged": true
+  },
+  "directed": {
+    "arms": {
+      "baseline": {
+        "matrix": [
+          [
+            2,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            1,
+            0,
+            2
+          ]
+        ],
+        "n_both_unusable": 2,
+        "n_both_usable": 4,
+        "n_one_unusable": 3,
+        "n_rows": 9,
+        "n_usable_agreement": 3,
+        "n_usable_disagreement": 1,
+        "usable_agreement_rate": 0.75
+      },
+      "quantized": {
+        "matrix": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            2,
+            0,
+            1
+          ],
+          [
+            1,
+            2,
+            0
+          ]
+        ],
+        "n_both_unusable": 0,
+        "n_both_usable": 3,
+        "n_one_unusable": 6,
+        "n_rows": 9,
+        "n_usable_agreement": 0,
+        "n_usable_disagreement": 3,
+        "usable_agreement_rate": 0.0
+      }
+    },
+    "consensus_calibration": false,
+    "exit_code": 0,
+    "human_labels_authenticated": false,
+    "identical_sheet_bytes": false,
+    "independence_verified": false,
+    "inputs": {
+      "key": {
+        "sha256": "412ca4ae357e6bf4d17fad87c7b2ba870fd0caaf99bc5854cf6ab98345a3fde3",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "a6b62018ae39425ccd20bd713ef448846e67230b24becd3d81cd95d048cc4e3d",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "57c61c5363bc16878a3d52b1b821f81a444cac5b9bfac480c8becaf66d2089b1",
+        "size_bytes": 2199
+      }
+    },
+    "n_pairs": 9,
+    "n_rows": 18,
+    "scientific_go": false
+  },
+  "invalid-legacy-population": {
+    "exit_code": 2,
+    "inputs": {
+      "key": {
+        "sha256": "4ace348d5ce9c3ecd68453fb1699573e201ec0b041bbc9712c315ec3e705e374",
+        "size_bytes": 3909
+      },
+      "sheet_a": {
+        "sha256": "aa3a5a2335b95e76c122c976926c39c14f6df7aa870189793b007fb0b730257d",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "4a742a567a1229af25112d6ba5ba0342bd42e2c064bcc3fc11382b3502f4b472",
+        "size_bytes": 2199
+      }
+    },
+    "private_bytes_unchanged": true,
+    "sdk_key_parse_calls": 0
+  },
+  "legacy-v1": {
+    "arms": {
+      "baseline": {
+        "matrix": [
+          [
+            2,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            1,
+            0,
+            2
+          ]
+        ],
+        "n_both_unusable": 2,
+        "n_both_usable": 4,
+        "n_one_unusable": 3,
+        "n_rows": 9,
+        "n_usable_agreement": 3,
+        "n_usable_disagreement": 1,
+        "usable_agreement_rate": 0.75
+      },
+      "quantized": {
+        "matrix": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            2,
+            0,
+            1
+          ],
+          [
+            1,
+            2,
+            0
+          ]
+        ],
+        "n_both_unusable": 0,
+        "n_both_usable": 3,
+        "n_one_unusable": 6,
+        "n_rows": 9,
+        "n_usable_agreement": 0,
+        "n_usable_disagreement": 3,
+        "usable_agreement_rate": 0.0
+      }
+    },
+    "consensus_calibration": false,
+    "exit_code": 0,
+    "human_labels_authenticated": false,
+    "identical_sheet_bytes": false,
+    "independence_verified": false,
+    "inputs": {
+      "key": {
+        "sha256": "108eac6098b74c6f54a2a1ed99c3738c57513fc36736eca06aad1702c893f8b6",
+        "size_bytes": 3906
+      },
+      "sheet_a": {
+        "sha256": "45a3175225bea851c7c111fe28e4cd0a570f966a9a2092a2fbb9b933bbc735a2",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "772bb0a086783f50bf620e54f5fbc48eb22c72f80e6d6bb3649a1120ae47765c",
+        "size_bytes": 2199
+      }
+    },
+    "n_pairs": 9,
+    "n_rows": 18,
+    "scientific_go": false
+  },
+  "limits": {
+    "consensus_calibration": false,
+    "fictional_labels": true,
+    "human_labels_authenticated": false,
+    "independence_verified": false,
+    "ingestion_calls": 0,
+    "model_arm_resolution_or_download_calls": 0,
+    "model_or_judge_calls": 0,
+    "per_row_identifiers_published": false,
+    "private_inputs_published": false,
+    "private_provenance_limit": "Whole-input hashes identify this private local run; without the private files they cannot authenticate or recover the sheets or key.",
+    "proof": "source CLI aggregate/hash receiving; installed wheel qualification separate",
+    "reproduction": "Fresh native blinding salts change private input hashes on rerun; label plans and aggregate counts are reproducible.",
+    "scientific_go": false
+  },
+  "missing-id": {
+    "exit_code": 2,
+    "inputs": {
+      "key": {
+        "sha256": "367e428b405704f2697c069069181d659a13c94297cc525a1572847b3a55ba56",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "21a0d869ac186125585de7693b288112ddf1050ea362b7cd91cac7bbc0ac49b0",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "6a9aecaaf83c3026f4acc3986cc784eb6f1348019ab98b263243a4eac11430fe",
+        "size_bytes": 2080
+      }
+    },
+    "private_bytes_unchanged": true
+  },
+  "output-alias": {
+    "exit_code": 2,
+    "inputs": {
+      "key": {
+        "sha256": "cc97cf8fd068881056e1c064194d1bcb18b10f9481ab6163550f7d44465ab032",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "3532aad014debe3fb9af1eae37e11f0d01061a456dbfff5a4434749030a2160b",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "bb48b1f12f815e20a82d1f91c51b60f16b6ff572fcf2488efb48e5d71c9078d2",
+        "size_bytes": 2199
+      }
+    },
+    "private_bytes_unchanged": true
+  },
+  "record-budget": {
+    "exit_code": 2,
+    "inputs": {
+      "key": {
+        "sha256": "2f6f09610d620a61a0f87ae1f84609e45c56c52e45f59b51e681b953117780a8",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "99c1522aa8ceda8a43e47cc04fa70737e83d1ee9c90cb59dffe4aceb0a6480e9",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "ee5a9f7f70a550fff36cfdc62935936815f46ee0c262f671d1a8c15474ab92f5",
+        "size_bytes": 18566
+      }
+    },
+    "private_bytes_unchanged": true
+  },
+  "runtime": {
+    "dependencies": {
+      "huggingface_hub": "1.31.0",
+      "pytest": "9.0.3",
+      "torch": null,
+      "transformers": null
+    },
+    "distribution_version": "0.36.0",
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python": "3.12.13",
+    "source_files": {
+      "__init__.py": {
+        "sha256": "397cd05cbdd4156ca31ee1f350da420b685e00b77891d52e22acf6dfcb047ae9",
+        "size_bytes": 1760
+      },
+      "cli.py": {
+        "sha256": "477c3788a44018efdb62cecfe21d35773da472e98f4bdf7b86979ae2496f35aa",
+        "size_bytes": 75375
+      },
+      "safety/calibrate.py": {
+        "sha256": "6d4bf9612a00fe1b9a176a4ef51af077c5d9f01cc1fb11b887b41c73327b66ae",
+        "size_bytes": 34694
+      },
+      "safety/calibration_binding.py": {
+        "sha256": "188b66cc98dd88249cd69bc8e5d6824fcb4380904987420b2a63b7124310895f",
+        "size_bytes": 25166
+      },
+      "safety/reconcile.py": {
+        "sha256": "2c7b2d49c756ec8f9b8e6bb595a040b6ad90e428d5c8ed057aac3d8faab65e47",
+        "size_bytes": 7926
+      },
+      "safety/verify.py": {
+        "sha256": "83350d0bb519fa7d113f679db17f2a23eb4c8b87d9d719ee785efd2fa462c70d",
+        "size_bytes": 44909
+      }
+    },
+    "source_origin_verified": true,
+    "source_version": "0.36.0"
+  },
+  "self-control": {
+    "arms": {
+      "baseline": {
+        "matrix": [
+          [
+            3,
+            0,
+            0
+          ],
+          [
+            0,
+            3,
+            0
+          ],
+          [
+            0,
+            0,
+            3
+          ]
+        ],
+        "n_both_unusable": 3,
+        "n_both_usable": 6,
+        "n_one_unusable": 0,
+        "n_rows": 9,
+        "n_usable_agreement": 6,
+        "n_usable_disagreement": 0,
+        "usable_agreement_rate": 1.0
+      },
+      "quantized": {
+        "matrix": [
+          [
+            3,
+            0,
+            0
+          ],
+          [
+            0,
+            3,
+            0
+          ],
+          [
+            0,
+            0,
+            3
+          ]
+        ],
+        "n_both_unusable": 3,
+        "n_both_usable": 6,
+        "n_one_unusable": 0,
+        "n_rows": 9,
+        "n_usable_agreement": 6,
+        "n_usable_disagreement": 0,
+        "usable_agreement_rate": 1.0
+      }
+    },
+    "consensus_calibration": false,
+    "exit_code": 0,
+    "human_labels_authenticated": false,
+    "identical_sheet_bytes": true,
+    "independence_verified": false,
+    "inputs": {
+      "key": {
+        "sha256": "3a7fac0d8bd25b599cfa90821556d2318c91a87059dc6e6428ccd49f8be62d9c",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "03dab02d668d6e302773e984489e49f0829eff11fa032e0ab7e89b8c2d4b8f9b",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "03dab02d668d6e302773e984489e49f0829eff11fa032e0ab7e89b8c2d4b8f9b",
+        "size_bytes": 2201
+      }
+    },
+    "n_pairs": 9,
+    "n_rows": 18,
+    "scientific_go": false
+  },
+  "swapped": {
+    "arms": {
+      "baseline": {
+        "matrix": [
+          [
+            2,
+            0,
+            1
+          ],
+          [
+            1,
+            1,
+            0
+          ],
+          [
+            0,
+            2,
+            2
+          ]
+        ],
+        "n_both_unusable": 2,
+        "n_both_usable": 4,
+        "n_one_unusable": 3,
+        "n_rows": 9,
+        "n_usable_agreement": 3,
+        "n_usable_disagreement": 1,
+        "usable_agreement_rate": 0.75
+      },
+      "quantized": {
+        "matrix": [
+          [
+            0,
+            2,
+            1
+          ],
+          [
+            1,
+            0,
+            2
+          ],
+          [
+            2,
+            1,
+            0
+          ]
+        ],
+        "n_both_unusable": 0,
+        "n_both_usable": 3,
+        "n_one_unusable": 6,
+        "n_rows": 9,
+        "n_usable_agreement": 0,
+        "n_usable_disagreement": 3,
+        "usable_agreement_rate": 0.0
+      }
+    },
+    "consensus_calibration": false,
+    "exit_code": 0,
+    "human_labels_authenticated": false,
+    "identical_sheet_bytes": false,
+    "independence_verified": false,
+    "inputs": {
+      "key": {
+        "sha256": "412ca4ae357e6bf4d17fad87c7b2ba870fd0caaf99bc5854cf6ab98345a3fde3",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "57c61c5363bc16878a3d52b1b821f81a444cac5b9bfac480c8becaf66d2089b1",
+        "size_bytes": 2199
+      },
+      "sheet_b": {
+        "sha256": "a6b62018ae39425ccd20bd713ef448846e67230b24becd3d81cd95d048cc4e3d",
+        "size_bytes": 2201
+      }
+    },
+    "n_pairs": 9,
+    "n_rows": 18,
+    "scientific_go": false
+  },
+  "unbound-v2": {
+    "arms": {
+      "baseline": {
+        "matrix": [
+          [
+            2,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            1,
+            0,
+            2
+          ]
+        ],
+        "n_both_unusable": 2,
+        "n_both_usable": 4,
+        "n_one_unusable": 3,
+        "n_rows": 9,
+        "n_usable_agreement": 3,
+        "n_usable_disagreement": 1,
+        "usable_agreement_rate": 0.75
+      },
+      "quantized": {
+        "matrix": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            2,
+            0,
+            1
+          ],
+          [
+            1,
+            2,
+            0
+          ]
+        ],
+        "n_both_unusable": 0,
+        "n_both_usable": 3,
+        "n_one_unusable": 6,
+        "n_rows": 9,
+        "n_usable_agreement": 0,
+        "n_usable_disagreement": 3,
+        "usable_agreement_rate": 0.0
+      }
+    },
+    "consensus_calibration": false,
+    "exit_code": 0,
+    "human_labels_authenticated": false,
+    "identical_sheet_bytes": false,
+    "independence_verified": false,
+    "inputs": {
+      "key": {
+        "sha256": "e4d96191ba8a18960d39a8ab2b81fbb5e740cca2eb490ed78e951644397e1a94",
+        "size_bytes": 4135
+      },
+      "sheet_a": {
+        "sha256": "28e7e98beaa0c040ca94ae24e45f6767d26caa203b041e50729fa6de84a5e1f7",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "f6a978406f42399fe3026882556bb6151d4f006ebb96e0a5b760acad47812ebf",
+        "size_bytes": 2199
+      }
+    },
+    "n_pairs": 9,
+    "n_rows": 18,
+    "scientific_go": false
+  }
+}
