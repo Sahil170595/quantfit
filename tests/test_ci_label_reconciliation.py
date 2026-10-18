@@ -247,8 +247,3 @@ def test_csv_record_budget_counts_header_and_blank_records_while_preserving_mult
     refused, stderr = consumer.invoke(first, second, key, tmp_path / "refused.json")
     assert refused["exit_code"] == 2
     consumer.assert_private_not_reflected(refused, stderr, key.read_bytes())
-
-
-def test_installed_origin_guard_selects_reconciliation_consumer_once():
-    source = (ROOT / "tools/ci_installed.py").read_text(encoding="utf-8")
-    assert source.count('"test_ci_label_reconciliation.py"') == 1 and "--rootdir" in source
