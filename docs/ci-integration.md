@@ -2,9 +2,9 @@
 
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
-This checkout prepares **0.28.0**, an unpublished candidate. The 0.28.0 action and
-instrument pins below apply after release; candidate acceptance uses the exact
-source or wheel through `quantfit-path`, not a nonexistent public tag/package.
+The action and instrument examples below pin **quantfit 0.28.0**.
+Candidate acceptance uses the exact source or wheel through `quantfit-path`;
+release publication separately qualifies the versioned distributions.
 Protocol: QSR v0 (`spec/qsr-v0.md`). Implementation authority for everything on this page
 is `quantfit/gate.py` (the decision, the exit codes, the tier table),
 `quantfit/safety/mde.py` (what epsilon means and what the printed MDE is) and
