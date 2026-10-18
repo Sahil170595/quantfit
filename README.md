@@ -41,10 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.26.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.26.0).
-All workflows below are available in this release.
+This README documents [quantfit 0.27.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.27.0), including portable-bundle reproduction. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.26.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.27.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -181,6 +180,23 @@ failed T0, source aliasing or an unmeasured axis can void it. Exit 2 is operatio
 replicate runs and cannot be derived from two reports, so pass them explicitly
 with `--t0-reference` and `--t0-candidate`; without that evidence the outcome is
 never the gate pass.
+
+Quantfit 0.27.0 also consumes relocated three-report replay
+bundles without reopening producer report paths:
+
+```bash
+quantfit reproduce --reference-bundle reference-handoff --candidate-bundle candidate-handoff --out comparison.json --json
+```
+
+Each verified side selects `replicate-1` and preserves its original reports/T0,
+ordered member bindings and separate receiving T0. Use exactly both bundle flags;
+mixing loose reports or `--t0-reference` / `--t0-candidate` is refused before I/O.
+The existing reproduction policy and exits remain unchanged. A copied selected
+report still makes P1 void, and valid negative T0 still yields void/4. Bundle
+integrity and relocation do not authenticate producer locations, human labels,
+independent execution or scientific claims. See the
+[CLI input contract](docs/cli-reference.md#reproduction-and-reporting) and
+[three-report handoff](docs/replicate-bundles.md).
 
 **Audit the docs against the code.** `quantfit audit` checks that this repo's
 prose still describes the shipped code — CLI commands and flags, `file:symbol`

@@ -416,8 +416,10 @@ def _build_parser() -> argparse.ArgumentParser:
         help="is this report a reproduction of that one? applies the QSR v0 cross-hardware tolerance "
         "(exit 0 = reproduced, 3 = breach or not-met, 4 = nothing was compared, 2 = operational error)",
     )
-    pr.add_argument("--reference", required=True, metavar="PATH", help="the reference schema-v2 drift report")
-    pr.add_argument("--candidate", required=True, metavar="PATH", help="the report claiming to reproduce it")
+    pr.add_argument("--reference", metavar="PATH", help="the reference schema-v2 drift report")
+    pr.add_argument("--candidate", metavar="PATH", help="the report claiming to reproduce it")
+    pr.add_argument("--reference-bundle", metavar="DIR", help="verified reference schema-2 replay bundle")
+    pr.add_argument("--candidate-bundle", metavar="DIR", help="verified candidate schema-2 replay bundle")
     pr.add_argument("--out", default=None, metavar="PATH", help="write the comparison record JSON")
     pr.add_argument(
         "--t0-reference",
@@ -1195,7 +1197,18 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "reproduce":
         from pathlib import Path
 
-        from quantfit.reproduce import ReproduceError, compare, within_hardware_identical
+        from quantfit.reproduce import ReproduceError, compare, compare_bundles, within_hardware_identical
+
+        bundle_mode = args.reference_bundle is not None or args.candidate_bundle is not None
+        if bundle_mode:
+            if args.reference_bundle is None or args.candidate_bundle is None:
+                raise ReproduceError("supply both --reference-bundle and --candidate-bundle")
+            if any(
+                value is not None for value in (args.reference, args.candidate, args.t0_reference, args.t0_candidate)
+            ):
+                raise ReproduceError("bundle inputs cannot be mixed with loose reports or --t0-* inputs")
+        elif args.reference is None or args.candidate is None:
+            raise ReproduceError("supply both --reference and --candidate, or both replay bundle inputs")
 
         def _t0_input(paths):
             if not paths:
@@ -1212,9 +1225,12 @@ def _dispatch(args: argparse.Namespace) -> int:
                 return value
             raise ReproduceError("one T0 input must be a standalone artifact; otherwise supply replicate report paths")
 
-        t0_ref = _t0_input(args.t0_reference)
-        t0_cand = _t0_input(args.t0_candidate)
-        decision = compare(args.reference, args.candidate, args.out, t0_reference=t0_ref, t0_candidate=t0_cand)
+        if bundle_mode:
+            decision = compare_bundles(args.reference_bundle, args.candidate_bundle, args.out)
+        else:
+            t0_ref = _t0_input(args.t0_reference)
+            t0_cand = _t0_input(args.t0_candidate)
+            decision = compare(args.reference, args.candidate, args.out, t0_reference=t0_ref, t0_candidate=t0_cand)
 
         def _human_reproduce() -> None:
             print(decision["headline"])

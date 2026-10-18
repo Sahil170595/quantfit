@@ -408,7 +408,10 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import re
+import stat
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -1425,12 +1428,8 @@ def _p0_gated_axis_measured(ref: _View, cand: _View) -> dict:
     )
 
 
-def _p1_distinct_reports(ref: _View, cand: _View) -> dict:
+def _p1_distinct_reports(ref: _View, cand: _View, *, same_path: bool) -> dict:
     """P1 — the two inputs are two files, not one file twice (ambiguity 11)."""
-    try:
-        same_path = Path(ref.path).resolve() == Path(cand.path).resolve()
-    except OSError:  # pragma: no cover - both files were just read successfully
-        same_path = ref.path == cand.path
     return _check(
         "P1_distinct_reports",
         [
@@ -2167,14 +2166,35 @@ def compare(
     or the §3.4 fingerprint. The module docstring's first section is the full list of what
     this does not establish.
     """
+    ref = _load(reference_path, "reference")
+    cand = _load(candidate_path, "candidate")
+    t0_ref = _t0_side(t0_reference, "reference", ref)
+    t0_cand = _t0_side(t0_candidate, "candidate", cand)
+    try:
+        same_path = Path(ref.path).resolve() == Path(cand.path).resolve()
+    except OSError:  # pragma: no cover - both files were just read successfully
+        same_path = ref.path == cand.path
+    artifact = _compare_views(ref, cand, t0_ref=t0_ref, t0_cand=t0_cand, same_path=same_path)
+    if out_path is not None:
+        _write(out_path, artifact)
+    return artifact
+
+
+def _compare_views(
+    ref: _View,
+    cand: _View,
+    *,
+    t0_ref: tuple[bool | None, dict],
+    t0_cand: tuple[bool | None, dict],
+    same_path: bool,
+) -> dict:
+    """Apply the native rule to held views and normalized evidence, without filesystem IO."""
     from datetime import datetime, timezone
 
     import quantfit
 
-    ref = _load(reference_path, "reference")
-    cand = _load(candidate_path, "candidate")
-    t0_ref_pass, t0_ref_block = _t0_side(t0_reference, "reference", ref)
-    t0_cand_pass, t0_cand_block = _t0_side(t0_candidate, "candidate", cand)
+    t0_ref_pass, t0_ref_block = t0_ref
+    t0_cand_pass, t0_cand_block = t0_cand
     # False beats None: a side that FAILED T0 voids the record even if the other side was
     # never supplied. None beats True, so one unsupplied side withholds the reserved name.
     if t0_ref_pass is False or t0_cand_pass is False:
@@ -2190,7 +2210,7 @@ def compare(
     t4 = _t4_flip_counts(ref, cand)
     t5 = _t5_refusal_totals(ref, cand)
     p0 = _p0_gated_axis_measured(ref, cand)
-    p1 = _p1_distinct_reports(ref, cand)
+    p1 = _p1_distinct_reports(ref, cand, same_path=same_path)
 
     outcome, void_reasons = _decide(t1, t2, t3, t4, t5, p0, p1, t0_pass)
     exit_code = OUTCOME_EXIT_CODES[outcome]
@@ -2293,9 +2313,165 @@ def compare(
     }
     artifact["headline"] = _headline(artifact)
 
-    if out_path is not None:
-        _write(out_path, artifact)
     return artifact
+
+
+def _canonical_receiving_path(path: str) -> str:
+    """Guard receiving path components before resolution; producer labels never enter here."""
+    from quantfit.bundle import _no_links
+
+    receiving = Path(path).absolute()
+    # Check lexical prefixes too: a link followed by '..' must not disappear when
+    # resolving the path. The shared guard observes junctions/reparse points.
+    for end in range(1, len(receiving.parts) + 1):
+        _no_links(Path(*receiving.parts[:end]))
+    return str(receiving.resolve())
+
+
+def _bundle_output_path(bundle_paths: tuple[str, str], out_path: str) -> Path:
+    """Protect prepared canonical receiving paths without resolving or reading held sources."""
+    from quantfit.bundle import _no_links
+    from quantfit.replay_bundle import ROLES
+
+    roots = [Path(path).absolute() for path in bundle_paths]
+    target = Path(out_path).absolute()
+    _no_links(target)
+    if not target.parent.is_dir():
+        raise ReproduceError("comparison output parent must already exist")
+    if target.exists() and not stat.S_ISREG(target.lstat().st_mode):
+        raise ReproduceError("comparison output must be a regular file")
+    for root in roots:
+        _no_links(root)
+        if target.is_relative_to(root):
+            raise ReproduceError("comparison output cannot be inside either closed replay bundle")
+        for member in (*ROLES.values(), "manifest.json"):
+            source = root / member
+            _no_links(source)
+            if target == source or (target.exists() and source.exists() and target.samefile(source)):
+                raise ReproduceError("comparison output aliases a replay bundle member; inputs preserved")
+    return target
+
+
+def _publish_bundle_comparison(bundle_paths: tuple[str, str], out_path: str, artifact: dict) -> None:
+    """Stage a complete buffer and recheck both protected bundles before atomic publication."""
+    temporary: Path | None = None
+    try:
+        target = _bundle_output_path(bundle_paths, out_path)
+        raw = (json.dumps(artifact, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
+        with tempfile.NamedTemporaryFile(dir=target.parent, prefix=".reproduce-", delete=False) as stream:
+            temporary = Path(stream.name)
+            if stream.write(raw) != len(raw):
+                raise ReproduceError("incomplete reproduction comparison output write")
+            stream.flush()
+        _bundle_output_path(bundle_paths, out_path)
+        os.replace(temporary, target)
+    except (OSError, RuntimeError, TypeError, ValueError) as exc:
+        if isinstance(exc, ReproduceError):
+            raise
+        raise ReproduceError(f"cannot publish reproduction comparison: {exc}") from exc
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def _bundle_comparison_side(bundle_path: str, side: str) -> tuple[_View, tuple[bool | None, dict], dict]:
+    """Derive report selection, native T0 and all bindings from verified held member bytes."""
+    from quantfit.bundle import _report
+    from quantfit.replay_bundle import ROLES, _verified_bundle
+
+    verified, held = _verified_bundle(bundle_path)
+    if not verified["integrity_verified"]:
+        raise ReproduceError(f"{side} replay bundle bytes differ from their manifest")
+    root = Path(verified["bundle_path"])
+    views = [
+        _view_from_report(_report(held[role]), held[role], str(root / ROLES[role]), f"replicate[{i - 1}]")
+        for i in range(1, 4)
+        for role in (f"replicate-{i}",)
+    ]
+    receiving = _t0_from_views(views)
+    target = _view_from_report(views[0].report, held["replicate-1"], views[0].path, side)
+    identity, environment, fingerprint = _t0_identity(target)
+    member = receiving["reports"][0] == {"path": target.path, "report_sha256": target.sha256}
+    bound = (
+        member
+        and receiving["measurement_identity"] == identity
+        and receiving["environment_identity"] == environment
+        and receiving["identity_sha256"] == fingerprint
+    )
+    if not bound:
+        raise ReproduceError(f"{side} replay T0 does not bind to the selected report's bytes and scope")
+    if receiving["pass"] is True and (
+        receiving["meets_protocol_replicate_count"] is not True or receiving["protocol_pass"] is not True
+    ):
+        raise ReproduceError(f"{side} replay T0 does not establish the protocol replicate count")
+    block = {
+        "supplied": True,
+        "pass": receiving["pass"],
+        "meets_protocol_replicate_count": receiving["meets_protocol_replicate_count"],
+        "n_replicates": receiving["n_replicates"],
+        "evidence": receiving,
+        "comparison_report_is_member": member,
+        "bound_to_comparison_report": bound,
+    }
+    original = verified["original_t0"]
+    evidence = {
+        "bundle_path": verified["bundle_path"],
+        "bundle_schema": verified["bundle_schema"],
+        "manifest": verified["manifest"],
+        "integrity_verified": True,
+        "selected_role": "replicate-1",
+        "selected_member": ROLES["replicate-1"],
+        "selected_report_sha256": target.sha256,
+        "report_bindings": [
+            {
+                "role": f"replicate-{i}",
+                "member": ROLES[f"replicate-{i}"],
+                "report_sha256": view.sha256,
+                "producer_path": original["reports"][i - 1]["path"],
+                "receiving_path": view.path,
+            }
+            for i, view in enumerate(views, 1)
+        ],
+        "original_t0": original,
+        "receiving_t0": receiving,
+        "producer_locations_verified": False,
+        "independent_execution_verified": False,
+        "scientific_claims_verified": False,
+        "scope": verified["scope"],
+    }
+    return target, (receiving["pass"], block), evidence
+
+
+def compare_bundles(reference_bundle_path: str, candidate_bundle_path: str, out_path: str | None = None) -> dict:
+    """Compare fixed replicate-1 from two verified schema-2 replay bundles.
+
+    Both sides' native T0 and selected report bindings are derived from held member
+    buffers. Original T0 bytes are preserved in the inputs and its producer paths
+    remain unverified labels. All native outcomes survive, including valid negative
+    T0 and P1 void for copied reports. No independent execution, physical-host
+    authentication, human truth, sensitivity, scientific GO or free-T4 qualification
+    is established. Unsafe/forged layouts and output failures raise ReproduceError.
+    """
+    try:
+        bundle_paths = (
+            _canonical_receiving_path(reference_bundle_path),
+            _canonical_receiving_path(candidate_bundle_path),
+        )
+        if out_path is not None:
+            out_path = _canonical_receiving_path(out_path)
+        if out_path is not None:
+            _bundle_output_path(bundle_paths, out_path)
+        ref, t0_ref, ref_evidence = _bundle_comparison_side(bundle_paths[0], "reference")
+        cand, t0_cand, cand_evidence = _bundle_comparison_side(bundle_paths[1], "candidate")
+        artifact = _compare_views(ref, cand, t0_ref=t0_ref, t0_cand=t0_cand, same_path=ref.path == cand.path)
+        artifact["bundle_evidence"] = {"reference": ref_evidence, "candidate": cand_evidence}
+        if out_path is not None:
+            _publish_bundle_comparison(bundle_paths, out_path, artifact)
+        return artifact
+    except (OSError, RuntimeError, RecursionError, TypeError, ValueError, KeyError) as exc:
+        if isinstance(exc, ReproduceError):
+            raise
+        raise ReproduceError(str(exc)) from exc
 
 
 def _t0_identity(view: _View) -> tuple[dict, dict, str]:
