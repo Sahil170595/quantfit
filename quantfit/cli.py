@@ -327,7 +327,7 @@ def _build_parser() -> argparse.ArgumentParser:
     pca = sub.add_parser(
         "calibrate",
         help="judge-calibration machinery (ROADMAP 0.6; labeling itself starts only on the 0.5 GO): "
-        "build a blinded labeling sheet from a capture, or ingest filled labels into a calibration report "
+        "build a blinded sheet, ingest labels into a calibration report, or reconcile two filled sheets "
         "(exit 0 = done, 2 = operational error)",
     )
     csub = pca.add_subparsers(dest="calibrate_cmd", required=True)
@@ -339,6 +339,11 @@ def _build_parser() -> argparse.ArgumentParser:
     pci.add_argument("--sheet", required=True, metavar="PATH", help="the filled labeling sheet")
     pci.add_argument("--key", required=True, metavar="PATH", help="the key written next to it")
     pci.add_argument("--out", required=True, metavar="PATH", help="calibration report JSON to write (counts only)")
+    pcr = csub.add_parser("reconcile", help="two filled sheets + one key -> aggregate label-disagreement counts")
+    pcr.add_argument("--sheet-a", required=True, metavar="PATH", help="first private filled labeling sheet")
+    pcr.add_argument("--sheet-b", required=True, metavar="PATH", help="second private filled labeling sheet")
+    pcr.add_argument("--key", required=True, metavar="PATH", help="private unblinding key shared by both sheets")
+    pcr.add_argument("--out", required=True, metavar="PATH", help="aggregate reconciliation JSON; no labels or text")
 
     pg = sub.add_parser(
         "gate",
@@ -1268,6 +1273,23 @@ def _dispatch(args: argparse.Namespace) -> int:
                 },
                 _human_sheet,
             )
+        if args.calibrate_cmd == "reconcile":
+            from quantfit.safety.reconcile import reconcile_labels
+
+            result = reconcile_labels(args.sheet_a, args.sheet_b, args.key, out_path=args.out)
+
+            def _human_reconcile() -> None:
+                for arm in ("baseline", "quantized"):
+                    block = result["arms"][arm]
+                    print(
+                        f"{arm}: rows={block['n_rows']} usable_agreement={block['n_usable_agreement']} "
+                        f"usable_disagreement={block['n_usable_disagreement']}"
+                    )
+                print("Rater identity and independence remain unverified; counts do not create consensus calibration.")
+                print(f"aggregate reconciliation -> {args.out}")
+
+            return _emit(args, "calibrate reconcile", 0, result, _human_reconcile)
+
         from quantfit.safety.calibrate import ingest_labels
 
         report = ingest_labels(args.sheet, args.key, args.out)

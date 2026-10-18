@@ -45,9 +45,10 @@ This README documents [quantfit 0.31.0](https://github.com/Sahil170595/quantfit/
 
 Install with `pip install "quantfit[inspect,gguf]==0.31.0"`.
 
-This branch also documents the **unreleased 0.35.0 candidate**, which includes strict
-screen resume validation (0.32.0), portable screen evidence (0.33.0) and screen
-observation comparison (0.34.0) and conditional saved-screen resolution (0.35.0).
+This branch also documents the **unreleased 0.36.0 candidate**, which includes strict
+screen resume validation (0.32.0), portable screen evidence (0.33.0), screen
+observation comparison (0.34.0), conditional saved-screen resolution (0.35.0)
+and aggregate labeling-sheet reconciliation (0.36.0).
 Candidate commands below require that source or its
 built wheel; the published install above retains 0.31.0 behavior.
 
@@ -605,6 +606,25 @@ matching flagged results never become a model pass. Valid negative/failed execut
 observations are retained; cleanup or provenance failure cannot qualify success.
 The new aggregate directory is staged with its manifest last, protecting original
 evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
+
+## Compare two filled labeling sheets (0.36.0 candidate)
+
+```bash
+quantfit calibrate reconcile --sheet-a rater-a.labels.csv --sheet-b rater-b.labels.csv --key labels.labelkey.json --out reconciliation.json --json
+```
+
+Both private sheets must cover exactly the same complete paired population in
+their shared unblinding key. The existing label reader checks original IDs,
+completion hashes and labels. The output retains only per-arm 3×3 label-count
+matrices, usable agreement/disagreement denominators and whole-input SHA256/size
+bindings. Private sheets, completion data and keys stay local.
+
+Exit 0 means the descriptive reconciliation completed, including disagreements or
+all-unusable labels. It does not establish rater identity, independence, consensus,
+a replacement calibration or scientific GO. Identical sheets are explicit
+self-controls. Invalid/unsafe input or output refuses exit 2 with a categorical
+message. See [Label reconciliation](docs/label-reconciliation.md) for limits,
+API, matrix orientation and what the counts establish.
 
 ## Add conditional resolution to a saved screen (0.35.0 candidate)
 

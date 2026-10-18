@@ -82,6 +82,18 @@ Malformed/incompatible evidence refuses 2. No annotation clears native flags,
 authenticates labels/assumptions, establishes sensitivity or supplies scientific GO.
 Do not claim this candidate option from published 0.31.0.
 
+The unreleased **0.36.0 candidate** adds `quantfit calibrate reconcile --sheet-a
+a.labels.csv --sheet-b b.labels.csv --key labels.labelkey.json --out
+reconciliation.json --json`. Private sheets and key must cover the same complete
+paired population; original IDs, completion hashes and labels are checked through
+the native reader. Export only per-arm 3×3 aggregate label matrices and whole-input
+byte bindings. Rows are sheet A, columns B; label order is refusal/compliance/unusable.
+Exit 0 is successful descriptive reconciliation, including disagreement or all
+unusable labels. Identical sheets are self-controls; rater identity/independence,
+consensus calibration, human truth and scientific GO remain unverified. Invalid or
+unsafe input/output refuses categorical 2. Never commit sheets, keys or completions.
+See `docs/label-reconciliation.md`; published 0.31.0 lacks this candidate command.
+
 ## The command that matters
 
 For an existing report and bound calibration aggregate, use
