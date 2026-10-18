@@ -61,7 +61,7 @@ def main() -> None:
             target = manifest_data["targets"][0]
             assert baseline == target["baseline"] and quant == target["quant"] and max_new_tokens == 64
             raw = reports["clean"]
-            assert Path(report_path) == out / "clean.json"
+            assert Path(report_path).resolve() == (out / "clean.json").resolve()
             Path(report_path).write_bytes(raw)
             drift = json.loads(raw)["drift"]
             d, o = drift["refusal_robustness"], drift["over_refusal"]
