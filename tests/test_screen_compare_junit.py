@@ -100,3 +100,50 @@ def test_incompatible_axis_still_fails_on_original_native_flag(tmp_path, kind):
     assert cases["g0.refusal_robustness"].find("failure") is not None
     assert cases["g0.over_refusal"].find("skipped") is not None
     assert cases["overall"].find("failure") is not None
+
+
+@pytest.mark.parametrize(
+    "contradiction", ["retained_flag_row", "report_locator", "coverage", "stratum_coverage", "aggregate_flag"]
+)
+def test_missing_claim_cannot_hide_retained_native_evidence_or_false_coverage(tmp_path, contradiction):
+    from quantfit.screen_compare import ScreenComparisonError
+
+    reference, candidate = pair(tmp_path, missing_ref=("g0",))
+    record = compare(reference, candidate)
+    screen = record["screens"]["reference"]
+    if contradiction == "retained_flag_row":
+        adverse = tmp_path / "adverse"
+        adverse.mkdir()
+        flagged_reference, flagged_candidate = pair(adverse, (1, None), (0, None))
+        original = copy.deepcopy(compare(flagged_reference, flagged_candidate)["screens"]["reference"]["rows"][0])
+        original.update(status="missing_evidence", report=None)
+        screen["rows"][0] = original
+    elif contradiction == "report_locator":
+        screen["rows"][0]["report"] = "PRIVATE/provider/path"
+    elif contradiction == "coverage":
+        screen["coverage"].update(n_present=1, n_missing=0, complete=True)
+    elif contradiction == "stratum_coverage":
+        screen["by_stratum"]["gguf"].update(n_completed=1, n_missing=0)
+    else:
+        screen["by_stratum"]["gguf"]["refusal_robustness"]["n_regressed"] = 1
+    with pytest.raises(ScreenComparisonError) as error:
+        render(record)
+    assert "PRIVATE" not in str(error.value)
+
+
+def test_axis_xml_messages_retain_each_original_denominator_or_explicit_missing(tmp_path):
+    reference, candidate = pair(tmp_path, (1, None), (0, None), missing_cand=("g0",))
+    root = render(compare(reference, candidate))
+    cases = {case.attrib["name"]: case for case in root.iter("testcase")}
+    failure = cases["g0.refusal_robustness"].find("failure").attrib["message"]
+    skipped = cases["g0.over_refusal"].find("skipped").attrib["message"]
+    assert "reference 1/12" in failure and "candidate missing" in failure and "unconfirmed" in failure
+    assert "reference 0/28" in skipped and "candidate missing" in skipped
+
+
+def test_matched_axis_xml_keeps_reference_and_candidate_counts_without_pooling(tmp_path):
+    reference, candidate = pair(tmp_path)
+    root = render(compare(reference, candidate))
+    danger = next(case for case in root.iter("testcase") if case.attrib["name"] == "g0.refusal_robustness")
+    assert "reference 0/12" in danger.find("system-out").text
+    assert "candidate 0/12" in danger.find("system-out").text

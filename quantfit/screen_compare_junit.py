@@ -126,13 +126,19 @@ def _screen_valid(screen: dict[str, Any]) -> None:
     flagged = False
     incomplete = False
     for original in screen["rows"]:
+        _require(type(original) is dict and original["stratum"] in STRATA)
+        if original["status"] == "missing_evidence":
+            _require(
+                set(original) == {"name", "stratum", "baseline", "quant", "notes", "report", "status", "human_verified"}
+                and original["report"] is None
+                and original["human_verified"] is None
+            )
+            incomplete = True
+            continue
         observations = {axis: _observation(original, axis) for axis in AXES}
         for observation in observations.values():
             _observation_valid(observation)
-        if original["status"] == "missing_evidence":
-            incomplete = True
-            continue
-        native_flag = any(observation["flagged"] for observation in observations.values())
+        native_flag = any(observation["flagged"] is True for observation in observations.values())
         native_names = {"refusal_robustness": AXIS_REFUSAL_ROBUSTNESS, "over_refusal": AXIS_OVER_REFUSAL}
         unmeasured = [native_names[axis] for axis, observation in observations.items() if not observation["measured"]]
         expected_status = "regression" if native_flag else "unmeasurable" if unmeasured else "no_regression"
@@ -141,10 +147,42 @@ def _screen_valid(screen: dict[str, Any]) -> None:
             and type(original["regression_detected"]) is bool
             and original["regression_detected"] is native_flag
             and original["unmeasurable_axes"] == unmeasured
+            and original["human_verified"] is None
         )
         flagged = flagged or native_flag
         incomplete = incomplete or bool(unmeasured)
     _require(type(screen["exit_code"]) is int and screen["exit_code"] == (3 if flagged else 4 if incomplete else 0))
+    missing = sum(row["status"] == "missing_evidence" for row in screen["rows"])
+    expected_coverage = {
+        "n_targets": len(screen["rows"]),
+        "n_present": len(screen["rows"]) - missing,
+        "n_missing": missing,
+    }
+    coverage = screen["coverage"]
+    _require(type(coverage) is dict and set(coverage) == {*expected_coverage, "complete"})
+    _require(all(type(coverage[key]) is int and coverage[key] == value for key, value in expected_coverage.items()))
+    _require(coverage["complete"] is (missing == 0))
+    _require(type(screen["manifest"]["n_targets"]) is int and screen["manifest"]["n_targets"] == len(screen["rows"]))
+    strata = {row["stratum"] for row in screen["rows"]}
+    _require(type(screen["by_stratum"]) is dict and set(screen["by_stratum"]) == strata)
+    for stratum in strata:
+        selected = [row for row in screen["rows"] if row["stratum"] == stratum]
+        present = [row for row in selected if row["status"] != "missing_evidence"]
+        block = screen["by_stratum"][stratum]
+        for key, value in {
+            "n_targets": len(selected),
+            "n_completed": len(present),
+            "n_missing": len(selected) - len(present),
+        }.items():
+            _require(type(block[key]) is int and block[key] == value)
+        for axis in AXES:
+            measured = [row for row in present if row[axis]["at_risk"] > 0]
+            for key, value in {
+                "n_measured": len(measured),
+                "n_regressed": sum(row[axis]["flips"] > 0 for row in measured),
+                "n_regressed_human_verified": 0,
+            }.items():
+                _require(type(block[axis][key]) is int and block[axis][key] == value)
 
 
 def _validate(record: dict[str, Any]) -> None:
@@ -262,17 +300,24 @@ def screen_comparison_to_junit(record: dict[str, Any]) -> str:
         for row in record["rows"]:
             for name, axis in row["axes"].items():
                 case = _case(suite, f"{row['name']}.{name}", "quantfit.screen-comparison")
+                counts = "; ".join(
+                    f"{side} {axis[side]['flips']}/{axis[side]['at_risk']} at-risk pairs"
+                    if axis[side]["present"]
+                    else f"{side} missing evidence"
+                    for side in _SIDES
+                )
+                ET.SubElement(case, "system-out").text = counts
                 if any(axis[side]["flagged"] is True for side in _SIDES):
                     ET.SubElement(
                         case,
                         "failure",
                         {
                             "type": "NativeFlagRetained",
-                            "message": "Original native axis flag retained; unconfirmed by humans",
+                            "message": f"Original native axis flag retained (unconfirmed); {counts}",
                         },
                     )
                 elif axis["status"] != "matched":
-                    ET.SubElement(case, "skipped", {"message": axis["status"]})
+                    ET.SubElement(case, "skipped", {"message": f"{axis['status']}; {counts}"})
         overall = _case(suite, "overall", "quantfit.screen-comparison")
         if record["exit_code"] == 3:
             ET.SubElement(
