@@ -26,6 +26,7 @@ def working_directory(path: Path):
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--expected-source", type=Path, help="assert this application checkout before any CLI call")
     args = parser.parse_args()
     here = Path(__file__).resolve().parent
     checkout = here.parents[1]
@@ -36,6 +37,10 @@ def main() -> None:
     import quantfit
     from quantfit.safety.verify import SafetyDrift
 
+    expected_source = (args.expected_source or checkout).resolve()
+    assert Path(quantfit.__file__).resolve() == expected_source / "quantfit/__init__.py", (
+        "unexpected application origin"
+    )
     manifest_data = json.loads((here / "inputs/manifest.json").read_bytes())
     reports = {
         target["name"]: (here / "inputs/reports" / f"{target['name']}.json").read_bytes()
@@ -112,6 +117,12 @@ def main() -> None:
         assert alias["exit_code"] == 2 and all(path.read_bytes() == raw for path, raw in originals.items())
         records["output_alias"] = {"exit_code": 2, "native_calls": 0, "all_original_bytes_unchanged": True}
         Path("output-alias.json").write_text(json.dumps(alias, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        dependencies = {}
+        for name in ("torch", "transformers", "huggingface_hub", "pytest"):
+            try:
+                dependencies[name] = importlib.metadata.version(name)
+            except importlib.metadata.PackageNotFoundError:
+                dependencies[name] = None
         records["runtime"] = {
             "source_version": quantfit.__version__,
             "distribution_version": importlib.metadata.version("quantfit"),
@@ -119,9 +130,11 @@ def main() -> None:
             "platform": platform.platform(),
             "machine": platform.machine(),
             "processor": platform.processor(),
-            "dependencies": {
-                name: importlib.metadata.version(name)
-                for name in ("torch", "transformers", "huggingface_hub", "pytest")
+            "dependencies": dependencies,
+            "source_origin_verified": True,
+            "source_files": {
+                name: consumer.binding((expected_source / "quantfit" / name).read_bytes())
+                for name in ("__init__.py", "cli.py", "screen.py", "screen_resume.py", "saved_screen.py")
             },
         }
         records["limits"] = {
