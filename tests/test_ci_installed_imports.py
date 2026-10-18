@@ -9,7 +9,7 @@ from pathlib import Path
 from tools.ci_installed import _pytest_code
 
 
-def run(tmp_path, checkout, pythonpath):
+def run(tmp_path, checkout, pythonpath, test_names=("test_consumer.py",)):
     config = tmp_path / "pytest.ini"
     paths = pythonpath if isinstance(pythonpath, list) else [pythonpath] if pythonpath else []
     config.write_text(
@@ -26,7 +26,7 @@ def run(tmp_path, checkout, pythonpath):
             str(config),
             "--import-mode=importlib",
             "-q",
-            str(checkout / "tests/test_consumer.py"),
+            *[str(checkout / "tests" / name) for name in test_names],
         ],
         cwd=tmp_path,
         env=env,
@@ -53,6 +53,28 @@ def test_sibling_helpers_need_only_tests_directory_with_importlib(tmp_path):
     result = run(tmp_path, checkout, tests)
     assert result.returncode == 0, result.stdout + result.stderr
     assert b"1 passed" in result.stdout
+
+
+def test_external_config_preserves_module_autouse_fixture_scope(tmp_path):
+    checkout, tests = fixture(tmp_path)
+    (tests / "test_offline.py").write_text(
+        "import os, pytest\n"
+        "@pytest.fixture(autouse=True)\n"
+        "def offline_guard(monkeypatch):\n"
+        "    monkeypatch.setenv('QUANTFIT_MODULE_GUARD', 'active')\n"
+        "def test_offline():\n"
+        "    assert os.environ['QUANTFIT_MODULE_GUARD'] == 'active'\n",
+        encoding="utf-8",
+    )
+    (tests / "test_execution.py").write_text(
+        "import os\ndef test_execution():\n    assert 'QUANTFIT_MODULE_GUARD' not in os.environ\n",
+        encoding="utf-8",
+    )
+    sandbox = tmp_path / "outside-checkout"
+    sandbox.mkdir()
+    result = run(sandbox, checkout, tests, ("test_offline.py", "test_execution.py"))
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert b"2 passed" in result.stdout
 
 
 def test_bare_helpers_reproduce_collection_failure_without_test_path(tmp_path):
