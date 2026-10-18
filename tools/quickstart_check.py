@@ -206,6 +206,8 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     # Plus a target manifest that a clean venv does not have.
     "screen": (REQ_ARTIFACT, REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),
     "screen-summary": (REQ_ARTIFACT,),  # Strict offline saved manifest/report evidence only.
+    # Strict offline comparison of two saved bundles; no models/network (quantfit/screen_compare.py).
+    "screen-compare": (REQ_ARTIFACT,),
     # Pure local rendering — but of a drift report that must already exist.
     "emit": (REQ_ARTIFACT,),
     # Pure local — but of a capture / labeling sheet that must already exist.
