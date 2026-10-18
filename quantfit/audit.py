@@ -588,6 +588,8 @@ def _parser_surface() -> dict[str, dict]:
                     walk(sub, f"{prefix} {name}".strip())
                 continue
             if action.option_strings:
+                if action.help == argparse.SUPPRESS:
+                    continue  # argparse's private worker options are not a public documentation promise.
                 usable = [opt for opt in action.option_strings if opt not in ("-h", "--help")]
                 if not usable:
                     continue

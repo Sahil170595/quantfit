@@ -179,6 +179,7 @@ def cold_run(
     max_new_tokens: int = 64,
     baseline_revision: str | None = None,
     quant_revision: str | None = None,
+    _execution_recipe: tuple[str, str] | None = None,
 ) -> dict:
     """Attempt exactly three sequential new native children; 0=T0 pass, 3=disagreement, 2=operational.
 
@@ -252,6 +253,10 @@ def cold_run(
             for flag, revision in (("baseline", baseline_revision), ("quant", quant_revision)):
                 if revision is not None:
                     argv.extend([f"--{flag}-revision", revision])
+            if _execution_recipe is not None:
+                argv.extend(
+                    ["--_execution-recipe", _execution_recipe[0], "--_execution-recipe-sha256", _execution_recipe[1]]
+                )
             receipt = {
                 "index": index,
                 "pid": None,

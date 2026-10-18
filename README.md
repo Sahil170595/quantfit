@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.29.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.29.0), including reference-candidate assessment. The workflows below are available in this version.
+This README documents [quantfit 0.30.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.30.0), including recipe-bound native reruns. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.29.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.30.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -583,6 +583,22 @@ T0 validates aggregate agreement and identity, not human confirmation, detection
 sensitivity, independent hardware or cross-hardware tolerance. Reference admission
 also requires full report repeatability, permitting only the protocol's explicit
 timestamp/runtime differences. See [the cold-run contract](docs/cold-replicate-runner.md).
+
+Quantfit 0.30.0 reruns a saved three-report recipe on the qualified Linux
+native path, holding its original handoff and target before starting fresh children:
+
+```bash
+quantfit evidence rerun --bundle reference-handoff --target target.json --out rerun-evidence --timeout-seconds 3600 --json
+```
+
+Resolved weight hashes/sizes, executable hash and applied controls are checked
+before each native server starts and rechecked afterward. Hub GGUF references require
+immutable revisions; local SHA-bound files retain unknown Hub lineage. Original and
+fresh native exits, assessments and reproduction comparison remain separate, so
+matching flagged results never become a model pass. Valid negative/failed execution
+observations are retained; cleanup or provenance failure cannot qualify success.
+The new aggregate directory is staged with its manifest last, protecting original
+evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
 
 ## Public campaigns and offline reference artifacts
 

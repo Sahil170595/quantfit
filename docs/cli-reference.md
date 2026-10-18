@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.29.0. The workflows below are available in this version.
+This reference documents quantfit 0.30.0. The workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -20,6 +20,54 @@ The typed API, JSON/JUnit, strict comparison and exit contract are in
 `quantfit cold-run` starts three fresh uncached native GGUF children and checks existing
 T0 on POSIX hosts. Native measurement exits remain separate from T0. Its revision,
 cleanup and aggregate-output contract is in [Three fresh native GGUF runs](cold-replicate-runner.md).
+
+### Recipe-bound native reruns
+
+Quantfit 0.30.0 adds a fresh native rerun bound to an original handoff and
+explicit target, using the supported Linux native path:
+
+```bash
+quantfit evidence rerun --bundle reference-handoff --target target.json --out rerun-evidence --timeout-seconds 3600 --json
+```
+
+The API is `quantfit.reference_replay.rerun_candidate(bundle_path, target, out_path, timeout_seconds=3600)`;
+the timeout is keyword-only. Bundle/target arguments are paths, and `out_path` is a
+new directory. The 64 KiB target and original bundle are held once; producer T0/report
+locators remain labels. Use the [closed target schema](#reference-candidate-assessment).
+Unsupported or incomplete execution recipes refuse before generation, preserving
+the original assessment where safely available. Arbitrary commands, moving Hub
+revisions, capture, completion-cache serving and fallback are unsupported.
+
+The recipe requires enforceable weight SHA/size, executable SHA, precision, CPU
+threads/offload controls, shipped judge/probe/input policy and greedy64 settings.
+Each resolved arm and actual executable are checked before its native server starts,
+then assets and fresh report identities are rechecked after execution. Three fresh
+children use the existing owned deadline/cleanup lifecycle. A finite positive
+`--timeout-seconds` up to 3600 applies to each child; preparation/resolution is outside
+that budget. Windows refuses native execution; other platforms do not inherit
+Linux `/proc` cleanup qualification.
+
+Hub GGUF references require a lowercase immutable 40-hex revision before resolution.
+Local GGUF files can be bound by exact SHA/size with `revision=null`; a Transformer
+conversion pin does not become a Hub GGUF snapshot revision. Local Hub lineage remains
+unknown in the reference/fresh assessment, and a missing publication fact remains
+unestablished even when execution succeeds. Ref spelling and original evidence are
+not rewritten to hide native identity differences.
+
+The new `reference_replay_schema_version: 1` result keeps original/fresh native
+exits, `reference_assessment`, `fresh_assessment`, `comparison`, `cold_run` and execution
+observations separate. Operational, provenance or cleanup failure exits **2**. Fresh
+T0 or full-payload disagreement exits **3**. Otherwise the existing reproduction
+comparison's **0/3/4** is retained. Agreement can coexist with original/fresh flagged
+regressions or unestablished publication criteria; it never converts a native safety
+failure into a model pass. Valid negative or failed execution observations remain
+visible, without raw completions or provider diagnostics.
+
+Complete aggregate files are staged in a new closed directory and its manifest is
+published last. Preflight and publication protect the original target/bundle/members,
+resolved weights/executable and aliases; interrupted or cleanup-uncertain work cannot
+qualify success. Registration, authenticated human labels/weights/physical hosts,
+independent execution, sensitivity and scientific GO remain separate and unverified.
 
 `quantfit bundle create` and `quantfit bundle verify` package and check portable
 aggregate evidence offline. Their role/flag/exit-code contract and worked commands are
@@ -45,9 +93,11 @@ caller never strips lines before parsing. The envelope is `schema_version` / `to
 `error` block; a *verdict* failure carries no `error` block, because an answer is not a
 breakage.
 
-**Exit codes** are the CI contract: `0` clean, `2` operational (nothing ran), `3` the
-verdict failed, `4` nothing was measured, `5` the gate cannot resolve the declared
-threshold. **4 and 5 are not passes.**
+**Exit codes** follow each command's contract: `0` command-specific success, `2`
+operational failure, `3` a known blocker or failed verdict, `4` unestablished
+measurement/comparison prerequisites, and `5` an unresolved declared threshold.
+Retained execution observations stay separate from an operational failure.
+**4 and 5 are not passes.**
 
 **`--token`** takes a Hugging Face token for gated or private repos, falling back to
 `$HF_TOKEN`. It is on the commands that reach the Hub and deliberately nowhere else —
