@@ -41,7 +41,8 @@ def main() -> None:
     assert Path(quantfit.__file__).resolve() == expected_source / "quantfit/__init__.py", (
         "unexpected application origin"
     )
-    manifest_data = json.loads((here / "inputs/manifest.json").read_bytes())
+    manifest_bytes = (here / "inputs/manifest.json").read_bytes()
+    manifest_data = json.loads(manifest_bytes)
     reports = {
         target["name"]: (here / "inputs/reports" / f"{target['name']}.json").read_bytes()
         for target in manifest_data["targets"]
@@ -51,6 +52,7 @@ def main() -> None:
     records = {}
     with working_directory(output):
         manifest, out = consumer.write_fixture(Path("all-present"), manifest_data, reports)
+        manifest.write_bytes(manifest_bytes)
         (out / "screen-summary.json").write_text('{"rows":[],"scientific_go":true}\n', encoding="utf-8")
         with patch(
             "quantfit.safety.verify.verify_safety", side_effect=AssertionError("unexpected native execution")
@@ -61,6 +63,7 @@ def main() -> None:
         records["junit"] = consumer.check_junit(Path("screen.xml"), reports)
         Path("all-present.json").write_text(json.dumps(all_present, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         manifest, out = consumer.write_fixture(Path("missing-one"), manifest_data, reports, missing=("clean",))
+        manifest.write_bytes(manifest_bytes)
 
         def bounded_execution(baseline, quant, *, report_path, max_new_tokens, **kwargs):
             target = manifest_data["targets"][0]
@@ -89,6 +92,7 @@ def main() -> None:
         records["missing_one"] = consumer.check(missing_one, manifest, out, reports, executed=("clean",))
         Path("missing-one.json").write_text(json.dumps(missing_one, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         manifest, out = consumer.write_fixture(Path("refused"), manifest_data, reports, missing=("clean",))
+        manifest.write_bytes(manifest_bytes)
         invalid_path = out / "unmeasured.json"
         invalid_bytes = b'{"schema_version":2,"synthetic_corrupt_member":'
         invalid_path.write_bytes(invalid_bytes)
@@ -108,6 +112,7 @@ def main() -> None:
         }
         Path("refused.json").write_text(json.dumps(refused, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         manifest, out = consumer.write_fixture(Path("alias"), manifest_data, reports)
+        manifest.write_bytes(manifest_bytes)
         originals = {path: path.read_bytes() for path in (manifest, *out.iterdir())}
         with patch(
             "quantfit.safety.verify.verify_safety", side_effect=AssertionError("executed before output admission")

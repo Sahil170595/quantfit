@@ -64,7 +64,7 @@ origin assertion and an external working directory:
 ```powershell
 $env:PYTHONDONTWRITEBYTECODE = '1'
 $env:PYTHONPATH = 'C:/tmp/qf-screen-resume-delivery-20261018'
-C:/tmp/sequential-delivery-20261017/qf-unit-env/Scripts/python.exe C:/tmp/qf-screen-resume-consumers-20261018/validation/2026-10-18-screen-resume/run_validation.py --expected-source C:/tmp/qf-screen-resume-delivery-20261018 --out C:/tmp/sequential-delivery-20261017/qf032-screen-resume-validation-final-notes
+C:/tmp/sequential-delivery-20261017/qf-unit-env/Scripts/python.exe C:/tmp/qf-screen-resume-consumers-20261018/validation/2026-10-18-screen-resume/run_validation.py --expected-source C:/tmp/qf-screen-resume-delivery-20261018 --out C:/tmp/sequential-delivery-20261017/qf032-screen-resume-validation-original-bytes
 ```
 
 The output directory must not exist. The script invokes `quantfit.cli.main` with
@@ -90,6 +90,9 @@ output-alias case must refuse exit 2 while preserving every original manifest an
 report byte. `receipt.json` records primitive-count projections, raw bindings,
 runtime versions and explicit proof limits. `.gitattributes` prevents JSON/XML
 newline translation from invalidating the original-byte bindings.
+The runner copies the original manifest bytes into every case before admission;
+it does not rely on the host's JSON newline convention. The stored original
+manifest has CRLF endings and the stored original native reports have LF endings.
 
 | Recorded case | CLI exit | Skipped / executed | Additional check |
 | --- | --- | --- | --- |

@@ -36,7 +36,7 @@
       "compressed-tensors": "<= 3B parameters in-GPU on 12 GB VRAM; transformers-loadable quantized checkpoints (compressed-tensors format or AWQ)",
       "gguf": "unquantized baseline arm <= 16.5 GB on disk (~8B-class) in CPU RAM; both arms under one pinned llama.cpp binary, CPU-only"
     },
-    "created_utc": "2026-10-18T05:04:24+00:00",
+    "created_utc": "2026-10-18T05:07:50+00:00",
     "decode": {
       "max_new_tokens": 64
     },
@@ -44,7 +44,7 @@
     "manifest": {
       "n_targets": 3,
       "name": "synthetic strict-resume protocol fixture; no measurements",
-      "path": "C:\\tmp\\sequential-delivery-20261017\\qf032-screen-resume-validation-final-notes\\missing-one\\manifest.json"
+      "path": "C:\\tmp\\sequential-delivery-20261017\\qf032-screen-resume-validation-original-bytes\\missing-one\\manifest.json"
     },
     "notes": [
       "Prevalence counts measured targets per stratum and axis, never pooled probes. Flags remain unconfirmed; dangerous zeros mean the detector did not fire. Existing native reports are held and validated; only missing target reports execute. Content checks do not authenticate controls, hosts, weights, human labels or independent execution, and establish no scientific GO.",
