@@ -120,7 +120,9 @@ def _publish(root: Path, files: tuple[tuple[str, bytes], ...]) -> None:
             )
             _write_member(root / relative, raw, owned)
         _require(
-            _directory_owned(root, root_id) and all(_file_owned(member) for member in owned),
+            _directory_owned(root, root_id)
+            and _directory_owned(root / "reports", reports_id)
+            and all(_file_owned(member) for member in owned),
             "publication_ownership_changed",
         )
         _scan(root, {"manifest.json": False, "targets.json": False, "reports": True})
