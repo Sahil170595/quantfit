@@ -163,12 +163,18 @@ def check(
         "n_targets": len(targets),
     }
     assert receiving["reports_dir"] == "reports" and isinstance(receiving["scope"], str) and receiving["scope"]
+    assert receiving["ignored_members"] == (
+        [{"member": "screen-summary.json", **binding(summary)}] if summary is not None else []
+    )
     assert receiving["control_evidence_verified"] is receiving["human_labels_authenticated"] is False
     assert receiving["independent_execution_verified"] is receiving["scientific_go"] is False
     for row, target in zip(receiving["report_bindings"], targets, strict=True):
         name = target["name"]
         assert row["name"] == name and row["member"] == f"{name}.json"
         assert row["status"] == ("validated" if name in reports else "missing_evidence")
+        assert row["producer_quantfit_version"] == (
+            json.loads(reports[name])["quantfit_version"] if name in reports else None
+        )
         assert {key: row[key] for key in ("sha256", "size_bytes")} == (
             binding(reports[name]) if name in reports else {"sha256": None, "size_bytes": None}
         )
