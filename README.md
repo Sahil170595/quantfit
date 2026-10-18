@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.27.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.27.0), including portable-bundle reproduction. The workflows below are available in this version.
+This README documents [quantfit 0.28.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.28.0), including reproduction JUnit. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.27.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.28.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -197,6 +197,19 @@ integrity and relocation do not authenticate producer locations, human labels,
 independent execution or scientific claims. See the
 [CLI input contract](docs/cli-reference.md#reproduction-and-reporting) and
 [three-report handoff](docs/replicate-bundles.md).
+
+Quantfit 0.28.0 adds `--junit PATH` to either reproduction input mode:
+
+```bash
+quantfit reproduce --reference-bundle reference-handoff --candidate-bundle candidate-handoff --out comparison.json --junit reproduction.xml --json
+```
+
+Ten cases report both T0 legs, P0/P1, T1–T5 and the overall native decision. Unknown
+T0 is skipped; negative T0 fails. The overall case passes only for `reproduced`,
+exit 0 and `passed=true`, so void and unverified decisions cannot look green.
+Native JSON and exit codes retain their meaning. JSON/XML are staged before
+publication, with successful XML last; each file is replaced atomically, without
+a transaction across the pair. Consumed evidence and output aliases are protected.
 
 **Audit the docs against the code.** `quantfit audit` checks that this repo's
 prose still describes the shipped code — CLI commands and flags, `file:symbol`

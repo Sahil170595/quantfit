@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.27.0. The workflows below are available in this version.
+This reference documents quantfit 0.28.0. The workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -437,6 +437,35 @@ Output preflight and checked atomic publication protect both closed directories 
 all member paths, including manifests and hardlink aliases. An output cannot replace
 consumed evidence or appear inside either bundle. Both original native T0/report
 bytes and historical producer versions remain intact.
+
+### Reproduction JUnit
+
+Quantfit 0.28.0 adds `--junit PATH` in both loose-report and bundle input
+modes. The library renderer is
+`quantfit.reproduce_junit.reproduction_to_junit(decision)`, accepting a mapping
+and returning XML. It reports the native decision without recalculating tolerance.
+
+```bash
+quantfit reproduce --reference-bundle reference-handoff --candidate-bundle candidate-handoff --out comparison.json --junit reproduction.xml --json
+```
+
+The suite `quantfit.reproduce` has ten stable cases: `reference-t0`, `candidate-t0`,
+`P0`, `P1`, `T1`, `T2`, `T3`, `T4`, `T5` and `overall`. Unknown T0 skips with a
+bounded reason; known negative T0 fails. P0/P1 and T1–T5 use their native boolean
+results. The overall case passes only for `outcome=reproduced`, exit 0 and
+`passed=true`. Every other native outcome fails overall, including void and
+unverified results. XML therefore cannot turn a withheld comparison into a pass.
+Messages are bounded and omit raw paths, provider diagnostics and private data.
+
+The CLI preserves native JSON and exit codes. An operational failure can publish
+one fixed-message error case when the output destination is safe; it does not
+fabricate a native comparison. Invalid or protected destinations refuse publication.
+JSON and XML are staged before replacing either destination. Each replacement is
+atomic, and successful XML is published last; this is not a transaction across
+both files. A later replacement fault exits 2 and can leave the already-published
+JSON result. Both outputs must be distinct from each other and every consumed
+input, including aliases. Loose positive T0 source reports receive the same
+protection; negative or legacy producer locators remain labels.
 
 ### Loose report inputs
 

@@ -2328,50 +2328,101 @@ def _canonical_receiving_path(path: str) -> str:
     return str(receiving.resolve())
 
 
-def _bundle_output_path(bundle_paths: tuple[str, str], out_path: str) -> Path:
-    """Protect prepared canonical receiving paths without resolving or reading held sources."""
+@dataclass(frozen=True)
+class _ReproductionOutputs:
+    """Prepared receiving paths; publication checks never resolve held source labels."""
+
+    sources: tuple[Path, ...]
+    roots: tuple[Path, ...]
+    targets: tuple[Path, ...]
+
+
+def _validate_reproduction_outputs(plan: _ReproductionOutputs) -> None:
     from quantfit.bundle import _no_links
+
+    for path in (*plan.roots, *plan.sources, *plan.targets):
+        _no_links(path)
+    for source in plan.sources:
+        if source.exists() and not stat.S_ISREG(source.lstat().st_mode):
+            raise ReproduceError("consumed comparison sources must be regular files")
+    for i, target in enumerate(plan.targets):
+        if not target.parent.is_dir():
+            raise ReproduceError("comparison output parent must already exist")
+        if target.exists() and not stat.S_ISREG(target.lstat().st_mode):
+            raise ReproduceError("comparison output must be a regular file")
+        if any(target.is_relative_to(root) for root in plan.roots):
+            raise ReproduceError("comparison output cannot be inside either closed replay bundle")
+        for source in (*plan.sources, *plan.targets[:i]):
+            if target == source or (target.exists() and source.exists() and target.samefile(source)):
+                raise ReproduceError("comparison output aliases a consumed source or another output; inputs preserved")
+
+
+def _prepare_reproduction_outputs(
+    source_paths: list[str], bundle_paths: list[str], output_paths: list[str]
+) -> _ReproductionOutputs:
+    """Canonicalize only receiving inputs/outputs before comparison consumes report bytes."""
     from quantfit.replay_bundle import ROLES
 
-    roots = [Path(path).absolute() for path in bundle_paths]
-    target = Path(out_path).absolute()
-    _no_links(target)
-    if not target.parent.is_dir():
-        raise ReproduceError("comparison output parent must already exist")
-    if target.exists() and not stat.S_ISREG(target.lstat().st_mode):
-        raise ReproduceError("comparison output must be a regular file")
-    for root in roots:
-        _no_links(root)
-        if target.is_relative_to(root):
-            raise ReproduceError("comparison output cannot be inside either closed replay bundle")
-        for member in (*ROLES.values(), "manifest.json"):
-            source = root / member
-            _no_links(source)
-            if target == source or (target.exists() and source.exists() and target.samefile(source)):
-                raise ReproduceError("comparison output aliases a replay bundle member; inputs preserved")
-    return target
+    roots = tuple(Path(_canonical_receiving_path(path)) for path in bundle_paths)
+    sources = tuple(Path(_canonical_receiving_path(path)) for path in source_paths) + tuple(
+        root / member for root in roots for member in (*ROLES.values(), "manifest.json")
+    )
+    targets = tuple(Path(_canonical_receiving_path(path)) for path in output_paths)
+    plan = _ReproductionOutputs(sources, roots, targets)
+    _validate_reproduction_outputs(plan)
+    return plan
 
 
-def _publish_bundle_comparison(bundle_paths: tuple[str, str], out_path: str, artifact: dict) -> None:
-    """Stage a complete buffer and recheck both protected bundles before atomic publication."""
-    temporary: Path | None = None
+def _publish_reproduction_outputs(plan: _ReproductionOutputs, outputs: list[tuple[Path, bytes]]) -> None:
+    """Stage all complete buffers first; each replacement is atomic, not a pair transaction."""
+    temporary: list[tuple[Path, Path]] = []
     try:
-        target = _bundle_output_path(bundle_paths, out_path)
-        raw = (json.dumps(artifact, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
-        with tempfile.NamedTemporaryFile(dir=target.parent, prefix=".reproduce-", delete=False) as stream:
-            temporary = Path(stream.name)
-            if stream.write(raw) != len(raw):
-                raise ReproduceError("incomplete reproduction comparison output write")
-            stream.flush()
-        _bundle_output_path(bundle_paths, out_path)
-        os.replace(temporary, target)
+        _validate_reproduction_outputs(plan)
+        for target, raw in outputs:
+            if target not in plan.targets:
+                raise ReproduceError("comparison publication target was not prepared")
+            with tempfile.NamedTemporaryFile(dir=target.parent, prefix=".reproduce-", delete=False) as stream:
+                path = Path(stream.name)
+                temporary.append((path, target))
+                if stream.write(raw) != len(raw):
+                    raise ReproduceError("incomplete reproduction comparison output write")
+                stream.flush()
+        _validate_reproduction_outputs(plan)
+        for path, target in temporary:
+            _validate_reproduction_outputs(plan)
+            os.replace(path, target)
     except (OSError, RuntimeError, TypeError, ValueError) as exc:
         if isinstance(exc, ReproduceError):
             raise
         raise ReproduceError(f"cannot publish reproduction comparison: {exc}") from exc
     finally:
-        if temporary is not None:
-            temporary.unlink(missing_ok=True)
+        for path, _ in temporary:
+            path.unlink(missing_ok=True)
+
+
+def _bundle_output_plan(bundle_paths: tuple[str, str], out_path: str) -> _ReproductionOutputs:
+    from quantfit.replay_bundle import ROLES
+
+    roots = tuple(Path(path) for path in bundle_paths)
+    return _ReproductionOutputs(
+        tuple(root / member for root in roots for member in (*ROLES.values(), "manifest.json")),
+        roots,
+        (Path(out_path),),
+    )
+
+
+def _bundle_output_path(bundle_paths: tuple[str, str], out_path: str) -> Path:
+    """Protect prepared canonical receiving paths without resolving or reading held sources."""
+    plan = _bundle_output_plan(bundle_paths, out_path)
+    _validate_reproduction_outputs(plan)
+    return plan.targets[0]
+
+
+def _publish_bundle_comparison(bundle_paths: tuple[str, str], out_path: str, artifact: dict) -> None:
+    """Stage a complete buffer and recheck both protected bundles before atomic publication."""
+    plan = _bundle_output_plan(bundle_paths, out_path)
+    raw = (json.dumps(artifact, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
+    _publish_reproduction_outputs(plan, [(plan.targets[0], raw)])
 
 
 def _bundle_comparison_side(bundle_path: str, side: str) -> tuple[_View, tuple[bool | None, dict], dict]:
