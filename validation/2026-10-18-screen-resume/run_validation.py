@@ -102,6 +102,16 @@ def main() -> None:
             "native_calls": 0,
         }
         Path("refused.json").write_text(json.dumps(refused, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        manifest, out = consumer.write_fixture(Path("alias"), manifest_data, reports)
+        originals = {path: path.read_bytes() for path in (manifest, *out.iterdir())}
+        with patch(
+            "quantfit.safety.verify.verify_safety", side_effect=AssertionError("executed before output admission")
+        ) as execution:
+            alias, _ = consumer.invoke(manifest, out, junit=manifest)
+        execution.assert_not_called()
+        assert alias["exit_code"] == 2 and all(path.read_bytes() == raw for path, raw in originals.items())
+        records["output_alias"] = {"exit_code": 2, "native_calls": 0, "all_original_bytes_unchanged": True}
+        Path("output-alias.json").write_text(json.dumps(alias, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         records["runtime"] = {
             "source_version": quantfit.__version__,
             "distribution_version": importlib.metadata.version("quantfit"),
