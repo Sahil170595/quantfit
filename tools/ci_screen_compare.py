@@ -101,7 +101,7 @@ def native_axis(raw: bytes | None, axis: str) -> dict:
         return {
             "present": False,
             "measured": False,
-            "flagged": False,
+            "flagged": None,
             "flips": None,
             "at_risk": None,
             "flip_rate_wilson95": None,
@@ -188,10 +188,10 @@ def check(
             for side in ("reference", "candidate"):
                 expected = native_axis(reports[side].get(name), axis)
                 assert value[side] == expected
-                counts[f"n_flagged_axes_{side}"] += expected["flagged"]
+                counts[f"n_flagged_axes_{side}"] += expected["flagged"] is True
                 counts[f"n_unmeasured_axes_{side}"] += expected["present"] and not expected["measured"]
             if value["status"] == "matched":
-                before, after = value["reference"]["flagged"], value["candidate"]["flagged"]
+                before, after = value["reference"]["flagged"] is True, value["candidate"]["flagged"] is True
                 transition = (
                     ("persisting_flag" if before else "newly_flagged")
                     if after
@@ -222,7 +222,7 @@ def check_junit(path: Path, document: dict) -> dict:
         for axis in AXES:
             value = row["axes"][axis]
             case = cases[f"{row['name']}.{axis}"]
-            flagged = value["reference"]["flagged"] or value["candidate"]["flagged"]
+            flagged = value["reference"]["flagged"] is True or value["candidate"]["flagged"] is True
             unavailable = value["status"] != "matched"
             assert (case.find("failure") is not None) == flagged
             assert (case.find("skipped") is not None) == (unavailable and not flagged)
@@ -250,7 +250,7 @@ def accept_cpu(bundle_path: Path, report_path: Path, out_root: Path) -> dict:
     reports = {target["name"]: original}
     code = (
         3
-        if any(native_axis(original, axis)["flagged"] for axis in AXES)
+        if any(native_axis(original, axis)["flagged"] is True for axis in AXES)
         else 4
         if any(not native_axis(original, axis)["measured"] for axis in AXES)
         else 0
