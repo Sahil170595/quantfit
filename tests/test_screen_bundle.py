@@ -434,3 +434,29 @@ def test_declared_order_and_forged_held_members_are_not_trusted(tmp_path):
     outer["reports"].reverse()
     with pytest.raises(inputs.ScreenBundleError, match="target_inventory_mismatch"):
         inputs._verify_held(replace(held, outer=json.dumps(outer).encode()))
+
+
+def test_final_readiness_refuses_substituted_empty_reports_directory(tmp_path, monkeypatch):
+    module = api()
+    from quantfit import screen_bundle_publication as publication
+
+    manifest, reports = corpus(tmp_path, [("g0", "gguf", 0, 0, None)], missing=("g0",))
+    out = tmp_path / "bundle"
+    retired = tmp_path / "owned-reports-retired"
+    write = publication._write_member
+    foreign_identity = []
+
+    def substitute_after_manifest(path, raw, owned):
+        result = write(path, raw, owned)
+        if path.name == "manifest.json":
+            (out / "reports").rename(retired)
+            (out / "reports").mkdir()
+            foreign_identity.append(publication._identity(out / "reports"))
+        return result
+
+    monkeypatch.setattr(publication, "_write_member", substitute_after_manifest)
+    with pytest.raises(module.ScreenBundleError, match="publication_failed_preserved"):
+        module.create_screen_bundle(str(manifest), str(reports), str(out))
+    assert publication._identity(out / "reports") == foreign_identity[0]
+    assert retired.is_dir() and not (out / "manifest.json").exists()
+    assert (out / "targets.json").read_bytes() == manifest.read_bytes()
