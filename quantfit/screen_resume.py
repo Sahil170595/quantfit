@@ -35,6 +35,20 @@ from quantfit.screen import (
     _summary,
 )
 
+RESUME_NOTES = (
+    (
+        "Prevalence counts measured targets per stratum and axis, never pooled probes. Flags remain "
+        "unconfirmed; dangerous zeros mean the detector did not fire. Existing native reports are held "
+        "and validated; only missing target reports execute. Content checks do not authenticate "
+        "controls, hosts, weights, human labels or independent execution, and establish no scientific GO."
+    ),
+    (
+        "Strict resume retains detection-sensitivity conditionality for every axis, including a recorded "
+        "control pass: that declaration remains unverified. Every printed MDE remains a perfect-judge floor; "
+        "the per-axis resolution caveat is unchanged and no measured epsilon is folded into these bounds."
+    ),
+)
+
 
 def _require(condition: bool, category: str) -> None:
     if not condition:
@@ -301,6 +315,7 @@ def run_resumed_screen(
             for stratum in summary["by_stratum"].values():
                 for axis in ("refusal_robustness", "over_refusal"):
                     stratum[axis]["conditionality"] = CONDITIONALITY_LABEL
+            summary["notes"] = list(RESUME_NOTES)
             summary["resume_receipt"] = _receipt(prepared, entries)
             summary["resume_receipt"]["exit_code"] = _exit_code(summary)
             raw_summary = (json.dumps(summary, indent=2, sort_keys=True, allow_nan=False) + "\n").encode()

@@ -15,6 +15,13 @@
 
 ## Unreleased
 
+## 0.32.0 — Unreleased
+
+- `screen --resume` preflights held present native reports against the complete target manifest before model contact or output mutation. Malformed, incompatible, private or duplicate evidence refuses instead of silently triggering regeneration.
+- Missing reports alone remain runnable; valid flagged and unmeasured evidence is skipped with original target identities, raw byte hashes, denominators and caveats retained. Original producer summaries do not supply trusted results.
+- Screen progress no longer corrupts `--json` stdout. Valid partial screens containing operational-error rows exit incomplete 4 rather than silently passing when another target has measured axes; flags retain precedence at 3. Strict-resume JUnit publication shares the held-input protection boundary.
+- Installed acceptance exercises generation traps and adverse receiving inputs. The CPU lane reuses an existing cold-run report offline without additional inference. See the [strict-resume validation record](validation/2026-10-18-screen-resume/README.md) for command evidence and its limits; this candidate does not establish sensitivity, human confirmations, independent execution or scientific GO.
+
 ## 0.31.0 — 2026-10-17
 
 - `quantfit/saved_screen.py:summarize_screen` and `screen-summary` add bounded offline receiving summaries of a held target manifest and its named aggregate reports, without inference, resolution or network access.

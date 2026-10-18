@@ -41,6 +41,14 @@ sensitivity. Invalid/IO evidence exits 2, valid flags 3 before missing/unmeasure
 and complete supported no-detection 0 remains conditional. Original files and
 producer versions are preserved.
 
+The unreleased **0.32.0 candidate** makes `screen --resume` strict: hold and
+validate all present native reports before model contact or output mutation;
+match target/protocol/decode/max-new-tokens, native arithmetic, privacy and
+duplicate-evidence rules. Present corrupt/incompatible evidence refuses 2 and
+is preserved; only missing reports execute. Valid flags/unmeasured evidence
+remain skipped evidence with original denominators, hashes and caveats. Do not
+claim this candidate behavior from a published 0.31.0 installation.
+
 ## The command that matters
 
 For an existing report and bound calibration aggregate, use

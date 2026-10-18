@@ -45,6 +45,10 @@ This README documents [quantfit 0.31.0](https://github.com/Sahil170595/quantfit/
 
 Install with `pip install "quantfit[inspect,gguf]==0.31.0"`.
 
+This branch also documents the **unreleased 0.32.0 candidate**, which adds strict
+screen resume validation. Candidate commands below require that source or its
+built wheel; the published install above retains 0.31.0 behavior.
+
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
 
@@ -599,6 +603,18 @@ matching flagged results never become a model pass. Valid negative/failed execut
 observations are retained; cleanup or provenance failure cannot qualify success.
 The new aggregate directory is staged with its manifest last, protecting original
 evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
+
+## Resume a screen with validated saved evidence (0.32.0 candidate)
+
+```bash
+quantfit screen --targets targets.json --out screen-reports --max-new-tokens 64 --resume --json
+```
+
+Every present native report is validated before model contact or output mutation.
+Corrupt, incompatible or duplicate evidence refuses with exit 2 and remains
+unchanged. Only missing reports run; valid flagged/unmeasured reports are retained,
+with original denominators, hashes and unconfirmed human status. Recorded control
+pass does not establish sensitivity. See [the resume contract](docs/cli-reference.md#screen-a-whole-manifest).
 
 ## Summarize saved screen reports
 

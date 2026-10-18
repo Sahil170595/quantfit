@@ -268,9 +268,8 @@ def _build_parser() -> argparse.ArgumentParser:
     ps.add_argument(
         "--resume",
         action="store_true",
-        help="skip targets whose report already exists in --out, rebuilding their rows from disk. "
-        "A screen over a big manifest is hours long and a machine that cannot hold every pair at "
-        "once must run it in pieces; without this, an interruption costs every completed target",
+        help="validate all existing native reports before model contact, then skip validated targets. "
+        "Malformed or incompatible saved evidence refuses without regeneration; only missing targets run",
     )
     ps.add_argument(
         "--attempts",
@@ -956,19 +955,23 @@ def _dispatch(args: argparse.Namespace) -> int:
         )
 
     if args.cmd == "screen":
-        from quantfit.screen import STATUS_REGRESSION, STATUS_UNMEASURABLE, run_screen
+        import contextlib
 
-        summary = run_screen(
-            args.targets,
-            args.out,
-            token=args.token,
-            max_new_tokens=args.max_new_tokens,
-            capture_dir=args.capture,
-            resume=args.resume,
-            attempts=args.attempts,
-        )
+        from quantfit.screen import STATUS_ERROR, STATUS_REGRESSION, STATUS_UNMEASURABLE, run_screen
 
-        if args.junit:
+        with contextlib.redirect_stdout(sys.stderr) if args.json else contextlib.nullcontext():
+            summary = run_screen(
+                args.targets,
+                args.out,
+                token=args.token,
+                max_new_tokens=args.max_new_tokens,
+                capture_dir=args.capture,
+                resume=args.resume,
+                attempts=args.attempts,
+                **({"junit_path": args.junit} if args.resume and args.junit else {}),
+            )
+
+        if args.junit and not args.resume:
             from pathlib import Path
 
             from quantfit.junit import screen_to_junit
@@ -1007,7 +1010,7 @@ def _dispatch(args: argparse.Namespace) -> int:
         # Same contract as verify-safety: a flagged regression outranks unmeasured.
         if STATUS_REGRESSION in statuses:
             code = 3
-        elif STATUS_UNMEASURABLE in statuses or any(a["n_measured"] == 0 for a in axes):
+        elif statuses & {STATUS_ERROR, STATUS_UNMEASURABLE} or any(a["n_measured"] == 0 for a in axes):
             code = 4  # an axis nothing was measured on is not a clean screen
         else:
             code = 0
