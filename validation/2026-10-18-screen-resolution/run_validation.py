@@ -56,6 +56,7 @@ def main() -> None:
             {name: raw for name, raw in calibrations_raw.items() if name != "unmeasured"},
         ),
         "conditional": (measured_raw, calibrations_raw),
+        "conditional-missing-calibrations": (measured_raw, {}),
         "native-incomplete": ({name: raw for name, raw in reports_raw.items() if name != "flagged"}, calibrations_raw),
     }
     output = args.out.resolve()
