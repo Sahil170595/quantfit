@@ -67,14 +67,17 @@ def main() -> None:
         ]
         source = Path("producer")
         manifest, directory = consumer.stage(source, manifest_raw, reports, summary=summary_raw)
+        originals = {path.relative_to(source): path.read_bytes() for path in source.rglob("*") if path.is_file()}
         bundle = Path("bundle")
         created = consumer.create(manifest, directory, bundle)
         records["create"] = consumer.check(created, bundle, manifest_raw, reports, summary=summary_raw)
+        assert all((source / path).read_bytes() == raw for path, raw in originals.items())
         retain("create.json", created)
         moved = Path("relocated-bundle")
         bundle.rename(moved)
         source.rename(Path("producer-unavailable"))
         assert not source.exists() and not bundle.exists()
+        assert all((Path("producer-unavailable") / path).read_bytes() == raw for path, raw in originals.items())
         verified = consumer.verify(moved)
         records["relocated_verify"] = consumer.check(verified, moved, manifest_raw, reports, summary=summary_raw)
         assert records["create"] == records["relocated_verify"]
@@ -152,6 +155,7 @@ def main() -> None:
             "synthetic_aggregate_only": True,
             "model_or_judge_calls": 0,
             "model_resolution_or_download_calls": 0,
+            "producer_input_bytes_unchanged": True,
             "physical_identities_authenticated": False,
             "independent_execution_verified": False,
             "control_evidence_verified": False,
