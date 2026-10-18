@@ -15,16 +15,18 @@
 
 ## Unreleased
 
-## 0.27.0 — Unreleased candidate
+## 0.27.0 — 2026-10-17
 
 - `quantfit/reproduce.py:compare_bundles` and existing `reproduce` bundle flags compare fixed first replicates from two verified three-report handoffs offline. Prepared T0 and path observations let the shared comparison consume held views without reopening producer files; loose-report behavior remains intact.
 - Per-side selection, ordered bindings, parsed manifest and original/receiving T0 are retained. Existing native tolerance criteria and exits are preserved: copied selected reports and valid negative T0 remain void/4, without claiming independent execution or scientific qualification.
 - Atomic output preflight/publication protects both closed bundles and all members/aliases. Source substitution, private layouts, forged T0, mixed modes and publication faults have targeted adverse coverage.
 - Existing installed consumers exercise relocated historical Phi4 bundles and explicit synthetic controls. The existing native cold job reuses its already-produced reports for offline copied-bundle void checks; no extra model run or job is introduced.
 
-Exact-head local, independent and hosted acceptance is recorded on the PR before
-readiness. Version 0.27.0 requires candidate source or wheels until publication;
-native model/human/sensitivity/safety/scientific GO and producer authenticity remain
+Released independently from PR #131: portable-bundle reproduction.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/38312561095); publication separately qualifies the exact versioned distributions.
+
+Native model/human/sensitivity/safety/scientific GO and producer authenticity remain
 separate. Historical validation and public reference reports are unchanged.
 
 ## 0.26.0

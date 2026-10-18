@@ -1,8 +1,7 @@
 # CLI reference — every command, every flag
 
-The published instrument is 0.26.0. This checkout prepares the unpublished 0.27.0
-candidate with portable-bundle inputs to `reproduce`; use candidate source or wheels
-for those flags. Software versions do not establish roadmap or scientific GO.
+This reference documents quantfit 0.27.0. The workflows below are available in this version.
+Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,
@@ -400,7 +399,7 @@ these assumptions explicitly. No sample size fixes correlated judge error.
 
 ## Reproduction and reporting
 
-The 0.27.0 candidate adds a bundle input mode to the existing command:
+Quantfit 0.27.0 adds a bundle input mode to the existing command:
 
 ```bash
 quantfit reproduce --reference-bundle reference-handoff --candidate-bundle candidate-handoff --out comparison.json --json

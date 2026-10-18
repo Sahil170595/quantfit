@@ -41,12 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.26.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.26.0).
-The branch prepares **0.27.0**, an unpublished candidate adding offline reproduction
-from portable three-report bundles. That new input mode requires candidate source
-or wheels; the other released workflows below remain available in 0.26.0.
+This README documents [quantfit 0.27.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.27.0), including portable-bundle reproduction. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.26.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.27.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -184,7 +181,7 @@ replicate runs and cannot be derived from two reports, so pass them explicitly
 with `--t0-reference` and `--t0-candidate`; without that evidence the outcome is
 never the gate pass.
 
-The unpublished 0.27.0 candidate also consumes relocated three-report replay
+Quantfit 0.27.0 also consumes relocated three-report replay
 bundles without reopening producer report paths:
 
 ```bash
