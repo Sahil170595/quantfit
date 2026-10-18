@@ -1,0 +1,160 @@
+{
+  "all_present": {
+    "axes": {
+      "over_refusal": {
+        "n_measured": 2,
+        "n_regressed": 0,
+        "n_regressed_human_verified": 0
+      },
+      "refusal_robustness": {
+        "n_measured": 2,
+        "n_regressed": 1,
+        "n_regressed_human_verified": 0
+      }
+    },
+    "control_evidence_verified": false,
+    "exit_code": 3,
+    "independent_execution_verified": false,
+    "manifest": {
+      "sha256": "60a61566f4d18c6f87619bdcf7cea4ba36e26ca64be824da4cd4e05f7e58937c",
+      "size_bytes": 803
+    },
+    "n_executed": 0,
+    "n_operational_errors": 0,
+    "n_skipped": 3,
+    "n_targets": 3,
+    "reports": [
+      {
+        "action": "skipped",
+        "name": "clean",
+        "sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d",
+        "size_bytes": 3321
+      },
+      {
+        "action": "skipped",
+        "name": "flagged",
+        "sha256": "8dd8265210cf1816a049eb6912acda1aa069b8865678b724904db9076c952b30",
+        "size_bytes": 3303
+      },
+      {
+        "action": "skipped",
+        "name": "unmeasured",
+        "sha256": "31a5ecd7cd5b70017a06571576ce9e9d7ef6f22fc783caf0498099e519347a4a",
+        "size_bytes": 3343
+      }
+    ]
+  },
+  "junit": {
+    "errors": 0,
+    "failures": 1,
+    "skipped": 1,
+    "tests": 3
+  },
+  "limits": {
+    "bounded_native_write_hooks": 1,
+    "control_evidence_verified": false,
+    "human_labels_authenticated": false,
+    "independent_execution_verified": false,
+    "model_or_judge_calls": 0,
+    "physical_identities_authenticated": false,
+    "proof": "source CLI parser/dispatch/emission; not installed wheel or real CPU inference",
+    "scientific_go": false,
+    "synthetic_aggregate_only": true
+  },
+  "missing_one": {
+    "axes": {
+      "over_refusal": {
+        "n_measured": 2,
+        "n_regressed": 0,
+        "n_regressed_human_verified": 0
+      },
+      "refusal_robustness": {
+        "n_measured": 2,
+        "n_regressed": 1,
+        "n_regressed_human_verified": 0
+      }
+    },
+    "control_evidence_verified": false,
+    "exit_code": 3,
+    "independent_execution_verified": false,
+    "manifest": {
+      "sha256": "60a61566f4d18c6f87619bdcf7cea4ba36e26ca64be824da4cd4e05f7e58937c",
+      "size_bytes": 803
+    },
+    "n_executed": 1,
+    "n_operational_errors": 0,
+    "n_skipped": 2,
+    "n_targets": 3,
+    "reports": [
+      {
+        "action": "executed",
+        "name": "clean",
+        "sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d",
+        "size_bytes": 3321
+      },
+      {
+        "action": "skipped",
+        "name": "flagged",
+        "sha256": "8dd8265210cf1816a049eb6912acda1aa069b8865678b724904db9076c952b30",
+        "size_bytes": 3303
+      },
+      {
+        "action": "skipped",
+        "name": "unmeasured",
+        "sha256": "31a5ecd7cd5b70017a06571576ce9e9d7ef6f22fc783caf0498099e519347a4a",
+        "size_bytes": 3343
+      }
+    ]
+  },
+  "output_alias": {
+    "all_original_bytes_unchanged": true,
+    "exit_code": 2,
+    "native_calls": 0
+  },
+  "refused": {
+    "category": "ScreenError",
+    "exit_code": 2,
+    "native_calls": 0,
+    "unchanged_invalid_member": {
+      "sha256": "70deadce52904e132d21ecfc01fcac6edf8b5ae546afff63ff27d533ece62096",
+      "size_bytes": 47
+    }
+  },
+  "runtime": {
+    "dependencies": {
+      "huggingface_hub": "1.31.0",
+      "pytest": "9.0.3",
+      "torch": null,
+      "transformers": null
+    },
+    "distribution_version": "0.32.0",
+    "machine": "AMD64",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python": "3.12.13",
+    "source_files": {
+      "__init__.py": {
+        "sha256": "72605c409bc5d97104a91895b25ab5a6b4c54ad3b3c5e585619575c586210b9a",
+        "size_bytes": 1800
+      },
+      "cli.py": {
+        "sha256": "4f49c12cfd109338297c439dc94a9c45d9f8199a996e713473a0aaf68e8aa603",
+        "size_bytes": 70407
+      },
+      "saved_screen.py": {
+        "sha256": "50aae99b20fa24232267f57f8abae272413cb7aaeb147c325d0eb1af06ca9489",
+        "size_bytes": 17206
+      },
+      "screen.py": {
+        "sha256": "2608a9a4b865d695ede6b80da181a01e57fb4f07f9b5b7ce4d71288124264c63",
+        "size_bytes": 25976
+      },
+      "screen_resume.py": {
+        "sha256": "d078130d5990d72847a0bcd2cd1cd404ddf38b350dce4bdae480e40e88b1f8ca",
+        "size_bytes": 15024
+      }
+    },
+    "source_origin_verified": true,
+    "source_version": "0.32.0"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "command": "screen",
+  "error": {
+    "kind": "ScreenError",
+    "message": "invalid_resume_input"
+  },
+  "exit_code": 2,
+  "result": null,
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.32.0"
+  }
+}
