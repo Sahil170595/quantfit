@@ -120,7 +120,8 @@ def test_the_leaf_set_is_what_we_think_it_is():
         "check", "list", "plan", "probe", "verify", "verify-safety", "inspect-run", "screen", "screen-summary", "emit",
         "calibrate sheet", "calibrate ingest", "gate", "t0", "reproduce", "audit", "quantize", "resolution",
         "references list", "references verify", "references assess", "bundle create", "bundle verify",
-        "bundle replay-create", "bundle replay-verify", "cold-run", "repeatability", "evidence fetch", "evidence rerun",
+        "bundle replay-create", "bundle replay-verify", "bundle screen-create", "bundle screen-verify",
+        "cold-run", "repeatability", "evidence fetch", "evidence rerun",
     }  # fmt: skip
     assert leaves == expected, f"leaf command set changed: {sorted(leaves ^ expected)}"
 
@@ -181,6 +182,21 @@ _CASES = [
         2,
     ),
     ("bundle-replay-verify-missing", ["bundle", "replay-verify", "--bundle", "no-replay-bundle-xyz"], 2),
+    (
+        "bundle-screen-create-missing",
+        [
+            "bundle",
+            "screen-create",
+            "--targets",
+            "no-targets-xyz.json",
+            "--reports-dir",
+            "no-reports-xyz",
+            "--out",
+            "unused-screen-bundle",
+        ],
+        2,
+    ),
+    ("bundle-screen-verify-missing", ["bundle", "screen-verify", "--bundle", "no-screen-bundle-xyz"], 2),
     ("cold-run-unsupported", ["cold-run", "--baseline", "base", "--quant", "q", "--out", "unused-cold"], 2),
 ]
 
@@ -225,6 +241,42 @@ def test_an_operational_failure_is_still_json(tmp_path):
     assert document["result"] is None
     assert document["error"]["message"], "an error block with no message helps nobody"
     assert document["error"]["kind"], "the exception class is what a caller branches on"
+
+
+def test_screen_bundle_real_stream_contract_without_model_backends(tmp_path):
+    from tools.ci_screen_bundle import committed_inputs, stage
+
+    manifest_raw, reports = committed_inputs(_ROOT)
+    producer = tmp_path / "producer"
+    manifest, directory = stage(producer, manifest_raw, reports)
+    bundle = tmp_path / "bundle"
+    blocked = tmp_path / "blocked"
+    blocked.mkdir()
+    created = _run(
+        "bundle",
+        "screen-create",
+        "--targets",
+        str(manifest),
+        "--reports-dir",
+        str(directory),
+        "--out",
+        str(bundle),
+        "--json",
+        block_backends=blocked,
+    )
+    first = json.loads(created.stdout)
+    assert created.returncode == first["exit_code"] == 0
+    assert first["command"] == "bundle screen-create"
+    assert first["result"]["receiving_summary"]["exit_code"] == 3
+    moved = tmp_path / "relocated"
+    bundle.rename(moved)
+    producer.rename(tmp_path / "producer-unavailable")
+    verified = _run("bundle", "screen-verify", "--bundle", str(moved), "--json", block_backends=blocked)
+    second = json.loads(verified.stdout)
+    assert verified.returncode == second["exit_code"] == 0
+    assert second["command"] == "bundle screen-verify"
+    assert second["result"]["receiving_summary"]["exit_code"] == 3
+    assert first["result"]["manifest_sha256"] == second["result"]["manifest_sha256"]
 
 
 def test_t0_agreement_runs_without_model_backends_and_writes_its_artifact(tmp_path):
