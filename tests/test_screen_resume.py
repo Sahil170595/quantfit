@@ -401,3 +401,35 @@ def test_report_symlink_is_never_missing_or_followed(tmp_path, monkeypatch):
     with pytest.raises(ScreenError):
         run_screen(str(manifest), str(reports), resume=True)
     assert outside.read_bytes() == b"PRIVATE foreign source" and not (reports / "screen-summary.json").exists()
+
+
+@pytest.mark.parametrize("sink", ["capture", "summary", "junit"])
+def test_retry_rechecks_changed_output_alias_before_second_model_contact(tmp_path, monkeypatch, sink):
+    manifest, reports = native_corpus(
+        tmp_path, [("missing", "gguf", 0, 0, None), ("held", "gguf", 0, 0, None)], missing=("missing",)
+    )
+    original_manifest = manifest.read_bytes()
+    original_report = (reports / "held.json").read_bytes()
+    capture = tmp_path / "captures"
+    junit = tmp_path / "result.xml"
+    calls = []
+
+    def first_failure(*args, **kwargs):
+        calls.append(args)
+        if len(calls) == 1:
+            path = {
+                "capture": capture / "missing.capture.jsonl",
+                "summary": reports / "screen-summary.json",
+                "junit": junit,
+            }[sink]
+            os.link(manifest, path)
+        raise OSError("PRIVATE transient failure")
+
+    monkeypatch.setattr("quantfit.safety.verify.verify_safety", first_failure)
+    with pytest.raises(ScreenError):
+        run_screen(
+            str(manifest), str(reports), resume=True, attempts=2, capture_dir=str(capture), junit_path=str(junit)
+        )
+    assert len(calls) == 1, "unsafe changed sink reached a second model invocation"
+    assert manifest.read_bytes() == original_manifest and (reports / "held.json").read_bytes() == original_report
+    assert not (reports / "missing.json").exists()

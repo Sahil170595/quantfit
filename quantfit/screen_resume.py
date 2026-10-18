@@ -245,6 +245,7 @@ def run_resumed_screen(
                 print(f"resume: {target.name} already measured")
             else:
                 for attempt in range(1, max(1, attempts) + 1):
+                    _paths(prepared)
                     _require(not _exists(path), "unexpected_report_member")
                     phase = "execution_failed"
                     try:
