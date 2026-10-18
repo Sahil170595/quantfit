@@ -759,7 +759,9 @@ def test_both_parsers_agree_on_date_released_in_either_spelling(released):
     # is a datetime.date — and the point is that BOTH parsers say the same thing either
     # way, so the file cannot become unparseable by writing the conventional form. Which
     # spelling the file must use is a separate decision, enforced above.
-    text = _CITATION.read_text(encoding="utf-8") + released
+    current = _CITATION.read_text(encoding="utf-8")
+    undated = re.sub(r"^date-released:[^\n]*(?:\n|$)", "", current, flags=re.MULTILINE)
+    text = undated + released
     parsed = _parse_cff(text)
     assert parsed["date-released"] in ("2026-08-06", date(2026, 8, 6))
     if _yaml is not None:
