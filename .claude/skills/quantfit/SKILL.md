@@ -41,15 +41,15 @@ sensitivity. Invalid/IO evidence exits 2, valid flags 3 before missing/unmeasure
 and complete supported no-detection 0 remains conditional. Original files and
 producer versions are preserved.
 
-The unreleased **0.32.0 candidate** makes `screen --resume` strict: hold and
+Quantfit **0.32.0** makes `screen --resume` strict: hold and
 validate all present native reports before model contact or output mutation;
 match target/protocol/decode/max-new-tokens, native arithmetic, privacy and
 duplicate-evidence rules. Present corrupt/incompatible evidence refuses 2 and
 is preserved; only missing reports execute. Valid flags/unmeasured evidence
-remain skipped evidence with original denominators, hashes and caveats. Do not
-claim this candidate behavior from a published 0.31.0 installation.
+remain skipped evidence with original denominators, hashes and caveats. Strict
+resume requires quantfit 0.32.0 or later.
 
-The unreleased **0.33.0 candidate** adds `quantfit bundle screen-create --targets
+Quantfit **0.33.0** adds `quantfit bundle screen-create --targets
 targets.json --reports-dir screen-reports --out screen-handoff --json` and
 `quantfit bundle screen-verify --bundle relocated/screen-handoff --json`.
 Original target/report bytes, missing rows, negative native results and optional
@@ -60,7 +60,7 @@ input exits 2. Full transport is bounded at 64 MiB, including both manifests.
 Treat bundles as private handoffs; hashes establish byte binding, not execution
 authenticity, calibrated sensitivity, human confirmations or scientific GO.
 
-The unreleased **0.34.0 candidate** adds `quantfit screen-compare
+Quantfit **0.34.0** adds `quantfit screen-compare
 --reference-bundle reference-screen --candidate-bundle candidate-screen --out
 comparison.json --junit comparison.xml --json`. Exact target-manifest bytes must
 match. Retain per-axis native denominators/flags and missing, unmeasured or

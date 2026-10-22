@@ -85,8 +85,10 @@ Read from `pyproject.toml` **[V]**:
 
 | requirement | group | cap | why this one churns |
 |---|---|---|---|
+| `datasets>=3.0,<=5.0.1` | hard | `<=5.0.1` | preserves the admitted ceiling removed by the llmcompressor 0.14.0.1 security hotfix; later releases require qualification **[V]** |
+| `accelerate>=1.0,<=1.15.0` | hard | `<=1.15.0` | preserves the prior compressor ceiling without admitting unqualified patches **[V]** |
 | `llmcompressor>=0.5,<0.15` | hard | `<0.15` | the modifier/oneshot API churns across minors; `backends/compressed_tensors.py` imports `AWQModifier`, `GPTQModifier`, `QuantizationModifier`, `SmoothQuantModifier` and `oneshot` by path **[V]** |
-| `inspect-ai>=0.3.252,<0.4` | `inspect` | `<0.4` | `quantfit/inspect_task.py` depends on `inspect_ai` internals (`SampleScore`/`Score`/`Value`, `inspect_ai.score`, the epoch-reduction behaviour of `Score.value`) and is verified against 0.3.252 **[V]** |
+| `inspect-ai==0.3.269` | `inspect` | `==0.3.269` | `quantfit/inspect_task.py` depends on `inspect_ai` internals (`SampleScore`/`Score`/`Value`, `inspect_ai.score`, the epoch-reduction behaviour of `Score.value`); the public model/score/lifecycle API and installed consumers are qualified against exactly 0.3.269 **[V]** |
 | `gguf>=0.10,<1.0` | `gguf`, `dev` | `<1.0` | pre-1.0 and tracks llama.cpp; the enums quantfit reads are append-only in practice, so `<1.0` is the honest cap **[V]** |
 | `ruff>=0.16,<0.17` | `dev` | `<0.17` | 0.16.0 shipped new default rules mid-cycle and broke a green branch **[V]** |
 | `gptqmodel>=7.1,<8` | `awq` | `<8` | held for transformers' `AwqQuantizer` internals; see §4, where the cap is closed but the floor is not **[V]** |
@@ -111,11 +113,11 @@ AWQ/GPTQ qualification. Complete release candidates repeat the hosted CPU checks
 
 ## 3. What is deliberately unbounded, and why
 
-**Ten** declared requirements carry no upper bound **[V]**: eight under `[project]`
-(`torch`, `transformers`, `huggingface_hub`, `datasets`, `accelerate`, `psutil`, plus
-dev-only `pytest` and `scipy`) and **two under `[build-system].requires`**
-(`setuptools>=77`, `wheel`) — the group this document did not count at all until §3.6 was
-written, and which no test read either. All ten are exempt below.
+**Eight** declared requirements carry no upper bound **[V]**: six under `[project]`
+(`torch`, `transformers`, `huggingface_hub`, `psutil`, plus dev-only `pytest` and `scipy`)
+and **two under `[build-system].requires`** (`setuptools>=77`, `wheel`). All eight are
+exempt below. The 2026-10-22 maintenance moved datasets and accelerate from inherited
+bounds to the direct ceilings in §2, retaining the previously admitted boundary.
 
 Filter behind that count: every string in `[project].dependencies`,
 `[project.optional-dependencies].*` and `[build-system].requires` whose specifier set
@@ -160,25 +162,21 @@ is **not** machine-checked, and the exemption says so. **[?]**
 
 `llmcompressor` is a **hard** dependency, so every default `pip install quantfit` resolves
 it, and quantfit caps it at `<0.15`. llmcompressor in turn constrains its own stack at
-**both** ends. Read from the published dependency metadata of `llmcompressor==0.14.0` **[V]**:
+**both** ends for the remaining exemptions. Read from installed
+`llmcompressor==0.14.0.1` metadata **[V]**:
 
 ```
 torch<=2.14.0,>=2.10.0
 transformers<=5.17.0,>=5.15.0
-datasets<=5.0.1,>=4.8.4
-accelerate<=1.15.0,>=1.15.0
 ```
 
-Those are `<=` pins on exact versions — considerably tighter than anything quantfit would
-write. Adding an independent quantfit cap on top would not add safety; it would add a
+Those are `<=` pins on exact versions. Adding an independent quantfit cap on top would not add safety; it would add a
 second opinion that can be *unsatisfiable* against llmcompressor's own upper pin, and an
 unresolvable install is harder to diagnose than a caught API break.
 
 | requirement | chain that bounds it |
 |---|---|
 | `transformers>=4.56` | `llmcompressor` → `transformers` **[V]** |
-| `datasets>=3.0` | `llmcompressor` → `datasets` **[V]** |
-| `accelerate>=1.0` | `llmcompressor` → `accelerate` **[V]** |
 | `huggingface_hub>=0.25` | `llmcompressor` → `transformers` → `huggingface-hub` (`transformers==5.17.0` declares `huggingface-hub<2.0,>=1.5.0`; `datasets==5.0.1` declares `huggingface-hub<2.0,>=0.25.0`) **[V]** |
 
 **The chain is checked, not asserted.** `test_parent_bounded_premises_hold_against_installed_metadata`
@@ -188,6 +186,12 @@ decorative: the first draft of the exemption table claimed `llmcompressor` bound
 `huggingface_hub` at all **[V]**. The entry now names the real two-link chain. Separately,
 `test_parent_bounded_exemptions_root_in_a_dependency_quantfit_itself_caps` fails the moment
 `llmcompressor` loses its own cap, because every entry in this class collapses with it.
+
+The 0.14.0.1 hotfix removed datasets/accelerate upper bounds along with the Pillow cap.
+The installed-metadata premise test caught both lost bounds. Quantfit now caps those
+two directly at `<=5.0.1` and `<=1.15.0`, with the original public floors unchanged; they
+are no longer parent-bound exemptions. `test_compressor_hotfix_retains_qualified_dependency_ceilings`
+accepts the qualified versions and rejects the next patch releases **[V]**.
 
 **Scope of the argument.** Parent bounds hold on the full-dependency install path.
 The source unit and numerical roles intentionally omit the compressor; their versions are
@@ -208,28 +212,26 @@ this class, read from installed metadata **[V]**:
 |---|---|---|
 | `torch>=2.4` | `llmcompressor` → `torch>=2.10.0` | inert on a default install |
 | `transformers>=4.56` | `llmcompressor` → `transformers>=5.15.0` | inert |
-| `datasets>=3.0` | `llmcompressor` → `datasets>=4.8.4` | inert |
-| `accelerate>=1.0` | `llmcompressor` → `accelerate>=1.15.0` | inert |
 | `huggingface_hub>=0.25` | `llmcompressor` → `transformers` → `huggingface-hub>=1.5.0` | inert |
 
 The lighter source roles do not claim full-runtime acceptance; that proof comes from
 the installed wheel/sdist and backend jobs. Their complete graph is still locked.
 
 `test_floors_that_cannot_bind_are_recorded_not_discovered` computes this table from
-installed metadata and pins it **[V]**. It deliberately does **not** fail on the five above:
+installed metadata and pins it **[V]**. It deliberately does **not** fail on the three above:
 raising a floor is itself a claim that the new version was validated (§5), and this file does
-not own `pyproject.toml`. What it fails on is a *new* inert floor, or one of these five being
-raised without the record being updated. **[?]** Raising all five to their parents' floors is
+not own `pyproject.toml`. What it fails on is a *new* inert floor, or one of these three being
+raised without the record being updated. **[?]** Raising all three to their parents' floors is
 the obvious fix and needs a run to justify; it is a maintainer decision, listed in §5.
 
 **`accelerate` deserves a separate note.** It is a hard dependency that quantfit imports
 **nowhere** — asserted by `test_accelerate_is_declared_but_never_imported` **[V]**. The
 `device_map="auto"` offload path that justified it was deleted at 0.3 (`CHANGELOG.md:346`,
 `ROADMAP.md:24`) **[V]**, and the only surviving mention is a comment at
-`backends/compressed_tensors.py:93` saying it is not used **[V]**. The exemption records
-that *capping* is not the right instrument here; the right fix is to **delete the
-declaration**, which is `pyproject.toml`-owner work. Until then the test pins the
-no-import state, so restoring an import forces this section to be rewritten on purpose.
+`backends/compressed_tensors.py:93` saying it is not used **[V]**. The no-import test remains. The 2026-10-22 maintenance conservatively retains the
+declaration and its prior admitted ceiling as a direct cap; deciding whether to delete
+the dependency is separate work. Restoring an import still forces this section to be
+reviewed on purpose.
 
 ### 3.3 `LEAF_SINGLE_CALL` — one call, no surface to break
 
@@ -313,14 +315,14 @@ is recorded. The previous metadata snapshot recorded transformers 5.10.1 and dat
 | requirement | declared floor | resolves to | crossed |
 |---|---|---|---|
 | `transformers` | `>=4.56` | 5.17.0 | **4 → 5**, hard dependency |
-| `datasets` | `>=3.0` | 5.0.1 | **3 → 5**, hard dependency |
 | `huggingface_hub` | `>=0.25` | 1.31.0 | **0 → 1**, hard dependency — the largest relative jump here |
 | `psutil` | `>=5.9` | 7.2.2 | 5 → 7, but the single call site is premise-tested (§3.3) |
 | `pytest` | `>=8.0` | 9.0.3 | 8 → 9, and this one **is** recorded — the absorbed bump is §3.5's evidence |
 
 No direct cap stopped these crossings. The parent bounds still hold; validation is a
-separate claim. The narrow datasets-5 registry update is tied to the pinned probe-corpus
-canary in `validation/2026-10-04-hosted-ci/`, not general datasets compatibility.
+separate claim. Datasets previously crossed 3 → 5 under an exemption; it is now directly
+capped at 5.0.1. Its narrow datasets-5 registry update remains tied to the pinned
+probe-corpus canary in `validation/2026-10-04-hosted-ci/`, not general datasets compatibility.
 `test_a_major_boundary_crossed_under_an_exemption_is_recorded` pins the observed major
 list; a further crossing fails until its scope is recorded **[V]**. Public floors were
 not raised, and this does not validate every API of those dependencies.
@@ -397,6 +399,20 @@ This exception establishes only the hosted CPU scope; the GPU AWQ/GPTQ + verify-
 pair in the normal row remains unverified and is required before claiming that scope.
 No advisory is ignored and no parent constraint is overridden. It does not amend the
 scientific sensitivity-control protocol or claim a safety result.
+
+**Dated security maintenance — 2026-10-22.** The installed-graph audit rejected
+aiohttp 3.14.3, certifi 2026.7.22, opentelemetry-api 1.45.0 and Pillow 12.3.0.
+The lock selects their fixed releases 3.14.5, 2026.10.19, 1.45.1 and 13.0.0.
+The llmcompressor 0.14.0.1 metadata-only hotfix admits Pillow 13 without changing
+Torch, transformers or compressed-tensors pins. Its removed datasets/accelerate
+ceilings are restored directly in quantfit metadata, preserving the previously
+admitted versions; the meaningful installed-metadata checker remains intact.
+Pillow 13 requires Python 3.11+, so UV's native runtime-group requirement enforces
+that floor; unit/tooling/numerical groups still cover Python 3.10. Complete hosted
+runtime qualification uses 3.12. No vulnerable Python 3.10 runtime fallback or
+advisory exception is introduced. The earlier dated receipts remain historical;
+current release validation must repeat the CPU/backend, installation and audit
+gates before publication. No GPU AWQ/GPTQ or scientific scope is added **[V]**.
 
 **Raising a FLOOR needs a run too, and this is the half that is easy to forget.** Every row
 above is written for a cap, but a floor is the same kind of claim pointed the other way: it
