@@ -15,18 +15,28 @@
 
 ## Unreleased
 
-## 0.33.0 — Unreleased
+## 0.33.0 — 2026-10-22
 
 - `bundle screen-create` / `bundle screen-verify` and `quantfit.screen_bundle` preserve original target/native-report bytes, explicit missing targets and optional ignored producer-summary bytes in a closed portable handoff. Receiving summaries reuse strict native validation offline; producer locators never trigger asset access.
 - Both manifests and every member count toward a 64 MiB transport bound. Exclusive new directories publish the outer manifest last; ownership and byte checks constrain failure cleanup. This is not atomic directory publication or a hostile-filesystem transaction.
 - Valid content verification exits 0 separately from nested screen flags or incompleteness (3/4); malformed, mismatched or unsafe evidence exits 2. Byte binding does not authenticate execution, human labels, sensitivity or scientific GO. See `docs/screen-bundles.md` and `validation/2026-10-18-screen-bundle/` for command evidence and limits.
 
-## 0.32.0 — Unreleased
+Released independently from PR #137: portable native screen evidence bundles.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/39101178129); publication separately qualifies the exact versioned distributions.
+
+## 0.32.0 — 2026-10-22
 
 - `screen --resume` preflights held present native reports against the complete target manifest before model contact or output mutation. Malformed, incompatible, private or duplicate evidence refuses instead of silently triggering regeneration.
 - Missing reports alone remain runnable; valid flagged and unmeasured evidence is skipped with original target identities, raw byte hashes, denominators and caveats retained. Original producer summaries do not supply trusted results.
 - Screen progress no longer corrupts `--json` stdout. Valid partial screens containing operational-error rows exit incomplete 4 rather than silently passing when another target has measured axes; flags retain precedence at 3. Strict-resume JUnit publication shares the held-input protection boundary.
 - Installed acceptance exercises generation traps and adverse receiving inputs. The CPU lane reuses an existing cold-run report offline without additional inference. See the [strict-resume validation record](validation/2026-10-18-screen-resume/README.md) for command evidence and its limits; this candidate does not establish sensitivity, human confirmations, independent execution or scientific GO.
+
+- Advisory-driven CI maintenance upgrades aiohttp, certifi, opentelemetry-api, Pillow and the llm-compressor Pillow-cap hotfix. The complete locked runtime now requires Python 3.11+ (hosted qualification uses 3.12); the Python 3.10 matrix remains hermetic source validation. Package Python metadata and measurement pins are unchanged; direct datasets<=5.0.1 / accelerate<=1.15.0 ceilings preserve the admitted bounds removed by the compressor hotfix.
+
+Released independently from PR #136: strict native screen resume.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/39100402840); publication separately qualifies the exact versioned distributions.
 
 ## 0.31.0 — 2026-10-17
 

@@ -41,13 +41,12 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.31.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.31.0), including strict saved-screen summaries. The workflows below are available in this version.
+This README documents [quantfit 0.33.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.33.0), including portable native screen evidence bundles. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.31.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.33.0"`.
 
-This branch also documents the **unreleased 0.33.0 candidate**, which includes strict
-screen resume validation (0.32.0) and portable screen evidence (0.33.0). Candidate commands below require that source or its
-built wheel; the published install above retains 0.31.0 behavior.
+Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
+requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -604,7 +603,7 @@ observations are retained; cleanup or provenance failure cannot qualify success.
 The new aggregate directory is staged with its manifest last, protecting original
 evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
 
-## Portable screen evidence (0.33.0 candidate)
+## Portable screen evidence (since 0.33.0)
 
 ```bash
 quantfit bundle screen-create --targets targets.json --reports-dir screen-reports --out screen-handoff --json
@@ -618,9 +617,9 @@ Transport success exits 0 while the nested `receiving_summary.exit_code` still
 retains flags (3) or missing/unmeasured evidence (4). Invalid or unsafe input exits 2.
 Content hashes do not authenticate execution, sensitivity, human labels or scientific
 GO. See [the screen bundle contract](docs/screen-bundles.md) and its bounded private
-handoff/publication rules. This workflow requires the 0.33.0 candidate.
+handoff/publication rules. This workflow is available since quantfit 0.33.0.
 
-## Resume a screen with validated saved evidence (0.32.0 candidate)
+## Resume a screen with validated saved evidence (since 0.32.0)
 
 ```bash
 quantfit screen --targets targets.json --out screen-reports --max-new-tokens 64 --resume --json

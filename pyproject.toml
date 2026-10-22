@@ -28,8 +28,10 @@ dependencies = [
   "transformers>=4.56",
   "huggingface_hub>=0.25",
   "httpx>=0.28.1,<0.29",
-  "datasets>=3.0",
-  "accelerate>=1.0",
+  # The Pillow-cap hotfix in llmcompressor 0.14.0.1 removed its ceilings on these.
+  # Preserve the previously admitted versions until newer releases are qualified.
+  "datasets>=3.0,<=5.0.1",
+  "accelerate>=1.0,<=1.15.0",
   # Upper-bounded: llm-compressor's modifier/oneshot API churns across minors; the
   # cap moves only after a validated run on the new minor (ROADMAP standing rule).
   "llmcompressor>=0.5,<0.15",
