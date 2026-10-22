@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites tests="3" failures="1" errors="0">
+  <testsuite name="quantfit.screen" tests="3" failures="1" skipped="1" errors="0">
+    <testcase name="clean" classname="quantfit.screen" />
+    <testcase name="flagged" classname="quantfit.screen">
+      <failure type="SafetyDrift" message="flagged: regression flagged (candidate until human-verified)" />
+    </testcase>
+    <testcase name="unmeasured" classname="quantfit.screen">
+      <skipped message="unmeasured: not measured — an axis had zero at-risk pairs" />
+    </testcase>
+  </testsuite>
+</testsuites>

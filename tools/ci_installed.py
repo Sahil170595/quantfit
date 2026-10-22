@@ -32,7 +32,10 @@ class Guard:
     def pytest_sessionstart(self, session): guard()
     def pytest_sessionfinish(self, session, exitstatus): guard()
 guard()
-code = pytest.main(sys.argv[1:], plugins=[Guard()])
+# The scratch config is outside the checkout. Give pytest a test-tree root so
+# distinct modules cannot acquire the same empty nodeid and leak autouse fixtures.
+# rootdir controls collection identity; it does not add application import paths.
+code = pytest.main(['--rootdir', str(checkout / 'tests'), *sys.argv[1:]], plugins=[Guard()])
 guard()
 raise SystemExit(code)
 """
@@ -795,6 +798,7 @@ def main() -> None:
             "test_reference_assessment.py",
             "test_reference_replay.py",
             "test_saved_screen.py",
+            "test_ci_screen_resume.py",
             "test_repeatability.py",
             "test_evidence_fetch.py",
             "test_verify.py",

@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.31.0. The workflows below are available in this version.
+This reference documents quantfit 0.32.0. All workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -409,12 +409,25 @@ are local only, and are never committed or redistributed; the `*.capture.jsonl` 
 in `.gitignore` backstops that. See
 [`docs/data-handling-completions.md`](data-handling-completions.md).
 
-`--resume` skips targets whose report already exists in `--out`, rebuilding their rows
-from disk so a resumed summary is identical to the one an uninterrupted run would have
-written. A screen over a large manifest runs for hours, and a machine that cannot hold
-every pair at once has to run it in pieces; without resume an interruption costs every
-target already measured. A report that will not parse is re-run rather than trusted:
-resuming onto a truncated artifact would publish it.
+Quantfit 0.32.0 makes `--resume` validate the complete present native
+report population before any model contact or output mutation. Original target
+references, pinned protocol, native arithmetic, privacy, duplicate evidence and
+requested `--max-new-tokens` must match. Valid flagged or unmeasured reports remain
+saved evidence and are skipped with their original denominators and caveats.
+Only missing target reports are executed. A present malformed or incompatible
+file refuses with exit 2, preserving its bytes rather than regenerating it.
+The resume receipt records skipped/executed target identities and original hashes.
+The current generation-side chat-template policy must match; receiver-supported
+historical policies remain valid for offline `screen-summary`, but cannot be mixed
+into a current resume run. Producer package versions are preserved.
+Optional JUnit output must be outside report/capture directories with an existing
+parent. Its aliases and the summary/native/capture output paths are checked before
+contact, with guarded per-file atomic publication. Fresh results are checked against
+held evidence after execution; a later incompatibility preserves existing evidence
+without promising whole-run rollback. Progress goes to stderr under `--json`.
+Valid flags exit 3 before partial execution errors or unmeasured evidence exit 4;
+neither an operational-error row nor incomplete measurement becomes a clean result.
+Strict resume is available since quantfit 0.32.0.
 
 `--attempts N` retries a target up to N times before recording it as an operational
 error (default `1`, meaning no retry). The absorbed failure class is mostly transient.

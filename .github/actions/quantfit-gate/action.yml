@@ -187,7 +187,7 @@ inputs:
       Pin it exactly for a reproducible gate — the instrument's version is part of the
       measurement. Ignored when `quantfit-path` is set.
     required: false
-    default: ">=0.31.0,<0.32"
+    default: ">=0.32.0,<0.33"
   quantfit-path:
     description: >-
       Install quantfit from this local path (e.g. `.` for a checked-out repo) instead of
