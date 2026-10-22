@@ -41,9 +41,12 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.32.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.32.0), including strict native screen resume. The workflows below are available in this version.
+This README documents [quantfit 0.33.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.33.0), including portable native screen evidence bundles. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.32.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.33.0"`.
+
+Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
+requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -599,6 +602,22 @@ matching flagged results never become a model pass. Valid negative/failed execut
 observations are retained; cleanup or provenance failure cannot qualify success.
 The new aggregate directory is staged with its manifest last, protecting original
 evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
+
+## Portable screen evidence (since 0.33.0)
+
+```bash
+quantfit bundle screen-create --targets targets.json --reports-dir screen-reports --out screen-handoff --json
+quantfit bundle screen-verify --bundle relocated/screen-handoff --json
+```
+
+These commands preserve original target/native-report bytes, every missing target,
+negative flags and any original ignored producer summary. A relocated receiver
+rebuilds the strict screen summary offline; it follows no producer model paths.
+Transport success exits 0 while the nested `receiving_summary.exit_code` still
+retains flags (3) or missing/unmeasured evidence (4). Invalid or unsafe input exits 2.
+Content hashes do not authenticate execution, sensitivity, human labels or scientific
+GO. See [the screen bundle contract](docs/screen-bundles.md) and its bounded private
+handoff/publication rules. This workflow is available since quantfit 0.33.0.
 
 ## Resume a screen with validated saved evidence (since 0.32.0)
 

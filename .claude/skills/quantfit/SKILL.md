@@ -49,6 +49,17 @@ is preserved; only missing reports execute. Valid flags/unmeasured evidence
 remain skipped evidence with original denominators, hashes and caveats. Strict
 resume requires quantfit 0.32.0 or later.
 
+Quantfit **0.33.0** adds `quantfit bundle screen-create --targets
+targets.json --reports-dir screen-reports --out screen-handoff --json` and
+`quantfit bundle screen-verify --bundle relocated/screen-handoff --json`.
+Original target/report bytes, missing rows, negative native results and optional
+ignored producer summary survive relocation. Rebuild strict summaries offline;
+never follow producer model paths. Content verification exits 0 while nested
+`receiving_summary.exit_code` retains native flags/incomplete 3/4. Invalid/unsafe
+input exits 2. Full transport is bounded at 64 MiB, including both manifests.
+Treat bundles as private handoffs; hashes establish byte binding, not execution
+authenticity, calibrated sensitivity, human confirmations or scientific GO.
+
 ## The command that matters
 
 For an existing report and bound calibration aggregate, use
