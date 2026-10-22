@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.33.0. All workflows below are available in this version.
+This reference documents quantfit 0.34.0. All workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -68,6 +68,16 @@ published last. Preflight and publication protect the original target/bundle/mem
 resolved weights/executable and aliases; interrupted or cleanup-uncertain work cannot
 qualify success. Registration, authenticated human labels/weights/physical hosts,
 independent execution, sensitivity and scientific GO remain separate and unverified.
+
+Quantfit 0.34.0 adds `screen-compare --reference-bundle DIR
+--candidate-bundle DIR --out comparison.json --junit comparison.xml --json`.
+The optional JSON/XML outputs share source/alias protection; they do not form a
+transaction. Both bundles must contain the exact same target-manifest bytes.
+Native flags on either side retain exit 3 before incomplete/incompatible 4;
+conditional complete no-flag is 0, invalid/unsafe input or output failure is 2.
+Two axis cases per target plus overall retain failures and skips separately.
+See [Screen observation comparison](screen-comparison.md) for the API, declared
+identity availability, original denominators and descriptive-transition boundaries.
 
 Quantfit 0.33.0 adds `bundle screen-create --targets PATH --reports-dir DIR
 --out NEWDIR --json` and `bundle screen-verify --bundle DIR --json`. These package

@@ -294,6 +294,7 @@ jobs:
           mypy --strict --follow-imports=silent quantfit/saved_screen.py
           mypy --strict --follow-imports=silent quantfit/screen_resume.py
           mypy --strict --follow-imports=silent quantfit/screen_bundle.py quantfit/screen_bundle_inputs.py quantfit/screen_bundle_publication.py
+          mypy --strict --follow-imports=silent quantfit/screen_compare.py quantfit/screen_compare_junit.py
           quantfit audit
       - name: Verify and run actionlint
         run: |

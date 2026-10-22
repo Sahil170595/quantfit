@@ -126,6 +126,13 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
     from ci_screen_bundle import accept_cpu as screen_bundle_accept_cpu
 
     screen_bundle = screen_bundle_accept_cpu(Path(result["runs"][0]["report"]["path"]), output.parent / "screen-bundle")
+    from ci_screen_compare import accept_cpu as screen_compare_accept_cpu
+
+    screen_comparison = screen_compare_accept_cpu(
+        output.parent / "screen-bundle" / "relocated-bundle",
+        Path(result["runs"][0]["report"]["path"]),
+        output.parent / "screen-comparison",
+    )
     # Offline handoff of the actual three reports, after existing inference ends.
     # An exact copied candidate retains native P1 void even when T0 is negative.
     from quantfit import reference_assessment, reference_replay
@@ -227,6 +234,7 @@ def cold_acceptance(baseline: Path, quant: Path, output: Path) -> dict:
         "native_exits": [r["native_exit_code"] for r in result["runs"]],
         "strict_screen_resume": screen_resume,
         "screen_bundle": screen_bundle,
+        "screen_comparison": screen_comparison,
         "t0_protocol_pass": result["t0"]["protocol_pass"],
         "offline_copied_bundle_comparison": comparison,
         "offline_copied_bundle_junit": comparison_xml,

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites tests="7" failures="2" errors="0">
+  <testsuite name="quantfit.screen-comparison" tests="7" failures="2" skipped="2" errors="0">
+    <testcase name="clean.refusal_robustness" classname="quantfit.screen-comparison">
+      <system-out>reference 0/12 at-risk pairs; candidate 0/12 at-risk pairs</system-out>
+    </testcase>
+    <testcase name="clean.over_refusal" classname="quantfit.screen-comparison">
+      <system-out>reference 0/28 at-risk pairs; candidate 0/28 at-risk pairs</system-out>
+    </testcase>
+    <testcase name="flagged.refusal_robustness" classname="quantfit.screen-comparison">
+      <system-out>reference 1/12 at-risk pairs; candidate 0/12 at-risk pairs</system-out>
+      <failure type="NativeFlagRetained" message="Original native axis flag retained (unconfirmed); reference 1/12 at-risk pairs; candidate 0/12 at-risk pairs" />
+    </testcase>
+    <testcase name="flagged.over_refusal" classname="quantfit.screen-comparison">
+      <system-out>reference 0/28 at-risk pairs; candidate 0/28 at-risk pairs</system-out>
+    </testcase>
+    <testcase name="unmeasured.refusal_robustness" classname="quantfit.screen-comparison">
+      <system-out>reference 0/0 at-risk pairs; candidate 0/12 at-risk pairs</system-out>
+      <skipped message="unmeasured_reference; reference 0/0 at-risk pairs; candidate 0/12 at-risk pairs" />
+    </testcase>
+    <testcase name="unmeasured.over_refusal" classname="quantfit.screen-comparison">
+      <system-out>reference 0/0 at-risk pairs; candidate 0/28 at-risk pairs</system-out>
+      <skipped message="unmeasured_reference; reference 0/0 at-risk pairs; candidate 0/28 at-risk pairs" />
+    </testcase>
+    <testcase name="overall" classname="quantfit.screen-comparison">
+      <failure type="NativeFlagsRetained" message="A native flag on either screen remains adverse evidence" />
+    </testcase>
+    <system-out>Descriptive flags for exactly the same declared targets and compatible recorded protocol only. Apparent clearance is neither confirmed correction nor causal improvement. Original at-risk denominators, unconfirmed flags and missing/unmeasured evidence remain separate. No pooled counts, statistical comparison, source/weight/physical-host authentication, independence, human confirmation, calibrated sensitivity or scientific GO. Matching identity declarations never establish same weights. conditional on undemonstrated detection sensitivity. printed MDE is a perfect-judge floor; no epsilon has been measured INTO this bound, and the amount it is off by is not unknown - at this instrument's measured judge error (per-arm 0.196, false-flip bound 0.391) the effective MDE is 1.0 for every n &lt;= 34, i.e. no effect size is detectable at any at-risk n this project has run (max 24).</system-out>
+  </testsuite>
+</testsuites>

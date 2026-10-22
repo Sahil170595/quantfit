@@ -235,11 +235,12 @@ def _verify_held(held: _HeldScreen) -> dict[str, Any]:
     }
 
 
-def _capture_bundle(bundle_dir: str) -> _HeldScreen:
+def _capture_bundle(bundle_dir: str, *, cache: _Cache | None = None) -> _HeldScreen:
     root = Path(_canonical_receiving_path(bundle_dir))
     top = _scan(root, {"manifest.json": False, "targets.json": False, "reports": True})
     budget = _Budget()
-    cache: _Cache = {}
+    if cache is None:
+        cache = {}
     raw_outer = _hold(top["manifest.json"], MAX_OUTER_BYTES, budget, cache)
     outer = _outer(raw_outer)  # Charge the entire declared transport before any large member read.
     rows = [*outer["reports"], outer["producer_summary"]]

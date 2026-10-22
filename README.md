@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.33.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.33.0), including portable native screen evidence bundles. The workflows below are available in this version.
+This README documents [quantfit 0.34.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.34.0), including offline native screen observation comparisons. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.33.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.34.0"`.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
@@ -602,6 +602,25 @@ matching flagged results never become a model pass. Valid negative/failed execut
 observations are retained; cleanup or provenance failure cannot qualify success.
 The new aggregate directory is staged with its manifest last, protecting original
 evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
+
+## Compare screen observations (since 0.34.0)
+
+```bash
+quantfit screen-compare --reference-bundle reference-screen --candidate-bundle candidate-screen --out comparison.json --junit comparison.xml --json
+```
+
+Both bundles must hold the exact same target manifest. Compare native observations
+per target and axis, retaining original denominators, missing evidence, unmeasured
+axes, incompatible declarations and all flags. Matched declared observations can be
+newly flagged, persistently flagged, apparently cleared or unflagged; these are
+descriptions, with no causal or human-confirmed regression claim.
+
+Any native flag on either side exits 3, including an apparent clearance; otherwise
+incomplete/incompatible evidence exits 4, and complete compatible no-flag evidence
+exits conditional 0. Invalid input/output exits 2. JUnit has two axis cases per
+target plus an overall case; known native flags fail before incomplete cases skip.
+Matching report statements do not establish actual weight identity, independent
+execution, calibrated sensitivity or safety. See [the comparison contract](docs/screen-comparison.md).
 
 ## Portable screen evidence (since 0.33.0)
 

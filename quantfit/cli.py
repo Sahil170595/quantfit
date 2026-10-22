@@ -302,6 +302,14 @@ def _build_parser() -> argparse.ArgumentParser:
     psaved.add_argument("--reports-dir", required=True, metavar="DIR", help="closed saved aggregate directory")
     psaved.add_argument("--out", default=None, metavar="PATH", help="separate receiving JSON output")
     psaved.add_argument("--junit", default=None, metavar="PATH", help="receiving XML; missing evidence is skipped")
+    pcompare = sub.add_parser(
+        "screen-compare",
+        help="offline declared screen observations (0 conditional no-flag, 3 retained flags, 4 incomplete, 2 refusal)",
+    )
+    pcompare.add_argument("--reference-bundle", required=True, metavar="DIR", help="original screen bundle")
+    pcompare.add_argument("--candidate-bundle", required=True, metavar="DIR", help="candidate screen bundle")
+    pcompare.add_argument("--out", default=None, metavar="PATH", help="separate receiving comparison JSON")
+    pcompare.add_argument("--junit", default=None, metavar="PATH", help="two axes per target and overall XML case")
     pe.add_argument("what", choices=("model-card",), help="what to emit")
     pe.add_argument("--report", required=True, metavar="PATH", help="a schema-v2 drift report written by --report")
     pe.add_argument(
@@ -569,6 +577,20 @@ def _add_json_flag(parser: argparse.ArgumentParser) -> None:
 
 
 def _dispatch(args: argparse.Namespace) -> int:
+    if args.cmd == "screen-compare":
+        from quantfit.screen_compare import compare_screen_bundles
+
+        result = compare_screen_bundles(
+            args.reference_bundle, args.candidate_bundle, out_path=args.out, junit_path=args.junit
+        )
+
+        def human_screen_compare():
+            print(f"Screen observation comparison exit: {result['exit_code']}")
+            print("Native flags remain unconfirmed; apparent clearance does not establish safety.")
+            print(result["scope"])
+
+        return _emit(args, "screen-compare", result["exit_code"], result, human_screen_compare)
+
     if args.cmd == "screen-summary":
         from quantfit.saved_screen import summarize_screen
 
