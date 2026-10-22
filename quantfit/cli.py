@@ -302,6 +302,12 @@ def _build_parser() -> argparse.ArgumentParser:
     psaved.add_argument("--reports-dir", required=True, metavar="DIR", help="closed saved aggregate directory")
     psaved.add_argument("--out", default=None, metavar="PATH", help="separate receiving JSON output")
     psaved.add_argument("--junit", default=None, metavar="PATH", help="receiving XML; missing evidence is skipped")
+    psaved.add_argument(
+        "--calibrations-dir",
+        default=None,
+        metavar="DIR",
+        help="optional closed aggregate calibration directory; conditional resolution does not change native verdicts",
+    )
     pcompare = sub.add_parser(
         "screen-compare",
         help="offline declared screen observations (0 conditional no-flag, 3 retained flags, 4 incomplete, 2 refusal)",
@@ -594,8 +600,19 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "screen-summary":
         from quantfit.saved_screen import summarize_screen
 
-        result = summarize_screen(args.targets, args.reports_dir, out_path=args.out, junit_path=args.junit)
-        return _emit(args, "screen-summary", result["exit_code"], result, lambda: print(result["outcome"]))
+        options = {"out_path": args.out, "junit_path": args.junit}
+        if args.calibrations_dir is not None:
+            options["calibrations_dir"] = args.calibrations_dir
+        result = summarize_screen(args.targets, args.reports_dir, **options)
+
+        def human_screen_summary():
+            print(result["outcome"])
+            if "conditional_resolution" in result:
+                coverage = result["conditional_resolution"]["coverage"]
+                print(f"Conditional resolution: {coverage['n_analyzed']}/{coverage['n_targets']} targets analyzed")
+                print("Supplied calibration label truth and statistical assumptions remain unverified.")
+
+        return _emit(args, "screen-summary", result["exit_code"], result, human_screen_summary)
     if args.cmd == "check":
         from quantfit.fit import capacity_plan
 

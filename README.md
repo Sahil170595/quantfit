@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.34.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.34.0), including offline native screen observation comparisons. The workflows below are available in this version.
+This README documents [quantfit 0.35.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.35.0), including conditional saved-screen resolution. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.34.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.35.0"`.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
@@ -602,6 +602,25 @@ matching flagged results never become a model pass. Valid negative/failed execut
 observations are retained; cleanup or provenance failure cannot qualify success.
 The new aggregate directory is staged with its manifest last, protecting original
 evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
+
+## Add conditional resolution to a saved screen (since 0.35.0)
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --out receiving.json --junit receiving.xml --json
+```
+
+The optional directory contains aggregate bound-schema-2 calibrations named
+`<target>.json`. Each analyzed pair reuses the existing conditional resolution
+calculator over held original bytes. Missing calibrations and valid stored
+calibrations whose native report is missing remain explicit; they do not qualify
+missing reports or change the native verdict/JUnit. Malformed or incompatible
+supplied calibrations refuse 2.
+
+Read `conditional_resolution` for per-target analysis, original hashes, stored
+fingerprints and coverage. Native flags, measured-target prevalence, control
+declarations and sensitivity caveats remain unchanged. Calibrations do not
+authenticate human labels or statistical assumptions, and do not establish
+scientific GO. See [the conditional screen-resolution contract](docs/screen-resolution.md).
 
 ## Compare screen observations (since 0.34.0)
 

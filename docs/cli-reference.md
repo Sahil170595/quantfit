@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.34.0. All workflows below are available in this version.
+This reference documents quantfit 0.35.0. All workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -68,6 +68,17 @@ published last. Preflight and publication protect the original target/bundle/mem
 resolved weights/executable and aliases; interrupted or cleanup-uncertain work cannot
 qualify success. Registration, authenticated human labels/weights/physical hosts,
 independent execution, sensitivity and scientific GO remain separate and unverified.
+
+Quantfit 0.35.0 adds optional `--calibrations-dir DIR` to `screen-summary`:
+`screen-summary --targets targets.json --reports-dir reports --calibrations-dir
+calibrations --out receiving.json --junit receiving.xml --json`. The Python
+`summarize_screen` API gains the same optional `calibrations_dir` keyword.
+Per-target conditional resolution is appended; original native exits, prevalence,
+flags, sensitivity/control status and XML remain unchanged. Valid stored calibrations
+without a native report stay pending, and absent calibrations remain explicit.
+Malformed/incompatible supplied evidence or bounded-work refusal exits 2.
+See [Conditional saved-screen resolution](screen-resolution.md) for exact limits,
+coverage states, byte bindings and label/assumption boundaries.
 
 Quantfit 0.34.0 adds `screen-compare --reference-bundle DIR
 --candidate-bundle DIR --out comparison.json --junit comparison.xml --json`.

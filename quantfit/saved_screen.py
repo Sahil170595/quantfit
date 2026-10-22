@@ -8,6 +8,7 @@ import math
 import os
 import re
 import stat
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -363,10 +364,20 @@ def _summarize_held(
     }
 
 
-def summarize_screen(
+@dataclass(frozen=True)
+class _HeldScreenInputs:
+    manifest: bytes
+    members: tuple[tuple[str, bytes], ...]
+    manifest_path: str
+    reports_dir: str
+    allowed: frozenset[str]
+    plan: _ReproductionOutputs
+
+
+def _hold_screen_inputs(
     manifest_path: str, reports_dir: str, *, out_path: str | None = None, junit_path: str | None = None
-) -> dict[str, object]:
-    """Hold one bounded manifest and closed report directory; publish receiving JSON/XML atomically per file."""
+) -> _HeldScreenInputs:
+    """Existing native input boundary, held once for optional pure receiving consumers."""
     phase = "unsafe_output"
     try:
         manifest_path, reports_dir = (_canonical_receiving_path(p) for p in (manifest_path, reports_dir))
@@ -389,16 +400,51 @@ def summarize_screen(
             _require(len(raw) <= remaining, "report_byte_limit")
             held[path.name] = raw
             remaining -= len(raw)
-        result = _summarize_held(raw_manifest, held, manifest_path=manifest_path, reports_dir=reports_dir)
+        return _HeldScreenInputs(
+            raw_manifest, tuple(held.items()), manifest_path, reports_dir, frozenset(allowed), plan
+        )
+    except SavedScreenError:
+        raise
+    except (KeyboardInterrupt, RuntimeError, OSError, ValueError, TypeError, KeyError, RecursionError, ImportError):
+        raise SavedScreenError(phase) from None
+
+
+def summarize_screen(
+    manifest_path: str,
+    reports_dir: str,
+    *,
+    out_path: str | None = None,
+    junit_path: str | None = None,
+    calibrations_dir: str | None = None,
+) -> dict[str, object]:
+    """Hold native evidence once; optional conditional resolution never changes the native verdict."""
+    if calibrations_dir is not None:
+        from quantfit.screen_resolution import summarize_screen_with_resolution
+
+        return summarize_screen_with_resolution(
+            manifest_path, reports_dir, calibrations_dir=calibrations_dir, out_path=out_path, junit_path=junit_path
+        )
+    phase = "unsafe_output"
+    try:
+        inputs = _hold_screen_inputs(manifest_path, reports_dir, out_path=out_path, junit_path=junit_path)
+        phase = "invalid_report"
+        result = _summarize_held(
+            inputs.manifest, dict(inputs.members), manifest_path=inputs.manifest_path, reports_dir=inputs.reports_dir
+        )
         phase = "output_failure"
         buffers = []
         if out_path is not None:
             buffers.append(
-                (outputs[0], (json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n").encode())
+                (
+                    inputs.plan.targets[0],
+                    (json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n").encode(),
+                )
             )
         if junit_path is not None:
-            buffers.append((outputs[-1], screen_to_junit(result).encode()))
-        _publish_reproduction_outputs(plan, buffers, recheck=lambda: _inventory(root, allowed))
+            buffers.append((inputs.plan.targets[-1], screen_to_junit(result).encode()))
+        _publish_reproduction_outputs(
+            inputs.plan, buffers, recheck=lambda: _inventory(Path(inputs.reports_dir), set(inputs.allowed))
+        )
         return result
     except SavedScreenError:
         raise

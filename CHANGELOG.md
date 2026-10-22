@@ -15,6 +15,16 @@
 
 ## Unreleased
 
+## 0.35.0 — 2026-10-22
+
+- `screen-summary --calibrations-dir` and the matching optional `summarize_screen` keyword append per-target conditional resolution using original held native/calibration bytes and the existing authoritative calculator. Default saved-screen behavior and pure native aggregation remain unchanged.
+- Complete actual scope matching and a bounded aggregate work preflight happen before any analysis. Missing calibrations remain explicit; valid stored calibrations for missing native reports stay pending with a stored fingerprint, without fabricating an actual report match. Malformed, unsupported or incompatible supplied evidence refuses 2.
+- Calibration context never changes native flags, prevalence, control/sensitivity status, human-confirmation status, exit or JUnit. Byte hashes and declared bindings do not authenticate labels or assumptions. See `docs/screen-resolution.md` and the synthetic `validation/2026-10-18-screen-resolution/` record for behavior and limits.
+
+Released independently from PR #139: conditional saved-screen resolution.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/39104474216); publication separately qualifies the exact versioned distributions.
+
 ## 0.34.0 — 2026-10-22
 
 - `screen-compare` and `quantfit.screen_compare.compare_screen_bundles` compare original screen observations offline over exact matching target-manifest bytes. Per-axis counts, raw bindings, missing/unmeasured evidence, known protocol/identity contradictions and native flags remain explicit; qualified transitions describe declarations only.
