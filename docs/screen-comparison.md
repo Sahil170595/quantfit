@@ -1,7 +1,6 @@
-# Screen observation comparison — 0.34.0 candidate
+# Screen observation comparison — 0.34.0
 
-This unreleased interface compares two portable screen bundles offline. Use the
-candidate source or built wheel; published 0.31.0 does not provide this command.
+Available since quantfit 0.34.0. Compare two portable screen bundles offline.
 
 ```bash
 quantfit screen-compare --reference-bundle reference-screen --candidate-bundle candidate-screen --out comparison.json --junit comparison.xml --json
