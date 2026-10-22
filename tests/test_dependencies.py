@@ -249,27 +249,6 @@ _EXEMPTIONS: dict[str, _Exemption] = {
         ),
         chain=("llmcompressor",),
     ),
-    "datasets": _Exemption(
-        kind="PARENT_BOUNDED",
-        reason=(
-            "Same chain as transformers: the capped llmcompressor constrains datasets at both ends. quantfit "
-            "calls load_dataset with an explicit pinned revision and split (safety/verify.py:517) and builds "
-            "calibration blocks with Dataset.from_dict (backends/compressed_tensors.py:70); both are the "
-            "stable surface."
-        ),
-        chain=("llmcompressor",),
-    ),
-    "accelerate": _Exemption(
-        kind="PARENT_BOUNDED",
-        reason=(
-            "Bounded through the capped llmcompressor, which requires accelerate at both ends. Note the "
-            "stronger fact recorded by test_accelerate_is_declared_but_never_imported: quantfit imports "
-            "accelerate NOWHERE — the device_map='auto' offload path that justified it was deleted at 0.3 "
-            "(CHANGELOG.md:346, ROADMAP.md:24). The honest fix is to drop the declaration, not to cap it; "
-            "the exemption records why capping is not the answer, not that the declaration is correct."
-        ),
-        chain=("llmcompressor",),
-    ),
     "huggingface-hub": _Exemption(
         kind="PARENT_BOUNDED",
         reason=(
@@ -332,7 +311,7 @@ _EXEMPTIONS: dict[str, _Exemption] = {
             "dead weight rather than a bound worth setting. Capping it would pin a package this build does not "
             "meaningfully use; the honest fix is to DELETE it from [build-system].requires, which is "
             "pyproject.toml-owner work. The exemption records why capping is not the answer, not that the "
-            "declaration is correct — the same shape as the accelerate entry above."
+            "declaration is correct."
         ),
     ),
 }
@@ -350,6 +329,19 @@ def _unbounded_and_unexempt(pairs: list[tuple[str, _Requirement]]) -> list[str]:
             continue
         offenders.append(f"{req.raw!r} in {_location(group)}")
     return offenders
+
+
+@pytest.mark.parametrize(
+    ("name", "qualified", "unqualified"),
+    [("datasets", "5.0.1", "5.0.2"), ("accelerate", "1.15.0", "1.15.1")],
+)
+def test_compressor_hotfix_retains_qualified_dependency_ceilings(name, qualified, unqualified):
+    """The Pillow-cap hotfix must not admit unqualified datasets/accelerate patches."""
+    from packaging.requirements import Requirement
+
+    requirements = {req.name: Requirement(req.raw) for req in _hard_requirements()}
+    assert qualified in requirements[name].specifier
+    assert unqualified not in requirements[name].specifier
 
 
 def test_every_hard_dependency_is_bounded_or_exempt():
@@ -531,8 +523,6 @@ def test_parent_bounded_premises_hold_against_installed_metadata():
 _INERT_FLOORS: dict[str, str] = {
     "torch": ">=2.4",  # llmcompressor requires torch>=2.10.0
     "transformers": ">=4.56",  # llmcompressor requires transformers>=5.15.0
-    "datasets": ">=3.0",  # llmcompressor requires datasets>=4.8.4
-    "accelerate": ">=1.0",  # llmcompressor requires accelerate>=1.6.0
     "huggingface-hub": ">=0.25",  # transformers requires huggingface-hub>=1.5.0
 }
 
@@ -602,7 +592,6 @@ def test_floors_that_cannot_bind_are_recorded_not_discovered():
 # name already here, fails the test and has to be argued.
 _MAJOR_CROSSED: dict[str, tuple[str, int]] = {
     "transformers": (">=4.56", 5),  # hard dep; floor never moved, no validated run on 5.x recorded
-    "datasets": (">=3.0", 5),  # public load_dataset + Dataset.from_dict; hosted corpus canary receipt in validation
     "huggingface-hub": (">=0.25", 1),  # hard dep; 0.x -> 1.x, the largest relative jump in the set
     "psutil": (">=5.9", 7),  # LEAF_SINGLE_CALL: two majors, but the single call site is premise-tested
     "pytest": (">=8.0", 9),  # DEV_HARNESS: the 8 -> 9 bump IS recorded, in the exemption reason itself

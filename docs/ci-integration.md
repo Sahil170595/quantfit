@@ -3,8 +3,6 @@
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
 The action and instrument examples below pin **quantfit 0.32.0**.
-This is an unreleased candidate: versioned action/package examples become usable
-after release. Candidate qualification uses its exact source or built wheel.
 Candidate acceptance uses the exact source or wheel through `quantfit-path`;
 release publication separately qualifies the versioned distributions.
 Protocol: QSR v0 (`spec/qsr-v0.md`). Implementation authority for everything on this page
@@ -651,6 +649,9 @@ on a hosted CPU runner, and is worth copying into your own repo:
   its own resolution is a silent overclaim.
 - **quickstart install** — build the wheel with locked tooling, install it into a clean
   venv with the complete hash-locked runtime on Linux and Windows, and smoke the CLI.
+  The complete locked `runtime` group requires Python 3.11 or newer (Pillow 13 security
+  fixes); hosted runtime qualification uses Python 3.12. The Python 3.10 unit matrix
+  validates hermetic source contracts and does not establish complete runtime compatibility.
   The independent daily dependency-drift workflow resolves fresh versions and runs the
   suite plus its advisory audit. The canary preserves cold model/judge/probe downloads
   and same-model determinism checks. See `docs/hosted-ci.md` for their proof scopes.

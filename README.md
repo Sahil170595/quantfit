@@ -41,13 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.31.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.31.0), including strict saved-screen summaries. The workflows below are available in this version.
+This README documents [quantfit 0.32.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.32.0), including strict native screen resume. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.31.0"`.
-
-This branch also documents the **unreleased 0.32.0 candidate**, which adds strict
-screen resume validation. Candidate commands below require that source or its
-built wheel; the published install above retains 0.31.0 behavior.
+Install with `pip install "quantfit[inspect,gguf]==0.32.0"`.
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -604,7 +600,7 @@ observations are retained; cleanup or provenance failure cannot qualify success.
 The new aggregate directory is staged with its manifest last, protecting original
 evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
 
-## Resume a screen with validated saved evidence (0.32.0 candidate)
+## Resume a screen with validated saved evidence (since 0.32.0)
 
 ```bash
 quantfit screen --targets targets.json --out screen-reports --max-new-tokens 64 --resume --json
