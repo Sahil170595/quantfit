@@ -416,13 +416,24 @@ def summarize_screen(
     out_path: str | None = None,
     junit_path: str | None = None,
     calibrations_dir: str | None = None,
+    required_conditional_resolution_pp: float | None = None,
 ) -> dict[str, object]:
-    """Hold native evidence once; optional conditional resolution never changes the native verdict."""
+    """Hold once; annotate native resolution, or explicitly require its declared ceiling."""
+    if required_conditional_resolution_pp is not None:
+        from quantfit.screen_requirement import validate_requirement
+
+        required_conditional_resolution_pp = validate_requirement(required_conditional_resolution_pp)
+        _require(calibrations_dir is not None, "conditional_resolution_requires_calibrations")
     if calibrations_dir is not None:
         from quantfit.screen_resolution import summarize_screen_with_resolution
 
         return summarize_screen_with_resolution(
-            manifest_path, reports_dir, calibrations_dir=calibrations_dir, out_path=out_path, junit_path=junit_path
+            manifest_path,
+            reports_dir,
+            calibrations_dir=calibrations_dir,
+            out_path=out_path,
+            junit_path=junit_path,
+            required_conditional_resolution_pp=required_conditional_resolution_pp,
         )
     phase = "unsafe_output"
     try:

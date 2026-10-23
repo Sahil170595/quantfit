@@ -101,6 +101,20 @@ only fixed counts, hashes and a fingerprint. Agreed labels stay unchanged; disag
 require explicit supplied judgments. No automatic ingestion, preferred rater, authentic
 blinding or independent adjudication is claimed. See [the full workflow](docs/label-review.md).
 
+The stacked **unreleased 0.41.0 source candidate** can require conditional resolution
+when receiving a complete saved screen:
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --require-conditional-resolution 40 --out receiving.json --junit receiving.xml --json
+```
+
+Both native axes of every declared target need matched evidence, a measured denominator,
+attainable target power and effective MDE at most the declared ceiling in percentage
+points. Native flags/incomplete evidence still take priority (3/4); otherwise missing
+calibration exits 4 and unmet resolution exits 5. Read native outcome and qualification
+separately. Without this flag, existing annotation and JUnit behavior stay unchanged.
+Neither path authenticates labels, sensitivity or scientific GO. See [the contract](docs/screen-resolution.md#explicit-requirement-unreleased-0410).
+
 ## What it has found
 
 The findings below are the dated August 2026 studies, not a cumulative count of
