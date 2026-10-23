@@ -349,6 +349,15 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Evidence (of non-run)** | `docs/judge-calibration-v0.md` front matter — "machinery, **not started** … No completion has been labeled, no ε has been measured"; `CHANGELOG.md` §0.5.1. E3: `tests/test_calibrate.py` (53). |
 | **NOT validated** | The round trip through a real spreadsheet (the blinded CSV has never been opened by a labeler, and spreadsheet mangling is the documented threat model), and every ε‑consuming number downstream. |
 
+### Unreleased 0.37.0 candidate: retained-label extraction and ingestion (2026-10-23)
+
+| | |
+|---|---|
+| **Functional source evidence** | Actual `calibrate extract` → original synthetic sheet removal → `calibrate ingest --retained-labels` → native `resolution`, 40 fictional pairs / 80 rows / 24 unusable. Full-sheet schema-2 and retained schema-3 statistics match; complete retained population and original hash declarations are preserved. This is offline software evidence, not a human calibration study. |
+| **Hardware / runtime** | Windows 11, Intel64 Family 6 Model 183 Stepping 1, Python 3.12.13, source 0.37.0. No model, network, GPU or inference was used. |
+| **Evidence** | `validation/2026-10-23-retained-labels/`; `tests/test_retained_labels.py`; `tests/test_retained_labels_cli.py`; `tests/test_ci_retained_labels.py`. Existing installed wheel/sdist acceptance includes the native consumer; exact-head hosted qualification is pending on the candidate PR. |
+| **Not established** | Human truth, rater authentication, independent labeling/execution, sensitivity or scientific GO. The private CSV/key are not published; the native calibration file retains declared scope, including any supplied local model identifiers. |
+
 ### `quantfit gate --baseline B --quant Q (--threshold PP | --tier T) [--eps-upper R --eps-source S]`
 
 | | |
@@ -391,6 +400,14 @@ cross-release runs have been compared; the 0.5 screen has not run).
 ---
 
 ## 3. Major flags
+
+### Retained-label candidate (2026-10-23, unreleased 0.37.0)
+
+| Flag | Command | Scope validated | Evidence |
+|---|---|---|---|
+| `--receipt` | calibrate extract | New aggregate hash/size/count/fingerprint receipt alongside private two-column CSV; native original-sheet admission, staged exclusive publication, categorical partial failure. No source deletion or transaction claim. | `tests/test_retained_labels.py`; `tests/test_retained_labels_cli.py`; `validation/2026-10-23-retained-labels/` |
+| `--retained-labels` | calibrate ingest | Explicit mode mutually exclusive with legacy `--sheet`; exact bounded CSV/key population and label bindings; native per-arm Wilson/null behavior, closed schema 3 and actual resolution after original sheet is unavailable. | `tests/test_retained_labels.py`; `tests/test_ci_retained_labels.py`; exact-head installed qualification pending |
+| `--retention-receipt` | calibrate ingest | Required exactly with retained mode; strict JSON/count/hash/fingerprint/key binding, honest original-sheet and declared-capture provenance; new stdout summary excludes caller paths and native identity strings. | `tests/test_retained_labels_cli.py`; `tests/test_retained_labels.py`; `docs/retained-labels.md` |
 
 ### Cold native replicates (2026-10-08)
 
