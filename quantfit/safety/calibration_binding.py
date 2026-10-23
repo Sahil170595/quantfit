@@ -18,6 +18,7 @@ from quantfit.safety.report import ArmRun, DriftReport
 
 IDENTITY_SCHEMA = 1
 BOUND_SCHEMA = 2
+RETAINED_BOUND_SCHEMA = 3
 MAX_CALIBRATION_BYTES = 2 * 1024 * 1024
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 _REVISION = re.compile(r"[0-9a-f]{40}")
@@ -308,11 +309,17 @@ def _measurement_identity(report: DriftReport, *, require_observation: bool) -> 
     judge = {key: report.judge.get(key) for key in ("id", "revision", "input_contract")}
     for key, value in judge.items():
         _text(value, f"judge.{key}")
-    _require(bool(_REVISION.fullmatch(judge["revision"])), "judge revision must be an immutable commit")
+    _require(
+        bool(_REVISION.fullmatch(_text(judge["revision"], "judge.revision"))),
+        "judge revision must be an immutable commit",
+    )
     probes = {key: report.probe_dataset.get(key) for key in ("id", "revision", "split", "n_probes")}
     for key in ("id", "revision", "split"):
         _text(probes[key], f"probe_dataset.{key}")
-    _require(bool(_REVISION.fullmatch(probes["revision"])), "probe dataset revision must be an immutable commit")
+    _require(
+        bool(_REVISION.fullmatch(_text(probes["revision"], "probe_dataset.revision"))),
+        "probe dataset revision must be an immutable commit",
+    )
     _require(_count(probes["n_probes"], "probe_dataset.n_probes") > 0, "probe count must be positive")
     decode = dict(report.decode)
     _require(_count(decode.get("max_new_tokens"), "decode.max_new_tokens") > 0, "token budget must be positive")
@@ -505,8 +512,8 @@ def load_bound_calibration_bytes(data: bytes, *, report: DriftReport | None = No
     _require(
         isinstance(payload, dict)
         and type(payload.get("calibration_schema")) is int
-        and payload["calibration_schema"] == BOUND_SCHEMA,
-        "automatic calibration needs bound schema 2; legacy evidence is unbound",
+        and payload["calibration_schema"] in (BOUND_SCHEMA, RETAINED_BOUND_SCHEMA),
+        "automatic calibration needs bound schema 2 or 3; legacy evidence is unbound",
     )
     keys = {
         "calibration_schema",
@@ -527,8 +534,19 @@ def load_bound_calibration_bytes(data: bytes, *, report: DriftReport | None = No
         _text(payload[key], key)
     binding = validate_binding(payload.get("binding"))
     source = payload.get("source")
+    source_keys = (
+        {"capture_sha256", "key_sha256", "sheet_sha256"}
+        if payload["calibration_schema"] == BOUND_SCHEMA
+        else {
+            "capture_sha256_declared",
+            "key_sha256",
+            "sheet_sha256",
+            "retained_labels_sha256",
+            "retention_receipt_sha256",
+        }
+    )
     _require(
-        isinstance(source, dict) and set(source) == {"capture_sha256", "key_sha256", "sheet_sha256"},
+        isinstance(source, dict) and set(source) == source_keys,
         "bound calibration must record its source artifact hashes",
     )
     for key, value in source.items():

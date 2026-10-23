@@ -13,6 +13,12 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.37.0 — Unreleased
+
+- Complete retained-label workflow: `calibrate extract` validates an original filled sheet/key and writes a deterministic private `id,human_label` CSV plus an aggregate receipt; explicit `calibrate ingest --retained-labels --retention-receipt` recomputes the native per-arm Wilson calibration after the original sheet is unavailable.
+- Closed calibration schema 3 binds the original sheet, key, retained CSV and receipt hashes; the capture digest is explicitly declared, not verified. Native schema-2 ingestion and native scope/Wilson/unmeasured-arm checks remain strict. All-unusable extraction succeeds; ingestion still refuses an entirely unmeasured calibration.
+- Bounded held inputs and exclusive write-once outputs reject unsafe aliases/links and incomplete or changed evidence. New CLI summaries expose counts/hashes/fingerprints only; native calibration files retain declared measurement identity and may contain local model identifiers. Hashes authenticate neither human truth nor independent labeling. See [retained-label workflow](docs/retained-labels.md) and the fictional offline [command record](validation/2026-10-23-retained-labels/).
+
 ## Unreleased
 
 ## 0.36.0 — 2026-10-22

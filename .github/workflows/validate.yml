@@ -297,6 +297,8 @@ jobs:
           mypy --strict --follow-imports=silent quantfit/screen_compare.py quantfit/screen_compare_junit.py
           mypy --strict --follow-imports=silent quantfit/screen_resolution.py
           mypy --strict --follow-imports=silent quantfit/safety/reconcile.py
+          mypy --strict --follow-imports=silent quantfit/safety/retention_io.py quantfit/safety/retained_labels.py quantfit/safety/calibration_aggregate.py quantfit/retained_labels_cli.py tools/ci_retained_labels.py
+          mypy --follow-imports=silent --check-untyped-defs quantfit/safety/calibration_binding.py
           quantfit audit
       - name: Verify and run actionlint
         run: |

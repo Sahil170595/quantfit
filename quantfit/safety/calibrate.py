@@ -71,8 +71,8 @@ import io
 import json
 import re
 import secrets
-from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from quantfit.safety.verify import ARM_BASELINE, ARM_QUANTIZED, CAPTURE_SCHEMA, wilson_interval
 
@@ -419,7 +419,7 @@ def build_labeling_sheet(capture_path: str, sheet_path: str, key_path: str) -> t
 # --- key ---------------------------------------------------------------------------
 
 
-def _read_key(path: str, *, data: bytes | None = None) -> dict:
+def _read_key(path: str, *, data: bytes | None = None) -> dict[str, Any]:
     """Parse + structurally validate an unblinding key."""
     try:
         payload = json.loads(data if data is not None else _artifact_bytes(path, "labeling key"))
@@ -500,10 +500,10 @@ def _read_key(path: str, *, data: bytes | None = None) -> dict:
 
 
 def _join(
-    sheet_path: str, key_path: str, ids: dict, *, data: bytes | None = None, max_records: int | None = None
-) -> dict[str, dict]:
+    sheet_path: str, key_path: str, ids: dict[str, Any], *, data: bytes | None = None, max_records: int | None = None
+) -> dict[str, dict[str, Any]]:
     """Validate every sheet row and join it to the key; refusals name row, id and fault."""
-    joined: dict[str, dict] = {}
+    joined: dict[str, dict[str, Any]] = {}
     for row in _read_sheet(sheet_path, data=data, max_records=max_records):
         row_id = row["id"]
         where = f"labeling sheet {sheet_path} row {row['line']}"
@@ -559,7 +559,7 @@ def _directional(errors: int, n: int) -> dict:
     }
 
 
-def _arm_block(counts: dict) -> dict:
+def _arm_block(counts: dict[str, int]) -> dict[str, Any]:
     """One arm's ε with its Wilson 95% interval and the direction split that composes it."""
     n = counts["n"]
     errors = counts[DIR_JUDGE_REFUSAL_HUMAN_COMPLIANCE] + counts[DIR_JUDGE_COMPLIANCE_HUMAN_REFUSAL]
@@ -628,75 +628,24 @@ def ingest_labels(sheet_path: str, key_path: str, out_path: str) -> dict:
 
     Returns the report dict, which is also what lands at `out_path`.
     """
-    import quantfit
-
     key_bytes = _artifact_bytes(key_path, "labeling key")
     key = _read_key(key_path, data=key_bytes)
     ids = key["ids"]
     sheet_bytes = _artifact_bytes(sheet_path, "labeling sheet")
     joined = _join(sheet_path, key_path, ids, data=sheet_bytes)
 
-    counts = {
-        arm: {
-            "n": 0,
-            "n_unusable": 0,
-            "human_refusals": 0,
-            "human_compliances": 0,
-            DIR_JUDGE_REFUSAL_HUMAN_COMPLIANCE: 0,
-            DIR_JUDGE_COMPLIANCE_HUMAN_REFUSAL: 0,
-        }
-        for arm in ARMS
-    }
-    for row_id, row in joined.items():
-        # The arm is resolved BEFORE the unusable branch: an unusable row belongs to
-        # the arm it came from, and pooling those counts hid which side went dark.
-        arm = counts[ids[row_id]["arm"]]
-        label = row["human_label"]
-        if label == LABEL_UNUSABLE:
-            arm["n_unusable"] += 1
-            continue
-        judge_refusal = ids[row_id]["judge_refusal"]
-        arm["n"] += 1
-        if label == LABEL_REFUSAL:
-            arm["human_refusals"] += 1
-            if not judge_refusal:
-                arm[DIR_JUDGE_COMPLIANCE_HUMAN_REFUSAL] += 1
-        else:
-            arm["human_compliances"] += 1
-            if judge_refusal:
-                arm[DIR_JUDGE_REFUSAL_HUMAN_COMPLIANCE] += 1
+    from quantfit.safety.calibration_aggregate import aggregate_labels
 
-    blocks = {arm: _arm_block(counts[arm]) for arm in ARMS}
-    unmeasured_arms = [arm for arm in ARMS if blocks[arm]["n"] == 0]
-    _require(
-        len(unmeasured_arms) < len(ARMS),
-        f"every labeled row in {sheet_path} is unusable — nothing was measured, so this is not a calibration "
-        f"sample. A report here would stamp a schema and a scope label on an empty measurement.",
-    )
-
-    baseline_eps = blocks[ARM_BASELINE]["epsilon"]
-    quant_eps = blocks[ARM_QUANTIZED]["epsilon"]
-    report = {
-        "calibration_schema": CALIBRATION_SCHEMA,
-        "quantfit_version": quantfit.__version__,
-        "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "n_labeled": len(joined),  # every sheet row; all of them carry a label by now
-        "n_unusable": sum(blocks[arm]["n_unusable"] for arm in ARMS),
-        "unmeasured_arms": unmeasured_arms,
-        ARM_BASELINE: blocks[ARM_BASELINE],
-        ARM_QUANTIZED: blocks[ARM_QUANTIZED],
-        "arm_epsilon_delta": {
-            "delta": None if baseline_eps is None or quant_eps is None else quant_eps - baseline_eps,
-            "note": _DELTA_NOTE,
-        },
-        "label": CALIBRATION_LABEL if not unmeasured_arms else _qualified_label(unmeasured_arms),
-        "binding": key.get("binding") if key["key_schema"] == KEY_SCHEMA else None,
-        "source": {
+    report = aggregate_labels(
+        key,
+        {row_id: row["human_label"] for row_id, row in joined.items()},
+        {
             "capture_sha256": key.get("capture_sha256") if key["key_schema"] == KEY_SCHEMA else None,
             "key_sha256": hashlib.sha256(key_bytes).hexdigest(),
             "sheet_sha256": hashlib.sha256(sheet_bytes).hexdigest(),
         },
-    }
+        sheet_path=sheet_path,
+    )
     try:
         Path(out_path).write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     except OSError as exc:
