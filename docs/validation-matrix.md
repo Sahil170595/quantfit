@@ -358,6 +358,13 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Evidence** | `validation/2026-10-23-retained-labels/`; `tests/test_retained_labels.py`; `tests/test_retained_labels_cli.py`; `tests/test_ci_retained_labels.py`. Existing installed wheel/sdist acceptance includes the native consumer; exact-head hosted qualification is pending on the candidate PR. |
 | **Not established** | Human truth, rater authentication, independent labeling/execution, sensitivity or scientific GO. The private CSV/key are not published; the native calibration file retains declared scope, including any supplied local model identifiers. |
 
+### Unreleased 0.38.0 candidate: descriptive calibration strata (2026-10-23)
+
+| | |
+|---|---|
+| **Functional source evidence** | Actual native capture/key/sheet → `calibrate strata` → private extraction → original synthetic sheet removal → explicit retained-mode `calibrate strata`. Eight fictional pairs / 16 rows include all three zones, both borderline expectations, asymmetric unusable labels and two pairs in each observed-at-risk cohort. Full/retained statistics match; the native bound loader refuses the diagnostic as replacement calibration. |
+| **Evidence and limits** | `tests/test_calibration_strata.py`; `tests/test_calibration_strata_cli.py`; `tests/test_ci_calibration_strata.py`; `validation/2026-10-23-calibration-strata/`. No human judgment, inference, source authenticity, independence, A1 transfer, sensitivity or GO is established; exact-head hosted installed acceptance is separate and pending. |
+
 ### `quantfit gate --baseline B --quant Q (--threshold PP | --tier T) [--eps-upper R --eps-source S]`
 
 | | |
@@ -400,6 +407,12 @@ cross-release runs have been compared; the 0.5 screen has not run).
 ---
 
 ## 3. Major flags
+
+### Calibration strata candidate (2026-10-23, unreleased 0.38.0)
+
+| Flag | Command | Scope validated | Evidence |
+|---|---|---|---|
+| `--capture` / `--key` / `--sheet` / `--retained-labels` / `--retention-receipt` / `--out` / `--json` | calibrate strata | Exact held capture/key/header/row agreement, v2 key and honest full/retained provenance; descriptive per-zone/per-arm native Wilson diagnostics with selected-pair counts separate from usable denominators. Empty/all-unusable groups complete without replacement calibration or scientific GO. | `tests/test_calibration_strata.py`; `tests/test_calibration_strata_cli.py`; `validation/2026-10-23-calibration-strata/`; final-head installed qualification pending |
 
 ### Retained-label candidate (2026-10-23, unreleased 0.37.0)
 

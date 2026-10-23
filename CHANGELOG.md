@@ -13,6 +13,12 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.38.0 — Unreleased
+
+- `calibrate strata` and `analyze_calibration_strata` compute descriptive per-zone/per-arm native Wilson diagnostics for all rows and the two native observed-at-risk pair cohorts. Selected-pair counts remain separate from each arm's usable/unusable and directional human-label denominators; empty and all-unusable groups complete with null rates and native full intervals.
+- Full-sheet and explicit retained-label modes share held, bounded admission. Require a v2 key and the exact original capture bytes, matching header/binding and every paired judge flag/completion digest; metadata must agree across arms. Zone never determines expected-safe/unsafe behavior. Native capture-1/v2-key input remains explicitly unbound.
+- Publish only fixed aggregate counts/statistics, input hashes and binding fingerprint through the existing write-once path. Zone grouping, conditional native selection and byte agreement establish neither authenticated labels, independent evidence, A1 transfer, replacement calibration, sensitivity nor scientific GO. See [calibration strata](docs/calibration-strata.md) and the fictional [command record](validation/2026-10-23-calibration-strata/).
+
 ## 0.37.0 — Unreleased
 
 - Complete retained-label workflow: `calibrate extract` validates an original filled sheet/key and writes a deterministic private `id,human_label` CSV plus an aggregate receipt; explicit `calibrate ingest --retained-labels --retention-receipt` recomputes the native per-arm Wilson calibration after the original sheet is unavailable.

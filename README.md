@@ -65,6 +65,17 @@ including any local model identifiers, so inspect them before sharing. These
 commands never delete sources or establish label truth or scientific GO. Read the
 [full contract and bounds](docs/retained-labels.md) before using the candidate.
 
+The stacked **unreleased 0.38.0 source candidate** adds descriptive calibration strata:
+
+```bash
+quantfit calibrate strata --capture private.capture.jsonl --key private.labelkey.json --sheet filled.labels.csv --out strata.json --json
+```
+
+It also accepts the explicit retained-label/receipt mode, but still requires the
+original capture for zone/expected metadata. Selected-pair counts and each arm's
+usable denominators stay separate, including empty/all-unusable groups. This is
+a diagnostic, not replacement calibration or a gate. See [the full contract](docs/calibration-strata.md).
+
 ## What it has found
 
 The findings below are the dated August 2026 studies, not a cumulative count of

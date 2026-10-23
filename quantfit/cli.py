@@ -358,6 +358,28 @@ def _build_parser() -> argparse.ArgumentParser:
     pce.add_argument("--key", required=True, metavar="PATH", help="private unblinding key")
     pce.add_argument("--out", required=True, metavar="PATH", help="new private two-column retained CSV")
     pce.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate retention receipt JSON")
+    pct = csub.add_parser(
+        "strata",
+        help="descriptive per-zone/per-arm calibration and observed-at-risk diagnostics (0 completed, 2 invalid)",
+    )
+    pct.add_argument(
+        "--capture",
+        required=True,
+        metavar="PATH",
+        help="exact original private capture; required for zone/expected metadata",
+    )
+    pct.add_argument("--key", required=True, metavar="PATH", help="matching private v2 unblinding key")
+    strata_mode = pct.add_mutually_exclusive_group(required=True)
+    strata_mode.add_argument("--sheet", metavar="PATH", help="original filled three-column labeling sheet")
+    strata_mode.add_argument(
+        "--retained-labels", metavar="PATH", help="private two-column retained CSV; requires receipt"
+    )
+    pct.add_argument(
+        "--retention-receipt", metavar="PATH", help="exact extraction receipt; required exactly with retained labels"
+    )
+    pct.add_argument(
+        "--out", required=True, metavar="PATH", help="new aggregate diagnostics JSON; never replacement calibration"
+    )
     pcr = csub.add_parser("reconcile", help="two filled sheets + one key -> aggregate label-disagreement counts")
     pcr.add_argument("--sheet-a", required=True, metavar="PATH", help="first private filled labeling sheet")
     pcr.add_argument("--sheet-b", required=True, metavar="PATH", help="second private filled labeling sheet")
@@ -1270,6 +1292,10 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _emit(args, "resolution", 0, result, human_resolution)
 
     if args.cmd == "calibrate":
+        if args.calibrate_cmd == "strata":
+            from quantfit.calibration_strata_cli import dispatch_strata
+
+            return dispatch_strata(args, _emit)
         if args.calibrate_cmd == "extract" or (args.calibrate_cmd == "ingest" and args.retained_labels is not None):
             from quantfit.retained_labels_cli import dispatch_retained
 
@@ -1554,7 +1580,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if (
         args.cmd == "calibrate"
-        and args.calibrate_cmd == "ingest"
+        and args.calibrate_cmd in {"ingest", "strata"}
         and (args.retained_labels is not None) != (args.retention_receipt is not None)
     ):
         parser.error("--retention-receipt is required exactly with --retained-labels")
