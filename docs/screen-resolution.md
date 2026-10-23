@@ -1,7 +1,7 @@
-# Conditional saved-screen resolution — 0.35.0 candidate
+# Conditional saved-screen resolution — 0.35.0
 
-This optional unreleased workflow requires the candidate source or built wheel.
-Published 0.31.0 supports native saved-screen summaries without this option.
+Available since quantfit 0.35.0. Native saved-screen summaries retain their existing
+behavior when the optional calibration directory is omitted.
 
 ```bash
 quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --out receiving.json --junit receiving.xml --json

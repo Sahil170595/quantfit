@@ -1,8 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference covers published quantfit 0.31.0 and explicitly marked unreleased
-0.36.0 candidate workflows, including strict resume, screen bundles/comparisons,
-conditional resolution and labeling-sheet reconciliation. Candidate behavior requires that source or built wheel.
+This reference documents quantfit 0.36.0. All workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -71,7 +69,7 @@ resolved weights/executable and aliases; interrupted or cleanup-uncertain work c
 qualify success. Registration, authenticated human labels/weights/physical hosts,
 independent execution, sensitivity and scientific GO remain separate and unverified.
 
-The **0.35.0 candidate** adds optional `--calibrations-dir DIR` to `screen-summary`:
+Quantfit 0.35.0 adds optional `--calibrations-dir DIR` to `screen-summary`:
 `screen-summary --targets targets.json --reports-dir reports --calibrations-dir
 calibrations --out receiving.json --junit receiving.xml --json`. The Python
 `summarize_screen` API gains the same optional `calibrations_dir` keyword.
@@ -82,7 +80,7 @@ Malformed/incompatible supplied evidence or bounded-work refusal exits 2.
 See [Conditional saved-screen resolution](screen-resolution.md) for exact limits,
 coverage states, byte bindings and label/assumption boundaries.
 
-The **0.34.0 candidate** adds `screen-compare --reference-bundle DIR
+Quantfit 0.34.0 adds `screen-compare --reference-bundle DIR
 --candidate-bundle DIR --out comparison.json --junit comparison.xml --json`.
 The optional JSON/XML outputs share source/alias protection; they do not form a
 transaction. Both bundles must contain the exact same target-manifest bytes.
@@ -92,7 +90,7 @@ Two axis cases per target plus overall retain failures and skips separately.
 See [Screen observation comparison](screen-comparison.md) for the API, declared
 identity availability, original denominators and descriptive-transition boundaries.
 
-The **0.33.0 candidate** adds `bundle screen-create --targets PATH --reports-dir DIR
+Quantfit 0.33.0 adds `bundle screen-create --targets PATH --reports-dir DIR
 --out NEWDIR --json` and `bundle screen-verify --bundle DIR --json`. These package
 original bytes for the complete screen population and rebuild its strict receiving
 summary offline after relocation. Content verification exits 0 independently of
@@ -440,7 +438,7 @@ are local only, and are never committed or redistributed; the `*.capture.jsonl` 
 in `.gitignore` backstops that. See
 [`docs/data-handling-completions.md`](data-handling-completions.md).
 
-The **0.32.0 candidate** makes `--resume` validate the complete present native
+Quantfit 0.32.0 makes `--resume` validate the complete present native
 report population before any model contact or output mutation. Original target
 references, pinned protocol, native arithmetic, privacy, duplicate evidence and
 requested `--max-new-tokens` must match. Valid flagged or unmeasured reports remain
@@ -458,7 +456,7 @@ held evidence after execution; a later incompatibility preserves existing eviden
 without promising whole-run rollback. Progress goes to stderr under `--json`.
 Valid flags exit 3 before partial execution errors or unmeasured evidence exit 4;
 neither an operational-error row nor incomplete measurement becomes a clean result.
-This is an unreleased interface; published 0.31.0 has the older resume behavior.
+Strict resume is available since quantfit 0.32.0.
 
 `--attempts N` retries a target up to N times before recording it as an operational
 error (default `1`, meaning no retry). The absorbed failure class is mostly transient.
@@ -584,7 +582,7 @@ quantfit calibrate ingest --sheet labels.labels.csv \
 `sheet` builds a blinded labeling sheet; the key file is what unblinds it and the labeler
 never receives it. `ingest` folds the filled labels into a per-arm judge-error report.
 
-The **0.36.0 candidate** adds aggregate reconciliation of two private filled sheets:
+Quantfit 0.36.0 adds aggregate reconciliation of two private filled sheets:
 
 ```bash
 quantfit calibrate reconcile --sheet-a rater-a.labels.csv --sheet-b rater-b.labels.csv \

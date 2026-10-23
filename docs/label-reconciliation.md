@@ -1,7 +1,7 @@
-# Labeling-sheet reconciliation — 0.36.0 candidate
+# Labeling-sheet reconciliation — 0.36.0
 
-This unreleased command requires the candidate source or built wheel. Published
-0.31.0 retains the existing sheet-building and calibration-ingest commands.
+Available since quantfit 0.36.0. Existing sheet-building and calibration-ingest
+commands retain their behavior.
 
 ```bash
 quantfit calibrate reconcile --sheet-a rater-a.labels.csv --sheet-b rater-b.labels.csv --key labels.labelkey.json --out reconciliation.json --json

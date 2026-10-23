@@ -41,16 +41,12 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.31.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.31.0), including strict saved-screen summaries. The workflows below are available in this version.
+This README documents [quantfit 0.36.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.36.0), including aggregate private-labeling reconciliation. The workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.31.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.36.0"`.
 
-This branch also documents the **unreleased 0.36.0 candidate**, which includes strict
-screen resume validation (0.32.0), portable screen evidence (0.33.0), screen
-observation comparison (0.34.0), conditional saved-screen resolution (0.35.0)
-and aggregate labeling-sheet reconciliation (0.36.0).
-Candidate commands below require that source or its
-built wheel; the published install above retains 0.31.0 behavior.
+Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
+requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
 
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
@@ -607,7 +603,7 @@ observations are retained; cleanup or provenance failure cannot qualify success.
 The new aggregate directory is staged with its manifest last, protecting original
 evidence and resolved assets. See the [rerun contract](docs/cli-reference.md#recipe-bound-native-reruns).
 
-## Compare two filled labeling sheets (0.36.0 candidate)
+## Compare two filled labeling sheets (since 0.36.0)
 
 ```bash
 quantfit calibrate reconcile --sheet-a rater-a.labels.csv --sheet-b rater-b.labels.csv --key labels.labelkey.json --out reconciliation.json --json
@@ -626,7 +622,7 @@ self-controls. Invalid/unsafe input or output refuses exit 2 with a categorical
 message. See [Label reconciliation](docs/label-reconciliation.md) for limits,
 API, matrix orientation and what the counts establish.
 
-## Add conditional resolution to a saved screen (0.35.0 candidate)
+## Add conditional resolution to a saved screen (since 0.35.0)
 
 ```bash
 quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --out receiving.json --junit receiving.xml --json
@@ -645,7 +641,7 @@ declarations and sensitivity caveats remain unchanged. Calibrations do not
 authenticate human labels or statistical assumptions, and do not establish
 scientific GO. See [the conditional screen-resolution contract](docs/screen-resolution.md).
 
-## Compare screen observations (0.34.0 candidate)
+## Compare screen observations (since 0.34.0)
 
 ```bash
 quantfit screen-compare --reference-bundle reference-screen --candidate-bundle candidate-screen --out comparison.json --junit comparison.xml --json
@@ -664,7 +660,7 @@ target plus an overall case; known native flags fail before incomplete cases ski
 Matching report statements do not establish actual weight identity, independent
 execution, calibrated sensitivity or safety. See [the comparison contract](docs/screen-comparison.md).
 
-## Portable screen evidence (0.33.0 candidate)
+## Portable screen evidence (since 0.33.0)
 
 ```bash
 quantfit bundle screen-create --targets targets.json --reports-dir screen-reports --out screen-handoff --json
@@ -678,9 +674,9 @@ Transport success exits 0 while the nested `receiving_summary.exit_code` still
 retains flags (3) or missing/unmeasured evidence (4). Invalid or unsafe input exits 2.
 Content hashes do not authenticate execution, sensitivity, human labels or scientific
 GO. See [the screen bundle contract](docs/screen-bundles.md) and its bounded private
-handoff/publication rules. This workflow requires the 0.33.0 candidate.
+handoff/publication rules. This workflow is available since quantfit 0.33.0.
 
-## Resume a screen with validated saved evidence (0.32.0 candidate)
+## Resume a screen with validated saved evidence (since 0.32.0)
 
 ```bash
 quantfit screen --targets targets.json --out screen-reports --max-new-tokens 64 --resume --json

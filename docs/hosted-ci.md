@@ -10,17 +10,20 @@ deterministic generated properties against SciPy, selected mutation failures, br
 coverage floors, Ruff, strict typing on the spec/engine data contract, docs parity,
 workflow linting, and the installed dependency graph for known vulnerabilities.
 `tools/ci/uv.lock` fixes the complete validation dependency graph and artifact hashes
-for Python 3.10-3.14 on hosted Linux/Windows. `uv sync --locked` selects unit, numerical,
-runtime, and tooling groups; package builds use the locked build tooling without
+for Python 3.10-3.14 unit, numerical and tooling groups on hosted Linux/Windows.
+The complete `runtime` group requires Python 3.11+ because Pillow 13 drops 3.10; hosted
+runtime qualification uses Python 3.12. The 3.10 matrix establishes hermetic source
+contracts, not complete runtime compatibility. `uv sync --locked` selects these groups; package builds use the locked build tooling without
 PEP 517 isolation. Artifact installs use `--no-deps --no-build-isolation` into that
 graph, followed by `pip check`. The scheduled drift lane deliberately resolves the
 supported package graph afresh. The validation manifest does not alter PyPI metadata.
 
-The locked runtime uses Torch 2.13.0, llmcompressor 0.14.0, Accelerate 1.15.0 and
-Pillow 12.3.0. The dependency audit exposed affected Torch/Accelerate/Pillow versions;
-the previous compressor caps prevented selecting their patches. The dated security
-exception in `docs/dependency-policy.md` §5 limits the cap move to hosted CPU evidence
-and keeps GPU AWQ/GPTQ qualification open. CPU Torch's local `+cpu` suffix is normalized
+The locked runtime uses Torch 2.13.0, llmcompressor 0.14.0.1, Accelerate 1.15.0 and
+Pillow 13.0.0, with advisory patches aiohttp 3.14.5, certifi 2026.10.19 and
+opentelemetry-api 1.45.1. The compressor hotfix removes the Pillow upper cap; direct
+package ceilings retain the previously admitted datasets 5.0.1 / Accelerate 1.15.0
+boundary. The dated security maintenance in `docs/dependency-policy.md` §5 preserves
+the hosted CPU evidence scope and keeps GPU AWQ/GPTQ qualification open. CPU Torch's local `+cpu` suffix is normalized
 to its public release version for advisory lookup; Torch remains included in the audit.
 
 On 2026-10-08 the release-candidate dependency audit correctly rejected fsspec
