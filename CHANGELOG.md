@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.39.0 — Unreleased
+
+- Add `calibrate paired` fixed judge/label pair-state, paired-error and axis-flip diagnostics from held native capture/key and full or retained labels. Preserve whole/common populations, unusable coverage and source-specific at-risk denominators; no independence inference, bias correction or calibration replacement.
+- Add complete installed full/extract/retained consumer with native bound-loader and gate refusal, independent asymmetric cell/correlation controls, privacy/binding adversaries and a fictional aggregate command record in `validation/2026-10-23-calibration-paired/`.
+
 ## 0.38.0 — Unreleased
 
 - `calibrate strata` and `analyze_calibration_strata` compute descriptive per-zone/per-arm native Wilson diagnostics for all rows and the two native observed-at-risk pair cohorts. Selected-pair counts remain separate from each arm's usable/unusable and directional human-label denominators; empty and all-unusable groups complete with null rates and native full intervals.

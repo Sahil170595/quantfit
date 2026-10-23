@@ -76,6 +76,17 @@ original capture for zone/expected metadata. Selected-pair counts and each arm's
 usable denominators stay separate, including empty/all-unusable groups. This is
 a diagnostic, not replacement calibration or a gate. See [the full contract](docs/calibration-strata.md).
 
+The stacked **unreleased 0.39.0 source candidate** adds paired label diagnostics:
+
+```bash
+quantfit calibrate paired --capture private.capture.jsonl --key private.labelkey.json --sheet filled.labels.csv --out paired.json --json
+```
+
+It also accepts retained labels with their exact receipt. Fixed judge/label pair-state
+and error tables use two usable labels per pair; whole-judge counts, unusable coverage
+and source-specific at-risk denominators remain separate. No independence test, bias
+correction or calibration replacement is performed. See [the full contract](docs/calibration-paired.md).
+
 ## What it has found
 
 The findings below are the dated August 2026 studies, not a cumulative count of
