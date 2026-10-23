@@ -358,6 +358,14 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Evidence** | `validation/2026-10-23-retained-labels/`; `tests/test_retained_labels.py`; `tests/test_retained_labels_cli.py`; `tests/test_ci_retained_labels.py`. Existing installed wheel/sdist acceptance includes the native consumer; exact-head hosted qualification is pending on the candidate PR. |
 | **Not established** | Human truth, rater authentication, independent labeling/execution, sensitivity or scientific GO. The private CSV/key are not published; the native calibration file retains declared scope, including any supplied local model identifiers. |
 
+### Unreleased 0.41.0 candidate: required conditional screen resolution (2026-10-23)
+
+| Scope | Current evidence |
+| --- | --- |
+| **Functional source evidence** | Actual `screen-summary` default and explicit requirement over the same receiving primitives: native 120-probe/60-at-risk-per-axis positive 40 pp, coarse 30 pp, actual 40-probe saturation with unattainable power failing even at 100 pp, missing calibration, native flags/incomplete priority with simultaneous reasons, and native retained-schema-3 producer/consumer. |
+| **Limits** | Fictional aggregate labels/counts and offline software behavior only. No new inference, human calibration study, authenticated assumptions, sensitivity or scientific GO. Final-head installed/CPU hosted qualification is separate and pending until recorded on the PR. |
+| **Evidence** | `tests/test_screen_requirement.py`; `tests/test_screen_requirement_cli.py`; `tests/test_ci_screen_requirement.py`; `validation/2026-10-23-screen-requirement/` |
+
 ### Unreleased 0.40.0 candidate: explicit local label review (2026-10-23)
 
 | | |
@@ -421,6 +429,12 @@ cross-release runs have been compared; the 0.5 screen has not run).
 ---
 
 ## 3. Major flags
+
+### Conditional-resolution requirement candidate (2026-10-23, unreleased 0.41.0)
+
+| Flag | Command | Current behavior | Evidence |
+| --- | --- | --- | --- |
+| `--require-conditional-resolution` / `--calibrations-dir` | screen-summary | Explicit finite `(0,100]` pp ceiling requires a matched report/calibration and both measurable, target-power-detectable native axes for every declared target. Native 3/4 priority, otherwise missing calibration 4, coarse/unattainable 5, all criteria/native0 satisfied 0; invalid 2. Default annotation/native JUnit unchanged; opt-in appends requirement failures, including missing calibration. | `tests/test_screen_requirement.py`; `tests/test_screen_requirement_cli.py`; `tests/test_ci_screen_requirement.py`; `validation/2026-10-23-screen-requirement/`; final-head installed qualification pending |
 
 ### Label review candidate (2026-10-23, unreleased 0.40.0)
 

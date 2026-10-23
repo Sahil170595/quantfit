@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.41.0 — Unreleased
+
+- Add opt-in `screen-summary --require-conditional-resolution PP`: all declared targets and both native axes must have matched calibration, measurable denominators, attainable target power and effective MDE within the declared pp ceiling. Preserve native outcomes/flags/ordered evidence and native 3/4 priority; otherwise missing calibration exits 4 and unmet resolution exits 5.
+- Preserve default annotation/JUnit behavior, append explicit opt-in axis/overall JUnit failures, and exercise native positive/saturated/mixed/schema-3 receiving paths in installed qualification. Offline fictional command evidence and proof limits: `validation/2026-10-23-screen-requirement/`.
+
 ## 0.40.0 — Unreleased
 
 - Add complete `calibrate review prepare` and `calibrate review apply`: private disagreement subsets, explicit operator labels, exact role/receipt/text bindings, complete new native sheets and fixed aggregate receipts. No preferred rater, automatic ingestion, authentic blinding or independent adjudication.

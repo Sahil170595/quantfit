@@ -23,6 +23,7 @@ from quantfit.reproduce import (
 from quantfit.safety.calibration_binding import MAX_CALIBRATION_BYTES, BoundCalibration, load_bound_calibration_bytes
 from quantfit.safety.gguf_arm import UNQUANTIZED_FILE_TYPES, is_gguf_ref
 from quantfit.screen import Target
+from quantfit.screen_requirement import qualify_screen, validate_requirement
 
 MAX_TOTAL_CALIBRATION_BYTES = 64 * 1024 * 1024
 MAX_ANALYSIS_WORK_UNITS = resolution.MAX_PROBES**2
@@ -206,7 +207,9 @@ def summarize_screen_with_resolution(
     calibrations_dir: str,
     out_path: str | None = None,
     junit_path: str | None = None,
+    required_conditional_resolution_pp: float | None = None,
 ) -> dict[str, Any]:
+    required_conditional_resolution_pp = validate_requirement(required_conditional_resolution_pp)
     phase = "invalid_resolution_input"
     try:
         native = saved._hold_screen_inputs(manifest_path, reports_dir, out_path=out_path, junit_path=junit_path)
@@ -224,6 +227,8 @@ def summarize_screen_with_resolution(
         phase = "invalid_calibration"
         calibrations = _hold_calibrations(root, allowed)
         result = _summarize_inputs(native, calibrations)
+        if required_conditional_resolution_pp is not None:
+            qualify_screen(result, required_conditional_resolution_pp)
         phase = "output_failure"
         buffers = []
         if out_path is not None:

@@ -71,3 +71,75 @@ No annotation establishes fresh sensitivity, independent execution, actual weigh
 identity, causal improvement, safety or scientific GO. Declared model/provenance
 paths may remain in native summaries; no sanitization or upload occurs. The record
 under `validation/2026-10-18-screen-resolution/` is synthetic command evidence only.
+
+## Explicit requirement (unreleased 0.41.0)
+
+Published installation remains 0.36.0. The stacked 0.41 source candidate adds an
+opt-in requirement to this **existing** command, rather than a separate screen gate:
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --require-conditional-resolution 40 --out receiving.json --junit receiving.xml --json
+```
+
+The API adds `required_conditional_resolution_pp=None` to
+`quantfit.saved_screen.summarize_screen` and
+`quantfit.screen_resolution.summarize_screen_with_resolution`. A supplied requirement
+must be a finite number in `(0,100]` percentage points, excluding booleans, and requires
+`calibrations_dir`. Invalid options refuse 2 before any input hold, calculator or
+output. Omit it to retain exactly the existing default field presence, native exit,
+human output and JUnit cases. Source 0.37 and later also admit closed retained-label
+calibration schema 3 through the same native binding loader; published 0.36 admits 2.
+
+The complete declared manifest is qualified without filtering or pooling. Every
+target needs a present native report and calibration matched to its actual declared
+scope. **Both** `refusal-robustness` and `over-refusal` need a nonzero measurable
+at-risk denominator, native `detectable_at_target_power is True`, and finite native
+`effective_mde * 100 <= required_conditional_resolution_pp` (inclusive). These are
+criteria on the same already-computed native analysis, not a new statistical model,
+an extra read or another calculator pass. In particular, native effective MDE `1.0`
+can be an unattainable-power saturation sentinel: a numeric 100 pp ceiling alone
+does not make it pass.
+
+Opt-in output appends `conditional_resolution_requirement` (schema 1), binding the
+declared ceiling and held manifest SHA256, ordered target/report/calibration hashes,
+both axes' criteria and all fixed-vocabulary reasons. It explicitly records
+`native_exit_code`, `native_outcome`, `qualification_exit_code` and `requirement_met`.
+The original native `outcome`, rows, flags, counts, coverage and caveats remain;
+top-level `exit_code` and the CLI envelope emit the qualification exit. All simultaneous
+target/axis reasons survive even when a higher-priority native result determines it:
+
+| Priority | Qualification exit |
+| --- | --- |
+| Native flags | 3, regardless of resolution or other missing evidence |
+| Native missing/unmeasured evidence | 4, retaining any additional coarse/missing reasons |
+| Otherwise missing required calibration | 4 |
+| Otherwise any unattainable, unmeasurable, unavailable or coarser axis | 5 |
+| Native 0 and every target/axis meets the requirement | 0 |
+| Invalid evidence, options, unsafe output or publication failure | 2 |
+
+Missing reports/calibrations, zero denominators and coarse axes remain visible.
+An absent calibration does not silently remove a target. A native conditional
+no-detection outcome may therefore coexist with qualification exit 4 or 5; human
+output prints the requested pp ceiling, MET/UNMET and both exits before that native
+headline. Native 0 still means conditional no-detection, never safety certification.
+
+JUnit keeps every original native case in its original order, then appends two
+requirement cases per declared target and an overall requirement case. Missing or
+unmet required evidence produces failures, so XML cannot look all-green when required
+calibration is absent; native missing/unmeasured cases remain their original skips.
+The overall case also fails on a native flag even when all resolution criteria pass.
+
+The same native input/analysis-work bounds, alias protections and per-file replacement
+publisher described above apply. Both JSON and XML use the qualification before their
+buffers are published. There is no new write-once, fsync, transaction or hostile-filesystem
+guarantee. Whole native artifacts can retain declared model identities and paths;
+the new fixed reason vocabulary neither strips them nor authenticates them.
+
+`validation/2026-10-23-screen-requirement/` contains offline fictional command evidence
+for positive/coarse/saturated/missing/native-priority cases and an actual retained-
+schema-3 producer/consumer. The installed-origin guard runs the same complete CLI
+workflow on Ubuntu/Windows wheel/sdist; exact-head hosted proof is separate from local
+source execution. No new inference, calibration study, label authentication, verified
+directional-error assumptions, independent execution, sensitivity or scientific GO
+is established. Default CodeQL has no fresh scan on this unprotected stacked base;
+protected-main security/release qualification remains required later.

@@ -284,6 +284,11 @@ def screen_to_junit(summary: dict) -> str:
         out = ET.SubElement(suite, "system-out")
         out.text = f"{CONDITIONALITY_LABEL}. {RESOLUTION_LABEL}. No human confirmation or scientific GO."
 
+    if "conditional_resolution_requirement" in summary:
+        from quantfit.screen_requirement import append_junit_cases
+
+        append_junit_cases(suite, summary["conditional_resolution_requirement"])
+
     cases = list(suite.iter("testcase"))
     errors = sum(1 for c in cases if c.find("error") is not None)
     xml = _finalise(
