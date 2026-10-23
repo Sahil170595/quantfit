@@ -358,6 +358,13 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Evidence** | `validation/2026-10-23-retained-labels/`; `tests/test_retained_labels.py`; `tests/test_retained_labels_cli.py`; `tests/test_ci_retained_labels.py`. Existing installed wheel/sdist acceptance includes the native consumer; exact-head hosted qualification is pending on the candidate PR. |
 | **Not established** | Human truth, rater authentication, independent labeling/execution, sensitivity or scientific GO. The private CSV/key are not published; the native calibration file retains declared scope, including any supplied local model identifiers. |
 
+### Unreleased 0.40.0 candidate: explicit local label review (2026-10-23)
+
+| | |
+|---|---|
+| **Functional source evidence** | Actual two full native sheets/key → `calibrate review prepare` → explicit fictional selected labels → `calibrate review apply` → unchanged `calibrate ingest`. Nine pairs/18 rows include every normalized A/B label combination once per arm: 12 selected, 6 agreed, 10 changes vs A, 4 final unusable. Native schema 2 has baseline/quantized usable counts 7/7 and unchanged directional/native Wilson arithmetic. |
+| **Evidence and limits** | `tests/test_label_review.py`; `tests/test_label_review_cli.py`; `tests/test_ci_label_review.py`; `validation/2026-10-23-label-review/`. Blank or filled-partial queues refuse native ingestion; a filled all-selected queue may already be a complete native sheet. No automatic adjudication/consensus, authentic blinding, rater authentication, independence, sensitivity or GO; final-head hosted installed qualification is separate and pending. |
+
 ### Unreleased 0.39.0 candidate: paired calibration diagnostics (2026-10-23)
 
 | | |
@@ -414,6 +421,13 @@ cross-release runs have been compared; the 0.5 screen has not run).
 ---
 
 ## 3. Major flags
+
+### Label review candidate (2026-10-23, unreleased 0.40.0)
+
+| Flag | Command | Scope validated | Evidence |
+|---|---|---|---|
+| `--sheet-a` / `--sheet-b` / `--key` / `--sheet` / `--receipt` / `--json` | calibrate review prepare | Both original full native joins, every normalized inequality incl unusable, blank sorted private subset and closed aggregate role/queue bindings; zero selections produce a header-only subset. | `tests/test_label_review.py`; `tests/test_label_review_cli.py`; `validation/2026-10-23-label-review/` |
+| `--sheet-a` / `--sheet-b` / `--key` / `--review` / `--preparation` / `--out` / `--receipt` / `--json` | calibrate review apply | Exact original roles and regenerated preparation, selected IDs/text/explicit labels, new complete private sheet preserving agreed labels, aggregate application bindings and unchanged separate native ingestion. | `tests/test_label_review.py`; `tests/test_label_review_cli.py`; `tests/test_ci_label_review.py`; `validation/2026-10-23-label-review/`; final-head installed qualification pending |
 
 ### Calibration paired candidate (2026-10-23, unreleased 0.39.0)
 

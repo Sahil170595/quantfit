@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.40.0 — Unreleased
+
+- Add complete `calibrate review prepare` and `calibrate review apply`: private disagreement subsets, explicit operator labels, exact role/receipt/text bindings, complete new native sheets and fixed aggregate receipts. No preferred rater, automatic ingestion, authentic blinding or independent adjudication.
+- Add actual installed prepare/fill/apply/unchanged schema-2 ingestion, partial-queue and all-unusable/zero-selection controls, strict receipt/CSV/privacy/filesystem tests and a fictional aggregate command record in `validation/2026-10-23-label-review/`.
+
 ## 0.39.0 — Unreleased
 
 - Add `calibrate paired` fixed judge/label pair-state, paired-error and axis-flip diagnostics from held native capture/key and full or retained labels. Preserve whole/common populations, unusable coverage and source-specific at-risk denominators; no independence inference, bias correction or calibration replacement.

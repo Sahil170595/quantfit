@@ -207,6 +207,26 @@ def test_command_parity_flags_unknown_command_flag_and_positional(tmp_path, surf
     assert all(f.severity == A.SEVERITY_ERROR for f in findings)
 
 
+def test_command_parity_walks_registered_nested_leaves_and_preserves_unknown_flag_refusal(tmp_path, monkeypatch):
+    parser = argparse.ArgumentParser(prog="quantfit")
+    calibrate = parser.add_subparsers().add_parser("calibrate")
+    review = calibrate.add_subparsers().add_parser("review")
+    prepare = review.add_subparsers().add_parser("prepare")
+    prepare.add_argument("--sheet", required=True)
+    monkeypatch.setattr("quantfit.cli._build_parser", lambda: parser)
+    root = _repo(tmp_path, **{"README.md": "`quantfit calibrate review prepare --sheet private.csv`\n"})
+    monkeypatch.setattr(A, "COMMAND_DOC_GLOBS", ("README.md",))
+    findings, coverage = A._check_commands(root)
+    assert findings == []
+    assert set(coverage["commands_documented"]) == {"calibrate", "calibrate review", "calibrate review prepare"}
+    (root / "README.md").write_text(
+        "`quantfit calibrate review prepare --sheet private.csv --nope`\n", encoding="utf-8"
+    )
+    findings, _ = A._check_commands(root)
+    assert _kinds(findings) == ["unknown_flag"]
+    assert findings[0].claim == "quantfit calibrate review prepare --nope"
+
+
 def test_command_parity_flags_undocumented_surface(tmp_path, surface, monkeypatch):
     root = _repo(tmp_path, **{"README.md": "`quantfit check --model X --token T`\n"})
     monkeypatch.setattr(A, "COMMAND_DOC_GLOBS", ("README.md",))

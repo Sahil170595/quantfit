@@ -87,6 +87,20 @@ and error tables use two usable labels per pair; whole-judge counts, unusable co
 and source-specific at-risk denominators remain separate. No independence test, bias
 correction or calibration replacement is performed. See [the full contract](docs/calibration-paired.md).
 
+The stacked **unreleased 0.40.0 source candidate** completes explicit local label review:
+
+```bash
+quantfit calibrate review prepare --sheet-a a.labels.csv --sheet-b b.labels.csv --key private.labelkey.json --sheet private.review.labels.csv --receipt review.json --json
+# Fill every selected row using an externally fixed operator rule, then:
+quantfit calibrate review apply --sheet-a a.labels.csv --sheet-b b.labels.csv --key private.labelkey.json --review private.review.labels.csv --preparation review.json --out reviewed.labels.csv --receipt application.json --json
+quantfit calibrate ingest --sheet reviewed.labels.csv --key private.labelkey.json --out calibration.json --json
+```
+
+The queue and complete output sheet contain private text/IDs; public receipts contain
+only fixed counts, hashes and a fingerprint. Agreed labels stay unchanged; disagreements
+require explicit supplied judgments. No automatic ingestion, preferred rater, authentic
+blinding or independent adjudication is claimed. See [the full workflow](docs/label-review.md).
+
 ## What it has found
 
 The findings below are the dated August 2026 studies, not a cumulative count of

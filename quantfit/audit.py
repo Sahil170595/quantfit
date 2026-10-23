@@ -656,12 +656,13 @@ def _parse_invocations(docs: Sequence[_Doc], commands: Iterable[str]) -> list[_I
                     continue
                 command, rest = head, tokens[1:]
                 positional = None
-                if rest and not rest[0].startswith("-"):
+                while rest and not rest[0].startswith("-"):
                     candidate = rest[0].strip("`'\"),.;:|")
-                    if f"{head} {candidate}" in known:
-                        command, rest = f"{head} {candidate}", rest[1:]
+                    if f"{command} {candidate}" in known:
+                        command, rest = f"{command} {candidate}", rest[1:]
                     else:
                         positional = candidate
+                        break
                 flags = tuple(dict.fromkeys(_FLAG.findall(" ".join(rest))))
                 out.append(
                     _Invocation(
@@ -715,9 +716,11 @@ def _check_commands(root: Path) -> tuple[list[Finding], dict]:
                 )
             )
             continue
-        documented_commands.add(inv.command)
-        if " " in inv.command:  # `quantfit calibrate sheet` documents `calibrate` too
-            documented_commands.add(inv.command.split(" ", 1)[0])
+        parts = inv.command.split()
+        for depth in range(1, len(parts) + 1):
+            ancestor = " ".join(parts[:depth])
+            if ancestor in surface:
+                documented_commands.add(ancestor)
         flags_by_command.setdefault(inv.command, set()).update(inv.flags)
         if inv.positional is not None:
             choices = [c for c in spec["positionals"].values() if c]

@@ -1,0 +1,211 @@
+{
+  "application": {
+    "binding_fingerprint": "72dae777b1a8a024a2427a094bde8ec8be7c8fa2bb4d5084db9429a2672ad14c",
+    "capture_sha256_declared": "cf07de32ad3821749260fc4edc0b9a584d6d02096e4127a96defa26f18f93fd0",
+    "inputs": {
+      "key": {
+        "sha256": "e782b8587f145953388ba912ef2a762ac7d1d365ec81e24146cde07ca9365c2d",
+        "size_bytes": 6248
+      },
+      "preparation": {
+        "sha256": "270d04df6bf34af834dea70fab20d5c741f45097d8b4765a884d3e0e882fe824",
+        "size_bytes": 1947
+      },
+      "review": {
+        "sha256": "4ce064dd213bde757d8cf619f4770c42f11b1e0de5e12de9439b2b1c0b99c6c6",
+        "size_bytes": 1474
+      },
+      "sheet_a": {
+        "sha256": "e215d59cc0e59e112f5a2f56d0cdfdeca67cac45512ea68ccdd5b3a2056365b3",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "914f2fe692517af24bd4a86a623de085d640b4ecfa47d9f578ae4e8c1168ec46",
+        "size_bytes": 2201
+      }
+    },
+    "limits": {
+      "authentic_blinding": false,
+      "human_labels_authenticated": false,
+      "independent_adjudication": false,
+      "post_review_agreement_is_independent": false,
+      "rater_identity_verified": false,
+      "scientific_go": false,
+      "source_authenticity_verified": false
+    },
+    "n_changed_vs_a": 10,
+    "n_pairs": 9,
+    "n_reviewed": 12,
+    "n_rows": 18,
+    "n_unusable": 4,
+    "output_sheet": {
+      "sha256": "ae81ecc88807ccc5fae827ff681b398811d2f80f95375c0cf518d9dea33c698c",
+      "size_bytes": 2199
+    },
+    "per_arm": {
+      "baseline": {
+        "n_changed_vs_a": 5,
+        "n_reviewed": 6,
+        "n_rows": 9,
+        "n_unusable": 2
+      },
+      "quantized": {
+        "n_changed_vs_a": 5,
+        "n_reviewed": 6,
+        "n_rows": 9,
+        "n_unusable": 2
+      }
+    },
+    "quantfit_version": "0.40.0",
+    "review_application_schema": 1,
+    "scope": "Local transformation from supplied labels only. Queue membership reveals disagreement; a returning labeler may remember earlier labels. No authentic blinding, rater authentication, independent adjudication, human truth, preregistration, sensitivity or scientific GO. Judgments must follow an externally fixed operator rule; software supplies no preferred rater, consensus policy, automatic ingestion or replacement for pre-review inter-rater statistics. Capture digest and measurement scope are key declarations; no capture is read."
+  },
+  "binding_fingerprint": "72dae777b1a8a024a2427a094bde8ec8be7c8fa2bb4d5084db9429a2672ad14c",
+  "complete_reviewed_native_ingest_exit_code": 0,
+  "human_labels_authenticated": false,
+  "independent_adjudication": false,
+  "kind": "quantfit.label-review-functional-acceptance",
+  "n_pairs": 9,
+  "n_rows": 18,
+  "native_ingest_counts": {
+    "baseline": {
+      "direction": {
+        "judge_compliance_human_refusal": 2,
+        "judge_refusal_human_compliance": 2
+      },
+      "directional": {
+        "false_compliance": {
+          "epsilon": 0.5,
+          "epsilon_wilson95": [
+            0.15003898915214947,
+            0.8499610108478506
+          ],
+          "errors": 2,
+          "n": 4
+        },
+        "false_refusal": {
+          "epsilon": 0.6666666666666666,
+          "epsilon_wilson95": [
+            0.2076596008020477,
+            0.9385080552796037
+          ],
+          "errors": 2,
+          "n": 3
+        }
+      },
+      "epsilon": 0.5714285714285714,
+      "epsilon_wilson95": [
+        0.2504583645276572,
+        0.8417801447485302
+      ],
+      "human_compliances": 3,
+      "human_refusals": 4,
+      "judge_errors": 4,
+      "mde_epsilon_upper": 0.9385080552796037,
+      "n": 7,
+      "n_unusable": 2
+    },
+    "calibration_schema": 2,
+    "n_labeled": 18,
+    "n_unusable": 4,
+    "quantized": {
+      "direction": {
+        "judge_compliance_human_refusal": 2,
+        "judge_refusal_human_compliance": 1
+      },
+      "directional": {
+        "false_compliance": {
+          "epsilon": 0.5,
+          "epsilon_wilson95": [
+            0.15003898915214947,
+            0.8499610108478506
+          ],
+          "errors": 2,
+          "n": 4
+        },
+        "false_refusal": {
+          "epsilon": 0.3333333333333333,
+          "epsilon_wilson95": [
+            0.06149194472039621,
+            0.7923403991979522
+          ],
+          "errors": 1,
+          "n": 3
+        }
+      },
+      "epsilon": 0.42857142857142855,
+      "epsilon_wilson95": [
+        0.15821985525146975,
+        0.7495416354723428
+      ],
+      "human_compliances": 3,
+      "human_refusals": 4,
+      "judge_errors": 3,
+      "mde_epsilon_upper": 0.8499610108478506,
+      "n": 7,
+      "n_unusable": 2
+    },
+    "source": {
+      "capture_sha256": "cf07de32ad3821749260fc4edc0b9a584d6d02096e4127a96defa26f18f93fd0",
+      "key_sha256": "e782b8587f145953388ba912ef2a762ac7d1d365ec81e24146cde07ca9365c2d",
+      "sheet_sha256": "ae81ecc88807ccc5fae827ff681b398811d2f80f95375c0cf518d9dea33c698c"
+    },
+    "unmeasured_arms": []
+  },
+  "originals_unchanged": true,
+  "partial_review_native_ingest_exit_code": 2,
+  "preparation": {
+    "binding_fingerprint": "72dae777b1a8a024a2427a094bde8ec8be7c8fa2bb4d5084db9429a2672ad14c",
+    "capture_sha256_declared": "cf07de32ad3821749260fc4edc0b9a584d6d02096e4127a96defa26f18f93fd0",
+    "inputs": {
+      "key": {
+        "sha256": "e782b8587f145953388ba912ef2a762ac7d1d365ec81e24146cde07ca9365c2d",
+        "size_bytes": 6248
+      },
+      "sheet_a": {
+        "sha256": "e215d59cc0e59e112f5a2f56d0cdfdeca67cac45512ea68ccdd5b3a2056365b3",
+        "size_bytes": 2201
+      },
+      "sheet_b": {
+        "sha256": "914f2fe692517af24bd4a86a623de085d640b4ecfa47d9f578ae4e8c1168ec46",
+        "size_bytes": 2201
+      }
+    },
+    "limits": {
+      "authentic_blinding": false,
+      "human_labels_authenticated": false,
+      "independent_adjudication": false,
+      "post_review_agreement_is_independent": false,
+      "rater_identity_verified": false,
+      "scientific_go": false,
+      "source_authenticity_verified": false
+    },
+    "n_agreed": 6,
+    "n_pairs": 9,
+    "n_rows": 18,
+    "n_selected": 12,
+    "per_arm": {
+      "baseline": {
+        "n_agreed": 3,
+        "n_rows": 9,
+        "n_selected": 6
+      },
+      "quantized": {
+        "n_agreed": 3,
+        "n_rows": 9,
+        "n_selected": 6
+      }
+    },
+    "quantfit_version": "0.40.0",
+    "review_preparation_schema": 1,
+    "review_sheet": {
+      "sha256": "a9275f45a127bd358931bfb1440136c2b3f2088dc24fd1382a2725ebf498b347",
+      "size_bytes": 1376
+    },
+    "scope": "Local transformation from supplied labels only. Queue membership reveals disagreement; a returning labeler may remember earlier labels. No authentic blinding, rater authentication, independent adjudication, human truth, preregistration, sensitivity or scientific GO. Judgments must follow an externally fixed operator rule; software supplies no preferred rater, consensus policy, automatic ingestion or replacement for pre-review inter-rater statistics. Capture digest and measurement scope are key declarations; no capture is read.",
+    "selection": "unequal_normalized_labels"
+  },
+  "scientific_go": false,
+  "synthetic": true,
+  "synthetic_operator_labels": true
+}
