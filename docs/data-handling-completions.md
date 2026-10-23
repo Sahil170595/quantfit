@@ -194,9 +194,11 @@ sheet without taking that extract first is the one deletion in this document tha
 something.
 
 The durable artifacts are the drift report, the screen summary, the calibration report, the labeling
-key and the stripped `id,human_label` extract; all are counts and provenance, all contain no
-completion, and all are publishable — the key subject to §1.7's condition on its `baseline` / `quant`
-fields.
+key and the stripped `id,human_label` extract. The key and per-ID extract are **private retention
+artifacts**, even though they contain no completion text. The [retained-label workflow](retained-labels.md)
+adds a counts/hash/fingerprint-only extraction receipt; native calibration files retain declared
+measurement identity, which can include local model identifiers or paths. Inspect their scope metadata
+before sharing them; absence of completions alone does not make every artifact public.
 
 If a captured run cannot be regenerated — a Hub repo deleted, `main` moved under an unpinned GGUF
 fetch (`docs/sensitivity-control-v0.md` §2.3) — that is a **provenance** problem to record in the

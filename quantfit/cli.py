@@ -321,7 +321,7 @@ def _build_parser() -> argparse.ArgumentParser:
     pe.add_argument(
         "--calibration-report",
         metavar="PATH",
-        help="bound schema-2 calibration for separately labeled conditional resolution; no human-label authentication",
+        help="bound schema-2 or schema-3 calibration for separately labeled conditional resolution; no human-label authentication",
     )
 
     pca = sub.add_parser(
@@ -336,9 +336,28 @@ def _build_parser() -> argparse.ArgumentParser:
     pcs.add_argument("--sheet", required=True, metavar="PATH", help="blinded sheet to write (*.labels.csv)")
     pcs.add_argument("--key", required=True, metavar="PATH", help="unblinding key to write (*.labelkey.json)")
     pci = csub.add_parser("ingest", help="filled sheet + key -> per-arm judge-error calibration report")
-    pci.add_argument("--sheet", required=True, metavar="PATH", help="the filled labeling sheet")
+    ingest_mode = pci.add_mutually_exclusive_group(required=True)
+    ingest_mode.add_argument(
+        "--sheet", metavar="PATH", help="the original filled three-column labeling sheet (schema 2)"
+    )
+    ingest_mode.add_argument(
+        "--retained-labels", metavar="PATH", help="private id,human_label CSV (schema 3; requires receipt)"
+    )
+    pci.add_argument(
+        "--retention-receipt", metavar="PATH", help="exact aggregate extraction receipt; retained mode only"
+    )
     pci.add_argument("--key", required=True, metavar="PATH", help="the key written next to it")
-    pci.add_argument("--out", required=True, metavar="PATH", help="calibration report JSON to write (counts only)")
+    pci.add_argument(
+        "--out",
+        required=True,
+        metavar="PATH",
+        help="calibration report JSON to write (aggregate counts and declared scope)",
+    )
+    pce = csub.add_parser("extract", help="validate a filled sheet and retain completion-free private labels once")
+    pce.add_argument("--sheet", required=True, metavar="PATH", help="original filled three-column labeling sheet")
+    pce.add_argument("--key", required=True, metavar="PATH", help="private unblinding key")
+    pce.add_argument("--out", required=True, metavar="PATH", help="new private two-column retained CSV")
+    pce.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate retention receipt JSON")
     pcr = csub.add_parser("reconcile", help="two filled sheets + one key -> aggregate label-disagreement counts")
     pcr.add_argument("--sheet-a", required=True, metavar="PATH", help="first private filled labeling sheet")
     pcr.add_argument("--sheet-b", required=True, metavar="PATH", help="second private filled labeling sheet")
@@ -386,7 +405,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--calibration-report",
         default=None,
         metavar="PATH",
-        help="bound schema-2 calibration report; mutually exclusive with --eps-upper/--eps-source. "
+        help="bound schema-2 or schema-3 calibration report; mutually exclusive with --eps-upper/--eps-source. "
         "Scope matching does not verify human labels or sensitivity",
     )
     pg.add_argument(
@@ -495,7 +514,9 @@ def _build_parser() -> argparse.ArgumentParser:
         "--report", default=None, metavar="PATH", help="aggregate schema-2 report; omitted only for pre-run refusal"
     )
     bcreate.add_argument("--out", required=True, metavar="DIR", help="new bundle directory; parent must exist")
-    bcreate.add_argument("--calibration-report", metavar="PATH", help="optional bound schema-2 aggregate calibration")
+    bcreate.add_argument(
+        "--calibration-report", metavar="PATH", help="optional bound schema-2 or schema-3 aggregate calibration"
+    )
     bcreate.add_argument(
         "--gate", metavar="PATH", help="optional aggregate gate decision; original no-answer states survive"
     )
@@ -1249,6 +1270,10 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _emit(args, "resolution", 0, result, human_resolution)
 
     if args.cmd == "calibrate":
+        if args.calibrate_cmd == "extract" or (args.calibrate_cmd == "ingest" and args.retained_labels is not None):
+            from quantfit.retained_labels_cli import dispatch_retained
+
+            return dispatch_retained(args, _emit)
         if args.calibrate_cmd == "sheet":
             from quantfit.safety.calibrate import build_labeling_sheet
 
@@ -1525,7 +1550,14 @@ def _dispatch(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     _force_utf8_stdio()
-    args = _build_parser().parse_args(argv)
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    if (
+        args.cmd == "calibrate"
+        and args.calibrate_cmd == "ingest"
+        and (args.retained_labels is not None) != (args.retention_receipt is not None)
+    ):
+        parser.error("--retention-receipt is required exactly with --retained-labels")
     try:
         return _dispatch(args)
     except (RuntimeError, OSError, ImportError) as exc:
