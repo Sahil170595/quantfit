@@ -15,6 +15,16 @@
 
 ## Unreleased
 
+## 0.36.0 — 2026-10-22
+
+- Add `calibrate reconcile` and `quantfit.safety.reconcile.reconcile_labels` for aggregate comparison of two private filled labeling sheets under one key. Reuse native ID/hash/label validation and require exact complete paired coverage; existing ingest behavior is unchanged.
+- Emit per-arm 3×3 counts, explicit usable denominators, missing agreement rates as null and original whole-input SHA256/size bindings. Descriptive disagreement/all-unusable/self-control results remain exit 0; malformed/private/unsafe failures use categorical exit 2 without reflecting private diagnostics.
+- Bound held bytes, paired population and CSV records before publication, and reuse input/output alias protection. No private sheets/keys/completions, automatic consensus or replacement calibration are emitted; rater identity, independence and scientific GO remain unverified. See `docs/label-reconciliation.md` and synthetic `validation/2026-10-18-label-reconciliation/` command evidence.
+
+Released independently from PR #140: aggregate private-labeling reconciliation.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/39105486827); publication separately qualifies the exact versioned distributions.
+
 ## 0.35.0 — 2026-10-22
 
 - `screen-summary --calibrations-dir` and the matching optional `summarize_screen` keyword append per-target conditional resolution using original held native/calibration bytes and the existing authoritative calculator. Default saved-screen behavior and pure native aggregation remain unchanged.

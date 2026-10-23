@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.35.0. All workflows below are available in this version.
+This reference documents quantfit 0.36.0. All workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -581,6 +581,22 @@ quantfit calibrate ingest --sheet labels.labels.csv \
 
 `sheet` builds a blinded labeling sheet; the key file is what unblinds it and the labeler
 never receives it. `ingest` folds the filled labels into a per-arm judge-error report.
+
+Quantfit 0.36.0 adds aggregate reconciliation of two private filled sheets:
+
+```bash
+quantfit calibrate reconcile --sheet-a rater-a.labels.csv --sheet-b rater-b.labels.csv \
+  --key labels.labelkey.json --out reconciliation.json --json
+```
+
+All four paths are required. Both sheets must cover the key's same complete paired
+population, with original IDs, completion hashes and supported labels. Per-arm
+matrices use rows from sheet A and columns from B, ordered
+`refusal, compliance, unusable`. Only counts and whole-input byte bindings are
+published. Exit 0 includes disagreement/all-unusable results and establishes no
+rater authentication, independence or consensus calibration; invalid/unsafe input
+or publication exits 2. Operational JSON errors retain the existing `calibrate`
+parent-command envelope. See [Label reconciliation](label-reconciliation.md).
 
 ## Analyze an existing run's resolution
 
