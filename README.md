@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.40.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.40.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md) and explicit [local label review](docs/label-review.md). The released workflows below are available in this version.
+This README documents [quantfit 0.41.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.41.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.40.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.41.0"`.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
@@ -99,6 +99,20 @@ The queue and complete output sheet contain private text/IDs; public receipts co
 only fixed counts, hashes and a fingerprint. Agreed labels stay unchanged; disagreements
 require explicit supplied judgments. No automatic ingestion, preferred rater, authentic
 blinding or independent adjudication is claimed. See [the full workflow](docs/label-review.md).
+
+Quantfit 0.41.0 can require conditional resolution
+when receiving a complete saved screen:
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --require-conditional-resolution 40 --out receiving.json --junit receiving.xml --json
+```
+
+Both native axes of every declared target need matched evidence, a measured denominator,
+attainable target power and effective MDE at most the declared ceiling in percentage
+points. Native flags/incomplete evidence still take priority (3/4); otherwise missing
+calibration exits 4 and unmet resolution exits 5. Read native outcome and qualification
+separately. Without this flag, existing annotation and JUnit behavior stay unchanged.
+Neither path authenticates labels, sensitivity or scientific GO. See [the contract](docs/screen-resolution.md#explicit-requirement-0410).
 
 ## What it has found
 

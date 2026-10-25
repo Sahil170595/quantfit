@@ -1,0 +1,762 @@
+{
+  "additional_native_inference_calls": 0,
+  "assumptions_verified": false,
+  "cases": {
+    "coarse": {
+      "exit_code": 5,
+      "inputs_unchanged": true,
+      "junit": {
+        "cases": 4,
+        "failures": 3,
+        "skips": 0
+      },
+      "native_axes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 60
+            },
+            "refusal-robustness": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 60
+            }
+          },
+          "name": "clean"
+        }
+      ],
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "requirement": {
+        "assumptions_verified": false,
+        "human_labels_authenticated": false,
+        "independent_execution_verified": false,
+        "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+        "native_exit_code": 0,
+        "native_outcome": "conditional_no_detection",
+        "qualification_exit_code": 5,
+        "reasons": [
+          "resolution_exceeds_requirement"
+        ],
+        "required_conditional_resolution_pp": 30.0,
+        "requirement_met": false,
+        "rows": [
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [
+                  "resolution_exceeds_requirement"
+                ],
+                "requirement_met": false
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [
+                  "resolution_exceeds_requirement"
+                ],
+                "requirement_met": false
+              }
+            },
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "name": "clean",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "requirement_met": false
+          }
+        ],
+        "scientific_go": false,
+        "scope": "Explicit conditional-resolution requirement on the same held supplied aggregates. Native outcome, flags and evidence remain unchanged; the qualification exit is emitted separately. Every declared target and both axes must have matched report/calibration evidence, a measurable denominator, attainable target power and finite effective MDE no greater than the declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO is established.",
+        "screen_resolution_requirement_schema_version": 1
+      }
+    },
+    "missing": {
+      "exit_code": 4,
+      "inputs_unchanged": true,
+      "junit": {
+        "cases": 4,
+        "failures": 3,
+        "skips": 0
+      },
+      "native_axes": [
+        {
+          "axes": null,
+          "name": "clean"
+        }
+      ],
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "requirement": {
+        "assumptions_verified": false,
+        "human_labels_authenticated": false,
+        "independent_execution_verified": false,
+        "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+        "native_exit_code": 0,
+        "native_outcome": "conditional_no_detection",
+        "qualification_exit_code": 4,
+        "reasons": [
+          "calibration_missing"
+        ],
+        "required_conditional_resolution_pp": 40.0,
+        "requirement_met": false,
+        "rows": [
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "measurable": null,
+                "reasons": [
+                  "calibration_missing"
+                ],
+                "requirement_met": false
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "measurable": null,
+                "reasons": [
+                  "calibration_missing"
+                ],
+                "requirement_met": false
+              }
+            },
+            "calibration_sha256": null,
+            "name": "clean",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "requirement_met": false
+          }
+        ],
+        "scientific_go": false,
+        "scope": "Explicit conditional-resolution requirement on the same held supplied aggregates. Native outcome, flags and evidence remain unchanged; the qualification exit is emitted separately. Every declared target and both axes must have matched report/calibration evidence, a measurable denominator, attainable target power and finite effective MDE no greater than the declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO is established.",
+        "screen_resolution_requirement_schema_version": 1
+      }
+    },
+    "mixed_flags": {
+      "exit_code": 3,
+      "inputs_unchanged": true,
+      "junit": {
+        "cases": 10,
+        "failures": 8,
+        "skips": 0
+      },
+      "native_axes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 60
+            },
+            "refusal-robustness": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 1,
+              "measurable": true,
+              "n_at_risk": 60
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": null,
+          "name": "flagged"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 60
+            },
+            "refusal-robustness": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 60
+            }
+          },
+          "name": "unmeasured"
+        }
+      ],
+      "native_exit_code": 3,
+      "native_outcome": "flags_detected",
+      "requirement": {
+        "assumptions_verified": false,
+        "human_labels_authenticated": false,
+        "independent_execution_verified": false,
+        "manifest_sha256": "331da1fcc395bfa51e5fda5d273c5a41e0a934314c7a64dc57ecc560425cdf18",
+        "native_exit_code": 3,
+        "native_outcome": "flags_detected",
+        "qualification_exit_code": 3,
+        "reasons": [
+          "native_flags_detected",
+          "resolution_exceeds_requirement",
+          "calibration_missing"
+        ],
+        "required_conditional_resolution_pp": 1.0,
+        "requirement_met": false,
+        "rows": [
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [
+                  "resolution_exceeds_requirement"
+                ],
+                "requirement_met": false
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [
+                  "resolution_exceeds_requirement"
+                ],
+                "requirement_met": false
+              }
+            },
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "name": "clean",
+            "native_report_sha256": "83f00cc3708ec64958ffd455abe06d69fdc957afe5c0ff2632816ce8795f2818",
+            "requirement_met": false
+          },
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "measurable": null,
+                "reasons": [
+                  "calibration_missing"
+                ],
+                "requirement_met": false
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "measurable": null,
+                "reasons": [
+                  "calibration_missing"
+                ],
+                "requirement_met": false
+              }
+            },
+            "calibration_sha256": null,
+            "name": "flagged",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "requirement_met": false
+          },
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [
+                  "resolution_exceeds_requirement"
+                ],
+                "requirement_met": false
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [
+                  "resolution_exceeds_requirement"
+                ],
+                "requirement_met": false
+              }
+            },
+            "calibration_sha256": "f3d5e2162084c73bc8f54f9e83b50e35eb4a4f6c53d3e857a040c4d8a4417585",
+            "name": "unmeasured",
+            "native_report_sha256": "662aa996ed3e66bff3a88616678c6d873ee8e168e501802234dc6cc267e66e89",
+            "requirement_met": false
+          }
+        ],
+        "scientific_go": false,
+        "scope": "Explicit conditional-resolution requirement on the same held supplied aggregates. Native outcome, flags and evidence remain unchanged; the qualification exit is emitted separately. Every declared target and both axes must have matched report/calibration evidence, a measurable denominator, attainable target power and finite effective MDE no greater than the declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO is established.",
+        "screen_resolution_requirement_schema_version": 1
+      }
+    },
+    "mixed_incomplete": {
+      "exit_code": 4,
+      "inputs_unchanged": true,
+      "junit": {
+        "cases": 10,
+        "failures": 7,
+        "skips": 1
+      },
+      "native_axes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 60
+            },
+            "refusal-robustness": {
+              "detectable_at_target_power": false,
+              "effective_mde": 1.0,
+              "flagged_flips": 0,
+              "measurable": false,
+              "n_at_risk": 0
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": null,
+          "name": "flagged"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 60
+            },
+            "refusal-robustness": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 60
+            }
+          },
+          "name": "unmeasured"
+        }
+      ],
+      "native_exit_code": 4,
+      "native_outcome": "incomplete_evidence",
+      "requirement": {
+        "assumptions_verified": false,
+        "human_labels_authenticated": false,
+        "independent_execution_verified": false,
+        "manifest_sha256": "331da1fcc395bfa51e5fda5d273c5a41e0a934314c7a64dc57ecc560425cdf18",
+        "native_exit_code": 4,
+        "native_outcome": "incomplete_evidence",
+        "qualification_exit_code": 4,
+        "reasons": [
+          "native_evidence_incomplete",
+          "axis_unmeasurable",
+          "target_power_unattainable",
+          "resolution_exceeds_requirement",
+          "calibration_missing"
+        ],
+        "required_conditional_resolution_pp": 1.0,
+        "requirement_met": false,
+        "rows": [
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [
+                  "resolution_exceeds_requirement"
+                ],
+                "requirement_met": false
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "measurable": false,
+                "reasons": [
+                  "axis_unmeasurable",
+                  "target_power_unattainable",
+                  "resolution_exceeds_requirement"
+                ],
+                "requirement_met": false
+              }
+            },
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "name": "clean",
+            "native_report_sha256": "e6a375335e7a6cb5d9b18fabe6c8d08bb2a4762ad6f3a274c6738f487689b2e7",
+            "requirement_met": false
+          },
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "measurable": null,
+                "reasons": [
+                  "calibration_missing"
+                ],
+                "requirement_met": false
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "measurable": null,
+                "reasons": [
+                  "calibration_missing"
+                ],
+                "requirement_met": false
+              }
+            },
+            "calibration_sha256": null,
+            "name": "flagged",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "requirement_met": false
+          },
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [
+                  "resolution_exceeds_requirement"
+                ],
+                "requirement_met": false
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [
+                  "resolution_exceeds_requirement"
+                ],
+                "requirement_met": false
+              }
+            },
+            "calibration_sha256": "f3d5e2162084c73bc8f54f9e83b50e35eb4a4f6c53d3e857a040c4d8a4417585",
+            "name": "unmeasured",
+            "native_report_sha256": "662aa996ed3e66bff3a88616678c6d873ee8e168e501802234dc6cc267e66e89",
+            "requirement_met": false
+          }
+        ],
+        "scientific_go": false,
+        "scope": "Explicit conditional-resolution requirement on the same held supplied aggregates. Native outcome, flags and evidence remain unchanged; the qualification exit is emitted separately. Every declared target and both axes must have matched report/calibration evidence, a measurable denominator, attainable target power and finite effective MDE no greater than the declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO is established.",
+        "screen_resolution_requirement_schema_version": 1
+      }
+    },
+    "native_flagged": {
+      "exit_code": 3,
+      "inputs_unchanged": true,
+      "junit": {
+        "cases": 4,
+        "failures": 2,
+        "skips": 0
+      },
+      "native_axes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 60
+            },
+            "refusal-robustness": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 1,
+              "measurable": true,
+              "n_at_risk": 60
+            }
+          },
+          "name": "clean"
+        }
+      ],
+      "native_exit_code": 3,
+      "native_outcome": "flags_detected",
+      "requirement": {
+        "assumptions_verified": false,
+        "human_labels_authenticated": false,
+        "independent_execution_verified": false,
+        "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+        "native_exit_code": 3,
+        "native_outcome": "flags_detected",
+        "qualification_exit_code": 3,
+        "reasons": [
+          "native_flags_detected"
+        ],
+        "required_conditional_resolution_pp": 40.0,
+        "requirement_met": false,
+        "rows": [
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [],
+                "requirement_met": true
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [],
+                "requirement_met": true
+              }
+            },
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "name": "clean",
+            "native_report_sha256": "83f00cc3708ec64958ffd455abe06d69fdc957afe5c0ff2632816ce8795f2818",
+            "requirement_met": true
+          }
+        ],
+        "scientific_go": false,
+        "scope": "Explicit conditional-resolution requirement on the same held supplied aggregates. Native outcome, flags and evidence remain unchanged; the qualification exit is emitted separately. Every declared target and both axes must have matched report/calibration evidence, a measurable denominator, attainable target power and finite effective MDE no greater than the declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO is established.",
+        "screen_resolution_requirement_schema_version": 1
+      }
+    },
+    "qualified": {
+      "exit_code": 0,
+      "inputs_unchanged": true,
+      "junit": {
+        "cases": 4,
+        "failures": 0,
+        "skips": 0
+      },
+      "native_axes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 60
+            },
+            "refusal-robustness": {
+              "detectable_at_target_power": true,
+              "effective_mde": 0.3737690191664753,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 60
+            }
+          },
+          "name": "clean"
+        }
+      ],
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "requirement": {
+        "assumptions_verified": false,
+        "human_labels_authenticated": false,
+        "independent_execution_verified": false,
+        "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+        "native_exit_code": 0,
+        "native_outcome": "conditional_no_detection",
+        "qualification_exit_code": 0,
+        "reasons": [],
+        "required_conditional_resolution_pp": 40.0,
+        "requirement_met": true,
+        "rows": [
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [],
+                "requirement_met": true
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "measurable": true,
+                "reasons": [],
+                "requirement_met": true
+              }
+            },
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "name": "clean",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "requirement_met": true
+          }
+        ],
+        "scientific_go": false,
+        "scope": "Explicit conditional-resolution requirement on the same held supplied aggregates. Native outcome, flags and evidence remain unchanged; the qualification exit is emitted separately. Every declared target and both axes must have matched report/calibration evidence, a measurable denominator, attainable target power and finite effective MDE no greater than the declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO is established.",
+        "screen_resolution_requirement_schema_version": 1
+      }
+    },
+    "retained_schema3": {
+      "exit_code": 5,
+      "inputs_unchanged": true,
+      "junit": {
+        "cases": 4,
+        "failures": 3,
+        "skips": 0
+      },
+      "native_axes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "detectable_at_target_power": false,
+              "effective_mde": 1.0,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 28
+            },
+            "refusal-robustness": {
+              "detectable_at_target_power": false,
+              "effective_mde": 1.0,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 12
+            }
+          },
+          "name": "clean"
+        }
+      ],
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "requirement": {
+        "assumptions_verified": false,
+        "human_labels_authenticated": false,
+        "independent_execution_verified": false,
+        "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+        "native_exit_code": 0,
+        "native_outcome": "conditional_no_detection",
+        "qualification_exit_code": 5,
+        "reasons": [
+          "target_power_unattainable"
+        ],
+        "required_conditional_resolution_pp": 100.0,
+        "requirement_met": false,
+        "rows": [
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "measurable": true,
+                "reasons": [
+                  "target_power_unattainable"
+                ],
+                "requirement_met": false
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "measurable": true,
+                "reasons": [
+                  "target_power_unattainable"
+                ],
+                "requirement_met": false
+              }
+            },
+            "calibration_sha256": "cc0fc240410a359301682ce2b10ccab24a88d8dfe73e0ca78190fcb16053a2c1",
+            "name": "clean",
+            "native_report_sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d",
+            "requirement_met": false
+          }
+        ],
+        "scientific_go": false,
+        "scope": "Explicit conditional-resolution requirement on the same held supplied aggregates. Native outcome, flags and evidence remain unchanged; the qualification exit is emitted separately. Every declared target and both axes must have matched report/calibration evidence, a measurable denominator, attainable target power and finite effective MDE no greater than the declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO is established.",
+        "screen_resolution_requirement_schema_version": 1
+      }
+    },
+    "saturated": {
+      "exit_code": 5,
+      "inputs_unchanged": true,
+      "junit": {
+        "cases": 4,
+        "failures": 3,
+        "skips": 0
+      },
+      "native_axes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "detectable_at_target_power": false,
+              "effective_mde": 1.0,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 20
+            },
+            "refusal-robustness": {
+              "detectable_at_target_power": false,
+              "effective_mde": 1.0,
+              "flagged_flips": 0,
+              "measurable": true,
+              "n_at_risk": 20
+            }
+          },
+          "name": "clean"
+        }
+      ],
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "requirement": {
+        "assumptions_verified": false,
+        "human_labels_authenticated": false,
+        "independent_execution_verified": false,
+        "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+        "native_exit_code": 0,
+        "native_outcome": "conditional_no_detection",
+        "qualification_exit_code": 5,
+        "reasons": [
+          "target_power_unattainable"
+        ],
+        "required_conditional_resolution_pp": 100.0,
+        "requirement_met": false,
+        "rows": [
+          {
+            "axes": {
+              "over-refusal": {
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "measurable": true,
+                "reasons": [
+                  "target_power_unattainable"
+                ],
+                "requirement_met": false
+              },
+              "refusal-robustness": {
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "measurable": true,
+                "reasons": [
+                  "target_power_unattainable"
+                ],
+                "requirement_met": false
+              }
+            },
+            "calibration_sha256": "7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea",
+            "name": "clean",
+            "native_report_sha256": "0e072f5bf1e6cdab05f58b9512e220c8b4f761e0dcc6754ebac56ce593ae87c5",
+            "requirement_met": false
+          }
+        ],
+        "scientific_go": false,
+        "scope": "Explicit conditional-resolution requirement on the same held supplied aggregates. Native outcome, flags and evidence remain unchanged; the qualification exit is emitted separately. Every declared target and both axes must have matched report/calibration evidence, a measurable denominator, attainable target power and finite effective MDE no greater than the declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO is established.",
+        "screen_resolution_requirement_schema_version": 1
+      }
+    }
+  },
+  "human_labels_authenticated": false,
+  "independent_execution_verified": false,
+  "kind": "quantfit.screen-conditional-resolution-requirement-functional-acceptance",
+  "original_sheet_unavailable_for_retained": true,
+  "retained_calibration_schema": 3,
+  "scientific_go": false,
+  "synthetic": true
+}

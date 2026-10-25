@@ -296,7 +296,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     psaved = sub.add_parser(
         "screen-summary",
-        help="offline saved native screen aggregates (0 conditional no-detection, 3 flags, 4 incomplete, 2 refusal)",
+        help="offline native screen (0 conditional no-detection, 3 flags, 4 incomplete, 5 unmet resolution requirement, 2 refusal)",
     )
     psaved.add_argument("--targets", required=True, metavar="PATH", help="bounded schema-1 target manifest")
     psaved.add_argument("--reports-dir", required=True, metavar="DIR", help="closed saved aggregate directory")
@@ -307,6 +307,13 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="DIR",
         help="optional closed aggregate calibration directory; conditional resolution does not change native verdicts",
+    )
+    psaved.add_argument(
+        "--require-conditional-resolution",
+        type=float,
+        default=None,
+        metavar="PP",
+        help="opt-in finite (0,100] pp ceiling on both native conditional axes for every target; requires --calibrations-dir",
     )
     pcompare = sub.add_parser(
         "screen-compare",
@@ -699,9 +706,15 @@ def _dispatch(args: argparse.Namespace) -> int:
         options = {"out_path": args.out, "junit_path": args.junit}
         if args.calibrations_dir is not None:
             options["calibrations_dir"] = args.calibrations_dir
+        if args.require_conditional_resolution is not None:
+            options["required_conditional_resolution_pp"] = args.require_conditional_resolution
         result = summarize_screen(args.targets, args.reports_dir, **options)
 
         def human_screen_summary():
+            if "conditional_resolution_requirement" in result:
+                from quantfit.screen_requirement import print_requirement
+
+                print_requirement(result["conditional_resolution_requirement"])
             print(result["outcome"])
             if "conditional_resolution" in result:
                 coverage = result["conditional_resolution"]["coverage"]
