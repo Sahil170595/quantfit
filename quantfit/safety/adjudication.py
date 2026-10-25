@@ -96,8 +96,9 @@ def _protected(pair: int, axis: str, first: dict[str, Any], second: dict[str, An
 def _queue(originals: _Originals) -> bytes:
     stream = io.StringIO(newline="")
     writer = csv.writer(stream, lineterminator="\n")
-    writer.writerow(COLUMNS)
     field_limit = csv.field_size_limit()
+    _require(all(len(cell) <= field_limit for cell in COLUMNS))
+    writer.writerow(COLUMNS)
     for pair, (axis, first, second) in originals.selected.items():
         row = [*_protected(pair, axis, first, second), "", "", ""]
         _require(all(len(cell) <= field_limit for cell in row))

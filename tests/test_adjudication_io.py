@@ -7,6 +7,26 @@ import json
 import pytest
 
 
+def test_zero_selection_header_must_fit_native_csv_field_domain(tmp_path):
+    import csv
+
+    from test_adjudication import fixture
+
+    from quantfit.adjudication_record import AdjudicationError
+    from quantfit.safety.adjudication import prepare_adjudication
+
+    report, capture = fixture(tmp_path / "private", "zero")
+    queue, receipt = tmp_path / "review.adjudication.csv", tmp_path / "private.adjudication-preparation.json"
+    original = csv.field_size_limit()
+    try:
+        csv.field_size_limit(1)
+        with pytest.raises(AdjudicationError, match="^invalid_adjudication$"):
+            prepare_adjudication(str(report), str(capture), review_path=str(queue), receipt_path=str(receipt))
+    finally:
+        csv.field_size_limit(original)
+    assert not queue.exists() and not receipt.exists()
+
+
 @pytest.mark.parametrize("extra", [0, 1])
 def test_prepare_refuses_completion_beyond_native_csv_field_domain(tmp_path, extra):
     import csv
