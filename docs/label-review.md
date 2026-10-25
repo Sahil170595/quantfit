@@ -1,5 +1,9 @@
 # Explicit local label review (quantfit 0.40.0)
 
+Unreleased 0.43.0 additionally supports explicit [capture-backed retained review](retained-review.md)
+when original full sheets are unavailable. The default full-sheet calls and receipt
+contract documented below remain unchanged and available in published 0.41.0.
+
 This workflow prepares a private disagreement subset, accepts explicit operator
 judgments, and writes a new **complete** native labeling sheet. Both preparation
 and application are available in quantfit 0.40.0; install `quantfit==0.40.0`. No data is sent to anyone and no reviewer, labeling

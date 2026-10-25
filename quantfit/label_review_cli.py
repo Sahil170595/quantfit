@@ -7,12 +7,28 @@ from collections.abc import Callable
 from typing import Any
 
 from quantfit.safety.label_review import apply_label_review, prepare_label_review
+from quantfit.safety.retained_review import apply_retained_label_review, prepare_retained_label_review
 
 Emit = Callable[[argparse.Namespace, str, int, dict[str, Any], Callable[[], None]], int]
 
 
 def dispatch_review(args: argparse.Namespace, emit: Emit) -> int:
-    if args.review_cmd == "prepare":
+    if args.input_mode == "retained":
+        paths = (
+            args.capture,
+            args.key,
+            args.retained_labels_a,
+            args.retention_receipt_a,
+            args.retained_labels_b,
+            args.retention_receipt_b,
+        )
+        if args.review_cmd == "prepare":
+            result = prepare_retained_label_review(*paths, review_path=args.sheet, receipt_path=args.receipt)
+        else:
+            result = apply_retained_label_review(
+                *paths, args.review, args.preparation, out_path=args.out, receipt_path=args.receipt
+            )
+    elif args.review_cmd == "prepare":
         result = prepare_label_review(
             args.sheet_a, args.sheet_b, args.key, review_path=args.sheet, receipt_path=args.receipt
         )

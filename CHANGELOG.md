@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.43.0 — unreleased
+
+- Add explicit capture-backed retained mode to both `calibrate review prepare` and `calibrate review apply`, with complete CLI/API workflows after the original filled sheets are unavailable. Verify the actual shared capture/key and both own retained receipts once, preserve every inequality including unusable, and native-validate a NEW full sheet before publication.
+- Preserve default full-sheet review calls/receipts, original-sheet hashes as declarations, unusable/native arithmetic, dependencies and separate truthful extract/schema-3 ingestion. No human authentication, new statistics, automatic labeling/sharing or scientific GO. Regenerable fictional evidence: `validation/2026-10-25-retained-review/`.
+
 ## 0.42.0 — unreleased
 
 - Add complete `calibrate chunks prepare` and `calibrate chunks collect`: bounded private partitions of a complete blank native template, exact regenerated preparation bindings, explicit returned labels and a new complete native sheet. Original native ingest remains separate and unchanged.

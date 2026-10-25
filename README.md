@@ -45,10 +45,12 @@ This README documents [quantfit 0.41.0](https://github.com/Sahil170595/quantfit/
 
 Install with `pip install "quantfit[inspect,gguf]==0.41.0"`.
 
-Unreleased source 0.42.0 adds the complete [annotation chunk prepare/collect
-workflow](docs/annotation-chunks.md), with private source-bound partitions and
-separate unchanged native ingestion. It requires a source checkout or candidate
-wheel; it is not included in the published installation above.
+Unreleased source 0.43.0 includes 0.42's complete [annotation chunk prepare/collect
+workflow](docs/annotation-chunks.md) and adds [capture-backed review from retained
+labels](docs/retained-review.md). Review can rebuild a complete new native sheet
+without either original filled sheet, by verifying the actual capture, shared key
+and both exact retained-label receipts. Both additions require a source checkout
+or candidate wheel; they are not included in the published installation above.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).

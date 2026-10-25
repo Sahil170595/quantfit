@@ -430,6 +430,13 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+### Capture-backed retained review source candidate (2026-10-25, unreleased 0.43.0)
+
+| Flag | Command | What is exercised | Evidence / limits |
+|---|---|---|---|
+| `--input-mode` | calibrate review prepare / apply | Explicit retained mode verifies held capture/key and both own retained receipts; default full-sheet calls/output remain unchanged. Mixed or missing roles refuse. | `tests/test_retained_review_cli.py`; `tests/test_label_review_cli.py`; `docs/retained-review.md`; final-head hosted qualification pending |
+| `--capture` / `--retained-labels-a` / `--retention-receipt-a` / `--retained-labels-b` / `--retention-receipt-b` | calibrate review prepare / apply | All six originals held once; actual capture scope/complete rows/judge flags/text digests and both role-specific receipts. Original-sheet digests are declarations only; complete inequality queue and native-validated new full output, followed by separate truthful extract/schema3. | `tests/test_retained_review.py`; `tests/test_ci_retained_review.py`; `validation/2026-10-25-retained-review/`; no human/source authentication or GO |
+
 ### Annotation chunks source candidate (2026-10-25, unreleased 0.42.0)
 
 | Flag | Command | Scope validated | Evidence |
