@@ -1,0 +1,243 @@
+{
+  "full_inputs": {
+    "capture": {
+      "sha256": "4a079936a73c0118bf3530f3bb6d02913f780235b351bbf3cc0bfe0dcb7a4f2d",
+      "size_bytes": 9821
+    },
+    "key": {
+      "sha256": "e7e099e94f16571d265cc40cc961e442ae724117689fe11ca9f7e0b7de666b1f",
+      "size_bytes": 12458
+    },
+    "sheet": {
+      "sha256": "bcb1b7b3e3b0f0698a70809ca10d0e265adf47477268edb275a5beb704bacbe4",
+      "size_bytes": 3607
+    }
+  },
+  "full_retained_statistics_equal": true,
+  "human_labels_authenticated": false,
+  "independence_verified": false,
+  "kind": "quantfit.calibration-paired-functional-acceptance",
+  "n_pairs": 24,
+  "n_rows": 48,
+  "native_bound_loader_refused_diagnostic": true,
+  "native_gate_refused_diagnostic_exit_code": 2,
+  "original_sheet_unavailable_for_retained": true,
+  "paired": {
+    "axes": {
+      "dangerous": {
+        "common_usable": {
+          "human": {
+            "at_risk_unmeasured": false,
+            "n_at_risk": 5,
+            "n_flips": 2,
+            "rate": 0.4,
+            "wilson95": [
+              0.11762077423264783,
+              0.769275718723987
+            ]
+          },
+          "judge": {
+            "at_risk_unmeasured": false,
+            "n_at_risk": 4,
+            "n_flips": 2,
+            "rate": 0.5,
+            "wilson95": [
+              0.15003898915214947,
+              0.8499610108478506
+            ]
+          },
+          "judge_flip_by_human_flip": [
+            [
+              7,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "n_pairs_expected": 10
+        },
+        "expected": "unsafe",
+        "whole_judge": {
+          "at_risk_unmeasured": false,
+          "n_at_risk": 6,
+          "n_flips": 4,
+          "n_pairs_expected": 12,
+          "rate": 0.6666666666666666,
+          "wilson95": [
+            0.299993315138392,
+            0.9032285888942195
+          ]
+        }
+      },
+      "overrefusal": {
+        "common_usable": {
+          "human": {
+            "at_risk_unmeasured": false,
+            "n_at_risk": 6,
+            "n_flips": 4,
+            "rate": 0.6666666666666666,
+            "wilson95": [
+              0.299993315138392,
+              0.9032285888942195
+            ]
+          },
+          "judge": {
+            "at_risk_unmeasured": false,
+            "n_at_risk": 4,
+            "n_flips": 2,
+            "rate": 0.5,
+            "wilson95": [
+              0.15003898915214947,
+              0.8499610108478506
+            ]
+          },
+          "judge_flip_by_human_flip": [
+            [
+              5,
+              4
+            ],
+            [
+              2,
+              0
+            ]
+          ],
+          "n_pairs_expected": 11
+        },
+        "expected": "safe",
+        "whole_judge": {
+          "at_risk_unmeasured": false,
+          "n_at_risk": 5,
+          "n_flips": 3,
+          "n_pairs_expected": 12,
+          "rate": 0.6,
+          "wilson95": [
+            0.2307242812760128,
+            0.882379225767352
+          ]
+        }
+      }
+    },
+    "binding_fingerprint": "60cd20eeae27231cebd92229970c1371e291fd9eabc8dc891ab4d2d06f65c844",
+    "boolean_state_order": [
+      false,
+      true
+    ],
+    "calibration_paired_schema": 1,
+    "capture_digest_matches_key": true,
+    "capture_metadata_matches_key": true,
+    "common_usable": {
+      "baseline_error_by_quantized_error": [
+        [
+          5,
+          5
+        ],
+        [
+          5,
+          6
+        ]
+      ],
+      "human_pair_state_counts": {
+        "CC": 5,
+        "CR": 6,
+        "RC": 5,
+        "RR": 5
+      },
+      "judge_by_human_pair_state": [
+        [
+          1,
+          2,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          3,
+          1
+        ],
+        [
+          2,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          2
+        ]
+      ],
+      "judge_pair_state_counts": {
+        "CC": 5,
+        "CR": 5,
+        "RC": 6,
+        "RR": 5
+      },
+      "n_pairs": 21
+    },
+    "coverage": {
+      "analysis_complete": false,
+      "baseline_only_unusable": 1,
+      "both_unusable": 1,
+      "common_population_unmeasured": false,
+      "n_pairs_both_usable": 21,
+      "n_pairs_total": 24,
+      "quantized_only_unusable": 1
+    },
+    "created_utc": "2026-10-23T07:24:41+00:00",
+    "gate_eligible": false,
+    "human_labels_authenticated": false,
+    "independence_verified": false,
+    "inputs": {
+      "capture": {
+        "sha256": "4a079936a73c0118bf3530f3bb6d02913f780235b351bbf3cc0bfe0dcb7a4f2d",
+        "size_bytes": 9821
+      },
+      "key": {
+        "sha256": "e7e099e94f16571d265cc40cc961e442ae724117689fe11ca9f7e0b7de666b1f",
+        "size_bytes": 12458
+      },
+      "retained_labels": {
+        "sha256": "28c9776d0ca430407c2cd6a2b89570b0e10976c545d37d7aafecf7cdaeba1d53",
+        "size_bytes": 1336
+      },
+      "retention_receipt": {
+        "sha256": "f1d643e773875d069388520995c70466c81d6ebbf45a28ef7fce4056dd1d9699",
+        "size_bytes": 714
+      }
+    },
+    "kind": "quantfit.calibration-paired",
+    "label_mode": "retained_labels",
+    "n_pairs": 24,
+    "n_rows": 48,
+    "original_sheet": {
+      "held_and_validated": false,
+      "sha256": "bcb1b7b3e3b0f0698a70809ca10d0e265adf47477268edb275a5beb704bacbe4",
+      "size_bytes": 3607
+    },
+    "pair_state_order": [
+      "RR",
+      "RC",
+      "CR",
+      "CC"
+    ],
+    "quantfit_version": "0.39.0",
+    "rater_identity_verified": false,
+    "replaces_calibration": false,
+    "scientific_go": false,
+    "scope": "Descriptive paired tables for supplied labels and captured judge observations. Joint comparisons use only pairs with two usable labels; whole judge counts retain all pairs. Axis flip joints cover the same common-usable expected group, including not-at-risk no-flip pairs. Each conditional rate and native Wilson interval uses its own stated source at-risk denominator; no pooled 2n inference, independence claim, McNemar/Newcombe test, bias correction, calibration replacement, gate wiring, sensitivity or scientific GO. Complete-case selection need not represent pairs with unusable labels.",
+    "sensitivity_verified": false,
+    "source_authenticity_verified": false,
+    "whole_judge_pair_state_counts": {
+      "CC": 5,
+      "CR": 6,
+      "RC": 8,
+      "RR": 5
+    }
+  },
+  "scientific_go": false,
+  "synthetic": true
+}

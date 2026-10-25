@@ -358,6 +358,13 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Evidence** | `validation/2026-10-23-retained-labels/`; `tests/test_retained_labels.py`; `tests/test_retained_labels_cli.py`; `tests/test_ci_retained_labels.py`. Existing installed wheel/sdist acceptance includes the native consumer; exact-head hosted qualification is pending on the candidate PR. |
 | **Not established** | Human truth, rater authentication, independent labeling/execution, sensitivity or scientific GO. The private CSV/key are not published; the native calibration file retains declared scope, including any supplied local model identifiers. |
 
+### Unreleased 0.39.0 candidate: paired calibration diagnostics (2026-10-23)
+
+| | |
+|---|---|
+| **Functional source evidence** | Actual native 24-pair capture/key/sheet → `calibrate paired` → extraction → owned original-sheet removal → retained paired diagnostics. All 16 judge/label cells are nonzero with asymmetric counts; 21 common-usable pairs remain separate from three unusable-coverage cases and whole-judge counts. Distinct expected-group/source-at-risk denominators and asymmetric/correlation controls are checked. |
+| **Evidence and limits** | `tests/test_calibration_paired.py`; `tests/test_calibration_paired_cli.py`; `tests/test_ci_calibration_paired.py`; `validation/2026-10-23-calibration-paired/`. Native loader and actual gate refuse replacement calibration. No independence test, bias correction, source authentication, sensitivity or GO; exact-head hosted installed qualification is separate and pending. |
+
 ### Unreleased 0.38.0 candidate: descriptive calibration strata (2026-10-23)
 
 | | |
@@ -407,6 +414,12 @@ cross-release runs have been compared; the 0.5 screen has not run).
 ---
 
 ## 3. Major flags
+
+### Calibration paired candidate (2026-10-23, unreleased 0.39.0)
+
+| Flag | Command | Scope validated | Evidence |
+|---|---|---|---|
+| `--capture` / `--key` / `--sheet` / `--retained-labels` / `--retention-receipt` / `--out` / `--json` | calibrate paired | Unchanged held admission; complete pairs, fixed judge-row/human-column tables and baseline-row/quantized-column error tables on two usable labels; whole judge counts and per-source at-risk denominators remain separate. Empty/all-unusable groups complete descriptively. | `tests/test_calibration_paired.py`; `tests/test_calibration_paired_cli.py`; `tests/test_ci_calibration_paired.py`; `validation/2026-10-23-calibration-paired/`; final-head installed qualification pending |
 
 ### Calibration strata candidate (2026-10-23, unreleased 0.38.0)
 

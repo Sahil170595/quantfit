@@ -805,6 +805,7 @@ def main() -> None:
             "test_ci_label_reconciliation.py",
             "test_ci_retained_labels.py",
             "test_ci_calibration_strata.py",
+            "test_ci_calibration_paired.py",
             "test_repeatability.py",
             "test_evidence_fetch.py",
             "test_verify.py",

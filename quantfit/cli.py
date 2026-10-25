@@ -380,6 +380,23 @@ def _build_parser() -> argparse.ArgumentParser:
     pct.add_argument(
         "--out", required=True, metavar="PATH", help="new aggregate diagnostics JSON; never replacement calibration"
     )
+    pcp = csub.add_parser("paired", help="descriptive paired judge/label and axis-flip tables (0 completed, 2 invalid)")
+    pcp.add_argument("--capture", required=True, metavar="PATH", help="exact original private capture")
+    pcp.add_argument("--key", required=True, metavar="PATH", help="matching private v2 unblinding key")
+    paired_mode = pcp.add_mutually_exclusive_group(required=True)
+    paired_mode.add_argument("--sheet", metavar="PATH", help="original filled three-column labeling sheet")
+    paired_mode.add_argument(
+        "--retained-labels", metavar="PATH", help="private two-column retained CSV; requires receipt"
+    )
+    pcp.add_argument(
+        "--retention-receipt", metavar="PATH", help="exact extraction receipt; required exactly with retained labels"
+    )
+    pcp.add_argument(
+        "--out",
+        required=True,
+        metavar="PATH",
+        help="new aggregate paired diagnostics JSON; never replacement calibration",
+    )
     pcr = csub.add_parser("reconcile", help="two filled sheets + one key -> aggregate label-disagreement counts")
     pcr.add_argument("--sheet-a", required=True, metavar="PATH", help="first private filled labeling sheet")
     pcr.add_argument("--sheet-b", required=True, metavar="PATH", help="second private filled labeling sheet")
@@ -1296,6 +1313,10 @@ def _dispatch(args: argparse.Namespace) -> int:
             from quantfit.calibration_strata_cli import dispatch_strata
 
             return dispatch_strata(args, _emit)
+        if args.calibrate_cmd == "paired":
+            from quantfit.calibration_paired_cli import dispatch_paired
+
+            return dispatch_paired(args, _emit)
         if args.calibrate_cmd == "extract" or (args.calibrate_cmd == "ingest" and args.retained_labels is not None):
             from quantfit.retained_labels_cli import dispatch_retained
 
@@ -1580,7 +1601,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if (
         args.cmd == "calibrate"
-        and args.calibrate_cmd in {"ingest", "strata"}
+        and args.calibrate_cmd in {"ingest", "strata", "paired"}
         and (args.retained_labels is not None) != (args.retention_receipt is not None)
     ):
         parser.error("--retention-receipt is required exactly with --retained-labels")
