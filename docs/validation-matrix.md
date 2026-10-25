@@ -430,6 +430,12 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+### Calibration-choice source candidate (2026-10-25, unreleased 0.45.0)
+
+| Flag | Command | What is exercised | Evidence / limits |
+|---|---|---|---|
+| `--calibration-variant` / `--require-conditional-resolution` | screen-summary | Explicit named mode, one held native population, ALL-root global 64MiB inventory/actual bytes and combined n² work before conditional math. Every target×choice, pending/missing/unattainable rows, attainable envelopes/copies, frozen native3/4 priority; N+2NK+1 JUnit with no-ceiling skipped additions. | `tests/test_calibration_choices.py`; `tests/test_ci_calibration_choices.py`; `validation/2026-10-25-calibration-choices/`; no pooling/rater independence/GO; current-head hosted pending |
+
 ### Finite resolution budget source candidate (2026-10-25, unreleased 0.44.0)
 
 | Flag | Command | What is exercised | Evidence / limits |

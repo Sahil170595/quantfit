@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.45.0 — unreleased
+
+- Add named calibration-choice sensitivity to native `screen-summary`: one held original population and native summary, complete all-choice admission under combined byte/work budgets, actual per-choice native analysis, attainable-value envelopes and explicit digest-copy groups.
+- Preserve missing/unattainable rows and original native outcomes; reuse the native per-axis criterion for an explicit all-choice ceiling with existing 3/4 priority. JUnit keeps native cases first and adds every choice/axis plus one overall; without a ceiling the additions are skipped. No pooling, best-rater selection, independent raters or scientific GO. Fictional complete CLI/API/JSON/JUnit evidence: `validation/2026-10-25-calibration-choices/`.
+
 ## 0.44.0 — unreleased
 
 - Add opt-in finite unit-grid budgeting to the existing `resolution` CLI/API. Preserve the held original report/calibration and actual axes, admit conservative complete actual-plus-planned work before native math, and reuse native exact thresholds/power/MDE for one hypothetical global-bound curve.

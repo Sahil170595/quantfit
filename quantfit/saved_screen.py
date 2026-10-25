@@ -416,9 +416,22 @@ def summarize_screen(
     out_path: str | None = None,
     junit_path: str | None = None,
     calibrations_dir: str | None = None,
+    calibration_variants: dict[str, str | None] | None = None,
     required_conditional_resolution_pp: float | None = None,
 ) -> dict[str, object]:
     """Hold once; annotate native resolution, or explicitly require its declared ceiling."""
+    if calibration_variants is not None:
+        from quantfit.calibration_choices import summarize_screen_with_variants
+
+        _require(calibrations_dir is None, "mutually_exclusive_calibration_modes")
+        return summarize_screen_with_variants(
+            manifest_path,
+            reports_dir,
+            calibration_variants=calibration_variants,
+            out_path=out_path,
+            junit_path=junit_path,
+            required_conditional_resolution_pp=required_conditional_resolution_pp,
+        )
     if required_conditional_resolution_pp is not None:
         from quantfit.screen_requirement import validate_requirement
 

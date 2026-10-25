@@ -28,6 +28,39 @@ def validate_requirement(value: float | None) -> float | None:
     return float(value)
 
 
+def _check_axis(
+    observed: dict[str, Any] | None, report_present: bool, calibration_present: bool, ceiling: float
+) -> dict[str, Any]:
+    """Pure criterion shared by legacy single and named-choice receiving modes."""
+    reasons = []
+    if not report_present:
+        reasons.append("report_missing")
+    if not calibration_present:
+        reasons.append("calibration_missing")
+    effective_pp = None
+    if observed is not None:
+        if observed["measurable"] is not True:
+            reasons.append("axis_unmeasurable")
+        if observed["detectable_at_target_power"] is not True:
+            reasons.append("target_power_unattainable")
+        effective = observed["resolution"]["effective_mde"]
+        if type(effective) not in (int, float) or not 0 <= effective <= 1 or not math.isfinite(effective):
+            reasons.append("resolution_unavailable")
+        else:
+            effective_pp = effective * 100
+            if effective_pp > ceiling:
+                reasons.append("resolution_exceeds_requirement")
+    elif report_present and calibration_present:
+        reasons.append("analysis_unavailable")
+    return {
+        "requirement_met": not reasons,
+        "measurable": observed["measurable"] if observed is not None else None,
+        "detectable_at_target_power": observed["detectable_at_target_power"] if observed is not None else None,
+        "effective_mde_pp": effective_pp,
+        "reasons": reasons,
+    }
+
+
 def qualify_screen(result: dict[str, Any], ceiling: float) -> None:
     """Append criteria using exactly the already-computed, ordered native analyses."""
     native_exit = result["exit_code"]
@@ -38,37 +71,13 @@ def qualify_screen(result: dict[str, Any], ceiling: float) -> None:
     for row in result["conditional_resolution"]["rows"]:
         axes = {}
         for name in AXES:
-            reasons = []
-            report_present = row["native_report_sha256"] is not None
-            calibration_present = row["calibration"]["status"] == "present"
-            if not report_present:
-                reasons.append("report_missing")
-            if not calibration_present:
-                reasons.append("calibration_missing")
-            observed = row["analysis"]["axes"][name] if row["analysis"] is not None else None
-            effective_pp = None
-            if observed is not None:
-                if observed["measurable"] is not True:
-                    reasons.append("axis_unmeasurable")
-                if observed["detectable_at_target_power"] is not True:
-                    reasons.append("target_power_unattainable")
-                effective = observed["resolution"]["effective_mde"]
-                if type(effective) not in (int, float) or not 0 <= effective <= 1 or not math.isfinite(effective):
-                    reasons.append("resolution_unavailable")
-                else:
-                    effective_pp = effective * 100
-                    if effective_pp > ceiling:
-                        reasons.append("resolution_exceeds_requirement")
-            elif report_present and calibration_present:
-                reasons.append("analysis_unavailable")
-            axes[name] = {
-                "requirement_met": not reasons,
-                "measurable": observed["measurable"] if observed is not None else None,
-                "detectable_at_target_power": observed["detectable_at_target_power"] if observed is not None else None,
-                "effective_mde_pp": effective_pp,
-                "reasons": reasons,
-            }
-            all_reasons.extend(reasons)
+            axes[name] = _check_axis(
+                row["analysis"]["axes"][name] if row["analysis"] is not None else None,
+                row["native_report_sha256"] is not None,
+                row["calibration"]["status"] == "present",
+                ceiling,
+            )
+            all_reasons.extend(axes[name]["reasons"])
         rows.append(
             {
                 "name": row["name"],

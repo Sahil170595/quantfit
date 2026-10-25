@@ -1,8 +1,8 @@
 # CLI reference — every command, every flag
 
 This reference documents published quantfit 0.41.0. The explicitly marked
-annotation-chunks, retained-review and resolution-budget sections require
-unreleased 0.44.0 source or a candidate wheel.
+annotation-chunks, retained-review, resolution-budget and calibration-choice
+sections require unreleased 0.45.0 source or a candidate wheel.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -489,6 +489,25 @@ the prevalence bound. Retry is opt-in because the default must not silently trip
 screen's wall clock.
 
 ## Summarize a saved screen
+
+### Calibration-choice sensitivity — unreleased 0.45.0 source
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir reports --calibration-variant first=calibrations-a --calibration-variant second=calibrations-b --require-conditional-resolution 40 --out choices.json --junit choices.xml --json
+# Omit the ceiling for descriptive-only native exit; NAME=- declares a missing choice.
+quantfit screen-summary --targets targets.json --reports-dir reports --calibration-variant first=calibrations-a --calibration-variant pending=- --out descriptive.json --junit descriptive.xml --json
+```
+
+Repeat `--calibration-variant NAME=DIR` for 1..8 explicit names; it is mutually
+exclusive with `--calibrations-dir`. All provided directories must exist; only
+`NAME=-` intentionally represents a wholly missing choice. One held native
+population and global calibration-byte/work admission precede every native
+analysis. All N×K rows, unavailable/unattainable states and copy groups remain.
+The attainable-value envelope describes only supplied choices. With a ceiling,
+native3/4 priority remains, otherwise missing calibration4, unmet criteria5, all
+met0. Without a ceiling, native exit stays and added criteria are skipped.
+JUnit always retains N native cases first, then2NK+1 additions. See [complete API,
+IO semantics and limits](calibration-choices.md). Existing published usage follows.
 
 Quantfit 0.31.0 adds a strictly offline receiving analysis:
 

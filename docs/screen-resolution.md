@@ -1,5 +1,9 @@
 # Conditional saved-screen resolution — 0.35.0
 
+Unreleased 0.45.0 adds [named calibration-choice sensitivity](calibration-choices.md)
+as a mutually exclusive input mode. The published single-calibration workflow
+below and its JSON/JUnit behavior stay unchanged.
+
 Available since quantfit 0.35.0. Native saved-screen summaries retain their existing
 behavior when the optional calibration directory is omitted.
 
