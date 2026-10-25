@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.36.0. All workflows below are available in this version.
+This reference documents quantfit 0.40.0. All workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -597,6 +597,57 @@ published. Exit 0 includes disagreement/all-unusable results and establishes no
 rater authentication, independence or consensus calibration; invalid/unsafe input
 or publication exits 2. Operational JSON errors retain the existing `calibrate`
 parent-command envelope. See [Label reconciliation](label-reconciliation.md).
+
+Quantfit 0.37.0 adds completion-free retained labeling:
+
+```bash
+quantfit calibrate extract --sheet labels.labels.csv --key labels.labelkey.json --out retained.labels.csv --receipt retention.json --json
+quantfit calibrate ingest --retained-labels retained.labels.csv --retention-receipt retention.json --key labels.labelkey.json --out calibration.json --json
+```
+
+The retained CSV/key remain private. Extraction validates the full sheet and writes
+new retained-label and receipt paths; ingestion can then run without the original
+sheet. Neither command deletes source material or authenticates label truth. See
+[the retained-label contract](retained-labels.md).
+
+Quantfit 0.38.0 adds descriptive strata diagnostics, and 0.39.0 adds paired diagnostics:
+
+```bash
+quantfit calibrate strata --capture run.capture.jsonl --key labels.labelkey.json --sheet labels.labels.csv --out strata.json --json
+quantfit calibrate paired --capture run.capture.jsonl --key labels.labelkey.json --sheet labels.labels.csv --out paired.json --json
+```
+
+Both require the original capture and a complete key. Each accepts either the full
+sheet or the explicit retained-label/receipt mode, with a new output path. Strata
+retain per-group, per-arm usable denominators. Paired tables preserve whole-judge
+and common-usable populations, unusable coverage and source-specific at-risk
+denominators. Exit 0 means the descriptive analysis completed, including empty or
+unusable groups; invalid input or publication exits 2. Neither diagnostic is a
+replacement calibration or gate, and neither establishes independence, sensitivity
+or scientific GO. See [strata](calibration-strata.md) and [paired](calibration-paired.md)
+for the API, bounds and proof limits.
+
+Quantfit 0.40.0 adds explicit local review of disagreements between two complete sheets:
+
+```bash
+quantfit calibrate review prepare --sheet-a a.labels.csv --sheet-b b.labels.csv --key private.labelkey.json --sheet private.review.labels.csv --receipt review.json --json
+# Locally fill EVERY selected row with refusal, compliance, or unusable.
+quantfit calibrate review apply --sheet-a a.labels.csv --sheet-b b.labels.csv --key private.labelkey.json --review private.review.labels.csv --preparation review.json --out reviewed.labels.csv --receipt application.json --json
+# Ingestion is a separate explicit operation.
+quantfit calibrate ingest --sheet reviewed.labels.csv --key private.labelkey.json --out calibration.json --json
+```
+
+Prepare validates both complete sheets against their shared key and queues every
+unequal normalized label. Apply requires the exact selected subset, unchanged
+completion text and explicit labels; agreed rows are preserved in the new complete
+sheet. Both commands keep originals intact and require new output/receipt paths.
+Queues, sheets and keys stay private. Receipts expose fixed aggregates and byte
+bindings. These commands do not read the capture: its digest/scope remain key
+declarations. Exit 0 means the transformation completed; invalid input or publication
+exits 2. Native ingestion still refuses an entirely unusable measurement. Review
+counts establish no label truth, independent adjudication, authentic blinding,
+improved accuracy or scientific GO. See [the review contract](label-review.md) for
+API, bounds and publication limits.
 
 ## Analyze an existing run's resolution
 

@@ -1,7 +1,6 @@
 # Retained labels and native calibration
 
-Status: **unreleased 0.37.0 source candidate**. Published installation remains
-`quantfit==0.36.0`; these new commands require the candidate source. Use Python
+Status: **released in quantfit 0.37.0**. Install `quantfit==0.37.0`. Use Python
 3.12 for the complete runtime actually qualified by hosted CI; its locked runtime
 requires 3.11+, while source/unit support includes Python 3.10.
 
