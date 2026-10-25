@@ -60,6 +60,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
+from packaging.requirements import Requirement
 
 try:  # stdlib on 3.11+
     import tomllib
@@ -79,9 +80,9 @@ _PKG = _ROOT / "quantfit"
 
 
 # --------------------------------------------------------------------------------------
-# Requirement parsing. Deliberately minimal: this repo's requirement strings are plain
-# `name>=x[,<y]` with no markers, extras or URLs, and a parser that quietly accepted more
-# than that could quietly mis-read a bound.
+# Requirement parsing. Inspect every declared branch's version bounds, including
+# mutually exclusive Python markers. Marker evaluation belongs to the resolver;
+# policy coverage must not omit an inactive branch.
 # --------------------------------------------------------------------------------------
 
 _REQ_RE = re.compile(
@@ -294,12 +295,14 @@ _EXEMPTIONS: dict[str, _Exemption] = {
         kind="BUILD_BACKEND",
         reason=(
             "Build-time only: the PEP 517 frontend resolves [build-system].requires into a throwaway isolated "
-            "environment and it is never installed alongside quantfit at runtime, so a break cannot reach a "
-            "user who already has a wheel. It also cannot rot unnoticed, which is the actual premise: this "
+            "environment. This exemption applies to the build requirement only; the separately declared "
+            "runtime requirement is bounded at >=84.1.0,<85 because Torch otherwise admits an affected release. "
+            "The build backend also cannot rot unnoticed, which is the actual premise: this "
             "repo builds a wheel from the same pyproject on every push and on the weekly canary, on both ubuntu "
             "and windows, so a setuptools release that breaks the build fails distribution acceptance and "
             "quickstart-install first — asserted by test_build_backend_exemptions_rest_on_a_wheel_build_in_ci. "
-            "The >=77 floor is a real claim (PEP 639 license expressions, which this project's metadata uses); "
+            "The >=84.1.0 floor excludes the disclosed namespace_packages path-escape advisory and includes "
+            "PEP 639 license expressions, which this project's metadata uses; "
             "the open upper end says only that no known setuptools release breaks this build."
         ),
     ),
@@ -775,25 +778,58 @@ def test_build_backend_exemptions_rest_on_a_wheel_build_in_ci():
     )
 
 
-def test_a_dependency_declared_twice_carries_the_same_specifier():
-    """`gguf` is declared in two extras. Two copies of a bound is two places for it to drift.
-
-    Accumulated per OCCURRENCE, not per group. Keying by group made two divergent copies
-    inside the SAME group (`dev = ["gguf>=0.10,<1.0", "gguf>=0.9"]`) overwrite each other and
-    vanish — the exact drift this test exists to catch, silently swallowed by its own index.
-    """
-    seen: dict[str, list[tuple[str, str]]] = {}
-    for group, req in _all_requirements():
-        seen.setdefault(req.name, []).append((_location(group), req.raw))
-    divergent = {
+def _divergent_active_bounds(requirements, python_version: str) -> dict:
+    seen: dict[tuple[str, str], list[tuple[str, str]]] = {}
+    environment = {"python_version": python_version, "python_full_version": f"{python_version}.0"}
+    for group, req in requirements:
+        parsed = Requirement(req.raw)
+        if parsed.marker is not None and not parsed.marker.evaluate(environment=environment):
+            continue
+        domain = "build" if group == _BUILD_SYSTEM_GROUP else "runtime"
+        seen.setdefault((domain, req.name), []).append((_location(group), req.raw))
+    return {
         name: occurrences
         for name, occurrences in seen.items()
         if len({_parse_requirement(raw).specs for _where, raw in occurrences}) > 1
     }
-    assert not divergent, (
-        f"the same dependency is declared with different specifiers: {divergent}. Two copies of a bound is two "
-        "places for it to drift; make them identical in pyproject.toml."
-    )
+
+
+def test_a_dependency_declared_twice_carries_the_same_specifier():
+    """Keep every occurrence, distinguishing inactive markers and build isolation."""
+    for major, minor in _classifier_versions():
+        version = f"{major}.{minor}"
+        divergent = _divergent_active_bounds(_all_requirements(), version)
+        assert not divergent, (
+            f"the same dependency is declared with different active specifiers on Python {version}: "
+            f"{divergent}. Make bounds within each resolver domain identical in pyproject.toml."
+        )
+
+
+@pytest.mark.parametrize(
+    ("declarations", "conflicting"),
+    [
+        ([("dev", "gguf>=0.10,<1"), ("dev", "gguf>=0.10,<2")], True),
+        ([("dev", "gguf>=0.10,<1"), ("gguf", "gguf>=0.10,<2")], True),
+        (
+            [
+                ("", 'filelock==3.20.3; python_version < "3.11"'),
+                ("", 'filelock>=4.2.1,<5; python_version >= "3.11"'),
+            ],
+            False,
+        ),
+        (
+            [
+                ("dev", 'gguf>=0.10,<1; python_version >= "3.10"'),
+                ("dev", 'gguf>=0.10,<2; python_version >= "3.11"'),
+            ],
+            True,
+        ),
+        ([("", "setuptools>=84.1,<85"), (_BUILD_SYSTEM_GROUP, "setuptools>=84.1")], False),
+    ],
+)
+def test_duplicate_bound_policy_keeps_same_domain_conflicts(declarations, conflicting):
+    rows = [(group, _parse_requirement(raw)) for group, raw in declarations]
+    assert bool(_divergent_active_bounds(rows, "3.12")) is conflicting
 
 
 # --------------------------------------------------------------------------------------

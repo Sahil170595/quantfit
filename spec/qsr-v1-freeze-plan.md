@@ -114,10 +114,10 @@ its `version` to `pyproject.toml` and `quantfit/__init__.py` **[V]**.
 durable claim is the pin, not the digits: the test re-reads all three on every run, so the
 value here is a snapshot and the pin is the invariant. That is what makes the file exempt
 from step 9's ordering rule rather than a violation of it; see the exemption stated at step
-9. The same file already applies the discipline in the other direction, which is why it can
-land this early: it omits `date-released` because this repo records no release date, and omits its
+9. Its `date-released` records the authorized software release date in `CHANGELOG.md`,
+not a spec freeze or a scientific milestone. It still omits its
 `references` entry for arXiv 2606.10154 because CFF 1.2.0 requires an `authors` list it
-declines to invent — both omissions written into the file as comments **[V]**.
+declines to invent — that omission remains written into the file as comments **[V]**.
 
 ### 1.2 A — ε-calibrated MDE: the mechanism is READY and UNRUN
 
