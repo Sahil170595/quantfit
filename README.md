@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.37.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.37.0), including the complete [retained-label workflow](docs/retained-labels.md). The released workflows below are available in this version.
+This README documents [quantfit 0.38.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.38.0), including the complete [retained-label workflow](docs/retained-labels.md) and descriptive [calibration strata](docs/calibration-strata.md). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.37.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.38.0"`.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
@@ -62,7 +62,18 @@ Both outputs must be new paths. CSV/key stay private; new CLI summaries expose
 only counts/hashes/fingerprints. Native calibration files retain declared scope,
 including any local model identifiers, so inspect them before sharing. These
 commands never delete sources or establish label truth or scientific GO. Read the
-[full contract and bounds](docs/retained-labels.md) before using the candidate.
+[full contract and bounds](docs/retained-labels.md) before using the workflow.
+
+Describe calibration strata without replacing the aggregate calibration:
+
+```bash
+quantfit calibrate strata --capture private.capture.jsonl --key private.labelkey.json --sheet filled.labels.csv --out strata.json --json
+```
+
+It also accepts the explicit retained-label/receipt mode, but still requires the
+original capture for zone/expected metadata. Selected-pair counts and each arm's
+usable denominators stay separate, including empty/all-unusable groups. This is
+a diagnostic, not replacement calibration or a gate. See [the full contract](docs/calibration-strata.md).
 
 ## What it has found
 

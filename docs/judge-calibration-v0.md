@@ -928,10 +928,16 @@ irreproducible human judgment: re-running the model reproduces the text and not 
 a second labeling pass is a different measurement rather than a restoration. So the sheet's *text* is
 deleted on the same terms as the capture, and the sheet's *labels* survive as the stripped extract.
 
-The unreleased [retained-label workflow](retained-labels.md) implements this completion-free
+The [retained-label workflow](retained-labels.md), released in 0.37.0, implements this completion-free
 recomputation explicitly. The two-column extract and key remain private; its aggregate receipt is
 hash/count provenance, not label authentication. It does not perform the pending per-zone or at-risk
 analyses in §7.3 and never deletes caller inputs.
+
+The 0.38.0 [calibration strata diagnostic](calibration-strata.md) additionally
+computes per-zone and native observed-at-risk per-arm descriptive counts/Wilson intervals
+from the exact capture plus either label mode. Zone is a transparency grouping, not an
+independent statistical stratum. These conditional diagnostics do not establish A1 transfer,
+authenticated labels, independence or replacement calibration; the capture is still required.
 
 ### 7.4 Handoff to `mde.py`
 
