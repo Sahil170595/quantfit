@@ -81,9 +81,11 @@ outputs. Combined held inputs are bounded by
 `2*8 MiB + 2 MiB + 2 MiB + 128*512 bytes` (20 MiB + 64 KiB).
 Returned CSV record limits are twice their assigned rows plus one header, including
 blank records; source and final full-sheet scans use the native 16,385-record cap.
-The resulting combined CSV work is bounded by `3*16,385 + 128` records. Part count,
-row count and byte/work bounds apply before partition/output allocation and
-publication. No HTTP, models, external queue or annotation service is involved.
+The resulting combined CSV work is bounded by `3*16,385 + 128` records. Input,
+row and part bounds are admitted before partitioning, and native record limits
+bound CSV work. Serialized part, manifest and complete-output byte limits are
+checked before publication; this is not a hard preallocation-memory guarantee.
+No HTTP, models, external queue or annotation service is involved.
 
 All text-bearing sheets remain ignored `*.labels.csv`; the private manifest is
 ignored `*.chunkmanifest.json`. Neither manifest nor key goes to an annotator or
