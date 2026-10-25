@@ -411,6 +411,13 @@ def test_every_shipped_subcommand_has_a_classification_rule():
     )
 
 
+@pytest.mark.parametrize("leaf", ["prepare", "apply"])
+def test_adjudication_requires_private_saved_artifacts_without_model_or_network(leaf):
+    item = _classify(f"quantfit adjudicate {leaf} --report drift.json --capture private.capture.jsonl")
+    assert item.category == qs.CAT_NOT_RUNNABLE and not item.runnable
+    assert item.requirements == (qs.REQ_ARTIFACT,)
+
+
 @pytest.mark.parametrize("outputs", ["", " --out comparison.json --junit comparison.xml --json"])
 def test_screen_comparison_requires_saved_artifacts_without_network_or_model_work(outputs):
     item = _classify(
