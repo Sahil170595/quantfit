@@ -1,9 +1,8 @@
-# Explicit local label review (unreleased 0.40.0)
+# Explicit local label review (quantfit 0.40.0)
 
 This workflow prepares a private disagreement subset, accepts explicit operator
 judgments, and writes a new **complete** native labeling sheet. Both preparation
-and application are in the 0.40 source candidate, stacked after 0.39; published
-installation remains 0.36.0. No data is sent to anyone and no reviewer, labeling
+and application are available in quantfit 0.40.0; install `quantfit==0.40.0`. No data is sent to anyone and no reviewer, labeling
 rule or protocol is invented by software. Use the externally fixed/disclosed rule
 appropriate to your existing [calibration protocol](judge-calibration-v0.md).
 
@@ -122,8 +121,7 @@ prepare/apply return 0 without a readiness or truth judgment. Nested leaves acce
 `validation/2026-10-23-label-review/` records a fictional nine-pair/18-row actual
 prepare/fill/apply/native-ingest workflow and partial-queue refusal. The unchanged
 installed-origin guard exercises this workflow for Ubuntu/Windows wheel/sdist.
-Local source and hosted installed/CPU proof remain separate. Default CodeQL has no
-fresh scan on the unprotected stacked base; normal protected-main security/release
-qualification is required later. Keep queues, keys and full sheets private under
+Local source, protected-main security, hosted installed/CPU and versioned release
+qualification remain separate requirements. Keep queues, keys and full sheets private under
 [the data-handling policy](data-handling-completions.md); this workflow authorizes
 no new recipients or automatic source deletion.
