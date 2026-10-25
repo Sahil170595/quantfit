@@ -1,10 +1,10 @@
-# Paired calibration diagnostics (unreleased 0.39.0)
+# Paired calibration diagnostics (quantfit 0.39.0)
 
 `calibrate paired` compares supplied labels with captured judge observations while
 preserving the original baseline/quantized pairing. It requires the accepted
 0.38 held capture/key admission and either a complete original sheet or the
-0.37 explicit retained-label workflow. Published installation remains 0.36.0;
-these examples require the unreleased source chain.
+0.37 explicit retained-label workflow. Install `quantfit==0.39.0`; Python source/unit
+support remains 3.10+, while the complete locked runtime requires Python 3.11+.
 
 ```bash
 quantfit calibrate paired --capture private.capture.jsonl --key private.labelkey.json --sheet filled.labels.csv --out paired.json --json
@@ -103,8 +103,8 @@ the native bound loader and actual gate reject using it as replacement calibrati
 `validation/2026-10-23-calibration-paired/` records the actual fictional 24-pair full
 CLI→extract→owned-sheet removal→retained CLI workflow. The existing installed-origin
 guard runs the same consumer for Ubuntu/Windows wheel/sdist; hosted proof is separate
-from local source checks. Default CodeQL has no fresh scan for the unprotected
-stacked base; normal protected-main security/release qualification is still required.
+from local source checks. Protected-main source/security qualification and versioned
+release qualification remain separate requirements.
 
 This does not authenticate labels or raters, establish independent execution,
 calibration validity, sensitivity or scientific GO. It does not replace calibration,

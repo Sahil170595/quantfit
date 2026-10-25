@@ -18,22 +18,29 @@
 - Add complete `calibrate review prepare` and `calibrate review apply`: private disagreement subsets, explicit operator labels, exact role/receipt/text bindings, complete new native sheets and fixed aggregate receipts. No preferred rater, automatic ingestion, authentic blinding or independent adjudication.
 - Add actual installed prepare/fill/apply/unchanged schema-2 ingestion, partial-queue and all-unusable/zero-selection controls, strict receipt/CSV/privacy/filesystem tests and a fictional aggregate command record in `validation/2026-10-23-label-review/`.
 
-## 0.39.0 — Unreleased
+## 0.39.0 — 2026-10-25
 
 - Add `calibrate paired` fixed judge/label pair-state, paired-error and axis-flip diagnostics from held native capture/key and full or retained labels. Preserve whole/common populations, unusable coverage and source-specific at-risk denominators; no independence inference, bias correction or calibration replacement.
 - Add complete installed full/extract/retained consumer with native bound-loader and gate refusal, independent asymmetric cell/correlation controls, privacy/binding adversaries and a fictional aggregate command record in `validation/2026-10-23-calibration-paired/`.
 
-## 0.38.0 — Unreleased
+Released independently from PR #143: descriptive paired-label calibration diagnostics.
+
+## 0.38.0 — 2026-10-25
 
 - `calibrate strata` and `analyze_calibration_strata` compute descriptive per-zone/per-arm native Wilson diagnostics for all rows and the two native observed-at-risk pair cohorts. Selected-pair counts remain separate from each arm's usable/unusable and directional human-label denominators; empty and all-unusable groups complete with null rates and native full intervals.
 - Full-sheet and explicit retained-label modes share held, bounded admission. Require a v2 key and the exact original capture bytes, matching header/binding and every paired judge flag/completion digest; metadata must agree across arms. Zone never determines expected-safe/unsafe behavior. Native capture-1/v2-key input remains explicitly unbound.
 - Publish only fixed aggregate counts/statistics, input hashes and binding fingerprint through the existing write-once path. Zone grouping, conditional native selection and byte agreement establish neither authenticated labels, independent evidence, A1 transfer, replacement calibration, sensitivity nor scientific GO. See [calibration strata](docs/calibration-strata.md) and the fictional [command record](validation/2026-10-23-calibration-strata/).
 
-## 0.37.0 — Unreleased
+Released independently from PR #142: descriptive calibration strata diagnostics.
+
+## 0.37.0 — 2026-10-25
 
 - Complete retained-label workflow: `calibrate extract` validates an original filled sheet/key and writes a deterministic private `id,human_label` CSV plus an aggregate receipt; explicit `calibrate ingest --retained-labels --retention-receipt` recomputes the native per-arm Wilson calibration after the original sheet is unavailable.
 - Closed calibration schema 3 binds the original sheet, key, retained CSV and receipt hashes; the capture digest is explicitly declared, not verified. Native schema-2 ingestion and native scope/Wilson/unmeasured-arm checks remain strict. All-unusable extraction succeeds; ingestion still refuses an entirely unmeasured calibration.
 - Bounded held inputs and exclusive write-once outputs reject unsafe aliases/links and incomplete or changed evidence. New CLI summaries expose counts/hashes/fingerprints only; native calibration files retain declared measurement identity and may contain local model identifiers. Hashes authenticate neither human truth nor independent labeling. See [retained-label workflow](docs/retained-labels.md) and the fictional offline [command record](validation/2026-10-23-retained-labels/).
+- The fresh installed-graph audit rejected three filelock advisories and the setuptools namespace-packages path-escape advisory. The targeted hosted lock uses filelock 4.2.1 on Python 3.11+ and unaffected 3.20.3 on Python 3.10, plus setuptools 84.1.0. Public runtime/build bounds exclude the affected releases without changing the source/unit Python floor or the complete-runtime Python 3.11+ boundary. The manual constraints helper evaluates native PEP 508 markers for its interpreter and retains conflicting-active-bound refusal. See [dated dependency evidence](validation/2026-10-25-release-dependencies/).
+
+Released independently from PR #141: completion-free retained-label calibration.
 
 ## Unreleased
 
