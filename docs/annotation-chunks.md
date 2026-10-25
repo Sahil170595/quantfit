@@ -103,6 +103,13 @@ authenticated identity. Keep attribution alongside the published number as the
 protocol requires. The tool sends nothing and deletes no source material.
 Chunks are partitions of one population, not independent samples or raters.
 
+When that existing authorization applies, create a fresh empty private directory
+and supply the declared attribution explicitly:
+
+```bash
+quantfit calibrate chunks prepare --sheet blank.labels.csv --key private.labelkey.json --out-dir named-annotation-parts --rows-per-part 100 --annotator-role named_second --annotator-name "Declared Annotator" --json
+```
+
 Regenerable fictional CLI/API/native-consumer evidence, including adverse
 controls and privacy checks: [functional record](../validation/2026-10-25-annotation-chunks/README.md).
 Fixture judgments establish neither human truth, rater independence, sensitivity,
