@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.42.0 — unreleased
+
+- Add complete `calibrate chunks prepare` and `calibrate chunks collect`: bounded private partitions of a complete blank native template, exact regenerated preparation bindings, explicit returned labels and a new complete native sheet. Original native ingest remains separate and unchanged.
+- Retain all source rows, unusable judgments, role-specific source/filled hashes and operator-declared attribution. No automatic labeling/sharing, new annotator permission, independent samples or scientific GO. Regenerable fictional CLI/API/native-ingest evidence and limits: `validation/2026-10-25-annotation-chunks/`.
+
 ## 0.41.0 — 2026-10-25
 
 - Add opt-in `screen-summary --require-conditional-resolution PP`: all declared targets and both native axes must have matched calibration, measurable denominators, attainable target power and effective MDE within the declared pp ceiling. Preserve native outcomes/flags/ordered evidence and native 3/4 priority; otherwise missing calibration exits 4 and unmet resolution exits 5.
