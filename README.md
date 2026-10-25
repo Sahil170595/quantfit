@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.38.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.38.0), including the complete [retained-label workflow](docs/retained-labels.md) and descriptive [calibration strata](docs/calibration-strata.md). The released workflows below are available in this version.
+This README documents [quantfit 0.39.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.39.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md) and [paired-label diagnostics](docs/calibration-paired.md). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.38.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.39.0"`.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
@@ -75,7 +75,7 @@ original capture for zone/expected metadata. Selected-pair counts and each arm's
 usable denominators stay separate, including empty/all-unusable groups. This is
 a diagnostic, not replacement calibration or a gate. See [the full contract](docs/calibration-strata.md).
 
-The stacked **unreleased 0.39.0 source candidate** adds paired label diagnostics:
+Describe paired label and judge observations without replacing calibration:
 
 ```bash
 quantfit calibrate paired --capture private.capture.jsonl --key private.labelkey.json --sheet filled.labels.csv --out paired.json --json
