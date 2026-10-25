@@ -561,6 +561,31 @@ def _build_parser() -> argparse.ArgumentParser:
     pres.add_argument(
         "--out", required=True, metavar="PATH", help="separate resolution artifact; must not overwrite either input"
     )
+    pres.add_argument(
+        "--plan-n-min",
+        type=int,
+        metavar="N",
+        help="hypothetical inclusive minimum AT-RISK count; requires complete planning options",
+    )
+    pres.add_argument(
+        "--plan-n-max",
+        type=int,
+        metavar="N",
+        help="hypothetical inclusive maximum AT-RISK count; every integer is evaluated",
+    )
+    pres.add_argument(
+        "--plan-mde-pp",
+        type=float,
+        metavar="PP",
+        help="hypothetical effective-MDE ceiling in (0,100] percentage points; not a gate",
+    )
+    pres.add_argument(
+        "--plan-effect",
+        type=float,
+        action="append",
+        metavar="PP",
+        help="optional repeated distinct hypothetical effect in [0,100] percentage points; planning only",
+    )
 
     prep = sub.add_parser(
         "repeatability",
@@ -1386,13 +1411,28 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "resolution":
         from quantfit.resolution import analyze_resolution
 
-        result = analyze_resolution(args.report, args.calibration_report, args.out)
+        planning = None
+        if args.plan_n_min is not None:
+            from quantfit.resolution_budget import ResolutionBudget
+
+            planning = ResolutionBudget(
+                args.plan_n_min, args.plan_n_max, args.plan_mde_pp, tuple(args.plan_effect or ())
+            )
+        result = analyze_resolution(args.report, args.calibration_report, args.out, planning=planning)
 
         def human_resolution():
             for name, axis in result["axes"].items():
                 print(f"{name}: {axis['flagged_flips']}/{axis['n_at_risk']} flagged flips")
                 print(f"  {axis['resolution']['headline']}")
             print("Conditional analysis; calibration label truth and statistical assumptions are not verified.")
+            if "planning" in result:
+                plan = result["planning"]
+                print(
+                    f"Hypothetical finite at-risk grid: first pass {plan['first_passing_n']}; stable suffix {plan['stable_suffix']} (only within the declared range)."
+                )
+                print(
+                    "Planning description only; no future evidence, sampling instruction, adaptive stopping or scientific GO."
+                )
             print(f"resolution artifact -> {args.out}")
 
         return _emit(args, "resolution", 0, result, human_resolution)
@@ -1696,6 +1736,12 @@ def main(argv: list[str] | None = None) -> int:
     _force_utf8_stdio()
     parser = _build_parser()
     args = parser.parse_args(argv)
+    if args.cmd == "resolution":
+        plan_args = (args.plan_n_min, args.plan_n_max, args.plan_mde_pp)
+        if (any(value is not None for value in plan_args) or args.plan_effect is not None) and not all(
+            value is not None for value in plan_args
+        ):
+            parser.error("planning requires --plan-n-min, --plan-n-max and --plan-mde-pp together")
     if args.cmd == "calibrate" and args.calibrate_cmd == "review":
         retained_args = (
             args.capture,

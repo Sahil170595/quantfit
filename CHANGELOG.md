@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.44.0 — unreleased
+
+- Add opt-in finite unit-grid budgeting to the existing `resolution` CLI/API. Preserve the held original report/calibration and actual axes, admit conservative complete actual-plus-planned work before native math, and reuse native exact thresholds/power/MDE for one hypothetical global-bound curve.
+- Distinguish first pass, discrete feasible runs, finite stable suffix and no feasible point without assuming monotonicity in n. Detectability guards the 1.0 MDE sentinel. No new verdict, sample collection, adaptive stopping or scientific GO. Regenerable native CLI/API evidence: `validation/2026-10-25-resolution-budget/`.
+
 ## 0.43.0 — unreleased
 
 - Add explicit capture-backed retained mode to both `calibrate review prepare` and `calibrate review apply`, with complete CLI/API workflows after the original filled sheets are unavailable. Verify the actual shared capture/key and both own retained receipts once, preserve every inequality including unusable, and native-validate a NEW full sheet before publication.

@@ -1,8 +1,8 @@
 # CLI reference — every command, every flag
 
 This reference documents published quantfit 0.41.0. The explicitly marked
-annotation-chunks and retained-review sections require unreleased 0.43.0 source
-or a candidate wheel.
+annotation-chunks, retained-review and resolution-budget sections require
+unreleased 0.44.0 source or a candidate wheel.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -729,6 +729,21 @@ partial-publication behavior. This section requires an unreleased candidate,
 not the published 0.41.0 installation.
 
 ## Analyze an existing run's resolution
+
+Unreleased 0.44.0 adds explicit exhaustive finite budgeting:
+
+```bash
+quantfit resolution --report drift.json --calibration-report calibration.json --plan-n-min 0 --plan-n-max 128 --plan-mde-pp 50 --plan-effect 30 --out budget.json --json
+```
+
+All three range/ceiling options are required together; optional `--plan-effect`
+repeats up to eight distinct pp effects. The held original report/calibration,
+scope and distinct actual axes remain unchanged. One global-bound hypothetical
+**at-risk** curve exhausts every integer after complete work admission. First pass,
+feasible intervals and finite suffix ending at n_max remain distinct because
+native power/MDE are nonmonotone in n. No-feasible analysis exits 0; invalid/unsafe/
+budget refusal exits 2. No gate, future evidence or collection is created. See
+[the complete API and bounds](resolution-budget.md). Published default behavior:
 
 ```bash
 quantfit resolution --report drift.json --calibration-report calibration.json \
