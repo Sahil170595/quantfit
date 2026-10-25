@@ -1,7 +1,6 @@
 # Descriptive calibration strata
 
-Status: **unreleased 0.38.0 stacked source candidate**, depending on the retained-label
-0.37.0 candidate. Published installation remains `quantfit==0.36.0`. Python source/unit
+Status: **released in quantfit 0.38.0**. Install `quantfit==0.38.0`. Python source/unit
 support includes 3.10; the complete locked runtime requires 3.11+, actually qualified
 on hosted Python 3.12. These software diagnostics start no human calibration study.
 
