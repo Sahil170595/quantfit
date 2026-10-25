@@ -430,6 +430,14 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+### Source-bound adjudication source candidate (2026-10-25, unreleased 0.46.0)
+
+| Flags | Command | Source controls | Evidence and limits |
+|---|---|---|---|
+| `--report` / `--capture` / `--review` / `--receipt` / `--json` | adjudicate prepare | Actual held capture-v2 canonical binding, whole native typed tabulation, exact complete flagged population and blank private queue; zero/all/repeated text retained. | `tests/test_adjudication.py`; `tests/test_adjudication_adverse.py`; `docs/adjudication.md`; no human truth or new measurement |
+| `--report` / `--capture` / `--review` / `--preparation` / `--out` / `--json` | adjudicate apply | Held-once originals, regenerated blank preparation, explicit both-arm labels/class, complete selected protected text and strict NEW public hash/count record. Native exclusive alias/race checks. | `tests/test_adjudication_io.py`; `tests/test_ci_adjudication.py`; `validation/2026-10-25-adjudication/`; fictional labels only |
+| `--adjudication` / `--report` / `--calibration-report` / `--json` | emit model-card | Shared held/parsed report with strict capture-free record receiver and optional native calibration, deterministic declared section before unchanged footer, default bytes unchanged; no file-output option. | `tests/test_adjudication_adverse.py`; `tests/test_modelcard.py`; `tests/test_calibrated_modelcard.py`; source controls, final-head hosted pending; no human authentication, sensitivity or GO |
+
 ### Calibration-choice source candidate (2026-10-25, unreleased 0.45.0)
 
 | Flag | Command | What is exercised | Evidence / limits |

@@ -337,6 +337,44 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help="bound schema-2 or schema-3 calibration for separately labeled conditional resolution; no human-label authentication",
     )
+    pe.add_argument(
+        "--adjudication",
+        metavar="PATH",
+        help="closed source-bound operator-declared flip record; not authenticated human truth",
+    )
+
+    adjudicate = sub.add_parser(
+        "adjudicate", help="explicit source-bound operator flip declarations; no automatic confirmation"
+    )
+    adjudication_sub = adjudicate.add_subparsers(dest="adjudicate_cmd", required=True)
+    adjudication_prepare = adjudication_sub.add_parser(
+        "prepare", help="bound actual capture/report -> complete private blank flagged-pair queue"
+    )
+    adjudication_apply = adjudication_sub.add_parser(
+        "apply", help="all explicit judgments -> NEW public hash-only declared adjudication"
+    )
+    for adjudication_parser in (adjudication_prepare, adjudication_apply):
+        adjudication_parser.add_argument(
+            "--report", required=True, metavar="PATH", help="actual complete native schema-2 report"
+        )
+        adjudication_parser.add_argument(
+            "--capture", required=True, metavar="PATH", help="actual complete non-null bound capture-v2"
+        )
+        adjudication_parser.add_argument(
+            "--review",
+            required=True,
+            metavar="PATH",
+            help="private flagged-pair CSV queue (new blank at prepare; explicitly filled at apply)",
+        )
+    adjudication_prepare.add_argument(
+        "--receipt", required=True, metavar="PATH", help="NEW aggregate preparation binding"
+    )
+    adjudication_apply.add_argument(
+        "--preparation", required=True, metavar="PATH", help="exact original preparation receipt"
+    )
+    adjudication_apply.add_argument(
+        "--out", required=True, metavar="PATH", help="NEW closed public aggregate/per-pair-hash record"
+    )
 
     pca = sub.add_parser(
         "calibrate",
@@ -763,6 +801,23 @@ def _add_json_flag(parser: argparse.ArgumentParser) -> None:
 
 
 def _dispatch(args: argparse.Namespace) -> int:
+    if args.cmd == "adjudicate":
+        from quantfit.safety.adjudication import apply_adjudication, prepare_adjudication
+
+        if args.adjudicate_cmd == "prepare":
+            result = prepare_adjudication(args.report, args.capture, review_path=args.review, receipt_path=args.receipt)
+        else:
+            result = apply_adjudication(args.report, args.capture, args.review, args.preparation, out_path=args.out)
+
+        def human_adjudication() -> None:
+            print(
+                f"Adjudication {args.adjudicate_cmd} completed; {sum(result['original_flagged_counts'].values())} original judge-flagged pairs retained."
+            )
+            print(
+                "Operator declarations are unauthenticated; native statistics, sensitivity and scientific GO are unchanged."
+            )
+
+        return _emit(args, f"adjudicate {args.adjudicate_cmd}", 0, result, human_adjudication)
     if args.cmd == "screen-compare":
         from quantfit.screen_compare import compare_screen_bundles
 
@@ -1273,11 +1328,12 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "emit":
         from quantfit.modelcard import model_card_fragment
 
-        fragment = (
-            model_card_fragment(args.report, calibration_report=args.calibration_report)
-            if args.calibration_report is not None
-            else model_card_fragment(args.report)
-        )
+        card_options = {}
+        if args.calibration_report is not None:
+            card_options["calibration_report"] = args.calibration_report
+        if args.adjudication is not None:
+            card_options["adjudication_record"] = args.adjudication
+        fragment = model_card_fragment(args.report, **card_options)
         return _emit(
             args,
             "emit",

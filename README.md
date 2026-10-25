@@ -45,14 +45,16 @@ This README documents [quantfit 0.41.0](https://github.com/Sahil170595/quantfit/
 
 Install with `pip install "quantfit[inspect,gguf]==0.41.0"`.
 
-Unreleased source 0.45.0 includes [annotation chunks](docs/annotation-chunks.md)
+Unreleased source 0.46.0 includes [annotation chunks](docs/annotation-chunks.md)
 (0.42), [capture-backed retained review](docs/retained-review.md) (0.43),
-[finite-grid resolution budgets](docs/resolution-budget.md) (0.44), and adds
-[calibration-choice sensitivity](docs/calibration-choices.md). Named supplied
-calibrations retain all targets, missing/unattainable coverage and original native
-outcomes; only an explicit all-choice resolution ceiling changes receiving
-qualification. These additions require source or a candidate wheel; they are not
-included in the published installation above.
+[finite-grid resolution budgets](docs/resolution-budget.md) (0.44),
+[calibration-choice sensitivity](docs/calibration-choices.md) (0.45), and complete
+[source-bound flip adjudication](docs/adjudication.md) (0.46). The latter binds an
+explicit private prepare/fill/apply workflow to the actual capture/report and
+renders operator-declared counts beside unchanged native model-card statistics,
+with or without calibration. Human confirmation remains unverified. All additions
+require source or a candidate wheel; they are not included in the published
+installation above.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).

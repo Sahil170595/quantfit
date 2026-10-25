@@ -1,8 +1,8 @@
 # CLI reference — every command, every flag
 
 This reference documents published quantfit 0.41.0. The explicitly marked
-annotation-chunks, retained-review, resolution-budget and calibration-choice
-sections require unreleased 0.45.0 source or a candidate wheel.
+annotation-chunks, retained-review, resolution-budget, calibration-choice and adjudication
+sections require unreleased 0.46.0 source or a candidate wheel.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -856,6 +856,27 @@ both files. A later replacement fault exits 2 and can leave the already-publishe
 JSON result. Both outputs must be distinct from each other and every consumed
 input, including aliases. Loose positive T0 source reports receive the same
 protection; negative or legacy producer locators remain labels.
+
+### Source-bound flip adjudication — unreleased 0.46.0 source
+
+```bash
+quantfit adjudicate prepare --report drift.json --capture private.capture.jsonl --review private.adjudication.csv --receipt private.adjudication-preparation.json --json
+# Explicitly fill both labels AND flip_class for EVERY selected pair.
+quantfit adjudicate apply --report drift.json --capture private.capture.jsonl --review private.adjudication.csv --preparation private.adjudication-preparation.json --out adjudication.json --json
+quantfit emit model-card --report drift.json --adjudication adjudication.json
+quantfit emit model-card --report drift.json --adjudication adjudication.json --calibration-report calibration.json --json
+```
+
+Prepare/apply require actual capture-v2 scope and whole native report tabulation,
+all original flagged pairs, exact protected text and explicit per-arm labels/class.
+They exclusively create NEW outputs, with possible earlier new files on a later
+publication failure. The private queue/preparation stay local. The public record
+has counts, unique pair indices and per-completion hashes, no text. The receiver
+checks report bytes, typed accounting and declarations; without capture it cannot
+freshly verify selected membership/text or authenticate human judgment. Native
+statistics and `human_confirmation_verified=false` remain unchanged. `emit` is
+stdout/string only, with no `--out`. Success is 0; invalid/unsafe/excess evidence is
+2, not a gate. See [the complete API, class matrix and bounds](adjudication.md).
 
 ### Loose report inputs
 

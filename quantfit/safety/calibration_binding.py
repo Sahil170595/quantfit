@@ -469,8 +469,10 @@ class BoundCalibration:
 
     def match_report(self, report: DriftReport) -> None:
         _require(identity_fingerprint(self.identity) == self.fingerprint, "calibration scope was mutated")
+        actual = measurement_identity(report)
         _require(
-            measurement_identity(report) == self.identity, "calibration scope does not match the actual run report"
+            actual == self.identity and identity_fingerprint(actual) == self.fingerprint,
+            "calibration scope does not match the actual run report",
         )
 
 
