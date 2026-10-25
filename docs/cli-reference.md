@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.40.0. All workflows below are available in this version.
+This reference documents quantfit 0.41.0. All workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -79,6 +79,26 @@ without a native report stay pending, and absent calibrations remain explicit.
 Malformed/incompatible supplied evidence or bounded-work refusal exits 2.
 See [Conditional saved-screen resolution](screen-resolution.md) for exact limits,
 coverage states, byte bindings and label/assumption boundaries.
+
+Quantfit 0.41.0 adds the opt-in `--require-conditional-resolution PP` to this same
+`screen-summary` command:
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --require-conditional-resolution 40 --out receiving.json --junit receiving.xml --json
+```
+
+The finite `(0,100]` percentage-point ceiling requires `--calibrations-dir`. Every
+declared target and both axes need matched report/calibration evidence, measurable
+at-risk denominators, native attainable target power and effective MDE within that
+ceiling. Native flags/missing evidence retain exits 3/4; otherwise missing calibration
+exits 4 and an unmet requirement exits 5. Native exit/outcome, all target rows and
+all reasons remain visible. JUnit preserves its native cases, then appends two axis
+cases per target and an overall requirement case. Omitting the option preserves
+default output, native exits and JUnit. The receiving APIs add the keyword
+`required_conditional_resolution_pp=None`; the requirement reuses each pair's same
+native analysis. No label authentication, independence, sensitivity or scientific
+GO is established, including at exit 0. Invoke `screen-summary` directly in a
+workflow step when requiring this ceiling. See [the complete requirement contract](screen-resolution.md#explicit-requirement-0410).
 
 Quantfit 0.34.0 adds `screen-compare --reference-bundle DIR
 --candidate-bundle DIR --out comparison.json --junit comparison.xml --json`.

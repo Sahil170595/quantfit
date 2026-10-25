@@ -10,7 +10,8 @@ quantfit screen-summary --targets targets.json --reports-dir reports --calibrati
 `quantfit.saved_screen.summarize_screen(manifest_path, reports_dir, *, out_path=None,
 junit_path=None, calibrations_dir=None)` retains its existing behavior when
 `calibrations_dir` is omitted. When supplied, the directory is a closed, optional
-population of aggregate bound-schema-2 calibrations named `<target>.json`.
+population of aggregate bound-schema-2 or closed retained-schema-3 calibrations
+named `<target>.json`.
 Unrelated entries, symbolic links/reparse points, nonregular files, malformed or
 unsupported calibration data and known incompatible scope refuse exit 2. Inputs
 remain unchanged; no inference, download, model resolution or capture lookup runs.
@@ -72,10 +73,9 @@ identity, causal improvement, safety or scientific GO. Declared model/provenance
 paths may remain in native summaries; no sanitization or upload occurs. The record
 under `validation/2026-10-18-screen-resolution/` is synthetic command evidence only.
 
-## Explicit requirement (unreleased 0.41.0)
+## Explicit requirement (0.41.0)
 
-Published installation remains 0.36.0. The stacked 0.41 source candidate adds an
-opt-in requirement to this **existing** command, rather than a separate screen gate:
+Install `quantfit==0.41.0`. This version adds an opt-in requirement to this **existing** command, rather than a separate screen gate:
 
 ```bash
 quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --require-conditional-resolution 40 --out receiving.json --junit receiving.xml --json
@@ -87,8 +87,8 @@ The API adds `required_conditional_resolution_pp=None` to
 must be a finite number in `(0,100]` percentage points, excluding booleans, and requires
 `calibrations_dir`. Invalid options refuse 2 before any input hold, calculator or
 output. Omit it to retain exactly the existing default field presence, native exit,
-human output and JUnit cases. Source 0.37 and later also admit closed retained-label
-calibration schema 3 through the same native binding loader; published 0.36 admits 2.
+human output and JUnit cases. Quantfit 0.37 and later admit closed retained-label
+calibration schema 3 through the same native binding loader.
 
 The complete declared manifest is qualified without filtering or pooling. Every
 target needs a present native report and calibration matched to its actual declared
@@ -141,5 +141,5 @@ schema-3 producer/consumer. The installed-origin guard runs the same complete CL
 workflow on Ubuntu/Windows wheel/sdist; exact-head hosted proof is separate from local
 source execution. No new inference, calibration study, label authentication, verified
 directional-error assumptions, independent execution, sensitivity or scientific GO
-is established. Default CodeQL has no fresh scan on this unprotected stacked base;
-protected-main security/release qualification remains required later.
+is established. Protected-main source/security and versioned release qualification
+remain separate requirements.
