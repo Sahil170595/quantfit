@@ -26,6 +26,13 @@ boundary. The dated security maintenance in `docs/dependency-policy.md` §5 pres
 the hosted CPU evidence scope and keeps GPU AWQ/GPTQ qualification open. CPU Torch's local `+cpu` suffix is normalized
 to its public release version for advisory lookup; Torch remains included in the audit.
 
+The 2026-10-25 maintenance additionally excludes the affected filelock and setuptools
+releases. Conditional filelock 3.20.3 on Python 3.10 / 4.2.1 on Python 3.11+ retains the
+unit/source matrix; setuptools 84.1.0 is required by both public build and runtime
+metadata and pinned in tooling. These are bounds on existing Hub/Torch transitives.
+The fresh local installed-graph audit passes; hosted candidate acceptance and publication
+still qualify their own exact bytes. See `validation/2026-10-25-release-dependencies/`.
+
 On 2026-10-08 the release-candidate dependency audit correctly rejected fsspec
 2026.4.0 for CVE-2026-104851. The lock now selects fixed fsspec 2026.6.0 and
 matching s3fs 2026.6.0 without changing the pinned datasets or Inspect versions.

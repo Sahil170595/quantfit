@@ -6,19 +6,18 @@ manual subset installs (`pip install pytest scipy gguf inspect-ai ...`), where
 unconstrained packages bypass pyproject's bounds. Current GGUF caps and the exact
 `inspect-ai==0.3.269` observed SDK pin must survive those subset installs.
 
-Hand-copying bounds trades one drift for another. This script reads pyproject
-and prints every requirement it declares, and `pip install -c` applies those
-bounds to the chosen subset. A constraint on an uninstalled package is inert, so emitting all of them
-is both correct and maintenance-free.
+Hand-copying bounds trades one drift for another. This script reads pyproject,
+evaluates PEP 508 markers for its running interpreter, and prints the active
+bounds for `pip install -c`. Run the helper and pip with the same interpreter;
+regenerate the constraints for a different target. Uninstalled packages are inert.
 
 Usage:
     python tools/ci_constraints.py [--pyproject PATH] [--out PATH]
 
 Exit codes:
     0  constraints written
-    2  pyproject unreadable, or two extras declare conflicting bounds for one
-       package (pip permits a single constraint per name, so this must be fixed
-       in pyproject rather than papered over here)
+    2  parser unavailable, pyproject unreadable, or conflicting active declarations
+       (this helper refuses those rather than silently intersecting their bounds)
 """
 
 from __future__ import annotations
@@ -28,9 +27,11 @@ import re
 import sys
 from pathlib import Path
 
-# tomllib is stdlib only on 3.11+, and pyproject declares support down to 3.10 — where
-# CI's test matrix runs this script BEFORE installing anything, so there is no pytest to
-# drag `tomli` in. Fall back explicitly, and fail with a sentence rather than a traceback.
+EXIT_OK = 0
+EXIT_OPERATIONAL = 2
+
+# Locked CI tooling includes both parsers. Manual subset installs may not, and
+# Python 3.10 has no stdlib tomllib; explain missing bootstrap dependencies.
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover — 3.10 only
@@ -42,10 +43,13 @@ except ModuleNotFoundError:  # pragma: no cover — 3.10 only
             "installed. Install it first: pip install tomli",
             file=sys.stderr,
         )
-        raise SystemExit(2) from None
+        raise SystemExit(EXIT_OPERATIONAL) from None
 
-EXIT_OK = 0
-EXIT_OPERATIONAL = 2
+try:
+    from packaging.requirements import Requirement
+except ModuleNotFoundError:  # pragma: no cover - manual bootstrap only
+    print("no PEP 508 parser: install it first: pip install packaging", file=sys.stderr)
+    raise SystemExit(EXIT_OPERATIONAL) from None
 
 # Caps a dependency INHERITS through a parent that CI's unit job does not install.
 #
@@ -86,12 +90,11 @@ def requirement_name(requirement: str) -> str:
     return normalize(match.group(1))
 
 
-def collect(pyproject: dict) -> dict[str, str]:
-    """Map normalized package name -> the requirement string pyproject declares.
+def collect(pyproject: dict, *, marker_environment: dict[str, str] | None = None) -> dict[str, str]:
+    """Map normalized package name to its active, marker-free requirement.
 
-    Raises ValueError if one package is declared with two different specs; pip
-    accepts only one constraint per name, and disagreeing declarations are a
-    defect in pyproject regardless of what CI does with them.
+    Pip supports multiple constraint lines and markers. This helper deliberately
+    refuses different active declarations rather than choosing their intersection.
     """
     project = pyproject.get("project", {})
     sources: list[tuple[str, list[str]]] = [("dependencies", list(project.get("dependencies", [])))]
@@ -101,24 +104,27 @@ def collect(pyproject: dict) -> dict[str, str]:
     seen: dict[str, tuple[str, str]] = {}  # name -> (requirement, declaring section)
     for section, requirements in sources:
         for requirement in requirements:
-            if "[" in requirement:
+            parsed = Requirement(requirement)
+            if parsed.marker is not None and not parsed.marker.evaluate(environment=marker_environment):
+                continue
+            if parsed.extras:
                 # pip: "Constraints cannot have extras". None are declared today;
                 # refuse rather than emit a file pip will reject at install time.
                 raise ValueError(f"{section}: constraint entries cannot carry extras: {requirement!r}")
             name = requirement_name(requirement)
-            spec = requirement.strip()
+            spec = requirement.split(";", 1)[0].strip()
             previous = seen.get(name)
             if previous is not None and previous[0] != spec:
                 raise ValueError(
                     f"{name} is declared twice with different bounds: "
                     f"{previous[0]!r} in [{previous[1]}] and {spec!r} in [{section}]. "
-                    "pip permits one constraint per package; reconcile them in pyproject."
+                    "this helper refuses conflicting active declarations; reconcile them in pyproject."
                 )
             seen[name] = (spec, section)
 
     constraints = {name: spec for name, (spec, _) in sorted(seen.items())}
     for name, (cap, _parent) in INHERITED_CAPS.items():
-        if name in constraints:  # one constraint per name: fold the inherited cap into the declared spec
+        if name in constraints:  # markers were evaluated; fold into the active version spec
             constraints[name] = f"{constraints[name]},{cap}"
     return constraints
 
@@ -132,6 +138,7 @@ def render(constraints: dict[str, str], pyproject_path: Path) -> str:
     lines = [
         "# GENERATED by tools/ci_constraints.py - do not edit.",
         f"# Source of truth: {pyproject_path.name} ([project.dependencies] + [project.optional-dependencies]).",
+        f"# Marker scope: running Python {sys.version_info.major}.{sys.version_info.minor}; regenerate for each target.",
         "# Applied with `pip install -c` so CI cannot install a version the package forbids.",
     ]
     lines.extend(constraints.values())

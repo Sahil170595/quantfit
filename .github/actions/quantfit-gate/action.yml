@@ -113,8 +113,8 @@ inputs:
   from-report:
     description: >-
       Offline policy replay of an existing schema-v2 aggregate, without new inference.
-      Exclusive with baseline, quant, max-new-tokens and hf-token. Requires a candidate
-      installed via quantfit-path until a published version advertises --from-report.
+      Exclusive with baseline, quant, max-new-tokens and hf-token. Available since
+      quantfit 0.22.0; use quantfit-path for candidate acceptance.
     required: false
     default: ""
   baseline:

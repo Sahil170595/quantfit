@@ -41,10 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.36.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.36.0), including aggregate private-labeling reconciliation. The released workflows below are available in this version.
-The [retained-label workflow](docs/retained-labels.md) is an **unreleased 0.37.0 source candidate**; its new commands require that candidate, not the published installation.
+This README documents [quantfit 0.38.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.38.0), including the complete [retained-label workflow](docs/retained-labels.md) and descriptive [calibration strata](docs/calibration-strata.md). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.36.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.38.0"`.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
@@ -52,7 +51,7 @@ requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
 Installed CPU/provider qualification establishes neither GPU execution, human-label
 authentication, sensitivity nor scientific GO.
 
-For the unreleased candidate, retain labeling work without completion text:
+Retain labeling work without completion text:
 
 ```bash
 quantfit calibrate extract --sheet filled.labels.csv --key private.labelkey.json --out private.labels.csv --receipt retention.json --json
@@ -63,9 +62,9 @@ Both outputs must be new paths. CSV/key stay private; new CLI summaries expose
 only counts/hashes/fingerprints. Native calibration files retain declared scope,
 including any local model identifiers, so inspect them before sharing. These
 commands never delete sources or establish label truth or scientific GO. Read the
-[full contract and bounds](docs/retained-labels.md) before using the candidate.
+[full contract and bounds](docs/retained-labels.md) before using the workflow.
 
-The stacked **unreleased 0.38.0 source candidate** adds descriptive calibration strata:
+Describe calibration strata without replacing the aggregate calibration:
 
 ```bash
 quantfit calibrate strata --capture private.capture.jsonl --key private.labelkey.json --sheet filled.labels.csv --out strata.json --json
@@ -501,8 +500,8 @@ quantfit resolution --report drift.json --calibration-report calibration.json --
 quantfit emit model-card --report drift.json --calibration-report calibration.json
 ```
 
-Supply a schema-2 calibration with matching immutable measurement scope
-(the unreleased 0.37.0 candidate also accepts the distinct retained-label schema 3). These
+Supply a schema-2 or distinct retained-label schema-3 calibration with matching
+immutable measurement scope. These
 commands validate paired counts and use each arm's directional error bound for
 separately labeled conditional resolution. The native report/QSR v0 verdict,
 flagged counts and perfect-judge floor remain intact. Neither scope/hash binding
@@ -665,8 +664,7 @@ API, matrix orientation and what the counts establish.
 quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --out receiving.json --junit receiving.xml --json
 ```
 
-The optional directory contains aggregate bound-schema-2 calibrations (the unreleased
-0.37.0 candidate additionally accepts closed retained schema 3) named
+The optional directory contains aggregate bound-schema-2 or closed retained-schema-3 calibrations named
 `<target>.json`. Each analyzed pair reuses the existing conditional resolution
 calculator over held original bytes. Missing calibrations and valid stored
 calibrations whose native report is missing remain explicit; they do not qualify
