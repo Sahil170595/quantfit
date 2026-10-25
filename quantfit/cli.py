@@ -397,6 +397,37 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help="new aggregate paired diagnostics JSON; never replacement calibration",
     )
+    pcreview = csub.add_parser(
+        "review", help="local explicit review preparation/application; never automatic adjudication"
+    )
+    review_sub = pcreview.add_subparsers(dest="review_cmd", required=True)
+    review_prepare = review_sub.add_parser(
+        "prepare", help="two complete originals -> private disagreement subset + receipt"
+    )
+    review_apply = review_sub.add_parser("apply", help="explicit filled subset -> complete new private sheet + receipt")
+    for review_parser in (review_prepare, review_apply):
+        review_parser.add_argument("--sheet-a", required=True, metavar="PATH", help="original complete filled sheet A")
+        review_parser.add_argument("--sheet-b", required=True, metavar="PATH", help="original complete filled sheet B")
+        review_parser.add_argument("--key", required=True, metavar="PATH", help="shared private unblinding key")
+        review_parser.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate receipt JSON")
+    review_prepare.add_argument(
+        "--sheet", required=True, metavar="PATH", help="new private completion-bearing subset with blank labels"
+    )
+    review_apply.add_argument(
+        "--review", required=True, metavar="PATH", help="exact selected subset with explicit labels"
+    )
+    review_apply.add_argument(
+        "--preparation",
+        required=True,
+        metavar="PATH",
+        help="original preparation receipt for these role-specific input bytes",
+    )
+    review_apply.add_argument(
+        "--out",
+        required=True,
+        metavar="PATH",
+        help="new complete private sheet, suitable for separate native ingestion",
+    )
     pcr = csub.add_parser("reconcile", help="two filled sheets + one key -> aggregate label-disagreement counts")
     pcr.add_argument("--sheet-a", required=True, metavar="PATH", help="first private filled labeling sheet")
     pcr.add_argument("--sheet-b", required=True, metavar="PATH", help="second private filled labeling sheet")
@@ -1309,6 +1340,10 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _emit(args, "resolution", 0, result, human_resolution)
 
     if args.cmd == "calibrate":
+        if args.calibrate_cmd == "review":
+            from quantfit.label_review_cli import dispatch_review
+
+            return dispatch_review(args, _emit)
         if args.calibrate_cmd == "strata":
             from quantfit.calibration_strata_cli import dispatch_strata
 

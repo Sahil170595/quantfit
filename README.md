@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.39.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.39.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md) and [paired-label diagnostics](docs/calibration-paired.md). The released workflows below are available in this version.
+This README documents [quantfit 0.40.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.40.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md) and explicit [local label review](docs/label-review.md). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.39.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.40.0"`.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
@@ -85,6 +85,20 @@ It also accepts retained labels with their exact receipt. Fixed judge/label pair
 and error tables use two usable labels per pair; whole-judge counts, unusable coverage
 and source-specific at-risk denominators remain separate. No independence test, bias
 correction or calibration replacement is performed. See [the full contract](docs/calibration-paired.md).
+
+Prepare and apply explicit local label review:
+
+```bash
+quantfit calibrate review prepare --sheet-a a.labels.csv --sheet-b b.labels.csv --key private.labelkey.json --sheet private.review.labels.csv --receipt review.json --json
+# Fill every selected row using an externally fixed operator rule, then:
+quantfit calibrate review apply --sheet-a a.labels.csv --sheet-b b.labels.csv --key private.labelkey.json --review private.review.labels.csv --preparation review.json --out reviewed.labels.csv --receipt application.json --json
+quantfit calibrate ingest --sheet reviewed.labels.csv --key private.labelkey.json --out calibration.json --json
+```
+
+The queue and complete output sheet contain private text/IDs; public receipts contain
+only fixed counts, hashes and a fingerprint. Agreed labels stay unchanged; disagreements
+require explicit supplied judgments. No automatic ingestion, preferred rater, authentic
+blinding or independent adjudication is claimed. See [the full workflow](docs/label-review.md).
 
 ## What it has found
 

@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.39.0. All workflows below are available in this version.
+This reference documents quantfit 0.40.0. All workflows below are available in this version.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -626,6 +626,28 @@ unusable groups; invalid input or publication exits 2. Neither diagnostic is a
 replacement calibration or gate, and neither establishes independence, sensitivity
 or scientific GO. See [strata](calibration-strata.md) and [paired](calibration-paired.md)
 for the API, bounds and proof limits.
+
+Quantfit 0.40.0 adds explicit local review of disagreements between two complete sheets:
+
+```bash
+quantfit calibrate review prepare --sheet-a a.labels.csv --sheet-b b.labels.csv --key private.labelkey.json --sheet private.review.labels.csv --receipt review.json --json
+# Locally fill EVERY selected row with refusal, compliance, or unusable.
+quantfit calibrate review apply --sheet-a a.labels.csv --sheet-b b.labels.csv --key private.labelkey.json --review private.review.labels.csv --preparation review.json --out reviewed.labels.csv --receipt application.json --json
+# Ingestion is a separate explicit operation.
+quantfit calibrate ingest --sheet reviewed.labels.csv --key private.labelkey.json --out calibration.json --json
+```
+
+Prepare validates both complete sheets against their shared key and queues every
+unequal normalized label. Apply requires the exact selected subset, unchanged
+completion text and explicit labels; agreed rows are preserved in the new complete
+sheet. Both commands keep originals intact and require new output/receipt paths.
+Queues, sheets and keys stay private. Receipts expose fixed aggregates and byte
+bindings. These commands do not read the capture: its digest/scope remain key
+declarations. Exit 0 means the transformation completed; invalid input or publication
+exits 2. Native ingestion still refuses an entirely unusable measurement. Review
+counts establish no label truth, independent adjudication, authentic blinding,
+improved accuracy or scientific GO. See [the review contract](label-review.md) for
+API, bounds and publication limits.
 
 ## Analyze an existing run's resolution
 
