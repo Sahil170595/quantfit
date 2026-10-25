@@ -47,7 +47,7 @@ evidence implicitly. There are three explicit modes:
     a bound (`safety/mde.py`, the 0.1318-vs-0.10 counterexample). `eps_source` is
     then **required**: an MDE is a claim about resolution, and a claim about
     resolution with anonymous inputs is worse than none.
-  - **`calibration_report` supplied** (`--calibration-report`) — bound schema-2
+  - **`calibration_report` supplied** (`--calibration-report`) — bound schema-2 or schema-3
     evidence produced from a fully identified capture and key. The consumer recomputes
     directional Wilson bounds separately per arm. It validates requested scope before
     loading, then requires the actual resolved run to match before emitting a calibrated

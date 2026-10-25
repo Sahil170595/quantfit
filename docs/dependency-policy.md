@@ -85,6 +85,8 @@ Read from `pyproject.toml` **[V]**:
 
 | requirement | group | cap | why this one churns |
 |---|---|---|---|
+| `filelock==3.20.3` on Python 3.10; `>=4.2.1,<5` on Python 3.11+ | hard | conditional exact pin / `<5` | exclude the disclosed ReadWriteLock/SoftFileLock advisory ranges while preserving Python 3.10 **[V]** |
+| `setuptools>=84.1.0,<85` | hard | `<85` | Torch already requires setuptools at runtime; the raised floor excludes the Windows legacy-install path escape **[V]** |
 | `datasets>=3.0,<=5.0.1` | hard | `<=5.0.1` | preserves the admitted ceiling removed by the llmcompressor 0.14.0.1 security hotfix; later releases require qualification **[V]** |
 | `accelerate>=1.0,<=1.15.0` | hard | `<=1.15.0` | preserves the prior compressor ceiling without admitting unqualified patches **[V]** |
 | `llmcompressor>=0.5,<0.15` | hard | `<0.15` | the modifier/oneshot API churns across minors; `backends/compressed_tensors.py` imports `AWQModifier`, `GPTQModifier`, `QuantizationModifier`, `SmoothQuantModifier` and `oneshot` by path **[V]** |
@@ -101,6 +103,9 @@ checks the installed candidate metadata, rather than comparing copied YAML requi
 The preserved weekly canary also uses this graph. `.github/workflows/drift.yml` resolves
 fresh dependencies independently and runs the suite plus the vulnerability audit **[V]**.
 `tools/ci_constraints.py` remains a manual subset-install helper, not the baseline lock.
+It uses the installed `packaging` parser to evaluate markers for its running interpreter;
+generate and consume its constraints with the same Python. Locked tooling includes the
+parser and Python 3.10's `tomli`; missing manual bootstrap parsers produce exit 2.
 
 The compressor cap permits 0.14.0 so the runtime can select patched Torch 2.13.0 and
 Accelerate 1.15.0. Compressor 0.12 restricts Torch to at most 2.12; 0.13 restricts
@@ -272,7 +277,7 @@ and must not be imported by any module under `quantfit/`.
 
 ### 3.6 `BUILD_BACKEND` — build-time only, and the build runs
 
-**`setuptools>=77` and `wheel`**, from `pyproject.toml:2` **[V]**. This group is here
+**`setuptools>=84.1.0` and `wheel`**, from `[build-system].requires` **[V]**. This group is here
 because it was **missing**: two unbounded requirements that no test read, that no section
 of this document mentioned, and that the §3 count did not include. "It is only the build"
 is a reason for a different exemption *class*, not a reason to sit outside the policy —
@@ -282,9 +287,10 @@ build requirements; user installs and the deliberate drift lane still resolve li
 
 The argument has two halves and only the second is load-bearing:
 
-- **It never reaches a user's runtime environment.** The frontend resolves these into a
-  throwaway isolated build env; nothing installs them alongside quantfit. A user who
-  already has a wheel cannot be affected at all. **[I]**
+- **Build isolation is a separate resolver domain.** The frontend normally resolves build
+  requirements into a throwaway environment. That does not constrain Torch's separate
+  runtime setuptools requirement, so quantfit now declares the bounded runtime floor
+  `setuptools>=84.1.0,<85`. This exemption applies only to the build requirement **[V]**.
 - **A break fails a build that actually runs, before a user sees it.** This is the premise,
   and it is checked rather than assumed:
   `test_build_backend_exemptions_rest_on_a_wheel_build_in_ci` reads both workflows and fails
@@ -292,8 +298,8 @@ The argument has two halves and only the second is load-bearing:
   `.github/workflows/validate.yml` builds on Linux and installs wheel/sdist on Linux
   **and** Windows. `.github/workflows/canary.yml` builds weekly with locked tooling **[V]**.
 
-`setuptools>=77` is a real floor claim (PEP 639 license expressions, which
-`pyproject.toml:11` uses) **[V]**. `wheel` carries **no specifier of any kind** and
+`setuptools>=84.1.0` excludes GHSA-xmj3-9gf7-h52w and includes the PEP 639 license-expression
+support required by this metadata **[V]**. `wheel` carries **no specifier of any kind** and
 setuptools has vendored its own wheel handling for years, so it is very likely dead weight
 rather than a bound worth setting **[I]**. The exemption records that *capping* is not the
 answer; the honest fix is to **delete** it, which is `pyproject.toml`-owner work — the same
@@ -413,6 +419,19 @@ runtime qualification uses 3.12. No vulnerable Python 3.10 runtime fallback or
 advisory exception is introduced. The earlier dated receipts remain historical;
 current release validation must repeat the CPU/backend, installation and audit
 gates before publication. No GPU AWQ/GPTQ or scientific scope is added **[V]**.
+
+**Dated security maintenance — 2026-10-25.** The fresh installed-graph audit rejected
+filelock 4.0.10 for CVE-2026-112940, CVE-2026-112913 and CVE-2026-112907, and
+setuptools 84.0.0 for GHSA-xmj3-9gf7-h52w. Fixed filelock 4.2.1 requires Python 3.11;
+3.20.3 supports Python 3.10 and precedes the affected ranges. Native conditional
+requirements retain those branches in both the public package and hosted unit graph.
+HF Hub 1.31.0 admits filelock >=3.10.0, while Torch 2.13.0 requires unbounded filelock
+and setuptools >=77.0.3. Therefore the public runtime floor for setuptools is necessary
+in addition to the build floor. Native targeted resolution changes only these package
+versions and their dependent branch references; unrelated versions/artifact hashes stay
+fixed. Local audit and marker/policy evidence is in
+`validation/2026-10-25-release-dependencies/`; complete hosted acceptance remains a
+separate release requirement. No engine, GPU or measurement campaign is added **[V]**.
 
 **Raising a FLOOR needs a run too, and this is the half that is easy to forget.** Every row
 above is written for a cap, but a floor is the same kind of claim pointed the other way: it

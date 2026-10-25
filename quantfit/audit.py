@@ -1939,7 +1939,7 @@ SCHEMA_CLAIMS: tuple[SchemaClaim, ...] = (
     ),
     SchemaClaim(
         id="calibration_report",
-        modules=("quantfit/safety/calibrate.py",),
+        modules=("quantfit/safety/calibrate.py", "quantfit/safety/calibration_aggregate.py"),
         docs=("docs/judge-calibration-v0.md",),
         sections=("What the calibration report carries",),
     ),

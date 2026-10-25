@@ -928,6 +928,11 @@ irreproducible human judgment: re-running the model reproduces the text and not 
 a second labeling pass is a different measurement rather than a restoration. So the sheet's *text* is
 deleted on the same terms as the capture, and the sheet's *labels* survive as the stripped extract.
 
+The unreleased [retained-label workflow](retained-labels.md) implements this completion-free
+recomputation explicitly. The two-column extract and key remain private; its aggregate receipt is
+hash/count provenance, not label authentication. It does not perform the pending per-zone or at-risk
+analyses in §7.3 and never deletes caller inputs.
+
 ### 7.4 Handoff to `mde.py`
 
 The measured ε is not the deliverable; the resolution it buys is. `mde_block` takes

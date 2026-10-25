@@ -1,0 +1,79 @@
+{
+  "kind": "installed dependency advisory maintenance; no inference",
+  "date": "2026-10-25",
+  "baseline_source": "b7d16fa0f5a2c407b9dc043ba3e76cc8f83a645c",
+  "baseline_git_lock_sha256": "b98b2ef48a19843caa336f7f314144c3b92906ea0db799fd4da71dfe98500598",
+  "maintained_git_lf_lock_sha256": "97a2a96248061824a6f9785046feb4dd9f0f963c97da6876418ea21d134b326b",
+  "command": "python tools/ci_dependency_audit.py",
+  "environment": {
+    "os": "Windows",
+    "python": "3.12",
+    "pip_audit": "2.10.1",
+    "torch": "2.13.0+cpu",
+    "huggingface_hub": "1.31.0"
+  },
+  "before": {
+    "exit_code": 1,
+    "advisories": {
+      "filelock@4.0.10": [
+        "CVE-2026-112940",
+        "CVE-2026-112913",
+        "CVE-2026-112907"
+      ],
+      "setuptools@84.0.0": [
+        "GHSA-xmj3-9gf7-h52w"
+      ]
+    }
+  },
+  "after": {
+    "exit_code": 0,
+    "known_vulnerabilities": 0,
+    "installed_filelock": "4.2.1",
+    "installed_setuptools": "84.1.0",
+    "pip_check_exit_code": 0
+  },
+  "python310_branch": {
+    "filelock": "3.20.3",
+    "evidence": "PyPI Requires-Python>=3.10, outside the disclosed affected ranges, native UV conditional lock and packaging marker cases; not an execution of a Python3.10 full runtime"
+  },
+  "focused_marker_and_dependency_policy": {
+    "passed": 48,
+    "failed": 0,
+    "native_cli_red": "original helper rejected disjoint conditional bounds with exit2; maintained helper exits0",
+    "new_api_cases": "Target marker environments and overlapping active declarations exercise the new helper interface; original TypeError failures do not establish an old branch-evaluation defect."
+  },
+  "resolution": {
+    "old_package_entries": 175,
+    "new_package_entries": 176,
+    "removed": [
+      "filelock@4.0.10",
+      "setuptools@84.0.0"
+    ],
+    "added": [
+      "filelock@3.20.3",
+      "filelock@4.2.1",
+      "setuptools@84.1.0"
+    ],
+    "dependent_filelock_edges": [
+      "cachecontrol optional filecache",
+      "datasets",
+      "huggingface-hub",
+      "torch"
+    ],
+    "unrelated_versions_sources_artifact_hashes_unchanged": true
+  },
+  "sources": [
+    "https://github.com/tox-dev/filelock/security/advisories/GHSA-v4x8-3wr5-3wq8",
+    "https://github.com/tox-dev/filelock/security/advisories/GHSA-9vhv-jxww-xfm5",
+    "https://github.com/tox-dev/filelock/security/advisories/GHSA-567q-5qvw-pf92",
+    "https://github.com/advisories/GHSA-xmj3-9gf7-h52w",
+    "https://pypi.org/pypi/filelock/3.20.3/json",
+    "https://pypi.org/pypi/filelock/4.2.1/json",
+    "https://pypi.org/pypi/setuptools/84.1.0/json"
+  ],
+  "limits": [
+    "Known release advisories only; vendor binary integrity and undisclosed vulnerabilities are not established.",
+    "Local Windows Python3.12 checks do not substitute for hosted source, installed artifacts or provider publication acceptance.",
+    "No GPU, model, labeling or scientific campaign ran."
+  ]
+}

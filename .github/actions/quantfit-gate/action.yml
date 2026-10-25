@@ -113,8 +113,8 @@ inputs:
   from-report:
     description: >-
       Offline policy replay of an existing schema-v2 aggregate, without new inference.
-      Exclusive with baseline, quant, max-new-tokens and hf-token. Requires a candidate
-      installed via quantfit-path until a published version advertises --from-report.
+      Exclusive with baseline, quant, max-new-tokens and hf-token. Available since
+      quantfit 0.22.0; use quantfit-path for candidate acceptance.
     required: false
     default: ""
   baseline:
@@ -167,7 +167,7 @@ inputs:
     default: ""
   calibration-report:
     description: >-
-      Bound schema-2 calibration JSON checked against the requested pinned protocol
+      Bound schema-2 calibration JSON (or retained schema 3 since 0.37) checked against the requested pinned protocol
       and actual resolved run. Mutually exclusive with eps-upper/eps-source. Scope
       matching does not authenticate human labels, verify A1/A2/A3 or pass sensitivity.
       Supported by quantfit gate since 0.16.0; no model-card emit is invoked by this action.
@@ -187,7 +187,7 @@ inputs:
       Pin it exactly for a reproducible gate — the instrument's version is part of the
       measurement. Ignored when `quantfit-path` is set.
     required: false
-    default: ">=0.36.0,<0.37"
+    default: ">=0.37.0,<0.38"
   quantfit-path:
     description: >-
       Install quantfit from this local path (e.g. `.` for a checked-out repo) instead of
