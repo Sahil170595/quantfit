@@ -5,6 +5,10 @@ CPython 3.12.13, pytest 9.0.3 and the unchanged 176-package private CI lock were
 used. No model, inference, remote provider, human labeling or scientific campaign
 was run.
 
+In `counts.json`, `prepare_exit_code` maps an API receipt to harness 0 and
+`RetainedReviewError` to harness 2; CLI cases record the native CLI exit code
+returned by its in-process entrypoint.
+
 The existing native capture writer and key/sheet producer create all inputs.
 Both retained-label receipts are produced by actual `extract_labels` calls under
 an explicit setup-only CSV field limit of 131073 characters. The test restores
