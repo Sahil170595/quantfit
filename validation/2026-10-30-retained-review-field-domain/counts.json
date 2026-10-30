@@ -1,0 +1,366 @@
+{
+  "kind": "quantfit.retained-review-field-domain-controls",
+  "date": "2026-10-30",
+  "synthetic": true,
+  "human_labels_authenticated": false,
+  "scientific_go": false,
+  "source": {
+    "quantfit/safety/retained_review.py": {
+      "raw_sha256": "fe2401338a5f46fcb3380142a45a06e4586f3e73bec3b8c24d51f7f0998eeb21",
+      "git_lf_sha256": "d1f563d3cd9a14a9b265ac8dd4d6a478dc555a1fb0fe88d3508d498a3dea78b5"
+    },
+    "tests/test_ci_retained_review.py": {
+      "raw_sha256": "3d14b442a6cfce5934ebde8d24abfd1f1281c5a8bbf34b314c705b3ddca1c1b9",
+      "git_lf_sha256": "c52de42c90a885ace0174e1ec44064009d2b844a9aaf3c2b2e965e279d3452d7"
+    },
+    "tools/ci_label_review.py": {
+      "raw_sha256": "2c9e5a99948e6aad8b9331dcd71a6683b48b6149f4a8f7936ebbd7dd4daa7b6d",
+      "git_lf_sha256": "e6d4f62e5d29c6a62d8251812b32ae3e522ff038c68f9d7501dff57677a7f1f9"
+    },
+    "tools/ci_label_reconciliation.py": {
+      "raw_sha256": "106efa10f5acb106f81bcd4d31ca7d07106e006caad54c19f7108a257943082f",
+      "git_lf_sha256": "b37804dafe8c3e838ab43a5e1012044f8740df0fc07eec3b7a324b64dfa5493c"
+    }
+  },
+  "before_fix": {
+    "runtime": {
+      "runtime_raw_sha256": "cafb8da373885405c05938eb180fae0344adc2526983c53129e2b20ecbd7c63a",
+      "runtime_git_blob": "5c626ae84bcbb23fcf48398b608aeba82bb92d3e",
+      "runtime_original_unchanged": true,
+      "test_sha256": "3d14b442a6cfce5934ebde8d24abfd1f1281c5a8bbf34b314c705b3ddca1c1b9",
+      "expected": "2 boundary controls PASS;4oversize prepare refusals RED on unchanged originalruntime",
+      "fixture": "real native capture/key/sheets and both extract_labels under wider setup-only limit; restore default before public entrypoint"
+    },
+    "counts": {
+      "cases": 6,
+      "passed": 2,
+      "failed": 4,
+      "errors": 0
+    },
+    "observations": [
+      {
+        "interface": "api",
+        "mode": "all-disagree",
+        "field_characters": 131072,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "a56fa34b223dca4df44688d8260fd1ae1c36e0c118192beb4a18464881e79376",
+          "43c49ba7fd33b9168afce2a19b2ff43b2b77862b563473e1a8e71e10f8b39750",
+          "b63a2dc3fa1a304a45d86acaf14ff8508cd9aff34744829cebc0f2a03d5ca986",
+          "32211123511925954b35fc32e04626180762a5cc10dd27a2ceb165de8cbffc73",
+          "843cf6adee99a1416e5905ce05a07d57771b2d445689d5f45c7422d84ec4fbec",
+          "2a0a1f144019490270ef5f333f5c6cf2c902fe76eb94db7b2b97d9882b5ef35f"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 0,
+        "queue_created": true,
+        "preparation_created": true,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false,
+        "native_full_rows": 18,
+        "separate_schema3_ingest": true
+      },
+      {
+        "interface": "cli",
+        "mode": "all-disagree",
+        "field_characters": 131072,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "ec59dcc946b7c842c5056b74bcdb1f40f5b6ad4dc2d736963a23ba3e1e598939",
+          "0a0871921b95de920092871f1fdcaf3535133016e8e98d12da3c95915a3536ff",
+          "4f57089c57b298c4fc73d959eb2574d8e6fb18a228b78a74859ba60c209101fd",
+          "7e592433367c56c3ed85897b3069b508ae019cf9dc8d3d4cc112a89763449363",
+          "cb6d8d6ec7cdbd05a26ba83ea1fc444b1f5bacdf0237b151971816a92b3a9b03",
+          "4d6ee6322febf1e1aabc509c544fac64f6d99c428308afb28a2962b3158445a8"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 0,
+        "queue_created": true,
+        "preparation_created": true,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false,
+        "native_full_rows": 18,
+        "separate_schema3_ingest": true
+      },
+      {
+        "interface": "api",
+        "mode": "all-disagree",
+        "field_characters": 131073,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "5e68788b03299072f6e0cd65f40b7ac5d33033c2142baa4827b03781b43b8635",
+          "fe616c492fa0c560ff249af3d9306ef5b575c1101f2872378a30cc230901da9d",
+          "e3ca0fd0f024a2e1f9c0c7218a623da1d5b6b102b7236c92e80962dd29d596ae",
+          "06c7e0a47fb170f554b562d5b743d2319a285f1f31a549669a8db22467ea5b8e",
+          "b4bf4477194af10ee0c15f024640120701345bf7b6f99dffbbe474b50bb808f7",
+          "029dfb849546ff279d5eb8a5e7bc36fcdbef528fc8d0137e99df88c2550132d6"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 0,
+        "queue_created": true,
+        "preparation_created": true,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false
+      },
+      {
+        "interface": "cli",
+        "mode": "all-disagree",
+        "field_characters": 131073,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "6aebec78664176ce9f06958cda3e0224d1285afd9a15b1bcbc648f36461744c2",
+          "b11c8247af8a5ef2e5daf30d886aa61e1ce6e3eb3fd269be35b8f2726fd5d6e1",
+          "d14586c60a7d700ca841534706e5c98e721bad7deb3eac34ec10b2192ad362dd",
+          "be6c157c37846c8543a608f999be10c0f958ad463fafca9601cef71fb7678e32",
+          "bc7c9657b9bfc1c68784cb307ce6d4ee835a511a10ae1589bb7ee0504302bb94",
+          "b081895d02fa3e2a70e2e5ad72bdec8b0f4a3396ea1aadbb5c592ecf6a5f727a"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 0,
+        "queue_created": true,
+        "preparation_created": true,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false
+      },
+      {
+        "interface": "api",
+        "mode": "zero",
+        "field_characters": 131073,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "cf01820f39abbd9bf78b6b6fc5cec7b5c9665d6e9a5653302dcb59811e4bd52c",
+          "7d265bacc8f3bcc812dce1976d7cc6ca0374dc86b42c884ccb672be3311ab5fd",
+          "54f8064950eb76188defd6a3fbc7fd1f832014b405d47166b4822f8186b7161f",
+          "39c33f7c322deca061975530e4ab639c4feed287b0a07e5f78cd93e04df74813",
+          "54f8064950eb76188defd6a3fbc7fd1f832014b405d47166b4822f8186b7161f",
+          "39c33f7c322deca061975530e4ab639c4feed287b0a07e5f78cd93e04df74813"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 0,
+        "queue_created": true,
+        "preparation_created": true,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false
+      },
+      {
+        "interface": "cli",
+        "mode": "zero",
+        "field_characters": 131073,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "cf01820f39abbd9bf78b6b6fc5cec7b5c9665d6e9a5653302dcb59811e4bd52c",
+          "837b0589aa939c80172d7fea89c89ef8042e4d315b3793d92f867770d4860fa9",
+          "caf0c98435ff5ea2e7de1e395114983e39de9069ffcf0b985596ca30fc2b960f",
+          "770557b50bbeebfd650936668b0f11dbdc6704f5c0ca64301383ec030a7dfeb6",
+          "caf0c98435ff5ea2e7de1e395114983e39de9069ffcf0b985596ca30fc2b960f",
+          "770557b50bbeebfd650936668b0f11dbdc6704f5c0ca64301383ec030a7dfeb6"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 0,
+        "queue_created": true,
+        "preparation_created": true,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false
+      }
+    ],
+    "log_sha256": "4ba1983beb7a351fda105a2f0631d5db4078a23c5015510f722ac8685232c0be",
+    "junit_sha256": "60d68eaee451267c072cd9f4ff4166f4b722efb93e3b0de72a8f88ea35dd32a2"
+  },
+  "after_fix": {
+    "counts": {
+      "cases": 6,
+      "passed": 6,
+      "failed": 0,
+      "errors": 0
+    },
+    "observations": [
+      {
+        "interface": "api",
+        "mode": "all-disagree",
+        "field_characters": 131072,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "90faa584fd0c5c6908dd4a103eec342490bf089fb603f3cbc6b5d4dfbf246658",
+          "9f147326aa9fcf0dabcb64b2e9d4f5d7a66d9679cb7a4e69159e27315860b6cb",
+          "108aae48eb929cc04c3792e303a60695c9c0813c5d8a841d3e69e75cca56bd88",
+          "2371fe53f6e07d701b6415dde061afd31c3ce0b4e5dffd5aa782c2a8028f8991",
+          "fb4557def766cade8d5ded5ec44cbb1fbe95d38298e7344e6d284cf0162c4cdd",
+          "8456e8ee307511d2c56f8452877dba4f3f64126be53e529c9c53df7fce4efac8"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 0,
+        "queue_created": true,
+        "preparation_created": true,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false,
+        "native_full_rows": 18,
+        "separate_schema3_ingest": true
+      },
+      {
+        "interface": "api",
+        "mode": "all-disagree",
+        "field_characters": 131073,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "ea92e4744ffddc4d0fa169e995f0999edb9080b530b970e8bd4fe9cbe1cab933",
+          "475c92384d98e5d06c84a14c177235a9df5ea2397b1adca603d0eabdbc69500c",
+          "c42d890fc4175edf4d214ad3d675084aa290bb97667673d282afdd328f556158",
+          "08ffdc3f8a6bb6c91581a190eb5960939b45160d3f98fb4b9895ebd30677b06f",
+          "e4b25d6071d348d6d0e4b32f6e07590e5f50a86a0c531b63b345c6baea665b38",
+          "9a747903930673ee0b31b636a9942bb541fe65f18ebc15854afd31a5bce6d478"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 2,
+        "queue_created": false,
+        "preparation_created": false,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false
+      },
+      {
+        "interface": "api",
+        "mode": "zero",
+        "field_characters": 131073,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "5146b149940b02836029402550b220d06187223ffe42764b8859841017304405",
+          "8ffe491d2f63e5c2e1519d757372d841704aa204afb41c53e9f45666b06623fd",
+          "559feb0f038d01f0dee25ad0ef3cbcd5768e5a97f99d3185317c8351a5ed1ab8",
+          "eecfc9f407a0db834c04cdeaa09a672b337920051dd7c82dafebbb2a529d59f4",
+          "559feb0f038d01f0dee25ad0ef3cbcd5768e5a97f99d3185317c8351a5ed1ab8",
+          "eecfc9f407a0db834c04cdeaa09a672b337920051dd7c82dafebbb2a529d59f4"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 2,
+        "queue_created": false,
+        "preparation_created": false,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false
+      },
+      {
+        "interface": "cli",
+        "mode": "all-disagree",
+        "field_characters": 131072,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "94ea16a62fb92199accc3ee464fd97aadc600b9df6b4edc79c666e6707142759",
+          "fe0ef6b0d5b1073fa48cfefc8777a5c25c041e354aa5f01589781ffe2ccef974",
+          "89ed938662884541e13c88742ec13438e85015efda4a0737e5799f5b82996fcc",
+          "964bd352e6de3bb4f69c0aef16355239ffe671af02a85ddaabd6ceec766964d2",
+          "0b1428d3d6fe0bd4dea9d6913db34a09d661754527d494431d1129117f841183",
+          "b6d833cf0815b253e471ebfb9da8d275dd4efd47fc0ed0160b7a53b2d58b7b13"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 0,
+        "queue_created": true,
+        "preparation_created": true,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false,
+        "native_full_rows": 18,
+        "separate_schema3_ingest": true
+      },
+      {
+        "interface": "cli",
+        "mode": "all-disagree",
+        "field_characters": 131073,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "5146b149940b02836029402550b220d06187223ffe42764b8859841017304405",
+          "a32a5748ac7baed616b90fe7b721b3ad00b0f6c5707fd102d0776bcacfe49e02",
+          "cd7184ca376a15dece21e9dc91266605e275a87b81df88b538c36b9686ccea31",
+          "98a925c9830172f948543ed34f2a4b2485027b0f726acd76fd53505651fe1263",
+          "c571396effd329a0811ec9f9861658408fad17e65def5c030288a7927ff73900",
+          "fe21067d3929901b08deb6177bbf3b76d6600c4686fa1cf9752984a3197f1da5"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 2,
+        "queue_created": false,
+        "preparation_created": false,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false
+      },
+      {
+        "interface": "cli",
+        "mode": "zero",
+        "field_characters": 131073,
+        "native_field_limit": 131072,
+        "setup_only_field_limit": 131073,
+        "native_capture_writes": 1,
+        "native_retention_extractions": 2,
+        "input_sha256s": [
+          "5146b149940b02836029402550b220d06187223ffe42764b8859841017304405",
+          "9192d75d59c7bb787b2ec493165c265d928bd7b94dffa5a34a9da0e04155b185",
+          "0babbe39de10450148c6e271a2fa27cbea317ca04e3ac662ecc73f21c6b5e664",
+          "0b3b123bd3314ed1eea2bc3922b9340512e42854212819a4e74cf2e02b275f70",
+          "0babbe39de10450148c6e271a2fa27cbea317ca04e3ac662ecc73f21c6b5e664",
+          "0b3b123bd3314ed1eea2bc3922b9340512e42854212819a4e74cf2e02b275f70"
+        ],
+        "original_sheets_unavailable": true,
+        "prepare_exit_code": 2,
+        "queue_created": false,
+        "preparation_created": false,
+        "global_limit_restored": true,
+        "synthetic": true,
+        "human_labels_authenticated": false,
+        "scientific_go": false
+      }
+    ],
+    "log_sha256": "8a537063c80d5026add21f7b77174ef2895b892903bd8e9ec7544edc94350c10",
+    "junit_sha256": "86d1122768d39d71d926cd5ea2e309d2807e36aa65a1ff7bb75dd1dbc9a80b99"
+  },
+  "limits": "Real native artifacts issued under explicit setup-only131073 reader setting; restored131072 before every public prepare/apply call. No product global limit change, inference, human labeling or scientific qualification."
+}

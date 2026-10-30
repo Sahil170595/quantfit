@@ -13,12 +13,14 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.43.0 — unreleased
+## 0.43.0 — 2026-10-30
 
 - Add explicit capture-backed retained mode to both `calibrate review prepare` and `calibrate review apply`, with complete CLI/API workflows after the original filled sheets are unavailable. Verify the actual shared capture/key and both own retained receipts once, preserve every inequality including unusable, and native-validate a NEW full sheet before publication.
 - Preserve default full-sheet review calls/receipts, original-sheet hashes as declarations, unusable/native arithmetic, dependencies and separate truthful extract/schema-3 ingestion. No human authentication, new statistics, automatic labeling/sharing or scientific GO. Regenerable fictional evidence: `validation/2026-10-25-retained-review/`.
 
-## 0.42.0 — unreleased
+- Refuse every reconstructed captured field outside the current native CSV reader domain before publishing retained-review outputs, including agreed rows absent from the queue. Exact-limit API/CLI controls retain complete native joins and separate schema-3 ingestion; no global reader/parser or native statistics change. Actual public-entrypoint RED/GREEN evidence: `validation/2026-10-30-retained-review-field-domain/`.
+
+## 0.42.0 — 2026-10-30
 
 - Add complete `calibrate chunks prepare` and `calibrate chunks collect`: bounded private partitions of a complete blank native template, exact regenerated preparation bindings, explicit returned labels and a new complete native sheet. Original native ingest remains separate and unchanged.
 - Retain all source rows, unusable judgments, role-specific source/filled hashes and operator-declared attribution. No automatic labeling/sharing, new annotator permission, independent samples or scientific GO. Regenerable fictional CLI/API/native-ingest evidence and limits: `validation/2026-10-25-annotation-chunks/`.
