@@ -1,7 +1,7 @@
-# Conditional finite-grid resolution budget — unreleased 0.44.0
+# Conditional finite-grid resolution budget — since 0.44.0
 
-This opt-in block requires 0.44.0 source or a candidate wheel. Published 0.41.0's
-default `resolution` workflow remains unchanged. Planning evaluates one declared
+Available since quantfit 0.44.0. The default `resolution` workflow remains
+unchanged. Planning evaluates one declared
 **hypothetical at-risk** range under the supplied calibration bounds; it never
 rewrites a report, its scope/corpus/actual denominators or observed verdict.
 
