@@ -302,18 +302,25 @@ def _build_parser() -> argparse.ArgumentParser:
     psaved.add_argument("--reports-dir", required=True, metavar="DIR", help="closed saved aggregate directory")
     psaved.add_argument("--out", default=None, metavar="PATH", help="separate receiving JSON output")
     psaved.add_argument("--junit", default=None, metavar="PATH", help="receiving XML; missing evidence is skipped")
-    psaved.add_argument(
+    calibration_modes = psaved.add_mutually_exclusive_group()
+    calibration_modes.add_argument(
         "--calibrations-dir",
         default=None,
         metavar="DIR",
         help="optional closed aggregate calibration directory; conditional resolution does not change native verdicts",
+    )
+    calibration_modes.add_argument(
+        "--calibration-variant",
+        action="append",
+        metavar="NAME=DIR",
+        help="repeat for 1..8 named closed calibration choices; NAME=- explicitly declares missing; mutually exclusive single directory",
     )
     psaved.add_argument(
         "--require-conditional-resolution",
         type=float,
         default=None,
         metavar="PP",
-        help="opt-in finite (0,100] pp ceiling on both native conditional axes for every target; requires --calibrations-dir",
+        help="opt-in finite (0,100] pp ceiling on both native conditional axes for every target and declared choice; requires a calibration mode",
     )
     pcompare = sub.add_parser(
         "screen-compare",
@@ -776,6 +783,10 @@ def _dispatch(args: argparse.Namespace) -> int:
         options = {"out_path": args.out, "junit_path": args.junit}
         if args.calibrations_dir is not None:
             options["calibrations_dir"] = args.calibrations_dir
+        if args.calibration_variant is not None:
+            from quantfit.calibration_choices import parse_variant_options
+
+            options["calibration_variants"] = parse_variant_options(args.calibration_variant)
         if args.require_conditional_resolution is not None:
             options["required_conditional_resolution_pp"] = args.require_conditional_resolution
         result = summarize_screen(args.targets, args.reports_dir, **options)
@@ -790,6 +801,15 @@ def _dispatch(args: argparse.Namespace) -> int:
                 coverage = result["conditional_resolution"]["coverage"]
                 print(f"Conditional resolution: {coverage['n_analyzed']}/{coverage['n_targets']} targets analyzed")
                 print("Supplied calibration label truth and statistical assumptions remain unverified.")
+            if "calibration_choice_sensitivity" in result:
+                coverage = result["calibration_choice_sensitivity"]["coverage"]
+                requirement = result["calibration_choice_requirement"]
+                print(
+                    f"Calibration choices: {coverage['analyzed']}/{coverage['expected']} target-choice pairs analyzed; native exit {requirement['native_exit_code']}, receiving exit {result['exit_code']}."
+                )
+                print(
+                    "Descriptive supplied choices only; copied payloads are not independent raters. No authenticated labels or scientific GO."
+                )
 
         return _emit(args, "screen-summary", result["exit_code"], result, human_screen_summary)
     if args.cmd == "check":

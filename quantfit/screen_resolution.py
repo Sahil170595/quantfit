@@ -22,6 +22,7 @@ from quantfit.reproduce import (
 )
 from quantfit.safety.calibration_binding import MAX_CALIBRATION_BYTES, BoundCalibration, load_bound_calibration_bytes
 from quantfit.safety.gguf_arm import UNQUANTIZED_FILE_TYPES, is_gguf_ref
+from quantfit.safety.report import DriftReport
 from quantfit.screen import Target
 from quantfit.screen_requirement import qualify_screen, validate_requirement
 
@@ -38,7 +39,7 @@ SCOPE = (
 
 @dataclass(frozen=True)
 class _HeldCalibrations:
-    root: Path
+    root: Path | None
     members: tuple[tuple[str, bytes], ...]
     allowed: frozenset[str]
 
@@ -100,11 +101,33 @@ def _target_binding(target: Target, calibration: BoundCalibration) -> None:
         )
 
 
-def _summarize_inputs(native: saved._HeldScreenInputs, calibrations: _HeldCalibrations) -> dict[str, Any]:
-    """Pure held receiving/preflight followed by the single authoritative analysis path."""
-    result: dict[str, Any] = saved._summarize_held(
-        native.manifest, dict(native.members), manifest_path=native.manifest_path, reports_dir=native.reports_dir
-    )
+@dataclass(frozen=True)
+class _PreparedRow:
+    target: Target
+    binding: dict[str, Any]
+    report_raw: bytes | None
+    calibration_raw: bytes | None
+    calibration: BoundCalibration | None
+    report: DriftReport | None
+
+
+@dataclass(frozen=True)
+class _PreparedResolution:
+    rows: tuple[_PreparedRow, ...]
+    work: int
+
+
+def _prepare_rows(
+    native: saved._HeldScreenInputs,
+    result: dict[str, Any],
+    calibrations: _HeldCalibrations,
+    *,
+    work_limit: int | None = None,
+    parsed_reports: dict[str, DriftReport] | None = None,
+) -> _PreparedResolution:
+    """Pure held preflight; no threshold, power or MDE calculation."""
+    if work_limit is None:
+        work_limit = MAX_ANALYSIS_WORK_UNITS
     _, targets, _ = saved._manifest(native.manifest)
     allowed = {f"{target.name}.json" for target in targets}
     saved._require(
@@ -128,28 +151,46 @@ def _summarize_inputs(native: saved._HeldScreenInputs, calibrations: _HeldCalibr
         sum(len(raw) for raw in raw_calibrations.values()) <= MAX_TOTAL_CALIBRATION_BYTES, "calibration_byte_limit"
     )
     reports = dict(native.members)
-    prepared: list[tuple[Target, dict[str, Any], bytes | None, bytes | None, BoundCalibration | None]] = []
+    prepared = []
     work = 0
     for index, target in enumerate(targets):
         member = f"{target.name}.json"
         report_raw, calibration_raw = reports.get(member), raw_calibrations.get(member)
         calibration = None
+        report = None
         if calibration_raw is not None:
             _json(calibration_raw)  # Aggregate privacy/duplicate-key checks before authoritative bound receiving.
             calibration = load_bound_calibration_bytes(calibration_raw)
             _target_binding(target, calibration)
             if report_raw is not None:
-                report = resolution.parse_report_bytes(report_raw)
+                if parsed_reports is None:
+                    report = resolution.parse_report_bytes(report_raw)
+                else:
+                    if member not in parsed_reports:
+                        parsed_reports[member] = resolution.parse_report_bytes(report_raw)
+                    report = parsed_reports[member]
                 calibration.match_report(report)
                 resolution._axes(report)  # All structural/count/probe resource checks, without resolution math.
                 work += report.probe_dataset["n_probes"] ** 2
-                saved._require(work <= MAX_ANALYSIS_WORK_UNITS, "resolution_work_limit")
-        prepared.append((target, result["report_bindings"][index], report_raw, calibration_raw, calibration))
+                saved._require(work <= work_limit, "resolution_work_limit")
+        prepared.append(
+            _PreparedRow(target, result["report_bindings"][index], report_raw, calibration_raw, calibration, report)
+        )
+    return _PreparedResolution(tuple(prepared), work)
+
+
+def _analyze_rows(prepared: _PreparedResolution, *, use_prepared: bool = False) -> list[dict[str, Any]]:
     rows = []
-    for target, binding, report_raw, calibration_raw, calibration in prepared:
+    for item in prepared.rows:
+        target, binding = item.target, item.binding
+        report_raw, calibration_raw, calibration = item.report_raw, item.calibration_raw, item.calibration
         analysis = None
         if report_raw is not None and calibration_raw is not None:
-            _, analysis = resolution.analyze_resolution_bytes(report_raw, calibration_raw)
+            if use_prepared:
+                assert item.report is not None and calibration is not None
+                analysis = resolution._analysis(item.report, hashlib.sha256(report_raw).hexdigest(), calibration)
+            else:
+                _, analysis = resolution.analyze_resolution_bytes(report_raw, calibration_raw)
             status = "analyzed"
         else:
             status = (
@@ -174,6 +215,17 @@ def _summarize_inputs(native: saved._HeldScreenInputs, calibrations: _HeldCalibr
                 "analysis": analysis,
             }
         )
+    return rows
+
+
+def _summarize_inputs(native: saved._HeldScreenInputs, calibrations: _HeldCalibrations) -> dict[str, Any]:
+    """Pure held receiving/preflight followed by the single authoritative analysis path."""
+    result: dict[str, Any] = saved._summarize_held(
+        native.manifest, dict(native.members), manifest_path=native.manifest_path, reports_dir=native.reports_dir
+    )
+    prepared = _prepare_rows(native, result, calibrations)
+    rows = _analyze_rows(prepared)
+    work = prepared.work
     counts = {
         f"n_{status}": sum(row["status"] == status for row in rows)
         for status in ("analyzed", "calibration_missing", "pending_report_missing", "report_and_calibration_missing")

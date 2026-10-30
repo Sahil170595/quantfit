@@ -41,16 +41,17 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.44.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.44.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
+This README documents [quantfit 0.45.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.45.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.44.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.45.0"`.
 
-Quantfit 0.44.0 includes 0.42's [annotation chunk prepare/collect](docs/annotation-chunks.md)
-and 0.43's [capture-backed retained review](docs/retained-review.md), and adds
-[conditional finite-grid resolution budgets](docs/resolution-budget.md). The last
-workflow holds the original report/calibration and separately evaluates every
-hypothetical at-risk count in a bounded declared range, preserving actual counts
-and scope. These workflows are included in this version.
+Quantfit 0.45.0 includes [annotation chunks](docs/annotation-chunks.md)
+(0.42), [capture-backed retained review](docs/retained-review.md) (0.43),
+[finite-grid resolution budgets](docs/resolution-budget.md) (0.44), and adds
+[calibration-choice sensitivity](docs/calibration-choices.md). Named supplied
+calibrations retain all targets, missing/unattainable coverage and original native
+outcomes; only an explicit all-choice resolution ceiling changes receiving
+qualification. These workflows are included in this version.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
