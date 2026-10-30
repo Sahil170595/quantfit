@@ -1,0 +1,174 @@
+{
+  "api_all_unusable": {
+    "n_rows": 18,
+    "n_unusable": 18,
+    "native_ingest_refused": true
+  },
+  "collection": {
+    "annotation_chunks_schema": 1,
+    "annotator_declared": {
+      "name": null,
+      "role": "maintainer"
+    },
+    "inputs": {
+      "key": {
+        "sha256": "2b52aafc1d6915fbd47a8b50bf65d42c0f5be1a256a5557cbf96aaf87ae68a30",
+        "size_bytes": 6248
+      },
+      "sheet": {
+        "sha256": "66711c2f0cc54dd71e0675be05db15cc50006a72b1f2b2caaf2e95a7158d0dab",
+        "size_bytes": 2054
+      }
+    },
+    "limits": {
+      "human_labels_authenticated": false,
+      "rater_identity_verified": false,
+      "scientific_go": false
+    },
+    "manifest": {
+      "sha256": "3dffaf50748efdbd15f5a86e1dc40ec56084c6006a68741f829e9b11ef9c1810",
+      "size_bytes": 2798
+    },
+    "n_pairs": 9,
+    "n_parts": 4,
+    "n_rows": 18,
+    "n_unusable": 4,
+    "output_sheet": {
+      "sha256": "023625163672a47003712f2ac4ad4c39882cef5036838ee91fab24f73b1f3f83",
+      "size_bytes": 2199
+    },
+    "parts": [
+      {
+        "blank_sheet": {
+          "sha256": "665d6a6eda087df777348d9a93cb69effb6a0116949f696f2b471fbea5fdef9b",
+          "size_bytes": 589
+        },
+        "filled_sheet": {
+          "sha256": "8e7725f11170be6dfbdb36f78f8a5760e4e09301b25f57111b9c164348081c0a",
+          "size_bytes": 627
+        },
+        "index": 1,
+        "n_rows": 5
+      },
+      {
+        "blank_sheet": {
+          "sha256": "f212c4b844a99648065c141737fe657d0d86787334f4b8ca233d8d27d9803617",
+          "size_bytes": 589
+        },
+        "filled_sheet": {
+          "sha256": "e1f3504e7bd2acba87bd5a012cf4d10eca0251c94ffe6110bac11a4f321816e0",
+          "size_bytes": 626
+        },
+        "index": 2,
+        "n_rows": 5
+      },
+      {
+        "blank_sheet": {
+          "sha256": "7cbc66b312ff34b882df883d99ef523215cdd144f6d9301fd23d8a06a15af8d6",
+          "size_bytes": 588
+        },
+        "filled_sheet": {
+          "sha256": "f079e5267e5726044d7caeedf2b1925ad10ceb04eea4fa4c62dc72ee7962681c",
+          "size_bytes": 633
+        },
+        "index": 3,
+        "n_rows": 5
+      },
+      {
+        "blank_sheet": {
+          "sha256": "18a143073fc083466b6b93e0a2c30923a44fc98a09e43df1787768f33b90e0e5",
+          "size_bytes": 363
+        },
+        "filled_sheet": {
+          "sha256": "3233b691e0d05b418a11f7a0ceec0638a1eaa6d6d946f7d3f46de43d796b4fee",
+          "size_bytes": 391
+        },
+        "index": 4,
+        "n_rows": 3
+      }
+    ],
+    "quantfit_version": "0.42.0",
+    "scope": "Local partition and collection of supplied native labeling sheets only. No capture is read; capture scope/digest are key declarations. Only blinded parts may be shared under the existing single named second-annotator carve-out; never share this manifest or key. No automatic labeling, sending, ingestion, rater authentication, independence, human truth or scientific GO. Manifest-last exclusive publication is not a directory transaction; earlier new outputs may remain after failure."
+  },
+  "human_labels_authenticated": false,
+  "kind": "quantfit.annotation-chunks-functional-acceptance",
+  "missing_part_exit_code": 2,
+  "native_counts": {
+    "calibration_schema": 2,
+    "n_labeled": 18,
+    "n_unusable": 4,
+    "unmeasured_arms": []
+  },
+  "native_ingest_exit_code": 0,
+  "originals_unchanged": true,
+  "preparation": {
+    "annotation_chunks_schema": 1,
+    "annotator_declared": {
+      "name": null,
+      "role": "maintainer"
+    },
+    "inputs": {
+      "key": {
+        "sha256": "2b52aafc1d6915fbd47a8b50bf65d42c0f5be1a256a5557cbf96aaf87ae68a30",
+        "size_bytes": 6248
+      },
+      "sheet": {
+        "sha256": "66711c2f0cc54dd71e0675be05db15cc50006a72b1f2b2caaf2e95a7158d0dab",
+        "size_bytes": 2054
+      }
+    },
+    "limits": {
+      "human_labels_authenticated": false,
+      "rater_identity_verified": false,
+      "scientific_go": false
+    },
+    "manifest": {
+      "sha256": "3dffaf50748efdbd15f5a86e1dc40ec56084c6006a68741f829e9b11ef9c1810",
+      "size_bytes": 2798
+    },
+    "n_pairs": 9,
+    "n_parts": 4,
+    "n_rows": 18,
+    "parts": [
+      {
+        "blank_sheet": {
+          "sha256": "665d6a6eda087df777348d9a93cb69effb6a0116949f696f2b471fbea5fdef9b",
+          "size_bytes": 589
+        },
+        "index": 1,
+        "n_rows": 5
+      },
+      {
+        "blank_sheet": {
+          "sha256": "f212c4b844a99648065c141737fe657d0d86787334f4b8ca233d8d27d9803617",
+          "size_bytes": 589
+        },
+        "index": 2,
+        "n_rows": 5
+      },
+      {
+        "blank_sheet": {
+          "sha256": "7cbc66b312ff34b882df883d99ef523215cdd144f6d9301fd23d8a06a15af8d6",
+          "size_bytes": 588
+        },
+        "index": 3,
+        "n_rows": 5
+      },
+      {
+        "blank_sheet": {
+          "sha256": "18a143073fc083466b6b93e0a2c30923a44fc98a09e43df1787768f33b90e0e5",
+          "size_bytes": 363
+        },
+        "index": 4,
+        "n_rows": 3
+      }
+    ],
+    "quantfit_version": "0.42.0",
+    "scope": "Local partition and collection of supplied native labeling sheets only. No capture is read; capture scope/digest are key declarations. Only blinded parts may be shared under the existing single named second-annotator carve-out; never share this manifest or key. No automatic labeling, sending, ingestion, rater authentication, independence, human truth or scientific GO. Manifest-last exclusive publication is not a directory transaction; earlier new outputs may remain after failure."
+  },
+  "rater_identity_verified": false,
+  "retained_calibration_schema": 3,
+  "scientific_go": false,
+  "synthetic": true,
+  "synthetic_operator_labels": true
+}

@@ -41,9 +41,13 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.41.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.41.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
+This README documents [quantfit 0.42.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.42.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.41.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.42.0"`.
+
+Quantfit 0.42.0 adds the complete [annotation chunk prepare/collect
+workflow](docs/annotation-chunks.md), with private source-bound partitions and
+separate unchanged native ingestion. This workflow is included in this version.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).

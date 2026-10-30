@@ -302,6 +302,7 @@ jobs:
           mypy --strict --follow-imports=silent quantfit/safety/calibration_inputs.py quantfit/safety/calibration_strata.py quantfit/calibration_strata_cli.py tools/ci_calibration_strata.py
           mypy --strict --follow-imports=silent quantfit/safety/calibration_paired.py quantfit/calibration_paired_cli.py tools/ci_calibration_paired.py
           mypy --strict --follow-imports=silent quantfit/safety/label_review.py quantfit/label_review_cli.py tools/ci_label_review.py
+          mypy --strict --follow-imports=silent quantfit/safety/annotation_chunks.py quantfit/annotation_chunks_cli.py tools/ci_annotation_chunks.py
           mypy --strict --follow-imports=silent quantfit/screen_requirement.py tools/ci_screen_requirement.py
           quantfit audit
       - name: Verify and run actionlint

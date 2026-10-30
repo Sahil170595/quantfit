@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.41.0. All workflows below are available in this version.
+This reference documents quantfit 0.42.0, including annotation chunks.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -668,6 +668,38 @@ exits 2. Native ingestion still refuses an entirely unusable measurement. Review
 counts establish no label truth, independent adjudication, authentic blinding,
 improved accuracy or scientific GO. See [the review contract](label-review.md) for
 API, bounds and publication limits.
+
+### Annotation chunks — since 0.42.0
+
+The workflow accepts only a complete **blank** native template
+and its original key. Create an empty private directory first, then prepare every
+bounded partition and its private manifest:
+
+```bash
+quantfit calibrate chunks prepare --sheet blank.labels.csv --key private.labelkey.json --out-dir annotation-parts --rows-per-part 100 --json
+```
+
+Explicitly fill every returned part, then collect them in manifest order:
+
+```bash
+quantfit calibrate chunks collect --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --part annotation-parts/part-0001.labels.csv --part annotation-parts/part-0002.labels.csv --out collected.labels.csv --receipt collection.json --json
+quantfit calibrate ingest --sheet collected.labels.csv --key private.labelkey.json --out calibration.json --json
+```
+
+The example assumes two actual parts; repeat `--part` for the complete assigned
+set. Collection binds exact unchanged source/key/manifest bytes, assigned IDs and
+text, records the **changed filled hashes** separately from original blank hashes,
+and native-validates a NEW complete sheet. Partially filled originals belong in
+the existing review workflow. All-unusable collection succeeds; unchanged native
+ingestion refuses the empty measurement. Missing/extra/overlapping parts, blank
+labels, text drift, aliases, existing outputs or publication failures exit 2.
+
+Only blinded parts fall within the existing one-named-second-annotator carve-out;
+keep the key and `*.chunkmanifest.json` private. `--annotator-role named_second`
+requires `--annotator-name`; attribution is declared, not authenticated. No
+automatic sending, labeling, ingestion, independence or scientific GO. See
+[the complete contract](annotation-chunks.md) for API, limits and manifest-last
+partial-publication behavior. This workflow is available since quantfit 0.42.0.
 
 ## Analyze an existing run's resolution
 

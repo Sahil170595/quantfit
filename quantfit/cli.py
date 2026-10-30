@@ -435,6 +435,33 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help="new complete private sheet, suitable for separate native ingestion",
     )
+    chunks = csub.add_parser("chunks", help="private blank-template partitioning and complete explicit collection")
+    chunk_sub = chunks.add_subparsers(dest="chunks_cmd", required=True)
+    chunk_prepare = chunk_sub.add_parser(
+        "prepare", help="complete blank template + key -> all parts and private manifest"
+    )
+    chunk_collect = chunk_sub.add_parser("collect", help="all explicit filled parts -> complete new native sheet")
+    for chunk_parser in (chunk_prepare, chunk_collect):
+        chunk_parser.add_argument(
+            "--sheet", required=True, metavar="PATH", help="unchanged original complete BLANK template"
+        )
+        chunk_parser.add_argument(
+            "--key", required=True, metavar="PATH", help="original private unblinding key; never share"
+        )
+    chunk_prepare.add_argument("--out-dir", required=True, metavar="DIR", help="existing empty private directory")
+    chunk_prepare.add_argument(
+        "--rows-per-part", type=int, default=100, help="maximum rows per part; at most 128 parts"
+    )
+    chunk_prepare.add_argument("--annotator-role", choices=("maintainer", "named_second"), default="maintainer")
+    chunk_prepare.add_argument(
+        "--annotator-name", help="bounded operator-declared attribution; required for named_second"
+    )
+    chunk_collect.add_argument("--manifest", required=True, metavar="PATH", help="original private chunk manifest")
+    chunk_collect.add_argument(
+        "--part", required=True, action="append", metavar="PATH", help="filled part, repeated in manifest order"
+    )
+    chunk_collect.add_argument("--out", required=True, metavar="PATH", help="new complete private native sheet")
+    chunk_collect.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate counts/hash receipt")
     pcr = csub.add_parser("reconcile", help="two filled sheets + one key -> aggregate label-disagreement counts")
     pcr.add_argument("--sheet-a", required=True, metavar="PATH", help="first private filled labeling sheet")
     pcr.add_argument("--sheet-b", required=True, metavar="PATH", help="second private filled labeling sheet")
@@ -1353,6 +1380,10 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _emit(args, "resolution", 0, result, human_resolution)
 
     if args.cmd == "calibrate":
+        if args.calibrate_cmd == "chunks":
+            from quantfit.annotation_chunks_cli import dispatch_chunks
+
+            return dispatch_chunks(args, _emit)
         if args.calibrate_cmd == "review":
             from quantfit.label_review_cli import dispatch_review
 
