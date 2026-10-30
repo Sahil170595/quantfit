@@ -212,6 +212,8 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     "emit": (REQ_ARTIFACT,),
     # Pure local — but of a capture / labeling sheet that must already exist.
     "calibrate": (REQ_ARTIFACT,),
+    # Offline held report/capture/queue declarations only (quantfit/safety/adjudication.py).
+    "adjudicate": (REQ_ARTIFACT,),
     # Offline CPU JSON check; requires >=3 existing uncached replicate reports
     # (quantfit/reproduce.py: within_hardware_identical; docs/cli-reference.md).
     "t0": (REQ_ARTIFACT,),

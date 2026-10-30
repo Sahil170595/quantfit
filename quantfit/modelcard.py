@@ -54,13 +54,29 @@ _AXES = (
 )
 
 
-def model_card_fragment(report_path: str, *, calibration_report: str | None = None) -> str:
+def model_card_fragment(
+    report_path: str, *, calibration_report: str | None = None, adjudication_record: str | None = None
+) -> str:
     """Render a schema-v2 drift report as a markdown model-card section.
 
     Wrong-schema and malformed reports are refused by `DriftReport.from_json`;
     An optional calibration is checked against the same report instance rendered
     here. Its conditional resolution never replaces the original floor or verdict.
     """
+    if adjudication_record is not None:
+        from quantfit.adjudication_record import MAX_CARD_BYTES, AdjudicationError, load_card_inputs, section
+
+        try:
+            held = load_card_inputs(report_path, adjudication_record, calibration_report)
+            lines = _render(held.report, held.analysis, section(held))
+            fragment = "\n".join(lines) + "\n"
+            if len(fragment.encode("utf-8")) > MAX_CARD_BYTES:
+                raise AdjudicationError("invalid_adjudication")
+            for item in held.files:
+                item.check()
+            return fragment
+        except (RuntimeError, OSError, ValueError, TypeError, KeyError, RecursionError, ImportError, IndexError):
+            raise AdjudicationError("invalid_adjudication") from None
     resolution = None
     if calibration_report is None:
         report = DriftReport.from_json(report_path)
@@ -121,7 +137,7 @@ def _check_original_statistics(report: DriftReport) -> dict:
     return expected
 
 
-def _render(report: DriftReport, resolution: dict | None = None) -> list[str]:
+def _render(report: DriftReport, resolution: dict | None = None, adjudication: list[str] | None = None) -> list[str]:
     drift = report.drift
     lines = [
         "## Quantization safety drift (QSR v0)",
@@ -140,6 +156,8 @@ def _render(report: DriftReport, resolution: dict | None = None) -> list[str]:
     footer = [*_caps_line(report.quantized), *_footer(drift, calibrated=resolution is not None)]
     if resolution is not None:
         lines += ["", *_conditional_resolution(resolution)]
+    if adjudication is not None:
+        lines += ["", *adjudication]
     return lines + ["", "---", "", *footer]
 
 

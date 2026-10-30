@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.46.0 — 2026-10-30
+
+- Add complete source-bound `adjudicate prepare` → explicit private labels/classes → `adjudicate apply`, plus strict optional `emit model-card --adjudication` receiving with/without native calibration. Recompute whole native capture/report correspondence, preserve all flagged pairs and four disjoint declared outcomes, and publish a new closed hash/count record.
+- Preserve original native counts/verdict/Wilson/MDE/calibration and default model-card bytes. Receiving lacks the private capture and cannot freshly authenticate selected membership, text, human reading or authorship; confirmation does not validate nulls. Correct demonstrated bool/int/float scope-equality collisions with native canonical fingerprints. Fictional complete CLI/API evidence and limits: `validation/2026-10-25-adjudication/`.
+
 ## 0.45.0 — 2026-10-30
 
 - Add named calibration-choice sensitivity to native `screen-summary`: one held original population and native summary, complete all-choice admission under combined byte/work budgets, actual per-choice native analysis, attainable-value envelopes and explicit digest-copy groups.

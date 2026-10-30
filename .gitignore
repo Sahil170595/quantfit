@@ -32,6 +32,8 @@ cases/
 *.labels.csv
 *.labelkey.json
 *.chunkmanifest.json
+*.adjudication.csv
+*.adjudication-preparation.json
 *.baseline-cache.json
 # Inspect eval logs hold model completions the same way a capture does.
 logs/
