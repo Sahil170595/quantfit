@@ -77,6 +77,8 @@ def _originals(inputs: tuple[HeldFile, ...]) -> tuple[_Originals, dict[str, Any]
     a = _load_retained_held(inputs[2], inputs[3], inputs[1], parsed_key=(key, n))
     b = _load_retained_held(inputs[4], inputs[5], inputs[1], parsed_key=(key, n))
     captured = _verified_capture(inputs[0], key, n)
+    field_limit = csv.field_size_limit()
+    require(all(len(row["completion"]) <= field_limit for row in captured.values()))
     first = {
         row_id: {"completion": captured[row_id]["completion"], "human_label": label}
         for row_id, label in a.labels.items()

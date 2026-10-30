@@ -1,8 +1,7 @@
-# Calibration-choice sensitivity — unreleased 0.45.0
+# Calibration-choice sensitivity — since 0.45.0
 
-This complete CLI/API/JSON/JUnit mode requires 0.45.0 source or a candidate wheel.
-Published 0.41.0's no-calibration and [single-calibration](screen-resolution.md)
-workflows are unchanged. Predeclare the supplied choices; the instrument selects
+Available since quantfit 0.45.0. The no-calibration and
+[single-calibration](screen-resolution.md) workflows are unchanged. Predeclare the supplied choices; the instrument selects
 no primary, preferred or favorable rater.
 
 ```bash

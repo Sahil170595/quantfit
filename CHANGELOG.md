@@ -13,22 +13,24 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.45.0 — unreleased
+## 0.45.0 — 2026-10-30
 
 - Add named calibration-choice sensitivity to native `screen-summary`: one held original population and native summary, complete all-choice admission under combined byte/work budgets, actual per-choice native analysis, attainable-value envelopes and explicit digest-copy groups.
 - Preserve missing/unattainable rows and original native outcomes; reuse the native per-axis criterion for an explicit all-choice ceiling with existing 3/4 priority. JUnit keeps native cases first and adds every choice/axis plus one overall; without a ceiling the additions are skipped. No pooling, best-rater selection, independent raters or scientific GO. Fictional complete CLI/API/JSON/JUnit evidence: `validation/2026-10-25-calibration-choices/`.
 
-## 0.44.0 — unreleased
+## 0.44.0 — 2026-10-30
 
 - Add opt-in finite unit-grid budgeting to the existing `resolution` CLI/API. Preserve the held original report/calibration and actual axes, admit conservative complete actual-plus-planned work before native math, and reuse native exact thresholds/power/MDE for one hypothetical global-bound curve.
 - Distinguish first pass, discrete feasible runs, finite stable suffix and no feasible point without assuming monotonicity in n. Detectability guards the 1.0 MDE sentinel. No new verdict, sample collection, adaptive stopping or scientific GO. Regenerable native CLI/API evidence: `validation/2026-10-25-resolution-budget/`.
 
-## 0.43.0 — unreleased
+## 0.43.0 — 2026-10-30
 
 - Add explicit capture-backed retained mode to both `calibrate review prepare` and `calibrate review apply`, with complete CLI/API workflows after the original filled sheets are unavailable. Verify the actual shared capture/key and both own retained receipts once, preserve every inequality including unusable, and native-validate a NEW full sheet before publication.
 - Preserve default full-sheet review calls/receipts, original-sheet hashes as declarations, unusable/native arithmetic, dependencies and separate truthful extract/schema-3 ingestion. No human authentication, new statistics, automatic labeling/sharing or scientific GO. Regenerable fictional evidence: `validation/2026-10-25-retained-review/`.
 
-## 0.42.0 — unreleased
+- Refuse every reconstructed captured field outside the current native CSV reader domain before publishing retained-review outputs, including agreed rows absent from the queue. Exact-limit API/CLI controls retain complete native joins and separate schema-3 ingestion; no global reader/parser or native statistics change. Actual public-entrypoint RED/GREEN evidence: `validation/2026-10-30-retained-review-field-domain/`.
+
+## 0.42.0 — 2026-10-30
 
 - Add complete `calibrate chunks prepare` and `calibrate chunks collect`: bounded private partitions of a complete blank native template, exact regenerated preparation bindings, explicit returned labels and a new complete native sheet. Original native ingest remains separate and unchanged.
 - Retain all source rows, unusable judgments, role-specific source/filled hashes and operator-declared attribution. No automatic labeling/sharing, new annotator permission, independent samples or scientific GO. Regenerable fictional CLI/API/native-ingest evidence and limits: `validation/2026-10-25-annotation-chunks/`.

@@ -1,8 +1,7 @@
 # CLI reference — every command, every flag
 
-This reference documents published quantfit 0.41.0. The explicitly marked
-annotation-chunks, retained-review, resolution-budget and calibration-choice
-sections require unreleased 0.45.0 source or a candidate wheel.
+This reference documents quantfit 0.45.0, including annotation chunks,
+capture-backed retained review, finite-grid budgets and calibration-choice sensitivity.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -490,7 +489,7 @@ screen's wall clock.
 
 ## Summarize a saved screen
 
-### Calibration-choice sensitivity — unreleased 0.45.0 source
+### Calibration-choice sensitivity — since 0.45.0
 
 ```bash
 quantfit screen-summary --targets targets.json --reports-dir reports --calibration-variant first=calibrations-a --calibration-variant second=calibrations-b --require-conditional-resolution 40 --out choices.json --junit choices.xml --json
@@ -690,7 +689,7 @@ counts establish no label truth, independent adjudication, authentic blinding,
 improved accuracy or scientific GO. See [the review contract](label-review.md) for
 API, bounds and publication limits.
 
-### Capture-backed retained review — unreleased 0.43.0 source
+### Capture-backed retained review — since 0.43.0
 
 Both native review leaves accept an explicit retained mode. Default full-sheet
 calls and outputs above remain unchanged:
@@ -714,9 +713,9 @@ automatic ingestion, extra sharing permission, independent adjudication or GO.
 See [the complete retained-review contract](retained-review.md) for APIs, held-once
 bounds, exclusive/partial publication and zero/all-unusable semantics.
 
-### Annotation chunks — unreleased 0.42.0 source
+### Annotation chunks — since 0.42.0
 
-The source/candidate workflow accepts only a complete **blank** native template
+The workflow accepts only a complete **blank** native template
 and its original key. Create an empty private directory first, then prepare every
 bounded partition and its private manifest:
 
@@ -744,12 +743,11 @@ keep the key and `*.chunkmanifest.json` private. `--annotator-role named_second`
 requires `--annotator-name`; attribution is declared, not authenticated. No
 automatic sending, labeling, ingestion, independence or scientific GO. See
 [the complete contract](annotation-chunks.md) for API, limits and manifest-last
-partial-publication behavior. This section requires an unreleased candidate,
-not the published 0.41.0 installation.
+partial-publication behavior. This workflow is available since quantfit 0.42.0.
 
 ## Analyze an existing run's resolution
 
-Unreleased 0.44.0 adds explicit exhaustive finite budgeting:
+Quantfit 0.44.0 adds explicit exhaustive finite budgeting:
 
 ```bash
 quantfit resolution --report drift.json --calibration-report calibration.json --plan-n-min 0 --plan-n-max 128 --plan-mde-pp 50 --plan-effect 30 --out budget.json --json

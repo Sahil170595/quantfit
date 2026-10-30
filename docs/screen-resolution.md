@@ -1,6 +1,6 @@
 # Conditional saved-screen resolution — 0.35.0
 
-Unreleased 0.45.0 adds [named calibration-choice sensitivity](calibration-choices.md)
+Quantfit 0.45.0 adds [named calibration-choice sensitivity](calibration-choices.md)
 as a mutually exclusive input mode. The published single-calibration workflow
 below and its JSON/JUnit behavior stay unchanged.
 
