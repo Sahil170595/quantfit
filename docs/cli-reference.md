@@ -1,7 +1,7 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.43.0, including annotation chunks and
-capture-backed retained review.
+This reference documents quantfit 0.44.0, including annotation chunks,
+capture-backed retained review and conditional finite-grid resolution budgets.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -727,6 +727,21 @@ automatic sending, labeling, ingestion, independence or scientific GO. See
 partial-publication behavior. This workflow is available since quantfit 0.42.0.
 
 ## Analyze an existing run's resolution
+
+Quantfit 0.44.0 adds explicit exhaustive finite budgeting:
+
+```bash
+quantfit resolution --report drift.json --calibration-report calibration.json --plan-n-min 0 --plan-n-max 128 --plan-mde-pp 50 --plan-effect 30 --out budget.json --json
+```
+
+All three range/ceiling options are required together; optional `--plan-effect`
+repeats up to eight distinct pp effects. The held original report/calibration,
+scope and distinct actual axes remain unchanged. One global-bound hypothetical
+**at-risk** curve exhausts every integer after complete work admission. First pass,
+feasible intervals and finite suffix ending at n_max remain distinct because
+native power/MDE are nonmonotone in n. No-feasible analysis exits 0; invalid/unsafe/
+budget refusal exits 2. No gate, future evidence or collection is created. See
+[the complete API and bounds](resolution-budget.md). Published default behavior:
 
 ```bash
 quantfit resolution --report drift.json --calibration-report calibration.json \

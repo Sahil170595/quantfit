@@ -430,6 +430,12 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+### Finite resolution budget source candidate (2026-10-25, unreleased 0.44.0)
+
+| Flag | Command | What is exercised | Evidence / limits |
+|---|---|---|---|
+| `--plan-n-min` / `--plan-n-max` / `--plan-mde-pp` / `--plan-effect` | resolution | Complete inclusive hypothetical at-risk grid/options before IO; held original scope/counts; complete actual+planned native work before math; exact local thresholds, one native curve, sentinel guard, discrete feasible runs and finite suffix. Defaults and actual denominators remain unchanged. | `tests/test_resolution_budget.py`; `tests/test_ci_resolution_budget.py`; `validation/2026-10-25-resolution-budget/`; fictional source controls, hosted qualification pending; no future evidence or GO |
+
 ### Capture-backed retained review source candidate (2026-10-25, unreleased 0.43.0)
 
 | Flag | Command | What is exercised | Evidence / limits |

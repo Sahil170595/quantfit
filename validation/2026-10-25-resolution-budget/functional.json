@@ -1,0 +1,331 @@
+{
+  "actual_inputs_unchanged": true,
+  "future_evidence_collected": false,
+  "human_labels_authenticated": false,
+  "interfaces": {
+    "api": {
+      "actual_analysis_preserved": true,
+      "actual_axes": {
+        "over-refusal": {
+          "detectable_at_target_power": false,
+          "flagged_flips": 0,
+          "measurable": true,
+          "n_at_risk": 28,
+          "n_axis": 28,
+          "resolution": {
+            "alpha": 0.05,
+            "correlated_error_note": "Assumes the judge's per-arm errors are independent given the true labels. Arm-correlated judge error is BIAS, not variance: it shifts the true false-flip rate off this bound and no sample size reduces it. This MDE is conditional on that assumption and does not correct for it.",
+            "detection_threshold_flips": 18,
+            "effective_mde": 1.0,
+            "eps_baseline_upper": 0.16112515805281938,
+            "eps_definition": "per-arm upper bound on BOTH directional judge-error rates (max of false-compliance and false-refusal upper CIs)",
+            "eps_quant_upper": 0.2775327998628892,
+            "eps_source": "bound calibration report SHA256 7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea; scope eb13143ed492d5e224600721dd0751c73d76ba80475b792249621499f5855101; label truth not authenticated",
+            "false_flip_rate_bound": 0.4386579579157086,
+            "headline": "effective MDE ~100pp at n=28 and 80% power (>=18 of 28 at-risk pairs must read flipped to reject H0 at alpha=0.05; false-flip bound 43.9pp per pair); assumes arm-independent judge error",
+            "n_at_risk": 28,
+            "perfect_judge_mde": 0.055859156595655116,
+            "power": 0.8,
+            "power_at_pre_registered": [
+              {
+                "effect": 0.05,
+                "power": 1.1710958110631937e-21
+              },
+              {
+                "effect": 0.1,
+                "power": 2.327994167898788e-16
+              },
+              {
+                "effect": 0.15,
+                "power": 2.589152700513075e-13
+              },
+              {
+                "effect": 0.3,
+                "power": 2.7512914619130228e-08
+              }
+            ],
+            "test": "one-sided exact binomial upper tail on observed flips among at-risk pairs"
+          }
+        },
+        "refusal-robustness": {
+          "detectable_at_target_power": false,
+          "flagged_flips": 0,
+          "measurable": true,
+          "n_at_risk": 12,
+          "n_axis": 12,
+          "resolution": {
+            "alpha": 0.05,
+            "correlated_error_note": "Assumes the judge's per-arm errors are independent given the true labels. Arm-correlated judge error is BIAS, not variance: it shifts the true false-flip rate off this bound and no sample size reduces it. This MDE is conditional on that assumption and does not correct for it.",
+            "detection_threshold_flips": 9,
+            "effective_mde": 1.0,
+            "eps_baseline_upper": 0.16112515805281938,
+            "eps_definition": "per-arm upper bound on BOTH directional judge-error rates (max of false-compliance and false-refusal upper CIs)",
+            "eps_quant_upper": 0.2775327998628892,
+            "eps_source": "bound calibration report SHA256 7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea; scope eb13143ed492d5e224600721dd0751c73d76ba80475b792249621499f5855101; label truth not authenticated",
+            "false_flip_rate_bound": 0.4386579579157086,
+            "headline": "effective MDE ~100pp at n=12 and 80% power (>=9 of 12 at-risk pairs must read flipped to reject H0 at alpha=0.05; false-flip bound 43.9pp per pair); assumes arm-independent judge error",
+            "n_at_risk": 12,
+            "perfect_judge_mde": 0.12551472777883235,
+            "power": 0.8,
+            "power_at_pre_registered": [
+              {
+                "effect": 0.05,
+                "power": 2.2022952531598086e-12
+              },
+              {
+                "effect": 0.1,
+                "power": 1.042232367785242e-09
+              },
+              {
+                "effect": 0.15,
+                "power": 3.6957739737538645e-08
+              },
+              {
+                "effect": 0.3,
+                "power": 1.4650261057197342e-05
+              }
+            ],
+            "test": "one-sided exact binomial upper tail on observed flips among at-risk pairs"
+          }
+        }
+      },
+      "binding_fingerprint": "eb13143ed492d5e224600721dd0751c73d76ba80475b792249621499f5855101",
+      "curve_point_count": 129,
+      "curve_sha256": "e564edb8aa1477ba7e4bb42429d90ff2e6043b44d8f5390be372701f7ad3a3b9",
+      "exit_code": 0,
+      "inputs": {
+        "calibration_sha256": "7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea",
+        "report_sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d"
+      },
+      "planning": {
+        "alpha": 0.05,
+        "assumptions_verified": false,
+        "correlated_error_note": "Assumes the judge's per-arm errors are independent given the true labels. Arm-correlated judge error is BIAS, not variance: it shifts the true false-flip rate off this bound and no sample size reduces it. This MDE is conditional on that assumption and does not correct for it.",
+        "false_flip_rate_bound": 0.4386579579157086,
+        "feasible_runs": [
+          {
+            "n_max": 103,
+            "n_min": 103
+          },
+          {
+            "n_max": 105,
+            "n_min": 105
+          },
+          {
+            "n_max": 107,
+            "n_min": 107
+          },
+          {
+            "n_max": 109,
+            "n_min": 109
+          },
+          {
+            "n_max": 111,
+            "n_min": 111
+          },
+          {
+            "n_max": 128,
+            "n_min": 113
+          }
+        ],
+        "first_passing_n": 103,
+        "grid": {
+          "n_max": 128,
+          "n_min": 0,
+          "n_points": 129,
+          "step": 1
+        },
+        "human_confirmation_verified": false,
+        "hypothetical": true,
+        "max_mde_pp": 100.0,
+        "n_basis": "hypothetical at-risk pairs; not recorded corpus size or actual per-axis denominators",
+        "no_feasible_point": false,
+        "planning_schema": 1,
+        "power": 0.8,
+        "scientific_go": false,
+        "scope": "One hypothetical at-risk curve under the same supplied global directional calibration bounds, not separate axis measurements, new report scope, future evidence or a change to recorded probe/axis counts. Feasible runs and a stable suffix concern only EVERY integer in this finite declared range; no conclusion applies above n_max. Native power is not monotone in n. Conditional on unchanged directional-error applicability, arm-independent judge error and majority-real at-risk population. No source/label authentication, sampling instruction, adaptive stopping, sensitivity, safety verdict or scientific GO.",
+        "stable_suffix": {
+          "n_max": 128,
+          "n_min": 113
+        },
+        "test": "one-sided exact binomial upper tail on observed flips among at-risk pairs",
+        "work_admission": {
+          "actual_power_requests_per_axis_upper_bound": 127,
+          "actual_thresholds_per_axis": 3,
+          "actual_upper_bound": 6912,
+          "limit": 40000000,
+          "planned_perfect_judge_contrast": false,
+          "planned_power_requests_per_point_upper_bound": 67,
+          "planned_threshold_cache": "local exact (n, false_flip_bound, alpha); actual native analysis is not cached",
+          "planned_upper_bound": 927940,
+          "total_upper_bound": 934852,
+          "unit": "conservative binomial-tail terms plus threshold/scan overhead; not wall time or exact operations"
+        }
+      }
+    },
+    "cli": {
+      "actual_analysis_preserved": true,
+      "actual_axes": {
+        "over-refusal": {
+          "detectable_at_target_power": false,
+          "flagged_flips": 0,
+          "measurable": true,
+          "n_at_risk": 28,
+          "n_axis": 28,
+          "resolution": {
+            "alpha": 0.05,
+            "correlated_error_note": "Assumes the judge's per-arm errors are independent given the true labels. Arm-correlated judge error is BIAS, not variance: it shifts the true false-flip rate off this bound and no sample size reduces it. This MDE is conditional on that assumption and does not correct for it.",
+            "detection_threshold_flips": 18,
+            "effective_mde": 1.0,
+            "eps_baseline_upper": 0.16112515805281938,
+            "eps_definition": "per-arm upper bound on BOTH directional judge-error rates (max of false-compliance and false-refusal upper CIs)",
+            "eps_quant_upper": 0.2775327998628892,
+            "eps_source": "bound calibration report SHA256 7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea; scope eb13143ed492d5e224600721dd0751c73d76ba80475b792249621499f5855101; label truth not authenticated",
+            "false_flip_rate_bound": 0.4386579579157086,
+            "headline": "effective MDE ~100pp at n=28 and 80% power (>=18 of 28 at-risk pairs must read flipped to reject H0 at alpha=0.05; false-flip bound 43.9pp per pair); assumes arm-independent judge error",
+            "n_at_risk": 28,
+            "perfect_judge_mde": 0.055859156595655116,
+            "power": 0.8,
+            "power_at_pre_registered": [
+              {
+                "effect": 0.05,
+                "power": 1.1710958110631937e-21
+              },
+              {
+                "effect": 0.1,
+                "power": 2.327994167898788e-16
+              },
+              {
+                "effect": 0.15,
+                "power": 2.589152700513075e-13
+              },
+              {
+                "effect": 0.3,
+                "power": 2.7512914619130228e-08
+              }
+            ],
+            "test": "one-sided exact binomial upper tail on observed flips among at-risk pairs"
+          }
+        },
+        "refusal-robustness": {
+          "detectable_at_target_power": false,
+          "flagged_flips": 0,
+          "measurable": true,
+          "n_at_risk": 12,
+          "n_axis": 12,
+          "resolution": {
+            "alpha": 0.05,
+            "correlated_error_note": "Assumes the judge's per-arm errors are independent given the true labels. Arm-correlated judge error is BIAS, not variance: it shifts the true false-flip rate off this bound and no sample size reduces it. This MDE is conditional on that assumption and does not correct for it.",
+            "detection_threshold_flips": 9,
+            "effective_mde": 1.0,
+            "eps_baseline_upper": 0.16112515805281938,
+            "eps_definition": "per-arm upper bound on BOTH directional judge-error rates (max of false-compliance and false-refusal upper CIs)",
+            "eps_quant_upper": 0.2775327998628892,
+            "eps_source": "bound calibration report SHA256 7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea; scope eb13143ed492d5e224600721dd0751c73d76ba80475b792249621499f5855101; label truth not authenticated",
+            "false_flip_rate_bound": 0.4386579579157086,
+            "headline": "effective MDE ~100pp at n=12 and 80% power (>=9 of 12 at-risk pairs must read flipped to reject H0 at alpha=0.05; false-flip bound 43.9pp per pair); assumes arm-independent judge error",
+            "n_at_risk": 12,
+            "perfect_judge_mde": 0.12551472777883235,
+            "power": 0.8,
+            "power_at_pre_registered": [
+              {
+                "effect": 0.05,
+                "power": 2.2022952531598086e-12
+              },
+              {
+                "effect": 0.1,
+                "power": 1.042232367785242e-09
+              },
+              {
+                "effect": 0.15,
+                "power": 3.6957739737538645e-08
+              },
+              {
+                "effect": 0.3,
+                "power": 1.4650261057197342e-05
+              }
+            ],
+            "test": "one-sided exact binomial upper tail on observed flips among at-risk pairs"
+          }
+        }
+      },
+      "binding_fingerprint": "eb13143ed492d5e224600721dd0751c73d76ba80475b792249621499f5855101",
+      "curve_point_count": 129,
+      "curve_sha256": "e564edb8aa1477ba7e4bb42429d90ff2e6043b44d8f5390be372701f7ad3a3b9",
+      "exit_code": 0,
+      "inputs": {
+        "calibration_sha256": "7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea",
+        "report_sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d"
+      },
+      "planning": {
+        "alpha": 0.05,
+        "assumptions_verified": false,
+        "correlated_error_note": "Assumes the judge's per-arm errors are independent given the true labels. Arm-correlated judge error is BIAS, not variance: it shifts the true false-flip rate off this bound and no sample size reduces it. This MDE is conditional on that assumption and does not correct for it.",
+        "false_flip_rate_bound": 0.4386579579157086,
+        "feasible_runs": [
+          {
+            "n_max": 103,
+            "n_min": 103
+          },
+          {
+            "n_max": 105,
+            "n_min": 105
+          },
+          {
+            "n_max": 107,
+            "n_min": 107
+          },
+          {
+            "n_max": 109,
+            "n_min": 109
+          },
+          {
+            "n_max": 111,
+            "n_min": 111
+          },
+          {
+            "n_max": 128,
+            "n_min": 113
+          }
+        ],
+        "first_passing_n": 103,
+        "grid": {
+          "n_max": 128,
+          "n_min": 0,
+          "n_points": 129,
+          "step": 1
+        },
+        "human_confirmation_verified": false,
+        "hypothetical": true,
+        "max_mde_pp": 100.0,
+        "n_basis": "hypothetical at-risk pairs; not recorded corpus size or actual per-axis denominators",
+        "no_feasible_point": false,
+        "planning_schema": 1,
+        "power": 0.8,
+        "scientific_go": false,
+        "scope": "One hypothetical at-risk curve under the same supplied global directional calibration bounds, not separate axis measurements, new report scope, future evidence or a change to recorded probe/axis counts. Feasible runs and a stable suffix concern only EVERY integer in this finite declared range; no conclusion applies above n_max. Native power is not monotone in n. Conditional on unchanged directional-error applicability, arm-independent judge error and majority-real at-risk population. No source/label authentication, sampling instruction, adaptive stopping, sensitivity, safety verdict or scientific GO.",
+        "stable_suffix": {
+          "n_max": 128,
+          "n_min": 113
+        },
+        "test": "one-sided exact binomial upper tail on observed flips among at-risk pairs",
+        "work_admission": {
+          "actual_power_requests_per_axis_upper_bound": 127,
+          "actual_thresholds_per_axis": 3,
+          "actual_upper_bound": 6912,
+          "limit": 40000000,
+          "planned_perfect_judge_contrast": false,
+          "planned_power_requests_per_point_upper_bound": 67,
+          "planned_threshold_cache": "local exact (n, false_flip_bound, alpha); actual native analysis is not cached",
+          "planned_upper_bound": 927940,
+          "total_upper_bound": 934852,
+          "unit": "conservative binomial-tail terms plus threshold/scan overhead; not wall time or exact operations"
+        }
+      }
+    }
+  },
+  "kind": "quantfit.resolution-budget-functional-acceptance",
+  "no_feasible_grid_analysis_completed": true,
+  "scientific_go": false,
+  "synthetic_calibration": true
+}

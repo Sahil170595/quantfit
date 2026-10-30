@@ -9,6 +9,10 @@ import os
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from quantfit.resolution_budget import ResolutionBudget
 
 from quantfit import __version__
 from quantfit.safety.calibration_binding import load_bound_calibration, load_bound_calibration_bytes
@@ -159,7 +163,9 @@ def _write(target: Path, artifact: dict) -> None:
             temporary.unlink(missing_ok=True)
 
 
-def analyze_resolution_inputs(report_path: str, calibration_path: str) -> tuple[DriftReport, dict]:
+def analyze_resolution_inputs(
+    report_path: str, calibration_path: str, *, planning: ResolutionBudget | None = None
+) -> tuple[DriftReport, dict]:
     """Return the exact validated report instance and its conditional analysis.
 
     Matching scope and recomputed calibration counts do not authenticate the
@@ -167,6 +173,10 @@ def analyze_resolution_inputs(report_path: str, calibration_path: str) -> tuple[
     Consumers rendering counts must use this same single-buffer report instance,
     rather than rereading a path that may have changed since scope validation.
     """
+    if planning is not None:
+        from quantfit.resolution_budget import analyze_budget_inputs
+
+        return analyze_budget_inputs(report_path, calibration_path, planning)
     try:
         report, report_sha256 = _report(report_path)
         calibration = load_bound_calibration(calibration_path, report=report)
@@ -177,8 +187,14 @@ def analyze_resolution_inputs(report_path: str, calibration_path: str) -> tuple[
         raise ResolutionError(str(exc)) from exc
 
 
-def analyze_resolution_bytes(report_data: bytes, calibration_data: bytes) -> tuple[DriftReport, dict]:
+def analyze_resolution_bytes(
+    report_data: bytes, calibration_data: bytes, *, planning: ResolutionBudget | None = None
+) -> tuple[DriftReport, dict]:
     """Analyze exactly the supplied buffers; hash, scope validation and rendering share bytes."""
+    if planning is not None:
+        from quantfit.resolution_budget import analyze_budget_bytes
+
+        return analyze_budget_bytes(report_data, calibration_data, planning)
     try:
         report = parse_report_bytes(report_data)
         calibration = load_bound_calibration_bytes(calibration_data, report=report)
@@ -222,8 +238,14 @@ def _analysis(report: DriftReport, report_sha256: str, calibration) -> dict:
     return artifact
 
 
-def analyze_resolution(report_path: str, calibration_path: str, out_path: str | None = None) -> dict:
+def analyze_resolution(
+    report_path: str, calibration_path: str, out_path: str | None = None, *, planning: ResolutionBudget | None = None
+) -> dict:
     """Analyze aggregates; exit 0 is successful analysis, including unmeasurable axes, not a gate."""
+    if planning is not None:
+        from quantfit.resolution_budget import analyze_budget
+
+        return analyze_budget(report_path, calibration_path, out_path, planning)
     try:
         target = _check_output(out_path, (report_path, calibration_path)) if out_path is not None else None
         _, artifact = analyze_resolution_inputs(report_path, calibration_path)
