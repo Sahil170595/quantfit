@@ -1,7 +1,6 @@
-# Source-bound flip adjudication — unreleased 0.46.0
+# Source-bound flip adjudication — since 0.46.0
 
-This complete CLI/API workflow requires 0.46.0 source or a candidate wheel.
-Published 0.41.0 does not include it. It records explicit operator declarations
+Available since quantfit 0.46.0, this CLI/API workflow records explicit operator declarations
 about the original judge-flagged population and renders them alongside unchanged
 native statistics. It never authenticates human judgment or changes a gate.
 

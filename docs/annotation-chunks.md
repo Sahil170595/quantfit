@@ -1,7 +1,7 @@
-# Local annotation chunks (unreleased 0.42.0)
+# Local annotation chunks (since 0.42.0)
 
-This complete prepare/collect workflow requires the 0.42.0 source or candidate
-wheel. The published instrument remains 0.41.0. It partitions a **complete blank**
+Available since quantfit 0.42.0, this complete prepare/collect workflow
+partitions a **complete blank**
 native three-column template and reconstructs a new full sheet from explicit
 returned judgments. Existing native ingestion and review workflows are unchanged.
 

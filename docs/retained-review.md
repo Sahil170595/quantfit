@@ -1,10 +1,16 @@
-# Capture-backed retained review — unreleased 0.43.0
+# Capture-backed retained review — since 0.43.0
 
-This complete prepare/apply workflow requires 0.43.0 source or a candidate wheel.
-Published quantfit 0.41.0 retains the unchanged [full-sheet review](label-review.md).
+Available since quantfit 0.43.0. The [full-sheet review](label-review.md) remains unchanged.
 Use this explicit mode when both completion-free retained label sets, their own
 extraction receipts, the shared bound key and the actual capture remain available,
 but the original filled sheets need not be available. No original full sheet is read.
+
+Every reconstructed row, including agreed rows absent from the review queue, must
+fit the current native CSV reader field limit before either output is created.
+Oversized captured fields are categorically refused; the process-global reader
+limit and native parser are not widened. Exact-limit rows retain normal review,
+full-sheet join and separate extraction/ingestion behavior. See the
+[dated field-domain controls](../validation/2026-10-30-retained-review-field-domain/README.md).
 
 ```bash
 quantfit calibrate review prepare --input-mode retained --capture private.capture.jsonl --key private.labelkey.json --retained-labels-a a.labels.csv --retention-receipt-a a-retention.json --retained-labels-b b.labels.csv --retention-receipt-b b-retention.json --sheet private.review.labels.csv --receipt preparation.json --json
