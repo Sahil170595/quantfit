@@ -94,6 +94,33 @@ def _capture(data: bytes, n: int) -> tuple[dict[str, Any], list[dict[str, Any]]]
     return header, rows
 
 
+def _verified_capture(capture_file: HeldFile, key: dict[str, Any], n: int) -> dict[str, dict[str, Any]]:
+    """Verify actual capture facts once, retaining text only inside private native callers."""
+    _require(key["key_schema"] == calibrate.KEY_SCHEMA)
+    _require(key["capture_sha256"] == hashlib.sha256(capture_file.data).hexdigest())
+    header, captured = _capture(capture_file.data, n)
+    _require(key["capture"] == {field: header[field] for field in ("created_utc", "baseline", "quant", "n_pairs")})
+    effective_binding = header.get("binding") if header["capture_schema"] == 2 else None
+    _require(key["binding"] == effective_binding)
+    by_pair: dict[tuple[int, str], dict[str, Any]] = {}
+    pair_metadata: dict[int, tuple[str, str]] = {}
+    for row in captured:
+        zone = _choice(row.get("zone"), ZONES)
+        expected = _choice(row.get("expected"), EXPECTED)
+        metadata = (zone, expected)
+        pair = row["pair"]
+        _require(pair not in pair_metadata or pair_metadata[pair] == metadata)
+        pair_metadata[pair] = metadata
+        by_pair[(pair, row["arm"])] = row
+    result = {}
+    for row_id, entry in key["ids"].items():
+        row = by_pair[(entry["pair"], entry["arm"])]
+        _require(entry["judge_refusal"] == row["judge_refusal"])
+        _require(entry["completion_sha256"] == calibrate._completion_sha256(row["completion"]))
+        result[row_id] = row
+    return result
+
+
 def load_calibration_inputs(
     capture_path: str,
     key_path: str,
@@ -127,12 +154,7 @@ def load_calibration_inputs(
             roles = ("capture", "key", "retained_labels", "retention_receipt")
             label_mode = "retained_labels"
             original_sheet = {**retained.receipt["inputs"]["sheet"], "held_and_validated": False}
-        _require(key["key_schema"] == calibrate.KEY_SCHEMA)
-        _require(key["capture_sha256"] == hashlib.sha256(capture_file.data).hexdigest())
-        header, captured = _capture(capture_file.data, n)
-        _require(key["capture"] == {field: header[field] for field in ("created_utc", "baseline", "quant", "n_pairs")})
-        effective_binding = header.get("binding") if header["capture_schema"] == 2 else None
-        _require(key["binding"] == effective_binding)
+        captured_by_id = _verified_capture(capture_file, key, n)
         if sheet_path is not None:
             joined = calibrate._join(
                 "private sheet", "private key", key["ids"], data=sheet_file.data, max_records=MAX_CSV_RECORDS
@@ -140,26 +162,13 @@ def load_calibration_inputs(
             labels = {row_id: row["human_label"] for row_id, row in joined.items()}
         else:
             labels = retained.labels
-        by_pair: dict[tuple[int, str], dict[str, Any]] = {}
-        pair_metadata: dict[int, tuple[str, str]] = {}
-        for row in captured:
-            zone = _choice(row.get("zone"), ZONES)
-            expected = _choice(row.get("expected"), EXPECTED)
-            metadata = (zone, expected)
-            pair = row["pair"]
-            _require(pair not in pair_metadata or pair_metadata[pair] == metadata)
-            pair_metadata[pair] = metadata
-            by_pair[(pair, row["arm"])] = row
-        rows = []
-        for row_id, entry in key["ids"].items():
-            row = by_pair[(entry["pair"], entry["arm"])]
-            _require(entry["judge_refusal"] == row["judge_refusal"])
-            _require(entry["completion_sha256"] == calibrate._completion_sha256(row["completion"]))
-            rows.append(
-                CalibrationRow(
-                    entry["pair"], entry["arm"], row["zone"], row["expected"], row["judge_refusal"], labels[row_id]
-                )
+        rows = [
+            CalibrationRow(
+                entry["pair"], entry["arm"], row["zone"], row["expected"], row["judge_refusal"], labels[row_id]
             )
+            for row_id, entry in key["ids"].items()
+            for row in (captured_by_id[row_id],)
+        ]
         fingerprint, _ = _scope(key)
         return HeldCalibrationInputs(
             tuple(sorted(rows, key=lambda row: (row.pair, row.arm))),

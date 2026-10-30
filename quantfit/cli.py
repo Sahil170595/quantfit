@@ -413,8 +413,26 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     review_apply = review_sub.add_parser("apply", help="explicit filled subset -> complete new private sheet + receipt")
     for review_parser in (review_prepare, review_apply):
-        review_parser.add_argument("--sheet-a", required=True, metavar="PATH", help="original complete filled sheet A")
-        review_parser.add_argument("--sheet-b", required=True, metavar="PATH", help="original complete filled sheet B")
+        review_parser.add_argument(
+            "--input-mode",
+            choices=("full-sheet", "retained"),
+            default="full-sheet",
+            help="full-sheet default, or explicit actual-capture-backed retained review",
+        )
+        for arm in ("a", "b"):
+            arm_inputs = review_parser.add_mutually_exclusive_group(required=True)
+            arm_inputs.add_argument(
+                f"--sheet-{arm}", metavar="PATH", help=f"original complete filled sheet {arm.upper()}"
+            )
+            arm_inputs.add_argument(
+                f"--retained-labels-{arm}", metavar="PATH", help=f"complete retained labels {arm.upper()}"
+            )
+            review_parser.add_argument(
+                f"--retention-receipt-{arm}", metavar="PATH", help=f"actual extraction receipt for {arm.upper()}"
+            )
+        review_parser.add_argument(
+            "--capture", metavar="PATH", help="actual complete bound capture, required in retained mode"
+        )
         review_parser.add_argument("--key", required=True, metavar="PATH", help="shared private unblinding key")
         review_parser.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate receipt JSON")
     review_prepare.add_argument(
@@ -1678,6 +1696,27 @@ def main(argv: list[str] | None = None) -> int:
     _force_utf8_stdio()
     parser = _build_parser()
     args = parser.parse_args(argv)
+    if args.cmd == "calibrate" and args.calibrate_cmd == "review":
+        retained_args = (
+            args.capture,
+            args.retained_labels_a,
+            args.retention_receipt_a,
+            args.retained_labels_b,
+            args.retention_receipt_b,
+        )
+        if args.input_mode == "retained":
+            if (
+                not all(value is not None for value in retained_args)
+                or args.sheet_a is not None
+                or args.sheet_b is not None
+            ):
+                parser.error(
+                    "retained review requires --capture and both --retained-labels-a/b with --retention-receipt-a/b"
+                )
+        elif any(value is not None for value in retained_args):
+            parser.error(
+                "full-sheet review accepts only --sheet-a and --sheet-b; retained inputs require --input-mode retained"
+            )
     if (
         args.cmd == "calibrate"
         and args.calibrate_cmd in {"ingest", "strata", "paired"}

@@ -139,39 +139,50 @@ class HeldRetainedLabels:
     inputs: tuple[HeldFile, ...]
 
 
+def _load_retained_held(
+    labels_file: HeldFile,
+    receipt_file: HeldFile,
+    key_file: HeldFile,
+    *,
+    parsed_key: tuple[dict[str, Any], int] | None = None,
+) -> HeldRetainedLabels:
+    """Native retained admission over already held bytes; no filesystem reads."""
+    key, n = _key(key_file.data) if parsed_key is None else parsed_key
+    labels = _labels(labels_file.data, key["ids"])
+    receipt = _json(receipt_file.data)
+    require(
+        set(receipt) == RECEIPT_KEYS
+        and type(receipt["retention_schema"]) is int
+        and receipt["retention_schema"] == RETENTION_SCHEMA
+    )
+    require(type(receipt["quantfit_version"]) is str and bool(receipt["quantfit_version"].strip()))
+    require(type(receipt["inputs"]) is dict and set(receipt["inputs"]) == {"sheet", "key"})
+    for role, limit in (("sheet", MAX_SHEET_BYTES), ("key", MAX_KEY_BYTES)):
+        entry = receipt["inputs"][role]
+        require(type(entry) is dict and set(entry) == {"sha256", "size_bytes"})
+        require(type(entry["sha256"]) is str and bool(_SHA256.fullmatch(entry["sha256"])))
+        require(type(entry["size_bytes"]) is int and 0 < entry["size_bytes"] <= limit)
+    retained = receipt["retained_labels"]
+    require(type(retained) is dict and set(retained) == {"sha256", "size_bytes"})
+    require(type(retained["size_bytes"]) is int and type(retained["sha256"]) is str)
+    require(retained == _binding(labels_file.data) and receipt["inputs"]["key"] == _binding(key_file.data))
+    for field, expected in (
+        ("n_pairs", n),
+        ("n_rows", 2 * n),
+        ("n_unusable", sum(label == calibrate.LABEL_UNUSABLE for label in labels.values())),
+    ):
+        require(type(receipt[field]) is int and receipt[field] == expected)
+    fingerprint, capture = _scope(key)
+    require(receipt["binding_fingerprint"] == fingerprint and receipt["capture_sha256_declared"] == capture)
+    return HeldRetainedLabels(key, labels, receipt, (labels_file, receipt_file, key_file))
+
+
 def load_retained_labels(labels_path: str, receipt_path: str, key_path: str) -> HeldRetainedLabels:
     try:
         key_file = hold(key_path, MAX_KEY_BYTES)
         labels_file = hold(labels_path, MAX_RETAINED_BYTES)
         receipt_file = hold(receipt_path, MAX_RECEIPT_BYTES)
-        key, n = _key(key_file.data)
-        labels = _labels(labels_file.data, key["ids"])
-        receipt = _json(receipt_file.data)
-        require(
-            set(receipt) == RECEIPT_KEYS
-            and type(receipt["retention_schema"]) is int
-            and receipt["retention_schema"] == RETENTION_SCHEMA
-        )
-        require(type(receipt["quantfit_version"]) is str and bool(receipt["quantfit_version"].strip()))
-        require(type(receipt["inputs"]) is dict and set(receipt["inputs"]) == {"sheet", "key"})
-        for role, limit in (("sheet", MAX_SHEET_BYTES), ("key", MAX_KEY_BYTES)):
-            entry = receipt["inputs"][role]
-            require(type(entry) is dict and set(entry) == {"sha256", "size_bytes"})
-            require(type(entry["sha256"]) is str and bool(_SHA256.fullmatch(entry["sha256"])))
-            require(type(entry["size_bytes"]) is int and 0 < entry["size_bytes"] <= limit)
-        retained = receipt["retained_labels"]
-        require(type(retained) is dict and set(retained) == {"sha256", "size_bytes"})
-        require(type(retained["size_bytes"]) is int and type(retained["sha256"]) is str)
-        require(retained == _binding(labels_file.data) and receipt["inputs"]["key"] == _binding(key_file.data))
-        for field, expected in (
-            ("n_pairs", n),
-            ("n_rows", 2 * n),
-            ("n_unusable", sum(label == calibrate.LABEL_UNUSABLE for label in labels.values())),
-        ):
-            require(type(receipt[field]) is int and receipt[field] == expected)
-        fingerprint, capture = _scope(key)
-        require(receipt["binding_fingerprint"] == fingerprint and receipt["capture_sha256_declared"] == capture)
-        return HeldRetainedLabels(key, labels, receipt, (labels_file, receipt_file, key_file))
+        return _load_retained_held(labels_file, receipt_file, key_file)
     except (
         KeyboardInterrupt,
         RuntimeError,

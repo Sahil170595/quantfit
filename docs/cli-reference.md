@@ -1,6 +1,7 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.42.0, including annotation chunks.
+This reference documents quantfit 0.43.0, including annotation chunks and
+capture-backed retained review.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -668,6 +669,30 @@ exits 2. Native ingestion still refuses an entirely unusable measurement. Review
 counts establish no label truth, independent adjudication, authentic blinding,
 improved accuracy or scientific GO. See [the review contract](label-review.md) for
 API, bounds and publication limits.
+
+### Capture-backed retained review — since 0.43.0
+
+Both native review leaves accept an explicit retained mode. Default full-sheet
+calls and outputs above remain unchanged:
+
+```bash
+quantfit calibrate review prepare --input-mode retained --capture private.capture.jsonl --key private.labelkey.json --retained-labels-a a.labels.csv --retention-receipt-a a-retention.json --retained-labels-b b.labels.csv --retention-receipt-b b-retention.json --sheet private.review.labels.csv --receipt preparation.json --json
+# Explicitly supply every selected label locally; never change IDs or text.
+quantfit calibrate review apply --input-mode retained --capture private.capture.jsonl --key private.labelkey.json --retained-labels-a a.labels.csv --retention-receipt-a a-retention.json --retained-labels-b b.labels.csv --retention-receipt-b b-retention.json --review private.review.labels.csv --preparation preparation.json --out reviewed.labels.csv --receipt application.json --json
+quantfit calibrate extract --sheet reviewed.labels.csv --key private.labelkey.json --out new.labels.csv --receipt new-retention.json --json
+quantfit calibrate ingest --retained-labels new.labels.csv --retention-receipt new-retention.json --key private.labelkey.json --out calibration.json --json
+```
+
+Retained mode requires actual capture/shared bound key, both complete retained CSVs
+and **both own** extraction receipts. The original full-sheet digests remain
+receipt declarations (`held_and_validated=false`); those sheets are not read.
+Actual held capture facts/digests are checked without authenticating human truth.
+Every inequality including unusable is selected. Apply creates a complete NEW
+native-validated sheet; separate truthful extraction produces the schema-3 receipt.
+Mixed/missing roles and invalid native inputs exit 2, transformations 0. No
+automatic ingestion, extra sharing permission, independent adjudication or GO.
+See [the complete retained-review contract](retained-review.md) for APIs, held-once
+bounds, exclusive/partial publication and zero/all-unusable semantics.
 
 ### Annotation chunks — since 0.42.0
 
