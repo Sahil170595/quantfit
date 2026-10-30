@@ -13,7 +13,7 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.42.0 — unreleased
+## 0.42.0 — 2026-10-30
 
 - Add complete `calibrate chunks prepare` and `calibrate chunks collect`: bounded private partitions of a complete blank native template, exact regenerated preparation bindings, explicit returned labels and a new complete native sheet. Original native ingest remains separate and unchanged.
 - Retain all source rows, unusable judgments, role-specific source/filled hashes and operator-declared attribution. No automatic labeling/sharing, new annotator permission, independent samples or scientific GO. Regenerable fictional CLI/API/native-ingest evidence and limits: `validation/2026-10-25-annotation-chunks/`.

@@ -1,7 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents published quantfit 0.41.0. The explicitly marked
-annotation-chunks section requires unreleased 0.42.0 source or a candidate wheel.
+This reference documents quantfit 0.42.0, including annotation chunks.
 Software versions do not establish roadmap or scientific GO.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
@@ -670,9 +669,9 @@ counts establish no label truth, independent adjudication, authentic blinding,
 improved accuracy or scientific GO. See [the review contract](label-review.md) for
 API, bounds and publication limits.
 
-### Annotation chunks — unreleased 0.42.0 source
+### Annotation chunks — since 0.42.0
 
-The source/candidate workflow accepts only a complete **blank** native template
+The workflow accepts only a complete **blank** native template
 and its original key. Create an empty private directory first, then prepare every
 bounded partition and its private manifest:
 
@@ -700,8 +699,7 @@ keep the key and `*.chunkmanifest.json` private. `--annotator-role named_second`
 requires `--annotator-name`; attribution is declared, not authenticated. No
 automatic sending, labeling, ingestion, independence or scientific GO. See
 [the complete contract](annotation-chunks.md) for API, limits and manifest-last
-partial-publication behavior. This section requires an unreleased candidate,
-not the published 0.41.0 installation.
+partial-publication behavior. This workflow is available since quantfit 0.42.0.
 
 ## Analyze an existing run's resolution
 
