@@ -430,6 +430,14 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+### Capture-backed adjudication source candidate (2026-10-31, unreleased 0.47.0)
+
+| Flag surface | Command | Bounded source behavior | Evidence and limits |
+|---|---|---|---|
+| `--report` / `--capture` / `--record` / `--out` / `--json` | adjudicate verify | Held-only whole-native tabulation, exact selected membership/axes/both UTF8 hashes; no queue/key/CSV. Consistency 0 includes zero/unresolved; refusal 2. | `tests/test_adjudication_verification.py`; `tests/test_ci_adjudication_verification.py`; `validation/2026-10-31-adjudication-verification/`; no source/human authentication |
+| `--adjudication-capture` / `--adjudication` / `--calibration-report` | emit model-card | Capture requires record before I/O; one held report feeds receiver/capture/calibration/render. Default/capture-free bytes and native math remain. | Same source consumer; actual hosted installed acceptance is separate, no human confirmation or scientific GO |
+
+
 ### Source-bound adjudication source candidate (2026-10-25, unreleased 0.46.0)
 
 | Flags | Command | Source controls | Evidence and limits |

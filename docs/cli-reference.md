@@ -1,6 +1,7 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.46.0, including annotation chunks,
+This reference documents released quantfit 0.46.0 and the explicitly unreleased
+0.47.0 capture-backed adjudication receiver, including annotation chunks,
 capture-backed retained review, finite-grid budgets, calibration-choice sensitivity
 and source-bound flip adjudication.
 Software versions do not establish roadmap or scientific GO.
@@ -876,6 +877,26 @@ freshly verify selected membership/text or authenticate human judgment. Native
 statistics and `human_confirmation_verified=false` remain unchanged. `emit` is
 stdout/string only, with no `--out`. Success is 0; invalid/unsafe/excess evidence is
 2, not a gate. See [the complete API, class matrix and bounds](adjudication.md).
+
+### Capture-backed adjudication receiving — unreleased 0.47.0
+
+```bash
+quantfit adjudicate verify --report drift.json --capture private.capture.jsonl --record adjudication.json --out verification.json --json
+quantfit emit model-card --report drift.json --adjudication adjudication.json --adjudication-capture private.capture.jsonl --calibration-report calibration.json --json
+```
+
+`verify` holds only report/capture/existing record (8/16/4 MiB), checks the entire
+native tabulation and exact selected indices/axes/both UTF8 hashes, and optionally
+exclusively creates a NEW aggregate proof capped at 64 KiB. It needs no original
+queue/preparation, key or CSV; pair count remains 1..4096. Exit 0 is consistency,
+including unresolved/zero-selected cases; invalid evidence or unsafe output is 2.
+No original native verdict/statistic changes. `--adjudication-capture` requires
+`--adjudication` before input I/O. Optional calibration is another held 2 MiB role
+(total input profile 30 MiB) and retains native typed scope matching. `emit` still
+returns only string/stdout; JSON retains its existing `report_path` field, so the
+whole legacy envelope is not universally path-free. Human/source authentication,
+false-negative validation, sensitivity and scientific GO remain unestablished.
+See [the API, privacy and publication contract](adjudication.md#capture-backed-receiving--unreleased-0470).
 
 ### Loose report inputs
 

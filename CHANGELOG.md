@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## Unreleased — 0.47.0
+
+- Add held-only `verify_adjudication` and `adjudicate verify` for an existing report/capture/record, without original queue/preparation or CSV/key inputs. Check whole native capture tabulation, exact selected pair set/axes and both UTF8 completion hashes. Return a 64 KiB aggregate proof; consistency 0 includes unresolved/zero-selected declarations, invalid/unsafe/excess evidence is 2.
+- Add optional capture-backed model cards sharing the same held report with record/capture/calibration, retaining default/capture-free bytes and original native math, flags and verdict. Supplied-source consistency does not authenticate human labels, origin or scientific GO. Native bounds, privacy limits and regenerable fictional controls: `validation/2026-10-31-adjudication-verification/` and `docs/adjudication.md`.
+
 ## 0.46.0 — 2026-10-30
 
 - Add complete source-bound `adjudicate prepare` → explicit private labels/classes → `adjudicate apply`, plus strict optional `emit model-card --adjudication` receiving with/without native calibration. Recompute whole native capture/report correspondence, preserve all flagged pairs and four disjoint declared outcomes, and publish a new closed hash/count record.
