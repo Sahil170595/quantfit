@@ -81,6 +81,7 @@ def test_public_provider_reuses_one_server_and_reports_actual_calls(fixture):
 def test_observed_whole_custom_corpus_keeps_loaded_source_and_closed_native_owners(fixture, monkeypatch, tmp_path):
     import datasets
 
+    import quantfit.safety.report as report_module
     from quantfit.inspect_task import qsr_eval
     from quantfit.safety import verify as native
     from quantfit.safety.report import DriftReport
@@ -92,6 +93,20 @@ def test_observed_whole_custom_corpus_keeps_loaded_source_and_closed_native_owne
         {"prompt": "controlled s", "zone": "clear_safe", "expected": "safe"},
     ]
     events = []
+    env_calls = []
+    expected_env = {
+        "device": "cpu",
+        "python": "synthetic",
+        "torch": "synthetic",
+        "transformers": "synthetic",
+        "cuda": None,
+    }
+
+    def environment():
+        env_calls.append(True)
+        return dict(expected_env)
+
+    monkeypatch.setattr(report_module, "environment_fingerprint", environment)
 
     class Builder:
         hash = source.revision
@@ -124,8 +139,11 @@ def test_observed_whole_custom_corpus_keeps_loaded_source_and_closed_native_owne
     assert events == ["factory", "stream", "whole"] and run.probe_corpus == source
     assert run.drift.n == 2 and run.observed_arms is not None
     assert len(servers) == 2 and all(server.closed and server.calls == 2 for server in servers)
+    assert not env_calls
     report = run.write_report(str(tmp_path / "custom-report.json"), *run.observed_arms, 64)
-    assert DriftReport.from_json(str(report)).probe_dataset == {
+    parsed = DriftReport.from_json(str(report))
+    assert env_calls == [True] and parsed.env == expected_env
+    assert parsed.probe_dataset == {
         "id": source.id,
         "revision": source.revision,
         "split": source.split,
