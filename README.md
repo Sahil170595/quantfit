@@ -178,6 +178,15 @@ calibration exits 4 and unmet resolution exits 5. Read native outcome and qualif
 separately. Without this flag, existing annotation and JUnit behavior stay unchanged.
 Neither path authenticates labels, sensitivity or scientific GO. See [the contract](docs/screen-resolution.md#explicit-requirement-0410).
 
+
+The **unreleased 0.51.0 source candidate** adds [pinned alternative probe corpora](docs/probe-corpus.md): `ProbeCorpus(id, revision, split)` and an all-or-none source triple on `verify-safety`/`inspect-run`. Every row is admitted in native order before model work. Alternative sources are explicitly noncanonical; changing only the default ID's revision or split is also noncanonical. Historical default-corpus judge accuracy/detectability does not validate a new distribution. Public install remains 0.46.0.
+
+```bash
+quantfit verify-safety --baseline org/base --quant ./out --probe-dataset org/probes --probe-revision 1111111111111111111111111111111111111111 --probe-split validation --report drift.json --json
+```
+
+This is an operator-supplied measurement request, not a corpus/model run recorded here. The candidate requires qualified `datasets==5.0.1`; selected UTF8 limits are 64KiB/prompt and 8MiB/whole population, 1..4096 probes. A valid one-axis population remains unmeasurable on its missing axis; zero means the detector did not fire, never safety.
+
 ## What it has found
 
 The findings below are the dated August 2026 studies, not a cumulative count of

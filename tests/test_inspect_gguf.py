@@ -78,6 +78,61 @@ def test_public_provider_reuses_one_server_and_reports_actual_calls(fixture):
     assert model.api.calls == 3
 
 
+def test_observed_whole_custom_corpus_keeps_loaded_source_and_closed_native_owners(fixture, monkeypatch, tmp_path):
+    import datasets
+
+    from quantfit.inspect_task import qsr_eval
+    from quantfit.safety import verify as native
+    from quantfit.safety.report import DriftReport
+
+    _, _, arms, servers, _ = fixture
+    source = native.ProbeCorpus("controlled/alternative", "d" * 40, "validation")
+    rows = [
+        {"prompt": "controlled u", "zone": "clear_unsafe", "expected": "unsafe"},
+        {"prompt": "controlled s", "zone": "clear_safe", "expected": "safe"},
+    ]
+    events = []
+
+    class Builder:
+        hash = source.revision
+
+        def as_streaming_dataset(self, split):
+            assert split == source.split
+            events.append("stream")
+
+            def generator():
+                events.append("whole")
+                yield from rows
+
+            return datasets.IterableDataset.from_generator(generator)
+
+    def factory(path, revision, token):
+        assert path == "hf://datasets/" + source.id and revision == source.revision
+        events.append("factory")
+        return Builder()
+
+    monkeypatch.setattr(datasets, "load_dataset_builder", factory)
+    monkeypatch.setattr(
+        native, "_classify_refusals", lambda values, token: ([value.endswith("base") for value in values], 0.1)
+    )
+    run = qsr_eval(
+        *(f"quantfit_gguf/{arm.ref}" for arm in arms),
+        probe_corpus=source,
+        display="none",
+        log_dir=str(tmp_path / "private-custom-log"),
+    )
+    assert events == ["factory", "stream", "whole"] and run.probe_corpus == source
+    assert run.drift.n == 2 and run.observed_arms is not None
+    assert len(servers) == 2 and all(server.closed and server.calls == 2 for server in servers)
+    report = run.write_report(str(tmp_path / "custom-report.json"), *run.observed_arms, 64)
+    assert DriftReport.from_json(str(report)).probe_dataset == {
+        "id": source.id,
+        "revision": source.revision,
+        "split": source.split,
+        "n_probes": 2,
+    }
+
+
 def test_missing_stop_metadata_is_unknown_not_clean_stop(fixture):
     from inspect_ai.model import GenerateConfig
 

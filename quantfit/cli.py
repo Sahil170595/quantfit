@@ -29,6 +29,18 @@ def _json_document(command: str, code: int, result: dict) -> dict:
     }
 
 
+def _probe_metadata(options, drift):
+    from quantfit.safety.verify import _canonical_source
+
+    source = options.get("probe_corpus")
+    if source is None or _canonical_source(source):
+        return {}
+    return {
+        "probe_dataset": {"id": source.id, "revision": source.revision, "split": source.split, "n_probes": drift.n},
+        "probe_scope": "supplied noncanonical; no curation or judge-accuracy qualification",
+    }
+
+
 def _emit(
     args: argparse.Namespace,
     command: str,
@@ -188,6 +200,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "--log-dir", default=None, metavar="DIR", help="LOCAL capture-class Inspect logs; never commit"
     )
 
+    pinspect.add_argument(
+        "--probe-dataset", default=None, help="declared namespaced Hub dataset; all three probe flags required"
+    )
+    pinspect.add_argument("--probe-revision", default=None, help="exact lowercase 40-hex dataset revision")
+    pinspect.add_argument("--probe-split", default=None, help="one literal whole named split, not a slice/union")
+
     pvs = sub.add_parser(
         "verify-safety",
         parents=[tok],
@@ -247,6 +265,11 @@ def _build_parser() -> argparse.ArgumentParser:
         "harmful model output; never commit, redistribute, or attach to a report — see "
         "docs/data-handling-completions.md; use the *.capture.jsonl suffix)",
     )
+    pvs.add_argument(
+        "--probe-dataset", default=None, help="declared noncanonical corpus; all three probe flags required"
+    )
+    pvs.add_argument("--probe-revision", default=None, help="exact lowercase 40-hex dataset revision")
+    pvs.add_argument("--probe-split", default=None, help="one whole literal split; no slicing/concatenation")
     pvs.add_argument("--baseline-cache", default=None, metavar="DIR", help=_BASELINE_CACHE_HELP)
     pvs.add_argument("--baseline-revision", default=None, help="immutable 40-hex commit; Hub GGUF refs only")
     pvs.add_argument("--quant-revision", default=None, help="immutable 40-hex commit; Hub GGUF refs only")
@@ -1174,6 +1197,19 @@ def _dispatch(args: argparse.Namespace) -> int:
             lambda: print(("PASS: " if ok else "FAIL: ") + msg),
         )
 
+    source_options = {}
+    if args.cmd in {"verify-safety", "inspect-run"}:
+        source_values = (args.probe_dataset, args.probe_revision, args.probe_split)
+        if any(value is not None for value in source_values):
+            if any(value is None for value in source_values) or getattr(args, "demo", False):
+                raise RuntimeError("invalid_probe_corpus_options")
+            from quantfit.safety.verify import ProbeCorpus, _canonical_source
+
+            source = ProbeCorpus(*source_values)
+            if getattr(args, "_execution_recipe", None) is not None and not _canonical_source(source):
+                raise RuntimeError("execution_recipe_mismatch")
+            source_options["probe_corpus"] = source
+
     if args.cmd == "inspect-run":
         import contextlib
         import tempfile
@@ -1207,6 +1243,7 @@ def _dispatch(args: argparse.Namespace) -> int:
                     token=args.token,
                     max_new_tokens=args.max_new_tokens,
                     **observations,
+                    **source_options,
                     log_dir=log_dir,
                     display="none",
                     max_samples=1,
@@ -1222,6 +1259,7 @@ def _dispatch(args: argparse.Namespace) -> int:
                 "inspect-run",
                 code,
                 {
+                    **_probe_metadata(source_options, run.drift),
                     "regression_detected": run.drift.regression_detected,
                     "unmeasurable_axes": list(run.drift.unmeasurable_axes),
                     "summary": run.drift.summary(),
@@ -1321,6 +1359,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             capture_path=args.capture,
             baseline_cache_dir=args.baseline_cache,
             **revisions,
+            **source_options,
         )
         # Exit codes are the CI contract; they must not collide with 2 (operational
         # failure, from main's handler) or an unmeasured run would read as a verdict.
@@ -1356,6 +1395,7 @@ def _dispatch(args: argparse.Namespace) -> int:
                 # The schema-v2 report is the artifact of record; the envelope carries the
                 # same aggregates so a caller need not write a file to read a verdict. Both
                 # are aggregates only — no probe text crosses this boundary either way.
+                **_probe_metadata(source_options, drift),
                 "regression_detected": drift.regression_detected,
                 "unmeasurable_axes": list(drift.unmeasurable_axes),
                 "summary": drift.summary(),

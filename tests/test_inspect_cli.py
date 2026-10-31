@@ -23,6 +23,37 @@ ARGS = [
 ]
 
 
+@pytest.fixture
+def observed_population(monkeypatch):
+    import datasets
+
+    from quantfit.safety import verify
+
+    state = {"builds": 0, "yielded": 0, "EOF": 0}
+
+    def generate():
+        for i in range(40):
+            state["yielded"] += 1
+            yield {"prompt": f"controlled runner row {i}", "zone": "clear_safe", "expected": "safe"}
+        state["EOF"] += 1
+
+    class Builder:
+        hash = verify.PROBE_DATASET_REVISION
+
+        def as_streaming_dataset(self, split):
+            assert split == verify.PROBE_SPLIT
+            return datasets.IterableDataset.from_generator(generate)
+
+    def builder(path, *, revision, token):
+        assert path == "hf://datasets/" + verify.PROBE_DATASET_ID
+        assert revision == verify.PROBE_DATASET_REVISION and token is None
+        state["builds"] += 1
+        return Builder()
+
+    monkeypatch.setattr(datasets, "load_dataset_builder", builder)
+    return state
+
+
 @pytest.mark.parametrize("args", [["inspect-run", "--json"], ARGS[:5] + ["--json"]])
 def test_missing_inputs_clean_exit_two(args, capsys):
     assert main(args) == 2
@@ -162,11 +193,13 @@ def test_observed_mode_does_not_admit_source_override(monkeypatch):
         )
 
 
-def test_observed_runner_failure_releases_process_lock(monkeypatch):
+def test_observed_runner_failure_releases_process_lock(monkeypatch, observed_population):
     import quantfit.inspect_hf as hf
     import quantfit.inspect_task as task
 
     def failure(*a, **k):
+        assert observed_population["yielded"] == 40 * observed_population["builds"]
+        assert observed_population["EOF"] == observed_population["builds"]
         raise RuntimeError("fixture load failed")
 
     monkeypatch.setattr(task, "_inspect_api", lambda: {"get_model": object()})
@@ -175,33 +208,49 @@ def test_observed_runner_failure_releases_process_lock(monkeypatch):
         with pytest.raises(RuntimeError, match="fixture load failed"):
             task.qsr_eval("hf/example/base", "hf/example/quant", hf_revisions=(SHA, SHA))
         assert not hf.RUN_LOCK.locked()
+    assert observed_population == {"builds": 2, "yielded": 80, "EOF": 2}
 
 
-def test_observed_runner_defaults_to_serial_and_restores_after_eval_failure(monkeypatch):
+def test_observed_runner_defaults_to_serial_and_restores_after_eval_failure(monkeypatch, observed_population):
     import quantfit.inspect_hf as hf
     import quantfit.inspect_task as task
+    from quantfit.safety import verify
 
     closed = []
+    received = []
     sentinel = types.SimpleNamespace(close=lambda: closed.append(True))
     monkeypatch.setattr(task, "_inspect_api", lambda: {"get_model": object()})
     monkeypatch.setattr(hf, "HfRunObserver", lambda *a, **k: sentinel)
-    monkeypatch.setattr(task, "_registry", lambda: {"task": lambda *a, **k: types.SimpleNamespace(dataset=[1])})
 
-    def evaluate(api, built, passthrough, *args):
+    def prepared(*args):
+        source, probes, observer = args[-3:]
+        assert source == verify.ProbeCorpus(verify.PROBE_DATASET_ID, verify.PROBE_DATASET_REVISION, verify.PROBE_SPLIT)
+        assert len(probes) == 40 and all(type(p) is verify.Probe for p in probes)
+        assert observer is sentinel
+        assert observed_population == {"builds": 1, "yielded": 40, "EOF": 1}
+        received.append((source, probes))
+        return types.SimpleNamespace(dataset=probes)
+
+    monkeypatch.setattr(task, "_registry", lambda: {"prepared_task": prepared})
+
+    def evaluate(api, built, passthrough, *args, probe_corpus):
         assert passthrough["max_samples"] == 1
         assert args[-1] is sentinel
+        assert probe_corpus is received[0][0] and built.dataset is received[0][1]
         raise RuntimeError("fixture eval failed")
 
     monkeypatch.setattr(task, "_eval_task", evaluate)
     with pytest.raises(RuntimeError, match="fixture eval failed"):
         task.qsr_eval("hf/example/base", "hf/example/quant", hf_revisions=(SHA, SHA))
     assert closed == [True] and not hf.RUN_LOCK.locked()
+    assert len(received) == 1
 
 
-def test_concurrent_observed_evaluation_fails_before_load(monkeypatch):
+def test_concurrent_observed_evaluation_fails_before_load(monkeypatch, observed_population):
     import quantfit.inspect_hf as hf
     import quantfit.inspect_task as task
 
     monkeypatch.setattr(task, "_inspect_api", dict)
     with hf.RUN_LOCK, pytest.raises(RuntimeError, match="concurrent"):
         task.qsr_eval("hf/example/base", "hf/example/quant", hf_revisions=(SHA, SHA))
+    assert observed_population == {"builds": 1, "yielded": 40, "EOF": 1}

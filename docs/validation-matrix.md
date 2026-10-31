@@ -660,6 +660,10 @@ qualification remains pending for this candidate.
 | `--review` / `--preparation` / `--out` / `--json` | adjudicate review-page (unreleased 0.50) | Actual blank/preparation consistency; all selected rows/private escaped source strings; bounded whole export; fixed native triplets; no source or human authentication. | `tests/test_adjudication_review.py`; `validation/2026-10-31-adjudication-review/`; actual hosted browser separate |
 
 
+| `--probe-dataset` | verify-safety, inspect-run (unreleased 0.51) | Declared namespaced remote-only source; whole software-fixture population admitted before any observer/model. No real alternative corpus/model qualification. | `tests/test_probe_corpus.py`; `validation/2026-10-31-probe-corpus/` |
+| `--probe-revision` | verify-safety, inspect-run (unreleased 0.51) | Exact 40 lowercase-hex requested and resolved builder hash; no cached auto fallback. | Native loader fixtures, same-ID changed revision noncanonical |
+| `--probe-split` | verify-safety, inspect-run (unreleased 0.51) | One literal whole named split; no union/slice/all; actual source propagated into all outputs/cache. | Native source/cache/Inspect fixtures; no curation/authenticity claim |
+
 ## 4. Advertised-but-unevidenced claims found while writing this
 
 These are docs=code findings, not command rows. Each is a claim on a shipped surface

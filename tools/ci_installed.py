@@ -819,6 +819,8 @@ def main() -> None:
             "test_ci_calibration_choices.py",
             "test_ci_adjudication.py",
             "test_ci_adjudication_review.py",
+            "test_ci_probe_corpus.py",
+            "test_probe_corpus.py",
             "test_ci_adjudication_verification.py",
             "test_ci_screen_adjudication.py",
             "test_ci_screen_requirement.py",

@@ -24,6 +24,7 @@ import quantfit.safety.gguf_arm as ga
 import quantfit.safety.verify as sv
 from quantfit.safety import cache
 from quantfit.safety.report import ArmRun
+from quantfit.safety.verify import _load_probes as native_corpus_loader
 
 F16, Q4_K_M = 1, 15
 F16_NAME = "F16"  # what gguf_arm resolves file_type 1 to
@@ -143,6 +144,54 @@ def test_a_hit_skips_baseline_generation_and_changes_nothing_reported(pair):
     warm = sv.verify_safety(base, quant, baseline_cache_dir=str(cache_dir))
     assert generated == ["Q4_K_M"], "a hit must skip baseline generation; the quant always runs"
     assert warm == cold, "a hit changes no measured number"
+
+
+def test_admitted_custom_source_revisions_splits_and_full_order_rekey_native_cache(pair, monkeypatch):
+    import datasets
+
+    base, quant, generated, cache_dir = pair
+    monkeypatch.setattr(sv, "_load_probes", native_corpus_loader)
+    population = [{"prompt": p.prompt, "zone": p.zone, "expected": p.expected} for p in _PROBES]
+    loads = []
+
+    def factory(path, revision, token):
+        loads.append((path, revision))
+
+        class Builder:
+            hash = revision
+
+            def as_streaming_dataset(self, split):
+                return datasets.IterableDataset.from_generator(lambda: iter(population))
+
+        return Builder()
+
+    monkeypatch.setattr(datasets, "load_dataset_builder", factory)
+    source = sv.ProbeCorpus("controlled/alternative", "a" * 40, "train")
+    options = {"baseline_cache_dir": str(cache_dir), "probe_corpus": source}
+    cold = sv.verify_safety(base, quant, **options)
+    assert generated == ["F16", "Q4_K_M"]
+    generated.clear()
+    assert sv.verify_safety(base, quant, **options).to_dict() == cold.to_dict()
+    assert generated == ["Q4_K_M"]
+    for next_source in [
+        sv.ProbeCorpus("controlled/other", "a" * 40, "train"),
+        sv.ProbeCorpus(source.id, "b" * 40, "train"),
+        sv.ProbeCorpus(source.id, source.revision, "validation"),
+    ]:
+        generated.clear()
+        sv.verify_safety(base, quant, baseline_cache_dir=str(cache_dir), probe_corpus=next_source)
+        assert generated == ["F16", "Q4_K_M"]
+    for change in ("prompt", "order", "population"):
+        if change == "prompt":
+            population[0] = {**population[0], "prompt": "different controlled prompt"}
+        elif change == "order":
+            population.reverse()
+        else:
+            population.pop()
+        generated.clear()
+        sv.verify_safety(base, quant, **options)
+        assert generated == ["F16", "Q4_K_M"]
+    assert len(loads) == 8
 
 
 def _leaves(obj, path=""):

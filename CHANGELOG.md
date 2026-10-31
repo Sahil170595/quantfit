@@ -13,6 +13,13 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## Unreleased — 0.51.0
+
+- Add frozen `ProbeCorpus` and all-or-none `--probe-dataset`, `--probe-revision`, `--probe-split` on `verify-safety`/`inspect-run`. Admit one entire ordered 1..4096 population from the qualified SDK remote-only Hub dataset route with an exact resolved 40-hex builder hash, before any model/observer/generation/judge. No filtering, coercion, expected-label inference or best subset.
+- Bound each actual prompt at 64KiB strict UTF8 and total selected prompt/zone/expected strings at 8MiB; late malformed rows/EOF/4097 reject. These are application retention bounds, not SDK/network/parser/heap or external-data authenticity guarantees. Exact default source/order/native math and report/capture/card behavior remain, apart from the explicit software version.
+- Carry actual source through reports/capture-only bindings, GGUF cache keys, Inspect dataset/log/completed runs and delayed report writers. Source-aware API summaries and plain/calibrated/adjudicated cards disclose noncanonical distributions without applying the default corpus's historical n<=34 detectability conclusion. No curation, judge-accuracy transfer, independence, sensitivity, null clearance or scientific GO.
+- Narrow public datasets to qualified 5.0.1: older advertised 3.0 source lacks its native remote-only URI dispatch. Installed SDK, private 174-node lock and 160 active externals remain unchanged; Hubfloor remains native >=0.25. Preserve every dated validation record. Regenerable controlled software/API/CLI/Inspect/cache evidence and limits: `validation/2026-10-31-probe-corpus/`; public install remains 0.46.0.
+
 ## Unreleased — 0.50.0
 
 - Add `render_adjudication_review` and `adjudicate review-page`: held native blank nine-column queue/preparation consistency, complete selected population, fixed protected-field captions and explicitly blank decision controls. This does not reexecute source checks or authenticate an operator.

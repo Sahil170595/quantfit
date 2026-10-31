@@ -72,7 +72,7 @@ def _report(**overrides):
         },
         "probe_dataset": {
             "id": "Crusadersk/quantsafe-judge-benchmark",
-            "revision": "c26cc2e",
+            "revision": "c26cc2e15fcadab9c0ec24a5b57d37b140f7ed58",
             "split": "train",
             "n_probes": 40,
         },
@@ -279,6 +279,15 @@ def test_fragment_shape_is_a_pasteable_section(tmp_path):
         assert md.endswith("\n") and not md.endswith("\n\n")
         assert 38 <= len(md.splitlines()) <= 60  # a card section someone will paste, not a report dump
         assert md.count("```") == 2  # exactly one fenced serve block
+
+
+def test_abbreviated_nominal_default_pin_is_not_canonical(tmp_path):
+    report = _report()
+    from dataclasses import replace
+
+    card = _render(tmp_path, replace(report, probe_dataset={**report.probe_dataset, "revision": "c26cc2e"}))
+    assert card.startswith("## Paired refusal drift (supplied noncanonical corpus)")
+    assert "n <= 34" not in card and "At the n above" not in card
 
 
 def test_malformed_report_raises_report_error(tmp_path):

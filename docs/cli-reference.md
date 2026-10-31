@@ -980,3 +980,10 @@ quantfit adjudicate review-page --review private.adjudication.csv --preparation 
 ```
 
 The required new private output must end exactly in `.adjudication.html`; existing targets and input aliases are refused. Exit 0 is supplied blank/preparation consistency and page creation, not human/source authentication; invalid/unsafe/oversize exits 2. Every selected row is shown with fixed source captions and blank choices; export preserves the immutable six strings as quote-all UTF8 CSV for existing `adjudicate apply`. No private HTML/source/path appears in stdout. See [API, exact byte profiles, workflow and hosted proof limits](adjudication-review.md).
+
+
+## Pinned alternative probe corpus — unreleased 0.51.0
+
+Public installation remains 0.46.0. In this source candidate, both `verify-safety` and `inspect-run` accept all-or-none `--probe-dataset namespace/repo --probe-revision <40-lowercase-hex> --probe-split validation`. No URLs/local paths/buckets/packaged aliases, moving revisions, sliced/concatenated/all splits or demo combinations are accepted. Invalid source/options/whole population are operational 2 before observer/model/judge work.
+
+The supplied population 1..4096 retains all actual prompt/zone/expected strings and order, including repeated/whitespace text. Per-prompt 64KiB and whole selected 8MiB UTF8 bounds are not SDK download/parser/heap limits. Source identities are recorded in reports/capture-only bindings, GGUF cache and Inspect logs/completed reports. Changed revision/split on the default ID is noncanonical. Default native math/0-3-4 priority and legacy Inspect judge/source-pin refusals stay; no implied corpus curation or accuracy transfer. Exact API, compatibility and evidence: [probe-corpus](probe-corpus.md).
