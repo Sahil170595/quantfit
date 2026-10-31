@@ -805,6 +805,28 @@ def test_a_dependency_declared_twice_carries_the_same_specifier():
         )
 
 
+def test_every_supported_python_excludes_disclosed_filelock_versions():
+    """Advisory-domain metadata control; no exploit or runtime failure is claimed.
+
+    GHSA-8mx5-7m5m-r77g and GHSA-69hj-f68j-2879 are patched in 4.2.1.
+    Check every advertised marker branch, not only this process's interpreter.
+    """
+    declarations = [Requirement(raw) for raw in _pyproject()["project"]["dependencies"]]
+    for major, minor in _classifier_versions():
+        environment = {"python_version": f"{major}.{minor}", "python_full_version": f"{major}.{minor}.0"}
+        active = [
+            req
+            for req in declarations
+            if req.name == "filelock" and (req.marker is None or req.marker.evaluate(environment=environment))
+        ]
+        assert active, f"No explicit filelock security bound on {major}.{minor}"
+        for affected in ("3.20.3", "4.0.10", "4.2.0"):
+            assert not all(affected in req.specifier for req in active), (
+                f"Supported {major}.{minor} admits affected filelock {affected}"
+            )
+        assert all("4.2.1" in req.specifier for req in active), f"Fixed filelock excluded on {major}.{minor}"
+
+
 @pytest.mark.parametrize(
     ("declarations", "conflicting"),
     [

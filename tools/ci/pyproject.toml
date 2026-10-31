@@ -1,14 +1,13 @@
 [project]
 name = "quantfit-hosted-validation"
 version = "0.0.0"
-requires-python = ">=3.10,<3.15"
+requires-python = ">=3.11,<3.15"
 
 [dependency-groups]
 unit = [
   "pytest==9.0.3", "hypothesis==6.152.5", "gguf==0.19.0", "inspect-ai==0.3.269",
   "huggingface-hub==1.31.0", "psutil==7.2.2", "tomli==2.4.0",
-  "filelock==3.20.3; python_version < '3.11'",
-  "filelock==4.2.1; python_version >= '3.11'",
+  "filelock==4.2.1",
   "scipy==1.15.3; python_version < '3.14'", "scipy==1.17.1; python_version >= '3.14'",
 ]
 numerical = [{ include-group = "unit" }, "torch==2.13.0", "pytest-cov==7.1.0", "coverage==7.14.0"]
@@ -30,7 +29,7 @@ required-version = "==0.12.23"
 default-groups = []
 environments = ["sys_platform == 'linux'", "sys_platform == 'win32'"]
 
-# Pillow 13 security fixes require Python 3.11; unit/tooling retain the 3.10 matrix.
+# Public/private supported floor is 3.11; retain the explicit runtime-group floor.
 [tool.uv.dependency-groups]
 runtime = { requires-python = ">=3.11" }
 

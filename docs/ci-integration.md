@@ -653,8 +653,10 @@ on a hosted CPU runner, and is worth copying into your own repo:
 - **quickstart install** — build the wheel with locked tooling, install it into a clean
   venv with the complete hash-locked runtime on Linux and Windows, and smoke the CLI.
   The complete locked `runtime` group requires Python 3.11 or newer (Pillow 13 security
-  fixes); hosted runtime qualification uses Python 3.12. The Python 3.10 unit matrix
-  validates hermetic source contracts and does not establish complete runtime compatibility.
+  fixes); hosted runtime and numerical qualification use Python 3.12. From the
+  unreleased 0.47.0 candidate's 2026-10-31 security correction, public/private
+  minimum Python is 3.11 and the supported unit matrix is 3.11-3.14. Earlier 3.10
+  source-only checks are historical, not a current support or universal-security claim.
   The independent daily dependency-drift workflow resolves fresh versions and runs the
   suite plus its advisory audit. The canary preserves cold model/judge/probe downloads
   and same-model determinism checks. See `docs/hosted-ci.md` for their proof scopes.
