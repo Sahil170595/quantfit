@@ -1,0 +1,96 @@
+{
+  "C_hosted_qualification": "pending fresh current-head CI/CodeQL/installed/browser",
+  "candidate": "0.51.0",
+  "historical_B": {
+    "CLI_adverse_cases": 8,
+    "bound_source_mismatch_controls": 14,
+    "changed_profile_source_hashes": {
+      "tools/ci/pyproject.toml": {
+        "B": "68cc3aaab4d158452773aa43764d30cf55d88101354edb9fad20d7af54034cb4",
+        "C": "8f149313eb594a95037156e33c8b81732a6e263a2df894dfeab4042fe8ecaa00"
+      },
+      "tools/ci/uv.lock": {
+        "B": "06d0f2f5e1421a9eeda47279e1209b5d7e9e803bf01fa6612b0e902836a9389c",
+        "C": "35bcbaef851d6ba5ad56e10e379d1ea9312ac381c2ee816b1c8a4ba18c1ad152"
+      }
+    },
+    "failed_CI": "https://github.com/Sahil170595/quantfit/actions/runs/41222240431",
+    "failed_numerical_job_id": 124599049822,
+    "failed_unit_job_ids": [
+      124599049814,
+      124599049819,
+      124599049820,
+      124599049952
+    ],
+    "failure": "datasets absent from unit; all four unit profiles and inherited numerical profile failed",
+    "full_source": {
+      "deselected": 6,
+      "log_sha256": "d109613d4735ba50ebb6ed3a412d48c0bd8baa4cc2596d86f909fefd6131b707",
+      "passed": 3617,
+      "skipped": 55
+    },
+    "head": "afc239bb0f00bd35d019bf2fe693b1c1d3120db1",
+    "installed_each": {
+      "loaded_module_count": null,
+      "passed": 1325,
+      "skipped": 19,
+      "wheel_Python_files": 94
+    },
+    "positive_cases": 16,
+    "prior_executions_carried_by_held_application_and_public_metadata": true,
+    "record": "validation/2026-10-31-probe-corpus/summary.json",
+    "record_sha256": "ed8b514412b54d115d62c138b5d05335ed7d3d1cc09b273bc05466b9f7de341a",
+    "source_hashes_held": {
+      ".github/workflows/validate.yml": "7a9dcd9b1b12b6461481c4595525ee2c3221fecec830fe978029c928e59c6ce1",
+      "pyproject.toml": "e4c09d383b3a28c47e817cd5b2e76aed41693e253a27ae59cf2f47480b6d024e",
+      "quantfit/__init__.py": "acf91effe5e1a70336af6d5a2b2e74533d59f16637977526aa6453abacf3dc70",
+      "quantfit/cli.py": "1f11ba6741bd16b5c5968d71c70837aa0d045a580d1c1143b054b0ae5d804ebb",
+      "quantfit/inspect_gguf.py": "18d35cbfcbe6c42be5728b7deb6e94b5cf9ed353cea6cbc07ce8596ba6dec836",
+      "quantfit/inspect_hf.py": "48ee48850786480c39e85488ea295e69258e29ce5c1f0b7c07ecec7c14f82852",
+      "quantfit/inspect_task.py": "189723757b75b95dad830ca12a837cf2bfec7a38f5af03acedbd0d337cb908c9",
+      "quantfit/modelcard.py": "4484f8777b8f768ab42d5a1ae7058680e3984cf2d7aa0a860541712b13df5737",
+      "quantfit/reference_assessment.py": "ef8bd69d2da5aa190544726e7b6c9e0dd5e86c959c282255b19b8ed733457efb",
+      "quantfit/reference_replay.py": "e2ce7faad07af3c81b8bf7eddfe56d91081f6f69e8ff7db3469abbb2a33751a4",
+      "quantfit/resolution.py": "e6b23319a795182ac3cde8256fb76919636c8e7bea44dc55fb8fb57471e5cb2d",
+      "quantfit/safety/cache.py": "9812dcf76cae12df581c36c050860a1d10b81a0f254de358c33ef2a5bdcfbd13",
+      "quantfit/safety/calibration_binding.py": "4072ef2798bc7535ed0e7ddf2528593bd3d80f98574073c375c5f936b459bc5b",
+      "quantfit/safety/report.py": "45f1d35a3f06f486119f16e002d0df2f2376a3867d491c5dc903b9513c0f9c74",
+      "quantfit/safety/verify.py": "20e009fdfe8dccaf85319400014b42e9bf24562380748ce37711df70a31be574",
+      "tests/test_baseline_cache_wiring.py": "0507cf894dd552e18c0cd192961fe9c982c07d1bdceee59ce8783d111ae22275",
+      "tests/test_ci_probe_corpus.py": "e7bd9c79dd353ccad587ccc771513ae6af27fbadd59f3a2c59ce1dcf9a956237",
+      "tests/test_inspect_gguf.py": "a54a1ddb77a3fd38f9366e490486c6f74d2ac9ab64d9d8b73d3a38883a5644b5",
+      "tests/test_modelcard.py": "1319f0eb6269d9b8b002292f5a010c1c63e172843bc0331b1cf311dbc0606e54",
+      "tests/test_probe_corpus.py": "5eeb54dee4820bd0697948f625cfd392b5de695f17c75c1e6a433a87a30b6d6b",
+      "tools/ci_installed.py": "eae78ab4669f34612935806fe0a47b5da52de9658ed012f491a186f6b7964f11",
+      "tools/ci_probe_corpus.py": "8a87215dbb0b2321384e37b2e22f0790b1d611818608fed684117fb305c205c1"
+    }
+  },
+  "native_lock": {
+    "full_nodes": 174,
+    "full_registry_entries_held": 173,
+    "only_virtual_unit_and_inherited_numerical_edges_and_requirements_added": "datasets==5.0.1",
+    "profile_hashes": {
+      "tools/ci/pyproject.toml": "8f149313eb594a95037156e33c8b81732a6e263a2df894dfeab4042fe8ecaa00",
+      "tools/ci/uv.lock": "35bcbaef851d6ba5ad56e10e379d1ea9312ac381c2ee816b1c8a4ba18c1ad152"
+    },
+    "unique_names": 171
+  },
+  "native_unit_tooling_export": {
+    "bytes": 174342,
+    "datasets_requirement": "datasets==5.0.1; sys_platform == \"linux\" or sys_platform == \"win32\"",
+    "native_marker_selected_on_declared_profiles": {
+      "3.11/linux": true,
+      "3.11/win32": true,
+      "3.12/linux": true,
+      "3.12/win32": true,
+      "3.13/linux": true,
+      "3.13/win32": true,
+      "3.14/linux": true,
+      "3.14/win32": true
+    },
+    "scope": "Exported locked requirements, not execution in a newly constructed unit environment.",
+    "sha256": "f2551cc5e3f1ac95dd9104885171606d5481e7908e5afd238b9ae581be250162"
+  },
+  "profile_scope": "Native locked unit+tooling export; no new environment, install or C full/native execution.",
+  "science_or_Hub_model_qualification": false
+}

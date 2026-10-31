@@ -7,7 +7,7 @@ requires-python = ">=3.11,<3.15"
 unit = [
   "pytest==9.0.3", "hypothesis==6.152.5", "gguf==0.19.0", "inspect-ai==0.3.269",
   "huggingface-hub==1.31.0", "psutil==7.2.2", "tomli==2.4.0",
-  "filelock==4.2.1",
+  "filelock==4.2.1", "datasets==5.0.1",
   "scipy==1.15.3; python_version < '3.14'", "scipy==1.17.1; python_version >= '3.14'",
 ]
 numerical = [{ include-group = "unit" }, "torch==2.13.0", "pytest-cov==7.1.0", "coverage==7.14.0"]
