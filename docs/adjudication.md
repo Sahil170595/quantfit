@@ -79,7 +79,7 @@ All producer outputs must be NEW, distinct from every held input and each other,
 including aliases. Native staged exclusive publication rechecks inputs and
 protects existing files. Outputs publish sequentially, receipt last: a later
 failure can leave earlier new files. There is no multi-file transaction or
-hostile-filesystem guarantee. Receiving only emits a string and changes no file.
+hostile-filesystem guarantee. Capture-free model-card receiving emits only a string and changes no file.
 
 ## API and proof limits
 
@@ -112,3 +112,72 @@ remain unchanged. Confirmation cannot validate false negatives or null screens.
 Fictional CLI/API cases, including absent-capture receiving with/without native
 calibration, are regenerable at `validation/2026-10-25-adjudication/`. They establish
 instrument behavior, not human truth, rater independence, sensitivity or GO.
+
+## Capture-backed receiving — unreleased 0.47.0
+
+This source-only extension freshly verifies an already produced record against
+its actual supplied report and private capture. Public installation remains
+0.46.0. It does not require the original queue/preparation, label key or CSV.
+
+```python
+from quantfit.safety.adjudication import verify_adjudication
+from quantfit.modelcard import model_card_fragment
+
+proof = verify_adjudication("drift.json", "private.capture.jsonl", "adjudication.json",
+    out_path="verification.json")  # Optional NEW output; never overwrite.
+card = model_card_fragment("drift.json", adjudication_record="adjudication.json",
+    adjudication_capture="private.capture.jsonl", calibration_report="calibration.json")
+```
+
+```bash
+quantfit adjudicate verify --report drift.json --capture private.capture.jsonl --record adjudication.json --out verification.json --json
+quantfit emit model-card --report drift.json --adjudication adjudication.json --adjudication-capture private.capture.jsonl --json
+```
+
+The API returns a small `adjudication_verification_schema: 1` aggregate proof.
+It binds actual SHA256/encoded sizes of all three held inputs, native scope,
+original flagged counts, disjoint operator-declared counts and checked population.
+`source_verified=true` means **supplied-source consistency only**. Native whole
+capture tabulation, exact unique selected index SET, axis and BOTH UTF8 completion
+hashes are checked. Entry order is immaterial; repeated text/hashes are legitimate.
+Unselected rows still participate in full tabulation. Zero selected and unresolved
+declarations are valid consistency outcomes (CLI 0); invalid, unsafe or excessive
+evidence is a categorical `invalid_adjudication` refusal (CLI 2). Selection uses
+each probe's explicit expected role, never its zone as a surrogate.
+
+The existing schema-1 record, proof-limit declarations, native math/flags/verdict,
+Wilson/MDE/calibration and scope rules are unchanged. The new proof freshly
+checks source facts, but original queue/preparation hashes remain unverified
+operator declarations. It contains no copied entries, labels, completion text,
+model IDs or private paths. Hashes cannot authenticate coordinated fabrication,
+human reading/truth, rater independence or genuine model execution. Confirmation
+cannot validate false negatives or null screens, and grants no sensitivity,
+control, QSR or scientific GO. Keep the capture private under existing data rules.
+
+Each report/capture/record role is held once under 8/16/4 MiB bounds (28 MiB total
+encoded input profile); native work admission remains 1..4096 pairs. Output
+admission checks all held roles before parsing. The report is parsed once and
+shared with the existing strict record receiver and native capture helper. No
+queue reconstruction or CSV-field check occurs, so long captured text can verify
+within the native byte/count bounds even if it cannot be rebuilt as a CSV queue.
+A NEW proof output is at most 64 KiB and uses existing exclusive staged publication;
+inputs are rechecked before publication or return. Existing files, symlinks,
+hardlinks, input aliases and ordinary replacement races refuse. This is not a
+hostile-filesystem transaction or a heap/runtime bound.
+
+`adjudication_capture` without a record refuses before I/O. In capture-aware card
+mode the same held report/raw bytes feed record verification, capture checking,
+optional native 2 MiB calibration (30 MiB total encoded profile), and rendering.
+Conditional analysis runs once under its existing work admission. The new section
+states the actual capture was read; capture-free/default cards keep their old
+bytes and limited wording. No operational timestamp enters the card. Card output
+is still a string/stdout, with its existing 16 MiB cap and no `--out`; the existing
+CLI `emit --json` envelope retains `report_path`. Only the new proof and section
+are path/text-free, not every legacy output.
+
+Regenerable fictional API/CLI producer → explicit synthetic fill → apply → receive
+controls are in `validation/2026-10-31-adjudication-verification/`. They remove
+only their own original synthetic queue/preparation before receiving, exercise
+cards with/without native calibration and retain native outcomes. No inference,
+real human labels, GPU, paid calls or network execution is established. Hosted
+installed qualification and public release remain separate acceptance steps.

@@ -3,8 +3,9 @@
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
 The action and instrument examples below pin **quantfit 0.46.0**.
-The action defaults to `>=0.46.0,<0.47`; pin exactly when reproducibility requires
-the same instrument version.
+The unreleased 0.50.0 source action defaults to `>=0.50.0,<0.51`; the public
+examples retain the released 0.46.0 action and instrument pins. Pin both exactly
+when reproducibility requires the same action and instrument.
 Candidate acceptance uses the exact source or wheel through `quantfit-path`;
 release publication separately qualifies the versioned distributions.
 Protocol: QSR v0 (`spec/qsr-v0.md`). Implementation authority for everything on this page
@@ -160,7 +161,7 @@ measures between releases.
 | `calibration-report` | `""` | Bound schema-2 or closed retained-schema-3 calibration input. Mutually exclusive with both operator epsilon inputs. Protocol is checked before generation; actual resolved scope is checked afterward. All output paths, including JUnit, must differ from this input. |
 | `max-new-tokens` | `""` (CLI default 64) | Applied identically to both arms (§2.3). |
 | `python-version` | `3.12` | Same version quantfit's own CI pins. |
-| `quantfit-version` | `>=0.46.0,<0.47` | PEP 440 specifier. Pin exactly for a reproducible gate. |
+| `quantfit-version` | `>=0.48.0,<0.49` (unreleased source) | PEP 440 specifier. Pin exactly for a reproducible gate. |
 | `quantfit-path` | `""` | Install from a local path instead of PyPI; overrides `quantfit-version`. |
 | `report` | `quantfit-gate/drift.json` | Schema-v2 drift report (`quantfit gate --report`). |
 | `gate-out` | `quantfit-gate/gate.json` | Gate decision artifact, schema 1 (`quantfit gate --out`). Written on refusals too. |
@@ -652,8 +653,10 @@ on a hosted CPU runner, and is worth copying into your own repo:
 - **quickstart install** — build the wheel with locked tooling, install it into a clean
   venv with the complete hash-locked runtime on Linux and Windows, and smoke the CLI.
   The complete locked `runtime` group requires Python 3.11 or newer (Pillow 13 security
-  fixes); hosted runtime qualification uses Python 3.12. The Python 3.10 unit matrix
-  validates hermetic source contracts and does not establish complete runtime compatibility.
+  fixes); hosted runtime and numerical qualification use Python 3.12. From the
+  unreleased 0.47.0 candidate's 2026-10-31 security correction, public/private
+  minimum Python is 3.11 and the supported unit matrix is 3.11-3.14. Earlier 3.10
+  source-only checks are historical, not a current support or universal-security claim.
   The independent daily dependency-drift workflow resolves fresh versions and runs the
   suite plus its advisory audit. The canary preserves cold model/judge/probe downloads
   and same-model determinism checks. See `docs/hosted-ci.md` for their proof scopes.
