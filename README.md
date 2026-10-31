@@ -69,6 +69,19 @@ Exit 0 means supplied-source consistency, including zero selected or unresolved
 operator declarations. It does not authenticate human truth, source origin or
 scientific GO. Invalid/unsafe/excess evidence exits 2; no new gate is introduced.
 
+The **unreleased 0.48.0 source candidate**, stacked on 0.47.0, adds a
+[whole-target saved adjudication screen](docs/screen-adjudication.md):
+
+```bash
+quantfit adjudicate screen --targets targets.json --reports-dir reports --adjudications-dir adjudications --captures-dir captures --require-source-complete --out summary.json --junit summary.xml --json
+```
+
+Every original manifest target remains, including missing reports. Source closure,
+record coverage and declared operator resolution are separate. Default native
+3/4/0 outcomes remain; the optional requirement changes only a native 0 to 4 for
+incomplete sources. JUnit keeps all 3N+1 cases. No CSV/key/inference or human truth
+is introduced. Public installation remains 0.46.0.
+
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
 

@@ -13,6 +13,12 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## Unreleased — 0.48.0
+
+- Add `summarize_screen_adjudication` and `adjudicate screen`: hold the original manifest and closed report/record/capture roots once, admit every structural/source binding and combined logical-role n² work before native statistics, and retain all original rows/native outcomes.
+- Separate source closure, required record coverage and unauthenticated operator resolution. Missing reports keep null native counts; pending available sources must agree. Opt-in source completeness changes only native 0 to 4; native 3/4 priority remains. Complete JUnit is 3N+1, with whole JSON/envelope/XML admission before guarded per-file publication.
+- Keep native math/default summary/card behavior and public install 0.46.0; this candidate stacks on unreleased 0.47.0. Fictional API/CLI/privacy/alias/budget controls and limitations: `validation/2026-10-31-screen-adjudication/` and `docs/screen-adjudication.md`.
+
 ## Unreleased — 0.47.0
 
 - Add held-only `verify_adjudication` and `adjudicate verify` for an existing report/capture/record, without original queue/preparation or CSV/key inputs. Check whole native capture tabulation, exact selected pair set/axes and both UTF8 completion hashes. Return a 64 KiB aggregate proof; consistency 0 includes unresolved/zero-selected declarations, invalid/unsafe/excess evidence is 2.

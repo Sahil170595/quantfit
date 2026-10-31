@@ -43,10 +43,10 @@ authors:
   - family-names: "Kadadekar"
     given-names: "Sahil"
 
-# pyproject.toml `version = "0.47.0"`, and quantfit/__init__.py `__version__ = "0.47.0"`.
+# pyproject.toml `version = "0.48.0"`, and quantfit/__init__.py `__version__ = "0.48.0"`.
 # tests/test_meta.py already pins those two to each other; tests/test_refreports.py
 # pins this line to both, so the citation cannot drift from what the tool ships.
-version: "0.47.0"
+version: "0.48.0"
 # Unreleased source candidate: date-released is added only at the authorized release cut.
 
 # pyproject.toml `license = "Apache-2.0"` (PEP 639 SPDX expression); LICENSE is Apache 2.0.
