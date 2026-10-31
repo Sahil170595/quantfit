@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from quantfit import __version__
-from quantfit.bundle import _json, _no_links, _read, _report
+from quantfit.bundle import _json, _no_links, _read, _report, _report_from_parsed
 from quantfit.junit import screen_to_junit
 from quantfit.modelcard import _check_original_statistics
 from quantfit.reproduce import (
@@ -125,12 +125,56 @@ def _protocol(report: DriftReport, target: Target, raw: bytes) -> dict[str, Any]
         ),
         "invalid_report",
     )
-    judge = {key: report.judge.get(key) for key in ("id", "revision", "input_contract")}
+    _require(_nonempty(report.quantfit_version), "unsupported_protocol")
+    view = _view_from_report(report, raw, target.name, "saved_screen")
+    arms = [
+        {key: getattr(arm, key) for key in ("model", "revision", "artifact_sha256", "resolved_dtype", "engine")}
+        for arm in (report.baseline, report.quantized)
+    ]
+    facts = _protocol_fields(
+        report.judge,
+        report.probe_dataset,
+        report.decode,
+        report.env,
+        arms[0],
+        arms[1],
+        target,
+        chat_canonical=_chat_template_policy(view)[2],
+        greedy=_decode_greediness(view)[0],
+    )
+    return {
+        "judge": facts["judge"],
+        "probe_dataset": facts["probe_dataset"],
+        "input_population": {
+            "expected_unsafe_n": report.drift["refusal_robustness"]["expected_unsafe_n"],
+            "expected_safe_n": report.drift["over_refusal"]["expected_safe_n"],
+            "by_zone": {zone: block["n"] for zone, block in report.drift["by_zone"].items()},
+        },
+        "decode": facts["decode"],
+        "engine": facts["engine"],
+        "env": facts["env"],
+    }
+
+
+def _protocol_fields(
+    judge: dict[str, Any],
+    probes: dict[str, Any],
+    decode: dict[str, Any],
+    env: dict[str, Any],
+    baseline: dict[str, Any],
+    quantized: dict[str, Any],
+    target: Target,
+    *,
+    chat_canonical: bool,
+    greedy: bool | None,
+    observed: bool = True,
+) -> dict[str, Any]:
+    """Shared native protocol fields; a pending capture is not a fabricated report."""
+    judge = {key: judge.get(key) for key in ("id", "revision", "input_contract")}
     _require(
         judge == {"id": JUDGE_MODEL_ID, "revision": JUDGE_REVISION, "input_contract": JUDGE_INPUT_CONTRACT},
         "unsupported_protocol",
     )
-    probes = report.probe_dataset
     _require(
         all(
             probes.get(k) == v
@@ -139,17 +183,13 @@ def _protocol(report: DriftReport, target: Target, raw: bytes) -> dict[str, Any]
         "unsupported_protocol",
     )
     _require(type(probes.get("n_probes")) is int and probes["n_probes"] > 0, "unsupported_protocol")
-    decode = report.decode
-    view = _view_from_report(report, raw, target.name, "saved_screen")
     _require(
-        type(decode.get("max_new_tokens")) is int and decode["max_new_tokens"] > 0 and _chat_template_policy(view)[2],
+        type(decode.get("max_new_tokens")) is int and decode["max_new_tokens"] > 0 and chat_canonical,
         "unsupported_protocol",
     )
     _require(all(type(decode[key]) is bool for key in ("do_sample", "greedy") if key in decode), "unsupported_protocol")
     _require(
-        _decode_greediness(view)[0] is True
-        and decode.get("do_sample") is not True
-        and decode.get("greedy") is not False,
+        greedy is True and decode.get("do_sample") is not True and decode.get("greedy") is not False,
         "unsupported_protocol",
     )
     _require(
@@ -163,26 +203,25 @@ def _protocol(report: DriftReport, target: Target, raw: bytes) -> dict[str, Any]
         "unsupported_protocol",
     )
     _require(
-        all(_nonempty(report.env.get(k)) for k in ("python", "torch", "transformers", "device"))
-        and (report.env.get("cuda") is None or _nonempty(report.env["cuda"])),
+        all(_nonempty(env.get(k)) for k in ("python", "torch", "transformers", "device"))
+        and (env.get("cuda") is None or _nonempty(env["cuda"])),
         "unsupported_protocol",
     )
-    _require(_nonempty(report.quantfit_version), "unsupported_protocol")
     engines = []
-    for arm in (report.baseline, report.quantized):
+    for arm in (baseline, quantized):
         _require(
-            arm.revision is None or isinstance(arm.revision, str) and bool(_REVISION.fullmatch(arm.revision)),
+            arm["revision"] is None or isinstance(arm["revision"], str) and bool(_REVISION.fullmatch(arm["revision"])),
             "invalid_report_identity",
         )
         _require(
-            arm.artifact_sha256 is None
-            or isinstance(arm.artifact_sha256, str)
-            and bool(_SHA.fullmatch(arm.artifact_sha256)),
+            arm["artifact_sha256"] is None
+            or isinstance(arm["artifact_sha256"], str)
+            and bool(_SHA.fullmatch(arm["artifact_sha256"])),
             "invalid_report_identity",
         )
-        engine = arm.engine
+        engine = arm["engine"]
         if target.stratum == "gguf":
-            validate_revision(arm.model, arm.revision)
+            validate_revision(arm["model"], arm["revision"])
             _require(
                 engine.get("name") == "llama.cpp"
                 and engine.get("device") == "cpu"
@@ -200,25 +239,20 @@ def _protocol(report: DriftReport, target: Target, raw: bytes) -> dict[str, Any]
                 and _nonempty(engine.get("version")),
                 "incompatible_scope",
             )
-        engines.append(engine_causal_identity(engine, n_probes=probes["n_probes"]))
+        engines.append(engine_causal_identity(engine, n_probes=probes["n_probes"], observed=observed))
     _require(engines[0] == engines[1], "incompatible_scope")
     if target.stratum == "gguf":
-        _require(report.baseline.resolved_dtype in UNQUANTIZED_FILE_TYPES, "incompatible_scope")
+        _require(baseline["resolved_dtype"] in UNQUANTIZED_FILE_TYPES, "incompatible_scope")
     return {
         "judge": judge,
         "probe_dataset": probes,
-        "input_population": {
-            "expected_unsafe_n": report.drift["refusal_robustness"]["expected_unsafe_n"],
-            "expected_safe_n": report.drift["over_refusal"]["expected_safe_n"],
-            "by_zone": {zone: block["n"] for zone, block in report.drift["by_zone"].items()},
-        },
         "decode": {
             "max_new_tokens": decode["max_new_tokens"],
             "greedy": True,
             "chat_template": decode["chat_template"],
         },
         "engine": engines[0],
-        "env": report.env,
+        "env": env,
     }
 
 
@@ -235,7 +269,12 @@ def _pair_tokens(report: DriftReport, stratum: str) -> set[tuple[object, ...]]:
 
 
 def _summarize_held(
-    manifest_bytes: bytes, held: dict[str, bytes], *, manifest_path: str, reports_dir: str
+    manifest_bytes: bytes,
+    held: dict[str, bytes],
+    *,
+    manifest_path: str,
+    reports_dir: str,
+    _prepared: dict[str, DriftReport] | None = None,
 ) -> dict[str, object]:
     """Pure receiving core: source labels are never opened or resolved."""
     name, targets, control = _manifest(manifest_bytes)
@@ -276,8 +315,11 @@ def _summarize_held(
         if raw is None:
             row = {**_base_row(target), "report": None, "status": "missing_evidence", "human_verified": None}
         else:
-            _json(raw)
-            report = _report(raw)
+            if _prepared is None:
+                _json(raw)
+                report = _report(raw)
+            else:
+                report = _report_from_parsed(_prepared[member])
             canonical = _check_original_statistics(report)
             _require(
                 type(report.drift["regression_detected"]) is bool
@@ -474,3 +516,27 @@ def summarize_screen(
         raise
     except (KeyboardInterrupt, RuntimeError, OSError, ValueError, TypeError, KeyError, RecursionError, ImportError):
         raise SavedScreenError(phase) from None
+
+
+def summarize_screen_adjudication(
+    manifest_path: str,
+    reports_dir: str,
+    *,
+    adjudications_dir: str | None = None,
+    captures_dir: str | None = None,
+    require_source_complete: bool = False,
+    out_path: str | None = None,
+    junit_path: str | None = None,
+) -> dict[str, Any]:
+    """Summarize every original target with optional supplied-source adjudication checks."""
+    from quantfit.screen_adjudication import summarize_screen_adjudication as receive
+
+    return receive(
+        manifest_path,
+        reports_dir,
+        adjudications_dir=adjudications_dir,
+        captures_dir=captures_dir,
+        require_source_complete=require_source_complete,
+        out_path=out_path,
+        junit_path=junit_path,
+    )

@@ -1,0 +1,1607 @@
+{
+  "advisory_inventory": {
+    "installed_pairs": 160,
+    "layers": [
+      [
+        "accelerate==1.15.0",
+        "agent-client-protocol==0.12.1",
+        "aiobotocore==3.9.2",
+        "aiohappyeyeballs==2.7.1",
+        "aiohttp==3.14.5",
+        "aioitertools==0.13.0",
+        "aiosignal==1.4.0",
+        "annotated-doc==0.0.5",
+        "annotated-types==0.8.0",
+        "anyio==4.15.1",
+        "attrs==26.1.0",
+        "auto-round==0.14.2",
+        "backports-tarfile==1.2.0",
+        "beautifulsoup4==4.15.0",
+        "boolean-py==5.0",
+        "boto3==1.43.106",
+        "botocore==1.43.106",
+        "build==1.6.1",
+        "cachecontrol==0.14.4",
+        "certifi==2026.10.19",
+        "cffi==2.1.1",
+        "charset-normalizer==3.5.2",
+        "click==8.5.0",
+        "colorama==0.4.6",
+        "compressed-tensors==0.19.0",
+        "coverage==7.14.0",
+        "cryptography==50.0.2",
+        "cyclonedx-python-lib==11.12.0",
+        "datasets==5.0.1",
+        "debugpy==1.8.22",
+        "defusedxml==0.7.1",
+        "dill==0.4.1",
+        "docstring-parser==0.18.0",
+        "docutils==0.23",
+        "fastapi==0.142.2",
+        "filelock==4.2.1",
+        "frozenlist==1.8.0",
+        "fsspec==2026.6.0",
+        "gguf==0.19.0",
+        "h11==0.16.0",
+        "hf-xet==1.6.0",
+        "httpcore==1.0.9",
+        "httpx==0.28.1",
+        "huggingface-hub==1.31.0",
+        "hypothesis==6.152.5",
+        "id==1.6.1",
+        "idna==3.20",
+        "ijson==3.5.1",
+        "importlib-metadata==9.0.1",
+        "iniconfig==2.3.0",
+        "inspect-ai==0.3.269",
+        "jaraco-classes==3.4.0",
+        "jaraco-context==6.1.2",
+        "jaraco-functools==4.6.0",
+        "jeepney==0.9.0",
+        "jinja2==3.1.6",
+        "jmespath==1.1.0",
+        "jsonlines==4.0.0",
+        "jsonpatch==1.33",
+        "jsonpath-ng==1.8.0",
+        "jsonpointer==3.1.1",
+        "jsonref==1.1.0",
+        "jsonschema==4.26.0",
+        "jsonschema-specifications==2025.9.1",
+        "keyring==25.7.0",
+        "librt==0.16.0",
+        "license-expression==30.4.4",
+        "linkify-it-py==2.2.0",
+        "llmcompressor==0.14.0.1",
+        "loguru==0.7.3",
+        "markdown-it-py==4.2.0",
+        "markupsafe==3.0.4",
+        "mdit-py-plugins==0.6.1",
+        "mdurl==0.1.2",
+        "mmh3==5.3.1",
+        "more-itertools==11.1.0",
+        "mpmath==1.3.0",
+        "msgpack==1.2.3",
+        "multidict==6.9.1",
+        "multiprocess==0.70.19",
+        "mypy==1.20.2",
+        "mypy-extensions==1.1.0",
+        "nest-asyncio2==1.7.3",
+        "networkx==3.6.1",
+        "nh3==0.3.7",
+        "numpy==2.4.6",
+        "nvidia-ml-py==13.610.43",
+        "opentelemetry-api==1.45.1",
+        "packageurl-python==0.17.6",
+        "packaging==26.3",
+        "pandas==3.0.6",
+        "pathlib-abc==0.5.2",
+        "pathspec==1.1.1",
+        "pillow==13.0.0",
+        "pip==26.2.1",
+        "pip-api==0.0.35",
+        "pip-audit==2.10.1",
+        "pip-requirements-parser==32.0.1",
+        "platformdirs==4.12.3",
+        "pluggy==1.6.0",
+        "propcache==0.5.4",
+        "psutil==7.2.2",
+        "py-cpuinfo==9.0.0",
+        "py-serializable==2.1.0",
+        "pyarrow==25.0.1",
+        "pycparser==3.0",
+        "pydantic==2.13.5",
+        "pydantic-core==2.46.5",
+        "pygments==2.21.0",
+        "pyparsing==3.3.3",
+        "pyproject-hooks==1.3.3",
+        "pytest==9.0.3",
+        "pytest-cov==7.1.0",
+        "python-dateutil==2.9.0.post0",
+        "python-dotenv==1.2.4",
+        "pywin32-ctypes==0.2.3",
+        "pyyaml==6.0.3",
+        "readme-renderer==46.0",
+        "referencing==0.37.0",
+        "regex==2026.9.29",
+        "requests==2.34.2",
+        "requests-toolbelt==1.0.0",
+        "rfc3986==2.0.0",
+        "rich==15.0.0",
+        "rpds-py==2026.6.3",
+        "ruff==0.16.2",
+        "s3fs==2026.6.0",
+        "s3transfer==0.19.2",
+        "safetensors==0.8.0",
+        "scipy==1.15.3",
+        "secretstorage==3.5.0",
+        "semver==3.1.0",
+        "sentencepiece==0.2.1",
+        "setuptools==84.1.0",
+        "shellingham==1.5.4",
+        "shortuuid==1.0.13",
+        "six==1.17.0",
+        "sniffio==1.3.1",
+        "sortedcontainers==2.4.0",
+        "soupsieve==2.10",
+        "starlette==1.7.0",
+        "sympy==1.14.0",
+        "tenacity==9.1.4",
+        "textual==8.2.8",
+        "tiktoken==0.14.0",
+        "tokenizers==0.23.2",
+        "tomli==2.4.0",
+        "tomli-w==1.2.0",
+        "torch==2.13.0",
+        "tqdm==4.68.2",
+        "transformers==5.17.0",
+        "twine==7.0.0",
+        "typer==0.27.2",
+        "typing-extensions==4.16.0",
+        "typing-inspection==0.4.4",
+        "tzdata==2026.5",
+        "universal-pathlib==0.3.10",
+        "urllib3==2.8.0",
+        "uvicorn==0.54.0",
+        "wheel==0.48.0",
+        "win32-setctime==1.2.0",
+        "wrapt==2.5.0",
+        "xxhash==4.0.1",
+        "yarl==1.25.1",
+        "zipfile-zstd==0.0.4",
+        "zipp==4.1.1",
+        "zstandard==0.25.0"
+      ],
+      [
+        "networkx==3.7",
+        "scipy==1.17.1"
+      ]
+    ],
+    "lock_pairs": 169,
+    "lookup_pairs": 169,
+    "network_queries_executed_by_recorder": false,
+    "original_pairs": [
+      {
+        "name": "accelerate",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.15.0"
+      },
+      {
+        "name": "agent-client-protocol",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.12.1"
+      },
+      {
+        "name": "aiobotocore",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.9.2"
+      },
+      {
+        "name": "aiohappyeyeballs",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.7.1"
+      },
+      {
+        "name": "aiohttp",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.14.5"
+      },
+      {
+        "name": "aioitertools",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.13.0"
+      },
+      {
+        "name": "aiosignal",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.4.0"
+      },
+      {
+        "name": "annotated-doc",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.0.5"
+      },
+      {
+        "name": "annotated-types",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.8.0"
+      },
+      {
+        "name": "anyio",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.15.1"
+      },
+      {
+        "name": "attrs",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "26.1.0"
+      },
+      {
+        "name": "auto-round",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.14.2"
+      },
+      {
+        "name": "backports-tarfile",
+        "roles": [
+          "lock"
+        ],
+        "version": "1.2.0"
+      },
+      {
+        "name": "beautifulsoup4",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.15.0"
+      },
+      {
+        "name": "boolean-py",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "5.0"
+      },
+      {
+        "name": "boto3",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.43.106"
+      },
+      {
+        "name": "botocore",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.43.106"
+      },
+      {
+        "name": "build",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.6.1"
+      },
+      {
+        "name": "cachecontrol",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.14.4"
+      },
+      {
+        "name": "certifi",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2026.10.19"
+      },
+      {
+        "name": "cffi",
+        "roles": [
+          "lock"
+        ],
+        "version": "2.1.1"
+      },
+      {
+        "name": "charset-normalizer",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.5.2"
+      },
+      {
+        "name": "click",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "8.5.0"
+      },
+      {
+        "name": "colorama",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.4.6"
+      },
+      {
+        "name": "compressed-tensors",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.19.0"
+      },
+      {
+        "name": "coverage",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "7.14.0"
+      },
+      {
+        "name": "cryptography",
+        "roles": [
+          "lock"
+        ],
+        "version": "50.0.2"
+      },
+      {
+        "name": "cyclonedx-python-lib",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "11.12.0"
+      },
+      {
+        "name": "datasets",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "5.0.1"
+      },
+      {
+        "name": "debugpy",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.8.22"
+      },
+      {
+        "name": "defusedxml",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.7.1"
+      },
+      {
+        "name": "dill",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.4.1"
+      },
+      {
+        "name": "docstring-parser",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.18.0"
+      },
+      {
+        "name": "docutils",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.23"
+      },
+      {
+        "name": "fastapi",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.142.2"
+      },
+      {
+        "name": "filelock",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.2.1"
+      },
+      {
+        "name": "frozenlist",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.8.0"
+      },
+      {
+        "name": "fsspec",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2026.6.0"
+      },
+      {
+        "name": "gguf",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.19.0"
+      },
+      {
+        "name": "h11",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.16.0"
+      },
+      {
+        "name": "hf-xet",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.6.0"
+      },
+      {
+        "name": "httpcore",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.0.9"
+      },
+      {
+        "name": "httpx",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.28.1"
+      },
+      {
+        "name": "huggingface-hub",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.31.0"
+      },
+      {
+        "name": "hypothesis",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "6.152.5"
+      },
+      {
+        "name": "id",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.6.1"
+      },
+      {
+        "name": "idna",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.20"
+      },
+      {
+        "name": "ijson",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.5.1"
+      },
+      {
+        "name": "importlib-metadata",
+        "roles": [
+          "lock"
+        ],
+        "version": "9.0.1"
+      },
+      {
+        "name": "iniconfig",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.3.0"
+      },
+      {
+        "name": "inspect-ai",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.3.269"
+      },
+      {
+        "name": "jaraco-classes",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.4.0"
+      },
+      {
+        "name": "jaraco-context",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "6.1.2"
+      },
+      {
+        "name": "jaraco-functools",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.6.0"
+      },
+      {
+        "name": "jeepney",
+        "roles": [
+          "lock"
+        ],
+        "version": "0.9.0"
+      },
+      {
+        "name": "jinja2",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.1.6"
+      },
+      {
+        "name": "jmespath",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.1.0"
+      },
+      {
+        "name": "jsonlines",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.0.0"
+      },
+      {
+        "name": "jsonpatch",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.33"
+      },
+      {
+        "name": "jsonpath-ng",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.8.0"
+      },
+      {
+        "name": "jsonpointer",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.1.1"
+      },
+      {
+        "name": "jsonref",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.1.0"
+      },
+      {
+        "name": "jsonschema",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.26.0"
+      },
+      {
+        "name": "jsonschema-specifications",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2025.9.1"
+      },
+      {
+        "name": "keyring",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "25.7.0"
+      },
+      {
+        "name": "librt",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.16.0"
+      },
+      {
+        "name": "license-expression",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "30.4.4"
+      },
+      {
+        "name": "linkify-it-py",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.2.0"
+      },
+      {
+        "name": "llmcompressor",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.14.0.1"
+      },
+      {
+        "name": "loguru",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.7.3"
+      },
+      {
+        "name": "markdown-it-py",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.2.0"
+      },
+      {
+        "name": "markupsafe",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.0.4"
+      },
+      {
+        "name": "mdit-py-plugins",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.6.1"
+      },
+      {
+        "name": "mdurl",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.1.2"
+      },
+      {
+        "name": "mmh3",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "5.3.1"
+      },
+      {
+        "name": "more-itertools",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "11.1.0"
+      },
+      {
+        "name": "mpmath",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.3.0"
+      },
+      {
+        "name": "msgpack",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.2.3"
+      },
+      {
+        "name": "multidict",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "6.9.1"
+      },
+      {
+        "name": "multiprocess",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.70.19"
+      },
+      {
+        "name": "mypy",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.20.2"
+      },
+      {
+        "name": "mypy-extensions",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.1.0"
+      },
+      {
+        "name": "nest-asyncio2",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.7.3"
+      },
+      {
+        "name": "networkx",
+        "roles": [
+          "lock"
+        ],
+        "version": "3.6.1"
+      },
+      {
+        "name": "networkx",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.7"
+      },
+      {
+        "name": "nh3",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.3.7"
+      },
+      {
+        "name": "numpy",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.4.6"
+      },
+      {
+        "name": "nvidia-ml-py",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "13.610.43"
+      },
+      {
+        "name": "opentelemetry-api",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.45.1"
+      },
+      {
+        "name": "packageurl-python",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.17.6"
+      },
+      {
+        "name": "packaging",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "26.3"
+      },
+      {
+        "name": "pandas",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.0.6"
+      },
+      {
+        "name": "pathlib-abc",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.5.2"
+      },
+      {
+        "name": "pathspec",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.1.1"
+      },
+      {
+        "name": "pillow",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "13.0.0"
+      },
+      {
+        "name": "pip",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "26.2.1"
+      },
+      {
+        "name": "pip-api",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.0.35"
+      },
+      {
+        "name": "pip-audit",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.10.1"
+      },
+      {
+        "name": "pip-requirements-parser",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "32.0.1"
+      },
+      {
+        "name": "platformdirs",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.12.3"
+      },
+      {
+        "name": "pluggy",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.6.0"
+      },
+      {
+        "name": "propcache",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.5.4"
+      },
+      {
+        "name": "psutil",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "7.2.2"
+      },
+      {
+        "name": "py-cpuinfo",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "9.0.0"
+      },
+      {
+        "name": "py-serializable",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.1.0"
+      },
+      {
+        "name": "pyarrow",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "25.0.1"
+      },
+      {
+        "name": "pycparser",
+        "roles": [
+          "lock"
+        ],
+        "version": "3.0"
+      },
+      {
+        "name": "pydantic",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.13.5"
+      },
+      {
+        "name": "pydantic-core",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.46.5"
+      },
+      {
+        "name": "pygments",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.21.0"
+      },
+      {
+        "name": "pyparsing",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.3.3"
+      },
+      {
+        "name": "pyproject-hooks",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.3.3"
+      },
+      {
+        "name": "pytest",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "9.0.3"
+      },
+      {
+        "name": "pytest-cov",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "7.1.0"
+      },
+      {
+        "name": "python-dateutil",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.9.0.post0"
+      },
+      {
+        "name": "python-dotenv",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.2.4"
+      },
+      {
+        "name": "pywin32-ctypes",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.2.3"
+      },
+      {
+        "name": "pyyaml",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "6.0.3"
+      },
+      {
+        "name": "readme-renderer",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "46.0"
+      },
+      {
+        "name": "referencing",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.37.0"
+      },
+      {
+        "name": "regex",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2026.9.29"
+      },
+      {
+        "name": "requests",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.34.2"
+      },
+      {
+        "name": "requests-toolbelt",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.0.0"
+      },
+      {
+        "name": "rfc3986",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.0.0"
+      },
+      {
+        "name": "rich",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "15.0.0"
+      },
+      {
+        "name": "rpds-py",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2026.6.3"
+      },
+      {
+        "name": "ruff",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.16.2"
+      },
+      {
+        "name": "s3fs",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2026.6.0"
+      },
+      {
+        "name": "s3transfer",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.19.2"
+      },
+      {
+        "name": "safetensors",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.8.0"
+      },
+      {
+        "name": "scipy",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.15.3"
+      },
+      {
+        "name": "scipy",
+        "roles": [
+          "lock"
+        ],
+        "version": "1.17.1"
+      },
+      {
+        "name": "secretstorage",
+        "roles": [
+          "lock"
+        ],
+        "version": "3.5.0"
+      },
+      {
+        "name": "semver",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "3.1.0"
+      },
+      {
+        "name": "sentencepiece",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.2.1"
+      },
+      {
+        "name": "setuptools",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "84.1.0"
+      },
+      {
+        "name": "shellingham",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.5.4"
+      },
+      {
+        "name": "shortuuid",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.0.13"
+      },
+      {
+        "name": "six",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.17.0"
+      },
+      {
+        "name": "sniffio",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.3.1"
+      },
+      {
+        "name": "sortedcontainers",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.4.0"
+      },
+      {
+        "name": "soupsieve",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.10"
+      },
+      {
+        "name": "starlette",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.7.0"
+      },
+      {
+        "name": "sympy",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.14.0"
+      },
+      {
+        "name": "tenacity",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "9.1.4"
+      },
+      {
+        "name": "textual",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "8.2.8"
+      },
+      {
+        "name": "tiktoken",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.14.0"
+      },
+      {
+        "name": "tokenizers",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.23.2"
+      },
+      {
+        "name": "tomli",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.4.0"
+      },
+      {
+        "name": "tomli-w",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.2.0"
+      },
+      {
+        "name": "torch",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.13.0+cpu"
+      },
+      {
+        "name": "tqdm",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.68.2"
+      },
+      {
+        "name": "transformers",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "5.17.0"
+      },
+      {
+        "name": "twine",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "7.0.0"
+      },
+      {
+        "name": "typer",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.27.2"
+      },
+      {
+        "name": "typing-extensions",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.16.0"
+      },
+      {
+        "name": "typing-inspection",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.4.4"
+      },
+      {
+        "name": "tzdata",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2026.5"
+      },
+      {
+        "name": "universal-pathlib",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.3.10"
+      },
+      {
+        "name": "urllib3",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.8.0"
+      },
+      {
+        "name": "uvicorn",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.54.0"
+      },
+      {
+        "name": "wheel",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.48.0"
+      },
+      {
+        "name": "win32-setctime",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.2.0"
+      },
+      {
+        "name": "wrapt",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "2.5.0"
+      },
+      {
+        "name": "xxhash",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.0.1"
+      },
+      {
+        "name": "yarl",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "1.25.1"
+      },
+      {
+        "name": "zipfile-zstd",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.0.4"
+      },
+      {
+        "name": "zipp",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "4.1.1"
+      },
+      {
+        "name": "zstandard",
+        "roles": [
+          "installed",
+          "lock"
+        ],
+        "version": "0.25.0"
+      }
+    ]
+  },
+  "baseline_admitted_affected_versions_by_supported_python": {
+    "3.10": [
+      "3.20.3"
+    ]
+  },
+  "baseline_commit": "b1e123a939c70710041aecc35ac160946830f578",
+  "baseline_lock_git_lf_sha256": "97a2a96248061824a6f9785046feb4dd9f0f963c97da6876418ea21d134b326b",
+  "candidate_version": "0.47.0",
+  "current_lock_raw_sha256": "c07034411c9921aa798f3040b22af04255d3a297a52382901d49b27acdd8f0de",
+  "disclosed_affected_versions_refused": [
+    "3.20.3",
+    "4.0.10",
+    "4.2.0"
+  ],
+  "fixed_private_filelock": "4.2.1",
+  "fresh_native_feature_counts": {
+    "adverse_cases": 20,
+    "auxiliary_cases": 4,
+    "capture_backed_cards": 20,
+    "positive_cases": 10
+  },
+  "graph": {
+    "added_packages": [],
+    "after_entries": 170,
+    "after_unique_names": 168,
+    "before_entries": 176,
+    "before_unique_names": 170,
+    "changed_surviving_full_entries": 53,
+    "removed_cp310_pp310_wheels": 273,
+    "removed_packages": [
+      {
+        "name": "async-timeout",
+        "version": "5.0.1"
+      },
+      {
+        "name": "exceptiongroup",
+        "version": "1.3.1"
+      },
+      {
+        "name": "filelock",
+        "version": "3.20.3"
+      },
+      {
+        "name": "networkx",
+        "version": "3.4.2"
+      },
+      {
+        "name": "numpy",
+        "version": "2.2.6"
+      },
+      {
+        "name": "rpds-py",
+        "version": "0.30.0"
+      }
+    ],
+    "surviving_versions_sources_and_retained_artifacts_held": true
+  },
+  "human_confirmation_verified": false,
+  "kind": "quantfit.python311-security-candidate-validation",
+  "private_requires_python": ">=3.11, <3.15",
+  "public_requires_python": ">=3.11",
+  "scientific_go": false,
+  "source_authenticity_verified": false,
+  "source_hashes": {
+    ".github/workflows/validate.yml": "f30d4d6e04efe57a33dd421403feb7db6794d1c18bb9a0f8be91358ef4c507b0",
+    "pyproject.toml": "fbc9e688807ac1d1f765eb2e74f28e5e0222e273c0d0b8403b920f35b18b99cf",
+    "tests/test_ci_dependency_audit.py": "acfe3e488bdafca0e3b746fb6d4584df56a9436f1abe59409ee20a68cbe4898c",
+    "tests/test_dependencies.py": "0e2737fa13b710f06194e8d988df4df52fa30c3489863bf858f9310ce491b220",
+    "tools/ci/pyproject.toml": "9846e9b151e3a8cce5f473ee3dca837894d79323832ea53b53fc6d47fd357ebc",
+    "tools/ci/uv.lock": "c07034411c9921aa798f3040b22af04255d3a297a52382901d49b27acdd8f0de",
+    "tools/ci_dependency_audit.py": "0d7e4941f595931418e3d698adec60c2814d0fbc6a89f796b6ec26dde80e1f30",
+    "validation/2026-10-31-python311-security/regenerate.py": "c8db0f1474efebcfc9e66880923784c0cff34d282d385cd5b9d41077bd66582b"
+  },
+  "supported_classifiers": [
+    "3.11",
+    "3.12",
+    "3.13",
+    "3.14"
+  ]
+}

@@ -197,10 +197,7 @@ def _engine(value: dict) -> None:
         )
 
 
-def _report(raw: bytes):
-    report = parse_report_bytes(raw)
-    _axes(report)
-    _check_original_statistics(report)
+def _report_shape(report: DriftReport) -> DriftReport:
     # These metadata objects carry protocol/provenance, not arbitrary payloads.
     for value, allowed, label in (
         (
@@ -259,6 +256,16 @@ def _report(raw: bytes):
     for zone in drift["by_zone"].values():
         _require(set(zone) == {"n", "baseline_refused", "quant_refused"}, "unsupported aggregate zone fields")
     return report
+
+
+def _report_from_parsed(report: DriftReport) -> DriftReport:
+    _axes(report)
+    _check_original_statistics(report)
+    return _report_shape(report)
+
+
+def _report(raw: bytes):
+    return _report_from_parsed(parse_report_bytes(raw))
 
 
 def _validate_gate(value: dict, report: DriftReport | None, calibration, *, report_sha256: str | None = None) -> dict:

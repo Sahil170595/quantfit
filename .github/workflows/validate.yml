@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        python-version: ['3.11', '3.12', '3.13', '3.14']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -306,7 +306,7 @@ jobs:
           mypy --strict --follow-imports=silent quantfit/safety/retained_review.py tools/ci_retained_review.py
           mypy --strict --follow-imports=silent quantfit/resolution_budget.py tools/ci_resolution_budget.py
           mypy --strict --follow-imports=silent quantfit/calibration_choices.py tools/ci_calibration_choices.py
-          mypy --strict --follow-imports=silent quantfit/adjudication_record.py quantfit/safety/adjudication.py tools/ci_adjudication.py
+          mypy --strict --follow-imports=silent quantfit/adjudication_record.py quantfit/safety/adjudication.py quantfit/screen_adjudication.py tools/ci_adjudication.py tools/ci_adjudication_verification.py tools/ci_screen_adjudication.py
           mypy --strict --follow-imports=silent quantfit/screen_requirement.py tools/ci_screen_requirement.py
           quantfit audit
       - name: Verify and run actionlint

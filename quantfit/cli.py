@@ -19,7 +19,25 @@ from quantfit.spec import DEFAULT_SPEC  # a frozen dataclass of constants
 CLI_JSON_SCHEMA_VERSION = 1
 
 
-def _emit(args: argparse.Namespace, command: str, code: int, result: dict, human: Callable[[], None]) -> int:
+def _json_document(command: str, code: int, result: dict) -> dict:
+    return {
+        "schema_version": CLI_JSON_SCHEMA_VERSION,
+        "tool": {"name": "quantfit", "version": __version__},
+        "command": command,
+        "exit_code": code,
+        "result": result,
+    }
+
+
+def _emit(
+    args: argparse.Namespace,
+    command: str,
+    code: int,
+    result: dict,
+    human: Callable[[], None],
+    *,
+    encoded_json: bytes | None = None,
+) -> int:
     """Print one JSON document, or the prose rendering, and return the exit code.
 
     Under `--json`, stdout carries exactly one document and nothing else. Anything that
@@ -31,13 +49,14 @@ def _emit(args: argparse.Namespace, command: str, code: int, result: dict, human
     if not getattr(args, "json", False):
         human()
         return code
-    document = {
-        "schema_version": CLI_JSON_SCHEMA_VERSION,
-        "tool": {"name": "quantfit", "version": __version__},
-        "command": command,
-        "exit_code": code,
-        "result": result,
-    }
+    if encoded_json is not None:
+        binary = getattr(sys.stdout, "buffer", None)
+        if binary is None:
+            sys.stdout.write(encoded_json.decode("utf-8"))
+        else:
+            binary.write(encoded_json)
+        return code
+    document = _json_document(command, code, result)
     json.dump(document, sys.stdout, indent=2, default=str)
     sys.stdout.write("\n")
     return code
@@ -343,10 +362,26 @@ def _build_parser() -> argparse.ArgumentParser:
         help="closed source-bound operator-declared flip record; not authenticated human truth",
     )
 
+    pe.add_argument(
+        "--adjudication-capture",
+        metavar="PATH",
+        help="private capture for fresh supplied-source consistency; requires --adjudication",
+    )
+
     adjudicate = sub.add_parser(
         "adjudicate", help="explicit source-bound operator flip declarations; no automatic confirmation"
     )
     adjudication_sub = adjudicate.add_subparsers(dest="adjudicate_cmd", required=True)
+    adjudication_screen = adjudication_sub.add_parser(
+        "screen", help="whole original-target saved screen with optional source-matched declarations (0/3/4; invalid 2)"
+    )
+    adjudication_screen.add_argument("--targets", required=True, metavar="PATH")
+    adjudication_screen.add_argument("--reports-dir", required=True, metavar="DIR")
+    adjudication_screen.add_argument("--adjudications-dir", metavar="DIR")
+    adjudication_screen.add_argument("--captures-dir", metavar="DIR")
+    adjudication_screen.add_argument("--require-source-complete", action="store_true")
+    adjudication_screen.add_argument("--out", metavar="PATH")
+    adjudication_screen.add_argument("--junit", metavar="PATH")
     adjudication_prepare = adjudication_sub.add_parser(
         "prepare", help="bound actual capture/report -> complete private blank flagged-pair queue"
     )
@@ -374,6 +409,16 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     adjudication_apply.add_argument(
         "--out", required=True, metavar="PATH", help="NEW closed public aggregate/per-pair-hash record"
+    )
+
+    adjudication_verify = adjudication_sub.add_parser(
+        "verify", help="held report/capture/record consistency, not authenticated human truth (0 consistent, 2 invalid)"
+    )
+    adjudication_verify.add_argument("--report", required=True, metavar="PATH")
+    adjudication_verify.add_argument("--capture", required=True, metavar="PATH")
+    adjudication_verify.add_argument("--record", required=True, metavar="PATH")
+    adjudication_verify.add_argument(
+        "--out", default=None, metavar="PATH", help="optional NEW aggregate verification proof"
     )
 
     pca = sub.add_parser(
@@ -802,12 +847,37 @@ def _add_json_flag(parser: argparse.ArgumentParser) -> None:
 
 def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "adjudicate":
-        from quantfit.safety.adjudication import apply_adjudication, prepare_adjudication
+        if args.adjudicate_cmd == "screen":
+            from quantfit.screen_adjudication import _receive
+
+            result, encoded = _receive(
+                args.targets,
+                args.reports_dir,
+                adjudications_dir=args.adjudications_dir,
+                captures_dir=args.captures_dir,
+                require_source_complete=args.require_source_complete,
+                out_path=args.out,
+                junit_path=args.junit,
+            )
+
+            def human_adjudication_screen() -> None:
+                print(f"Saved adjudication screen exit: {result['exit_code']}")
+                print(
+                    f"Original targets: {len(result['rows'])}; source complete: {result['screen_adjudication']['source_complete']}"
+                )
+                print(result["screen_adjudication"]["scope"])
+
+            return _emit(
+                args, "adjudicate screen", result["exit_code"], result, human_adjudication_screen, encoded_json=encoded
+            )
+        from quantfit.safety.adjudication import apply_adjudication, prepare_adjudication, verify_adjudication
 
         if args.adjudicate_cmd == "prepare":
             result = prepare_adjudication(args.report, args.capture, review_path=args.review, receipt_path=args.receipt)
-        else:
+        elif args.adjudicate_cmd == "apply":
             result = apply_adjudication(args.report, args.capture, args.review, args.preparation, out_path=args.out)
+        else:
+            result = verify_adjudication(args.report, args.capture, args.record, out_path=args.out)
 
         def human_adjudication() -> None:
             print(
@@ -1333,6 +1403,8 @@ def _dispatch(args: argparse.Namespace) -> int:
             card_options["calibration_report"] = args.calibration_report
         if args.adjudication is not None:
             card_options["adjudication_record"] = args.adjudication
+        if args.adjudication_capture is not None:
+            card_options["adjudication_capture"] = args.adjudication_capture
         fragment = model_card_fragment(args.report, **card_options)
         return _emit(
             args,
@@ -1812,6 +1884,8 @@ def main(argv: list[str] | None = None) -> int:
     _force_utf8_stdio()
     parser = _build_parser()
     args = parser.parse_args(argv)
+    if args.cmd == "emit" and args.adjudication_capture is not None and args.adjudication is None:
+        parser.error("--adjudication-capture requires --adjudication")
     if args.cmd == "resolution":
         plan_args = (args.plan_n_min, args.plan_n_max, args.plan_mde_pp)
         if (any(value is not None for value in plan_args) or args.plan_effect is not None) and not all(
