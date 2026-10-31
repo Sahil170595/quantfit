@@ -13,6 +13,13 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## Unreleased — 0.47.0
+
+- **2026-10-31 security compatibility correction:** withdraw Python 3.10 installation/source/CI support from this unreleased candidate. Both public and private projects require Python 3.11+; keep public filelock `>=4.2.1,<5` and private `4.2.1`, removing the affected conditional `3.20.3` branch without an unrelated upgrade. Existing flags/statistics/scientific limits stay unchanged; dated evidence and compatibility scope: `validation/2026-10-31-python311-security/`.
+- Extend the existing dependency audit to all universal-lock registry versions plus installed externals, partitioning conflicting versions into strict exact-pin layers without new jobs, environments, marker filtering or advisory suppressions. Preserve the sole Torch CPU/public lookup mapping; unknown inputs and any layer failure fail closed. This corrects dormant-branch audit coverage, not an observed exploit.
+- Add held-only `verify_adjudication` and `adjudicate verify` for an existing report/capture/record, without original queue/preparation or CSV/key inputs. Check whole native capture tabulation, exact selected pair set/axes and both UTF8 completion hashes. Return a 64 KiB aggregate proof; consistency 0 includes unresolved/zero-selected declarations, invalid/unsafe/excess evidence is 2.
+- Add optional capture-backed model cards sharing the same held report with record/capture/calibration, retaining default/capture-free bytes and original native math, flags and verdict. Supplied-source consistency does not authenticate human labels, origin or scientific GO. Native bounds, privacy limits and regenerable fictional controls: `validation/2026-10-31-adjudication-verification/` and `docs/adjudication.md`.
+
 ## 0.46.0 — 2026-10-30
 
 - Add complete source-bound `adjudicate prepare` → explicit private labels/classes → `adjudicate apply`, plus strict optional `emit model-card --adjudication` receiving with/without native calibration. Recompute whole native capture/report correspondence, preserve all flagged pairs and four disjoint declared outcomes, and publish a new closed hash/count record.

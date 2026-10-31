@@ -55,6 +55,28 @@ renders operator-declared counts beside unchanged native model-card statistics,
 with or without calibration. Human confirmation remains unverified. These
 workflows are included in this version.
 
+The **unreleased 0.47.0 source candidate** adds [capture-backed adjudication
+verification](docs/adjudication.md#capture-backed-receiving--unreleased-0470).
+**2026-10-31 compatibility correction:** this unreleased source candidate requires
+Python 3.11 or newer for installation and source/CI support. Python 3.10 support
+is withdrawn because the official patched filelock releases require 3.11 and the
+old conditional 3.20.3 branch is affected by current advisories. The private graph
+keeps already-qualified filelock 4.2.1; no compatibility bypass or advisory waiver
+is used. [Evidence and limits](validation/2026-10-31-python311-security/).
+
+Public installation remains 0.46.0; this source correction does not rewrite
+already-published metadata. Receive an existing report/capture/record
+without the original private queue or preparation:
+
+```bash
+quantfit adjudicate verify --report drift.json --capture private.capture.jsonl --record adjudication.json --out verification.json --json
+quantfit emit model-card --report drift.json --adjudication adjudication.json --adjudication-capture private.capture.jsonl
+```
+
+Exit 0 means supplied-source consistency, including zero selected or unresolved
+operator declarations. It does not authenticate human truth, source origin or
+scientific GO. Invalid/unsafe/excess evidence exits 2; no new gate is introduced.
+
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
 

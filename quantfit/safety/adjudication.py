@@ -53,10 +53,11 @@ class _Originals:
     selected: dict[int, tuple[str, dict[str, Any], dict[str, Any]]]
 
 
-def _originals(inputs: tuple[HeldFile, ...]) -> _Originals:
-    report = resolution.parse_report_bytes(inputs[0].data)
-    n = _validate_report(report)
-    header, captured = _capture(inputs[1].data, n)
+def _capture_originals(
+    report: DriftReport, n: int, capture_data: bytes
+) -> dict[int, tuple[str, dict[str, Any], dict[str, Any]]]:
+    """Native whole-capture verification, independent of CSV and held-path adapters."""
+    header, captured = _capture(capture_data, n)
     _require(header["capture_schema"] == 2 and header["binding"] is not None)
     identity = measurement_identity(report)
     _require(header["binding"]["identity"] == identity)
@@ -86,7 +87,13 @@ def _originals(inputs: tuple[HeldFile, ...]) -> _Originals:
         if axis is not None:
             selected[pair] = (axis, first, second)
     _same_numbers(report.drift, _tabulate(probes, a, b).to_dict(), "actual capture tabulation")
-    return _Originals(report, inputs, selected)
+    return selected
+
+
+def _originals(inputs: tuple[HeldFile, ...]) -> _Originals:
+    report = resolution.parse_report_bytes(inputs[0].data)
+    n = _validate_report(report)
+    return _Originals(report, inputs, _capture_originals(report, n, inputs[1].data))
 
 
 def _protected(pair: int, axis: str, first: dict[str, Any], second: dict[str, Any]) -> list[str]:
@@ -229,4 +236,82 @@ def apply_adjudication(
         ImportError,
         csv.Error,
     ):
+        raise AdjudicationError("invalid_adjudication") from None
+
+
+VERIFICATION_SCOPE = (
+    "Supplied report/capture/record consistency, not authenticated source or human truth. "
+    "All native capture rows, tabulation, selected membership, axes and both UTF8 completion hashes were checked. "
+    "Original preparation and review queue remain unverified declarations. Native flags, statistics, verdict, "
+    "calibration, sensitivity and scientific GO are unchanged. Coordinated fabricated inputs may be consistent."
+)
+
+
+def _verify_held(
+    report: DriftReport,
+    report_file: HeldFile,
+    capture_file: HeldFile,
+    record_file: HeldFile,
+    record: dict[str, Any],
+) -> dict[str, Any]:
+    """Receive already parsed/validated native report+record and one held capture."""
+    _same_numbers(record["inputs"]["capture"], _binding(capture_file.data), "actual capture")
+    selected = _capture_originals(report, record["n_probes"], capture_file.data)
+    entries = {entry["pair"]: entry for entry in record["entries"]}
+    _require(set(entries) == set(selected))
+    for pair, (axis, first, second) in selected.items():
+        entry = entries[pair]
+        _require(entry["axis"] == axis)
+        _require(entry["baseline_sha256"] == _completion_sha256(first["completion"]))
+        _require(entry["quantized_sha256"] == _completion_sha256(second["completion"]))
+    proof = {
+        "adjudication_verification_schema": 1,
+        "quantfit_version": __version__,
+        "source_verified": True,
+        "inputs": {
+            "report": _binding(report_file.data),
+            "capture": _binding(capture_file.data),
+            "record": _binding(record_file.data),
+        },
+        "binding_fingerprint": record["binding_fingerprint"],
+        "n_probes": record["n_probes"],
+        "n_selected": len(selected),
+        "original_flagged_counts": record["original_flagged_counts"],
+        "counts": record["counts"],
+        "checks": {**PRODUCER_CHECKS, "receiver_capture_read": True, "selected_axes_checked": True},
+        "operator_status": "declared_unauthenticated",
+        "proof_limits": {key: value for key, value in PROOF_LIMITS.items() if key != "receiver_capture_read"},
+        "unverified_declared_inputs": ["preparation", "review_queue"],
+        "scope": VERIFICATION_SCOPE,
+    }
+    _require(len(_encode(proof)) <= MAX_RECEIPT_BYTES)
+    return proof
+
+
+def verify_adjudication(
+    report_path: str, capture_path: str, record_path: str, *, out_path: str | None = None
+) -> dict[str, Any]:
+    """Verify supplied-source consistency; zero selected/unresolved declarations are valid.
+
+    No original queue, preparation, label key or CSV is opened. An optional NEW
+    output is exclusive; encoded inputs are bounded to 8/16/4 MiB by role, and
+    the aggregate proof to 64 KiB. These are not heap or execution-time bounds.
+    """
+    try:
+        inputs = (
+            hold(report_path, resolution.MAX_REPORT_BYTES),
+            hold(capture_path, MAX_CAPTURE_BYTES),
+            hold(record_path, MAX_RECORD_BYTES),
+        )
+        targets = admit_outputs((out_path,), inputs) if out_path is not None else ()
+        report = resolution.parse_report_bytes(inputs[0].data)
+        record = load_adjudication_record_bytes(inputs[2].data, report=report, report_data=inputs[0].data)
+        proof = _verify_held(report, *inputs, record)
+        raw = _encode(proof)
+        for held in inputs:
+            held.check()
+        if targets:
+            publish(((targets[0], raw),), inputs)
+        return proof
+    except (KeyboardInterrupt, RuntimeError, OSError, ValueError, TypeError, KeyError, RecursionError, ImportError):
         raise AdjudicationError("invalid_adjudication") from None
