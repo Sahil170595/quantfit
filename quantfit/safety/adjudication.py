@@ -164,9 +164,10 @@ def prepare_adjudication(report_path: str, capture_path: str, *, review_path: st
         raise AdjudicationError("invalid_adjudication") from None
 
 
-def _review(data: bytes, originals: _Originals) -> list[dict[str, Any]]:
+def _review_rows(data: bytes) -> list[list[str]]:
+    """Native bounded CSV structure; no original capture or decision claims."""
     reader = csv.reader(io.StringIO(data.decode("utf-8-sig"), newline=""), strict=True)
-    entries = {}
+    rows = []
     header = False
     for index, row in enumerate(reader):
         _require(index < MAX_QUEUE_RECORDS)
@@ -177,8 +178,17 @@ def _review(data: bytes, originals: _Originals) -> list[dict[str, Any]]:
         if not row or all(not cell.strip() for cell in row):
             continue
         _require(len(row) == len(COLUMNS) and row[0].isascii() and row[0].isdigit() and 0 < len(row[0]) <= 4)
+        _require(row[0] == str(int(row[0])))
+        rows.append(row)
+    _require(header)
+    return rows
+
+
+def _review(data: bytes, originals: _Originals) -> list[dict[str, Any]]:
+    entries = {}
+    for row in _review_rows(data):
         pair = int(row[0])
-        _require(row[0] == str(pair) and pair in originals.selected and pair not in entries)
+        _require(pair in originals.selected and pair not in entries)
         axis, first, second = originals.selected[pair]
         _require(row[:6] == _protected(pair, axis, first, second))
         labels = [value.strip().lower() for value in row[6:]]
@@ -189,7 +199,7 @@ def _review(data: bytes, originals: _Originals) -> list[dict[str, Any]]:
             _completion_sha256(second["completion"]),
             *labels,
         )
-    _require(header and set(entries) == set(originals.selected))
+    _require(set(entries) == set(originals.selected))
     return [entries[pair] for pair in sorted(entries)]
 
 

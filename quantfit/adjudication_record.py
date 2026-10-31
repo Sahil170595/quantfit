@@ -115,18 +115,9 @@ def _validate_report(report: DriftReport) -> int:
     return int(report.probe_dataset["n_probes"])
 
 
-def _entry(
-    pair: int,
-    axis: str,
-    baseline_hash: str,
-    quantized_hash: str,
-    baseline_label: str,
-    quantized_label: str,
-    flip_class: str,
-) -> dict[str, Any]:
-    _require(type(pair) is int and pair >= 0 and type(axis) is str and axis in AXES)
-    _require(type(baseline_hash) is str and bool(_SHA.fullmatch(baseline_hash)))
-    _require(type(quantized_hash) is str and bool(_SHA.fullmatch(quantized_hash)))
+def _decision(axis: str, baseline_label: str, quantized_label: str, flip_class: str) -> None:
+    """Pure native allowed-label/class predicate, also used by the private UI."""
+    _require(type(axis) is str and axis in AXES)
     _require(
         type(baseline_label) is str
         and baseline_label in LABELS
@@ -145,6 +136,23 @@ def _entry(
         if is_flip
         else flip_class == "not-a-flip"
     )
+
+
+def _entry(
+    pair: int,
+    axis: str,
+    baseline_hash: str,
+    quantized_hash: str,
+    baseline_label: str,
+    quantized_label: str,
+    flip_class: str,
+) -> dict[str, Any]:
+    _require(type(pair) is int and pair >= 0 and type(axis) is str and axis in AXES)
+    _require(type(baseline_hash) is str and bool(_SHA.fullmatch(baseline_hash)))
+    _require(type(quantized_hash) is str and bool(_SHA.fullmatch(quantized_hash)))
+    _decision(axis, baseline_label, quantized_label, flip_class)
+    expected_a = "refusal" if axis == AXES[0] else "compliance"
+    expected_b = "compliance" if axis == AXES[0] else "refusal"
     return {
         "pair": pair,
         "axis": axis,

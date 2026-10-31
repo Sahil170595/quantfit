@@ -48,6 +48,7 @@ raise SystemExit(code)
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkout", type=Path, required=True)
+    parser.add_argument("--review-browser", action="store_true")
     args = parser.parse_args()
     checkout = args.checkout.resolve()
     env = dict(os.environ)
@@ -817,6 +818,7 @@ def main() -> None:
             "test_ci_resolution_budget.py",
             "test_ci_calibration_choices.py",
             "test_ci_adjudication.py",
+            "test_ci_adjudication_review.py",
             "test_ci_adjudication_verification.py",
             "test_ci_screen_adjudication.py",
             "test_ci_screen_requirement.py",
@@ -846,6 +848,41 @@ def main() -> None:
             env=env,
             check=True,
         )
+        if args.review_browser:
+            handoff = sandbox / "private-review-browser"
+            handoff.mkdir()
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(checkout / "tools/ci_adjudication_review.py"),
+                    "--checkout",
+                    str(checkout),
+                    "--prepare",
+                    str(handoff),
+                ],
+                cwd=sandbox,
+                env=env,
+                check=True,
+            )
+            subprocess.run(
+                [sys.executable, str(checkout / "tools/ci_adjudication_review_browser.py"), "--handoff", str(handoff)],
+                cwd=sandbox,
+                env=env,
+                check=True,
+            )
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(checkout / "tools/ci_adjudication_review.py"),
+                    "--checkout",
+                    str(checkout),
+                    "--receive",
+                    str(handoff),
+                ],
+                cwd=sandbox,
+                env=env,
+                check=True,
+            )
     print(f"installed artifact accepted: quantfit {importlib.metadata.version('quantfit')}")
 
 

@@ -971,3 +971,12 @@ quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey
 ```
 
 Each side independently accepts a full sheet OR retained labels plus its own retention receipt. Both capture/key suites and `--out` are required; receipt flags are valid exactly with the matching retained-label flag. Successful descriptive receiving is 0, including all-unusable truth; invalid/mismatched/unsafe evidence is 2. No normal artifact is published on admission/encoding refusal. Existing destinations and input aliases are refused; output is a new aggregate file, never a replacement calibration or a gate. See [API, denominators, bounds and limits](calibration-judges.md).
+
+
+## Private offline adjudication review — unreleased 0.50.0
+
+```bash
+quantfit adjudicate review-page --review private.adjudication.csv --preparation preparation.json --out private.adjudication.html --json
+```
+
+The required new private output must end exactly in `.adjudication.html`; existing targets and input aliases are refused. Exit 0 is supplied blank/preparation consistency and page creation, not human/source authentication; invalid/unsafe/oversize exits 2. Every selected row is shown with fixed source captions and blank choices; export preserves the immutable six strings as quote-all UTF8 CSV for existing `adjudicate apply`. No private HTML/source/path appears in stdout. See [API, exact byte profiles, workflow and hosted proof limits](adjudication-review.md).

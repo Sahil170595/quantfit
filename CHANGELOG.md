@@ -13,6 +13,13 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## Unreleased — 0.50.0
+
+- Add `render_adjudication_review` and `adjudicate review-page`: held native blank nine-column queue/preparation consistency, complete selected population, fixed protected-field captions and explicitly blank decision controls. This does not reexecute source checks or authenticate an operator.
+- Freeze the six protected strings in escaped private JSON and export from that snapshot using native-derived allowed triplets, quote-all CSV, explicit CRLF records and UTF8 byte parts. Original CR/CRLF/LF, NUL, Unicode and quotes are preserved; no trimming, formula rewriting or DOM-derived source substitution. Native prepare/default queue/hash regeneration and authoritative apply/card arithmetic remain unchanged.
+- Admit worst-filled CSV under the native 16MiB profile and exact escaped HTML under 32MiB before new exclusive `*.adjudication.html` publication. A valid native queue need not fit the page/export profiles. Aggregate stdout only; private HTML/CSV/captures, browser traces/screenshots/video and uploads stay outside committed evidence.
+- Add the nondefault hosted-only pinned Playwright browser-ci group and actual download→unchanged native apply/cards checks to existing Linux installed profiles, preserving existing job population/budgets. Counts/hashes, source controls and explicit browser-proof limits: `validation/2026-10-31-adjudication-review/`. Public install remains 0.46.0.
+
 ## Unreleased — 0.49.0
 
 - Add `analyze_calibration_judges` and `calibrate compare-judges`: independently hold two complete capture/key/full-or-retained suites, require matching canonical pair/arm strings, metadata and ternary truth, and permit only declared judge ID/revision differences in the common typed protocol identity.

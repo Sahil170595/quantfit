@@ -101,6 +101,14 @@ quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey
 
 Whole-N flag tables include unusable truth; error tables use each arm's usable truth. All-unusable input completes descriptively with null epsilon and native full intervals. This does not establish equal judge tokenization/truncation, real execution, human truth, independence or scientific GO. Public installation remains 0.46.0; Python 3.11 and the inherited all-version dependency audit baseline remain.
 
+The **unreleased 0.50.0 source candidate** adds a [private offline adjudication review page](docs/adjudication-review.md). From the actual native blank queue and its preparation, it displays every selected pair with explicit Baseline/Quantized captions and blank decision controls, then exports a private quote-all CSV for unchanged native apply. The page contains private source strings; it is never a public report or authenticated human review.
+
+```bash
+quantfit adjudicate review-page --review private.adjudication.csv --preparation preparation.json --out private.adjudication.html --json
+```
+
+No model, paid provider or upload is involved. Browser/download qualification is restricted to the existing hosted Linux installed profiles; the nondefault browser-ci group is not a runtime extra. Public installation remains 0.46.0.
+
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
 
