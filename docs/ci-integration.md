@@ -3,7 +3,7 @@
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
 The action and instrument examples below pin **quantfit 0.46.0**.
-The unreleased 0.48.0 source action defaults to `>=0.48.0,<0.49`; the public
+The unreleased 0.49.0 source action defaults to `>=0.49.0,<0.50`; the public
 examples retain the released 0.46.0 action and instrument pins. Pin both exactly
 when reproducibility requires the same action and instrument.
 Candidate acceptance uses the exact source or wheel through `quantfit-path`;

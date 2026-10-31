@@ -13,6 +13,12 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## Unreleased — 0.49.0
+
+- Add `analyze_calibration_judges` and `calibrate compare-judges`: independently hold two complete capture/key/full-or-retained suites, require matching canonical pair/arm strings, metadata and ternary truth, and permit only declared judge ID/revision differences in the common typed protocol identity.
+- Reuse native per-arm/directional Wilson/count blocks and publish whole-N judge-flag and per-arm usable-truth error-concordance tables. All-unusable diagnostics complete with null epsilon/native [0,1] intervals; existing calibration refusal stays unchanged. No pooled calibration, preferred judge, independent-rater inference, source authentication, sensitivity or scientific GO.
+- Bound logical inputs at 52 MiB and each aggregate file/actual CLI envelope at 256 KiB before native exclusive publication. Preserve native CSV admission without rebuilding retained capture text. Fictional regenerable controls and limitations: `validation/2026-10-31-calibration-judges/`; public install remains 0.46.0.
+
 ## Unreleased — 0.48.0
 
 - **2026-10-31 inherited security baseline:** carry accepted 0.47 Python 3.11 minimum and universal-lock advisory audit into this candidate through a normal merge. Preserve all earlier validation records; fresh source/API/actual OS CLI controls and current workflow/audit/metadata hashes are in `validation/2026-10-31-screen-adjudication-python311/`.

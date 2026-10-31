@@ -300,7 +300,7 @@ jobs:
           mypy --strict --follow-imports=silent quantfit/safety/retention_io.py quantfit/safety/retained_labels.py quantfit/safety/calibration_aggregate.py quantfit/retained_labels_cli.py tools/ci_retained_labels.py
           mypy --follow-imports=silent --check-untyped-defs quantfit/safety/calibration_binding.py
           mypy --strict --follow-imports=silent quantfit/safety/calibration_inputs.py quantfit/safety/calibration_strata.py quantfit/calibration_strata_cli.py tools/ci_calibration_strata.py
-          mypy --strict --follow-imports=silent quantfit/safety/calibration_paired.py quantfit/calibration_paired_cli.py tools/ci_calibration_paired.py
+          mypy --strict --follow-imports=silent quantfit/safety/calibration_paired.py quantfit/calibration_paired_cli.py tools/ci_calibration_paired.py quantfit/safety/calibration_judges.py quantfit/calibration_judges_cli.py tools/ci_calibration_judges.py
           mypy --strict --follow-imports=silent quantfit/safety/label_review.py quantfit/label_review_cli.py tools/ci_label_review.py
           mypy --strict --follow-imports=silent quantfit/safety/annotation_chunks.py quantfit/annotation_chunks_cli.py tools/ci_annotation_chunks.py
           mypy --strict --follow-imports=silent quantfit/safety/retained_review.py tools/ci_retained_review.py

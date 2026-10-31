@@ -958,3 +958,16 @@ Default native priority remains 3 > 4 > 0. Opt-in incomplete sources change only
 native 0 to 4; malformed/unsafe/excess evidence is 2. Original rows and complete
 3N+1 JUnit remain. See [API, schema and encoded/work bounds](screen-adjudication.md).
 Public installation remains 0.46.0; this source candidate stacks on 0.47.0.
+
+
+## Two-judge calibration diagnostics — unreleased 0.49.0
+
+```bash
+quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --sheet-a a.labels.csv --capture-b b.capture.jsonl --key-b b.labelkey.json --sheet-b b.labels.csv --out judges.json --json
+```
+
+```bash
+quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --retained-labels-a a.retained.labels.csv --retention-receipt-a a-retention.json --capture-b b.capture.jsonl --key-b b.labelkey.json --retained-labels-b b.retained.labels.csv --retention-receipt-b b-retention.json --out judges-retained.json --json
+```
+
+Each side independently accepts a full sheet OR retained labels plus its own retention receipt. Both capture/key suites and `--out` are required; receipt flags are valid exactly with the matching retained-label flag. Successful descriptive receiving is 0, including all-unusable truth; invalid/mismatched/unsafe evidence is 2. No normal artifact is published on admission/encoding refusal. Existing destinations and input aliases are refused; output is a new aggregate file, never a replacement calibration or a gate. See [API, denominators, bounds and limits](calibration-judges.md).

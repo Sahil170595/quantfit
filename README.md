@@ -93,6 +93,14 @@ This candidate inherits the Python 3.11 minimum and universal-lock audit baselin
 above. [Fresh combined-head controls](validation/2026-10-31-screen-adjudication-python311/)
 retain the earlier dated evidence unchanged.
 
+The **unreleased 0.49.0 source candidate** adds [two-judge calibration diagnostics](docs/calibration-judges.md), stacked on the accepted 0.47/0.48 source candidates. It compares the full same supplied completion/truth population under two captured judge flag vectors, without choosing a winner or replacing calibration.
+
+```bash
+quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --sheet-a a.labels.csv --capture-b b.capture.jsonl --key-b b.labelkey.json --retained-labels-b b.retained.labels.csv --retention-receipt-b b-retention.json --out judges.json --json
+```
+
+Whole-N flag tables include unusable truth; error tables use each arm's usable truth. All-unusable input completes descriptively with null epsilon and native full intervals. This does not establish equal judge tokenization/truncation, real execution, human truth, independence or scientific GO. Public installation remains 0.46.0; Python 3.11 and the inherited all-version dependency audit baseline remain.
+
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
 

@@ -494,6 +494,26 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help="new aggregate paired diagnostics JSON; never replacement calibration",
     )
+    pcjudges = csub.add_parser(
+        "compare-judges",
+        help="descriptive two-judge diagnostics over the exact same supplied population (0 complete, 2 invalid)",
+    )
+    for side in ("a", "b"):
+        pcjudges.add_argument(
+            f"--capture-{side}", required=True, metavar="PATH", help="own exact private schema2 capture"
+        )
+        pcjudges.add_argument(f"--key-{side}", required=True, metavar="PATH", help="own matching bound v2 key")
+        judge_mode = pcjudges.add_mutually_exclusive_group(required=True)
+        judge_mode.add_argument(f"--sheet-{side}", metavar="PATH", help="own complete filled native labeling sheet")
+        judge_mode.add_argument(
+            f"--retained-labels-{side}", metavar="PATH", help="own retained labels; requires own receipt"
+        )
+        pcjudges.add_argument(
+            f"--retention-receipt-{side}", metavar="PATH", help="required exactly with own retained labels"
+        )
+    pcjudges.add_argument(
+        "--out", required=True, metavar="PATH", help="new aggregate diagnostic JSON; never calibration or a gate"
+    )
     pcreview = csub.add_parser(
         "review", help="local explicit review preparation/application; never automatic adjudication"
     )
@@ -1602,6 +1622,10 @@ def _dispatch(args: argparse.Namespace) -> int:
             from quantfit.calibration_paired_cli import dispatch_paired
 
             return dispatch_paired(args, _emit)
+        if args.calibrate_cmd == "compare-judges":
+            from quantfit.calibration_judges_cli import dispatch_judges
+
+            return dispatch_judges(args)
         if args.calibrate_cmd == "extract" or (args.calibrate_cmd == "ingest" and args.retained_labels is not None):
             from quantfit.retained_labels_cli import dispatch_retained
 
@@ -1913,6 +1937,12 @@ def main(argv: list[str] | None = None) -> int:
             parser.error(
                 "full-sheet review accepts only --sheet-a and --sheet-b; retained inputs require --input-mode retained"
             )
+    if args.cmd == "calibrate" and args.calibrate_cmd == "compare-judges":
+        for side in ("a", "b"):
+            if (getattr(args, f"retained_labels_{side}") is not None) != (
+                getattr(args, f"retention_receipt_{side}") is not None
+            ):
+                parser.error(f"--retention-receipt-{side} is required exactly with --retained-labels-{side}")
     if (
         args.cmd == "calibrate"
         and args.calibrate_cmd in {"ingest", "strata", "paired"}
