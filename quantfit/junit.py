@@ -294,6 +294,11 @@ def screen_to_junit(summary: dict) -> str:
 
         append_variant_junit_cases(suite, summary["calibration_choice_requirement"])
 
+    if "screen_adjudication" in summary:
+        from quantfit.screen_adjudication import append_junit_cases
+
+        append_junit_cases(suite, summary["screen_adjudication"])
+
     cases = list(suite.iter("testcase"))
     errors = sum(1 for c in cases if c.find("error") is not None)
     xml = _finalise(

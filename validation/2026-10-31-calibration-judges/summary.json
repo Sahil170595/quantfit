@@ -1,0 +1,310 @@
+{
+  "adverse": [
+    {
+      "case": "capture",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "key",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "receipt",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "strings",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "truth",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "zone",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "expected",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "bool-int",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "input-contract",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "extra-csv",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "late-field",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "existing",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "alias",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "output-limit",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "total-limit",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "population",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "capture",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "key",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "receipt",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "strings",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "truth",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "zone",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "expected",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "bool-int",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "input-contract",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "extra-csv",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "late-field",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "existing",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "alias",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "output-limit",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "total-limit",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "population",
+      "exit_code": 2,
+      "interface": "cli"
+    }
+  ],
+  "adverse_cases": 32,
+  "cases": [
+    {
+      "exit_code": 0,
+      "interface": "api",
+      "mode_a": "full",
+      "mode_b": "full",
+      "pairs": 8,
+      "usable_each_arm": 5
+    },
+    {
+      "exit_code": 0,
+      "interface": "api",
+      "mode_a": "retained",
+      "mode_b": "retained",
+      "pairs": 8,
+      "usable_each_arm": 5
+    },
+    {
+      "exit_code": 0,
+      "interface": "api",
+      "mode_a": "full",
+      "mode_b": "retained",
+      "pairs": 8,
+      "usable_each_arm": 5
+    },
+    {
+      "exit_code": 0,
+      "interface": "api",
+      "mode_a": "retained",
+      "mode_b": "full",
+      "pairs": 8,
+      "usable_each_arm": 5
+    },
+    {
+      "case": "self",
+      "exit_code": 0,
+      "interface": "api",
+      "pairs": 8
+    },
+    {
+      "case": "unusable",
+      "exit_code": 0,
+      "interface": "api",
+      "pairs": 8
+    },
+    {
+      "case": "one-arm",
+      "exit_code": 0,
+      "interface": "api",
+      "pairs": 8
+    },
+    {
+      "case": "long",
+      "exit_code": 0,
+      "interface": "api",
+      "pairs": 8
+    },
+    {
+      "exit_code": 0,
+      "interface": "cli",
+      "mode_a": "full",
+      "mode_b": "full",
+      "pairs": 8,
+      "usable_each_arm": 5
+    },
+    {
+      "exit_code": 0,
+      "interface": "cli",
+      "mode_a": "retained",
+      "mode_b": "retained",
+      "pairs": 8,
+      "usable_each_arm": 5
+    },
+    {
+      "exit_code": 0,
+      "interface": "cli",
+      "mode_a": "full",
+      "mode_b": "retained",
+      "pairs": 8,
+      "usable_each_arm": 5
+    },
+    {
+      "exit_code": 0,
+      "interface": "cli",
+      "mode_a": "retained",
+      "mode_b": "full",
+      "pairs": 8,
+      "usable_each_arm": 5
+    },
+    {
+      "case": "self",
+      "exit_code": 0,
+      "interface": "cli",
+      "pairs": 8
+    },
+    {
+      "case": "unusable",
+      "exit_code": 0,
+      "interface": "cli",
+      "pairs": 8
+    },
+    {
+      "case": "one-arm",
+      "exit_code": 0,
+      "interface": "cli",
+      "pairs": 8
+    },
+    {
+      "case": "long",
+      "exit_code": 0,
+      "interface": "cli",
+      "pairs": 8
+    }
+  ],
+  "human_confirmation_verified": false,
+  "os_cli_utf8_lf_parity": true,
+  "positive_cases": 16,
+  "private_fixture_directory_removed": true,
+  "scientific_go": false,
+  "software": {
+    "installed_metadata_version": "0.49.0",
+    "platform": "Windows",
+    "python": "3.12.13",
+    "scope": "Native fictional source/OS-entrypoint acceptance; installed distributions and hosted CI are separate qualifications."
+  },
+  "source_authenticity_verified": false,
+  "source_hashes": {
+    ".github/workflows/validate.yml": "62146578fe17dee0e1af7578e2a29edc23a1eca2486eb5333705267069d5b724",
+    "quantfit/calibration_judges_cli.py": "07f0a9a3a667b0d281dc88a3f148fcf11b6a4315304dac23e5e101f22909987f",
+    "quantfit/cli.py": "1a48c417efa9a874248ff24e6138ed4ff50ac63189eefc92dffa19d4e9b1995b",
+    "quantfit/safety/calibrate.py": "62e3312fa890fc7484b8fde902771b4693da20dcfa11c87df1ab38b54ef22346",
+    "quantfit/safety/calibration_aggregate.py": "c0ccb011759f5d78cbc1c2a984cc89deb0779d9a9f78a0e19641b395fe1544a5",
+    "quantfit/safety/calibration_binding.py": "4072ef2798bc7535ed0e7ddf2528593bd3d80f98574073c375c5f936b459bc5b",
+    "quantfit/safety/calibration_inputs.py": "a0096cf942e1d15d3a70234587f7c3431610a193e80ec29abd12472df63d8165",
+    "quantfit/safety/calibration_judges.py": "8bde7e5ae5048731ac558276155e8b0e63d3f1bec3a2210c5d22fd2a0f16f5a5",
+    "quantfit/safety/calibration_strata.py": "191766d034cbfec12c0e7c512786ceba4eadd143d9dbf22f10b95e2065f297f2",
+    "quantfit/safety/retained_labels.py": "c44f11d608702aec9b770a3b381fd44fba09220d9538d08d688c3bf7771208a5",
+    "quantfit/safety/retention_io.py": "a7dc49b2bba071283256ea64402240b9006bfcaa9df3f3d25f482e5293c682cd",
+    "quantfit/safety/verify.py": "83350d0bb519fa7d113f679db17f2a23eb4c8b87d9d719ee785efd2fa462c70d",
+    "tests/test_calibration_judges.py": "55c1594fc8fa9ffbcf8316d39cc8bb36535f1eaa4d119037b6d2f3ee0f130ba7",
+    "tests/test_ci_calibration_judges.py": "6191e01c654aad3066d8beb3247f18edc7cc6069c1a9a33f63e3c41e883424b8",
+    "tools/ci_calibration_judges.py": "ac3e7718e7c2be383df4aa2207d4183f8365094561163b85e7ce6484014d4aac",
+    "tools/ci_installed.py": "08501431c81202e602ee530c3be60032514ffb151c6fc89d46b90d16745d2364"
+  },
+  "synthetic_operator_declarations": true
+}

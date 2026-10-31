@@ -1,6 +1,7 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.46.0, including annotation chunks,
+This reference documents released quantfit 0.46.0 and the explicitly unreleased
+0.47.0 capture-backed receiver and 0.48.0 whole-target adjudication screen, including annotation chunks,
 capture-backed retained review, finite-grid budgets, calibration-choice sensitivity
 and source-bound flip adjudication.
 Software versions do not establish roadmap or scientific GO.
@@ -877,6 +878,26 @@ statistics and `human_confirmation_verified=false` remain unchanged. `emit` is
 stdout/string only, with no `--out`. Success is 0; invalid/unsafe/excess evidence is
 2, not a gate. See [the complete API, class matrix and bounds](adjudication.md).
 
+### Capture-backed adjudication receiving — unreleased 0.47.0
+
+```bash
+quantfit adjudicate verify --report drift.json --capture private.capture.jsonl --record adjudication.json --out verification.json --json
+quantfit emit model-card --report drift.json --adjudication adjudication.json --adjudication-capture private.capture.jsonl --calibration-report calibration.json --json
+```
+
+`verify` holds only report/capture/existing record (8/16/4 MiB), checks the entire
+native tabulation and exact selected indices/axes/both UTF8 hashes, and optionally
+exclusively creates a NEW aggregate proof capped at 64 KiB. It needs no original
+queue/preparation, key or CSV; pair count remains 1..4096. Exit 0 is consistency,
+including unresolved/zero-selected cases; invalid evidence or unsafe output is 2.
+No original native verdict/statistic changes. `--adjudication-capture` requires
+`--adjudication` before input I/O. Optional calibration is another held 2 MiB role
+(total input profile 30 MiB) and retains native typed scope matching. `emit` still
+returns only string/stdout; JSON retains its existing `report_path` field, so the
+whole legacy envelope is not universally path-free. Human/source authentication,
+false-negative validation, sensitivity and scientific GO remain unestablished.
+See [the API, privacy and publication contract](adjudication.md#capture-backed-receiving--unreleased-0470).
+
 ### Loose report inputs
 
 ```bash
@@ -921,3 +942,48 @@ quantfit audit --root . --json-out findings.json --json
 says *where this checkout is*, not *which checkout to audit* — three of the five checks read
 the parser and constants by import, so a root that is not the imported tree is refused as
 operational rather than answered.
+
+
+## Whole-target saved adjudication screen — unreleased 0.48.0
+
+```bash
+quantfit adjudicate screen --targets targets.json --reports-dir reports --adjudications-dir adjudications --captures-dir captures --require-source-complete --out summary.json --junit summary.xml --json
+```
+
+`--targets` and `--reports-dir` are required. `--adjudications-dir` and
+`--captures-dir` are optional closed roots, defaulting to intentional absence.
+`--require-source-complete` defaults off. `--out`/`--junit` are optional guarded
+replacement sinks; `--json` emits the exact bounded native CLI envelope.
+Default native priority remains 3 > 4 > 0. Opt-in incomplete sources change only
+native 0 to 4; malformed/unsafe/excess evidence is 2. Original rows and complete
+3N+1 JUnit remain. See [API, schema and encoded/work bounds](screen-adjudication.md).
+Public installation remains 0.46.0; this source candidate stacks on 0.47.0.
+
+
+## Two-judge calibration diagnostics — unreleased 0.49.0
+
+```bash
+quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --sheet-a a.labels.csv --capture-b b.capture.jsonl --key-b b.labelkey.json --sheet-b b.labels.csv --out judges.json --json
+```
+
+```bash
+quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --retained-labels-a a.retained.labels.csv --retention-receipt-a a-retention.json --capture-b b.capture.jsonl --key-b b.labelkey.json --retained-labels-b b.retained.labels.csv --retention-receipt-b b-retention.json --out judges-retained.json --json
+```
+
+Each side independently accepts a full sheet OR retained labels plus its own retention receipt. Both capture/key suites and `--out` are required; receipt flags are valid exactly with the matching retained-label flag. Successful descriptive receiving is 0, including all-unusable truth; invalid/mismatched/unsafe evidence is 2. No normal artifact is published on admission/encoding refusal. Existing destinations and input aliases are refused; output is a new aggregate file, never a replacement calibration or a gate. See [API, denominators, bounds and limits](calibration-judges.md).
+
+
+## Private offline adjudication review — unreleased 0.50.0
+
+```bash
+quantfit adjudicate review-page --review private.adjudication.csv --preparation preparation.json --out private.adjudication.html --json
+```
+
+The required new private output must end exactly in `.adjudication.html`; existing targets and input aliases are refused. Exit 0 is supplied blank/preparation consistency and page creation, not human/source authentication; invalid/unsafe/oversize exits 2. Every selected row is shown with fixed source captions and blank choices; export preserves the immutable six strings as quote-all UTF8 CSV for existing `adjudicate apply`. No private HTML/source/path appears in stdout. See [API, exact byte profiles, workflow and hosted proof limits](adjudication-review.md).
+
+
+## Pinned alternative probe corpus — unreleased 0.51.0
+
+Public installation remains 0.46.0. In this source candidate, both `verify-safety` and `inspect-run` accept all-or-none `--probe-dataset namespace/repo --probe-revision <40-lowercase-hex> --probe-split validation`. No URLs/local paths/buckets/packaged aliases, moving revisions, sliced/concatenated/all splits or demo combinations are accepted. Invalid source/options/whole population are operational 2 before observer/model/judge work.
+
+The supplied population 1..4096 retains all actual prompt/zone/expected strings and order, including repeated/whitespace text. Per-prompt 64KiB and whole selected 8MiB UTF8 bounds are not SDK download/parser/heap limits. Source identities are recorded in reports/capture-only bindings, GGUF cache and Inspect logs/completed reports. Changed revision/split on the default ID is noncanonical. Default native math/0-3-4 priority and legacy Inspect judge/source-pin refusals stay; no implied corpus curation or accuracy transfer. Exact API, compatibility and evidence: [probe-corpus](probe-corpus.md).

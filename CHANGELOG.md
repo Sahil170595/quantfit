@@ -13,6 +13,40 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## Unreleased — 0.51.0
+
+- Add frozen `ProbeCorpus` and all-or-none `--probe-dataset`, `--probe-revision`, `--probe-split` on `verify-safety`/`inspect-run`. Admit one entire ordered 1..4096 population from the qualified SDK remote-only Hub dataset route with an exact resolved 40-hex builder hash, before any model/observer/generation/judge. No filtering, coercion, expected-label inference or best subset.
+- Bound each actual prompt at 64KiB strict UTF8 and total selected prompt/zone/expected strings at 8MiB; late malformed rows/EOF/4097 reject. These are application retention bounds, not SDK/network/parser/heap or external-data authenticity guarantees. Exact default source/order/native math and report/capture/card behavior remain, apart from the explicit software version.
+- Carry actual source through reports/capture-only bindings, GGUF cache keys, Inspect dataset/log/completed runs and delayed report writers. Source-aware API summaries and plain/calibrated/adjudicated cards disclose noncanonical distributions without applying the default corpus's historical n<=34 detectability conclusion. No curation, judge-accuracy transfer, independence, sensitivity, null clearance or scientific GO.
+- Narrow public datasets to qualified 5.0.1: older advertised 3.0 source lacks its native remote-only URI dispatch. Installed SDK, private 174-node lock and 160 active externals remain unchanged; Hubfloor remains native >=0.25. Preserve every dated validation record. Regenerable controlled software/API/CLI/Inspect/cache evidence and limits: `validation/2026-10-31-probe-corpus/`; public install remains 0.46.0.
+
+## Unreleased — 0.50.0
+
+- Add `render_adjudication_review` and `adjudicate review-page`: held native blank nine-column queue/preparation consistency, complete selected population, fixed protected-field captions and explicitly blank decision controls. This does not reexecute source checks or authenticate an operator.
+- Freeze the six protected strings in escaped private JSON and export from that snapshot using native-derived allowed triplets, quote-all CSV, explicit CRLF records and UTF8 byte parts. Original CR/CRLF/LF, NUL, Unicode and quotes are preserved; no trimming, formula rewriting or DOM-derived source substitution. Native prepare/default queue/hash regeneration and authoritative apply/card arithmetic remain unchanged.
+- Admit worst-filled CSV under the native 16MiB profile and exact escaped HTML under 32MiB before new exclusive `*.adjudication.html` publication. A valid native queue need not fit the page/export profiles. Aggregate stdout only; private HTML/CSV/captures, browser traces/screenshots/video and uploads stay outside committed evidence.
+- Add the nondefault hosted-only pinned Playwright browser-ci group and actual download→unchanged native apply/cards checks to existing Linux installed profiles, preserving existing job population/budgets. Counts/hashes, source controls and explicit browser-proof limits: `validation/2026-10-31-adjudication-review/`. Public install remains 0.46.0.
+
+## Unreleased — 0.49.0
+
+- Add `analyze_calibration_judges` and `calibrate compare-judges`: independently hold two complete capture/key/full-or-retained suites, require matching canonical pair/arm strings, metadata and ternary truth, and permit only declared judge ID/revision differences in the common typed protocol identity.
+- Reuse native per-arm/directional Wilson/count blocks and publish whole-N judge-flag and per-arm usable-truth error-concordance tables. All-unusable diagnostics complete with null epsilon/native [0,1] intervals; existing calibration refusal stays unchanged. No pooled calibration, preferred judge, independent-rater inference, source authentication, sensitivity or scientific GO.
+- Bound logical inputs at 52 MiB and each aggregate file/actual CLI envelope at 256 KiB before native exclusive publication. Preserve native CSV admission without rebuilding retained capture text. Fictional regenerable controls and limitations: `validation/2026-10-31-calibration-judges/`; public install remains 0.46.0.
+
+## Unreleased — 0.48.0
+
+- **2026-10-31 inherited security baseline:** carry accepted 0.47 Python 3.11 minimum and universal-lock advisory audit into this candidate through a normal merge. Preserve all earlier validation records; fresh source/API/actual OS CLI controls and current workflow/audit/metadata hashes are in `validation/2026-10-31-screen-adjudication-python311/`.
+- Add `summarize_screen_adjudication` and `adjudicate screen`: hold the original manifest and closed report/record/capture roots once, admit every structural/source binding and combined logical-role n² work before native statistics, and retain all original rows/native outcomes.
+- Separate source closure, required record coverage and unauthenticated operator resolution. Missing reports keep null native counts; pending available sources must agree. Opt-in source completeness changes only native 0 to 4; native 3/4 priority remains. Complete JUnit is 3N+1, with whole JSON/envelope/XML admission before guarded per-file publication.
+- Keep native math/default summary/card behavior and public install 0.46.0; this candidate stacks on unreleased 0.47.0. Fictional API/CLI/privacy/alias/budget controls and limitations: `validation/2026-10-31-screen-adjudication/` and `docs/screen-adjudication.md`.
+
+## Unreleased — 0.47.0
+
+- **2026-10-31 security compatibility correction:** withdraw Python 3.10 installation/source/CI support from this unreleased candidate. Both public and private projects require Python 3.11+; keep public filelock `>=4.2.1,<5` and private `4.2.1`, removing the affected conditional `3.20.3` branch without an unrelated upgrade. Existing flags/statistics/scientific limits stay unchanged; dated evidence and compatibility scope: `validation/2026-10-31-python311-security/`.
+- Extend the existing dependency audit to all universal-lock registry versions plus installed externals, partitioning conflicting versions into strict exact-pin layers without new jobs, environments, marker filtering or advisory suppressions. Preserve the sole Torch CPU/public lookup mapping; unknown inputs and any layer failure fail closed. This corrects dormant-branch audit coverage, not an observed exploit.
+- Add held-only `verify_adjudication` and `adjudicate verify` for an existing report/capture/record, without original queue/preparation or CSV/key inputs. Check whole native capture tabulation, exact selected pair set/axes and both UTF8 completion hashes. Return a 64 KiB aggregate proof; consistency 0 includes unresolved/zero-selected declarations, invalid/unsafe/excess evidence is 2.
+- Add optional capture-backed model cards sharing the same held report with record/capture/calibration, retaining default/capture-free bytes and original native math, flags and verdict. Supplied-source consistency does not authenticate human labels, origin or scientific GO. Native bounds, privacy limits and regenerable fictional controls: `validation/2026-10-31-adjudication-verification/` and `docs/adjudication.md`.
+
 ## 0.46.0 — 2026-10-30
 
 - Add complete source-bound `adjudicate prepare` → explicit private labels/classes → `adjudicate apply`, plus strict optional `emit model-card --adjudication` receiving with/without native calibration. Recompute whole native capture/report correspondence, preserve all flagged pairs and four disjoint declared outcomes, and publish a new closed hash/count record.

@@ -55,6 +55,60 @@ renders operator-declared counts beside unchanged native model-card statistics,
 with or without calibration. Human confirmation remains unverified. These
 workflows are included in this version.
 
+The **unreleased 0.47.0 source candidate** adds [capture-backed adjudication
+verification](docs/adjudication.md#capture-backed-receiving--unreleased-0470).
+**2026-10-31 compatibility correction:** this unreleased source candidate requires
+Python 3.11 or newer for installation and source/CI support. Python 3.10 support
+is withdrawn because the official patched filelock releases require 3.11 and the
+old conditional 3.20.3 branch is affected by current advisories. The private graph
+keeps already-qualified filelock 4.2.1; no compatibility bypass or advisory waiver
+is used. [Evidence and limits](validation/2026-10-31-python311-security/).
+
+Public installation remains 0.46.0; this source correction does not rewrite
+already-published metadata. Receive an existing report/capture/record
+without the original private queue or preparation:
+
+```bash
+quantfit adjudicate verify --report drift.json --capture private.capture.jsonl --record adjudication.json --out verification.json --json
+quantfit emit model-card --report drift.json --adjudication adjudication.json --adjudication-capture private.capture.jsonl
+```
+
+Exit 0 means supplied-source consistency, including zero selected or unresolved
+operator declarations. It does not authenticate human truth, source origin or
+scientific GO. Invalid/unsafe/excess evidence exits 2; no new gate is introduced.
+
+The **unreleased 0.48.0 source candidate**, stacked on 0.47.0, adds a
+[whole-target saved adjudication screen](docs/screen-adjudication.md):
+
+```bash
+quantfit adjudicate screen --targets targets.json --reports-dir reports --adjudications-dir adjudications --captures-dir captures --require-source-complete --out summary.json --junit summary.xml --json
+```
+
+Every original manifest target remains, including missing reports. Source closure,
+record coverage and declared operator resolution are separate. Default native
+3/4/0 outcomes remain; the optional requirement changes only a native 0 to 4 for
+incomplete sources. JUnit keeps all 3N+1 cases. No CSV/key/inference or human truth
+is introduced. Public installation remains 0.46.0.
+This candidate inherits the Python 3.11 minimum and universal-lock audit baseline
+above. [Fresh combined-head controls](validation/2026-10-31-screen-adjudication-python311/)
+retain the earlier dated evidence unchanged.
+
+The **unreleased 0.49.0 source candidate** adds [two-judge calibration diagnostics](docs/calibration-judges.md), stacked on the accepted 0.47/0.48 source candidates. It compares the full same supplied completion/truth population under two captured judge flag vectors, without choosing a winner or replacing calibration.
+
+```bash
+quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --sheet-a a.labels.csv --capture-b b.capture.jsonl --key-b b.labelkey.json --retained-labels-b b.retained.labels.csv --retention-receipt-b b-retention.json --out judges.json --json
+```
+
+Whole-N flag tables include unusable truth; error tables use each arm's usable truth. All-unusable input completes descriptively with null epsilon and native full intervals. This does not establish equal judge tokenization/truncation, real execution, human truth, independence or scientific GO. Public installation remains 0.46.0; Python 3.11 and the inherited all-version dependency audit baseline remain.
+
+The **unreleased 0.50.0 source candidate** adds a [private offline adjudication review page](docs/adjudication-review.md). From the actual native blank queue and its preparation, it displays every selected pair with explicit Baseline/Quantized captions and blank decision controls, then exports a private quote-all CSV for unchanged native apply. The page contains private source strings; it is never a public report or authenticated human review.
+
+```bash
+quantfit adjudicate review-page --review private.adjudication.csv --preparation preparation.json --out private.adjudication.html --json
+```
+
+No model, paid provider or upload is involved. Browser/download qualification is restricted to the existing hosted Linux installed profiles; the nondefault browser-ci group is not a runtime extra. Public installation remains 0.46.0.
+
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
 
@@ -123,6 +177,15 @@ points. Native flags/incomplete evidence still take priority (3/4); otherwise mi
 calibration exits 4 and unmet resolution exits 5. Read native outcome and qualification
 separately. Without this flag, existing annotation and JUnit behavior stay unchanged.
 Neither path authenticates labels, sensitivity or scientific GO. See [the contract](docs/screen-resolution.md#explicit-requirement-0410).
+
+
+The **unreleased 0.51.0 source candidate** adds [pinned alternative probe corpora](docs/probe-corpus.md): `ProbeCorpus(id, revision, split)` and an all-or-none source triple on `verify-safety`/`inspect-run`. Every row is admitted in native order before model work. Alternative sources are explicitly noncanonical; changing only the default ID's revision or split is also noncanonical. Historical default-corpus judge accuracy/detectability does not validate a new distribution. Public install remains 0.46.0.
+
+```bash
+quantfit verify-safety --baseline org/base --quant ./out --probe-dataset org/probes --probe-revision 1111111111111111111111111111111111111111 --probe-split validation --report drift.json --json
+```
+
+This is an operator-supplied measurement request, not a corpus/model run recorded here. The candidate requires qualified `datasets==5.0.1`; selected UTF8 limits are 64KiB/prompt and 8MiB/whole population, 1..4096 probes. A valid one-axis population remains unmeasurable on its missing axis; zero means the detector did not fire, never safety.
 
 ## What it has found
 

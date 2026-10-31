@@ -55,7 +55,11 @@ _AXES = (
 
 
 def model_card_fragment(
-    report_path: str, *, calibration_report: str | None = None, adjudication_record: str | None = None
+    report_path: str,
+    *,
+    calibration_report: str | None = None,
+    adjudication_record: str | None = None,
+    adjudication_capture: str | None = None,
 ) -> str:
     """Render a schema-v2 drift report as a markdown model-card section.
 
@@ -63,11 +67,15 @@ def model_card_fragment(
     An optional calibration is checked against the same report instance rendered
     here. Its conditional resolution never replaces the original floor or verdict.
     """
+    if adjudication_capture is not None and adjudication_record is None:
+        from quantfit.adjudication_record import AdjudicationError
+
+        raise AdjudicationError("invalid_adjudication")
     if adjudication_record is not None:
         from quantfit.adjudication_record import MAX_CARD_BYTES, AdjudicationError, load_card_inputs, section
 
         try:
-            held = load_card_inputs(report_path, adjudication_record, calibration_report)
+            held = load_card_inputs(report_path, adjudication_record, calibration_report, adjudication_capture)
             lines = _render(held.report, held.analysis, section(held))
             fragment = "\n".join(lines) + "\n"
             if len(fragment.encode("utf-8")) > MAX_CARD_BYTES:
@@ -138,11 +146,24 @@ def _check_original_statistics(report: DriftReport) -> dict:
 
 
 def _render(report: DriftReport, resolution: dict | None = None, adjudication: list[str] | None = None) -> list[str]:
+    from quantfit.safety.verify import PROBE_DATASET_ID, PROBE_DATASET_REVISION, PROBE_SPLIT
+
+    canonical = (
+        report.probe_dataset.get("id"),
+        report.probe_dataset.get("revision"),
+        report.probe_dataset.get("split"),
+    ) == (PROBE_DATASET_ID, PROBE_DATASET_REVISION, PROBE_SPLIT)
     drift = report.drift
     lines = [
-        "## Quantization safety drift (QSR v0)",
+        "## Quantization safety drift (QSR v0)"
+        if canonical
+        else "## Paired refusal drift (supplied noncanonical corpus)",
         "",
-        *_INTRO,
+        *(
+            _INTRO
+            if canonical
+            else tuple(line.replace("curated probe set", "supplied noncanonical probe set") for line in _INTRO)
+        ),
         "",
         f"**Verdict: {drift['verdict']}**",
         "",
@@ -153,7 +174,10 @@ def _render(report: DriftReport, resolution: dict | None = None, adjudication: l
         lines += ["", *warning]
     lines += ["", *_provenance(report)]
     lines += ["", *_serve_block(report.quantized)]
-    footer = [*_caps_line(report.quantized), *_footer(drift, calibrated=resolution is not None)]
+    footer = [
+        *(_caps_line(report.quantized) if canonical else []),
+        *_footer(drift, calibrated=resolution is not None, canonical=canonical),
+    ]
     if resolution is not None:
         lines += ["", *_conditional_resolution(resolution)]
     if adjudication is not None:
@@ -367,8 +391,23 @@ def _caps_line(quantized: ArmRun) -> list[str]:
     return [f"Scale cap for this measurement class (QSR v0 §7): {SPEC_CAPS[stratum]}."]
 
 
-def _footer(drift: dict, *, calibrated: bool = False) -> list[str]:
+def _footer(drift: dict, *, calibrated: bool = False, canonical: bool = True) -> list[str]:
     n = drift["n_probes"]
+    if not canonical:
+        # Reuse native verdict-specific caveats, but never its historical distribution conclusion.
+        lines = _footer(drift, calibrated=calibrated)
+        if not calibrated:
+            start = next(i for i, line in enumerate(lines) if line.startswith("The MDE is a PERFECT-JUDGE FLOOR"))
+            lines = lines[:start] + [
+                "The MDE is a PERFECT-JUDGE FLOOR, not this run's calibrated resolution.",
+                "No measured judge error has been folded into the original table.",
+            ]
+        return [line.replace("curated probes", "supplied noncanonical probes") for line in lines] + [
+            "No QSR-v0 conformance, curation, representativeness or independent source authentication is claimed.",
+            "Historical judge accuracy/error on the default corpus does not validate this supplied distribution.",
+            "No canonical historical n-based no-detectability conclusion applies to this run.",
+            "Bound calibration depends on its own matched scope and unverified assumptions, not the default corpus.",
+        ]
     if calibrated:
         return [
             f"Measured over {n} curated probes. Flagged flips are candidates until human-verified.",
