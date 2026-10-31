@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantfit"
-version = "0.46.0"
+version = "0.49.0"
 description = "Quantize an LLM and check it still refuses what it should — a GPU-aware quantization CLI that measures the safety drift of the quantization it just performed."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "Apache-2.0"
 authors = [{ name = "Sahil Kadadekar" }]
 keywords = ["llm", "quantization", "awq", "gptq", "gguf", "fp8", "gpu", "safety"]
@@ -15,7 +15,6 @@ classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -27,10 +26,9 @@ dependencies = [
   # >=4.56: the from_pretrained dtype= kwarg (torch_dtype was deprecated there).
   "transformers>=4.56",
   "huggingface_hub>=0.25",
-  # Existing Hub/Torch transitives: exclude the affected filelock releases while
-  # retaining the source/unit Python 3.10 contract; the patched 4.x line needs 3.11.
-  "filelock==3.20.3; python_version < '3.11'",
-  "filelock>=4.2.1,<5; python_version >= '3.11'",
+  # 2026-10-31: both disclosed filelock ranges require fixed 4.2.1; its
+  # supported interpreter floor is 3.11. No vulnerable 3.10 fallback is admitted.
+  "filelock>=4.2.1,<5",
   # Torch's runtime floor otherwise still admits the affected setuptools 84.0.
   "setuptools>=84.1.0,<85",
   "httpx>=0.28.1,<0.29",

@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        python-version: ['3.11', '3.12', '3.13', '3.14']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -300,13 +300,13 @@ jobs:
           mypy --strict --follow-imports=silent quantfit/safety/retention_io.py quantfit/safety/retained_labels.py quantfit/safety/calibration_aggregate.py quantfit/retained_labels_cli.py tools/ci_retained_labels.py
           mypy --follow-imports=silent --check-untyped-defs quantfit/safety/calibration_binding.py
           mypy --strict --follow-imports=silent quantfit/safety/calibration_inputs.py quantfit/safety/calibration_strata.py quantfit/calibration_strata_cli.py tools/ci_calibration_strata.py
-          mypy --strict --follow-imports=silent quantfit/safety/calibration_paired.py quantfit/calibration_paired_cli.py tools/ci_calibration_paired.py
+          mypy --strict --follow-imports=silent quantfit/safety/calibration_paired.py quantfit/calibration_paired_cli.py tools/ci_calibration_paired.py quantfit/safety/calibration_judges.py quantfit/calibration_judges_cli.py tools/ci_calibration_judges.py
           mypy --strict --follow-imports=silent quantfit/safety/label_review.py quantfit/label_review_cli.py tools/ci_label_review.py
           mypy --strict --follow-imports=silent quantfit/safety/annotation_chunks.py quantfit/annotation_chunks_cli.py tools/ci_annotation_chunks.py
           mypy --strict --follow-imports=silent quantfit/safety/retained_review.py tools/ci_retained_review.py
           mypy --strict --follow-imports=silent quantfit/resolution_budget.py tools/ci_resolution_budget.py
           mypy --strict --follow-imports=silent quantfit/calibration_choices.py tools/ci_calibration_choices.py
-          mypy --strict --follow-imports=silent quantfit/adjudication_record.py quantfit/safety/adjudication.py tools/ci_adjudication.py
+          mypy --strict --follow-imports=silent quantfit/adjudication_record.py quantfit/safety/adjudication.py quantfit/screen_adjudication.py tools/ci_adjudication.py tools/ci_adjudication_verification.py tools/ci_screen_adjudication.py
           mypy --strict --follow-imports=silent quantfit/screen_requirement.py tools/ci_screen_requirement.py
           quantfit audit
       - name: Verify and run actionlint

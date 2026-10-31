@@ -22,12 +22,16 @@ def _pytest_code(checkout: Path) -> str:
     return f"""
 import pathlib, sys, quantfit, pytest
 checkout = pathlib.Path({str(checkout)!r}).resolve()
+package_root = pathlib.Path(quantfit.__file__).resolve().parent
 def guard():
+    count = 0
     assert checkout not in {{pathlib.Path(p or '.').resolve() for p in sys.path}}, 'checkout root injected into pytest'
     for name, module in tuple(sys.modules.items()):
         if name == 'quantfit' or name.startswith('quantfit.'):
             origin = getattr(module, '__file__', None)
-            assert origin and not pathlib.Path(origin).resolve().is_relative_to(checkout), 'source-shadowed application: ' + name
+            assert origin and pathlib.Path(origin).resolve().is_relative_to(package_root) and not pathlib.Path(origin).resolve().is_relative_to(checkout), 'source-shadowed application: ' + name
+            count += 1
+    return count
 class Guard:
     def pytest_sessionstart(self, session): guard()
     def pytest_sessionfinish(self, session, exitstatus): guard()
@@ -806,12 +810,15 @@ def main() -> None:
             "test_ci_retained_labels.py",
             "test_ci_calibration_strata.py",
             "test_ci_calibration_paired.py",
+            "test_ci_calibration_judges.py",
             "test_ci_label_review.py",
             "test_ci_annotation_chunks.py",
             "test_ci_retained_review.py",
             "test_ci_resolution_budget.py",
             "test_ci_calibration_choices.py",
             "test_ci_adjudication.py",
+            "test_ci_adjudication_verification.py",
+            "test_ci_screen_adjudication.py",
             "test_ci_screen_requirement.py",
             "test_repeatability.py",
             "test_evidence_fetch.py",

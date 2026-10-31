@@ -170,15 +170,15 @@ def _counts(entries: list[dict[str, Any]], flagged: dict[str, int]) -> dict[str,
     return result
 
 
-def _record(raw: bytes, report: DriftReport, report_data: bytes) -> dict[str, Any]:
+def _record_structure(raw: bytes) -> dict[str, Any]:
     _require(type(raw) is bytes and 0 < len(raw) <= MAX_RECORD_BYTES)
     value = _json(raw)
     _require(
         set(value) == _RECORD_KEYS and type(value["adjudication_schema"]) is int and value["adjudication_schema"] == 1
     )
     _version(value["quantfit_version"])
-    n = _validate_report(report)
-    _require(type(value["n_probes"]) is int and value["n_probes"] == n)
+    n = value["n_probes"]
+    _require(type(n) is int and 0 < n <= resolution.MAX_PROBES)
     _require(
         type(value["inputs"]) is dict and set(value["inputs"]) == {"report", "capture", "preparation", "review_queue"}
     )
@@ -192,10 +192,11 @@ def _record(raw: bytes, report: DriftReport, report_data: bytes) -> dict[str, An
         _require(type(item) is dict and set(item) == {"sha256", "size_bytes"})
         _require(type(item["size_bytes"]) is int and 0 < item["size_bytes"] <= limit)
         _require(type(item["sha256"]) is str and bool(_SHA.fullmatch(item["sha256"])))
-    _same_numbers(value["inputs"]["report"], _binding(report_data), "actual report")
-    _require(value["binding_fingerprint"] == identity_fingerprint(measurement_identity(report)))
-    flagged = _flagged(report)
-    _same_numbers(value["original_flagged_counts"], flagged, "original flags")
+    _require(type(value["binding_fingerprint"]) is str and bool(_SHA.fullmatch(value["binding_fingerprint"])))
+    flagged = value["original_flagged_counts"]
+    _require(type(flagged) is dict and set(flagged) == set(AXES))
+    _require(all(type(flagged[axis]) is int and 0 <= flagged[axis] <= n for axis in AXES))
+    _require(sum(flagged.values()) <= n)
     entries = value["entries"]
     _require(type(entries) is list and len(entries) == sum(flagged.values()) <= n)
     seen = set()
@@ -223,6 +224,21 @@ def _record(raw: bytes, report: DriftReport, report_data: bytes) -> dict[str, An
     return value
 
 
+def _record_report_match(value: dict[str, Any], report: DriftReport, report_data: bytes) -> None:
+    """Pure actual-report binding checks, independent of fresh statistical validation."""
+    _require(value["n_probes"] == report.probe_dataset["n_probes"])
+    _same_numbers(value["inputs"]["report"], _binding(report_data), "actual report")
+    _require(value["binding_fingerprint"] == identity_fingerprint(measurement_identity(report)))
+    _same_numbers(value["original_flagged_counts"], _flagged(report), "original flags")
+
+
+def _record(raw: bytes, report: DriftReport, report_data: bytes) -> dict[str, Any]:
+    value = _record_structure(raw)
+    _validate_report(report)
+    _record_report_match(value, report, report_data)
+    return value
+
+
 def load_adjudication_record_bytes(raw: bytes, *, report: DriftReport, report_data: bytes) -> dict[str, Any]:
     try:
         return _record(raw, report, report_data)
@@ -238,16 +254,30 @@ class AdjudicatedCardInputs:
     report_sha256: str
     record_sha256: str
     files: tuple[HeldFile, ...]
+    verification: dict[str, Any] | None = None
 
 
-def load_card_inputs(report_path: str, record_path: str, calibration_path: str | None) -> AdjudicatedCardInputs:
+def load_card_inputs(
+    report_path: str, record_path: str, calibration_path: str | None, capture_path: str | None = None
+) -> AdjudicatedCardInputs:
     try:
         report_file = hold(report_path, resolution.MAX_REPORT_BYTES)
         record_file = hold(record_path, MAX_RECORD_BYTES)
+        capture_file = hold(capture_path, MAX_CAPTURE_BYTES) if capture_path is not None else None
         calibration_file = hold(calibration_path, MAX_CALIBRATION_BYTES) if calibration_path is not None else None
-        files = (report_file, record_file, *((calibration_file,) if calibration_file is not None else ()))
+        files = (
+            report_file,
+            record_file,
+            *((capture_file,) if capture_file is not None else ()),
+            *((calibration_file,) if calibration_file is not None else ()),
+        )
         report = resolution.parse_report_bytes(report_file.data)
         record = load_adjudication_record_bytes(record_file.data, report=report, report_data=report_file.data)
+        verification = None
+        if capture_file is not None:
+            from quantfit.safety.adjudication import _verify_held
+
+            verification = _verify_held(report, report_file, capture_file, record_file, record)
         report_sha = hashlib.sha256(report_file.data).hexdigest()
         analysis = None
         if calibration_file is not None:
@@ -263,7 +293,7 @@ def load_card_inputs(report_path: str, record_path: str, calibration_path: str |
         for held in files:
             held.check()
         return AdjudicatedCardInputs(
-            report, analysis, record, report_sha, hashlib.sha256(record_file.data).hexdigest(), files
+            report, analysis, record, report_sha, hashlib.sha256(record_file.data).hexdigest(), files, verification
         )
     except (RuntimeError, OSError, ValueError, TypeError, KeyError, RecursionError, ImportError):
         raise AdjudicationError("invalid_adjudication") from None
@@ -287,6 +317,17 @@ def section(held: AdjudicatedCardInputs) -> list[str]:
         lines.append(
             f"| {axis} | {row['flagged']} | {row['substantive']} | {row['degenerate']} | {row['not_confirmed']} | {row['unresolved']} |"
         )
+    if held.verification is not None:
+        return lines + [
+            "",
+            "This receiver read the supplied private capture and freshly checked its actual byte binding, complete",
+            "native tabulation, exact selected pair membership/axes and both UTF8 completion hashes.",
+            "- Actual capture SHA256: `" + held.verification["inputs"]["capture"]["sha256"] + "`.",
+            "- Supplied-source consistency: source_verified=true; original preparation/queue remain unverified declarations.",
+            "Human reading, authorship, source authenticity and truth are not authenticated. Coordinated fabricated",
+            "inputs may be self-consistent. Native flags remain flags; no false-negative validation, sensitivity,",
+            "control, QSR status or scientific GO is established.",
+        ]
     return lines + [
         "",
         "Producer declares whole-capture/tabulation/selection/text checks. This receiver did not read the private capture;",

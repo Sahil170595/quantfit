@@ -4,7 +4,7 @@ from typing import Any
 
 from quantfit.spec import DEFAULT_SPEC, QuantSpec
 
-__version__ = "0.46.0"
+__version__ = "0.49.0"
 
 # Heavy surfaces are re-exported lazily (PEP 562) so `import quantfit` stays
 # dependency-light: nothing here drags torch, transformers, or huggingface_hub
@@ -18,6 +18,8 @@ _LAZY = {
     "CapacityPlan": ("quantfit.fit", "CapacityPlan"),
     "run_screen": ("quantfit.screen", "run_screen"),
     "ScreenError": ("quantfit.screen", "ScreenError"),
+    "summarize_screen_adjudication": ("quantfit.screen_adjudication", "summarize_screen_adjudication"),
+    "verify_adjudication": ("quantfit.safety.adjudication", "verify_adjudication"),
     "model_card_fragment": ("quantfit.modelcard", "model_card_fragment"),
     "build_labeling_sheet": ("quantfit.safety.calibrate", "build_labeling_sheet"),
     "ingest_labels": ("quantfit.safety.calibrate", "ingest_labels"),
