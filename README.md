@@ -57,7 +57,15 @@ workflows are included in this version.
 
 The **unreleased 0.47.0 source candidate** adds [capture-backed adjudication
 verification](docs/adjudication.md#capture-backed-receiving--unreleased-0470).
-Public installation remains 0.46.0. Receive an existing report/capture/record
+**2026-10-31 compatibility correction:** this unreleased source candidate requires
+Python 3.11 or newer for installation and source/CI support. Python 3.10 support
+is withdrawn because the official patched filelock releases require 3.11 and the
+old conditional 3.20.3 branch is affected by current advisories. The private graph
+keeps already-qualified filelock 4.2.1; no compatibility bypass or advisory waiver
+is used. [Evidence and limits](validation/2026-10-31-python311-security/).
+
+Public installation remains 0.46.0; this source correction does not rewrite
+already-published metadata. Receive an existing report/capture/record
 without the original private queue or preparation:
 
 ```bash
