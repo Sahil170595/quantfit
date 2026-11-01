@@ -238,16 +238,30 @@ class AdjudicatedCardInputs:
     report_sha256: str
     record_sha256: str
     files: tuple[HeldFile, ...]
+    verification: dict[str, Any] | None = None
 
 
-def load_card_inputs(report_path: str, record_path: str, calibration_path: str | None) -> AdjudicatedCardInputs:
+def load_card_inputs(
+    report_path: str, record_path: str, calibration_path: str | None, capture_path: str | None = None
+) -> AdjudicatedCardInputs:
     try:
         report_file = hold(report_path, resolution.MAX_REPORT_BYTES)
         record_file = hold(record_path, MAX_RECORD_BYTES)
+        capture_file = hold(capture_path, MAX_CAPTURE_BYTES) if capture_path is not None else None
         calibration_file = hold(calibration_path, MAX_CALIBRATION_BYTES) if calibration_path is not None else None
-        files = (report_file, record_file, *((calibration_file,) if calibration_file is not None else ()))
+        files = (
+            report_file,
+            record_file,
+            *((capture_file,) if capture_file is not None else ()),
+            *((calibration_file,) if calibration_file is not None else ()),
+        )
         report = resolution.parse_report_bytes(report_file.data)
         record = load_adjudication_record_bytes(record_file.data, report=report, report_data=report_file.data)
+        verification = None
+        if capture_file is not None:
+            from quantfit.safety.adjudication import _verify_held
+
+            verification = _verify_held(report, report_file, capture_file, record_file, record)
         report_sha = hashlib.sha256(report_file.data).hexdigest()
         analysis = None
         if calibration_file is not None:
@@ -263,7 +277,7 @@ def load_card_inputs(report_path: str, record_path: str, calibration_path: str |
         for held in files:
             held.check()
         return AdjudicatedCardInputs(
-            report, analysis, record, report_sha, hashlib.sha256(record_file.data).hexdigest(), files
+            report, analysis, record, report_sha, hashlib.sha256(record_file.data).hexdigest(), files, verification
         )
     except (RuntimeError, OSError, ValueError, TypeError, KeyError, RecursionError, ImportError):
         raise AdjudicationError("invalid_adjudication") from None
@@ -287,6 +301,17 @@ def section(held: AdjudicatedCardInputs) -> list[str]:
         lines.append(
             f"| {axis} | {row['flagged']} | {row['substantive']} | {row['degenerate']} | {row['not_confirmed']} | {row['unresolved']} |"
         )
+    if held.verification is not None:
+        return lines + [
+            "",
+            "This receiver read the supplied private capture and freshly checked its actual byte binding, complete",
+            "native tabulation, exact selected pair membership/axes and both UTF8 completion hashes.",
+            "- Actual capture SHA256: `" + held.verification["inputs"]["capture"]["sha256"] + "`.",
+            "- Supplied-source consistency: source_verified=true; original preparation/queue remain unverified declarations.",
+            "Human reading, authorship, source authenticity and truth are not authenticated. Coordinated fabricated",
+            "inputs may be self-consistent. Native flags remain flags; no false-negative validation, sensitivity,",
+            "control, QSR status or scientific GO is established.",
+        ]
     return lines + [
         "",
         "Producer declares whole-capture/tabulation/selection/text checks. This receiver did not read the private capture;",

@@ -343,6 +343,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="closed source-bound operator-declared flip record; not authenticated human truth",
     )
 
+    pe.add_argument(
+        "--adjudication-capture",
+        metavar="PATH",
+        help="private capture for fresh supplied-source consistency; requires --adjudication",
+    )
+
     adjudicate = sub.add_parser(
         "adjudicate", help="explicit source-bound operator flip declarations; no automatic confirmation"
     )
@@ -374,6 +380,16 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     adjudication_apply.add_argument(
         "--out", required=True, metavar="PATH", help="NEW closed public aggregate/per-pair-hash record"
+    )
+
+    adjudication_verify = adjudication_sub.add_parser(
+        "verify", help="held report/capture/record consistency, not authenticated human truth (0 consistent, 2 invalid)"
+    )
+    adjudication_verify.add_argument("--report", required=True, metavar="PATH")
+    adjudication_verify.add_argument("--capture", required=True, metavar="PATH")
+    adjudication_verify.add_argument("--record", required=True, metavar="PATH")
+    adjudication_verify.add_argument(
+        "--out", default=None, metavar="PATH", help="optional NEW aggregate verification proof"
     )
 
     pca = sub.add_parser(
@@ -802,12 +818,14 @@ def _add_json_flag(parser: argparse.ArgumentParser) -> None:
 
 def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "adjudicate":
-        from quantfit.safety.adjudication import apply_adjudication, prepare_adjudication
+        from quantfit.safety.adjudication import apply_adjudication, prepare_adjudication, verify_adjudication
 
         if args.adjudicate_cmd == "prepare":
             result = prepare_adjudication(args.report, args.capture, review_path=args.review, receipt_path=args.receipt)
-        else:
+        elif args.adjudicate_cmd == "apply":
             result = apply_adjudication(args.report, args.capture, args.review, args.preparation, out_path=args.out)
+        else:
+            result = verify_adjudication(args.report, args.capture, args.record, out_path=args.out)
 
         def human_adjudication() -> None:
             print(
@@ -1333,6 +1351,8 @@ def _dispatch(args: argparse.Namespace) -> int:
             card_options["calibration_report"] = args.calibration_report
         if args.adjudication is not None:
             card_options["adjudication_record"] = args.adjudication
+        if args.adjudication_capture is not None:
+            card_options["adjudication_capture"] = args.adjudication_capture
         fragment = model_card_fragment(args.report, **card_options)
         return _emit(
             args,
@@ -1812,6 +1832,8 @@ def main(argv: list[str] | None = None) -> int:
     _force_utf8_stdio()
     parser = _build_parser()
     args = parser.parse_args(argv)
+    if args.cmd == "emit" and args.adjudication_capture is not None and args.adjudication is None:
+        parser.error("--adjudication-capture requires --adjudication")
     if args.cmd == "resolution":
         plan_args = (args.plan_n_min, args.plan_n_max, args.plan_mde_pp)
         if (any(value is not None for value in plan_args) or args.plan_effect is not None) and not all(

@@ -85,7 +85,7 @@ Read from `pyproject.toml` **[V]**:
 
 | requirement | group | cap | why this one churns |
 |---|---|---|---|
-| `filelock==3.20.3` on Python 3.10; `>=4.2.1,<5` on Python 3.11+ | hard | conditional exact pin / `<5` | exclude the disclosed ReadWriteLock/SoftFileLock advisory ranges while preserving Python 3.10 **[V]** |
+| `filelock>=4.2.1,<5` | hard | `<5` | fixed line for both currently disclosed advisory ranges; Python 3.11+ support, no vulnerable 3.10 fallback **[V]** |
 | `setuptools>=84.1.0,<85` | hard | `<85` | Torch already requires setuptools at runtime; the raised floor excludes the Windows legacy-install path escape **[V]** |
 | `datasets>=3.0,<=5.0.1` | hard | `<=5.0.1` | preserves the admitted ceiling removed by the llmcompressor 0.14.0.1 security hotfix; later releases require qualification **[V]** |
 | `accelerate>=1.0,<=1.15.0` | hard | `<=1.15.0` | preserves the prior compressor ceiling without admitting unqualified patches **[V]** |
@@ -105,7 +105,7 @@ fresh dependencies independently and runs the suite plus the vulnerability audit
 `tools/ci_constraints.py` remains a manual subset-install helper, not the baseline lock.
 It uses the installed `packaging` parser to evaluate markers for its running interpreter;
 generate and consume its constraints with the same Python. Locked tooling includes the
-parser and Python 3.10's `tomli`; missing manual bootstrap parsers produce exit 2.
+parser and the historical `tomli` fallback; missing manual bootstrap parsers produce exit 2.
 
 The compressor cap permits 0.14.0 so the runtime can select patched Torch 2.13.0 and
 Accelerate 1.15.0. Compressor 0.12 restricts Torch to at most 2.12; 0.13 restricts
@@ -414,17 +414,18 @@ Torch, transformers or compressed-tensors pins. Its removed datasets/accelerate
 ceilings are restored directly in quantfit metadata, preserving the previously
 admitted versions; the meaningful installed-metadata checker remains intact.
 Pillow 13 requires Python 3.11+, so UV's native runtime-group requirement enforces
-that floor; unit/tooling/numerical groups still cover Python 3.10. Complete hosted
-runtime qualification uses 3.12. No vulnerable Python 3.10 runtime fallback or
-advisory exception is introduced. The earlier dated receipts remain historical;
+that floor. The 2026-10-31 correction below additionally withdraws the old Python
+3.10 source/unit branch. Complete hosted runtime and numerical qualification use
+3.12. No vulnerable fallback or advisory exception is introduced. The earlier dated receipts remain historical;
 current release validation must repeat the CPU/backend, installation and audit
 gates before publication. No GPU AWQ/GPTQ or scientific scope is added **[V]**.
 
 **Dated security maintenance — 2026-10-25.** The fresh installed-graph audit rejected
 filelock 4.0.10 for CVE-2026-112940, CVE-2026-112913 and CVE-2026-112907, and
-setuptools 84.0.0 for GHSA-xmj3-9gf7-h52w. Fixed filelock 4.2.1 requires Python 3.11;
-3.20.3 supports Python 3.10 and precedes the affected ranges. Native conditional
-requirements retain those branches in both the public package and hosted unit graph.
+setuptools 84.0.0 for GHSA-xmj3-9gf7-h52w. Fixed filelock 4.2.1 requires Python 3.11.
+That maintenance retained 3.20.3 on Python 3.10 under the advisory ranges then
+checked. Its conditional branches and dated results are historical; the broader
+2026-10-31 advisory evidence below supersedes that compatibility decision.
 HF Hub 1.31.0 admits filelock >=3.10.0, while Torch 2.13.0 requires unbounded filelock
 and setuptools >=77.0.3. Therefore the public runtime floor for setuptools is necessary
 in addition to the build floor. Native targeted resolution changes only these package
@@ -432,6 +433,42 @@ versions and their dependent branch references; unrelated versions/artifact hash
 fixed. Local audit and marker/policy evidence is in
 `validation/2026-10-25-release-dependencies/`; complete hosted acceptance remains a
 separate release requirement. No engine, GPU or measurement campaign is added **[V]**.
+
+**Dated security compatibility withdrawal — 2026-10-31, unreleased 0.47.0.**
+[GHSA-8mx5-7m5m-r77g](https://github.com/advisories/GHSA-8mx5-7m5m-r77g) and
+[GHSA-69hj-f68j-2879](https://github.com/advisories/GHSA-69hj-f68j-2879) include
+the conditional filelock 3.20.3 branch. Official patched distributions start at
+4.2.1 and [require Python 3.11](https://pypi.org/project/filelock/4.2.1/);
+the maintainer advertises fixes only for its latest release. Python 3.10
+[reached EOL on 2026-10-01](https://peps.python.org/pep-0619/#310-lifespan).
+No official fixed 3.10 release was found in the inspected published metadata;
+that is not a claim about private or future backports.
+
+Public/private minimum is now 3.11, the 3.10 classifier/unit row is removed, and
+the existing secure public range `>=4.2.1,<5`/private pin `4.2.1` is retained.
+Native UV regeneration removes the unsupported vulnerable branch. Surviving
+package versions/source and retained artifact hashes and the active Python 3.12 external graph
+are compared rather than broadly unlocked. Existing numerical/runtime, coverage,
+mutation and scientific criteria remain. No `ignore-requires-python`, vendor
+fork, advisory suppression or false 3.10 qualification is used.
+
+The former active Python 3.12 audit pass was true for that environment, not every
+universal marker branch. No exploit or compromise is claimed. Historical dated
+records and released 0.46 metadata remain unchanged; current-source correction
+does not rewrite old wheels. Aggregate evidence and fresh candidate gates are in
+`validation/2026-10-31-python311-security/` **[V]**.
+
+The same existing audit command now includes every universal registry lock
+name/version pair alongside installed external pairs. It does not select only
+the current interpreter's marker branches or deduplicate by name. Exact same
+lookup pairs may be shared; conflicting versions use separate minimal layers,
+each passed to the existing `pip-audit --strict --disable-pip --no-deps` CLI.
+All layers are attempted and any vulnerability, collection, launch or service
+failure fails the command. Only the declared virtual root/installed candidate
+are excluded. Unknown lock schema, package source or version fails closed.
+The narrow Torch CPU-to-public advisory mapping stays explicit and retains
+original pair provenance. This is advisory coverage of the enumerated pairs,
+not a promise about future disclosures, transitive binary integrity or compromise.
 
 **Raising a FLOOR needs a run too, and this is the half that is easy to forget.** Every row
 above is written for a cap, but a floor is the same kind of claim pointed the other way: it
