@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.48.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.48.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
+This README documents [quantfit 0.49.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.49.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.48.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.49.0"`.
 
 Quantfit 0.46.0 includes [annotation chunks](docs/annotation-chunks.md)
 (0.42), [capture-backed retained review](docs/retained-review.md) (0.43),
@@ -91,6 +91,14 @@ is introduced. These workflows are available in this version.
 This release inherits the Python 3.11 minimum and universal-lock audit baseline
 above. [Fresh combined-head controls](validation/2026-10-31-screen-adjudication-python311/)
 retain the earlier dated evidence unchanged.
+
+The **0.49.0 release** adds [two-judge calibration diagnostics](docs/calibration-judges.md), extending the released 0.47/0.48 workflows. It compares the full same supplied completion/truth population under two captured judge flag vectors, without choosing a winner or replacing calibration.
+
+```bash
+quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --sheet-a a.labels.csv --capture-b b.capture.jsonl --key-b b.labelkey.json --retained-labels-b b.retained.labels.csv --retention-receipt-b b-retention.json --out judges.json --json
+```
+
+Whole-N flag tables include unusable truth; error tables use each arm's usable truth. All-unusable input completes descriptively with null epsilon and native full intervals. This does not establish equal judge tokenization/truncation, real execution, human truth, independence or scientific GO. These diagnostics are available in this version; Python 3.11 and the inherited all-version dependency audit baseline remain.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).
