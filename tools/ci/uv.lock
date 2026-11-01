@@ -2754,6 +2754,7 @@ browser-ci = [
 ]
 numerical = [
     { name = "coverage" },
+    { name = "datasets" },
     { name = "filelock" },
     { name = "gguf" },
     { name = "huggingface-hub" },
@@ -2792,6 +2793,7 @@ tooling = [
     { name = "wheel" },
 ]
 unit = [
+    { name = "datasets" },
     { name = "filelock" },
     { name = "gguf" },
     { name = "huggingface-hub" },
@@ -2813,6 +2815,7 @@ runtime = ">=3.11"
 browser-ci = [{ name = "playwright", specifier = "==1.64.1" }]
 numerical = [
     { name = "coverage", specifier = "==7.14.0" },
+    { name = "datasets", specifier = "==5.0.1" },
     { name = "filelock", specifier = "==4.2.1" },
     { name = "gguf", specifier = "==0.19.0" },
     { name = "huggingface-hub", specifier = "==1.31.0" },
@@ -2851,6 +2854,7 @@ tooling = [
     { name = "wheel", specifier = "==0.48.0" },
 ]
 unit = [
+    { name = "datasets", specifier = "==5.0.1" },
     { name = "filelock", specifier = "==4.2.1" },
     { name = "gguf", specifier = "==0.19.0" },
     { name = "huggingface-hub", specifier = "==1.31.0" },

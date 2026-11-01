@@ -4,13 +4,14 @@ from typing import Any
 
 from quantfit.spec import DEFAULT_SPEC, QuantSpec
 
-__version__ = "0.50.0"
+__version__ = "0.51.0"
 
 # Heavy surfaces are re-exported lazily (PEP 562) so `import quantfit` stays
 # dependency-light: nothing here drags torch, transformers, or huggingface_hub
 # until the attribute is actually touched.
 _LAZY = {
     "verify_safety": ("quantfit.safety.verify", "verify_safety"),
+    "ProbeCorpus": ("quantfit.safety.verify", "ProbeCorpus"),
     "SafetyDrift": ("quantfit.safety.verify", "SafetyDrift"),
     "DriftReport": ("quantfit.safety.report", "DriftReport"),
     "quantize": ("quantfit.quantize", "quantize"),

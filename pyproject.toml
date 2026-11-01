@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantfit"
-version = "0.50.0"
+version = "0.51.0"
 description = "Quantize an LLM and check it still refuses what it should — a GPU-aware quantization CLI that measures the safety drift of the quantization it just performed."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -34,7 +34,7 @@ dependencies = [
   "httpx>=0.28.1,<0.29",
   # The Pillow-cap hotfix in llmcompressor 0.14.0.1 removed its ceilings on these.
   # Preserve the previously admitted versions until newer releases are qualified.
-  "datasets>=3.0,<=5.0.1",
+  "datasets==5.0.1",
   "accelerate>=1.0,<=1.15.0",
   # Upper-bounded: llm-compressor's modifier/oneshot API churns across minors; the
   # cap moves only after a validated run on the new minor (ROADMAP standing rule).

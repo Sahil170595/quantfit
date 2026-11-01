@@ -1,0 +1,363 @@
+{
+  "actual_source_load_once": true,
+  "adverse": [
+    {
+      "case": "partial-id",
+      "exit_code": 2,
+      "pre_IO_source_refusal": true
+    },
+    {
+      "case": "partial-revision",
+      "exit_code": 2,
+      "pre_IO_source_refusal": true
+    },
+    {
+      "case": "partial-split",
+      "exit_code": 2,
+      "pre_IO_source_refusal": true
+    },
+    {
+      "case": "bucket",
+      "exit_code": 2,
+      "pre_IO_source_refusal": true
+    },
+    {
+      "case": "moving-pin",
+      "exit_code": 2,
+      "pre_IO_source_refusal": true
+    },
+    {
+      "case": "split-union",
+      "exit_code": 2,
+      "pre_IO_source_refusal": true
+    },
+    {
+      "case": "split-slice",
+      "exit_code": 2,
+      "pre_IO_source_refusal": true
+    },
+    {
+      "case": "demo-conflict",
+      "exit_code": 2,
+      "pre_IO_source_refusal": true
+    }
+  ],
+  "adverse_cases": 8,
+  "bound_source_mismatch_controls": 14,
+  "boundary": "controlled SDK factory/generation/judge; actual API and OS module entrypoint/Inspect-tested separately; no real corpus/model qualification",
+  "cases": [
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "default",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "api",
+      "loaded_modules_guarded": 16,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "explicit",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "api",
+      "loaded_modules_guarded": 16,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "custom",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "api",
+      "loaded_modules_guarded": 15,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "revision",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "api",
+      "loaded_modules_guarded": 15,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "split",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "api",
+      "loaded_modules_guarded": 15,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": true,
+      "case": "capture-only",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "api",
+      "loaded_modules_guarded": 13,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "one-axis",
+      "count": 4,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "api",
+      "loaded_modules_guarded": 15,
+      "native_exit": 4,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "regression",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": true,
+      "interface": "api",
+      "loaded_modules_guarded": 24,
+      "native_exit": 3,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "default",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "cli",
+      "loaded_modules_guarded": 24,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "explicit",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "cli",
+      "loaded_modules_guarded": 24,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "custom",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "cli",
+      "loaded_modules_guarded": 24,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "revision",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "cli",
+      "loaded_modules_guarded": 24,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "split",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "cli",
+      "loaded_modules_guarded": 24,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": true,
+      "case": "capture-only",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "cli",
+      "loaded_modules_guarded": 22,
+      "native_exit": 0,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "one-axis",
+      "count": 4,
+      "custom_capture_backed_adjudication_cards": false,
+      "interface": "cli",
+      "loaded_modules_guarded": 24,
+      "native_exit": 4,
+      "source_exact": true
+    },
+    {
+      "calls": {
+        "arm_calls": 2,
+        "factory": 1,
+        "iterations": 1,
+        "judge": 1,
+        "stream": 1
+      },
+      "capture_only": false,
+      "case": "regression",
+      "count": 40,
+      "custom_capture_backed_adjudication_cards": true,
+      "interface": "cli",
+      "loaded_modules_guarded": 33,
+      "native_exit": 3,
+      "source_exact": true
+    }
+  ],
+  "datasets_policy": {
+    "old3_compatibility": "official source inference only, not executed",
+    "public_pin": "==5.0.1",
+    "source_sha256": "ea755fddc5a1d3f56179d4ed9a376cfa7289162c2aab8c8e0e533d0b46365fb6",
+    "version": "5.0.1"
+  },
+  "positive_cases": 16,
+  "private_fixture_directory_removed": true,
+  "software": {
+    "active_external_name_count": 160,
+    "installed_metadata_version": "0.51.0",
+    "platform": "Windows",
+    "python": "3.12.13",
+    "scope": "Editable source/API/OS module entrypoint with controlled SDK/gen/judge; no real Hub/model or installed-distribution qualification."
+  },
+  "source_hashes": {
+    ".github/workflows/validate.yml": "7a9dcd9b1b12b6461481c4595525ee2c3221fecec830fe978029c928e59c6ce1",
+    "pyproject.toml": "e4c09d383b3a28c47e817cd5b2e76aed41693e253a27ae59cf2f47480b6d024e",
+    "quantfit/__init__.py": "acf91effe5e1a70336af6d5a2b2e74533d59f16637977526aa6453abacf3dc70",
+    "quantfit/cli.py": "1f11ba6741bd16b5c5968d71c70837aa0d045a580d1c1143b054b0ae5d804ebb",
+    "quantfit/inspect_gguf.py": "18d35cbfcbe6c42be5728b7deb6e94b5cf9ed353cea6cbc07ce8596ba6dec836",
+    "quantfit/inspect_hf.py": "48ee48850786480c39e85488ea295e69258e29ce5c1f0b7c07ecec7c14f82852",
+    "quantfit/inspect_task.py": "189723757b75b95dad830ca12a837cf2bfec7a38f5af03acedbd0d337cb908c9",
+    "quantfit/modelcard.py": "4484f8777b8f768ab42d5a1ae7058680e3984cf2d7aa0a860541712b13df5737",
+    "quantfit/reference_assessment.py": "ef8bd69d2da5aa190544726e7b6c9e0dd5e86c959c282255b19b8ed733457efb",
+    "quantfit/reference_replay.py": "e2ce7faad07af3c81b8bf7eddfe56d91081f6f69e8ff7db3469abbb2a33751a4",
+    "quantfit/resolution.py": "e6b23319a795182ac3cde8256fb76919636c8e7bea44dc55fb8fb57471e5cb2d",
+    "quantfit/safety/cache.py": "9812dcf76cae12df581c36c050860a1d10b81a0f254de358c33ef2a5bdcfbd13",
+    "quantfit/safety/calibration_binding.py": "4072ef2798bc7535ed0e7ddf2528593bd3d80f98574073c375c5f936b459bc5b",
+    "quantfit/safety/report.py": "45f1d35a3f06f486119f16e002d0df2f2376a3867d491c5dc903b9513c0f9c74",
+    "quantfit/safety/verify.py": "20e009fdfe8dccaf85319400014b42e9bf24562380748ce37711df70a31be574",
+    "tests/test_baseline_cache_wiring.py": "0507cf894dd552e18c0cd192961fe9c982c07d1bdceee59ce8783d111ae22275",
+    "tests/test_ci_probe_corpus.py": "e7bd9c79dd353ccad587ccc771513ae6af27fbadd59f3a2c59ce1dcf9a956237",
+    "tests/test_inspect_gguf.py": "a54a1ddb77a3fd38f9366e490486c6f74d2ac9ab64d9d8b73d3a38883a5644b5",
+    "tests/test_modelcard.py": "1319f0eb6269d9b8b002292f5a010c1c63e172843bc0331b1cf311dbc0606e54",
+    "tests/test_probe_corpus.py": "5eeb54dee4820bd0697948f625cfd392b5de695f17c75c1e6a433a87a30b6d6b",
+    "tools/ci/pyproject.toml": "68cc3aaab4d158452773aa43764d30cf55d88101354edb9fad20d7af54034cb4",
+    "tools/ci/uv.lock": "06d0f2f5e1421a9eeda47279e1209b5d7e9e803bf01fa6612b0e902836a9389c",
+    "tools/ci_installed.py": "eae78ab4669f34612935806fe0a47b5da52de9658ed012f491a186f6b7964f11",
+    "tools/ci_probe_corpus.py": "8a87215dbb0b2321384e37b2e22f0790b1d611818608fed684117fb305c205c1"
+  }
+}

@@ -299,7 +299,7 @@ jobs:
           ruff format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture
           mypy --strict quantfit/spec.py quantfit/engines/base.py
           mypy --strict --follow-imports=silent quantfit/reproduce_junit.py
-          mypy --strict --follow-imports=silent quantfit/reference_assessment.py
+          mypy --strict --follow-imports=silent quantfit/reference_assessment.py tools/ci_probe_corpus.py
           mypy --strict --follow-imports=silent quantfit/reference_replay.py
           mypy --strict --follow-imports=silent quantfit/saved_screen.py
           mypy --strict --follow-imports=silent quantfit/screen_resume.py

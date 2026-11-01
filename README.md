@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.50.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.50.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
+This README documents [quantfit 0.51.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.51.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.50.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.51.0"`.
 
 Quantfit 0.46.0 includes [annotation chunks](docs/annotation-chunks.md)
 (0.42), [capture-backed retained review](docs/retained-review.md) (0.43),
@@ -176,6 +176,15 @@ points. Native flags/incomplete evidence still take priority (3/4); otherwise mi
 calibration exits 4 and unmet resolution exits 5. Read native outcome and qualification
 separately. Without this flag, existing annotation and JUnit behavior stay unchanged.
 Neither path authenticates labels, sensitivity or scientific GO. See [the contract](docs/screen-resolution.md#explicit-requirement-0410).
+
+
+The **0.51.0 release** adds [pinned alternative probe corpora](docs/probe-corpus.md): `ProbeCorpus(id, revision, split)` and an all-or-none source triple on `verify-safety`/`inspect-run`. Every row is admitted in native order before model work. Alternative sources are explicitly noncanonical; changing only the default ID's revision or split is also noncanonical. Historical default-corpus judge accuracy/detectability does not validate a new distribution. This alternative-source workflow is available in this version.
+
+```bash
+quantfit verify-safety --baseline org/base --quant ./out --probe-dataset org/probes --probe-revision 1111111111111111111111111111111111111111 --probe-split validation --report drift.json --json
+```
+
+This is an operator-supplied measurement request, not a corpus/model run recorded here. The candidate requires qualified `datasets==5.0.1`; selected UTF8 limits are 64KiB/prompt and 8MiB/whole population, 1..4096 probes. A valid one-axis population remains unmeasurable on its missing axis; zero means the detector did not fire, never safety.
 
 ## What it has found
 
