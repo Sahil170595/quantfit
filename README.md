@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.46.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.46.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
+This README documents [quantfit 0.49.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.49.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.46.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.49.0"`.
 
 Quantfit 0.46.0 includes [annotation chunks](docs/annotation-chunks.md)
 (0.42), [capture-backed retained review](docs/retained-review.md) (0.43),
@@ -55,17 +55,16 @@ renders operator-declared counts beside unchanged native model-card statistics,
 with or without calibration. Human confirmation remains unverified. These
 workflows are included in this version.
 
-The **unreleased 0.47.0 source candidate** adds [capture-backed adjudication
-verification](docs/adjudication.md#capture-backed-receiving--unreleased-0470).
-**2026-10-31 compatibility correction:** this unreleased source candidate requires
+The **0.47.0 release** adds [capture-backed adjudication
+verification](docs/adjudication.md#capture-backed-receiving--since-0470).
+**2026-10-31 compatibility correction, released in 0.47.0:** this version requires
 Python 3.11 or newer for installation and source/CI support. Python 3.10 support
 is withdrawn because the official patched filelock releases require 3.11 and the
 old conditional 3.20.3 branch is affected by current advisories. The private graph
 keeps already-qualified filelock 4.2.1; no compatibility bypass or advisory waiver
 is used. [Evidence and limits](validation/2026-10-31-python311-security/).
 
-Public installation remains 0.46.0; this source correction does not rewrite
-already-published metadata. Receive an existing report/capture/record
+Earlier release metadata remains unchanged. Receive an existing report/capture/record
 without the original private queue or preparation:
 
 ```bash
@@ -77,7 +76,7 @@ Exit 0 means supplied-source consistency, including zero selected or unresolved
 operator declarations. It does not authenticate human truth, source origin or
 scientific GO. Invalid/unsafe/excess evidence exits 2; no new gate is introduced.
 
-The **unreleased 0.48.0 source candidate**, stacked on 0.47.0, adds a
+The **0.48.0 release** adds a
 [whole-target saved adjudication screen](docs/screen-adjudication.md):
 
 ```bash
@@ -88,18 +87,18 @@ Every original manifest target remains, including missing reports. Source closur
 record coverage and declared operator resolution are separate. Default native
 3/4/0 outcomes remain; the optional requirement changes only a native 0 to 4 for
 incomplete sources. JUnit keeps all 3N+1 cases. No CSV/key/inference or human truth
-is introduced. Public installation remains 0.46.0.
-This candidate inherits the Python 3.11 minimum and universal-lock audit baseline
+is introduced. These workflows are available in this version.
+This release inherits the Python 3.11 minimum and universal-lock audit baseline
 above. [Fresh combined-head controls](validation/2026-10-31-screen-adjudication-python311/)
 retain the earlier dated evidence unchanged.
 
-The **unreleased 0.49.0 source candidate** adds [two-judge calibration diagnostics](docs/calibration-judges.md), stacked on the accepted 0.47/0.48 source candidates. It compares the full same supplied completion/truth population under two captured judge flag vectors, without choosing a winner or replacing calibration.
+The **0.49.0 release** adds [two-judge calibration diagnostics](docs/calibration-judges.md), extending the released 0.47/0.48 workflows. It compares the full same supplied completion/truth population under two captured judge flag vectors, without choosing a winner or replacing calibration.
 
 ```bash
 quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --sheet-a a.labels.csv --capture-b b.capture.jsonl --key-b b.labelkey.json --retained-labels-b b.retained.labels.csv --retention-receipt-b b-retention.json --out judges.json --json
 ```
 
-Whole-N flag tables include unusable truth; error tables use each arm's usable truth. All-unusable input completes descriptively with null epsilon and native full intervals. This does not establish equal judge tokenization/truncation, real execution, human truth, independence or scientific GO. Public installation remains 0.46.0; Python 3.11 and the inherited all-version dependency audit baseline remain.
+Whole-N flag tables include unusable truth; error tables use each arm's usable truth. All-unusable input completes descriptively with null epsilon and native full intervals. This does not establish equal judge tokenization/truncation, real execution, human truth, independence or scientific GO. These diagnostics are available in this version; Python 3.11 and the inherited all-version dependency audit baseline remain.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).

@@ -1,7 +1,7 @@
 # CLI reference — every command, every flag
 
-This reference documents released quantfit 0.46.0 and the explicitly unreleased
-0.47.0 capture-backed receiver and 0.48.0 whole-target adjudication screen, including annotation chunks,
+This reference documents quantfit 0.49.0, including descriptive two-judge diagnostics,
+capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
 capture-backed retained review, finite-grid budgets, calibration-choice sensitivity
 and source-bound flip adjudication.
 Software versions do not establish roadmap or scientific GO.
@@ -878,7 +878,7 @@ statistics and `human_confirmation_verified=false` remain unchanged. `emit` is
 stdout/string only, with no `--out`. Success is 0; invalid/unsafe/excess evidence is
 2, not a gate. See [the complete API, class matrix and bounds](adjudication.md).
 
-### Capture-backed adjudication receiving — unreleased 0.47.0
+### Capture-backed adjudication receiving — since 0.47.0
 
 ```bash
 quantfit adjudicate verify --report drift.json --capture private.capture.jsonl --record adjudication.json --out verification.json --json
@@ -896,7 +896,7 @@ No original native verdict/statistic changes. `--adjudication-capture` requires
 returns only string/stdout; JSON retains its existing `report_path` field, so the
 whole legacy envelope is not universally path-free. Human/source authentication,
 false-negative validation, sensitivity and scientific GO remain unestablished.
-See [the API, privacy and publication contract](adjudication.md#capture-backed-receiving--unreleased-0470).
+See [the API, privacy and publication contract](adjudication.md#capture-backed-receiving--since-0470).
 
 ### Loose report inputs
 
@@ -944,7 +944,7 @@ the parser and constants by import, so a root that is not the imported tree is r
 operational rather than answered.
 
 
-## Whole-target saved adjudication screen — unreleased 0.48.0
+## Whole-target saved adjudication screen — since 0.48.0
 
 ```bash
 quantfit adjudicate screen --targets targets.json --reports-dir reports --adjudications-dir adjudications --captures-dir captures --require-source-complete --out summary.json --junit summary.xml --json
@@ -957,10 +957,10 @@ replacement sinks; `--json` emits the exact bounded native CLI envelope.
 Default native priority remains 3 > 4 > 0. Opt-in incomplete sources change only
 native 0 to 4; malformed/unsafe/excess evidence is 2. Original rows and complete
 3N+1 JUnit remain. See [API, schema and encoded/work bounds](screen-adjudication.md).
-Public installation remains 0.46.0; this source candidate stacks on 0.47.0.
+Available in quantfit 0.48.0; capture-backed receiving was introduced in 0.47.0.
 
 
-## Two-judge calibration diagnostics — unreleased 0.49.0
+## Two-judge calibration diagnostics — since 0.49.0
 
 ```bash
 quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --sheet-a a.labels.csv --capture-b b.capture.jsonl --key-b b.labelkey.json --sheet-b b.labels.csv --out judges.json --json

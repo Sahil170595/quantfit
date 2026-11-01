@@ -113,11 +113,11 @@ Fictional CLI/API cases, including absent-capture receiving with/without native
 calibration, are regenerable at `validation/2026-10-25-adjudication/`. They establish
 instrument behavior, not human truth, rater independence, sensitivity or GO.
 
-## Capture-backed receiving — unreleased 0.47.0
+## Capture-backed receiving — since 0.47.0
 
-This source-only extension freshly verifies an already produced record against
-its actual supplied report and private capture. Public installation remains
-0.46.0. It does not require the original queue/preparation, label key or CSV.
+Available since quantfit 0.47.0, this extension freshly verifies an already produced
+record against its actual supplied report and private capture. It does not require
+the original queue/preparation, label key or CSV.
 
 ```python
 from quantfit.safety.adjudication import verify_adjudication
