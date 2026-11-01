@@ -13,6 +13,16 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.48.0 — 2026-11-01
+
+Release context: 0.48.0 extends released 0.47.0. Candidate-stage installation/status
+statements retained below describe the dated 2026-10-31 source qualification.
+
+- **2026-10-31 inherited security baseline:** carry accepted 0.47 Python 3.11 minimum and universal-lock advisory audit into this candidate through a normal merge. Preserve all earlier validation records; fresh source/API/actual OS CLI controls and current workflow/audit/metadata hashes are in `validation/2026-10-31-screen-adjudication-python311/`.
+- Add `summarize_screen_adjudication` and `adjudicate screen`: hold the original manifest and closed report/record/capture roots once, admit every structural/source binding and combined logical-role n² work before native statistics, and retain all original rows/native outcomes.
+- Separate source closure, required record coverage and unauthenticated operator resolution. Missing reports keep null native counts; pending available sources must agree. Opt-in source completeness changes only native 0 to 4; native 3/4 priority remains. Complete JUnit is 3N+1, with whole JSON/envelope/XML admission before guarded per-file publication.
+- Keep native math/default summary/card behavior and public install 0.46.0; this candidate stacks on unreleased 0.47.0. Fictional API/CLI/privacy/alias/budget controls and limitations: `validation/2026-10-31-screen-adjudication/` and `docs/screen-adjudication.md`.
+
 ## 0.47.0 — 2026-11-01
 
 - **2026-10-31 security compatibility correction:** withdraw Python 3.10 installation/source/CI support from this unreleased candidate. Both public and private projects require Python 3.11+; keep public filelock `>=4.2.1,<5` and private `4.2.1`, removing the affected conditional `3.20.3` branch without an unrelated upgrade. Existing flags/statistics/scientific limits stay unchanged; dated evidence and compatibility scope: `validation/2026-10-31-python311-security/`.

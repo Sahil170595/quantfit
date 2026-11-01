@@ -19,7 +19,25 @@ from quantfit.spec import DEFAULT_SPEC  # a frozen dataclass of constants
 CLI_JSON_SCHEMA_VERSION = 1
 
 
-def _emit(args: argparse.Namespace, command: str, code: int, result: dict, human: Callable[[], None]) -> int:
+def _json_document(command: str, code: int, result: dict) -> dict:
+    return {
+        "schema_version": CLI_JSON_SCHEMA_VERSION,
+        "tool": {"name": "quantfit", "version": __version__},
+        "command": command,
+        "exit_code": code,
+        "result": result,
+    }
+
+
+def _emit(
+    args: argparse.Namespace,
+    command: str,
+    code: int,
+    result: dict,
+    human: Callable[[], None],
+    *,
+    encoded_json: bytes | None = None,
+) -> int:
     """Print one JSON document, or the prose rendering, and return the exit code.
 
     Under `--json`, stdout carries exactly one document and nothing else. Anything that
@@ -31,13 +49,14 @@ def _emit(args: argparse.Namespace, command: str, code: int, result: dict, human
     if not getattr(args, "json", False):
         human()
         return code
-    document = {
-        "schema_version": CLI_JSON_SCHEMA_VERSION,
-        "tool": {"name": "quantfit", "version": __version__},
-        "command": command,
-        "exit_code": code,
-        "result": result,
-    }
+    if encoded_json is not None:
+        binary = getattr(sys.stdout, "buffer", None)
+        if binary is None:
+            sys.stdout.write(encoded_json.decode("utf-8"))
+        else:
+            binary.write(encoded_json)
+        return code
+    document = _json_document(command, code, result)
     json.dump(document, sys.stdout, indent=2, default=str)
     sys.stdout.write("\n")
     return code
@@ -353,6 +372,16 @@ def _build_parser() -> argparse.ArgumentParser:
         "adjudicate", help="explicit source-bound operator flip declarations; no automatic confirmation"
     )
     adjudication_sub = adjudicate.add_subparsers(dest="adjudicate_cmd", required=True)
+    adjudication_screen = adjudication_sub.add_parser(
+        "screen", help="whole original-target saved screen with optional source-matched declarations (0/3/4; invalid 2)"
+    )
+    adjudication_screen.add_argument("--targets", required=True, metavar="PATH")
+    adjudication_screen.add_argument("--reports-dir", required=True, metavar="DIR")
+    adjudication_screen.add_argument("--adjudications-dir", metavar="DIR")
+    adjudication_screen.add_argument("--captures-dir", metavar="DIR")
+    adjudication_screen.add_argument("--require-source-complete", action="store_true")
+    adjudication_screen.add_argument("--out", metavar="PATH")
+    adjudication_screen.add_argument("--junit", metavar="PATH")
     adjudication_prepare = adjudication_sub.add_parser(
         "prepare", help="bound actual capture/report -> complete private blank flagged-pair queue"
     )
@@ -818,6 +847,29 @@ def _add_json_flag(parser: argparse.ArgumentParser) -> None:
 
 def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "adjudicate":
+        if args.adjudicate_cmd == "screen":
+            from quantfit.screen_adjudication import _receive
+
+            result, encoded = _receive(
+                args.targets,
+                args.reports_dir,
+                adjudications_dir=args.adjudications_dir,
+                captures_dir=args.captures_dir,
+                require_source_complete=args.require_source_complete,
+                out_path=args.out,
+                junit_path=args.junit,
+            )
+
+            def human_adjudication_screen() -> None:
+                print(f"Saved adjudication screen exit: {result['exit_code']}")
+                print(
+                    f"Original targets: {len(result['rows'])}; source complete: {result['screen_adjudication']['source_complete']}"
+                )
+                print(result["screen_adjudication"]["scope"])
+
+            return _emit(
+                args, "adjudicate screen", result["exit_code"], result, human_adjudication_screen, encoded_json=encoded
+            )
         from quantfit.safety.adjudication import apply_adjudication, prepare_adjudication, verify_adjudication
 
         if args.adjudicate_cmd == "prepare":

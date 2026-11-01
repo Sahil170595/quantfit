@@ -62,6 +62,15 @@ def _capture_originals(
     identity = measurement_identity(report)
     _require(header["binding"]["identity"] == identity)
     _require(header["binding"]["fingerprint"] == identity_fingerprint(identity))
+    selected, probes, a, b = _capture_selection(n, captured)
+    _same_numbers(report.drift, _tabulate(probes, a, b).to_dict(), "actual capture tabulation")
+    return selected
+
+
+def _capture_selection(
+    n: int, captured: list[dict[str, Any]]
+) -> tuple[dict[int, tuple[str, dict[str, Any], dict[str, Any]]], list[Probe], list[bool], list[bool]]:
+    """Native full-population metadata/selection, before tabulation statistics."""
     pairs = {(row["pair"], row["arm"]): row for row in captured}
     probes, a, b = [], [], []
     selected = {}
@@ -86,8 +95,7 @@ def _capture_originals(
         )
         if axis is not None:
             selected[pair] = (axis, first, second)
-    _same_numbers(report.drift, _tabulate(probes, a, b).to_dict(), "actual capture tabulation")
-    return selected
+    return selected, probes, a, b
 
 
 def _originals(inputs: tuple[HeldFile, ...]) -> _Originals:
@@ -247,6 +255,19 @@ VERIFICATION_SCOPE = (
 )
 
 
+def _match_selected_record(
+    selected: dict[int, tuple[str, dict[str, Any], dict[str, Any]]], record: dict[str, Any]
+) -> None:
+    """Exact selected index set, axes and both native UTF8 completion hashes."""
+    entries = {entry["pair"]: entry for entry in record["entries"]}
+    _require(set(entries) == set(selected))
+    for pair, (axis, first, second) in selected.items():
+        entry = entries[pair]
+        _require(entry["axis"] == axis)
+        _require(entry["baseline_sha256"] == _completion_sha256(first["completion"]))
+        _require(entry["quantized_sha256"] == _completion_sha256(second["completion"]))
+
+
 def _verify_held(
     report: DriftReport,
     report_file: HeldFile,
@@ -257,13 +278,7 @@ def _verify_held(
     """Receive already parsed/validated native report+record and one held capture."""
     _same_numbers(record["inputs"]["capture"], _binding(capture_file.data), "actual capture")
     selected = _capture_originals(report, record["n_probes"], capture_file.data)
-    entries = {entry["pair"]: entry for entry in record["entries"]}
-    _require(set(entries) == set(selected))
-    for pair, (axis, first, second) in selected.items():
-        entry = entries[pair]
-        _require(entry["axis"] == axis)
-        _require(entry["baseline_sha256"] == _completion_sha256(first["completion"]))
-        _require(entry["quantized_sha256"] == _completion_sha256(second["completion"]))
+    _match_selected_record(selected, record)
     proof = {
         "adjudication_verification_schema": 1,
         "quantfit_version": __version__,

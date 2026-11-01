@@ -1,7 +1,7 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.47.0 and its capture-backed adjudication
-receiver, including annotation chunks,
+This reference documents quantfit 0.48.0, including capture-backed adjudication
+receiving and whole-target saved adjudication screens, annotation chunks,
 capture-backed retained review, finite-grid budgets, calibration-choice sensitivity
 and source-bound flip adjudication.
 Software versions do not establish roadmap or scientific GO.
@@ -942,3 +942,19 @@ quantfit audit --root . --json-out findings.json --json
 says *where this checkout is*, not *which checkout to audit* — three of the five checks read
 the parser and constants by import, so a root that is not the imported tree is refused as
 operational rather than answered.
+
+
+## Whole-target saved adjudication screen — since 0.48.0
+
+```bash
+quantfit adjudicate screen --targets targets.json --reports-dir reports --adjudications-dir adjudications --captures-dir captures --require-source-complete --out summary.json --junit summary.xml --json
+```
+
+`--targets` and `--reports-dir` are required. `--adjudications-dir` and
+`--captures-dir` are optional closed roots, defaulting to intentional absence.
+`--require-source-complete` defaults off. `--out`/`--junit` are optional guarded
+replacement sinks; `--json` emits the exact bounded native CLI envelope.
+Default native priority remains 3 > 4 > 0. Opt-in incomplete sources change only
+native 0 to 4; malformed/unsafe/excess evidence is 2. Original rows and complete
+3N+1 JUnit remain. See [API, schema and encoded/work bounds](screen-adjudication.md).
+Available in quantfit 0.48.0; capture-backed receiving was introduced in 0.47.0.

@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.47.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.47.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
+This README documents [quantfit 0.48.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.48.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.47.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.48.0"`.
 
 Quantfit 0.46.0 includes [annotation chunks](docs/annotation-chunks.md)
 (0.42), [capture-backed retained review](docs/retained-review.md) (0.43),
@@ -75,6 +75,22 @@ quantfit emit model-card --report drift.json --adjudication adjudication.json --
 Exit 0 means supplied-source consistency, including zero selected or unresolved
 operator declarations. It does not authenticate human truth, source origin or
 scientific GO. Invalid/unsafe/excess evidence exits 2; no new gate is introduced.
+
+The **0.48.0 release** adds a
+[whole-target saved adjudication screen](docs/screen-adjudication.md):
+
+```bash
+quantfit adjudicate screen --targets targets.json --reports-dir reports --adjudications-dir adjudications --captures-dir captures --require-source-complete --out summary.json --junit summary.xml --json
+```
+
+Every original manifest target remains, including missing reports. Source closure,
+record coverage and declared operator resolution are separate. Default native
+3/4/0 outcomes remain; the optional requirement changes only a native 0 to 4 for
+incomplete sources. JUnit keeps all 3N+1 cases. No CSV/key/inference or human truth
+is introduced. These workflows are available in this version.
+This release inherits the Python 3.11 minimum and universal-lock audit baseline
+above. [Fresh combined-head controls](validation/2026-10-31-screen-adjudication-python311/)
+retain the earlier dated evidence unchanged.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).

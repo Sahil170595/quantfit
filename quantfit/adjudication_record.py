@@ -170,15 +170,15 @@ def _counts(entries: list[dict[str, Any]], flagged: dict[str, int]) -> dict[str,
     return result
 
 
-def _record(raw: bytes, report: DriftReport, report_data: bytes) -> dict[str, Any]:
+def _record_structure(raw: bytes) -> dict[str, Any]:
     _require(type(raw) is bytes and 0 < len(raw) <= MAX_RECORD_BYTES)
     value = _json(raw)
     _require(
         set(value) == _RECORD_KEYS and type(value["adjudication_schema"]) is int and value["adjudication_schema"] == 1
     )
     _version(value["quantfit_version"])
-    n = _validate_report(report)
-    _require(type(value["n_probes"]) is int and value["n_probes"] == n)
+    n = value["n_probes"]
+    _require(type(n) is int and 0 < n <= resolution.MAX_PROBES)
     _require(
         type(value["inputs"]) is dict and set(value["inputs"]) == {"report", "capture", "preparation", "review_queue"}
     )
@@ -192,10 +192,11 @@ def _record(raw: bytes, report: DriftReport, report_data: bytes) -> dict[str, An
         _require(type(item) is dict and set(item) == {"sha256", "size_bytes"})
         _require(type(item["size_bytes"]) is int and 0 < item["size_bytes"] <= limit)
         _require(type(item["sha256"]) is str and bool(_SHA.fullmatch(item["sha256"])))
-    _same_numbers(value["inputs"]["report"], _binding(report_data), "actual report")
-    _require(value["binding_fingerprint"] == identity_fingerprint(measurement_identity(report)))
-    flagged = _flagged(report)
-    _same_numbers(value["original_flagged_counts"], flagged, "original flags")
+    _require(type(value["binding_fingerprint"]) is str and bool(_SHA.fullmatch(value["binding_fingerprint"])))
+    flagged = value["original_flagged_counts"]
+    _require(type(flagged) is dict and set(flagged) == set(AXES))
+    _require(all(type(flagged[axis]) is int and 0 <= flagged[axis] <= n for axis in AXES))
+    _require(sum(flagged.values()) <= n)
     entries = value["entries"]
     _require(type(entries) is list and len(entries) == sum(flagged.values()) <= n)
     seen = set()
@@ -220,6 +221,21 @@ def _record(raw: bytes, report: DriftReport, report_data: bytes) -> dict[str, An
     _require(value["operator_status"] == "declared_unauthenticated" and value["scope"] == SCOPE)
     _same_numbers(value["producer_checks"], PRODUCER_CHECKS, "producer declarations")
     _same_numbers(value["proof_limits"], PROOF_LIMITS, "proof limits")
+    return value
+
+
+def _record_report_match(value: dict[str, Any], report: DriftReport, report_data: bytes) -> None:
+    """Pure actual-report binding checks, independent of fresh statistical validation."""
+    _require(value["n_probes"] == report.probe_dataset["n_probes"])
+    _same_numbers(value["inputs"]["report"], _binding(report_data), "actual report")
+    _require(value["binding_fingerprint"] == identity_fingerprint(measurement_identity(report)))
+    _same_numbers(value["original_flagged_counts"], _flagged(report), "original flags")
+
+
+def _record(raw: bytes, report: DriftReport, report_data: bytes) -> dict[str, Any]:
+    value = _record_structure(raw)
+    _validate_report(report)
+    _record_report_match(value, report, report_data)
     return value
 
 
