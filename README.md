@@ -41,9 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This README documents [quantfit 0.49.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.49.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
+This README documents [quantfit 0.50.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.50.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
 
-Install with `pip install "quantfit[inspect,gguf]==0.49.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.50.0"`.
 
 Quantfit 0.46.0 includes [annotation chunks](docs/annotation-chunks.md)
 (0.42), [capture-backed retained review](docs/retained-review.md) (0.43),
@@ -99,6 +99,14 @@ quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey
 ```
 
 Whole-N flag tables include unusable truth; error tables use each arm's usable truth. All-unusable input completes descriptively with null epsilon and native full intervals. This does not establish equal judge tokenization/truncation, real execution, human truth, independence or scientific GO. These diagnostics are available in this version; Python 3.11 and the inherited all-version dependency audit baseline remain.
+
+The **0.50.0 release** adds a [private offline adjudication review page](docs/adjudication-review.md). From the actual native blank queue and its preparation, it displays every selected pair with explicit Baseline/Quantized captions and blank decision controls, then exports a private quote-all CSV for unchanged native apply. The page contains private source strings; it is never a public report or authenticated human review.
+
+```bash
+quantfit adjudicate review-page --review private.adjudication.csv --preparation preparation.json --out private.adjudication.html --json
+```
+
+No model, paid provider or upload is involved. Browser/download qualification is restricted to the existing hosted Linux installed profiles; the nondefault browser-ci group is not a runtime extra. This private review workflow is available in this version.
 
 Use Python 3.12 for the complete runtime qualified by hosted CI. The locked runtime
 requires Python 3.11 or newer; see [hosted CI scope](docs/hosted-ci.md).

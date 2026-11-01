@@ -1,0 +1,232 @@
+{
+  "adverse": [
+    {
+      "case": "queue-hash",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "extra",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "count-bool",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "nonblank",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "existing",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "alias",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "suffix",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "input-cap",
+      "exit_code": 2,
+      "interface": "api"
+    },
+    {
+      "case": "queue-hash",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "extra",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "count-bool",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "nonblank",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "existing",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "alias",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "suffix",
+      "exit_code": 2,
+      "interface": "cli"
+    },
+    {
+      "case": "input-cap",
+      "exit_code": 2,
+      "interface": "cli"
+    }
+  ],
+  "adverse_cases": 16,
+  "browser_qualification": "required separately in hosted original/rebuilt profiles",
+  "cases": [
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "api-mixed",
+      "csv_sha256": "191d136381c2b01a6ac13b3309d62acb16e0f1d6d854ed1e358fea265f73ea7d",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 8,
+      "six_fields_exact": true
+    },
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "api-all",
+      "csv_sha256": "191d136381c2b01a6ac13b3309d62acb16e0f1d6d854ed1e358fea265f73ea7d",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 8,
+      "six_fields_exact": true
+    },
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "api-zero",
+      "csv_sha256": "77584373f3af2b31385508a4561b631b2a7e51b3718b7c5e6ceb903875bf8d02",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 0,
+      "six_fields_exact": true
+    },
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "api-unicode",
+      "csv_sha256": "60c874d7ae700f53f0b9727934fdb674e97c929ea2e5f11cf7d1838e1b5dc0a7",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 8,
+      "six_fields_exact": true
+    },
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "api-bare-cr",
+      "csv_sha256": "476cc212e84a3f2f7cc364b8e89f88e2c339af0d85048c7f1fde8c663cdef2bd",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 8,
+      "six_fields_exact": true
+    },
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "api-nul-byte",
+      "csv_sha256": "d59c507eca6a237e35c9d4b13f5948f64b4b6cf6447295bc163e80ca78d64efd",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 8,
+      "six_fields_exact": true
+    },
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "cli-mixed",
+      "csv_sha256": "191d136381c2b01a6ac13b3309d62acb16e0f1d6d854ed1e358fea265f73ea7d",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 8,
+      "six_fields_exact": true
+    },
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "cli-all",
+      "csv_sha256": "191d136381c2b01a6ac13b3309d62acb16e0f1d6d854ed1e358fea265f73ea7d",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 8,
+      "six_fields_exact": true
+    },
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "cli-zero",
+      "csv_sha256": "77584373f3af2b31385508a4561b631b2a7e51b3718b7c5e6ceb903875bf8d02",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 0,
+      "six_fields_exact": true
+    },
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "cli-unicode",
+      "csv_sha256": "60c874d7ae700f53f0b9727934fdb674e97c929ea2e5f11cf7d1838e1b5dc0a7",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 8,
+      "six_fields_exact": true
+    },
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "cli-bare-cr",
+      "csv_sha256": "476cc212e84a3f2f7cc364b8e89f88e2c339af0d85048c7f1fde8c663cdef2bd",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 8,
+      "six_fields_exact": true
+    },
+    {
+      "cards_plain_and_calibrated": true,
+      "case": "cli-nul-byte",
+      "csv_sha256": "d59c507eca6a237e35c9d4b13f5948f64b4b6cf6447295bc163e80ca78d64efd",
+      "csv_utf8_crlf_bytes_exact": true,
+      "native_apply_completed": true,
+      "selected": 8,
+      "six_fields_exact": true
+    }
+  ],
+  "human_confirmation_verified": false,
+  "positive_cases": 12,
+  "private_fixture_directory_removed": true,
+  "scientific_go": false,
+  "software": {
+    "installed_metadata_version": "0.50.0",
+    "platform": "Windows",
+    "python": "3.12.13",
+    "scope": "Editable source/native OS CLI and stdlib CSV transport; browser/installed-distribution qualifications remain separate."
+  },
+  "source_authenticity_verified": false,
+  "source_hashes": {
+    ".github/workflows/validate.yml": "f97e50b8d016572cd7784257f9a24731acdba164ab439944bf541775df5d74ce",
+    ".gitignore": "b324467ec9821eae8878962ca69df47b6fe306fd119bf4a0af27952fc73aa961",
+    "quantfit/adjudication_record.py": "29052bb45a235357d8eba2a8282dd9b27855d63c4fdf5dfaf44ea949a820fc5f",
+    "quantfit/cli.py": "1912c50d7227d72f15d1b0327049064cdf71ad6a638c63a055e6d50b12675cfd",
+    "quantfit/modelcard.py": "6ac53948c0c5ad681298988859186544f3d20f3d989307509e097ebc36a2b491",
+    "quantfit/resolution.py": "e6b23319a795182ac3cde8256fb76919636c8e7bea44dc55fb8fb57471e5cb2d",
+    "quantfit/safety/adjudication.py": "a1f8c64d4741d9215c38958e9cc7173515fac22c10877ae391dd637aa7a3143a",
+    "quantfit/safety/adjudication_review.py": "7a3a68d7eae66a4340e0c601cb77db199e7a4a5a9e187fa7050961aac443c172",
+    "quantfit/safety/calibration_binding.py": "4072ef2798bc7535ed0e7ddf2528593bd3d80f98574073c375c5f936b459bc5b",
+    "quantfit/safety/calibration_inputs.py": "a0096cf942e1d15d3a70234587f7c3431610a193e80ec29abd12472df63d8165",
+    "quantfit/safety/retained_labels.py": "c44f11d608702aec9b770a3b381fd44fba09220d9538d08d688c3bf7771208a5",
+    "quantfit/safety/retention_io.py": "a7dc49b2bba071283256ea64402240b9006bfcaa9df3f3d25f482e5293c682cd",
+    "quantfit/safety/verify.py": "83350d0bb519fa7d113f679db17f2a23eb4c8b87d9d719ee785efd2fa462c70d",
+    "tests/test_adjudication_review.py": "196250e100d113d14d4c31898dda5d0f83025dec1adb2c34062040f15b242668",
+    "tests/test_ci_adjudication_review.py": "211a27abfa51e9696d9c81d9f3ef2496499c8174d45c0b3536795a9c445f9e67",
+    "tests/test_json_envelope.py": "59f2ca47bf6c833cce8030ba8ced534dde9c0a19b109e6bd3870d912b3d8e094",
+    "tools/ci/pyproject.toml": "68cc3aaab4d158452773aa43764d30cf55d88101354edb9fad20d7af54034cb4",
+    "tools/ci/uv.lock": "06d0f2f5e1421a9eeda47279e1209b5d7e9e803bf01fa6612b0e902836a9389c",
+    "tools/ci_adjudication.py": "493aa32711c7cffee4f6556f00dc0df3b96083cae576f18abe8856f6fe725992",
+    "tools/ci_adjudication_review.py": "5af19b414ec0652fb79b6bb54ab7c7713c2ec71fc857bb4a20c825502dfeadc9",
+    "tools/ci_adjudication_review_browser.py": "d627d62634c6762b041afd4824caab7f620ce7b98337109e4550f9d94019f2ec",
+    "tools/ci_installed.py": "f784a7c42d15946db7c3443b8cc67142b4d1c53771d66941e73ede4cf40e4131"
+  },
+  "transport": "stdlib quote-all CSV fixture, NOT browser execution"
+}

@@ -144,13 +144,20 @@ jobs:
         env:
           UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/quantfit-ci
         run: |
-          uv sync --directory tools/ci --locked --no-default-groups --group runtime --group numerical --group tooling --python python
+          browser_group=()
+          if [ "$RUNNER_OS" = Linux ]; then browser_group=(--group browser-ci); fi
+          uv sync --directory tools/ci --locked --no-default-groups --group runtime --group numerical --group tooling "${browser_group[@]}" --python python
           python - <<'PY'
           import os, pathlib
           env = pathlib.Path(os.environ['UV_PROJECT_ENVIRONMENT'])
           with open(os.environ['GITHUB_PATH'], 'a') as out:
               out.write(str(env / ('Scripts' if os.name == 'nt' else 'bin')) + '\n')
           PY
+      - name: Install the pinned owned private-review browser (Linux only)
+        if: runner.os == 'Linux'
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/quantfit-review-browser
+        run: python -m playwright install --with-deps --only-shell chromium
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: candidate-dist
@@ -158,11 +165,14 @@ jobs:
       - run: |
           if [ "$ARTIFACT" = wheel ]; then python -m pip install --no-deps --no-build-isolation dist/*.whl; else python -m pip install --no-deps --no-build-isolation dist/*.tar.gz; fi
           python -m pip check
-          python tools/ci_installed.py --checkout "$GITHUB_WORKSPACE"
+          review_browser=()
+          if [ "$RUNNER_OS" = Linux ]; then review_browser=(--review-browser); fi
+          python tools/ci_installed.py --checkout "$GITHUB_WORKSPACE" "${review_browser[@]}"
           python tools/quickstart_check.py --min-commands 20
           python -m pip freeze
         env:
           ARTIFACT: ${{ matrix.artifact }}
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/quantfit-review-browser
 
   consumer-action:
     needs: distribution
@@ -306,7 +316,7 @@ jobs:
           mypy --strict --follow-imports=silent quantfit/safety/retained_review.py tools/ci_retained_review.py
           mypy --strict --follow-imports=silent quantfit/resolution_budget.py tools/ci_resolution_budget.py
           mypy --strict --follow-imports=silent quantfit/calibration_choices.py tools/ci_calibration_choices.py
-          mypy --strict --follow-imports=silent quantfit/adjudication_record.py quantfit/safety/adjudication.py quantfit/screen_adjudication.py tools/ci_adjudication.py tools/ci_adjudication_verification.py tools/ci_screen_adjudication.py
+          mypy --strict --follow-imports=silent quantfit/adjudication_record.py quantfit/safety/adjudication.py quantfit/screen_adjudication.py tools/ci_adjudication.py tools/ci_adjudication_verification.py tools/ci_screen_adjudication.py quantfit/safety/adjudication_review.py tools/ci_adjudication_review.py tools/ci_adjudication_review_browser.py
           mypy --strict --follow-imports=silent quantfit/screen_requirement.py tools/ci_screen_requirement.py
           quantfit audit
       - name: Verify and run actionlint

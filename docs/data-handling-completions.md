@@ -384,3 +384,10 @@ annotator is asked at all — belongs to the 0.6 GO, not to this document.
   `docs/sensitivity-control-v0.md` §2.3 and is why §3's last paragraph exists.
 - **No capture file, labeling sheet, key or calibration report exists** in this repository, and none
   was produced in writing this document.
+
+
+## 2026-10-31 source addendum: private offline review page (unreleased 0.50)
+
+The explicitly requested `adjudicate review-page` output contains the protected completion strings from the supplied private blank queue. ASCII/less-than escaping is safe transport, not redaction. Keep `*.adjudication.html` and downloaded `*.adjudication.csv` under the same private handling as their source capture; never commit, attach, upload or record browser screenshots/traces/video. The narrow ignore is only an accidental-add backstop, not confidentiality. Product stdout is a bounded aggregate/hash receipt. Hosted fictional browser fixtures persist only inside the parent-owned private temporary handoff until native receiving finishes, with no private artifact upload.
+
+The page has no requests, remote assets, storage or automatic judgments. Its six frozen source strings remain authoritative for byte-preserving export even after display DOM changes. Both labels/class are explicit unauthenticated operator declarations; unchanged apply with actual report/capture and the original preparation remains the source authority. Functional validation is synthetic software evidence, not real human reading, source authenticity or scientific clearance.

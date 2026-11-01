@@ -411,6 +411,13 @@ def _build_parser() -> argparse.ArgumentParser:
         "--out", required=True, metavar="PATH", help="NEW closed public aggregate/per-pair-hash record"
     )
 
+    adjudication_page = adjudication_sub.add_parser(
+        "review-page", help="NEW private offline blank-queue page; preparation consistency only (0/2)"
+    )
+    adjudication_page.add_argument("--review", required=True, metavar="PATH")
+    adjudication_page.add_argument("--preparation", required=True, metavar="PATH")
+    adjudication_page.add_argument("--out", required=True, metavar="PATH", help="NEW private *.adjudication.html")
+
     adjudication_verify = adjudication_sub.add_parser(
         "verify", help="held report/capture/record consistency, not authenticated human truth (0 consistent, 2 invalid)"
     )
@@ -890,6 +897,18 @@ def _dispatch(args: argparse.Namespace) -> int:
             return _emit(
                 args, "adjudicate screen", result["exit_code"], result, human_adjudication_screen, encoded_json=encoded
             )
+        if args.adjudicate_cmd == "review-page":
+            from quantfit.safety.adjudication_review import _receive as receive_review_page
+
+            result, encoded = receive_review_page(args.review, args.preparation, out_path=args.out)
+
+            def human_review_page() -> None:
+                print(
+                    f"Private review page created; {result['n_selected']} selected rows of {result['n_probes']} probes."
+                )
+                print(result["scope"])
+
+            return _emit(args, "adjudicate review-page", 0, result, human_review_page, encoded_json=encoded)
         from quantfit.safety.adjudication import apply_adjudication, prepare_adjudication, verify_adjudication
 
         if args.adjudicate_cmd == "prepare":
