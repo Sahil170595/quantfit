@@ -1,4 +1,4 @@
-# Descriptive two-judge diagnostics — unreleased 0.49.0
+# Descriptive two-judge diagnostics — since 0.49.0
 
 `quantfit.safety.calibration_judges.analyze_calibration_judges` receives two
 independent native capture/key/label suites and writes a new aggregate diagnostic:
@@ -62,4 +62,4 @@ remain unheld declarations, explicitly distinct from a full held sheet.
 This does not authenticate human labels, source/weights, actual judge execution,
 rater independence, sensitivity, null clearance or scientific GO. No real models,
 providers, GPU, paid calls or uploads are needed by the fictional controls in
-`validation/2026-10-31-calibration-judges/`. Public installation remains 0.46.0.
+`validation/2026-10-31-calibration-judges/`. Available in quantfit 0.49.0; install with `pip install "quantfit[inspect,gguf]==0.49.0"`.

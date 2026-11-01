@@ -430,7 +430,7 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
-### Whole-target adjudication screen (2026-10-31, unreleased 0.48.0)
+### Whole-target adjudication screen (0.48.0; source controls 2026-10-31)
 
 The regenerable native editable-source record in
 [`validation/2026-10-31-screen-adjudication/`](../validation/2026-10-31-screen-adjudication/)
@@ -440,12 +440,12 @@ missing reports, native 3/4/0 and complete 3N+1 JUnit. Available-source consiste
 and unauthenticated operator resolution remain separate. Scoped lower named
 budgets prove admission; this is not maximum-size/runtime evidence. No inference,
 human authentication, GPU result, sensitivity or scientific GO is established.
-Installed distributions and hosted CI remain separate qualifications. The public
-install remains 0.46.0; this candidate stacks on unreleased 0.47.0.
+Installed distributions and hosted CI remain separate qualifications. This workflow
+is available in 0.48.0, extending the capture-backed receiver introduced in 0.47.0.
 
 | Flag surface | Command | Bounded source behavior | Evidence and limits |
 |---|---|---|---|
-| `--adjudications-dir` | adjudicate screen | Optional closed target-named record root; supplied records are always validated, zero flags need no empty record. Declared counts never fill missing native report counts. | `tests/test_screen_adjudication.py`; `validation/2026-10-31-screen-adjudication/`; unreleased source controls, no human authentication |
+| `--adjudications-dir` | adjudicate screen | Optional closed target-named record root; supplied records are always validated, zero flags need no empty record. Declared counts never fill missing native report counts. | `tests/test_screen_adjudication.py`; `validation/2026-10-31-screen-adjudication/`; dated source controls, no human authentication |
 | `--captures-dir` | adjudicate screen | Optional closed target-named full capture root; all available native scope/population, byte/fingerprint and selected set/axis/hash declarations must agree before publication. | Same source record and `tests/test_ci_screen_adjudication.py`; installed/hosted qualification is separate |
 | `--require-source-complete` | adjudicate screen | Defaults off; incomplete source closure changes only native 0 to 4, never clears native 3/4. JUnit retains all 3N+1 cases; unresolved declarations may be source-complete. | `docs/screen-adjudication.md`; same fictional source record; no sensitivity or scientific GO |
 
@@ -656,8 +656,8 @@ qualification remains pending for this candidate.
 | Flag | Command | What has actually run | Evidence |
 |---|---|---|---|
 | `--from-report` | gate | Local source CLI replay of preserved real Phi4 aggregates: dangerous-axis gate0 alongside the original2/20 over-refusal flags; bound synthetic policy refusal5 with matched recorded scope; exact report copies and relocated bundle checks. Synthetic adverse tests cover all decision states, alias/corruption rejection and real Bash action routing. No new inference, authenticated labels, sensitivity or GO | `validation/2026-10-09-saved-report-gate/functional.json`; `tests/test_saved_report_gate.py` |
-| `--capture-a` / `--key-a` / `--sheet-a` / `--retained-labels-a` / `--retention-receipt-a` / `--capture-b` / `--key-b` / `--sheet-b` / `--retained-labels-b` / `--retention-receipt-b` / `--out` / `--json` | calibrate compare-judges (unreleased 0.49) | Two complete bound native populations and identical supplied ternary truth; whole per-arm flag/error tables, native Wilson blocks and honest all-unusable/null outcomes. Both mode suites precede IO; each aggregate output file and full CLI envelope <=256 KiB before exclusive publication. | `tests/test_calibration_judges.py`; `validation/2026-10-31-calibration-judges/`; installed/hosted qualification separate |
-| `--review` / `--preparation` / `--out` / `--json` | adjudicate review-page (unreleased 0.50) | Actual blank/preparation consistency; all selected rows/private escaped source strings; bounded whole export; fixed native triplets; no source or human authentication. | `tests/test_adjudication_review.py`; `validation/2026-10-31-adjudication-review/`; actual hosted browser separate |
+| `--capture-a` / `--key-a` / `--sheet-a` / `--retained-labels-a` / `--retention-receipt-a` / `--capture-b` / `--key-b` / `--sheet-b` / `--retained-labels-b` / `--retention-receipt-b` / `--out` / `--json` | calibrate compare-judges (since 0.49) | Two complete bound native populations and identical supplied ternary truth; whole per-arm flag/error tables, native Wilson blocks and honest all-unusable/null outcomes. Both mode suites precede IO; each aggregate output file and full CLI envelope <=256 KiB before exclusive publication. | `tests/test_calibration_judges.py`; `validation/2026-10-31-calibration-judges/`; installed/hosted qualification separate |
+| `--review` / `--preparation` / `--out` / `--json` | adjudicate review-page (since 0.50) | Actual blank/preparation consistency; all selected rows/private escaped source strings; bounded whole export; fixed native triplets; no source or human authentication. | `tests/test_adjudication_review.py`; `validation/2026-10-31-adjudication-review/`; actual hosted browser separate |
 
 
 ## 4. Advertised-but-unevidenced claims found while writing this

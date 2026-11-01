@@ -1,4 +1,4 @@
-# Private offline review — unreleased 0.50.0
+# Private offline review — since 0.50.0
 
 ```python
 from quantfit.safety.adjudication_review import render_adjudication_review
@@ -74,4 +74,4 @@ perform actual downloads and pass saved bytes to unchanged native apply/cards.
 The SDK controller imports no application, saves before closing the context and
 publishes no private browser artifacts. See [native download lifetime](https://playwright.dev/python/docs/downloads).
 Neither software fixture is authentic human reading, judge/model execution,
-independent evidence or scientific GO. Public install remains 0.46.0/Python>=3.11.
+independent evidence or scientific GO. Available in quantfit 0.50.0/Python>=3.11; install with `pip install "quantfit[inspect,gguf]==0.50.0"`.
