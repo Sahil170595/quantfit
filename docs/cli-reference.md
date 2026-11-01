@@ -1,7 +1,7 @@
 # CLI reference — every command, every flag
 
-This reference documents released quantfit 0.46.0 and the explicitly unreleased
-0.47.0 capture-backed adjudication receiver, including annotation chunks,
+This reference documents quantfit 0.47.0 and its capture-backed adjudication
+receiver, including annotation chunks,
 capture-backed retained review, finite-grid budgets, calibration-choice sensitivity
 and source-bound flip adjudication.
 Software versions do not establish roadmap or scientific GO.
@@ -878,7 +878,7 @@ statistics and `human_confirmation_verified=false` remain unchanged. `emit` is
 stdout/string only, with no `--out`. Success is 0; invalid/unsafe/excess evidence is
 2, not a gate. See [the complete API, class matrix and bounds](adjudication.md).
 
-### Capture-backed adjudication receiving — unreleased 0.47.0
+### Capture-backed adjudication receiving — since 0.47.0
 
 ```bash
 quantfit adjudicate verify --report drift.json --capture private.capture.jsonl --record adjudication.json --out verification.json --json
@@ -896,7 +896,7 @@ No original native verdict/statistic changes. `--adjudication-capture` requires
 returns only string/stdout; JSON retains its existing `report_path` field, so the
 whole legacy envelope is not universally path-free. Human/source authentication,
 false-negative validation, sensitivity and scientific GO remain unestablished.
-See [the API, privacy and publication contract](adjudication.md#capture-backed-receiving--unreleased-0470).
+See [the API, privacy and publication contract](adjudication.md#capture-backed-receiving--since-0470).
 
 ### Loose report inputs
 

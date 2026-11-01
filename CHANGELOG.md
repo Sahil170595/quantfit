@@ -13,7 +13,7 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## Unreleased — 0.47.0
+## 0.47.0 — 2026-11-01
 
 - **2026-10-31 security compatibility correction:** withdraw Python 3.10 installation/source/CI support from this unreleased candidate. Both public and private projects require Python 3.11+; keep public filelock `>=4.2.1,<5` and private `4.2.1`, removing the affected conditional `3.20.3` branch without an unrelated upgrade. Existing flags/statistics/scientific limits stay unchanged; dated evidence and compatibility scope: `validation/2026-10-31-python311-security/`.
 - Extend the existing dependency audit to all universal-lock registry versions plus installed externals, partitioning conflicting versions into strict exact-pin layers without new jobs, environments, marker filtering or advisory suppressions. Preserve the sole Torch CPU/public lookup mapping; unknown inputs and any layer failure fail closed. This corrects dormant-branch audit coverage, not an observed exploit.

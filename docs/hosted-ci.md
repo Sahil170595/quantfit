@@ -11,8 +11,8 @@ coverage floors, Ruff, strict typing on the spec/engine data contract, docs pari
 workflow linting, and the installed dependency graph for known vulnerabilities.
 `tools/ci/uv.lock` fixes the complete validation dependency graph and artifact hashes
 for the supported Python 3.11-3.14 unit/tooling domain on hosted Linux/Windows.
-The numerical and complete runtime jobs remain Python 3.12. From the unreleased
-0.47.0 candidate's 2026-10-31 correction, both public installation and private
+The numerical and complete runtime jobs remain Python 3.12. From 0.47.0's
+2026-10-31 correction, both public installation and private
 validation require Python 3.11+. The earlier Python 3.10 source-only matrix is
 withdrawn; its historical passing results did not establish complete runtime or
 universal dependency security. `uv sync --locked` selects these groups; package builds use the locked build tooling without
