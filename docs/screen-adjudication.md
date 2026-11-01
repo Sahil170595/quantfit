@@ -1,7 +1,7 @@
-# Whole-target adjudication screens — unreleased 0.48.0
+# Whole-target adjudication screens — since 0.48.0
 
-This source candidate depends on the unreleased 0.47 capture-backed receiver.
-The public install remains quantfit 0.46.0. This workflow receives saved files;
+Available since quantfit 0.48.0, this workflow extends the 0.47 capture-backed
+receiver. Install with `pip install "quantfit[inspect,gguf]==0.48.0"`. It receives saved files;
 it runs no models, CSV reconstruction, key lookup or original queue/preparation.
 
 ```python

@@ -1,6 +1,6 @@
-# Pinned alternative probe corpus — unreleased 0.51.0
+# Pinned alternative probe corpus — since 0.51.0
 
-Public installation remains 0.46.0. This candidate adds a frozen `ProbeCorpus(id, revision, split)` (also lazily exported at `quantfit.ProbeCorpus`) and keyword-only `probe_corpus=None` to `verify_safety`, `qsr_paired_diff` and `qsr_eval`. Existing positional inputs and the default source are unchanged. An explicit alternative is a supplied noncanonical distribution, not curated or authenticated by this tool.
+Available in quantfit 0.51.0; install with `pip install "quantfit[inspect,gguf]==0.51.0"`. This version adds a frozen `ProbeCorpus(id, revision, split)` (also lazily exported at `quantfit.ProbeCorpus`) and keyword-only `probe_corpus=None` to `verify_safety`, `qsr_paired_diff` and `qsr_eval`. Existing positional inputs and the default source are unchanged. An explicit alternative is a supplied noncanonical distribution, not curated or authenticated by this tool.
 
 ```python
 from quantfit import ProbeCorpus, verify_safety
