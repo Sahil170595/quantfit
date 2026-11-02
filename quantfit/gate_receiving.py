@@ -14,6 +14,7 @@ def validate_gate_context(
     calibration: BoundCalibration | None,
     *,
     report_sha256: str | None = None,
+    _corpus_scope: bool = False,
 ) -> tuple[dict[str, Any], dict[str, Any] | None, bool]:
     from quantfit import gate
     from quantfit.bundle import _require
@@ -160,6 +161,10 @@ def validate_gate_context(
             if eps.get("mode") == gate.EPS_MODE_FLOOR
             else gate._eps(eps.get("upper"), eps.get("source"))
         )
+        if _corpus_scope:
+            from quantfit.corpus_gate import scoped_epsilon
+
+            canonical_eps = scoped_epsilon(canonical_eps)
         _same_numbers(eps, canonical_eps, "gate epsilon")
         eps = canonical_eps
     calculation_eps = dict(eps)

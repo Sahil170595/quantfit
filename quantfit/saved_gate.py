@@ -46,6 +46,7 @@ def evaluate_report(
     report_path_out: str | None = None,
     out_path: str | None = None,
     axis_thresholds: Mapping[str, float] | None = None,
+    probe_corpus=None,
 ) -> dict:
     """Re-evaluate a saved aggregate under native gate policy, without new inference.
 
@@ -53,6 +54,22 @@ def evaluate_report(
     precedes observed-count evaluation; pre_run labels that policy phase only.
     Recorded scope is checkable, not fresh authentication of the host or labels.
     """
+    if probe_corpus is not None:
+        from quantfit.corpus_gate import evaluate_corpus_report
+
+        return evaluate_corpus_report(
+            source_path,
+            threshold=threshold,
+            tier=tier,
+            eps_upper=eps_upper,
+            eps_source=eps_source,
+            calibration_report=calibration_report,
+            report_path_out=report_path_out,
+            out_path=out_path,
+            axis_thresholds=axis_thresholds,
+            probe_corpus=probe_corpus,
+        )
+
     import hashlib
 
     from quantfit.bundle import _json, _read, _report

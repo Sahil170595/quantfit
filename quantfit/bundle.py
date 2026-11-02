@@ -269,6 +269,10 @@ def _report(raw: bytes):
 
 
 def _validate_gate(value: dict, report: DriftReport | None, calibration, *, report_sha256: str | None = None) -> dict:
+    if type(value.get("schema_version")) is int and value["schema_version"] == 3:
+        from quantfit.corpus_gate_receiving import validate_corpus_gate
+
+        return validate_corpus_gate(value, report, calibration, report_sha256=report_sha256)
     if type(value.get("schema_version")) is int and value["schema_version"] == 2:
         from quantfit.axis_gate_receiving import validate_axis_gate
 

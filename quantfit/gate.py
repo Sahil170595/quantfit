@@ -228,6 +228,7 @@ from quantfit.safety.verify import (
     DEFAULT_MAX_NEW_TOKENS,
     PROBE_DATASET_ID,
     PROBE_DATASET_REVISION,
+    ProbeCorpus,
 )
 from quantfit.screen import SPEC_CAPS
 
@@ -1061,6 +1062,7 @@ def evaluate_report(
     report_path_out: str | None = None,
     out_path: str | None = None,
     axis_thresholds: Mapping[str, float] | None = None,
+    probe_corpus: ProbeCorpus | None = None,
 ) -> dict:
     """Offline policy replay; see quantfit.saved_gate.evaluate_report for input/output contract."""
     from quantfit.saved_gate import evaluate_report as evaluate
@@ -1075,6 +1077,7 @@ def evaluate_report(
         report_path_out=report_path_out,
         out_path=out_path,
         axis_thresholds=axis_thresholds,
+        probe_corpus=probe_corpus,
     )
 
 
@@ -1093,6 +1096,7 @@ def run_gate(
     calibration_report: str | None = None,
     *,
     axis_thresholds: Mapping[str, float] | None = None,
+    probe_corpus: ProbeCorpus | None = None,
 ) -> dict:
     """Gate a quant against a declared threshold, refusing thresholds it cannot resolve.
 
@@ -1130,6 +1134,25 @@ def run_gate(
     Bound mode validates its private aggregate first, then publishes that validated
     schema-v2 report to the requested destination.
     """
+    if probe_corpus is not None:
+        from quantfit.corpus_gate import run_corpus_gate
+
+        return run_corpus_gate(
+            baseline,
+            quant,
+            threshold=threshold,
+            tier=tier,
+            eps_upper=eps_upper,
+            eps_source=eps_source,
+            token=token,
+            max_new_tokens=max_new_tokens,
+            report_path=report_path,
+            out_path=out_path,
+            baseline_cache_dir=baseline_cache_dir,
+            calibration_report=calibration_report,
+            axis_thresholds=axis_thresholds,
+            probe_corpus=probe_corpus,
+        )
     # The explicit policy is a separate closed artifact; no new fields enter v1.
     if axis_thresholds is not None:
         from quantfit.axis_gate_live import run_axis_gate
@@ -1223,18 +1246,22 @@ def run_gate(
     return decide(**_observed_policy(drift.to_dict(), threshold_value, eps, declared_as))
 
 
-def _observed_policy(drift_dict: dict, threshold_value: float, eps: dict, declared_as: str) -> dict:
+def _observed_policy(
+    drift_dict: dict, threshold_value: float, eps: dict, declared_as: str, *, _population: dict | None = None
+) -> dict:
     """The existing post-observation policy, shared by live and saved-report gates."""
     from quantfit.gate_axis import evaluate_axis
 
+    unsafe = SHIPPED_EXPECTED_UNSAFE_N if _population is None else _population["expected_unsafe_n"]
+    safe = SHIPPED_EXPECTED_SAFE_N if _population is None else _population["expected_safe_n"]
     n = drift_dict["refusal_robustness"]["at_risk"]
     flips = drift_dict["refusal_robustness"]["harmful_compliance_regressions"]
-    outcome = evaluate_axis(n, flips, threshold_value, eps, SHIPPED_EXPECTED_UNSAFE_N, stage=STAGE_POST_RUN)
+    outcome = evaluate_axis(n, flips, threshold_value, eps, unsafe, stage=STAGE_POST_RUN)
     realized = outcome["block"]
     over_refusal = {
         **_block(eps, drift_dict["over_refusal"]["at_risk"]),
         "flips": drift_dict["over_refusal"]["overrefusal_regressions"],
-        "best_case_n_at_risk": SHIPPED_EXPECTED_SAFE_N,
+        "best_case_n_at_risk": safe,
         "gated": False,
         "note": NOTES[0],
     }

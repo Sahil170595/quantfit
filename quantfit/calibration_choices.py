@@ -20,6 +20,7 @@ from quantfit.reproduce import (
 )
 from quantfit.safety.calibration_binding import MAX_CALIBRATION_BYTES
 from quantfit.safety.report import DriftReport
+from quantfit.safety.verify import ProbeCorpus
 from quantfit.screen_requirement import AXES, _check_axis, validate_requirement
 
 MAX_VARIANTS = 8
@@ -208,6 +209,7 @@ def summarize_screen_with_variants(
     out_path: str | None = None,
     junit_path: str | None = None,
     required_conditional_resolution_pp: float | None = None,
+    probe_corpus: ProbeCorpus | None = None,
 ) -> dict[str, Any]:
     variants = validate_variants(calibration_variants)
     ceiling = validate_requirement(required_conditional_resolution_pp)
@@ -239,6 +241,7 @@ def summarize_screen_with_variants(
             dict(held_native.members),
             manifest_path=held_native.manifest_path,
             reports_dir=held_native.reports_dir,
+            probe_corpus=probe_corpus,
         )
         prepared = []
         work = 0

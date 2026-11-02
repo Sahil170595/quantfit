@@ -8,6 +8,16 @@ capture-backed retained review, finite-grid budgets, calibration-choice sensitiv
 and source-bound flip adjudication.
 Software versions do not establish roadmap or scientific GO.
 
+The current **unreleased 0.53.0 source candidate** additionally accepts the
+same all-or-none `--probe-dataset ID --probe-revision FULL40 --probe-split SPLIT`
+on live/saved `gate`, `screen`/`--resume` and offline `screen-summary`.
+[The complete API/CLI/profile contract](pinned-corpus-gates.md) describes flat gate3
+with native decision discriminator1/2 and closed source census, live summary2,
+saved summary2, one held population and strict offline receiving. Default `None`
+paths retain their prior shapes. Thresholds remain native resolution targets;
+unknown/missing rows, control conditionality and human-verification limits stay.
+Published installation commands below remain 0.51.0, not an assumed candidate tag.
+
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,
 deadline/cleanup and 0/3/2 semantics are in [GGUF verification](gguf-verification.md).

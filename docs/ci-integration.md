@@ -3,11 +3,12 @@
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
 The published action/instrument examples below pin **quantfit 0.51.0**.
-This source tree is the **unreleased 0.52.0 candidate**; its reference action
-default is `>=0.52.0,<0.53` for that eventual release. Candidate acceptance uses
-`quantfit-path`, not an assumed public 0.52.0 install. Pin both exactly when
+This source tree is the **unreleased 0.53.0 candidate**; its reference action
+default is `>=0.53.0,<0.54` for that eventual release. Candidate acceptance uses
+`quantfit-path`, not an assumed public 0.53.0 install. Pin both exactly when
 reproducibility requires the same action and instrument.
 
+[Pinned-corpus gates/screens](pinned-corpus-gates.md) and
 [Selected-axis effect gates](axis-effect-gates.md) are candidate direct CLI/API
 options; the composite action continues to forward legacy threshold/tier only.
 Candidate acceptance uses the exact source or wheel through `quantfit-path`;

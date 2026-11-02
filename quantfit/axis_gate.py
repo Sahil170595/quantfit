@@ -105,9 +105,12 @@ def canonical_counts(drift: dict[str, Any]) -> None:
         )
 
 
-def preflight(policy: Mapping[str, float], eps: dict[str, Any]) -> dict[str, dict[str, Any]]:
+def preflight(
+    policy: Mapping[str, float], eps: dict[str, Any], *, _population: dict[str, Any] | None = None
+) -> dict[str, dict[str, Any]]:
+    sizes = BEST_CASE if _population is None else {name: _population[AXIS_FIELDS[name][1]] for name in AXES}
     return {
-        name: evaluate_axis(BEST_CASE[name], None, effect, eps, BEST_CASE[name], stage=gate.STAGE_PRE_RUN)
+        name: evaluate_axis(sizes[name], None, effect, eps, sizes[name], stage=gate.STAGE_PRE_RUN)
         for name, effect in policy.items()
     }
 
@@ -124,7 +127,7 @@ def _axis_result(
         "threshold": effect,
         "n_at_risk": drift[field]["at_risk"] if drift is not None else None,
         "flagged_flips": drift[field][flipped] if drift is not None else None,
-        "best_case_n_at_risk": BEST_CASE[name],
+        "best_case_n_at_risk": resolution["best_case_n_at_risk"],
         "mde_block": block,
         "resolution": resolution,
         "detection_threshold_flips": block["detection_threshold_flips"],
@@ -145,15 +148,17 @@ def decision(
     report_path: str | None,
     drift: dict[str, Any] | None,
     report_sha256: str | None = None,
+    _population: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     import quantfit
 
-    best = preflight(policy, eps)
+    best = preflight(policy, eps, _population=_population)
+    sizes = BEST_CASE if _population is None else {name: _population[AXIS_FIELDS[name][1]] for name in AXES}
     refused = any(not row["resolution"]["not_refused"] for row in best.values())
     if refused:
         drift = None
     gate._require(drift is not None or refused, "unobserved selected-axis decision requires a native preflight refusal")
-    if drift is not None:
+    if drift is not None and _population is None:
         canonical_counts(drift)
     stage = gate.STAGE_PRE_RUN if drift is None else gate.STAGE_POST_RUN
     results = {}
@@ -162,9 +167,7 @@ def decision(
         outcome = (
             best[name]
             if drift is None
-            else evaluate_axis(
-                drift[field]["at_risk"], drift[field][flipped], effect, eps, BEST_CASE[name], stage=stage
-            )
+            else evaluate_axis(drift[field]["at_risk"], drift[field][flipped], effect, eps, sizes[name], stage=stage)
         )
         results[name] = _axis_result(name, effect, eps, outcome, drift)
     codes = {row["exit_code"] for row in results.values()}
@@ -243,6 +246,12 @@ def decision(
         "message": message,
         "headline": message,
     }
+    if _population is not None:
+        value["corpus_composition"] = {
+            "pin": _population["id"] + "@" + _population["revision"],
+            "expected_unsafe_n": _population["expected_unsafe_n"],
+            "expected_safe_n": _population["expected_safe_n"],
+        }
     if report_sha256 is not None:
         value["source_evidence"] = {
             "kind": "saved_report",

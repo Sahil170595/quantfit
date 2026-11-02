@@ -123,6 +123,20 @@ def _positive_int(text: str) -> int:
     return value
 
 
+def _probe_source_options(args):
+    source_values = tuple(getattr(args, name, None) for name in ("probe_dataset", "probe_revision", "probe_split"))
+    if not any(value is not None for value in source_values):
+        return {}
+    if any(value is None for value in source_values) or getattr(args, "demo", False):
+        raise RuntimeError("invalid_probe_corpus_options")
+    from quantfit.safety.verify import ProbeCorpus, _canonical_source
+
+    source = ProbeCorpus(*source_values)
+    if getattr(args, "_execution_recipe", None) is not None and not _canonical_source(source):
+        raise RuntimeError("execution_recipe_mismatch")
+    return {"probe_corpus": source}
+
+
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="quantfit",
@@ -876,6 +890,19 @@ def _build_parser() -> argparse.ArgumentParser:
     pq.add_argument("--no-check", action="store_true", help="skip the GPU pre-flight")
 
     _add_json_flag(p)
+    for source_parser in (pg, ps, psaved):
+        source_parser.add_argument(
+            "--probe-dataset",
+            default=None,
+            metavar="ID",
+            help="explicit native whole pinned corpus; all three source flags required",
+        )
+        source_parser.add_argument(
+            "--probe-revision", default=None, metavar="FULL40", help="exact lowercase 40-hex corpus revision"
+        )
+        source_parser.add_argument(
+            "--probe-split", default=None, metavar="SPLIT", help="one native literal whole split"
+        )
     return p
 
 
@@ -974,7 +1001,7 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "screen-summary":
         from quantfit.saved_screen import summarize_screen
 
-        options = {"out_path": args.out, "junit_path": args.junit}
+        options = {"out_path": args.out, "junit_path": args.junit, **_probe_source_options(args)}
         if args.calibrations_dir is not None:
             options["calibrations_dir"] = args.calibrations_dir
         if args.calibration_variant is not None:
@@ -1204,18 +1231,9 @@ def _dispatch(args: argparse.Namespace) -> int:
             lambda: print(("PASS: " if ok else "FAIL: ") + msg),
         )
 
-    source_options = {}
-    if args.cmd in {"verify-safety", "inspect-run"}:
-        source_values = (args.probe_dataset, args.probe_revision, args.probe_split)
-        if any(value is not None for value in source_values):
-            if any(value is None for value in source_values) or getattr(args, "demo", False):
-                raise RuntimeError("invalid_probe_corpus_options")
-            from quantfit.safety.verify import ProbeCorpus, _canonical_source
-
-            source = ProbeCorpus(*source_values)
-            if getattr(args, "_execution_recipe", None) is not None and not _canonical_source(source):
-                raise RuntimeError("execution_recipe_mismatch")
-            source_options["probe_corpus"] = source
+    source_options = (
+        _probe_source_options(args) if args.cmd in {"verify-safety", "inspect-run", "gate", "screen"} else {}
+    )
 
     if args.cmd == "inspect-run":
         import contextlib
@@ -1427,10 +1445,11 @@ def _dispatch(args: argparse.Namespace) -> int:
                 capture_dir=args.capture,
                 resume=args.resume,
                 attempts=args.attempts,
-                **({"junit_path": args.junit} if args.resume and args.junit else {}),
+                **({"junit_path": args.junit} if (args.resume or source_options) and args.junit else {}),
+                **source_options,
             )
 
-        if args.junit and not args.resume:
+        if args.junit and not args.resume and not source_options:
             from pathlib import Path
 
             from quantfit.junit import screen_to_junit
@@ -1514,7 +1533,14 @@ def _dispatch(args: argparse.Namespace) -> int:
             "eps_source": args.eps_source,
             "calibration_report": args.calibration_report,
             "out_path": args.out,
+            **source_options,
         }
+        if source_options:
+            from quantfit.corpus_gate import _admit_publication_paths, _local_model_inputs
+
+            model_inputs = _local_model_inputs((args.baseline, args.quant)) if args.from_report is None else ()
+            opted_inputs = [args.calibration_report, args.from_report, *model_inputs]
+            _admit_publication_paths(opted_inputs, [args.report, args.out, args.junit])
         if args.axis_threshold is not None:
             from quantfit.axis_gate import cli_thresholds
 
@@ -1546,6 +1572,8 @@ def _dispatch(args: argparse.Namespace) -> int:
 
             from quantfit.junit import gate_to_junit
 
+            if source_options:
+                _admit_publication_paths(opted_inputs, [args.report, args.out, args.junit])
             Path(args.junit).write_text(
                 gate_to_junit(decision, baseline=decision["arms"]["baseline"], quant=decision["arms"]["quant"]),
                 encoding="utf-8",

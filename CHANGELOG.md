@@ -13,6 +13,19 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.53.0 — Unreleased (2026-11-02 candidate)
+
+- Complete opted native pinned-corpus forwarding through live/saved scalar and
+  selected-axis gates, whole screen/resume and saved summaries. One admitted
+  population/census is reused across targets/retries; defaults stay unchanged.
+- Add flat gate3 with native decision discriminator and strict source context;
+  native bundle/JUnit receiving and screen2/saved-summary2 preserve all outcomes,
+  missing rows, recorded-source identity and noncanonical sensitivity caveats.
+- Exercise actual API/OS CLI/native writers, calibration timing/fingerprints,
+  cache/capture identity and refusal boundaries with controlled fixtures. The
+  dated counts-only record does not establish real Hub/model/human/scientific
+  qualification; installed/hosted acceptance is separate.
+
 ## 0.52.0 — Unreleased (2026-11-02 candidate)
 
 - Add opt-in `axis_thresholds` API / repeatable `--axis-threshold AXIS=PP` for either or both native axes, including enforceable over-refusal. Targets govern native detectable-effect resolution, not observed-rate ceilings; one paired run evaluates all selected axes before 3 > 4 > 5 > 0 reduction. Native MDE, conditional directional-max epsilon and floor/calibration limits remain unchanged.

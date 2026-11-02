@@ -177,6 +177,22 @@ def gate_to_junit(decision: dict, *, baseline: str, quant: str) -> str:
       fails the build — changing that would contradict the gate's own contract — but is
       `skipped` with the regression named, so a green run does not silently swallow it.
     """
+    if type(decision.get("schema_version")) is int and decision["schema_version"] == 3:
+        import json
+
+        from quantfit.probe_population import admit_context
+
+        kind = decision.get("decision_schema_version")
+        if type(kind) is not int or kind not in (1, 2):
+            raise ValueError("unknown native gate decision schema")
+        context = admit_context(decision.get("probe_corpus"))
+        native = {**decision, "schema_version": kind}
+        suite = ET.fromstring(gate_to_junit(native, baseline=baseline, quant=quant))
+        output = suite.find("system-out")
+        if output is None:
+            output = ET.SubElement(suite, "system-out")
+        output.text = (output.text or "") + "\nprobe_corpus=" + json.dumps(context, sort_keys=True)
+        return ET.tostring(suite, encoding="unicode")
     if decision.get("schema_version") == 2:
         from quantfit.axis_gate_junit import axis_gate_to_junit
 

@@ -281,7 +281,10 @@ def test_public_api_keyword_input_and_explicit_signature(tmp_path):
         "report_path_out",
         "out_path",
         "axis_thresholds",
+        "probe_corpus",
     ]
+    source_parameter = inspect.signature(evaluate_report).parameters["probe_corpus"]
+    assert source_parameter.kind is inspect.Parameter.KEYWORD_ONLY and source_parameter.default is None
     parameter = inspect.signature(evaluate_report).parameters["axis_thresholds"]
     assert parameter.kind is inspect.Parameter.KEYWORD_ONLY and parameter.default is None
     with pytest.raises(TypeError):

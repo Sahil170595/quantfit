@@ -72,7 +72,7 @@ def prepare_calibration(
     return bound, calibration_epsilon(bound)
 
 
-def calibration_epsilon(bound, *, saved_report=False):
+def calibration_epsilon(bound: BoundCalibration, *, saved_report: bool = False) -> dict[str, Any]:
     """Render canonical bounds; a recorded report match is not fresh observation."""
     from quantfit.safety.mde import EPS_DEFINITION
 

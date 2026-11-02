@@ -296,7 +296,7 @@ jobs:
       - run: |
           python -m pip install -e . --no-deps --no-build-isolation
           ruff check quantfit tests tools
-          ruff format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture
+          ruff format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture tools/ci_corpus_fixture
           mypy --strict quantfit/spec.py quantfit/engines/base.py
           mypy --strict --follow-imports=silent quantfit/reproduce_junit.py
           mypy --strict --follow-imports=silent quantfit/reference_assessment.py tools/ci_probe_corpus.py
@@ -319,6 +319,7 @@ jobs:
           mypy --strict --follow-imports=silent quantfit/adjudication_record.py quantfit/safety/adjudication.py quantfit/screen_adjudication.py tools/ci_adjudication.py tools/ci_adjudication_verification.py tools/ci_screen_adjudication.py quantfit/safety/adjudication_review.py tools/ci_adjudication_review.py tools/ci_adjudication_review_browser.py
           mypy --strict --follow-imports=silent quantfit/screen_requirement.py tools/ci_screen_requirement.py
           mypy --strict --follow-imports=silent quantfit/axis_gate.py quantfit/gate_axis.py quantfit/axis_gate_live.py quantfit/axis_gate_receiving.py quantfit/axis_gate_junit.py quantfit/gate_receiving.py tools/ci_axis_gate.py tools/ci_axis_gate_record.py
+          mypy --strict --follow-imports=silent quantfit/probe_population.py quantfit/corpus_gate.py quantfit/corpus_gate_receiving.py tools/ci_corpus_gate.py tools/ci_corpus_gate_record.py
           quantfit audit
       - name: Verify and run actionlint
         run: |
