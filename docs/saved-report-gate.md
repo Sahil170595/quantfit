@@ -3,6 +3,13 @@
 Available since quantfit 0.22.0, this interface evaluates a saved schema-v2 aggregate
 without models, judge execution, downloads or completion caches.
 
+The unreleased 0.52.0 candidate adds opt-in `axis_thresholds` / repeated
+`--axis-threshold AXIS=PP` for one or both native axes. Its [closed gate-v2
+contract](axis-effect-gates.md) requires the canonical complete pinned corpus and
+strictly revalidates per-axis/overall outcomes in the existing bundle receiver.
+Only selected axes govern its exit; the threshold/tier behavior below remains
+legacy gate-v1 when `axis_thresholds` is absent or `None`.
+
 ```bash
 quantfit gate --from-report drift.json --threshold 30 --out gate.json --report copied-drift.json --junit gate.xml
 quantfit gate --from-report drift.json --tier smoke --calibration-report calibration.json --out conditional-gate.json
@@ -33,12 +40,12 @@ Native policy order remains unchanged. Its pinned-corpus best-case check can
 return 5 before count evaluation: `resolution.stage=pre_run`, null decision drift,
 and `source_evidence.evaluation_phase=policy_preflight`. This is a policy phase
 applied after consuming an already-produced report, not predeployment chronology.
-Otherwise actual dangerous at-risk counts determine 0/3/4/5 using the same native
+In the legacy threshold/tier mode, actual dangerous at-risk counts determine 0/3/4/5 using the same native
 post-observation rules. Over-refusal never changes the gate code and is explicitly
 reconciled with the report's own verdict. Flags remain unconfirmed. Dangerous 0/n
 means the detector did not fire; no absence, sensitivity, scientific GO or safety claim.
 
-Replay alone adds the closed schema-1 `source_evidence` block: `kind=saved_report`,
+Legacy replay alone adds the closed schema-1 `source_evidence` block: `kind=saved_report`,
 exact `report_sha256`, policy phase, and `inference_performed=false`. Legacy gate
 keys/statuses/messages are unchanged. Four-role schema-1 bundles support replay
 gate/report/optional calibration and resolution without a new manifest format.

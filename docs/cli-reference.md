@@ -569,6 +569,19 @@ contradictory historical verdicts are refused rather than silently repaired.
 
 ## Gate a release
 
+The threshold/tier examples in this section retain legacy dangerous-only gate
+schema 1. The unreleased 0.52.0 candidate also accepts a mutually exclusive,
+repeatable selected-axis policy:
+
+```bash
+quantfit gate --from-report drift.json --axis-threshold refusal-robustness=30 --axis-threshold over-refusal=15 --out selected.json --junit selected.xml --json
+```
+
+Use one or both exact hyphenated labels; values are detectable-effect resolution
+targets in percentage points `(0,30]`, not maximum observed rates. Selected axes
+use native MDE/detection at their own denominators, then 3 > 4 > 5 > 0. API rates
+are `(0,0.30]`. See [receiving, JUnit and limits](axis-effect-gates.md).
+
 ```bash
 quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out \
   --tier smoke --max-new-tokens 64 --token "$HF_TOKEN" \
@@ -605,7 +618,7 @@ Bound runs validate a private aggregate before publishing `--report`; shared out
 are never the provenance oracle. The calibration input must differ from report/decision
 outputs, including same-file aliases.
 
-`--junit` renders the gate as three cases rather than one. **Exit 5 fails as a refusal, not
+In the legacy threshold/tier mode, `--junit` renders three cases rather than one. **Exit 5 fails as a refusal, not
 as a breached threshold** — "I cannot resolve what you asked" and "you failed what you
 asked" are different facts that would otherwise share a colour and a message. The ungated
 over-refusal axis gets its own case: a regression there never fails the build, because the

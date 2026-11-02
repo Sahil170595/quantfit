@@ -177,6 +177,10 @@ def gate_to_junit(decision: dict, *, baseline: str, quant: str) -> str:
       fails the build — changing that would contradict the gate's own contract — but is
       `skipped` with the regression named, so a green run does not silently swallow it.
     """
+    if decision.get("schema_version") == 2:
+        from quantfit.axis_gate_junit import axis_gate_to_junit
+
+        return axis_gate_to_junit(decision, baseline=baseline, quant=quant)
     classname = f"{baseline}->{quant}"
     exit_code = decision.get("exit_code")
     suite = ET.Element("testsuite")

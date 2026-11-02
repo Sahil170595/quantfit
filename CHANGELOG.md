@@ -13,6 +13,12 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.52.0 — Unreleased (2026-11-02 candidate)
+
+- Add opt-in `axis_thresholds` API / repeatable `--axis-threshold AXIS=PP` for either or both native axes, including enforceable over-refusal. Targets govern native detectable-effect resolution, not observed-rate ceilings; one paired run evaluates all selected axes before 3 > 4 > 5 > 0 reduction. Native MDE, conditional directional-max epsilon and floor/calibration limits remain unchanged.
+- Ship closed gate-v2 strict receiving in the existing aggregate bundle format, per-axis resolution/detection plus overall JUnit, complete pre-execution declaration admission, and canonical 40/12/28 saved-policy scope. Numeric zero is refused as Boolean epsilon metadata. Legacy `None` keeps valid gate-v1/default JSON/JUnit semantics; only normal software metadata changes.
+- Add source and all original/rebuilt installed-profile consumers using synthetic native counts, the existing controlled live CLI fixture, actual saved CLI and strict receiving; no model execution, human truth, sensitivity, joint-error guarantee or scientific GO. Counts-only reproducible evidence and explicit adverse scopes: `validation/2026-11-02-axis-effect-gates/`. Public install remains 0.51.0.
+
 ## 0.51.0 — 2026-11-01
 
 Release context: 0.51.0 extends released 0.50.0. Candidate-stage installation/status

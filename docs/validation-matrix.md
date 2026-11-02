@@ -430,6 +430,13 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+### Selected-axis effect gates (unreleased 0.52.0 source candidate, 2026-11-02)
+
+| Flag surface | Command | Bounded source behavior | Evidence and limits |
+|---|---|---|---|
+| `--axis-threshold` | gate | Repeat 1..2 exact native axes with PP resolution targets; same native MDE/detection, complete selected 3 > 4 > 5 > 0, strict opted gate-v2 and per-axis/overall JUnit. Legacy threshold/tier remains. | `tests/test_axis_gate.py`; `tests/test_axis_gate_receiving.py`; `tests/test_axis_gate_cli.py`; `tests/test_ci_axis_gate.py`; `validation/2026-11-02-axis-effect-gates/`; synthetic native counts/API/actual controlled OSCLI, not model execution, human truth, sensitivity, joint error guarantee or scientific GO. Installed/hosted qualification is separate. |
+
+
 ### Whole-target adjudication screen (0.48.0; source controls 2026-10-31)
 
 The regenerable native editable-source record in

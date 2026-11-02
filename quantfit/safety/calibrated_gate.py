@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
-from quantfit.safety.calibration_binding import CalibrationBindingError, load_bound_calibration
+from quantfit.safety.calibration_binding import BoundCalibration, CalibrationBindingError, load_bound_calibration
+
+if TYPE_CHECKING:
+    from quantfit.safety.verify import SafetyDrift
 
 EPS_MODE_BOUND = "bound_calibration_report"
 ASSUMPTIONS = {
@@ -43,7 +47,9 @@ def validate_output_paths(path, report_path, out_path):
             raise CalibrationBindingError("calibration report input must differ from gate/report output paths")
 
 
-def prepare_calibration(path, baseline, quant, max_new_tokens, n_probes):
+def prepare_calibration(
+    path: str | Path, baseline: str, quant: str, max_new_tokens: int, n_probes: int
+) -> tuple[BoundCalibration, dict[str, Any]]:
     from quantfit.safety import verify as sv
 
     bound = load_bound_calibration(path)
@@ -89,7 +95,17 @@ def calibration_epsilon(bound, *, saved_report=False):
     }
 
 
-def verify_bound_run(bound, eps, baseline, quant, *, token, max_new_tokens, report_path, baseline_cache_dir):
+def verify_bound_run(
+    bound: BoundCalibration,
+    eps: dict[str, Any],
+    baseline: str,
+    quant: str,
+    *,
+    token: str | None,
+    max_new_tokens: int,
+    report_path: str | None,
+    baseline_cache_dir: str | None,
+) -> SafetyDrift:
     from quantfit.safety.report import DriftReport
     from quantfit.safety.verify import verify_safety
 

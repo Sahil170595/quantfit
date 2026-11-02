@@ -791,6 +791,10 @@ def main() -> None:
         config = sandbox / "pytest.ini"
         config.write_text(f"[pytest]\npythonpath = {shlex.quote((checkout / 'tests').as_posix())}\n", encoding="utf-8")
         tests = [
+            "test_axis_gate.py",
+            "test_axis_gate_receiving.py",
+            "test_axis_gate_cli.py",
+            "test_ci_axis_gate.py",
             "test_calibration_binding.py",
             "test_gate.py",
             "test_resolution.py",

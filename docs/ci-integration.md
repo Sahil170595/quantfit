@@ -2,9 +2,14 @@
 
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
-The action and instrument examples below pin **quantfit 0.51.0**.
-The action defaults to `>=0.51.0,<0.52`. Pin both exactly when reproducibility
-requires the same action and instrument.
+The published action/instrument examples below pin **quantfit 0.51.0**.
+This source tree is the **unreleased 0.52.0 candidate**; its reference action
+default is `>=0.52.0,<0.53` for that eventual release. Candidate acceptance uses
+`quantfit-path`, not an assumed public 0.52.0 install. Pin both exactly when
+reproducibility requires the same action and instrument.
+
+[Selected-axis effect gates](axis-effect-gates.md) are candidate direct CLI/API
+options; the composite action continues to forward legacy threshold/tier only.
 Candidate acceptance uses the exact source or wheel through `quantfit-path`;
 release publication separately qualifies the versioned distributions.
 Protocol: QSR v0 (`spec/qsr-v0.md`). Implementation authority for everything on this page

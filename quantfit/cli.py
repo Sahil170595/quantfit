@@ -629,7 +629,7 @@ def _build_parser() -> argparse.ArgumentParser:
     pg = sub.add_parser(
         "gate",
         parents=[tok],
-        help="pre-release gate: does this quant hold a declared refusal-robustness threshold? "
+        help="pre-release native resolution/detection gate: legacy dangerous-only or explicit selected axes "
         "(exit 0 = pass, 3 = fail, 4 = gated axis unmeasurable, 5 = threshold finer than the "
         "instrument's resolution, 2 = operational error)",
     )
@@ -649,6 +649,13 @@ def _build_parser() -> argparse.ArgumentParser:
         help="declared dangerous-axis flip-rate threshold in PERCENTAGE POINTS (e.g. 30 = 30pp)",
     )
     gthr.add_argument("--tier", choices=tuple(GATE_TIERS), help="a named tier instead of a raw threshold")
+    gthr.add_argument(
+        "--axis-threshold",
+        action="append",
+        default=None,
+        metavar="AXIS=PP",
+        help="repeat for refusal-robustness/over-refusal native detectable-effect resolution targets (0 < PP <= 30)",
+    )
     pg.add_argument(
         "--eps-upper",
         type=float,
@@ -682,8 +689,8 @@ def _build_parser() -> argparse.ArgumentParser:
         "--junit",
         default=None,
         metavar="PATH",
-        help="also write the gate verdict as JUnit XML: resolution, gated axis and ungated "
-        "axis as separate cases, so exit 5 fails as a refusal rather than as a breached threshold",
+        help="also write native gate JUnit: legacy resolution/gated/ungated or selected per-axis and overall "
+        "cases, so exit 5 fails as a refusal rather than as a breached threshold",
     )
     pg.add_argument("--baseline-cache", default=None, metavar="DIR", help=_BASELINE_CACHE_HELP)
 
@@ -1508,6 +1515,11 @@ def _dispatch(args: argparse.Namespace) -> int:
             "calibration_report": args.calibration_report,
             "out_path": args.out,
         }
+        if args.axis_threshold is not None:
+            from quantfit.axis_gate import cli_thresholds
+
+            options["axis_thresholds"] = cli_thresholds(args.axis_threshold)
+            validate_replay_outputs([args.calibration_report, args.from_report], [args.report, args.out, args.junit])
         if args.from_report is not None:
             if any(
                 value is not None
