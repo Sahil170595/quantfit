@@ -613,7 +613,8 @@ def _build_parser() -> argparse.ArgumentParser:
         "prepare", help="complete blank template + key -> all parts and private manifest"
     )
     chunk_collect = chunk_sub.add_parser("collect", help="all explicit filled parts -> complete new native sheet")
-    for chunk_parser in (chunk_prepare, chunk_collect):
+    chunk_packets = chunk_sub.add_parser("packets", help="original blank/key/manifest -> all private recipient pages")
+    for chunk_parser in (chunk_prepare, chunk_collect, chunk_packets):
         chunk_parser.add_argument(
             "--sheet", required=True, metavar="PATH", help="unchanged original complete BLANK template"
         )
@@ -634,6 +635,12 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     chunk_collect.add_argument("--out", required=True, metavar="PATH", help="new complete private native sheet")
     chunk_collect.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate counts/hash receipt")
+    chunk_packets.add_argument(
+        "--manifest", required=True, metavar="PATH", help="original private chunk manifest; never share"
+    )
+    chunk_packets.add_argument(
+        "--out-dir", required=True, metavar="DIR", help="existing empty private recipient-page directory"
+    )
     pcr = csub.add_parser("reconcile", help="two filled sheets + one key -> aggregate label-disagreement counts")
     pcr.add_argument("--sheet-a", required=True, metavar="PATH", help="first private filled labeling sheet")
     pcr.add_argument("--sheet-b", required=True, metavar="PATH", help="second private filled labeling sheet")

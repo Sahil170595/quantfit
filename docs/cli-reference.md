@@ -8,7 +8,7 @@ capture-backed retained review, finite-grid budgets, calibration-choice sensitiv
 and source-bound flip adjudication.
 Software versions do not establish roadmap or scientific GO.
 
-The current **unreleased 0.53.0 source candidate** additionally accepts the
+The accepted **unreleased 0.53.0 source work** additionally accepts the
 same all-or-none `--probe-dataset ID --probe-revision FULL40 --probe-split SPLIT`
 on live/saved `gate`, `screen`/`--resume` and offline `screen-summary`.
 [The complete API/CLI/profile contract](pinned-corpus-gates.md) describes flat gate3
@@ -17,6 +17,21 @@ saved summary2, one held population and strict offline receiving. Default `None`
 paths retain their prior shapes. Thresholds remain native resolution targets;
 unknown/missing rows, control conditionality and human-verification limits stay.
 Published installation commands below remain 0.51.0, not an assumed candidate tag.
+
+The current **unreleased 0.54.0 source candidate** adds private full-population
+blinded recipient pages, distinct from the flagged-pair adjudication review page:
+
+```bash
+mkdir private-recipient-pages
+quantfit calibrate chunks packets --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --out-dir private-recipient-pages --json
+```
+
+All four paths are explicit and required; `--json` returns only counts/hashes.
+The existing empty output directory receives one `part-NNNN.annotation.html` per
+original native part. Keep the key/manifest/capture private and separate; do not
+send them with a page. [The complete SDK/CLI, byte-bound and trust contract](annotation-packets.md)
+explains native collection/ingestion, explicit labels and the unchanged narrow
+sharing permission. This is no automatic labeling, sharing or calibration.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,

@@ -21,10 +21,14 @@ def dispatch_chunks(args: argparse.Namespace, emit: Emit) -> int:
             annotator_role=args.annotator_role,
             annotator_name=args.annotator_name,
         )
-    else:
+    elif args.chunks_cmd == "collect":
         result = collect_annotation_chunks(
             args.sheet, args.key, args.manifest, tuple(args.part), out_path=args.out, receipt_path=args.receipt
         )
+    else:
+        from quantfit.safety.annotation_packets import prepare_annotation_packets
+
+        result = prepare_annotation_packets(args.sheet, args.key, args.manifest, out_dir=args.out_dir)
 
     def human() -> None:
         print(f"Annotation {args.chunks_cmd}: {result['n_rows']} rows across {result['n_parts']} parts.")

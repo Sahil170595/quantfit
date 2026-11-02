@@ -41,11 +41,13 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This branch targets the **unreleased 0.53.0 candidate**, adding complete
-[pinned-corpus gates, screens and offline replay](docs/pinned-corpus-gates.md)
-over one held native population. It includes the accepted but unreleased 0.52.0
-[selected-axis gates](docs/axis-effect-gates.md). The latest public release remains
-0.51.0; neither candidate is a public release. No new statistical engine,
+This branch targets the **unreleased 0.54.0 candidate**, adding private
+[full-population blinded annotation packets](docs/annotation-packets.md) from the
+original native blank/key/chunk manifest. Every part gets a fresh recipient page;
+unchanged native collection and separate calibration ingestion remain required.
+It also includes accepted but unreleased [0.53 pinned-corpus gates](docs/pinned-corpus-gates.md)
+and [0.52 selected-axis gates](docs/axis-effect-gates.md). The latest public release
+remains 0.51.0. No candidate availability, authenticated human judgment, new
 sensitivity evidence or scientific GO is implied.
 
 This README documents [quantfit 0.51.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.51.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.

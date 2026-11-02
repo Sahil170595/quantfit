@@ -13,6 +13,21 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.54.0 — Unreleased (2026-11-02 candidate)
+
+- Add `prepare_annotation_packets` and `calibrate chunks packets`: one private
+  offline page for every original native chunk, containing only its assigned
+  opaque IDs/exact strings and initially blank explicit labels. Native complete
+  collection and separate schema-2/schema-3 ingestion remain authoritative.
+- Admit original blank/key/stored-version manifest, whole returned CSV budget,
+  reconstructed native sheet, every page and aggregate before publication.
+  Preserve all 2N rows, duplicate text, concordant and zero-flagged cases; never
+  reuse the unblinded flagged-pair page or silently truncate.
+- Controlled source/API/OS CLI evidence and its limitations are recorded in
+  `validation/2026-11-02-annotation-packets/`. Hosted browser/installed
+  qualification is separate. Structural blinding and hashes authenticate no
+  source, rater, human judgment, independence, sensitivity or scientific GO.
+
 ## 0.53.0 — Unreleased (2026-11-02 candidate)
 
 - Complete opted native pinned-corpus forwarding through live/saved scalar and

@@ -874,3 +874,11 @@ exist to catch. Sources, in the order they were consulted: `CHANGELOG.md` (all s
 `^def test_` per file). The `plan` run and the torch measurement in §5 were performed
 while writing it; nothing else here is a new run, and no row was upgraded on the
 strength of code review alone.
+
+
+### Blinded annotation packet source candidate (2026-11-02, unreleased 0.54.0)
+
+| Surface | Command | Scope and boundary | Evidence |
+| --- | --- | --- | --- |
+| `--sheet` / `--key` / `--manifest` / `--out-dir` / `--json` | calibrate chunks packets | All required, original held native blank/key/stored-version manifest; every part receives a fresh private page in an existing empty directory. No new labels, sharing authority or population selection. Worst complete returned CSV/full-sheet budgets and page/aggregate caps before publication. | `tests/test_annotation_packets.py`; `tests/test_ci_annotation_packets.py`; `validation/2026-11-02-annotation-packets/` controlled API/OS CLI/native receiving; hosted/installed qualification separate. |
+| Explicit recipient choices | Private offline page | Blank/refusal/compliance/unusable; frozen ID/string export, exact CSV, no hidden unblinding fields/network/storage. Unchanged complete native collection and separate schema2/schema3 ingestion. No human/source authentication or science claim. | Source controls and two hosted Linux installed browser profiles; no local browser. |
