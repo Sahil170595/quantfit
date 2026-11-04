@@ -1,0 +1,728 @@
+{
+  "adverse": [
+    {
+      "case": "capture_hash",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "report_hash",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "selected",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "axis",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "baseline_hash",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "quantized_hash",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "typed_count",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "typed_flagged",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "late_capture",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "pending_hash",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "pending_scope",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "orphan_record",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "orphan_capture",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "record_directory",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "report_alias",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "record_alias",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "capture_alias",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "manifest_alias",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "same_sinks",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "work_limit",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "additional_byte_limit",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "output_limit",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "pending_n",
+      "exit_code": 2,
+      "interface": "api",
+      "normal_output_absent": true
+    },
+    {
+      "case": "capture_hash",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "report_hash",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "selected",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "axis",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "baseline_hash",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "quantized_hash",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "typed_count",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "typed_flagged",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "late_capture",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "pending_hash",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "pending_scope",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "orphan_record",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "orphan_capture",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "record_directory",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "report_alias",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "record_alias",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "capture_alias",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "manifest_alias",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "same_sinks",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "work_limit",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "additional_byte_limit",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "output_limit",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    },
+    {
+      "case": "pending_n",
+      "exit_code": 2,
+      "interface": "cli",
+      "normal_output_absent": true
+    }
+  ],
+  "adverse_cases": 46,
+  "cases": [
+    {
+      "case": 0,
+      "exit_code": 0,
+      "interface": "api",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "zero",
+      "native_exit_code": 0,
+      "operator_resolution": [
+        "resolved",
+        "resolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 1,
+      "exit_code": 3,
+      "interface": "api",
+      "junit_cases": 10,
+      "missing_reports": 0,
+      "mode": "mixed",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 3,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 2,
+      "exit_code": 3,
+      "interface": "api",
+      "junit_cases": 10,
+      "missing_reports": 0,
+      "mode": "all",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 3,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 3,
+      "exit_code": 3,
+      "interface": "api",
+      "junit_cases": 10,
+      "missing_reports": 0,
+      "mode": "unresolved",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 3,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 4,
+      "exit_code": 4,
+      "interface": "api",
+      "junit_cases": 10,
+      "missing_reports": 1,
+      "mode": "zero",
+      "native_exit_code": 4,
+      "operator_resolution": [
+        "resolved",
+        "resolved",
+        "resolved"
+      ],
+      "original_targets": 3,
+      "private_inputs_unchanged": true,
+      "source_complete": false
+    },
+    {
+      "case": 5,
+      "exit_code": 0,
+      "interface": "api",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "zero",
+      "native_exit_code": 0,
+      "operator_resolution": [
+        "resolved",
+        "resolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": false
+    },
+    {
+      "case": 6,
+      "exit_code": 4,
+      "interface": "api",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "zero",
+      "native_exit_code": 0,
+      "operator_resolution": [
+        "resolved",
+        "resolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": false
+    },
+    {
+      "case": 7,
+      "exit_code": 0,
+      "interface": "api",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "zero",
+      "native_exit_code": 0,
+      "operator_resolution": [
+        "not_required",
+        "not_required"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 8,
+      "exit_code": 3,
+      "interface": "api",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "long-selected",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 9,
+      "exit_code": 3,
+      "interface": "api",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "long-unselected",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 10,
+      "exit_code": 3,
+      "interface": "api",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "repeated",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 11,
+      "exit_code": 4,
+      "interface": "api",
+      "junit_cases": 7,
+      "missing_reports": 2,
+      "mode": "mixed",
+      "native_exit_code": 4,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": false
+    },
+    {
+      "case": 0,
+      "exit_code": 0,
+      "interface": "cli",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "zero",
+      "native_exit_code": 0,
+      "operator_resolution": [
+        "resolved",
+        "resolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 1,
+      "exit_code": 3,
+      "interface": "cli",
+      "junit_cases": 10,
+      "missing_reports": 0,
+      "mode": "mixed",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 3,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 2,
+      "exit_code": 3,
+      "interface": "cli",
+      "junit_cases": 10,
+      "missing_reports": 0,
+      "mode": "all",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 3,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 3,
+      "exit_code": 3,
+      "interface": "cli",
+      "junit_cases": 10,
+      "missing_reports": 0,
+      "mode": "unresolved",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 3,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 4,
+      "exit_code": 4,
+      "interface": "cli",
+      "junit_cases": 10,
+      "missing_reports": 1,
+      "mode": "zero",
+      "native_exit_code": 4,
+      "operator_resolution": [
+        "resolved",
+        "resolved",
+        "resolved"
+      ],
+      "original_targets": 3,
+      "private_inputs_unchanged": true,
+      "source_complete": false
+    },
+    {
+      "case": 5,
+      "exit_code": 0,
+      "interface": "cli",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "zero",
+      "native_exit_code": 0,
+      "operator_resolution": [
+        "resolved",
+        "resolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": false
+    },
+    {
+      "case": 6,
+      "exit_code": 4,
+      "interface": "cli",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "zero",
+      "native_exit_code": 0,
+      "operator_resolution": [
+        "resolved",
+        "resolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": false
+    },
+    {
+      "case": 7,
+      "exit_code": 0,
+      "interface": "cli",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "zero",
+      "native_exit_code": 0,
+      "operator_resolution": [
+        "not_required",
+        "not_required"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 8,
+      "exit_code": 3,
+      "interface": "cli",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "long-selected",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 9,
+      "exit_code": 3,
+      "interface": "cli",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "long-unselected",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 10,
+      "exit_code": 3,
+      "interface": "cli",
+      "junit_cases": 7,
+      "missing_reports": 0,
+      "mode": "repeated",
+      "native_exit_code": 3,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": true
+    },
+    {
+      "case": 11,
+      "exit_code": 4,
+      "interface": "cli",
+      "junit_cases": 7,
+      "missing_reports": 2,
+      "mode": "mixed",
+      "native_exit_code": 4,
+      "operator_resolution": [
+        "unresolved",
+        "unresolved"
+      ],
+      "original_targets": 2,
+      "private_inputs_unchanged": true,
+      "source_complete": false
+    }
+  ],
+  "fixture": "Native fictional declarations and explicit synthetic fill; no inference/human truth",
+  "human_confirmation_verified": false,
+  "inheritance": {
+    "accepted_047_security_head": "0dae67ae686d486f088c43e3af8bf4f301341ffa",
+    "additional_current_profile_hashes": 8,
+    "native_producer_hashes": 16,
+    "no_vulnerability_service_query_by_recorder": true,
+    "older_validation_records_modified": false,
+    "original_048_head": "4a5fe9521f3371b72458ba5ec007785aa1cf84ca",
+    "private_full_entries": 170,
+    "private_full_entries_held": true,
+    "private_unique_names": 168,
+    "public_requires_python": ">=3.11"
+  },
+  "os_entrypoint_raw_utf8_lf_parity": true,
+  "positive_cases": 24,
+  "qualification": {
+    "no_human_authentication": true,
+    "no_installed_distribution_claim": true,
+    "no_model_execution": true,
+    "profile": "native editable source, fictional CPU-only saved-file controls",
+    "python": "3.12.13",
+    "quantfit": "0.48.0",
+    "regenerator_sha256": "43227315218f57ede379a8e048a230d10eee5cecc4c31588747e1823439e1d82"
+  },
+  "queue_preparation_not_received": true,
+  "scientific_go": false,
+  "source_hashes": {
+    ".github/workflows/validate.yml": "f2a9aee7023e453ccdd6aadb2931c3f69fa8e3293019acb6f3193051d8bc17dc",
+    "pyproject.toml": "bbfaee7a68348f737655d487e8168706b93bd019a88a4b9a5c4d6a48313fa4ad",
+    "quantfit/__init__.py": "61f71e8e946f8e19a5fe80245aa739b1520e9ca0172ad7ba86473b17e7d9cbeb",
+    "quantfit/adjudication_record.py": "4cae80f7c8f4a23b499104a3c912d61da6bbb658d40ad9a1943e49f82b0e02a6",
+    "quantfit/bundle.py": "4859653bcdb473030a823db4bd67d9165d5675f054af158fcab9e5155c246cf5",
+    "quantfit/cli.py": "12e1b9fbfcbb69d651d0544cb05e85fdde6cf63359444530b4b179659d46d260",
+    "quantfit/junit.py": "792acd2e626f18b6fda8579587a8d1cdf00733ae69723b7c151ac7e9f49fc590",
+    "quantfit/reproduce.py": "db531aae6774a53f6543e585b4c354d103fcd7d9ea8e62f71a449289ee742206",
+    "quantfit/resolution.py": "e6b23319a795182ac3cde8256fb76919636c8e7bea44dc55fb8fb57471e5cb2d",
+    "quantfit/safety/adjudication.py": "d0ac8672ee20aa19f1715e1d8b6eb031af2b4b96f16a9c9d3882b74a3115f970",
+    "quantfit/safety/calibrate.py": "62e3312fa890fc7484b8fde902771b4693da20dcfa11c87df1ab38b54ef22346",
+    "quantfit/safety/calibration_binding.py": "4072ef2798bc7535ed0e7ddf2528593bd3d80f98574073c375c5f936b459bc5b",
+    "quantfit/safety/calibration_inputs.py": "a0096cf942e1d15d3a70234587f7c3431610a193e80ec29abd12472df63d8165",
+    "quantfit/safety/verify.py": "83350d0bb519fa7d113f679db17f2a23eb4c8b87d9d719ee785efd2fa462c70d",
+    "quantfit/saved_screen.py": "b41a9e844b371c5879140656bab60b1a41bd28941f1e777deb5642f51363c399",
+    "quantfit/screen_adjudication.py": "541d40cab887ca9ff5dc5b8878e92f9f02427a7354b9a7177d175d9b3ec615c8",
+    "tests/test_ci_screen_adjudication.py": "40c35e8c2ae1196aaca3f379049e92f0af1b9f31ececc42e0c1d6a5b0067afae",
+    "tests/test_screen_adjudication.py": "33faafb7f9ab4c3d5df1659172846cb30acd740b88898c1a6b4008fa17d4bb57",
+    "tools/ci/pyproject.toml": "9846e9b151e3a8cce5f473ee3dca837894d79323832ea53b53fc6d47fd357ebc",
+    "tools/ci/uv.lock": "0df1916aafb8f8375996cf146a7eb814fe78a65026b26c5279e526b7f28d130c",
+    "tools/ci_dependency_audit.py": "0d7e4941f595931418e3d698adec60c2814d0fbc6a89f796b6ec26dde80e1f30",
+    "tools/ci_installed.py": "2523fff18a10bbcf7baedbffe3d8007f9a598b6a61a3a941130b7c81e909efa3",
+    "tools/ci_screen_adjudication.py": "4a6a2e581ee5c0f33a1796ef940d175fa8d8029f2e5f61897592c4aa6d2d6da7",
+    "validation/2026-10-31-screen-adjudication-python311/regenerate.py": "43227315218f57ede379a8e048a230d10eee5cecc4c31588747e1823439e1d82"
+  }
+}

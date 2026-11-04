@@ -10,18 +10,48 @@ deterministic generated properties against SciPy, selected mutation failures, br
 coverage floors, Ruff, strict typing on the spec/engine data contract, docs parity,
 workflow linting, and the installed dependency graph for known vulnerabilities.
 `tools/ci/uv.lock` fixes the complete validation dependency graph and artifact hashes
-for Python 3.10-3.14 on hosted Linux/Windows. `uv sync --locked` selects unit, numerical,
-runtime, and tooling groups; package builds use the locked build tooling without
+for the supported Python 3.11-3.14 unit/tooling domain on hosted Linux/Windows.
+The numerical and complete runtime jobs remain Python 3.12. From 0.47.0's
+2026-10-31 correction, both public installation and private
+validation require Python 3.11+. The earlier Python 3.10 source-only matrix is
+withdrawn; its historical passing results did not establish complete runtime or
+universal dependency security. `uv sync --locked` selects these groups; package builds use the locked build tooling without
 PEP 517 isolation. Artifact installs use `--no-deps --no-build-isolation` into that
 graph, followed by `pip check`. The scheduled drift lane deliberately resolves the
 supported package graph afresh. The validation manifest does not alter PyPI metadata.
 
-The locked runtime uses Torch 2.13.0, llmcompressor 0.14.0, Accelerate 1.15.0 and
-Pillow 12.3.0. The dependency audit exposed affected Torch/Accelerate/Pillow versions;
-the previous compressor caps prevented selecting their patches. The dated security
-exception in `docs/dependency-policy.md` §5 limits the cap move to hosted CPU evidence
-and keeps GPU AWQ/GPTQ qualification open. CPU Torch's local `+cpu` suffix is normalized
+The locked runtime uses Torch 2.13.0, llmcompressor 0.14.0.1, Accelerate 1.15.0 and
+Pillow 13.0.0, with advisory patches aiohttp 3.14.5, certifi 2026.10.19 and
+opentelemetry-api 1.45.1. The compressor hotfix removes the Pillow upper cap; direct
+package ceilings retain the previously admitted datasets 5.0.1 / Accelerate 1.15.0
+boundary. The dated security maintenance in `docs/dependency-policy.md` §5 preserves
+the hosted CPU evidence scope and keeps GPU AWQ/GPTQ qualification open. CPU Torch's local `+cpu` suffix is normalized
 to its public release version for advisory lookup; Torch remains included in the audit.
+
+The 2026-10-25 maintenance record remains historical. Its modern Python 3.12
+installed-graph audit used filelock 4.2.1, while the universal lock also retained
+3.20.3 for Python 3.10. The later disclosed GHSA-8mx5-7m5m-r77g and
+GHSA-69hj-f68j-2879 include that old branch. An active-environment audit pass is
+not a universal-graph vulnerability-free claim.
+
+**Dated correction — 2026-10-31, unreleased 0.47.0:** official fixed releases
+require Python 3.11 and Python 3.10 reached EOL on 2026-10-01. The source withdraws
+3.10 installation/source support and only its unit matrix entry. Native UV
+regeneration removes the affected branch, retaining filelock 4.2.1 and the other
+supported tests/coverage/ratchets. Setuptools 84.1.0 and the earlier runtime bounds
+remain. See `validation/2026-10-31-python311-security/`; fresh hosted acceptance
+still qualifies each candidate's exact bytes. This does not repair old wheels.
+
+The existing `tools/ci_dependency_audit.py` command now audits the union of
+installed external name/version pairs and every registry package version in the
+universal validation lock, without interpreter/platform/group marker filtering.
+Only the declared virtual validation root and installed candidate are excluded.
+Different versions of one name occupy separate minimal exact-pin layers because
+the pinned auditor rejects conflicting requirements in one input. Every layer
+uses the existing strict/no-deps/disable-pip CLI and is attempted before aggregate
+failure. Unknown lock schemas/sources/versions and lookup failures fail the audit.
+The existing Torch `+cpu` to public release mapping remains the only advisory
+normalization; it is not an installation-lock rewrite or binary-integrity proof.
 
 On 2026-10-08 the release-candidate dependency audit correctly rejected fsspec
 2026.4.0 for CVE-2026-104851. The lock now selects fixed fsspec 2026.6.0 and

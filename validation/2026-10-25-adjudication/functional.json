@@ -1,0 +1,528 @@
+{
+  "cases": [
+    {
+      "cards": {
+        "calibrated": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "af278d377638c57ae500ce27582e92ed0049d3b631209a24afca9a8f6a135194"
+        },
+        "plain": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "8015fa3292668ac83d17d348a64b92a18e2cff253ea65d8903ee906a2bfbfa00"
+        }
+      },
+      "counts": {
+        "over-refusal": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        },
+        "refusal-robustness": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        }
+      },
+      "entry_count": 8,
+      "inputs": {
+        "capture": {
+          "sha256": "77ea088e98bae066eff3dcb77bfd4bd09353094b6fad57e8053c7328233e6eef",
+          "size_bytes": 5825
+        },
+        "preparation": {
+          "sha256": "b5d652ad952ff5b75868c395c4451383b2b3bd363cbb447779b5ee969e7b7dac",
+          "size_bytes": 1742
+        },
+        "report": {
+          "sha256": "40d74fba00b14be864d036baaedfd4470834b3c84075f387bfefcd6f6961cd90",
+          "size_bytes": 3284
+        },
+        "review_queue": {
+          "sha256": "740cd91e5c6e4af35fabfa48e56f92487b63f03f3621884ed069d7c4b9666dd5",
+          "size_bytes": 1351
+        }
+      },
+      "interface": "cli",
+      "mode": "mixed",
+      "n_probes": 12,
+      "operator_status": "declared_unauthenticated",
+      "originals_unchanged_through_production": true,
+      "proof_limits": {
+        "human_confirmation_verified": false,
+        "human_labels_authenticated": false,
+        "independent_adjudication_verified": false,
+        "operator_identity_verified": false,
+        "receiver_capture_read": false,
+        "scientific_go": false,
+        "source_authenticity_verified": false
+      },
+      "record_sha256": "3a9ce9329dba20cf58331c88531cb10bad4599938d236ccd39a383da8f068221",
+      "synthetic_capture_removed_before_receiving": true
+    },
+    {
+      "cards": {
+        "calibrated": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "f588167a5529a47a285c41841c38261d96241d817ebadc9f8ab58069d4386898"
+        },
+        "plain": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "307b917346836da228510d237e4a99654795a8b353f0359e019fcde28166387e"
+        }
+      },
+      "counts": {
+        "over-refusal": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        },
+        "refusal-robustness": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        }
+      },
+      "entry_count": 8,
+      "inputs": {
+        "capture": {
+          "sha256": "bb6a442596091947750370cd053c50f7628c40281e4bc396bf8e6eec69626f94",
+          "size_bytes": 4531
+        },
+        "preparation": {
+          "sha256": "a445ede2d51c8e9688269cf8d4207586bb0db92f2e7a22668a0216399dad292e",
+          "size_bytes": 1741
+        },
+        "report": {
+          "sha256": "f2a2b5a3c72646695de54da34b3b9dadb427c4b913aaab8db6c2e6efe048a35b",
+          "size_bytes": 3250
+        },
+        "review_queue": {
+          "sha256": "740cd91e5c6e4af35fabfa48e56f92487b63f03f3621884ed069d7c4b9666dd5",
+          "size_bytes": 1351
+        }
+      },
+      "interface": "cli",
+      "mode": "all",
+      "n_probes": 8,
+      "operator_status": "declared_unauthenticated",
+      "originals_unchanged_through_production": true,
+      "proof_limits": {
+        "human_confirmation_verified": false,
+        "human_labels_authenticated": false,
+        "independent_adjudication_verified": false,
+        "operator_identity_verified": false,
+        "receiver_capture_read": false,
+        "scientific_go": false,
+        "source_authenticity_verified": false
+      },
+      "record_sha256": "6e2041ebb2f18b58cfb9dccfec62ba9bfbf367a482df19b62a87fdbf7170f4e9",
+      "synthetic_capture_removed_before_receiving": true
+    },
+    {
+      "cards": {
+        "calibrated": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "4e239645f3bd1150f14a6d7d57bd77ea89a539163b5affc79d1361d0aac70a7d"
+        },
+        "plain": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "677730bad159918e655b275e60375abfa168b4c0f531b7c929a18623ed9636c2"
+        }
+      },
+      "counts": {
+        "over-refusal": {
+          "degenerate": 0,
+          "flagged": 0,
+          "not_confirmed": 0,
+          "substantive": 0,
+          "unresolved": 0
+        },
+        "refusal-robustness": {
+          "degenerate": 0,
+          "flagged": 0,
+          "not_confirmed": 0,
+          "substantive": 0,
+          "unresolved": 0
+        }
+      },
+      "entry_count": 0,
+      "inputs": {
+        "capture": {
+          "sha256": "236dbcaa7773eb875a77217ab31bb299af716350254df896bec7c9351ccd47e9",
+          "size_bytes": 5825
+        },
+        "preparation": {
+          "sha256": "dc19d3caba9a6ed7dc1f003e9b58f3f9e4261b62255856acb87ce0689f1895f6",
+          "size_bytes": 1741
+        },
+        "report": {
+          "sha256": "1c83e9d4b85d9aff5c5699fedd62a6fa9f0d79f6f5626b33718424aa2f69c220",
+          "size_bytes": 3303
+        },
+        "review_queue": {
+          "sha256": "b3893c2068dca0fe0a3b5f712491c42979b6c369800fc8ea37eb4e1347238cd3",
+          "size_bytes": 107
+        }
+      },
+      "interface": "cli",
+      "mode": "zero",
+      "n_probes": 12,
+      "operator_status": "declared_unauthenticated",
+      "originals_unchanged_through_production": true,
+      "proof_limits": {
+        "human_confirmation_verified": false,
+        "human_labels_authenticated": false,
+        "independent_adjudication_verified": false,
+        "operator_identity_verified": false,
+        "receiver_capture_read": false,
+        "scientific_go": false,
+        "source_authenticity_verified": false
+      },
+      "record_sha256": "2d0c8aa5581951ff452b355c92e5829984665e2dbb7af9f01eaf13863dcda167",
+      "synthetic_capture_removed_before_receiving": true
+    },
+    {
+      "cards": {
+        "calibrated": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "37b3f4ad062b3770f5006f3d7a22481d3d7b836b5b1ebc220fa974d9e1aaba1c"
+        },
+        "plain": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "c799cea54a20cfbc04c0ff87c40c3a95666081a21d1155ada665933f65b94f39"
+        }
+      },
+      "counts": {
+        "over-refusal": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        },
+        "refusal-robustness": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        }
+      },
+      "entry_count": 8,
+      "inputs": {
+        "capture": {
+          "sha256": "1cfdea3da819fdc627028eb80e9dda700469d6e87274e4cc9589a8e65cce444d",
+          "size_bytes": 5389
+        },
+        "preparation": {
+          "sha256": "ffb961984992d5691c8a56f59f17131d3a93c7f32ee4e97ef4006cecbced97bb",
+          "size_bytes": 1741
+        },
+        "report": {
+          "sha256": "40d74fba00b14be864d036baaedfd4470834b3c84075f387bfefcd6f6961cd90",
+          "size_bytes": 3284
+        },
+        "review_queue": {
+          "sha256": "4461afa48c35693457376f5e5024e040d96597f4e9f8f6bcf2820e7adb075040",
+          "size_bytes": 1047
+        }
+      },
+      "interface": "cli",
+      "mode": "repeated",
+      "n_probes": 12,
+      "operator_status": "declared_unauthenticated",
+      "originals_unchanged_through_production": true,
+      "proof_limits": {
+        "human_confirmation_verified": false,
+        "human_labels_authenticated": false,
+        "independent_adjudication_verified": false,
+        "operator_identity_verified": false,
+        "receiver_capture_read": false,
+        "scientific_go": false,
+        "source_authenticity_verified": false
+      },
+      "record_sha256": "35b5db1262dc184e15e6137e6098b89555a7de3d3b5bbe548173accc7be87116",
+      "synthetic_capture_removed_before_receiving": true
+    },
+    {
+      "cards": {
+        "calibrated": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "91c9ddd7482a75fc4817d9c52219bd707f5d700ff8aa1b6e0b04f891777935e9"
+        },
+        "plain": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "544bc7623a2a0b2fe96338f02e5025328dbd8ff478b313da66690eb54e8c10d7"
+        }
+      },
+      "counts": {
+        "over-refusal": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        },
+        "refusal-robustness": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        }
+      },
+      "entry_count": 8,
+      "inputs": {
+        "capture": {
+          "sha256": "5b3b4e1493712ab077f0c67f68910b3888fed241836801451ee9aa9469576372",
+          "size_bytes": 5825
+        },
+        "preparation": {
+          "sha256": "e66d2c524634b0c518a9bc229f2412bf8537c716569f6991c386400a786d9f6b",
+          "size_bytes": 1742
+        },
+        "report": {
+          "sha256": "40d74fba00b14be864d036baaedfd4470834b3c84075f387bfefcd6f6961cd90",
+          "size_bytes": 3284
+        },
+        "review_queue": {
+          "sha256": "740cd91e5c6e4af35fabfa48e56f92487b63f03f3621884ed069d7c4b9666dd5",
+          "size_bytes": 1351
+        }
+      },
+      "interface": "api",
+      "mode": "mixed",
+      "n_probes": 12,
+      "operator_status": "declared_unauthenticated",
+      "originals_unchanged_through_production": true,
+      "proof_limits": {
+        "human_confirmation_verified": false,
+        "human_labels_authenticated": false,
+        "independent_adjudication_verified": false,
+        "operator_identity_verified": false,
+        "receiver_capture_read": false,
+        "scientific_go": false,
+        "source_authenticity_verified": false
+      },
+      "record_sha256": "5a95bd86939549f097e5726ece59b400ddd37223d0d43a07555bf1e7caa8b243",
+      "synthetic_capture_removed_before_receiving": true
+    },
+    {
+      "cards": {
+        "calibrated": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "b533f2928829e550d52a67d8eca32a5eed84bd39df4a0031687d2176fd7df5ec"
+        },
+        "plain": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "b7552daadd5c136cfd8fd2029b4bf19bac0ba06096b2b079b557b65271d78176"
+        }
+      },
+      "counts": {
+        "over-refusal": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        },
+        "refusal-robustness": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        }
+      },
+      "entry_count": 8,
+      "inputs": {
+        "capture": {
+          "sha256": "39c097a22ea28e8a8544424619c7920f6cd381cd4010d31e83c92e25264070c7",
+          "size_bytes": 4531
+        },
+        "preparation": {
+          "sha256": "db7689b110db7b97fa86e09a19ce1f8fa136bb3821897e9fef12dac12e3ebad8",
+          "size_bytes": 1741
+        },
+        "report": {
+          "sha256": "f2a2b5a3c72646695de54da34b3b9dadb427c4b913aaab8db6c2e6efe048a35b",
+          "size_bytes": 3250
+        },
+        "review_queue": {
+          "sha256": "740cd91e5c6e4af35fabfa48e56f92487b63f03f3621884ed069d7c4b9666dd5",
+          "size_bytes": 1351
+        }
+      },
+      "interface": "api",
+      "mode": "all",
+      "n_probes": 8,
+      "operator_status": "declared_unauthenticated",
+      "originals_unchanged_through_production": true,
+      "proof_limits": {
+        "human_confirmation_verified": false,
+        "human_labels_authenticated": false,
+        "independent_adjudication_verified": false,
+        "operator_identity_verified": false,
+        "receiver_capture_read": false,
+        "scientific_go": false,
+        "source_authenticity_verified": false
+      },
+      "record_sha256": "06c766cf50f91f04ef78d84f1383903ba572670ed9185d0ba2d3cc8ffa037296",
+      "synthetic_capture_removed_before_receiving": true
+    },
+    {
+      "cards": {
+        "calibrated": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "f7e7da3658390aa0e44b86890afe1dece4512a2954570708dfea446e5cb8c5a5"
+        },
+        "plain": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "a2ed4c6b889c8ea2f37274701dc952e82ef99e3d5f12eec8c2f7fff8770acbe1"
+        }
+      },
+      "counts": {
+        "over-refusal": {
+          "degenerate": 0,
+          "flagged": 0,
+          "not_confirmed": 0,
+          "substantive": 0,
+          "unresolved": 0
+        },
+        "refusal-robustness": {
+          "degenerate": 0,
+          "flagged": 0,
+          "not_confirmed": 0,
+          "substantive": 0,
+          "unresolved": 0
+        }
+      },
+      "entry_count": 0,
+      "inputs": {
+        "capture": {
+          "sha256": "28457845046aaae8b2643d2befae786dd3be88f33f5cd38c086b31551f308856",
+          "size_bytes": 5825
+        },
+        "preparation": {
+          "sha256": "ad34dd9fbe8c5a6acebbff415d9e4e0dfe6552887c838f88537f858d229b8c26",
+          "size_bytes": 1741
+        },
+        "report": {
+          "sha256": "1c83e9d4b85d9aff5c5699fedd62a6fa9f0d79f6f5626b33718424aa2f69c220",
+          "size_bytes": 3303
+        },
+        "review_queue": {
+          "sha256": "b3893c2068dca0fe0a3b5f712491c42979b6c369800fc8ea37eb4e1347238cd3",
+          "size_bytes": 107
+        }
+      },
+      "interface": "api",
+      "mode": "zero",
+      "n_probes": 12,
+      "operator_status": "declared_unauthenticated",
+      "originals_unchanged_through_production": true,
+      "proof_limits": {
+        "human_confirmation_verified": false,
+        "human_labels_authenticated": false,
+        "independent_adjudication_verified": false,
+        "operator_identity_verified": false,
+        "receiver_capture_read": false,
+        "scientific_go": false,
+        "source_authenticity_verified": false
+      },
+      "record_sha256": "5f1edf263e7c659c3bd84f6755bc6ea59eccc1c432e2b2cdbff5d70d0c4cba54",
+      "synthetic_capture_removed_before_receiving": true
+    },
+    {
+      "cards": {
+        "calibrated": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "37b3f4ad062b3770f5006f3d7a22481d3d7b836b5b1ebc220fa974d9e1aaba1c"
+        },
+        "plain": {
+          "deterministic": true,
+          "native_prefix_footer_preserved": true,
+          "sha256": "c799cea54a20cfbc04c0ff87c40c3a95666081a21d1155ada665933f65b94f39"
+        }
+      },
+      "counts": {
+        "over-refusal": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        },
+        "refusal-robustness": {
+          "degenerate": 1,
+          "flagged": 4,
+          "not_confirmed": 1,
+          "substantive": 1,
+          "unresolved": 1
+        }
+      },
+      "entry_count": 8,
+      "inputs": {
+        "capture": {
+          "sha256": "1cfdea3da819fdc627028eb80e9dda700469d6e87274e4cc9589a8e65cce444d",
+          "size_bytes": 5389
+        },
+        "preparation": {
+          "sha256": "ffb961984992d5691c8a56f59f17131d3a93c7f32ee4e97ef4006cecbced97bb",
+          "size_bytes": 1741
+        },
+        "report": {
+          "sha256": "40d74fba00b14be864d036baaedfd4470834b3c84075f387bfefcd6f6961cd90",
+          "size_bytes": 3284
+        },
+        "review_queue": {
+          "sha256": "4461afa48c35693457376f5e5024e040d96597f4e9f8f6bcf2820e7adb075040",
+          "size_bytes": 1047
+        }
+      },
+      "interface": "api",
+      "mode": "repeated",
+      "n_probes": 12,
+      "operator_status": "declared_unauthenticated",
+      "originals_unchanged_through_production": true,
+      "proof_limits": {
+        "human_confirmation_verified": false,
+        "human_labels_authenticated": false,
+        "independent_adjudication_verified": false,
+        "operator_identity_verified": false,
+        "receiver_capture_read": false,
+        "scientific_go": false,
+        "source_authenticity_verified": false
+      },
+      "record_sha256": "35b5db1262dc184e15e6137e6098b89555a7de3d3b5bbe548173accc7be87116",
+      "synthetic_capture_removed_before_receiving": true
+    }
+  ],
+  "human_confirmation_verified": false,
+  "kind": "quantfit.source-bound-adjudication-functional-acceptance",
+  "scientific_go": false,
+  "synthetic_operator_labels": true
+}

@@ -41,15 +41,15 @@ sensitivity. Invalid/IO evidence exits 2, valid flags 3 before missing/unmeasure
 and complete supported no-detection 0 remains conditional. Original files and
 producer versions are preserved.
 
-The unreleased **0.32.0 candidate** makes `screen --resume` strict: hold and
+Quantfit **0.32.0** makes `screen --resume` strict: hold and
 validate all present native reports before model contact or output mutation;
 match target/protocol/decode/max-new-tokens, native arithmetic, privacy and
 duplicate-evidence rules. Present corrupt/incompatible evidence refuses 2 and
 is preserved; only missing reports execute. Valid flags/unmeasured evidence
-remain skipped evidence with original denominators, hashes and caveats. Do not
-claim this candidate behavior from a published 0.31.0 installation.
+remain skipped evidence with original denominators, hashes and caveats. Strict
+resume requires quantfit 0.32.0 or later.
 
-The unreleased **0.33.0 candidate** adds `quantfit bundle screen-create --targets
+Quantfit **0.33.0** adds `quantfit bundle screen-create --targets
 targets.json --reports-dir screen-reports --out screen-handoff --json` and
 `quantfit bundle screen-verify --bundle relocated/screen-handoff --json`.
 Original target/report bytes, missing rows, negative native results and optional
@@ -59,6 +59,40 @@ never follow producer model paths. Content verification exits 0 while nested
 input exits 2. Full transport is bounded at 64 MiB, including both manifests.
 Treat bundles as private handoffs; hashes establish byte binding, not execution
 authenticity, calibrated sensitivity, human confirmations or scientific GO.
+
+Quantfit **0.34.0** adds `quantfit screen-compare
+--reference-bundle reference-screen --candidate-bundle candidate-screen --out
+comparison.json --junit comparison.xml --json`. Exact target-manifest bytes must
+match. Retain per-axis native denominators/flags and missing, unmeasured or
+incompatible evidence. A qualified declared-target transition does not establish
+same actual weights, causal clearance or independent execution. Any original flag
+on either side exits 3, including apparent clearance; otherwise incomplete or
+incompatible exits 4 before conditional complete no-flag 0. Invalid evidence or
+output exits 2. JUnit has two axis cases per target plus overall; native flags fail
+before incomplete cases skip. Never treat these observations as human confirmations,
+calibrated sensitivity or scientific GO.
+
+Quantfit **0.35.0** adds optional `--calibrations-dir calibrations`
+to `screen-summary`. Read the appended `conditional_resolution` rows and coverage
+separately from the unchanged native verdict/JUnit. Target-named aggregate schema-2
+calibrations are validated and scope-matched from held bytes before the existing
+conditional resolution calculator runs. Missing calibrations remain explicit; a valid
+stored calibration without its report is pending and proves no actual report match.
+Malformed/incompatible evidence refuses 2. No annotation clears native flags,
+authenticates labels/assumptions, establishes sensitivity or supplies scientific GO.
+This option requires quantfit 0.35.0 or later.
+
+Quantfit **0.36.0** adds `quantfit calibrate reconcile --sheet-a
+a.labels.csv --sheet-b b.labels.csv --key labels.labelkey.json --out
+reconciliation.json --json`. Private sheets and key must cover the same complete
+paired population; original IDs, completion hashes and labels are checked through
+the native reader. Export only per-arm 3×3 aggregate label matrices and whole-input
+byte bindings. Rows are sheet A, columns B; label order is refusal/compliance/unusable.
+Exit 0 is successful descriptive reconciliation, including disagreement or all
+unusable labels. Identical sheets are self-controls; rater identity/independence,
+consensus calibration, human truth and scientific GO remain unverified. Invalid or
+unsafe input/output refuses categorical 2. Never commit sheets, keys or completions.
+See `docs/label-reconciliation.md`; this command requires quantfit 0.36.0 or later.
 
 ## The command that matters
 

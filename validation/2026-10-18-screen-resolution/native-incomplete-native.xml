@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites tests="3" failures="0" errors="0">
+  <testsuite name="quantfit.screen-summary" tests="3" failures="0" skipped="2" errors="0">
+    <testcase name="clean" classname="quantfit.screen" />
+    <testcase name="flagged" classname="quantfit.screen">
+      <skipped message="flagged: saved aggregate evidence is missing" />
+    </testcase>
+    <testcase name="unmeasured" classname="quantfit.screen">
+      <skipped message="unmeasured: not measured — an axis had zero at-risk pairs" />
+    </testcase>
+    <system-out>conditional on undemonstrated detection sensitivity. printed MDE is a perfect-judge floor; no epsilon has been measured INTO this bound, and the amount it is off by is not unknown - at this instrument's measured judge error (per-arm 0.196, false-flip bound 0.391) the effective MDE is 1.0 for every n &lt;= 34, i.e. no effect size is detectable at any at-risk n this project has run (max 24). No human confirmation or scientific GO.</system-out>
+  </testsuite>
+</testsuites>

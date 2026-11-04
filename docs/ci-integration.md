@@ -2,9 +2,15 @@
 
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
-The action and instrument examples below pin **quantfit 0.33.0**.
-This is an unreleased candidate: versioned action/package examples become usable
-after release. Candidate qualification uses its exact source or built wheel.
+The published action/instrument examples below pin **quantfit 0.51.0**.
+This source tree is the **unreleased 0.54.0 candidate**; its reference action
+default is `>=0.54.0,<0.55` for that eventual release. Candidate acceptance uses
+`quantfit-path`, not an assumed public 0.54.0 install. Pin both exactly when
+reproducibility requires the same action and instrument.
+
+[Pinned-corpus gates/screens](pinned-corpus-gates.md) and
+[Selected-axis effect gates](axis-effect-gates.md) are candidate direct CLI/API
+options; the composite action continues to forward legacy threshold/tier only.
 Candidate acceptance uses the exact source or wheel through `quantfit-path`;
 release publication separately qualifies the versioned distributions.
 Protocol: QSR v0 (`spec/qsr-v0.md`). Implementation authority for everything on this page
@@ -58,7 +64,7 @@ under a promise nobody has measured. Hence exit 5, hence the required `eps-sourc
 hence no soft-fail input.
 
 For explicit calibration consumption, use the CLI's `--calibration-report PATH` with a
-current schema-2 aggregate report. The capture, key and calibration retain one canonical
+current schema-2 or closed retained-schema-3 aggregate report. The capture, key and calibration retain one canonical
 measurement identity and source hashes; directional Wilson uppers remain separate by arm.
 The gate checks scope before generation and the actual resolved report after generation.
 A pre-run refusal records `scope_validated_actual_run_unobserved`, never an actual-run
@@ -94,12 +100,12 @@ jobs:
       - uses: actions/checkout@v7
 
       - id: gate
-        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.33.0
+        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.51.0
         with:
           baseline: Qwen/Qwen2.5-1.5B-Instruct
           quant: ./out/qwen2.5-1.5b-awq
           tier: smoke                    # 30pp — gates >=30pp only, and says so
-          quantfit-version: "==0.33.0"    # the instrument version is part of the measurement
+          quantfit-version: "==0.51.0"    # the instrument version is part of the measurement
           hf-token: ${{ secrets.HF_TOKEN }}
 
       # Runs only on exit 0 — the action fails the job on 2/3/4/5.
@@ -140,7 +146,7 @@ checkout to happen first, and takes no `@ref`:
           quantfit-path: "."     # install the checked-out source instead of PyPI
 ```
 
-Two independent pins, and you want both: `@v0.33.0` pins the *action*, `quantfit-version`
+Two independent pins, and you want both: `@v0.51.0` pins the *action*, `quantfit-version`
 pins the *instrument*. A floating action ref with a pinned instrument is a supply-chain
 hole; a pinned action ref with a floating instrument silently changes what your gate
 measures between releases.
@@ -157,10 +163,10 @@ measures between releases.
 | `threshold-pp` | `""` | Explicit dangerous-axis flip threshold in **PERCENTAGE POINTS**. **30pp is `30`, not `0.30`.** Set `tier: ""` when you use it. |
 | `eps-upper` | `""` | Per-arm upper bound on **both** directional judge-error rates, as a rate in (0, 1]. Requires `eps-source`. Exactly `0` is refused. |
 | `eps-source` | `""` | **Required** with `eps-upper`. Where the bound came from, recorded verbatim in the artifact. |
-| `calibration-report` | `""` | Bound schema-2 calibration input. Mutually exclusive with both operator epsilon inputs. Protocol is checked before generation; actual resolved scope is checked afterward. All output paths, including JUnit, must differ from this input. |
+| `calibration-report` | `""` | Bound schema-2 or closed retained-schema-3 calibration input. Mutually exclusive with both operator epsilon inputs. Protocol is checked before generation; actual resolved scope is checked afterward. All output paths, including JUnit, must differ from this input. |
 | `max-new-tokens` | `""` (CLI default 64) | Applied identically to both arms (§2.3). |
 | `python-version` | `3.12` | Same version quantfit's own CI pins. |
-| `quantfit-version` | `>=0.33.0,<0.34` | PEP 440 specifier. Pin exactly for a reproducible gate. |
+| `quantfit-version` | `>=0.51.0,<0.52` | PEP 440 specifier. Pin exactly for a reproducible gate. |
 | `quantfit-path` | `""` | Install from a local path instead of PyPI; overrides `quantfit-version`. |
 | `report` | `quantfit-gate/drift.json` | Schema-v2 drift report (`quantfit gate --report`). |
 | `gate-out` | `quantfit-gate/gate.json` | Gate decision artifact, schema 1 (`quantfit gate --out`). Written on refusals too. |
@@ -651,6 +657,11 @@ on a hosted CPU runner, and is worth copying into your own repo:
   its own resolution is a silent overclaim.
 - **quickstart install** — build the wheel with locked tooling, install it into a clean
   venv with the complete hash-locked runtime on Linux and Windows, and smoke the CLI.
+  The complete locked `runtime` group requires Python 3.11 or newer (Pillow 13 security
+  fixes); hosted runtime and numerical qualification use Python 3.12. From the
+  0.47.0's 2026-10-31 security correction, public/private
+  minimum Python is 3.11 and the supported unit matrix is 3.11-3.14. Earlier 3.10
+  source-only checks are historical, not a current support or universal-security claim.
   The independent daily dependency-drift workflow resolves fresh versions and runs the
   suite plus its advisory audit. The canary preserves cold model/judge/probe downloads
   and same-model determinism checks. See `docs/hosted-ci.md` for their proof scopes.

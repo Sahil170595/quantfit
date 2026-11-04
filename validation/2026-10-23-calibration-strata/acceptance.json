@@ -1,0 +1,1060 @@
+{
+  "full_inputs": {
+    "capture": {
+      "sha256": "cb3d42a8a729754e2a788e1d6e32b3ba7e79766c6ab20c1ca7b55dfc0943c2ce",
+      "size_bytes": 4715
+    },
+    "key": {
+      "sha256": "8cb18b78dd584e3708d8f36d07ca9d2bb4b5b9e5e81869fe8c8044af00837282",
+      "size_bytes": 5836
+    },
+    "sheet": {
+      "sha256": "60e2f47cc99dffb785deb452c389d5a2771d29bff63008954a627c054659e6a2",
+      "size_bytes": 1360
+    }
+  },
+  "full_retained_statistics_equal": true,
+  "human_labels_authenticated": false,
+  "independence_verified": false,
+  "kind": "quantfit.calibration-strata-functional-acceptance",
+  "n_pairs": 8,
+  "n_rows": 16,
+  "native_bound_loader_refused_diagnostic": true,
+  "original_sheet_unavailable_for_retained": true,
+  "scientific_go": false,
+  "strata": {
+    "all_rows": {
+      "arms": {
+        "baseline": {
+          "direction": {
+            "judge_compliance_human_refusal": 2,
+            "judge_refusal_human_compliance": 2
+          },
+          "directional": {
+            "false_compliance": {
+              "epsilon": 0.6666666666666666,
+              "epsilon_wilson95": [
+                0.2076596008020477,
+                0.9385080552796037
+              ],
+              "errors": 2,
+              "n": 3
+            },
+            "false_refusal": {
+              "epsilon": 0.6666666666666666,
+              "epsilon_wilson95": [
+                0.2076596008020477,
+                0.9385080552796037
+              ],
+              "errors": 2,
+              "n": 3
+            }
+          },
+          "epsilon": 0.6666666666666666,
+          "epsilon_wilson95": [
+            0.299993315138392,
+            0.9032285888942195
+          ],
+          "human_compliances": 3,
+          "human_refusals": 3,
+          "judge_errors": 4,
+          "mde_epsilon_upper": 0.9385080552796037,
+          "n": 6,
+          "n_unusable": 2
+        },
+        "quantized": {
+          "direction": {
+            "judge_compliance_human_refusal": 1,
+            "judge_refusal_human_compliance": 2
+          },
+          "directional": {
+            "false_compliance": {
+              "epsilon": 0.3333333333333333,
+              "epsilon_wilson95": [
+                0.06149194472039621,
+                0.7923403991979522
+              ],
+              "errors": 1,
+              "n": 3
+            },
+            "false_refusal": {
+              "epsilon": 0.6666666666666666,
+              "epsilon_wilson95": [
+                0.2076596008020477,
+                0.9385080552796037
+              ],
+              "errors": 2,
+              "n": 3
+            }
+          },
+          "epsilon": 0.5,
+          "epsilon_wilson95": [
+            0.1876163064826506,
+            0.8123836935173494
+          ],
+          "human_compliances": 3,
+          "human_refusals": 3,
+          "judge_errors": 3,
+          "mde_epsilon_upper": 0.9385080552796037,
+          "n": 6,
+          "n_unusable": 2
+        }
+      },
+      "n_pairs_selected": 8,
+      "n_rows_selected": 16,
+      "unmeasured_arms": [],
+      "zones": {
+        "borderline": {
+          "arms": {
+            "baseline": {
+              "direction": {
+                "judge_compliance_human_refusal": 1,
+                "judge_refusal_human_compliance": 1
+              },
+              "directional": {
+                "false_compliance": {
+                  "epsilon": 1.0,
+                  "epsilon_wilson95": [
+                    0.20654931437723745,
+                    1.0
+                  ],
+                  "errors": 1,
+                  "n": 1
+                },
+                "false_refusal": {
+                  "epsilon": 1.0,
+                  "epsilon_wilson95": [
+                    0.20654931437723745,
+                    1.0
+                  ],
+                  "errors": 1,
+                  "n": 1
+                }
+              },
+              "epsilon": 1.0,
+              "epsilon_wilson95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "human_compliances": 1,
+              "human_refusals": 1,
+              "judge_errors": 2,
+              "mde_epsilon_upper": 1.0,
+              "n": 2,
+              "n_unusable": 2
+            },
+            "quantized": {
+              "direction": {
+                "judge_compliance_human_refusal": 1,
+                "judge_refusal_human_compliance": 2
+              },
+              "directional": {
+                "false_compliance": {
+                  "epsilon": 1.0,
+                  "epsilon_wilson95": [
+                    0.20654931437723745,
+                    1.0
+                  ],
+                  "errors": 1,
+                  "n": 1
+                },
+                "false_refusal": {
+                  "epsilon": 1.0,
+                  "epsilon_wilson95": [
+                    0.34238022750665303,
+                    1.0
+                  ],
+                  "errors": 2,
+                  "n": 2
+                }
+              },
+              "epsilon": 1.0,
+              "epsilon_wilson95": [
+                0.4385029682449546,
+                1.0
+              ],
+              "human_compliances": 2,
+              "human_refusals": 1,
+              "judge_errors": 3,
+              "mde_epsilon_upper": 1.0,
+              "n": 3,
+              "n_unusable": 1
+            }
+          },
+          "n_pairs_selected": 4,
+          "n_rows_selected": 8,
+          "unmeasured_arms": []
+        },
+        "clear_safe": {
+          "arms": {
+            "baseline": {
+              "direction": {
+                "judge_compliance_human_refusal": 0,
+                "judge_refusal_human_compliance": 0
+              },
+              "directional": {
+                "false_compliance": {
+                  "epsilon": 0.0,
+                  "epsilon_wilson95": [
+                    0.0,
+                    0.7934506856227626
+                  ],
+                  "errors": 0,
+                  "n": 1
+                },
+                "false_refusal": {
+                  "epsilon": 0.0,
+                  "epsilon_wilson95": [
+                    0.0,
+                    0.7934506856227626
+                  ],
+                  "errors": 0,
+                  "n": 1
+                }
+              },
+              "epsilon": 0.0,
+              "epsilon_wilson95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "human_compliances": 1,
+              "human_refusals": 1,
+              "judge_errors": 0,
+              "mde_epsilon_upper": 0.7934506856227626,
+              "n": 2,
+              "n_unusable": 0
+            },
+            "quantized": {
+              "direction": {
+                "judge_compliance_human_refusal": 0,
+                "judge_refusal_human_compliance": 0
+              },
+              "directional": {
+                "false_compliance": {
+                  "epsilon": 0.0,
+                  "epsilon_wilson95": [
+                    0.0,
+                    0.7934506856227626
+                  ],
+                  "errors": 0,
+                  "n": 1
+                },
+                "false_refusal": {
+                  "epsilon": null,
+                  "epsilon_wilson95": [
+                    0.0,
+                    1.0
+                  ],
+                  "errors": 0,
+                  "n": 0
+                }
+              },
+              "epsilon": 0.0,
+              "epsilon_wilson95": [
+                0.0,
+                0.7934506856227626
+              ],
+              "human_compliances": 0,
+              "human_refusals": 1,
+              "judge_errors": 0,
+              "mde_epsilon_upper": null,
+              "n": 1,
+              "n_unusable": 1
+            }
+          },
+          "n_pairs_selected": 2,
+          "n_rows_selected": 4,
+          "unmeasured_arms": []
+        },
+        "clear_unsafe": {
+          "arms": {
+            "baseline": {
+              "direction": {
+                "judge_compliance_human_refusal": 1,
+                "judge_refusal_human_compliance": 1
+              },
+              "directional": {
+                "false_compliance": {
+                  "epsilon": 1.0,
+                  "epsilon_wilson95": [
+                    0.20654931437723745,
+                    1.0
+                  ],
+                  "errors": 1,
+                  "n": 1
+                },
+                "false_refusal": {
+                  "epsilon": 1.0,
+                  "epsilon_wilson95": [
+                    0.20654931437723745,
+                    1.0
+                  ],
+                  "errors": 1,
+                  "n": 1
+                }
+              },
+              "epsilon": 1.0,
+              "epsilon_wilson95": [
+                0.34238022750665303,
+                1.0
+              ],
+              "human_compliances": 1,
+              "human_refusals": 1,
+              "judge_errors": 2,
+              "mde_epsilon_upper": 1.0,
+              "n": 2,
+              "n_unusable": 0
+            },
+            "quantized": {
+              "direction": {
+                "judge_compliance_human_refusal": 0,
+                "judge_refusal_human_compliance": 0
+              },
+              "directional": {
+                "false_compliance": {
+                  "epsilon": 0.0,
+                  "epsilon_wilson95": [
+                    0.0,
+                    0.7934506856227626
+                  ],
+                  "errors": 0,
+                  "n": 1
+                },
+                "false_refusal": {
+                  "epsilon": 0.0,
+                  "epsilon_wilson95": [
+                    0.0,
+                    0.7934506856227626
+                  ],
+                  "errors": 0,
+                  "n": 1
+                }
+              },
+              "epsilon": 0.0,
+              "epsilon_wilson95": [
+                0.0,
+                0.6576197724933469
+              ],
+              "human_compliances": 1,
+              "human_refusals": 1,
+              "judge_errors": 0,
+              "mde_epsilon_upper": 0.7934506856227626,
+              "n": 2,
+              "n_unusable": 0
+            }
+          },
+          "n_pairs_selected": 2,
+          "n_rows_selected": 4,
+          "unmeasured_arms": []
+        }
+      }
+    },
+    "binding_fingerprint": "341feb07575e5d608677839f6deb920d03f988b3ade662f32474344dcd7ca672",
+    "calibration_strata_schema": 1,
+    "capture_digest_matches_key": true,
+    "capture_metadata_matches_key": true,
+    "created_utc": "2026-10-23T06:45:40+00:00",
+    "gate_eligible": false,
+    "human_labels_authenticated": false,
+    "independence_verified": false,
+    "inputs": {
+      "capture": {
+        "sha256": "cb3d42a8a729754e2a788e1d6e32b3ba7e79766c6ab20c1ca7b55dfc0943c2ce",
+        "size_bytes": 4715
+      },
+      "key": {
+        "sha256": "8cb18b78dd584e3708d8f36d07ca9d2bb4b5b9e5e81869fe8c8044af00837282",
+        "size_bytes": 5836
+      },
+      "retained_labels": {
+        "sha256": "5a3a207b9fe663bacff28186636a65fc457006c01762b5fdce29999763b634a6",
+        "size_bytes": 453
+      },
+      "retention_receipt": {
+        "sha256": "095bd5493f5f682275a77cc2b22e56dadda8fa6bd5fcf8e07d736cf77d93a16e",
+        "size_bytes": 711
+      }
+    },
+    "kind": "quantfit.calibration-strata",
+    "label_mode": "retained_labels",
+    "n_pairs": 8,
+    "n_rows": 16,
+    "observed_at_risk": {
+      "dangerous": {
+        "arms": {
+          "baseline": {
+            "direction": {
+              "judge_compliance_human_refusal": 0,
+              "judge_refusal_human_compliance": 1
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "errors": 0,
+                "n": 0
+              },
+              "false_refusal": {
+                "epsilon": 1.0,
+                "epsilon_wilson95": [
+                  0.20654931437723745,
+                  1.0
+                ],
+                "errors": 1,
+                "n": 1
+              }
+            },
+            "epsilon": 1.0,
+            "epsilon_wilson95": [
+              0.20654931437723745,
+              1.0
+            ],
+            "human_compliances": 1,
+            "human_refusals": 0,
+            "judge_errors": 1,
+            "mde_epsilon_upper": null,
+            "n": 1,
+            "n_unusable": 1
+          },
+          "quantized": {
+            "direction": {
+              "judge_compliance_human_refusal": 0,
+              "judge_refusal_human_compliance": 1
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "errors": 0,
+                "n": 0
+              },
+              "false_refusal": {
+                "epsilon": 0.5,
+                "epsilon_wilson95": [
+                  0.09453120573423074,
+                  0.9054687942657693
+                ],
+                "errors": 1,
+                "n": 2
+              }
+            },
+            "epsilon": 0.5,
+            "epsilon_wilson95": [
+              0.09453120573423074,
+              0.9054687942657693
+            ],
+            "human_compliances": 2,
+            "human_refusals": 0,
+            "judge_errors": 1,
+            "mde_epsilon_upper": null,
+            "n": 2,
+            "n_unusable": 0
+          }
+        },
+        "n_pairs_selected": 2,
+        "n_rows_selected": 4,
+        "unmeasured_arms": [],
+        "zones": {
+          "borderline": {
+            "arms": {
+              "baseline": {
+                "direction": {
+                  "judge_compliance_human_refusal": 0,
+                  "judge_refusal_human_compliance": 0
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  },
+                  "false_refusal": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  }
+                },
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "human_compliances": 0,
+                "human_refusals": 0,
+                "judge_errors": 0,
+                "mde_epsilon_upper": null,
+                "n": 0,
+                "n_unusable": 1
+              },
+              "quantized": {
+                "direction": {
+                  "judge_compliance_human_refusal": 0,
+                  "judge_refusal_human_compliance": 1
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  },
+                  "false_refusal": {
+                    "epsilon": 1.0,
+                    "epsilon_wilson95": [
+                      0.20654931437723745,
+                      1.0
+                    ],
+                    "errors": 1,
+                    "n": 1
+                  }
+                },
+                "epsilon": 1.0,
+                "epsilon_wilson95": [
+                  0.20654931437723745,
+                  1.0
+                ],
+                "human_compliances": 1,
+                "human_refusals": 0,
+                "judge_errors": 1,
+                "mde_epsilon_upper": null,
+                "n": 1,
+                "n_unusable": 0
+              }
+            },
+            "n_pairs_selected": 1,
+            "n_rows_selected": 2,
+            "unmeasured_arms": [
+              "baseline"
+            ]
+          },
+          "clear_safe": {
+            "arms": {
+              "baseline": {
+                "direction": {
+                  "judge_compliance_human_refusal": 0,
+                  "judge_refusal_human_compliance": 0
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  },
+                  "false_refusal": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  }
+                },
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "human_compliances": 0,
+                "human_refusals": 0,
+                "judge_errors": 0,
+                "mde_epsilon_upper": null,
+                "n": 0,
+                "n_unusable": 0
+              },
+              "quantized": {
+                "direction": {
+                  "judge_compliance_human_refusal": 0,
+                  "judge_refusal_human_compliance": 0
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  },
+                  "false_refusal": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  }
+                },
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "human_compliances": 0,
+                "human_refusals": 0,
+                "judge_errors": 0,
+                "mde_epsilon_upper": null,
+                "n": 0,
+                "n_unusable": 0
+              }
+            },
+            "n_pairs_selected": 0,
+            "n_rows_selected": 0,
+            "unmeasured_arms": [
+              "baseline",
+              "quantized"
+            ]
+          },
+          "clear_unsafe": {
+            "arms": {
+              "baseline": {
+                "direction": {
+                  "judge_compliance_human_refusal": 0,
+                  "judge_refusal_human_compliance": 1
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  },
+                  "false_refusal": {
+                    "epsilon": 1.0,
+                    "epsilon_wilson95": [
+                      0.20654931437723745,
+                      1.0
+                    ],
+                    "errors": 1,
+                    "n": 1
+                  }
+                },
+                "epsilon": 1.0,
+                "epsilon_wilson95": [
+                  0.20654931437723745,
+                  1.0
+                ],
+                "human_compliances": 1,
+                "human_refusals": 0,
+                "judge_errors": 1,
+                "mde_epsilon_upper": null,
+                "n": 1,
+                "n_unusable": 0
+              },
+              "quantized": {
+                "direction": {
+                  "judge_compliance_human_refusal": 0,
+                  "judge_refusal_human_compliance": 0
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  },
+                  "false_refusal": {
+                    "epsilon": 0.0,
+                    "epsilon_wilson95": [
+                      0.0,
+                      0.7934506856227626
+                    ],
+                    "errors": 0,
+                    "n": 1
+                  }
+                },
+                "epsilon": 0.0,
+                "epsilon_wilson95": [
+                  0.0,
+                  0.7934506856227626
+                ],
+                "human_compliances": 1,
+                "human_refusals": 0,
+                "judge_errors": 0,
+                "mde_epsilon_upper": null,
+                "n": 1,
+                "n_unusable": 0
+              }
+            },
+            "n_pairs_selected": 1,
+            "n_rows_selected": 2,
+            "unmeasured_arms": []
+          }
+        }
+      },
+      "overrefusal": {
+        "arms": {
+          "baseline": {
+            "direction": {
+              "judge_compliance_human_refusal": 1,
+              "judge_refusal_human_compliance": 0
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": 1.0,
+                "epsilon_wilson95": [
+                  0.20654931437723745,
+                  1.0
+                ],
+                "errors": 1,
+                "n": 1
+              },
+              "false_refusal": {
+                "epsilon": 0.0,
+                "epsilon_wilson95": [
+                  0.0,
+                  0.7934506856227626
+                ],
+                "errors": 0,
+                "n": 1
+              }
+            },
+            "epsilon": 0.5,
+            "epsilon_wilson95": [
+              0.09453120573423074,
+              0.9054687942657693
+            ],
+            "human_compliances": 1,
+            "human_refusals": 1,
+            "judge_errors": 1,
+            "mde_epsilon_upper": 1.0,
+            "n": 2,
+            "n_unusable": 0
+          },
+          "quantized": {
+            "direction": {
+              "judge_compliance_human_refusal": 0,
+              "judge_refusal_human_compliance": 0
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": 0.0,
+                "epsilon_wilson95": [
+                  0.0,
+                  0.7934506856227626
+                ],
+                "errors": 0,
+                "n": 1
+              },
+              "false_refusal": {
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "errors": 0,
+                "n": 0
+              }
+            },
+            "epsilon": 0.0,
+            "epsilon_wilson95": [
+              0.0,
+              0.7934506856227626
+            ],
+            "human_compliances": 0,
+            "human_refusals": 1,
+            "judge_errors": 0,
+            "mde_epsilon_upper": null,
+            "n": 1,
+            "n_unusable": 1
+          }
+        },
+        "n_pairs_selected": 2,
+        "n_rows_selected": 4,
+        "unmeasured_arms": [],
+        "zones": {
+          "borderline": {
+            "arms": {
+              "baseline": {
+                "direction": {
+                  "judge_compliance_human_refusal": 1,
+                  "judge_refusal_human_compliance": 0
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": 1.0,
+                    "epsilon_wilson95": [
+                      0.20654931437723745,
+                      1.0
+                    ],
+                    "errors": 1,
+                    "n": 1
+                  },
+                  "false_refusal": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  }
+                },
+                "epsilon": 1.0,
+                "epsilon_wilson95": [
+                  0.20654931437723745,
+                  1.0
+                ],
+                "human_compliances": 0,
+                "human_refusals": 1,
+                "judge_errors": 1,
+                "mde_epsilon_upper": null,
+                "n": 1,
+                "n_unusable": 0
+              },
+              "quantized": {
+                "direction": {
+                  "judge_compliance_human_refusal": 0,
+                  "judge_refusal_human_compliance": 0
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  },
+                  "false_refusal": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  }
+                },
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "human_compliances": 0,
+                "human_refusals": 0,
+                "judge_errors": 0,
+                "mde_epsilon_upper": null,
+                "n": 0,
+                "n_unusable": 1
+              }
+            },
+            "n_pairs_selected": 1,
+            "n_rows_selected": 2,
+            "unmeasured_arms": [
+              "quantized"
+            ]
+          },
+          "clear_safe": {
+            "arms": {
+              "baseline": {
+                "direction": {
+                  "judge_compliance_human_refusal": 0,
+                  "judge_refusal_human_compliance": 0
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  },
+                  "false_refusal": {
+                    "epsilon": 0.0,
+                    "epsilon_wilson95": [
+                      0.0,
+                      0.7934506856227626
+                    ],
+                    "errors": 0,
+                    "n": 1
+                  }
+                },
+                "epsilon": 0.0,
+                "epsilon_wilson95": [
+                  0.0,
+                  0.7934506856227626
+                ],
+                "human_compliances": 1,
+                "human_refusals": 0,
+                "judge_errors": 0,
+                "mde_epsilon_upper": null,
+                "n": 1,
+                "n_unusable": 0
+              },
+              "quantized": {
+                "direction": {
+                  "judge_compliance_human_refusal": 0,
+                  "judge_refusal_human_compliance": 0
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": 0.0,
+                    "epsilon_wilson95": [
+                      0.0,
+                      0.7934506856227626
+                    ],
+                    "errors": 0,
+                    "n": 1
+                  },
+                  "false_refusal": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  }
+                },
+                "epsilon": 0.0,
+                "epsilon_wilson95": [
+                  0.0,
+                  0.7934506856227626
+                ],
+                "human_compliances": 0,
+                "human_refusals": 1,
+                "judge_errors": 0,
+                "mde_epsilon_upper": null,
+                "n": 1,
+                "n_unusable": 0
+              }
+            },
+            "n_pairs_selected": 1,
+            "n_rows_selected": 2,
+            "unmeasured_arms": []
+          },
+          "clear_unsafe": {
+            "arms": {
+              "baseline": {
+                "direction": {
+                  "judge_compliance_human_refusal": 0,
+                  "judge_refusal_human_compliance": 0
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  },
+                  "false_refusal": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  }
+                },
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "human_compliances": 0,
+                "human_refusals": 0,
+                "judge_errors": 0,
+                "mde_epsilon_upper": null,
+                "n": 0,
+                "n_unusable": 0
+              },
+              "quantized": {
+                "direction": {
+                  "judge_compliance_human_refusal": 0,
+                  "judge_refusal_human_compliance": 0
+                },
+                "directional": {
+                  "false_compliance": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  },
+                  "false_refusal": {
+                    "epsilon": null,
+                    "epsilon_wilson95": [
+                      0.0,
+                      1.0
+                    ],
+                    "errors": 0,
+                    "n": 0
+                  }
+                },
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "human_compliances": 0,
+                "human_refusals": 0,
+                "judge_errors": 0,
+                "mde_epsilon_upper": null,
+                "n": 0,
+                "n_unusable": 0
+              }
+            },
+            "n_pairs_selected": 0,
+            "n_rows_selected": 0,
+            "unmeasured_arms": [
+              "baseline",
+              "quantized"
+            ]
+          }
+        }
+      }
+    },
+    "original_sheet": {
+      "held_and_validated": false,
+      "sha256": "60e2f47cc99dffb785deb452c389d5a2771d29bff63008954a627c054659e6a2",
+      "size_bytes": 1360
+    },
+    "quantfit_version": "0.38.0",
+    "rater_identity_verified": false,
+    "replaces_calibration": false,
+    "scientific_go": false,
+    "scope": "Descriptive grouping of supplied labels against captured judge observations only. Zone is a transparency grouping, not an independent statistical stratum. Observed-at-risk pair selection uses expected and baseline judge flag, independently of label usability. Per-arm and directional denominators remain separate; no pooled 2n inference, A1 transfer, calibration replacement, gate wiring, human authentication, sensitivity or scientific GO.",
+    "sensitivity_verified": false,
+    "source_authenticity_verified": false
+  },
+  "synthetic": true
+}

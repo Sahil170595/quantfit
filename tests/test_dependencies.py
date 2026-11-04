@@ -60,6 +60,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
+from packaging.requirements import Requirement
 
 try:  # stdlib on 3.11+
     import tomllib
@@ -79,9 +80,9 @@ _PKG = _ROOT / "quantfit"
 
 
 # --------------------------------------------------------------------------------------
-# Requirement parsing. Deliberately minimal: this repo's requirement strings are plain
-# `name>=x[,<y]` with no markers, extras or URLs, and a parser that quietly accepted more
-# than that could quietly mis-read a bound.
+# Requirement parsing. Inspect every declared branch's version bounds, including
+# mutually exclusive Python markers. Marker evaluation belongs to the resolver;
+# policy coverage must not omit an inactive branch.
 # --------------------------------------------------------------------------------------
 
 _REQ_RE = re.compile(
@@ -249,27 +250,6 @@ _EXEMPTIONS: dict[str, _Exemption] = {
         ),
         chain=("llmcompressor",),
     ),
-    "datasets": _Exemption(
-        kind="PARENT_BOUNDED",
-        reason=(
-            "Same chain as transformers: the capped llmcompressor constrains datasets at both ends. quantfit "
-            "calls load_dataset with an explicit pinned revision and split (safety/verify.py:517) and builds "
-            "calibration blocks with Dataset.from_dict (backends/compressed_tensors.py:70); both are the "
-            "stable surface."
-        ),
-        chain=("llmcompressor",),
-    ),
-    "accelerate": _Exemption(
-        kind="PARENT_BOUNDED",
-        reason=(
-            "Bounded through the capped llmcompressor, which requires accelerate at both ends. Note the "
-            "stronger fact recorded by test_accelerate_is_declared_but_never_imported: quantfit imports "
-            "accelerate NOWHERE — the device_map='auto' offload path that justified it was deleted at 0.3 "
-            "(CHANGELOG.md:346, ROADMAP.md:24). The honest fix is to drop the declaration, not to cap it; "
-            "the exemption records why capping is not the answer, not that the declaration is correct."
-        ),
-        chain=("llmcompressor",),
-    ),
     "huggingface-hub": _Exemption(
         kind="PARENT_BOUNDED",
         reason=(
@@ -315,12 +295,14 @@ _EXEMPTIONS: dict[str, _Exemption] = {
         kind="BUILD_BACKEND",
         reason=(
             "Build-time only: the PEP 517 frontend resolves [build-system].requires into a throwaway isolated "
-            "environment and it is never installed alongside quantfit at runtime, so a break cannot reach a "
-            "user who already has a wheel. It also cannot rot unnoticed, which is the actual premise: this "
+            "environment. This exemption applies to the build requirement only; the separately declared "
+            "runtime requirement is bounded at >=84.1.0,<85 because Torch otherwise admits an affected release. "
+            "The build backend also cannot rot unnoticed, which is the actual premise: this "
             "repo builds a wheel from the same pyproject on every push and on the weekly canary, on both ubuntu "
             "and windows, so a setuptools release that breaks the build fails distribution acceptance and "
             "quickstart-install first — asserted by test_build_backend_exemptions_rest_on_a_wheel_build_in_ci. "
-            "The >=77 floor is a real claim (PEP 639 license expressions, which this project's metadata uses); "
+            "The >=84.1.0 floor excludes the disclosed namespace_packages path-escape advisory and includes "
+            "PEP 639 license expressions, which this project's metadata uses; "
             "the open upper end says only that no known setuptools release breaks this build."
         ),
     ),
@@ -332,7 +314,7 @@ _EXEMPTIONS: dict[str, _Exemption] = {
             "dead weight rather than a bound worth setting. Capping it would pin a package this build does not "
             "meaningfully use; the honest fix is to DELETE it from [build-system].requires, which is "
             "pyproject.toml-owner work. The exemption records why capping is not the answer, not that the "
-            "declaration is correct — the same shape as the accelerate entry above."
+            "declaration is correct."
         ),
     ),
 }
@@ -350,6 +332,19 @@ def _unbounded_and_unexempt(pairs: list[tuple[str, _Requirement]]) -> list[str]:
             continue
         offenders.append(f"{req.raw!r} in {_location(group)}")
     return offenders
+
+
+@pytest.mark.parametrize(
+    ("name", "qualified", "unqualified"),
+    [("datasets", "5.0.1", "5.0.2"), ("accelerate", "1.15.0", "1.15.1")],
+)
+def test_compressor_hotfix_retains_qualified_dependency_ceilings(name, qualified, unqualified):
+    """The Pillow-cap hotfix must not admit unqualified datasets/accelerate patches."""
+    from packaging.requirements import Requirement
+
+    requirements = {req.name: Requirement(req.raw) for req in _hard_requirements()}
+    assert qualified in requirements[name].specifier
+    assert unqualified not in requirements[name].specifier
 
 
 def test_every_hard_dependency_is_bounded_or_exempt():
@@ -531,8 +526,6 @@ def test_parent_bounded_premises_hold_against_installed_metadata():
 _INERT_FLOORS: dict[str, str] = {
     "torch": ">=2.4",  # llmcompressor requires torch>=2.10.0
     "transformers": ">=4.56",  # llmcompressor requires transformers>=5.15.0
-    "datasets": ">=3.0",  # llmcompressor requires datasets>=4.8.4
-    "accelerate": ">=1.0",  # llmcompressor requires accelerate>=1.6.0
     "huggingface-hub": ">=0.25",  # transformers requires huggingface-hub>=1.5.0
 }
 
@@ -602,7 +595,6 @@ def test_floors_that_cannot_bind_are_recorded_not_discovered():
 # name already here, fails the test and has to be argued.
 _MAJOR_CROSSED: dict[str, tuple[str, int]] = {
     "transformers": (">=4.56", 5),  # hard dep; floor never moved, no validated run on 5.x recorded
-    "datasets": (">=3.0", 5),  # public load_dataset + Dataset.from_dict; hosted corpus canary receipt in validation
     "huggingface-hub": (">=0.25", 1),  # hard dep; 0.x -> 1.x, the largest relative jump in the set
     "psutil": (">=5.9", 7),  # LEAF_SINGLE_CALL: two majors, but the single call site is premise-tested
     "pytest": (">=8.0", 9),  # DEV_HARNESS: the 8 -> 9 bump IS recorded, in the exemption reason itself
@@ -786,25 +778,80 @@ def test_build_backend_exemptions_rest_on_a_wheel_build_in_ci():
     )
 
 
-def test_a_dependency_declared_twice_carries_the_same_specifier():
-    """`gguf` is declared in two extras. Two copies of a bound is two places for it to drift.
-
-    Accumulated per OCCURRENCE, not per group. Keying by group made two divergent copies
-    inside the SAME group (`dev = ["gguf>=0.10,<1.0", "gguf>=0.9"]`) overwrite each other and
-    vanish — the exact drift this test exists to catch, silently swallowed by its own index.
-    """
-    seen: dict[str, list[tuple[str, str]]] = {}
-    for group, req in _all_requirements():
-        seen.setdefault(req.name, []).append((_location(group), req.raw))
-    divergent = {
+def _divergent_active_bounds(requirements, python_version: str) -> dict:
+    seen: dict[tuple[str, str], list[tuple[str, str]]] = {}
+    environment = {"python_version": python_version, "python_full_version": f"{python_version}.0"}
+    for group, req in requirements:
+        parsed = Requirement(req.raw)
+        if parsed.marker is not None and not parsed.marker.evaluate(environment=environment):
+            continue
+        domain = "build" if group == _BUILD_SYSTEM_GROUP else "runtime"
+        seen.setdefault((domain, req.name), []).append((_location(group), req.raw))
+    return {
         name: occurrences
         for name, occurrences in seen.items()
         if len({_parse_requirement(raw).specs for _where, raw in occurrences}) > 1
     }
-    assert not divergent, (
-        f"the same dependency is declared with different specifiers: {divergent}. Two copies of a bound is two "
-        "places for it to drift; make them identical in pyproject.toml."
-    )
+
+
+def test_a_dependency_declared_twice_carries_the_same_specifier():
+    """Keep every occurrence, distinguishing inactive markers and build isolation."""
+    for major, minor in _classifier_versions():
+        version = f"{major}.{minor}"
+        divergent = _divergent_active_bounds(_all_requirements(), version)
+        assert not divergent, (
+            f"the same dependency is declared with different active specifiers on Python {version}: "
+            f"{divergent}. Make bounds within each resolver domain identical in pyproject.toml."
+        )
+
+
+def test_every_supported_python_excludes_disclosed_filelock_versions():
+    """Advisory-domain metadata control; no exploit or runtime failure is claimed.
+
+    GHSA-8mx5-7m5m-r77g and GHSA-69hj-f68j-2879 are patched in 4.2.1.
+    Check every advertised marker branch, not only this process's interpreter.
+    """
+    declarations = [Requirement(raw) for raw in _pyproject()["project"]["dependencies"]]
+    for major, minor in _classifier_versions():
+        environment = {"python_version": f"{major}.{minor}", "python_full_version": f"{major}.{minor}.0"}
+        active = [
+            req
+            for req in declarations
+            if req.name == "filelock" and (req.marker is None or req.marker.evaluate(environment=environment))
+        ]
+        assert active, f"No explicit filelock security bound on {major}.{minor}"
+        for affected in ("3.20.3", "4.0.10", "4.2.0"):
+            assert not all(affected in req.specifier for req in active), (
+                f"Supported {major}.{minor} admits affected filelock {affected}"
+            )
+        assert all("4.2.1" in req.specifier for req in active), f"Fixed filelock excluded on {major}.{minor}"
+
+
+@pytest.mark.parametrize(
+    ("declarations", "conflicting"),
+    [
+        ([("dev", "gguf>=0.10,<1"), ("dev", "gguf>=0.10,<2")], True),
+        ([("dev", "gguf>=0.10,<1"), ("gguf", "gguf>=0.10,<2")], True),
+        (
+            [
+                ("", 'filelock==3.20.3; python_version < "3.11"'),
+                ("", 'filelock>=4.2.1,<5; python_version >= "3.11"'),
+            ],
+            False,
+        ),
+        (
+            [
+                ("dev", 'gguf>=0.10,<1; python_version >= "3.10"'),
+                ("dev", 'gguf>=0.10,<2; python_version >= "3.11"'),
+            ],
+            True,
+        ),
+        ([("", "setuptools>=84.1,<85"), (_BUILD_SYSTEM_GROUP, "setuptools>=84.1")], False),
+    ],
+)
+def test_duplicate_bound_policy_keeps_same_domain_conflicts(declarations, conflicting):
+    rows = [(group, _parse_requirement(raw)) for group, raw in declarations]
+    assert bool(_divergent_active_bounds(rows, "3.12")) is conflicting
 
 
 # --------------------------------------------------------------------------------------

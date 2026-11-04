@@ -19,7 +19,37 @@ from quantfit.spec import DEFAULT_SPEC  # a frozen dataclass of constants
 CLI_JSON_SCHEMA_VERSION = 1
 
 
-def _emit(args: argparse.Namespace, command: str, code: int, result: dict, human: Callable[[], None]) -> int:
+def _json_document(command: str, code: int, result: dict) -> dict:
+    return {
+        "schema_version": CLI_JSON_SCHEMA_VERSION,
+        "tool": {"name": "quantfit", "version": __version__},
+        "command": command,
+        "exit_code": code,
+        "result": result,
+    }
+
+
+def _probe_metadata(options, drift):
+    from quantfit.safety.verify import _canonical_source
+
+    source = options.get("probe_corpus")
+    if source is None or _canonical_source(source):
+        return {}
+    return {
+        "probe_dataset": {"id": source.id, "revision": source.revision, "split": source.split, "n_probes": drift.n},
+        "probe_scope": "supplied noncanonical; no curation or judge-accuracy qualification",
+    }
+
+
+def _emit(
+    args: argparse.Namespace,
+    command: str,
+    code: int,
+    result: dict,
+    human: Callable[[], None],
+    *,
+    encoded_json: bytes | None = None,
+) -> int:
     """Print one JSON document, or the prose rendering, and return the exit code.
 
     Under `--json`, stdout carries exactly one document and nothing else. Anything that
@@ -31,13 +61,14 @@ def _emit(args: argparse.Namespace, command: str, code: int, result: dict, human
     if not getattr(args, "json", False):
         human()
         return code
-    document = {
-        "schema_version": CLI_JSON_SCHEMA_VERSION,
-        "tool": {"name": "quantfit", "version": __version__},
-        "command": command,
-        "exit_code": code,
-        "result": result,
-    }
+    if encoded_json is not None:
+        binary = getattr(sys.stdout, "buffer", None)
+        if binary is None:
+            sys.stdout.write(encoded_json.decode("utf-8"))
+        else:
+            binary.write(encoded_json)
+        return code
+    document = _json_document(command, code, result)
     json.dump(document, sys.stdout, indent=2, default=str)
     sys.stdout.write("\n")
     return code
@@ -90,6 +121,20 @@ def _positive_int(text: str) -> int:
     if value < 1:
         raise argparse.ArgumentTypeError(f"must be at least 1, got {value}")
     return value
+
+
+def _probe_source_options(args):
+    source_values = tuple(getattr(args, name, None) for name in ("probe_dataset", "probe_revision", "probe_split"))
+    if not any(value is not None for value in source_values):
+        return {}
+    if any(value is None for value in source_values) or getattr(args, "demo", False):
+        raise RuntimeError("invalid_probe_corpus_options")
+    from quantfit.safety.verify import ProbeCorpus, _canonical_source
+
+    source = ProbeCorpus(*source_values)
+    if getattr(args, "_execution_recipe", None) is not None and not _canonical_source(source):
+        raise RuntimeError("execution_recipe_mismatch")
+    return {"probe_corpus": source}
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -169,6 +214,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "--log-dir", default=None, metavar="DIR", help="LOCAL capture-class Inspect logs; never commit"
     )
 
+    pinspect.add_argument(
+        "--probe-dataset", default=None, help="declared namespaced Hub dataset; all three probe flags required"
+    )
+    pinspect.add_argument("--probe-revision", default=None, help="exact lowercase 40-hex dataset revision")
+    pinspect.add_argument("--probe-split", default=None, help="one literal whole named split, not a slice/union")
+
     pvs = sub.add_parser(
         "verify-safety",
         parents=[tok],
@@ -228,6 +279,11 @@ def _build_parser() -> argparse.ArgumentParser:
         "harmful model output; never commit, redistribute, or attach to a report — see "
         "docs/data-handling-completions.md; use the *.capture.jsonl suffix)",
     )
+    pvs.add_argument(
+        "--probe-dataset", default=None, help="declared noncanonical corpus; all three probe flags required"
+    )
+    pvs.add_argument("--probe-revision", default=None, help="exact lowercase 40-hex dataset revision")
+    pvs.add_argument("--probe-split", default=None, help="one whole literal split; no slicing/concatenation")
     pvs.add_argument("--baseline-cache", default=None, metavar="DIR", help=_BASELINE_CACHE_HELP)
     pvs.add_argument("--baseline-revision", default=None, help="immutable 40-hex commit; Hub GGUF refs only")
     pvs.add_argument("--quant-revision", default=None, help="immutable 40-hex commit; Hub GGUF refs only")
@@ -296,24 +352,123 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     psaved = sub.add_parser(
         "screen-summary",
-        help="offline saved native screen aggregates (0 conditional no-detection, 3 flags, 4 incomplete, 2 refusal)",
+        help="offline native screen (0 conditional no-detection, 3 flags, 4 incomplete, 5 unmet resolution requirement, 2 refusal)",
     )
     psaved.add_argument("--targets", required=True, metavar="PATH", help="bounded schema-1 target manifest")
     psaved.add_argument("--reports-dir", required=True, metavar="DIR", help="closed saved aggregate directory")
     psaved.add_argument("--out", default=None, metavar="PATH", help="separate receiving JSON output")
     psaved.add_argument("--junit", default=None, metavar="PATH", help="receiving XML; missing evidence is skipped")
+    calibration_modes = psaved.add_mutually_exclusive_group()
+    calibration_modes.add_argument(
+        "--calibrations-dir",
+        default=None,
+        metavar="DIR",
+        help="optional closed aggregate calibration directory; conditional resolution does not change native verdicts",
+    )
+    calibration_modes.add_argument(
+        "--calibration-variant",
+        action="append",
+        metavar="NAME=DIR",
+        help="repeat for 1..8 named closed calibration choices; NAME=- explicitly declares missing; mutually exclusive single directory",
+    )
+    psaved.add_argument(
+        "--require-conditional-resolution",
+        type=float,
+        default=None,
+        metavar="PP",
+        help="opt-in finite (0,100] pp ceiling on both native conditional axes for every target and declared choice; requires a calibration mode",
+    )
+    pcompare = sub.add_parser(
+        "screen-compare",
+        help="offline declared screen observations (0 conditional no-flag, 3 retained flags, 4 incomplete, 2 refusal)",
+    )
+    pcompare.add_argument("--reference-bundle", required=True, metavar="DIR", help="original screen bundle")
+    pcompare.add_argument("--candidate-bundle", required=True, metavar="DIR", help="candidate screen bundle")
+    pcompare.add_argument("--out", default=None, metavar="PATH", help="separate receiving comparison JSON")
+    pcompare.add_argument("--junit", default=None, metavar="PATH", help="two axes per target and overall XML case")
     pe.add_argument("what", choices=("model-card",), help="what to emit")
     pe.add_argument("--report", required=True, metavar="PATH", help="a schema-v2 drift report written by --report")
     pe.add_argument(
         "--calibration-report",
         metavar="PATH",
-        help="bound schema-2 calibration for separately labeled conditional resolution; no human-label authentication",
+        help="bound schema-2 or schema-3 calibration for separately labeled conditional resolution; no human-label authentication",
+    )
+    pe.add_argument(
+        "--adjudication",
+        metavar="PATH",
+        help="closed source-bound operator-declared flip record; not authenticated human truth",
+    )
+
+    pe.add_argument(
+        "--adjudication-capture",
+        metavar="PATH",
+        help="private capture for fresh supplied-source consistency; requires --adjudication",
+    )
+
+    adjudicate = sub.add_parser(
+        "adjudicate", help="explicit source-bound operator flip declarations; no automatic confirmation"
+    )
+    adjudication_sub = adjudicate.add_subparsers(dest="adjudicate_cmd", required=True)
+    adjudication_screen = adjudication_sub.add_parser(
+        "screen", help="whole original-target saved screen with optional source-matched declarations (0/3/4; invalid 2)"
+    )
+    adjudication_screen.add_argument("--targets", required=True, metavar="PATH")
+    adjudication_screen.add_argument("--reports-dir", required=True, metavar="DIR")
+    adjudication_screen.add_argument("--adjudications-dir", metavar="DIR")
+    adjudication_screen.add_argument("--captures-dir", metavar="DIR")
+    adjudication_screen.add_argument("--require-source-complete", action="store_true")
+    adjudication_screen.add_argument("--out", metavar="PATH")
+    adjudication_screen.add_argument("--junit", metavar="PATH")
+    adjudication_prepare = adjudication_sub.add_parser(
+        "prepare", help="bound actual capture/report -> complete private blank flagged-pair queue"
+    )
+    adjudication_apply = adjudication_sub.add_parser(
+        "apply", help="all explicit judgments -> NEW public hash-only declared adjudication"
+    )
+    for adjudication_parser in (adjudication_prepare, adjudication_apply):
+        adjudication_parser.add_argument(
+            "--report", required=True, metavar="PATH", help="actual complete native schema-2 report"
+        )
+        adjudication_parser.add_argument(
+            "--capture", required=True, metavar="PATH", help="actual complete non-null bound capture-v2"
+        )
+        adjudication_parser.add_argument(
+            "--review",
+            required=True,
+            metavar="PATH",
+            help="private flagged-pair CSV queue (new blank at prepare; explicitly filled at apply)",
+        )
+    adjudication_prepare.add_argument(
+        "--receipt", required=True, metavar="PATH", help="NEW aggregate preparation binding"
+    )
+    adjudication_apply.add_argument(
+        "--preparation", required=True, metavar="PATH", help="exact original preparation receipt"
+    )
+    adjudication_apply.add_argument(
+        "--out", required=True, metavar="PATH", help="NEW closed public aggregate/per-pair-hash record"
+    )
+
+    adjudication_page = adjudication_sub.add_parser(
+        "review-page", help="NEW private offline blank-queue page; preparation consistency only (0/2)"
+    )
+    adjudication_page.add_argument("--review", required=True, metavar="PATH")
+    adjudication_page.add_argument("--preparation", required=True, metavar="PATH")
+    adjudication_page.add_argument("--out", required=True, metavar="PATH", help="NEW private *.adjudication.html")
+
+    adjudication_verify = adjudication_sub.add_parser(
+        "verify", help="held report/capture/record consistency, not authenticated human truth (0 consistent, 2 invalid)"
+    )
+    adjudication_verify.add_argument("--report", required=True, metavar="PATH")
+    adjudication_verify.add_argument("--capture", required=True, metavar="PATH")
+    adjudication_verify.add_argument("--record", required=True, metavar="PATH")
+    adjudication_verify.add_argument(
+        "--out", default=None, metavar="PATH", help="optional NEW aggregate verification proof"
     )
 
     pca = sub.add_parser(
         "calibrate",
         help="judge-calibration machinery (ROADMAP 0.6; labeling itself starts only on the 0.5 GO): "
-        "build a blinded labeling sheet from a capture, or ingest filled labels into a calibration report "
+        "build a blinded sheet, ingest labels into a calibration report, or reconcile two filled sheets "
         "(exit 0 = done, 2 = operational error)",
     )
     csub = pca.add_subparsers(dest="calibrate_cmd", required=True)
@@ -322,14 +477,180 @@ def _build_parser() -> argparse.ArgumentParser:
     pcs.add_argument("--sheet", required=True, metavar="PATH", help="blinded sheet to write (*.labels.csv)")
     pcs.add_argument("--key", required=True, metavar="PATH", help="unblinding key to write (*.labelkey.json)")
     pci = csub.add_parser("ingest", help="filled sheet + key -> per-arm judge-error calibration report")
-    pci.add_argument("--sheet", required=True, metavar="PATH", help="the filled labeling sheet")
+    ingest_mode = pci.add_mutually_exclusive_group(required=True)
+    ingest_mode.add_argument(
+        "--sheet", metavar="PATH", help="the original filled three-column labeling sheet (schema 2)"
+    )
+    ingest_mode.add_argument(
+        "--retained-labels", metavar="PATH", help="private id,human_label CSV (schema 3; requires receipt)"
+    )
+    pci.add_argument(
+        "--retention-receipt", metavar="PATH", help="exact aggregate extraction receipt; retained mode only"
+    )
     pci.add_argument("--key", required=True, metavar="PATH", help="the key written next to it")
-    pci.add_argument("--out", required=True, metavar="PATH", help="calibration report JSON to write (counts only)")
+    pci.add_argument(
+        "--out",
+        required=True,
+        metavar="PATH",
+        help="calibration report JSON to write (aggregate counts and declared scope)",
+    )
+    pce = csub.add_parser("extract", help="validate a filled sheet and retain completion-free private labels once")
+    pce.add_argument("--sheet", required=True, metavar="PATH", help="original filled three-column labeling sheet")
+    pce.add_argument("--key", required=True, metavar="PATH", help="private unblinding key")
+    pce.add_argument("--out", required=True, metavar="PATH", help="new private two-column retained CSV")
+    pce.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate retention receipt JSON")
+    pct = csub.add_parser(
+        "strata",
+        help="descriptive per-zone/per-arm calibration and observed-at-risk diagnostics (0 completed, 2 invalid)",
+    )
+    pct.add_argument(
+        "--capture",
+        required=True,
+        metavar="PATH",
+        help="exact original private capture; required for zone/expected metadata",
+    )
+    pct.add_argument("--key", required=True, metavar="PATH", help="matching private v2 unblinding key")
+    strata_mode = pct.add_mutually_exclusive_group(required=True)
+    strata_mode.add_argument("--sheet", metavar="PATH", help="original filled three-column labeling sheet")
+    strata_mode.add_argument(
+        "--retained-labels", metavar="PATH", help="private two-column retained CSV; requires receipt"
+    )
+    pct.add_argument(
+        "--retention-receipt", metavar="PATH", help="exact extraction receipt; required exactly with retained labels"
+    )
+    pct.add_argument(
+        "--out", required=True, metavar="PATH", help="new aggregate diagnostics JSON; never replacement calibration"
+    )
+    pcp = csub.add_parser("paired", help="descriptive paired judge/label and axis-flip tables (0 completed, 2 invalid)")
+    pcp.add_argument("--capture", required=True, metavar="PATH", help="exact original private capture")
+    pcp.add_argument("--key", required=True, metavar="PATH", help="matching private v2 unblinding key")
+    paired_mode = pcp.add_mutually_exclusive_group(required=True)
+    paired_mode.add_argument("--sheet", metavar="PATH", help="original filled three-column labeling sheet")
+    paired_mode.add_argument(
+        "--retained-labels", metavar="PATH", help="private two-column retained CSV; requires receipt"
+    )
+    pcp.add_argument(
+        "--retention-receipt", metavar="PATH", help="exact extraction receipt; required exactly with retained labels"
+    )
+    pcp.add_argument(
+        "--out",
+        required=True,
+        metavar="PATH",
+        help="new aggregate paired diagnostics JSON; never replacement calibration",
+    )
+    pcjudges = csub.add_parser(
+        "compare-judges",
+        help="descriptive two-judge diagnostics over the exact same supplied population (0 complete, 2 invalid)",
+    )
+    for side in ("a", "b"):
+        pcjudges.add_argument(
+            f"--capture-{side}", required=True, metavar="PATH", help="own exact private schema2 capture"
+        )
+        pcjudges.add_argument(f"--key-{side}", required=True, metavar="PATH", help="own matching bound v2 key")
+        judge_mode = pcjudges.add_mutually_exclusive_group(required=True)
+        judge_mode.add_argument(f"--sheet-{side}", metavar="PATH", help="own complete filled native labeling sheet")
+        judge_mode.add_argument(
+            f"--retained-labels-{side}", metavar="PATH", help="own retained labels; requires own receipt"
+        )
+        pcjudges.add_argument(
+            f"--retention-receipt-{side}", metavar="PATH", help="required exactly with own retained labels"
+        )
+    pcjudges.add_argument(
+        "--out", required=True, metavar="PATH", help="new aggregate diagnostic JSON; never calibration or a gate"
+    )
+    pcreview = csub.add_parser(
+        "review", help="local explicit review preparation/application; never automatic adjudication"
+    )
+    review_sub = pcreview.add_subparsers(dest="review_cmd", required=True)
+    review_prepare = review_sub.add_parser(
+        "prepare", help="two complete originals -> private disagreement subset + receipt"
+    )
+    review_apply = review_sub.add_parser("apply", help="explicit filled subset -> complete new private sheet + receipt")
+    for review_parser in (review_prepare, review_apply):
+        review_parser.add_argument(
+            "--input-mode",
+            choices=("full-sheet", "retained"),
+            default="full-sheet",
+            help="full-sheet default, or explicit actual-capture-backed retained review",
+        )
+        for arm in ("a", "b"):
+            arm_inputs = review_parser.add_mutually_exclusive_group(required=True)
+            arm_inputs.add_argument(
+                f"--sheet-{arm}", metavar="PATH", help=f"original complete filled sheet {arm.upper()}"
+            )
+            arm_inputs.add_argument(
+                f"--retained-labels-{arm}", metavar="PATH", help=f"complete retained labels {arm.upper()}"
+            )
+            review_parser.add_argument(
+                f"--retention-receipt-{arm}", metavar="PATH", help=f"actual extraction receipt for {arm.upper()}"
+            )
+        review_parser.add_argument(
+            "--capture", metavar="PATH", help="actual complete bound capture, required in retained mode"
+        )
+        review_parser.add_argument("--key", required=True, metavar="PATH", help="shared private unblinding key")
+        review_parser.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate receipt JSON")
+    review_prepare.add_argument(
+        "--sheet", required=True, metavar="PATH", help="new private completion-bearing subset with blank labels"
+    )
+    review_apply.add_argument(
+        "--review", required=True, metavar="PATH", help="exact selected subset with explicit labels"
+    )
+    review_apply.add_argument(
+        "--preparation",
+        required=True,
+        metavar="PATH",
+        help="original preparation receipt for these role-specific input bytes",
+    )
+    review_apply.add_argument(
+        "--out",
+        required=True,
+        metavar="PATH",
+        help="new complete private sheet, suitable for separate native ingestion",
+    )
+    chunks = csub.add_parser("chunks", help="private blank-template partitioning and complete explicit collection")
+    chunk_sub = chunks.add_subparsers(dest="chunks_cmd", required=True)
+    chunk_prepare = chunk_sub.add_parser(
+        "prepare", help="complete blank template + key -> all parts and private manifest"
+    )
+    chunk_collect = chunk_sub.add_parser("collect", help="all explicit filled parts -> complete new native sheet")
+    chunk_packets = chunk_sub.add_parser("packets", help="original blank/key/manifest -> all private recipient pages")
+    for chunk_parser in (chunk_prepare, chunk_collect, chunk_packets):
+        chunk_parser.add_argument(
+            "--sheet", required=True, metavar="PATH", help="unchanged original complete BLANK template"
+        )
+        chunk_parser.add_argument(
+            "--key", required=True, metavar="PATH", help="original private unblinding key; never share"
+        )
+    chunk_prepare.add_argument("--out-dir", required=True, metavar="DIR", help="existing empty private directory")
+    chunk_prepare.add_argument(
+        "--rows-per-part", type=int, default=100, help="maximum rows per part; at most 128 parts"
+    )
+    chunk_prepare.add_argument("--annotator-role", choices=("maintainer", "named_second"), default="maintainer")
+    chunk_prepare.add_argument(
+        "--annotator-name", help="bounded operator-declared attribution; required for named_second"
+    )
+    chunk_collect.add_argument("--manifest", required=True, metavar="PATH", help="original private chunk manifest")
+    chunk_collect.add_argument(
+        "--part", required=True, action="append", metavar="PATH", help="filled part, repeated in manifest order"
+    )
+    chunk_collect.add_argument("--out", required=True, metavar="PATH", help="new complete private native sheet")
+    chunk_collect.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate counts/hash receipt")
+    chunk_packets.add_argument(
+        "--manifest", required=True, metavar="PATH", help="original private chunk manifest; never share"
+    )
+    chunk_packets.add_argument(
+        "--out-dir", required=True, metavar="DIR", help="existing empty private recipient-page directory"
+    )
+    pcr = csub.add_parser("reconcile", help="two filled sheets + one key -> aggregate label-disagreement counts")
+    pcr.add_argument("--sheet-a", required=True, metavar="PATH", help="first private filled labeling sheet")
+    pcr.add_argument("--sheet-b", required=True, metavar="PATH", help="second private filled labeling sheet")
+    pcr.add_argument("--key", required=True, metavar="PATH", help="private unblinding key shared by both sheets")
+    pcr.add_argument("--out", required=True, metavar="PATH", help="aggregate reconciliation JSON; no labels or text")
 
     pg = sub.add_parser(
         "gate",
         parents=[tok],
-        help="pre-release gate: does this quant hold a declared refusal-robustness threshold? "
+        help="pre-release native resolution/detection gate: legacy dangerous-only or explicit selected axes "
         "(exit 0 = pass, 3 = fail, 4 = gated axis unmeasurable, 5 = threshold finer than the "
         "instrument's resolution, 2 = operational error)",
     )
@@ -349,6 +670,13 @@ def _build_parser() -> argparse.ArgumentParser:
         help="declared dangerous-axis flip-rate threshold in PERCENTAGE POINTS (e.g. 30 = 30pp)",
     )
     gthr.add_argument("--tier", choices=tuple(GATE_TIERS), help="a named tier instead of a raw threshold")
+    gthr.add_argument(
+        "--axis-threshold",
+        action="append",
+        default=None,
+        metavar="AXIS=PP",
+        help="repeat for refusal-robustness/over-refusal native detectable-effect resolution targets (0 < PP <= 30)",
+    )
     pg.add_argument(
         "--eps-upper",
         type=float,
@@ -367,7 +695,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--calibration-report",
         default=None,
         metavar="PATH",
-        help="bound schema-2 calibration report; mutually exclusive with --eps-upper/--eps-source. "
+        help="bound schema-2 or schema-3 calibration report; mutually exclusive with --eps-upper/--eps-source. "
         "Scope matching does not verify human labels or sensitivity",
     )
     pg.add_argument(
@@ -382,8 +710,8 @@ def _build_parser() -> argparse.ArgumentParser:
         "--junit",
         default=None,
         metavar="PATH",
-        help="also write the gate verdict as JUnit XML: resolution, gated axis and ungated "
-        "axis as separate cases, so exit 5 fails as a refusal rather than as a breached threshold",
+        help="also write native gate JUnit: legacy resolution/gated/ungated or selected per-axis and overall "
+        "cases, so exit 5 fails as a refusal rather than as a breached threshold",
     )
     pg.add_argument("--baseline-cache", default=None, metavar="DIR", help=_BASELINE_CACHE_HELP)
 
@@ -400,6 +728,31 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     pres.add_argument(
         "--out", required=True, metavar="PATH", help="separate resolution artifact; must not overwrite either input"
+    )
+    pres.add_argument(
+        "--plan-n-min",
+        type=int,
+        metavar="N",
+        help="hypothetical inclusive minimum AT-RISK count; requires complete planning options",
+    )
+    pres.add_argument(
+        "--plan-n-max",
+        type=int,
+        metavar="N",
+        help="hypothetical inclusive maximum AT-RISK count; every integer is evaluated",
+    )
+    pres.add_argument(
+        "--plan-mde-pp",
+        type=float,
+        metavar="PP",
+        help="hypothetical effective-MDE ceiling in (0,100] percentage points; not a gate",
+    )
+    pres.add_argument(
+        "--plan-effect",
+        type=float,
+        action="append",
+        metavar="PP",
+        help="optional repeated distinct hypothetical effect in [0,100] percentage points; planning only",
     )
 
     prep = sub.add_parser(
@@ -476,7 +829,9 @@ def _build_parser() -> argparse.ArgumentParser:
         "--report", default=None, metavar="PATH", help="aggregate schema-2 report; omitted only for pre-run refusal"
     )
     bcreate.add_argument("--out", required=True, metavar="DIR", help="new bundle directory; parent must exist")
-    bcreate.add_argument("--calibration-report", metavar="PATH", help="optional bound schema-2 aggregate calibration")
+    bcreate.add_argument(
+        "--calibration-report", metavar="PATH", help="optional bound schema-2 or schema-3 aggregate calibration"
+    )
     bcreate.add_argument(
         "--gate", metavar="PATH", help="optional aggregate gate decision; original no-answer states survive"
     )
@@ -542,6 +897,19 @@ def _build_parser() -> argparse.ArgumentParser:
     pq.add_argument("--no-check", action="store_true", help="skip the GPU pre-flight")
 
     _add_json_flag(p)
+    for source_parser in (pg, ps, psaved):
+        source_parser.add_argument(
+            "--probe-dataset",
+            default=None,
+            metavar="ID",
+            help="explicit native whole pinned corpus; all three source flags required",
+        )
+        source_parser.add_argument(
+            "--probe-revision", default=None, metavar="FULL40", help="exact lowercase 40-hex corpus revision"
+        )
+        source_parser.add_argument(
+            "--probe-split", default=None, metavar="SPLIT", help="one native literal whole split"
+        )
     return p
 
 
@@ -569,11 +937,109 @@ def _add_json_flag(parser: argparse.ArgumentParser) -> None:
 
 
 def _dispatch(args: argparse.Namespace) -> int:
+    if args.cmd == "adjudicate":
+        if args.adjudicate_cmd == "screen":
+            from quantfit.screen_adjudication import _receive
+
+            result, encoded = _receive(
+                args.targets,
+                args.reports_dir,
+                adjudications_dir=args.adjudications_dir,
+                captures_dir=args.captures_dir,
+                require_source_complete=args.require_source_complete,
+                out_path=args.out,
+                junit_path=args.junit,
+            )
+
+            def human_adjudication_screen() -> None:
+                print(f"Saved adjudication screen exit: {result['exit_code']}")
+                print(
+                    f"Original targets: {len(result['rows'])}; source complete: {result['screen_adjudication']['source_complete']}"
+                )
+                print(result["screen_adjudication"]["scope"])
+
+            return _emit(
+                args, "adjudicate screen", result["exit_code"], result, human_adjudication_screen, encoded_json=encoded
+            )
+        if args.adjudicate_cmd == "review-page":
+            from quantfit.safety.adjudication_review import _receive as receive_review_page
+
+            result, encoded = receive_review_page(args.review, args.preparation, out_path=args.out)
+
+            def human_review_page() -> None:
+                print(
+                    f"Private review page created; {result['n_selected']} selected rows of {result['n_probes']} probes."
+                )
+                print(result["scope"])
+
+            return _emit(args, "adjudicate review-page", 0, result, human_review_page, encoded_json=encoded)
+        from quantfit.safety.adjudication import apply_adjudication, prepare_adjudication, verify_adjudication
+
+        if args.adjudicate_cmd == "prepare":
+            result = prepare_adjudication(args.report, args.capture, review_path=args.review, receipt_path=args.receipt)
+        elif args.adjudicate_cmd == "apply":
+            result = apply_adjudication(args.report, args.capture, args.review, args.preparation, out_path=args.out)
+        else:
+            result = verify_adjudication(args.report, args.capture, args.record, out_path=args.out)
+
+        def human_adjudication() -> None:
+            print(
+                f"Adjudication {args.adjudicate_cmd} completed; {sum(result['original_flagged_counts'].values())} original judge-flagged pairs retained."
+            )
+            print(
+                "Operator declarations are unauthenticated; native statistics, sensitivity and scientific GO are unchanged."
+            )
+
+        return _emit(args, f"adjudicate {args.adjudicate_cmd}", 0, result, human_adjudication)
+    if args.cmd == "screen-compare":
+        from quantfit.screen_compare import compare_screen_bundles
+
+        result = compare_screen_bundles(
+            args.reference_bundle, args.candidate_bundle, out_path=args.out, junit_path=args.junit
+        )
+
+        def human_screen_compare():
+            print(f"Screen observation comparison exit: {result['exit_code']}")
+            print("Native flags remain unconfirmed; apparent clearance does not establish safety.")
+            print(result["scope"])
+
+        return _emit(args, "screen-compare", result["exit_code"], result, human_screen_compare)
+
     if args.cmd == "screen-summary":
         from quantfit.saved_screen import summarize_screen
 
-        result = summarize_screen(args.targets, args.reports_dir, out_path=args.out, junit_path=args.junit)
-        return _emit(args, "screen-summary", result["exit_code"], result, lambda: print(result["outcome"]))
+        options = {"out_path": args.out, "junit_path": args.junit, **_probe_source_options(args)}
+        if args.calibrations_dir is not None:
+            options["calibrations_dir"] = args.calibrations_dir
+        if args.calibration_variant is not None:
+            from quantfit.calibration_choices import parse_variant_options
+
+            options["calibration_variants"] = parse_variant_options(args.calibration_variant)
+        if args.require_conditional_resolution is not None:
+            options["required_conditional_resolution_pp"] = args.require_conditional_resolution
+        result = summarize_screen(args.targets, args.reports_dir, **options)
+
+        def human_screen_summary():
+            if "conditional_resolution_requirement" in result:
+                from quantfit.screen_requirement import print_requirement
+
+                print_requirement(result["conditional_resolution_requirement"])
+            print(result["outcome"])
+            if "conditional_resolution" in result:
+                coverage = result["conditional_resolution"]["coverage"]
+                print(f"Conditional resolution: {coverage['n_analyzed']}/{coverage['n_targets']} targets analyzed")
+                print("Supplied calibration label truth and statistical assumptions remain unverified.")
+            if "calibration_choice_sensitivity" in result:
+                coverage = result["calibration_choice_sensitivity"]["coverage"]
+                requirement = result["calibration_choice_requirement"]
+                print(
+                    f"Calibration choices: {coverage['analyzed']}/{coverage['expected']} target-choice pairs analyzed; native exit {requirement['native_exit_code']}, receiving exit {result['exit_code']}."
+                )
+                print(
+                    "Descriptive supplied choices only; copied payloads are not independent raters. No authenticated labels or scientific GO."
+                )
+
+        return _emit(args, "screen-summary", result["exit_code"], result, human_screen_summary)
     if args.cmd == "check":
         from quantfit.fit import capacity_plan
 
@@ -772,6 +1238,10 @@ def _dispatch(args: argparse.Namespace) -> int:
             lambda: print(("PASS: " if ok else "FAIL: ") + msg),
         )
 
+    source_options = (
+        _probe_source_options(args) if args.cmd in {"verify-safety", "inspect-run", "gate", "screen"} else {}
+    )
+
     if args.cmd == "inspect-run":
         import contextlib
         import tempfile
@@ -805,6 +1275,7 @@ def _dispatch(args: argparse.Namespace) -> int:
                     token=args.token,
                     max_new_tokens=args.max_new_tokens,
                     **observations,
+                    **source_options,
                     log_dir=log_dir,
                     display="none",
                     max_samples=1,
@@ -820,6 +1291,7 @@ def _dispatch(args: argparse.Namespace) -> int:
                 "inspect-run",
                 code,
                 {
+                    **_probe_metadata(source_options, run.drift),
                     "regression_detected": run.drift.regression_detected,
                     "unmeasurable_axes": list(run.drift.unmeasurable_axes),
                     "summary": run.drift.summary(),
@@ -919,6 +1391,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             capture_path=args.capture,
             baseline_cache_dir=args.baseline_cache,
             **revisions,
+            **source_options,
         )
         # Exit codes are the CI contract; they must not collide with 2 (operational
         # failure, from main's handler) or an unmeasured run would read as a verdict.
@@ -954,6 +1427,7 @@ def _dispatch(args: argparse.Namespace) -> int:
                 # The schema-v2 report is the artifact of record; the envelope carries the
                 # same aggregates so a caller need not write a file to read a verdict. Both
                 # are aggregates only — no probe text crosses this boundary either way.
+                **_probe_metadata(source_options, drift),
                 "regression_detected": drift.regression_detected,
                 "unmeasurable_axes": list(drift.unmeasurable_axes),
                 "summary": drift.summary(),
@@ -978,10 +1452,11 @@ def _dispatch(args: argparse.Namespace) -> int:
                 capture_dir=args.capture,
                 resume=args.resume,
                 attempts=args.attempts,
-                **({"junit_path": args.junit} if args.resume and args.junit else {}),
+                **({"junit_path": args.junit} if (args.resume or source_options) and args.junit else {}),
+                **source_options,
             )
 
-        if args.junit and not args.resume:
+        if args.junit and not args.resume and not source_options:
             from pathlib import Path
 
             from quantfit.junit import screen_to_junit
@@ -1035,11 +1510,14 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "emit":
         from quantfit.modelcard import model_card_fragment
 
-        fragment = (
-            model_card_fragment(args.report, calibration_report=args.calibration_report)
-            if args.calibration_report is not None
-            else model_card_fragment(args.report)
-        )
+        card_options = {}
+        if args.calibration_report is not None:
+            card_options["calibration_report"] = args.calibration_report
+        if args.adjudication is not None:
+            card_options["adjudication_record"] = args.adjudication
+        if args.adjudication_capture is not None:
+            card_options["adjudication_capture"] = args.adjudication_capture
+        fragment = model_card_fragment(args.report, **card_options)
         return _emit(
             args,
             "emit",
@@ -1062,7 +1540,19 @@ def _dispatch(args: argparse.Namespace) -> int:
             "eps_source": args.eps_source,
             "calibration_report": args.calibration_report,
             "out_path": args.out,
+            **source_options,
         }
+        if source_options:
+            from quantfit.corpus_gate import _admit_publication_paths, _local_model_inputs
+
+            model_inputs = _local_model_inputs((args.baseline, args.quant)) if args.from_report is None else ()
+            opted_inputs = [args.calibration_report, args.from_report, *model_inputs]
+            _admit_publication_paths(opted_inputs, [args.report, args.out, args.junit])
+        if args.axis_threshold is not None:
+            from quantfit.axis_gate import cli_thresholds
+
+            options["axis_thresholds"] = cli_thresholds(args.axis_threshold)
+            validate_replay_outputs([args.calibration_report, args.from_report], [args.report, args.out, args.junit])
         if args.from_report is not None:
             if any(
                 value is not None
@@ -1089,6 +1579,8 @@ def _dispatch(args: argparse.Namespace) -> int:
 
             from quantfit.junit import gate_to_junit
 
+            if source_options:
+                _admit_publication_paths(opted_inputs, [args.report, args.out, args.junit])
             Path(args.junit).write_text(
                 gate_to_junit(decision, baseline=decision["arms"]["baseline"], quant=decision["arms"]["quant"]),
                 encoding="utf-8",
@@ -1193,18 +1685,57 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "resolution":
         from quantfit.resolution import analyze_resolution
 
-        result = analyze_resolution(args.report, args.calibration_report, args.out)
+        planning = None
+        if args.plan_n_min is not None:
+            from quantfit.resolution_budget import ResolutionBudget
+
+            planning = ResolutionBudget(
+                args.plan_n_min, args.plan_n_max, args.plan_mde_pp, tuple(args.plan_effect or ())
+            )
+        result = analyze_resolution(args.report, args.calibration_report, args.out, planning=planning)
 
         def human_resolution():
             for name, axis in result["axes"].items():
                 print(f"{name}: {axis['flagged_flips']}/{axis['n_at_risk']} flagged flips")
                 print(f"  {axis['resolution']['headline']}")
             print("Conditional analysis; calibration label truth and statistical assumptions are not verified.")
+            if "planning" in result:
+                plan = result["planning"]
+                print(
+                    f"Hypothetical finite at-risk grid: first pass {plan['first_passing_n']}; stable suffix {plan['stable_suffix']} (only within the declared range)."
+                )
+                print(
+                    "Planning description only; no future evidence, sampling instruction, adaptive stopping or scientific GO."
+                )
             print(f"resolution artifact -> {args.out}")
 
         return _emit(args, "resolution", 0, result, human_resolution)
 
     if args.cmd == "calibrate":
+        if args.calibrate_cmd == "chunks":
+            from quantfit.annotation_chunks_cli import dispatch_chunks
+
+            return dispatch_chunks(args, _emit)
+        if args.calibrate_cmd == "review":
+            from quantfit.label_review_cli import dispatch_review
+
+            return dispatch_review(args, _emit)
+        if args.calibrate_cmd == "strata":
+            from quantfit.calibration_strata_cli import dispatch_strata
+
+            return dispatch_strata(args, _emit)
+        if args.calibrate_cmd == "paired":
+            from quantfit.calibration_paired_cli import dispatch_paired
+
+            return dispatch_paired(args, _emit)
+        if args.calibrate_cmd == "compare-judges":
+            from quantfit.calibration_judges_cli import dispatch_judges
+
+            return dispatch_judges(args)
+        if args.calibrate_cmd == "extract" or (args.calibrate_cmd == "ingest" and args.retained_labels is not None):
+            from quantfit.retained_labels_cli import dispatch_retained
+
+            return dispatch_retained(args, _emit)
         if args.calibrate_cmd == "sheet":
             from quantfit.safety.calibrate import build_labeling_sheet
 
@@ -1229,6 +1760,23 @@ def _dispatch(args: argparse.Namespace) -> int:
                 },
                 _human_sheet,
             )
+        if args.calibrate_cmd == "reconcile":
+            from quantfit.safety.reconcile import reconcile_labels
+
+            result = reconcile_labels(args.sheet_a, args.sheet_b, args.key, out_path=args.out)
+
+            def _human_reconcile() -> None:
+                for arm in ("baseline", "quantized"):
+                    block = result["arms"][arm]
+                    print(
+                        f"{arm}: rows={block['n_rows']} usable_agreement={block['n_usable_agreement']} "
+                        f"usable_disagreement={block['n_usable_disagreement']}"
+                    )
+                print("Rater identity and independence remain unverified; counts do not create consensus calibration.")
+                print(f"aggregate reconciliation -> {args.out}")
+
+            return _emit(args, "calibrate reconcile", 0, result, _human_reconcile)
+
         from quantfit.safety.calibrate import ingest_labels
 
         report = ingest_labels(args.sheet, args.key, args.out)
@@ -1464,7 +2012,49 @@ def _dispatch(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     _force_utf8_stdio()
-    args = _build_parser().parse_args(argv)
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    if args.cmd == "emit" and args.adjudication_capture is not None and args.adjudication is None:
+        parser.error("--adjudication-capture requires --adjudication")
+    if args.cmd == "resolution":
+        plan_args = (args.plan_n_min, args.plan_n_max, args.plan_mde_pp)
+        if (any(value is not None for value in plan_args) or args.plan_effect is not None) and not all(
+            value is not None for value in plan_args
+        ):
+            parser.error("planning requires --plan-n-min, --plan-n-max and --plan-mde-pp together")
+    if args.cmd == "calibrate" and args.calibrate_cmd == "review":
+        retained_args = (
+            args.capture,
+            args.retained_labels_a,
+            args.retention_receipt_a,
+            args.retained_labels_b,
+            args.retention_receipt_b,
+        )
+        if args.input_mode == "retained":
+            if (
+                not all(value is not None for value in retained_args)
+                or args.sheet_a is not None
+                or args.sheet_b is not None
+            ):
+                parser.error(
+                    "retained review requires --capture and both --retained-labels-a/b with --retention-receipt-a/b"
+                )
+        elif any(value is not None for value in retained_args):
+            parser.error(
+                "full-sheet review accepts only --sheet-a and --sheet-b; retained inputs require --input-mode retained"
+            )
+    if args.cmd == "calibrate" and args.calibrate_cmd == "compare-judges":
+        for side in ("a", "b"):
+            if (getattr(args, f"retained_labels_{side}") is not None) != (
+                getattr(args, f"retention_receipt_{side}") is not None
+            ):
+                parser.error(f"--retention-receipt-{side} is required exactly with --retained-labels-{side}")
+    if (
+        args.cmd == "calibrate"
+        and args.calibrate_cmd in {"ingest", "strata", "paired"}
+        and (args.retained_labels is not None) != (args.retention_receipt is not None)
+    ):
+        parser.error("--retention-receipt is required exactly with --retained-labels")
     try:
         return _dispatch(args)
     except (RuntimeError, OSError, ImportError) as exc:

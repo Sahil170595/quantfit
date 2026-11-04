@@ -1,0 +1,117 @@
+{
+  "aggregate_key_walk": {
+    "json_files": 36,
+    "matching_keys": []
+  },
+  "all_counts_match_native": true,
+  "copied_protocol_pins_checked": true,
+  "historical_source_file_bindings_verified": 8,
+  "method": "Zone marginal differences verify these deliberately constructed one-direction observations only; not a general paired-flip estimator. No comparison reducer invoked.",
+  "native_zone_counts": [
+    {
+      "over_refusal": {
+        "at_risk": 28,
+        "flips": 0
+      },
+      "path": "inputs/known-identity/clean.json",
+      "refusal_robustness": {
+        "at_risk": 12,
+        "flips": 0
+      }
+    },
+    {
+      "over_refusal": {
+        "at_risk": 28,
+        "flips": 0
+      },
+      "path": "inputs/measured/clean.json",
+      "refusal_robustness": {
+        "at_risk": 12,
+        "flips": 0
+      }
+    },
+    {
+      "over_refusal": {
+        "at_risk": 28,
+        "flips": 0
+      },
+      "path": "inputs/measured/flagged.json",
+      "refusal_robustness": {
+        "at_risk": 12,
+        "flips": 0
+      }
+    },
+    {
+      "over_refusal": {
+        "at_risk": 28,
+        "flips": 0
+      },
+      "path": "inputs/measured/unmeasured.json",
+      "refusal_robustness": {
+        "at_risk": 12,
+        "flips": 0
+      }
+    },
+    {
+      "over_refusal": {
+        "at_risk": 28,
+        "flips": 0
+      },
+      "path": "inputs/new-flag/clean.json",
+      "refusal_robustness": {
+        "at_risk": 12,
+        "flips": 1
+      }
+    },
+    {
+      "over_refusal": {
+        "at_risk": 28,
+        "flips": 0
+      },
+      "path": "inputs/original/clean.json",
+      "refusal_robustness": {
+        "at_risk": 12,
+        "flips": 0
+      }
+    },
+    {
+      "over_refusal": {
+        "at_risk": 28,
+        "flips": 0
+      },
+      "path": "inputs/original/flagged.json",
+      "refusal_robustness": {
+        "at_risk": 12,
+        "flips": 1
+      }
+    },
+    {
+      "over_refusal": {
+        "at_risk": 0,
+        "flips": 0
+      },
+      "path": "inputs/original/unmeasured.json",
+      "refusal_robustness": {
+        "at_risk": 0,
+        "flips": 0
+      }
+    },
+    {
+      "over_refusal": {
+        "at_risk": 28,
+        "flips": 0
+      },
+      "path": "inputs/unknown-identity/clean.json",
+      "refusal_robustness": {
+        "at_risk": 12,
+        "flips": 0
+      }
+    }
+  ],
+  "source_consumers": {
+    "failures": 0,
+    "proof": "source; installed wheel and real CPU inference qualification separate",
+    "skipped": 0,
+    "tests": 29
+  }
+}

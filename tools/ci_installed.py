@@ -22,12 +22,16 @@ def _pytest_code(checkout: Path) -> str:
     return f"""
 import pathlib, sys, quantfit, pytest
 checkout = pathlib.Path({str(checkout)!r}).resolve()
+package_root = pathlib.Path(quantfit.__file__).resolve().parent
 def guard():
+    count = 0
     assert checkout not in {{pathlib.Path(p or '.').resolve() for p in sys.path}}, 'checkout root injected into pytest'
     for name, module in tuple(sys.modules.items()):
         if name == 'quantfit' or name.startswith('quantfit.'):
             origin = getattr(module, '__file__', None)
-            assert origin and not pathlib.Path(origin).resolve().is_relative_to(checkout), 'source-shadowed application: ' + name
+            assert origin and pathlib.Path(origin).resolve().is_relative_to(package_root) and not pathlib.Path(origin).resolve().is_relative_to(checkout), 'source-shadowed application: ' + name
+            count += 1
+    return count
 class Guard:
     def pytest_sessionstart(self, session): guard()
     def pytest_sessionfinish(self, session, exitstatus): guard()
@@ -44,6 +48,7 @@ raise SystemExit(code)
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkout", type=Path, required=True)
+    parser.add_argument("--review-browser", action="store_true")
     args = parser.parse_args()
     checkout = args.checkout.resolve()
     env = dict(os.environ)
@@ -786,6 +791,15 @@ def main() -> None:
         config = sandbox / "pytest.ini"
         config.write_text(f"[pytest]\npythonpath = {shlex.quote((checkout / 'tests').as_posix())}\n", encoding="utf-8")
         tests = [
+            "test_corpus_gate.py",
+            "test_corpus_boundaries.py",
+            "test_corpus_calibration.py",
+            "test_corpus_publication.py",
+            "test_ci_corpus_gate.py",
+            "test_axis_gate.py",
+            "test_axis_gate_receiving.py",
+            "test_axis_gate_cli.py",
+            "test_ci_axis_gate.py",
             "test_calibration_binding.py",
             "test_gate.py",
             "test_resolution.py",
@@ -800,6 +814,27 @@ def main() -> None:
             "test_saved_screen.py",
             "test_ci_screen_resume.py",
             "test_ci_screen_bundle.py",
+            "test_ci_screen_compare.py",
+            "test_ci_screen_resolution.py",
+            "test_ci_label_reconciliation.py",
+            "test_ci_retained_labels.py",
+            "test_ci_calibration_strata.py",
+            "test_ci_calibration_paired.py",
+            "test_ci_calibration_judges.py",
+            "test_ci_label_review.py",
+            "test_ci_annotation_chunks.py",
+            "test_annotation_packets.py",
+            "test_ci_annotation_packets.py",
+            "test_ci_retained_review.py",
+            "test_ci_resolution_budget.py",
+            "test_ci_calibration_choices.py",
+            "test_ci_adjudication.py",
+            "test_ci_adjudication_review.py",
+            "test_ci_probe_corpus.py",
+            "test_probe_corpus.py",
+            "test_ci_adjudication_verification.py",
+            "test_ci_screen_adjudication.py",
+            "test_ci_screen_requirement.py",
             "test_repeatability.py",
             "test_evidence_fetch.py",
             "test_verify.py",
@@ -826,6 +861,53 @@ def main() -> None:
             env=env,
             check=True,
         )
+        if args.review_browser:
+            handoff = sandbox / "private-review-browser"
+            handoff.mkdir()
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(checkout / "tools/ci_adjudication_review.py"),
+                    "--checkout",
+                    str(checkout),
+                    "--prepare",
+                    str(handoff),
+                ],
+                cwd=sandbox,
+                env=env,
+                check=True,
+            )
+            subprocess.run(
+                [sys.executable, str(checkout / "tools/ci_adjudication_review_browser.py"), "--handoff", str(handoff)],
+                cwd=sandbox,
+                env=env,
+                check=True,
+            )
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(checkout / "tools/ci_adjudication_review.py"),
+                    "--checkout",
+                    str(checkout),
+                    "--receive",
+                    str(handoff),
+                ],
+                cwd=sandbox,
+                env=env,
+                check=True,
+            )
+        if args.review_browser:
+            packet_handoff = sandbox / "private-packet-browser"
+            packet_handoff.mkdir()
+            for script, mode in (
+                ("ci_annotation_packets.py", "--prepare"),
+                ("ci_annotation_packets_browser.py", "--handoff"),
+                ("ci_annotation_packets.py", "--receive"),
+            ):
+                command = [sys.executable, "-B", "-X", "utf8", str(checkout / "tools" / script)]
+                if script != "ci_annotation_packets_browser.py":
+                    command += ["--checkout", str(checkout)]
+                subprocess.run([*command, mode, str(packet_handoff)], cwd=sandbox, env=env, check=True)
     print(f"installed artifact accepted: quantfit {importlib.metadata.version('quantfit')}")
 
 

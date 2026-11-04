@@ -12,6 +12,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+from packaging.requirements import Requirement
 from packaging.specifiers import SpecifierSet
 
 try:  # stdlib on 3.11+
@@ -64,14 +66,18 @@ def _pyproject() -> dict:
 
 
 def _declared_requirements() -> dict[str, str]:
-    """{canonical name: requirement string} across dependencies + every extra."""
+    """Active version bounds across dependencies and every extra."""
     project = _pyproject()["project"]
     out: dict[str, str] = {}
     for requirement in project.get("dependencies", []):
-        out[cc.normalize(cc.requirement_name(requirement))] = requirement.strip()
+        parsed = Requirement(requirement)
+        if parsed.marker is None or parsed.marker.evaluate():
+            out[cc.normalize(parsed.name)] = requirement.split(";", 1)[0].strip()
     for requirements in project.get("optional-dependencies", {}).values():
         for requirement in requirements:
-            out[cc.normalize(cc.requirement_name(requirement))] = requirement.strip()
+            parsed = Requirement(requirement)
+            if parsed.marker is None or parsed.marker.evaluate():
+                out[cc.normalize(parsed.name)] = requirement.split(";", 1)[0].strip()
     return out
 
 
@@ -203,7 +209,7 @@ def test_everything_the_tool_prints_is_ascii():
 
 
 def test_a_package_declared_twice_with_different_bounds_is_refused(tmp_path):
-    """pip permits one constraint per name; emitting two would fail at install time."""
+    """The helper refuses conflicting active declarations instead of intersecting them."""
     bad = tmp_path / "pyproject.toml"
     bad.write_text(
         "[project]\nname='x'\ndependencies=['gguf>=0.10,<1.0']\n"
@@ -240,8 +246,7 @@ def test_a_bom_does_not_defeat_the_reader(tmp_path):
 
 
 def test_it_survives_an_interpreter_without_stdlib_tomllib():
-    """pyproject supports 3.10, where tomllib does not exist — and CI's 3.10 job runs this
-    script before installing anything, so the import cannot be assumed.
+    """Manual subset installs may use 3.10 without the locked tooling environment.
 
     Blocking `tomllib` via `sys.modules[...] = None` makes `import tomllib` raise
     ImportError, reproducing 3.10 on any interpreter. The tool must then either use `tomli`
@@ -263,7 +268,74 @@ def test_it_survives_an_interpreter_without_stdlib_tomllib():
         assert "pip install tomli" in result.stderr
 
 
+def test_missing_marker_parser_is_an_operational_error():
+    driver = (
+        "import sys, runpy;"
+        "sys.modules['packaging'] = None;"
+        f"sys.argv = ['ci_constraints.py', '--pyproject', {str(_PYPROJECT)!r}];"
+        f"runpy.run_path({str(_TOOL_PATH)!r}, run_name='__main__')"
+    )
+    result = subprocess.run([sys.executable, "-c", driver], capture_output=True, text=True, check=False)
+    assert result.returncode == 2
+    assert "pip install packaging" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
 def test_the_real_pyproject_generates_cleanly():
     result = _run_tool(cwd=str(_ROOT))
     assert result.returncode == cc.EXIT_OK, result.stderr
     assert "gguf>=0.10,<1.0" in result.stdout
+
+
+@pytest.mark.parametrize(
+    ("python_version", "accepted", "rejected"),
+    [("3.10", "3.20.3", "4.2.1"), ("3.11", "4.2.1", "3.20.3"), ("3.14", "4.2.1", "3.20.3")],
+)
+def test_conditional_security_bounds_follow_target_python(python_version, accepted, rejected):
+    project = {
+        "project": {
+            "dependencies": [
+                'filelock==3.20.3; python_version < "3.11"',
+                'filelock>=4.2.1,<5; python_version >= "3.11"',
+            ]
+        }
+    }
+    emitted = cc.collect(project, marker_environment={"python_version": python_version})
+    assert set(emitted) == {"filelock"}
+    requirement = Requirement(emitted["filelock"])
+    assert requirement.marker is None
+    assert accepted in requirement.specifier
+    assert rejected not in requirement.specifier
+    assert "4.0.10" not in requirement.specifier
+
+
+def test_active_overlapping_marker_bounds_are_still_refused():
+    project = {
+        "project": {
+            "dependencies": [
+                'gguf>=0.10,<1; python_version >= "3.10"',
+                'gguf>=0.10,<2; python_version >= "3.11"',
+            ]
+        }
+    }
+    with pytest.raises(ValueError, match="declared twice with different bounds"):
+        cc.collect(project, marker_environment={"python_version": "3.12"})
+
+
+def test_cli_filters_conditional_bounds_for_its_interpreter(tmp_path):
+    project = tmp_path / "pyproject.toml"
+    project.write_text(
+        "[project]\nname='conditional-security'\ndependencies=[\n"
+        "'filelock==3.20.3; python_version < \"3.11\"',\n"
+        "'filelock>=4.2.1,<5; python_version >= \"3.11\"',\n]\n",
+        encoding="utf-8",
+    )
+    result = _run_tool("--pyproject", str(project))
+    assert result.returncode == cc.EXIT_OK, result.stderr
+    rows = [line for line in result.stdout.splitlines() if line and not line.startswith("#")]
+    assert len(rows) == 1
+    requirement = Requirement(rows[0])
+    assert requirement.marker is None
+    expected = "3.20.3" if sys.version_info < (3, 11) else "4.2.1"
+    assert expected in requirement.specifier
+    assert "4.0.10" not in requirement.specifier

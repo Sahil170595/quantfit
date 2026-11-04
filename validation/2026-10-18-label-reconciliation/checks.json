@@ -1,0 +1,316 @@
+{
+  "aggregate_key_walk": {
+    "json_files": 23,
+    "matching_keys": []
+  },
+  "distinct_private_input_buffers_verified_locally": 35,
+  "historical_source_file_bindings_verified": 6,
+  "method": "Independent stdlib CSV lookup through native-produced private key, then one-pass Counter per arm; matrix margins and exclusive partitions verified. Private input validation and calibration statistics are not reimplemented.",
+  "per_arm_matrices_verified": {
+    "agreement": {
+      "baseline": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ],
+      "quantized": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ]
+    },
+    "all-unusable": {
+      "baseline": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          9
+        ]
+      ],
+      "quantized": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          9
+        ]
+      ]
+    },
+    "bom-reordered": {
+      "baseline": [
+        [
+          2,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ]
+      ],
+      "quantized": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          0,
+          1
+        ],
+        [
+          1,
+          2,
+          0
+        ]
+      ]
+    },
+    "directed": {
+      "baseline": [
+        [
+          2,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ]
+      ],
+      "quantized": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          0,
+          1
+        ],
+        [
+          1,
+          2,
+          0
+        ]
+      ]
+    },
+    "legacy-v1": {
+      "baseline": [
+        [
+          2,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ]
+      ],
+      "quantized": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          0,
+          1
+        ],
+        [
+          1,
+          2,
+          0
+        ]
+      ]
+    },
+    "self-control": {
+      "baseline": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ],
+      "quantized": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          3
+        ]
+      ]
+    },
+    "swapped": {
+      "baseline": [
+        [
+          2,
+          0,
+          1
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          2,
+          2
+        ]
+      ],
+      "quantized": [
+        [
+          0,
+          2,
+          1
+        ],
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          2,
+          1,
+          0
+        ]
+      ]
+    },
+    "unbound-v2": {
+      "baseline": [
+        [
+          2,
+          1,
+          0
+        ],
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          1,
+          0,
+          2
+        ]
+      ],
+      "quantized": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          2,
+          0,
+          1
+        ],
+        [
+          1,
+          2,
+          0
+        ]
+      ]
+    }
+  },
+  "private_input_hash_occurrences_verified_locally": 39,
+  "private_provenance_limit": "Private raw buffers are intentionally absent from Git; whole-input hashes alone cannot authenticate or recover them. Fresh salts change hashes on rerun.",
+  "recorder_hardware": {
+    "cores": 24,
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13980HX",
+    "logical_processors": 32,
+    "manufacturer": "ASUSTeK COMPUTER INC.",
+    "model": "ROG Strix G814JZ_G814JZ",
+    "physical_memory_bytes": 68319563776,
+    "scope": "Local synthetic CLI recorder only; no model execution or original producer host authentication."
+  },
+  "source_consumers": {
+    "failures": 0,
+    "proof": "41 behavioral consumers plus aggregate-only historical binding regression; source proof, installed qualification separate",
+    "skipped": 0,
+    "tests": 42
+  }
+}

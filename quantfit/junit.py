@@ -177,6 +177,26 @@ def gate_to_junit(decision: dict, *, baseline: str, quant: str) -> str:
       fails the build — changing that would contradict the gate's own contract — but is
       `skipped` with the regression named, so a green run does not silently swallow it.
     """
+    if type(decision.get("schema_version")) is int and decision["schema_version"] == 3:
+        import json
+
+        from quantfit.probe_population import admit_context
+
+        kind = decision.get("decision_schema_version")
+        if type(kind) is not int or kind not in (1, 2):
+            raise ValueError("unknown native gate decision schema")
+        context = admit_context(decision.get("probe_corpus"))
+        native = {**decision, "schema_version": kind}
+        suite = ET.fromstring(gate_to_junit(native, baseline=baseline, quant=quant))
+        output = suite.find("system-out")
+        if output is None:
+            output = ET.SubElement(suite, "system-out")
+        output.text = (output.text or "") + "\nprobe_corpus=" + json.dumps(context, sort_keys=True)
+        return ET.tostring(suite, encoding="unicode")
+    if decision.get("schema_version") == 2:
+        from quantfit.axis_gate_junit import axis_gate_to_junit
+
+        return axis_gate_to_junit(decision, baseline=baseline, quant=quant)
     classname = f"{baseline}->{quant}"
     exit_code = decision.get("exit_code")
     suite = ET.Element("testsuite")
@@ -283,6 +303,21 @@ def screen_to_junit(summary: dict) -> str:
 
         out = ET.SubElement(suite, "system-out")
         out.text = f"{CONDITIONALITY_LABEL}. {RESOLUTION_LABEL}. No human confirmation or scientific GO."
+
+    if "conditional_resolution_requirement" in summary:
+        from quantfit.screen_requirement import append_junit_cases
+
+        append_junit_cases(suite, summary["conditional_resolution_requirement"])
+
+    if "calibration_choice_requirement" in summary:
+        from quantfit.calibration_choices import append_variant_junit_cases
+
+        append_variant_junit_cases(suite, summary["calibration_choice_requirement"])
+
+    if "screen_adjudication" in summary:
+        from quantfit.screen_adjudication import append_junit_cases
+
+        append_junit_cases(suite, summary["screen_adjudication"])
 
     cases = list(suite.iter("testcase"))
     errors = sum(1 for c in cases if c.find("error") is not None)

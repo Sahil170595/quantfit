@@ -169,6 +169,19 @@ def test_fingerprint_uses_canonical_json_and_refuses_nonfinite():
         identity_fingerprint(broken)
 
 
+@pytest.mark.parametrize("declared,actual", [(1, True), (1.0, 1)])
+def test_scope_match_preserves_json_numeric_and_boolean_types(tmp_path, declared, actual):
+    report = report_fixture()
+    report = replace(report, decode={**report.decode, "scope_marker": actual})
+    payload = calibration_fixture(report)
+    payload["binding"]["identity"]["decode"]["scope_marker"] = declared
+    payload["binding"]["fingerprint"] = identity_fingerprint(payload["binding"]["identity"])
+    assert payload["binding"]["identity"] == measurement_identity(report)
+    assert payload["binding"]["fingerprint"] != identity_fingerprint(measurement_identity(report))
+    with pytest.raises(CalibrationBindingError, match="scope"):
+        load_bound_calibration(write_calibration(tmp_path, payload), report=report)
+
+
 def test_duplicate_json_fields_are_not_silently_overwritten(tmp_path):
     path = tmp_path / "duplicate.json"
     path.write_text('{"calibration_schema": 1, "calibration_schema": 2}', encoding="utf-8")

@@ -45,9 +45,10 @@ the quantization and the baseline is not VRAM-capped (7-8B pairs fit in RAM).
 Mixing a transformers arm with a GGUF arm is refused: that is a deployment
 delta, not a quantization diff. The judge is unchanged either way.
 
-Curated public corpus only (`Crusadersk/quantsafe-judge-benchmark`) so this stays
-distributable and umbrella-free — never raw harmbench/advbench. At most one model
-is GPU-resident at a time.
+The default corpus is the pinned curated `Crusadersk/quantsafe-judge-benchmark`.
+An explicit ProbeCorpus selects an entire supplied noncanonical distribution;
+its labels/curation and historical judge accuracy are not independently validated.
+At most one model is GPU-resident at a time.
 
 Completions are NOT persisted in reports — no raw harmful model output in an
 artifact meant to be published. `capture_path` is the single explicit, opt-in
@@ -84,9 +85,9 @@ from __future__ import annotations
 import math
 import re
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import InitVar, dataclass, replace
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from quantfit.torchrt import free_gpu, pick_device
 
@@ -190,6 +191,69 @@ def detectable_flip_rate(n: int, power: float = _MDE_POWER) -> float:
     return 1 - (1 - power) ** (1 / n)
 
 
+MAX_PROBE_PROMPT_BYTES = 64 * 1024
+MAX_PROBE_SELECTED_BYTES = 8 * 1024 * 1024
+
+
+@dataclass(frozen=True)
+class ProbeCorpus:
+    """A declared Hub dataset source, not a curation or authenticity claim."""
+
+    id: str
+    revision: str
+    split: str
+
+    def __post_init__(self) -> None:
+        try:
+            if (
+                type(self.id) is not str
+                or len(self.id.encode("utf-8")) > 256
+                or self.id.count("/") != 1
+                or self.id.startswith("buckets/")
+                or type(self.revision) is not str
+                or re.fullmatch(r"[0-9a-f]{40}", self.revision) is None
+                or type(self.split) is not str
+                or re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,63}", self.split) is None
+                or self.split.lower() == "all"
+            ):
+                raise ValueError
+            from huggingface_hub.utils import validate_repo_id
+
+            validate_repo_id(self.id)
+        except (ValueError, TypeError, UnicodeError):
+            raise RuntimeError("invalid_probe_corpus") from None
+
+
+def _corpus(value: ProbeCorpus | None) -> ProbeCorpus:
+    if value is None:
+        return ProbeCorpus(PROBE_DATASET_ID, PROBE_DATASET_REVISION, PROBE_SPLIT)
+    if type(value) is not ProbeCorpus:
+        raise RuntimeError("invalid_probe_corpus")
+    value.__post_init__()
+    return value
+
+
+def _canonical_source(value: ProbeCorpus | None) -> bool:
+    return value is None or (value.id, value.revision, value.split) == (
+        PROBE_DATASET_ID,
+        PROBE_DATASET_REVISION,
+        PROBE_SPLIT,
+    )
+
+
+def _source_kwargs(value: ProbeCorpus | None) -> dict:
+    if value is not None:
+        value = _corpus(value)
+    return {} if _canonical_source(value) else {"probe_corpus": value}
+
+
+def _prepare_probes(token: str | None, probe_corpus: ProbeCorpus | None = None) -> tuple[ProbeCorpus, list[Probe]]:
+    source = _corpus(probe_corpus)
+    # Keep the existing default private adapter seam; custom sources are explicit.
+    probes = _load_probes(token) if probe_corpus is None else _load_probes(token, probe_corpus=source)
+    return source, probes
+
+
 @dataclass(frozen=True)
 class Probe:
     prompt: str
@@ -214,6 +278,14 @@ class SafetyDrift:
     overrefusal_regressions: int  # expected-safe: baseline complied, quant refused (usability drift)
     # per-zone refusal counts for transparency.
     by_zone: dict
+    _probe_corpus: InitVar[ProbeCorpus | None] = None
+
+    def __post_init__(self, _probe_corpus: ProbeCorpus | None) -> None:
+        object.__setattr__(self, "_probe_corpus", _probe_corpus)
+
+    @property
+    def probe_corpus(self) -> ProbeCorpus | None:
+        return cast(ProbeCorpus | None, object.__getattribute__(self, "_probe_corpus"))
 
     @property
     def dangerous_at_risk(self) -> int:
@@ -322,6 +394,7 @@ class SafetyDrift:
         zones = " ".join(
             f"{z}[{d['baseline_refused']}->{d['quant_refused']}/{d['n']}]" for z, d in sorted(self.by_zone.items())
         )
+        scope = "curated" if _canonical_source(self.probe_corpus) else "supplied noncanonical"
         return (
             f"safety drift over {self.n} probes — {self._verdict()}\n"
             f"  refusal-robustness (expected-unsafe n={self.unsafe_n}): "
@@ -333,54 +406,30 @@ class SafetyDrift:
             f"    over-refusal regressions: "
             f"{self._axis_stats(self.overrefusal_regressions, self.overrefusal_at_risk)}\n"
             f"  by zone (baseline->quant refusals / n): {zones}\n"
-            f"  note: {self.n} curated probes; a no-detection result means the detector did not fire. "
+            f"  note: {self.n} {scope} probes; a no-detection result means the detector did not fire. "
             f"It bounds the instrument, not the artifact — the CI covers sampling error alone and the MDE is a "
             f"perfect-judge floor — and it does not certify safety."
         )
 
 
-def verify_safety(
+def _admit_verify_options(
     baseline_model_id: str,
     quant_path: str,
-    token: str | None = None,
-    max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
-    report_path: str | None = None,
-    capture_path: str | None = None,
-    baseline_cache_dir: str | None = None,
+    *,
+    probe_corpus: ProbeCorpus | None = None,
     baseline_revision: str | None = None,
     quant_revision: str | None = None,
-    _execution_guard: Callable[[ResolvedGguf, Path, int], None] | None = None,
-) -> SafetyDrift:
-    """Compare refusal behavior of the unquantized baseline vs a quantized artifact.
-
-    Arms are either both transformers (HF ids / local dirs) or both GGUF
-    (*.gguf paths or hf:<org>/<repo>/<file>.gguf) — GGUF pairs run under the
-    identical pinned llama.cpp binary on CPU, which is what lets an F16
-    baseline exceed VRAM. Mixing the two is refused: that diff would measure
-    engine + quantization at once (a deployment delta), never pooled with a
-    quantization diff.
-
-    With `report_path`, also writes the run as a schema-v2 `DriftReport` (JSON):
-    revision pins, resolved precisions, per-arm engine provenance, env
-    fingerprint, per-arm runtimes.
-
-    With `capture_path`, also writes every completion to a local JSONL file
-    (`CAPTURE_SCHEMA`) — the raw material judge calibration labels from. Opt-in
-    and off by default; see the module docstring for why completions are absent
-    from the report and what the capture may not be used for. A capture that
-    cannot be written warns and is skipped: it never costs the run its result.
-
-    With `baseline_cache_dir` (GGUF pairs only), the baseline arm's completions are served
-    from `safety/cache.py` when an entry for this exact arm, environment, probe set and decode
-    exists, and stored after generation when it does not. The key is derived from the arm's
-    identity BEFORE any server starts (`gguf_arm.arm_identity`), so a hit skips the baseline
-    generation entirely. A hit changes no measured number. The report records it: the baseline
-    arm's `engine` gains `cache.SERVED_ENGINE_KEY`, and its `runtime_s` is the stored
-    generation's. Budgets assume zero hits (`cache.BUDGET_RULE`). Entries hold completion
-    text and are local-only.
-    """
+    baseline_cache_dir: str | None = None,
+    capture_path: str | None = None,
+    max_new_tokens: int = 64,
+    _execution_guard: object = None,
+) -> tuple[ProbeCorpus, bool]:
+    """The native local arm/config boundary, reusable before a held population load."""
     from quantfit.safety.gguf_arm import is_gguf_ref, validate_revision
 
+    source = _corpus(probe_corpus)
+    if _execution_guard is not None and not _canonical_source(source):
+        raise RuntimeError("execution_recipe_mismatch")
     validate_revision(baseline_model_id, baseline_revision)
     validate_revision(quant_path, quant_revision)
     if _execution_guard is not None and (
@@ -414,7 +463,72 @@ def verify_safety(
             "generation. Drop --baseline-cache for this pair."
         )
 
-    probes = _load_probes(token)
+    return source, baseline_gguf
+
+
+def verify_safety(
+    baseline_model_id: str,
+    quant_path: str,
+    token: str | None = None,
+    max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
+    report_path: str | None = None,
+    capture_path: str | None = None,
+    baseline_cache_dir: str | None = None,
+    baseline_revision: str | None = None,
+    quant_revision: str | None = None,
+    _execution_guard: Callable[[ResolvedGguf, Path, int], None] | None = None,
+    *,
+    probe_corpus: ProbeCorpus | None = None,
+    _prepared_population=None,
+) -> SafetyDrift:
+    """Compare refusal behavior of the unquantized baseline vs a quantized artifact.
+
+    Arms are either both transformers (HF ids / local dirs) or both GGUF
+    (*.gguf paths or hf:<org>/<repo>/<file>.gguf) — GGUF pairs run under the
+    identical pinned llama.cpp binary on CPU, which is what lets an F16
+    baseline exceed VRAM. Mixing the two is refused: that diff would measure
+    engine + quantization at once (a deployment delta), never pooled with a
+    quantization diff.
+
+    With `report_path`, also writes the run as a schema-v2 `DriftReport` (JSON):
+    revision pins, resolved precisions, per-arm engine provenance, env
+    fingerprint, per-arm runtimes.
+
+    With `capture_path`, also writes every completion to a local JSONL file
+    (`CAPTURE_SCHEMA`) — the raw material judge calibration labels from. Opt-in
+    and off by default; see the module docstring for why completions are absent
+    from the report and what the capture may not be used for. A capture that
+    cannot be written warns and is skipped: it never costs the run its result.
+
+    With `baseline_cache_dir` (GGUF pairs only), the baseline arm's completions are served
+    from `safety/cache.py` when an entry for this exact arm, environment, probe set and decode
+    exists, and stored after generation when it does not. The key is derived from the arm's
+    identity BEFORE any server starts (`gguf_arm.arm_identity`), so a hit skips the baseline
+    generation entirely. A hit changes no measured number. The report records it: the baseline
+    arm's `engine` gains `cache.SERVED_ENGINE_KEY`, and its `runtime_s` is the stored
+    generation's. Budgets assume zero hits (`cache.BUDGET_RULE`). Entries hold completion
+    text and are local-only.
+    """
+    source, baseline_gguf = _admit_verify_options(
+        baseline_model_id,
+        quant_path,
+        probe_corpus=probe_corpus,
+        baseline_revision=baseline_revision,
+        quant_revision=quant_revision,
+        baseline_cache_dir=baseline_cache_dir,
+        capture_path=capture_path,
+        max_new_tokens=max_new_tokens,
+        _execution_guard=_execution_guard,
+    )
+
+    if _prepared_population is None:
+        source, probes = _prepare_probes(token, probe_corpus)
+    else:
+        from quantfit.probe_population import _PreparedPopulation
+
+        if type(_prepared_population) is not _PreparedPopulation or _prepared_population.source != source:
+            raise RuntimeError("invalid_prepared_probe_population")
+        probes = _prepared_population.probes
     if _execution_guard is not None and len(probes) != 40:
         raise RuntimeError("execution_recipe_mismatch")
     prompts = [p.prompt for p in probes]
@@ -437,9 +551,9 @@ def verify_safety(
 
             identity = gguf_arm.arm_identity(baseline_res)
             key_facts = {
-                "probe_dataset_id": PROBE_DATASET_ID,
-                "probe_dataset_revision": PROBE_DATASET_REVISION,
-                "probe_split": PROBE_SPLIT,
+                "probe_dataset_id": source.id,
+                "probe_dataset_revision": source.revision,
+                "probe_split": source.split,
                 "prompts": prompts,
                 "max_new_tokens": max_new_tokens,
                 "do_sample": False,
@@ -477,10 +591,12 @@ def verify_safety(
     baseline_ref = flags[: len(probes)]
     quant_ref = flags[len(probes) :]
 
-    drift = _tabulate(probes, baseline_ref, quant_ref)
+    drift = replace(_tabulate(probes, baseline_ref, quant_ref), _probe_corpus=source)
     actual_report = None
     if report_path:
-        actual_report = _write_report(report_path, drift, baseline_arm, quant_arm, judge_runtime_s, max_new_tokens)
+        actual_report = _write_report(
+            report_path, drift, baseline_arm, quant_arm, judge_runtime_s, max_new_tokens, **_source_kwargs(source)
+        )
     if capture_path:
         # After the report, deliberately: the auditable artifact is what a run owes
         # the world, and an unwritable capture must not cost a completed run its report.
@@ -502,7 +618,9 @@ def verify_safety(
                 actual_report=(
                     actual_report
                     if actual_report is not None
-                    else _make_report(drift, baseline_arm, quant_arm, judge_runtime_s, max_new_tokens)
+                    else _make_report(
+                        drift, baseline_arm, quant_arm, judge_runtime_s, max_new_tokens, **_source_kwargs(source)
+                    )
                 ),
             )
         except OSError as exc:
@@ -557,9 +675,11 @@ def _write_report(
     quantized: ArmRun,
     judge_runtime_s: float,
     max_new_tokens: int,
+    *,
+    probe_corpus: ProbeCorpus | None = None,
 ) -> DriftReport:
     """Write and return the same observed report used by optional capture binding."""
-    report = _make_report(drift, baseline, quantized, judge_runtime_s, max_new_tokens)
+    report = _make_report(drift, baseline, quantized, judge_runtime_s, max_new_tokens, **_source_kwargs(probe_corpus))
     report.to_json(path)
     return report
 
@@ -570,6 +690,8 @@ def _make_report(
     quantized: ArmRun,
     judge_runtime_s: float,
     max_new_tokens: int,
+    *,
+    probe_corpus: ProbeCorpus | None = None,
 ) -> DriftReport:
     """Assemble the schema-v2 report for one completed run."""
     from datetime import datetime, timezone
@@ -577,6 +699,10 @@ def _make_report(
     import quantfit
     from quantfit.safety.report import SCHEMA_VERSION, DriftReport, environment_fingerprint
 
+    source = _corpus(probe_corpus)
+    label = _measured_judge_label()
+    if not _canonical_source(source):
+        label += "; historical default-distribution measurement only, not accuracy or error calibration on these supplied probes"
     return DriftReport(
         schema_version=SCHEMA_VERSION,
         quantfit_version=quantfit.__version__,
@@ -586,12 +712,12 @@ def _make_report(
             "revision": JUDGE_REVISION,
             "input_contract": JUDGE_INPUT_CONTRACT,
             "card_xstest_accuracy": JUDGE_CARD_XSTEST_ACCURACY,
-            "card_xstest_accuracy_label": _measured_judge_label(),
+            "card_xstest_accuracy_label": label,
         },
         probe_dataset={
-            "id": PROBE_DATASET_ID,
-            "revision": PROBE_DATASET_REVISION,
-            "split": PROBE_SPLIT,
+            "id": source.id,
+            "revision": source.revision,
+            "split": source.split,
             # Sourced from the tabulation, not passed separately — one fact, one copy
             # (a redundant parameter was a divergence channel between the two).
             "n_probes": drift.n,
@@ -712,19 +838,49 @@ def _tabulate(probes: list[Probe], baseline_ref: list[bool], quant_ref: list[boo
     )
 
 
-def _load_probes(token: str | None) -> list[Probe]:
-    """Curated public probes with their zone + ground-truth label, at the pinned revision."""
-    from datasets import load_dataset
+def _load_probes(token: str | None, *, probe_corpus: ProbeCorpus | None = None) -> list[Probe]:
+    """Admit one entire pinned remote population before any model work.
 
-    ds = load_dataset(PROBE_DATASET_ID, split=PROBE_SPLIT, revision=PROBE_DATASET_REVISION, token=token)
-    return [
-        Probe(
-            prompt=str(row[PROBE_PROMPT_COLUMN]),
-            zone=str(row[PROBE_ZONE_COLUMN]),
-            expected=str(row[PROBE_EXPECTED_COLUMN]),
+    Limits selected UTF-8 retention, not SDK downloads/parser/chunk memory.
+    A matching builder hash is module revision evidence, not external-data authentication.
+    """
+    source = _corpus(probe_corpus)
+    from datasets import load_dataset_builder
+
+    from quantfit.resolution import MAX_PROBES
+
+    try:
+        builder = load_dataset_builder("hf://datasets/" + source.id, revision=source.revision, token=token)
+        if type(builder.hash) is not str or builder.hash != source.revision:
+            raise ValueError
+        dataset = builder.as_streaming_dataset(split=source.split).select_columns(
+            [PROBE_PROMPT_COLUMN, PROBE_ZONE_COLUMN, PROBE_EXPECTED_COLUMN]
         )
-        for row in ds
-    ]
+        probes: list[Probe] = []
+        total = 0
+        for row in dataset:
+            if len(probes) == MAX_PROBES:
+                raise ValueError
+            values = [row[key] for key in (PROBE_PROMPT_COLUMN, PROBE_ZONE_COLUMN, PROBE_EXPECTED_COLUMN)]
+            if any(type(value) is not str for value in values):
+                raise ValueError
+            prompt, zone, expected = values
+            sizes = [len(value.encode("utf-8")) for value in values]
+            if (
+                not 1 <= sizes[0] <= MAX_PROBE_PROMPT_BYTES
+                or zone not in {"clear_safe", "clear_unsafe", "borderline"}
+                or expected not in {"safe", "unsafe"}
+            ):
+                raise ValueError
+            total += sum(sizes)
+            if total > MAX_PROBE_SELECTED_BYTES:
+                raise ValueError
+            probes.append(Probe(prompt, zone, expected))
+        if not probes:
+            raise ValueError
+        return probes
+    except Exception:  # noqa: BLE001 -- Refuse untrusted SDK/iterator failures without exposing their private text.
+        raise RuntimeError("invalid_probe_corpus_population") from None
 
 
 def _require_accelerate() -> None:

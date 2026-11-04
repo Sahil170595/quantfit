@@ -1,0 +1,56 @@
+{
+  "C_profile_record_held": "273cd82fb05e7294222a9d4ac4acdf297c16eaba7e45ed4778ac25ef6b8fe1c3",
+  "candidate": "0.51.0",
+  "changed_historical_B_source_hashes": {
+    "tests/test_inspect_gguf.py": {
+      "B": "a54a1ddb77a3fd38f9366e490486c6f74d2ac9ab64d9d8b73d3a38883a5644b5",
+      "D": "fb2338f6ced608d93f5da961665abb44a4ab106f45743d6ab3ad667079abe00a"
+    },
+    "tools/ci/pyproject.toml": {
+      "B": "68cc3aaab4d158452773aa43764d30cf55d88101354edb9fad20d7af54034cb4",
+      "D": "8f149313eb594a95037156e33c8b81732a6e263a2df894dfeab4042fe8ecaa00"
+    },
+    "tools/ci/uv.lock": {
+      "B": "06d0f2f5e1421a9eeda47279e1209b5d7e9e803bf01fa6612b0e902836a9389c",
+      "D": "35bcbaef851d6ba5ad56e10e379d1ea9312ac381c2ee816b1c8a4ba18c1ad152"
+    }
+  },
+  "correction": "Only new software test's deterministic environment_fingerprint fixture; native report/source/server assertions retained.",
+  "current_JUnit_sha256": "466e8aab07a29c60f269a2340917144cd3d49fdd8f02bf1a067d0103cd4b4044",
+  "current_passed": 156,
+  "current_selected_cases": 157,
+  "current_skipped": 1,
+  "current_test": "test_observed_whole_custom_corpus_keeps_loaded_source_and_closed_native_owners",
+  "current_test_file_sha256": "fb2338f6ced608d93f5da961665abb44a4ab106f45743d6ab3ad667079abe00a",
+  "fixture_counter_and_parsed_env_assertions_passed": true,
+  "held_historical_B_source_hashes": 21,
+  "historical_C_CI": "https://github.com/Sahil170595/quantfit/actions/runs/41225246738",
+  "historical_C_failed_head": "202be42594af58645ca922c5b496fb18f106fe2e",
+  "historical_C_numerical_failure": {
+    "deselected": 6,
+    "failed": 1,
+    "job": 124607923956,
+    "missing": "transformers",
+    "passed": 3657,
+    "skipped": 14
+  },
+  "historical_C_unit_failures": {
+    "each_failed": 1,
+    "each_passed": 3650,
+    "each_skipped": 17,
+    "jobs": [
+      124607923986,
+      124607924010,
+      124607924039,
+      124607924041
+    ],
+    "missing": "torch"
+  },
+  "limits": "Synthetic environment, not physical hardware provenance. Historical B full/native remain B executions; D requires fresh hosted package/tests/browser/CodeQL.",
+  "native_existing_pattern": "tests/test_inspect_gguf.py::test_actual_public_inspect_full_fixture_batch_closes_before_judge",
+  "native_report_and_verifier_sha256": {
+    "quantfit/safety/report.py": "45f1d35a3f06f486119f16e002d0df2f2376a3867d491c5dc903b9513c0f9c74",
+    "quantfit/safety/verify.py": "20e009fdfe8dccaf85319400014b42e9bf24562380748ce37711df70a31be574"
+  },
+  "real_Hub_model_or_science_qualification": false
+}

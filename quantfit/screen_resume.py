@@ -13,7 +13,7 @@ import stat
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from quantfit import saved_screen as saved
 from quantfit.bundle import _no_links, _read
@@ -24,7 +24,7 @@ from quantfit.reproduce import (
     _ReproductionOutputs,
     _validate_reproduction_outputs,
 )
-from quantfit.safety.verify import DECODE_CHAT_TEMPLATE_POLICY
+from quantfit.safety.verify import DECODE_CHAT_TEMPLATE_POLICY, ProbeCorpus
 from quantfit.screen import (
     CAPTURE_NOTICE,
     CONDITIONALITY_LABEL,
@@ -34,6 +34,15 @@ from quantfit.screen import (
     _base_row,
     _summary,
 )
+
+if TYPE_CHECKING:
+    from quantfit.probe_population import _PreparedPopulation
+
+
+class _SourceOptions(TypedDict, total=False):
+    probe_corpus: ProbeCorpus
+    _prepared_population: _PreparedPopulation | None
+
 
 RESUME_NOTES = (
     (
@@ -80,6 +89,7 @@ class _Prepared:
     junit: Path | None
     held: dict[str, bytes]
     received: dict[str, Any]
+    local_model_inputs: tuple[Path, ...] = ()
 
     @property
     def reports(self) -> tuple[Path, ...]:
@@ -97,14 +107,20 @@ class _Prepared:
 
     def output_plan(self) -> _ReproductionOutputs:
         return _ReproductionOutputs(
-            (self.manifest_path, *self.reports, *self.captures, *((self.junit,) if self.junit else ())),
+            (
+                self.manifest_path,
+                *self.reports,
+                *self.captures,
+                *self.local_model_inputs,
+                *((self.junit,) if self.junit else ()),
+            ),
             (),
             (self.summary,),
         )
 
     def junit_plan(self) -> _ReproductionOutputs:
         return _ReproductionOutputs(
-            (self.manifest_path, *self.reports, self.summary, *self.captures),
+            (self.manifest_path, *self.reports, self.summary, *self.captures, *self.local_model_inputs),
             (self.root, *((self.capture,) if self.capture else ())),
             (self.junit,) if self.junit else (),
         )
@@ -121,7 +137,7 @@ def _paths(prepared: _Prepared) -> None:
             _require(not _exists(parent) or stat.S_ISDIR(parent.lstat().st_mode), "unsafe_output")
     if prepared.capture is not None:
         _require(not prepared.capture.is_relative_to(prepared.root), "unsafe_output")
-    sources = (prepared.manifest_path, *prepared.reports)
+    sources = (prepared.manifest_path, *prepared.reports, *prepared.local_model_inputs)
     outputs = (prepared.summary, *prepared.captures, *((prepared.junit,) if prepared.junit else ()))
     for path in (*sources, *outputs):
         _no_links(path)
@@ -141,18 +157,29 @@ def _current_protocol(received: dict[str, Any], max_new_tokens: int) -> None:
         )
 
 
-def _receive(prepared: _Prepared, held: dict[str, bytes], max_new_tokens: int) -> dict[str, Any]:
+def _receive(
+    prepared: _Prepared, held: dict[str, bytes], max_new_tokens: int, *, probe_corpus: ProbeCorpus | None = None
+) -> dict[str, Any]:
     received = saved._summarize_held(
         prepared.manifest,
         held,
         manifest_path=str(prepared.manifest_path),
         reports_dir=str(prepared.root),
+        probe_corpus=probe_corpus,
     )
     _current_protocol(received, max_new_tokens)
     return received
 
 
-def _prepare(manifest_path: str, out_dir: str, capture_dir: str | None, junit_path: str | None, cap: int) -> _Prepared:
+def _prepare(
+    manifest_path: str,
+    out_dir: str,
+    capture_dir: str | None,
+    junit_path: str | None,
+    cap: int,
+    *,
+    probe_corpus: ProbeCorpus | None = None,
+) -> _Prepared:
     _require(type(cap) is int and cap > 0, "invalid_max_new_tokens")
     manifest_path, out_dir = (_canonical_receiving_path(path) for path in (manifest_path, out_dir))
     manifest = _read(Path(manifest_path), saved.MAX_MANIFEST_BYTES)
@@ -160,7 +187,12 @@ def _prepare(manifest_path: str, out_dir: str, capture_dir: str | None, junit_pa
     root = Path(out_dir)
     capture = Path(_canonical_receiving_path(capture_dir)) if capture_dir is not None else None
     junit = Path(_canonical_receiving_path(junit_path)) if junit_path is not None else None
-    prepared = _Prepared(Path(manifest_path), manifest, name, targets, control, root, capture, junit, {}, {})
+    models: tuple[Path, ...] = ()
+    if probe_corpus is not None:
+        from quantfit.corpus_gate import _local_model_inputs
+
+        models = _local_model_inputs([ref for target in targets for ref in (target.baseline, target.quant)])
+    prepared = _Prepared(Path(manifest_path), manifest, name, targets, control, root, capture, junit, {}, {}, models)
     _paths(prepared)
     allowed = {path.name for path in prepared.reports} | {SUMMARY_FILENAME}
     members = saved._inventory(root, allowed) if _exists(root) else []
@@ -171,8 +203,10 @@ def _prepare(manifest_path: str, out_dir: str, capture_dir: str | None, junit_pa
         raw = _read(path, min(saved.MAX_REPORT_BYTES, remaining))
         held[path.name] = raw
         remaining -= len(raw)
-    received = _receive(prepared, held, cap)
-    return _Prepared(Path(manifest_path), manifest, name, targets, control, root, capture, junit, held, received)
+    received = _receive(prepared, held, cap, probe_corpus=probe_corpus)
+    return _Prepared(
+        Path(manifest_path), manifest, name, targets, control, root, capture, junit, held, received, models
+    )
 
 
 def _receipt(prepared: _Prepared, entries: list[dict[str, Any]]) -> dict[str, Any]:
@@ -231,11 +265,52 @@ def run_resumed_screen(
     capture_dir: str | None,
     attempts: int,
     junit_path: str | None,
+    probe_corpus: ProbeCorpus | None = None,
+    _fresh: bool = False,
 ) -> dict[str, Any]:
     """Admit all present evidence once; execute only absent native report members."""
     phase = "invalid_resume_input"
     try:
-        prepared = _prepare(manifest_path, out_dir, capture_dir, junit_path, max_new_tokens)
+        source_options: _SourceOptions = {}
+        corpus_context = None
+        if probe_corpus is not None:
+            from quantfit import probe_population as population
+            from quantfit.safety import verify
+            from quantfit.safety.calibration_binding import _same_numbers
+
+            probe_corpus = verify._corpus(probe_corpus)
+        prepared = _prepare(manifest_path, out_dir, capture_dir, junit_path, max_new_tokens, probe_corpus=probe_corpus)
+        if probe_corpus is not None:
+            _require(type(attempts) is int and attempts >= 1, "invalid_attempts")
+            for target in prepared.targets:
+                from quantfit.safety.gguf_arm import is_gguf_ref
+
+                _require(
+                    all(is_gguf_ref(ref) == (target.stratum == "gguf") for ref in (target.baseline, target.quant)),
+                    "target_stratum_mismatch",
+                )
+                verify._admit_verify_options(
+                    target.baseline, target.quant, probe_corpus=probe_corpus, max_new_tokens=max_new_tokens
+                )
+            if _fresh:
+                _require(
+                    not any(f"{target.name}.json" in prepared.held for target in prepared.targets),
+                    "existing_reports_require_resume",
+                )
+            missing = [t for t in prepared.targets if f"{t.name}.json" not in prepared.held]
+            corpus_context = prepared.received["probe_corpus"]
+            if missing:
+                held_population = population.prepare(token, probe_corpus)
+                resolved_context = population.context(held_population)
+                if corpus_context["population_basis"] != "unavailable_no_reports":
+                    _same_numbers(
+                        {k: v for k, v in corpus_context.items() if k != "population_basis"},
+                        {k: v for k, v in resolved_context.items() if k != "population_basis"},
+                        "resolved resume population",
+                    )
+                corpus_context = resolved_context
+                source_options = {"probe_corpus": probe_corpus, "_prepared_population": held_population}
+
         # No filesystem mutation or model call occurs before the complete preflight.
         from quantfit.safety.verify import verify_safety
 
@@ -270,6 +345,7 @@ def run_resumed_screen(
                             max_new_tokens=max_new_tokens,
                             report_path=str(path),
                             capture_path=str(prepared.captures[index]) if prepared.capture else None,
+                            **source_options,
                         )
                     except (RuntimeError, OSError, ImportError):
                         # Never overwrite a report that appeared during a failed attempt.
@@ -297,7 +373,13 @@ def run_resumed_screen(
                         remaining = saved.MAX_TOTAL_BYTES - sum(len(raw) for raw in held.values())
                         _require(remaining > 0, "report_byte_limit")
                         held[member] = _read(path, min(saved.MAX_REPORT_BYTES, remaining))
-                        received = _receive(prepared, held, max_new_tokens)
+                        received = _receive(prepared, held, max_new_tokens, probe_corpus=probe_corpus)
+                        if corpus_context is not None:
+                            _same_numbers(
+                                {k: v for k, v in received["probe_corpus"].items() if k != "population_basis"},
+                                {k: v for k, v in corpus_context.items() if k != "population_basis"},
+                                "executed native report versus held population",
+                            )
                         row = received["rows"][index]
                         entries.append(_entry(target, received["report_bindings"][index], row, "executed"))
                     break
@@ -316,8 +398,14 @@ def run_resumed_screen(
                 for axis in ("refusal_robustness", "over_refusal"):
                     stratum[axis]["conditionality"] = CONDITIONALITY_LABEL
             summary["notes"] = list(RESUME_NOTES)
-            summary["resume_receipt"] = _receipt(prepared, entries)
-            summary["resume_receipt"]["exit_code"] = _exit_code(summary)
+            if probe_corpus is not None:
+                summary["schema_version"] = 2
+                summary["probe_corpus"] = corpus_context
+                summary["control_evidence_verified"] = False
+                summary["effective_conditionality"] = CONDITIONALITY_LABEL
+            if not _fresh:
+                summary["resume_receipt"] = _receipt(prepared, entries)
+                summary["resume_receipt"]["exit_code"] = _exit_code(summary)
             raw_summary = (json.dumps(summary, indent=2, sort_keys=True, allow_nan=False) + "\n").encode()
             _require(
                 len(raw_summary) <= saved.MAX_REPORT_BYTES

@@ -1,0 +1,413 @@
+{
+  "limits": [
+    "Explicit synthetic choices over fictional capture rows; native blank/chunk/packet/collection and separate calibration ingestion, not human reading or model/judge execution.",
+    "Local returned CSVs are stdlib simulations, not browser downloads. Four installed Linux/Windows wheel/sdist profiles and two hosted Linux browser executions are later separate evidence.",
+    "Source/capture/rater authentication, human truth, independent labeling, sensitivity and scientific GO are not established.",
+    "Missing native directional denominators retain null MDE epsilon bounds; no perfect-judge or resolution claim."
+  ],
+  "profile": "controlled source/editable, not installed/browser qualification",
+  "result": {
+    "actual_cli_receiving": {
+      "changed_record_exit": 2,
+      "collect_exit": 0,
+      "missing_part_exit": 2,
+      "no_refused_outputs": true,
+      "schema2_schema3_arm_blocks_equal": true,
+      "typed_manifest_exit": 2
+    },
+    "all_2N_rows_per_case": 8,
+    "api_cli_page_bytes_equal": true,
+    "cases": [
+      {
+        "baseline_n": 4,
+        "n_rows": 8,
+        "n_unusable": 0,
+        "native_arm_blocks": {
+          "baseline": {
+            "direction": {
+              "judge_compliance_human_refusal": 2,
+              "judge_refusal_human_compliance": 0
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": 0.5,
+                "epsilon_wilson95": [
+                  0.15003898915214947,
+                  0.8499610108478506
+                ],
+                "errors": 2,
+                "n": 4
+              },
+              "false_refusal": {
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "errors": 0,
+                "n": 0
+              }
+            },
+            "epsilon": 0.5,
+            "epsilon_wilson95": [
+              0.15003898915214947,
+              0.8499610108478506
+            ],
+            "human_compliances": 0,
+            "human_refusals": 4,
+            "judge_errors": 2,
+            "mde_epsilon_upper": null,
+            "n": 4,
+            "n_unusable": 0
+          },
+          "quantized": {
+            "direction": {
+              "judge_compliance_human_refusal": 2,
+              "judge_refusal_human_compliance": 0
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": 0.5,
+                "epsilon_wilson95": [
+                  0.15003898915214947,
+                  0.8499610108478506
+                ],
+                "errors": 2,
+                "n": 4
+              },
+              "false_refusal": {
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "errors": 0,
+                "n": 0
+              }
+            },
+            "epsilon": 0.5,
+            "epsilon_wilson95": [
+              0.15003898915214947,
+              0.8499610108478506
+            ],
+            "human_compliances": 0,
+            "human_refusals": 4,
+            "judge_errors": 2,
+            "mde_epsilon_upper": null,
+            "n": 4,
+            "n_unusable": 0
+          }
+        },
+        "quantized_n": 4,
+        "schema2_schema3_arm_blocks_equal": true,
+        "sources_held": true,
+        "unmeasured_arms": []
+      },
+      {
+        "baseline_n": 4,
+        "n_rows": 8,
+        "n_unusable": 0,
+        "native_arm_blocks": {
+          "baseline": {
+            "direction": {
+              "judge_compliance_human_refusal": 0,
+              "judge_refusal_human_compliance": 0
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "errors": 0,
+                "n": 0
+              },
+              "false_refusal": {
+                "epsilon": 0.0,
+                "epsilon_wilson95": [
+                  0.0,
+                  0.4898908364545973
+                ],
+                "errors": 0,
+                "n": 4
+              }
+            },
+            "epsilon": 0.0,
+            "epsilon_wilson95": [
+              0.0,
+              0.4898908364545973
+            ],
+            "human_compliances": 4,
+            "human_refusals": 0,
+            "judge_errors": 0,
+            "mde_epsilon_upper": null,
+            "n": 4,
+            "n_unusable": 0
+          },
+          "quantized": {
+            "direction": {
+              "judge_compliance_human_refusal": 0,
+              "judge_refusal_human_compliance": 0
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": null,
+                "epsilon_wilson95": [
+                  0.0,
+                  1.0
+                ],
+                "errors": 0,
+                "n": 0
+              },
+              "false_refusal": {
+                "epsilon": 0.0,
+                "epsilon_wilson95": [
+                  0.0,
+                  0.4898908364545973
+                ],
+                "errors": 0,
+                "n": 4
+              }
+            },
+            "epsilon": 0.0,
+            "epsilon_wilson95": [
+              0.0,
+              0.4898908364545973
+            ],
+            "human_compliances": 4,
+            "human_refusals": 0,
+            "judge_errors": 0,
+            "mde_epsilon_upper": null,
+            "n": 4,
+            "n_unusable": 0
+          }
+        },
+        "quantized_n": 4,
+        "schema2_schema3_arm_blocks_equal": true,
+        "sources_held": true,
+        "unmeasured_arms": []
+      },
+      {
+        "both_ingestions_refused": true,
+        "n_rows": 8,
+        "n_unusable": 8,
+        "sources_held": true
+      }
+    ],
+    "human_review_verified": false,
+    "n_cases": 3,
+    "n_parts": 9,
+    "native_collect_then_separate_ingest": true,
+    "one_empty_arm": {
+      "baseline_n": 0,
+      "n_rows": 8,
+      "n_unusable": 4,
+      "native_arm_blocks": {
+        "baseline": {
+          "direction": {
+            "judge_compliance_human_refusal": 0,
+            "judge_refusal_human_compliance": 0
+          },
+          "directional": {
+            "false_compliance": {
+              "epsilon": null,
+              "epsilon_wilson95": [
+                0.0,
+                1.0
+              ],
+              "errors": 0,
+              "n": 0
+            },
+            "false_refusal": {
+              "epsilon": null,
+              "epsilon_wilson95": [
+                0.0,
+                1.0
+              ],
+              "errors": 0,
+              "n": 0
+            }
+          },
+          "epsilon": null,
+          "epsilon_wilson95": [
+            0.0,
+            1.0
+          ],
+          "human_compliances": 0,
+          "human_refusals": 0,
+          "judge_errors": 0,
+          "mde_epsilon_upper": null,
+          "n": 0,
+          "n_unusable": 4
+        },
+        "quantized": {
+          "direction": {
+            "judge_compliance_human_refusal": 0,
+            "judge_refusal_human_compliance": 0
+          },
+          "directional": {
+            "false_compliance": {
+              "epsilon": null,
+              "epsilon_wilson95": [
+                0.0,
+                1.0
+              ],
+              "errors": 0,
+              "n": 0
+            },
+            "false_refusal": {
+              "epsilon": 0.0,
+              "epsilon_wilson95": [
+                0.0,
+                0.4898908364545973
+              ],
+              "errors": 0,
+              "n": 4
+            }
+          },
+          "epsilon": 0.0,
+          "epsilon_wilson95": [
+            0.0,
+            0.4898908364545973
+          ],
+          "human_compliances": 4,
+          "human_refusals": 0,
+          "judge_errors": 0,
+          "mde_epsilon_upper": null,
+          "n": 4,
+          "n_unusable": 0
+        }
+      },
+      "quantized_n": 4,
+      "schema2_schema3_arm_blocks_equal": true,
+      "sources_held": true,
+      "unmeasured_arms": [
+        "baseline"
+      ]
+    },
+    "scientific_go": false,
+    "source_authenticity_verified": false,
+    "transport": "stdlib explicit synthetic choices; NOT browser/human execution"
+  },
+  "schema_version": 1,
+  "source_hash_basis": "Actual RAW bytes on this producing checkout, not portable Git/archive hashes",
+  "source_hashes": {
+    ".github/workflows/validate.yml": "391295123315de84d0bfa9069264a5e9c3d9a8726f5452a57a05a081eac15320",
+    "quantfit/__init__.py": "5878c69bc1d98c5da71d848129d33e4cb0775f11a1ceec550664bdccb6b1e29a",
+    "quantfit/_evidence_validation.py": "eaf2a797d523f59637c2502414d19964d889601818a0347db082555c09788d14",
+    "quantfit/_inspect_registry.py": "77bd5b5ca2338523d19c1a75320547c90ae1deae03fbc9050f5efed5a53a3236",
+    "quantfit/adjudication_record.py": "29052bb45a235357d8eba2a8282dd9b27855d63c4fdf5dfaf44ea949a820fc5f",
+    "quantfit/annotation_chunks_cli.py": "0d0f9187b5e8366e70eda095d1ea13f6aafe442fd02fd92314c8cfe2118ae748",
+    "quantfit/audit.py": "2130731abb98e3150b2f84852deb311662216593e5dbf34dcd9c770dd8763369",
+    "quantfit/axis_gate.py": "99cf700989fb9b1e2a31ce3d241e81a474b1159157653b5f04cd1cb51b175951",
+    "quantfit/axis_gate_junit.py": "5dc931b30957d101abc5e7923d5affca269335d0c29b1aa81bee5cec75b3b01d",
+    "quantfit/axis_gate_live.py": "5536a4a630ca52a0211547182aaca8302549cba8620f76ad3cbf814ce2cea988",
+    "quantfit/axis_gate_receiving.py": "f4eb64ce264a276f286a4c210c160b40b3191c37f2f4b902b8588eb058f43804",
+    "quantfit/backends/__init__.py": "7269a71fe24274dcc9acaef06430f58eeb40ede9a5787fe130fb97d61fcfcd35",
+    "quantfit/backends/compressed_tensors.py": "4071e0a1278bf4dc538b4ba19187378ef8307aa99670208812356990a6fdc34e",
+    "quantfit/backends/gguf.py": "d47d3e83c6cf1e6c8813d60400c64e7faae8ee122aa1204f21d8911a9707ec57",
+    "quantfit/bundle.py": "63e9d4e0cb16a9ad7f7d894517b6897851d6e01c73fb4670e916733c6776e235",
+    "quantfit/calibration_choices.py": "51371288d3e48d4516988c0eee114a918b2cd46a59f8c0f9f5195c29635097a9",
+    "quantfit/calibration_judges_cli.py": "0139ec18b021c063453f85bde73a1312dfb83f1e31132bc50ac70504783132b2",
+    "quantfit/calibration_paired_cli.py": "0b6541e2dc532c663d3475522b5ad890de3e94975e7d18dbbc2796b239fd3dec",
+    "quantfit/calibration_strata_cli.py": "6c86e6091567043a8274d9094d6aebbb57705ad3f9cd743b5810b484b3de0f84",
+    "quantfit/calibset.py": "a20c0bf1d0f54ca52c96024c0f7a0e98eae493d2b8517654bc3bc2321a4d109c",
+    "quantfit/cli.py": "99955f52329bcfe928df656576ea15e00a9ad26e849d9904791456948a1de23e",
+    "quantfit/cold_run.py": "3624dbd9f40475a7f99c9bb33e83c3afc331f007ea4ab19e2f2a1309397b986a",
+    "quantfit/corpus_gate.py": "4bedba369ce8aaa693e97057112d8a15a5381424961ab8b9d689177508139e64",
+    "quantfit/corpus_gate_receiving.py": "e5a0c7bd86e60dda7f89f8965d713f8d6bb8953954fbcb8dc038169862f18405",
+    "quantfit/data/reference-evidence-shape-v0.json": "2a8de7be788332e7af9f4b4170a44789e9b7f13438551c8c2660179ce498c802",
+    "quantfit/engines/__init__.py": "4e360536c24a11dbffdadef572b583a0c11a81efd0e2c5063db1f0268ef33c9d",
+    "quantfit/engines/base.py": "8bd67f95c3cf4dab2e149b8942b838ebc0f0c70f69ff9e7dbfacc4e6fafffc61",
+    "quantfit/engines/compressed_tensors.py": "2cb8db239300ca79a7b722f95b82b8e16e7bdd141eb59cf81e8ed394a95fe9a9",
+    "quantfit/engines/gguf.py": "cc8446bf2a3aa3fe2efc97d5c152032fb5d166754f63536fda56c5dc6dd689c4",
+    "quantfit/evidence.py": "1d2f71e071b7326685ccb0e43f60f2403e4d568c86a21013b6426fb167aa4aaf",
+    "quantfit/evidence_profile.py": "97444ee0ce0bd60c52de6a8bde7515f85c088fd77156005097cd580c9c6be7bd",
+    "quantfit/fit.py": "3a47d7d92d3caadb9bbe0f8e81db257ba251acc8921a859e182528b110f2657a",
+    "quantfit/gate.py": "804cd5fb6d9327937d09cfd7218b684a49a426d94061f28ee0911a6fc6e569d5",
+    "quantfit/gate_axis.py": "71628c5b9f060ab0cac621100aed5abbf18152a13f3ac10154503952981a3ba5",
+    "quantfit/gate_receiving.py": "ce91d7c57de12427f7d4ffa1c9fd5e1d5a4bac7093f88d591709a950b811366f",
+    "quantfit/gguf_runtime.py": "9eb4b0d3b54499721350244ef8ab8801c31e18d5d4813491a465d0b365c84f91",
+    "quantfit/gguf_server.py": "5bcb69653493be99485fbe42715da4a0cb62643d2563ddd0b0261fc574eefef2",
+    "quantfit/gguf_structure.py": "9ee12584314271e2b5920d5eec14a52805c34a267b296d89bcda43f8047c1070",
+    "quantfit/gguf_verify.py": "39339938dd75f6111699a2eb146ca7e9b9449f9d7a78f6167c23fd11c2ea0d7c",
+    "quantfit/gpufit.py": "2a73fad9c33221defa069642a1d684bc618033819becbc036ee3af031f415305",
+    "quantfit/inspect_errors.py": "a6be982e40a11d7c9abb62970a8bca5b7d712eff808a9c40b173b43b946ded0a",
+    "quantfit/inspect_gguf.py": "18d35cbfcbe6c42be5728b7deb6e94b5cf9ed353cea6cbc07ce8596ba6dec836",
+    "quantfit/inspect_hf.py": "48ee48850786480c39e85488ea295e69258e29ce5c1f0b7c07ecec7c14f82852",
+    "quantfit/inspect_task.py": "189723757b75b95dad830ca12a837cf2bfec7a38f5af03acedbd0d337cb908c9",
+    "quantfit/junit.py": "5215370d299839b235d2ce026b15a75b13b0b4454fb302b076c9aaccd8993ee4",
+    "quantfit/label_review_cli.py": "5dd6c493d67373fb415091357421fc1342357c6ae8a3484c726f610707e36d2e",
+    "quantfit/modelcard.py": "4484f8777b8f768ab42d5a1ae7058680e3984cf2d7aa0a860541712b13df5737",
+    "quantfit/policy/__init__.py": "b0cd1be5b7cbbe06cdb22b6fcf29c77db0f5a3c3cdbbad491f6609292c96fe51",
+    "quantfit/policy/probe.py": "c1d29482d6feff97956df6e46d6f4b194daf6e4dd2267153b52d775e457eff22",
+    "quantfit/policy/route.py": "cf53ab8ed415ef3733f86caf51bea3e5ed159226c84f8ac0326b9e810abde76f",
+    "quantfit/policy/target.py": "f8052be964780f0e4b04340680ca9e4ac233f5a2d5340aaf047736eee406be78",
+    "quantfit/probe_population.py": "9c9a8898c122a6224acdd39bfb6ad67cc2ca63edb5fdcf77c52a975437f30520",
+    "quantfit/quantize.py": "4b1ecba9433d3e40b736d3e4d086ef4e9900f17583f6a884a5913b542fb153a3",
+    "quantfit/reference_assessment.py": "ef8bd69d2da5aa190544726e7b6c9e0dd5e86c959c282255b19b8ed733457efb",
+    "quantfit/reference_cli.py": "86c3677f674d43928267878eefcdace03e73e58506ecf90328def479ebbf2c0f",
+    "quantfit/reference_replay.py": "e2ce7faad07af3c81b8bf7eddfe56d91081f6f69e8ff7db3469abbb2a33751a4",
+    "quantfit/refreports.py": "ab8791b9c7d0a93f579edf846a7ac28a64a2435c69ab017e2c89caa7f8a8a241",
+    "quantfit/registry.py": "1ffa0992009ba4a49b6e18c1191ee784416396719454050632316907b537fa05",
+    "quantfit/repeatability.py": "6a29c7bc5df1e82d4928357b108a4e2160dc1e5cb854f46627560db880cfe23d",
+    "quantfit/repeatability_junit.py": "6ce3fb92036e54b520a6b08308571f137bcf20a061221b3ef55fae27bec3a4a5",
+    "quantfit/replay_bundle.py": "bb7f5af96fa0efbfd92423c505dc93213aea48f3ef9adadc89106afefc043f9e",
+    "quantfit/report_comparison.py": "4fb45460213bd0239ed6f2dcfca99b1886bff78f6fe41d798f7fc340397f9faf",
+    "quantfit/reproduce.py": "db531aae6774a53f6543e585b4c354d103fcd7d9ea8e62f71a449289ee742206",
+    "quantfit/reproduce_junit.py": "911dc697e1a65d19ded1dbe45f08be2ec0ee6591bd3826feebd45b09b2bdcddb",
+    "quantfit/resolution.py": "e6b23319a795182ac3cde8256fb76919636c8e7bea44dc55fb8fb57471e5cb2d",
+    "quantfit/resolution_budget.py": "3442e0b84eda290101814557d4347ef92161e666022283075a82cdabc8c94034",
+    "quantfit/retained_labels_cli.py": "b5fc7b168e3313360a76193a62ecf751371f9cd20b6a3147cab1a44c63fc4987",
+    "quantfit/safety/__init__.py": "64ae70688ffe6bcd1fbc48ddf977aa0e15052b2babddaf9616863fb4ffda1521",
+    "quantfit/safety/adjudication.py": "a1f8c64d4741d9215c38958e9cc7173515fac22c10877ae391dd637aa7a3143a",
+    "quantfit/safety/adjudication_review.py": "7a3a68d7eae66a4340e0c601cb77db199e7a4a5a9e187fa7050961aac443c172",
+    "quantfit/safety/annotation_chunks.py": "044cfe486de275004471f7f67839a738ce6752a6f01da39035c76ced1b93fa92",
+    "quantfit/safety/annotation_packets.py": "226b0e7fb0cd9caf9bf785afa98e4aa7cadc8631998634cf7a074c187a73b0a7",
+    "quantfit/safety/cache.py": "9812dcf76cae12df581c36c050860a1d10b81a0f254de358c33ef2a5bdcfbd13",
+    "quantfit/safety/calibrate.py": "62e3312fa890fc7484b8fde902771b4693da20dcfa11c87df1ab38b54ef22346",
+    "quantfit/safety/calibrated_gate.py": "91f5110a48897fddc8c625e1a2670e4f67aa38d85e6c9ad7c3cbf6cf1f2d8704",
+    "quantfit/safety/calibration_aggregate.py": "c0ccb011759f5d78cbc1c2a984cc89deb0779d9a9f78a0e19641b395fe1544a5",
+    "quantfit/safety/calibration_binding.py": "4072ef2798bc7535ed0e7ddf2528593bd3d80f98574073c375c5f936b459bc5b",
+    "quantfit/safety/calibration_inputs.py": "a0096cf942e1d15d3a70234587f7c3431610a193e80ec29abd12472df63d8165",
+    "quantfit/safety/calibration_judges.py": "5e7e17610e5bc91b9ed939bbce6833936b9959d7b5e48efcc8c2c4e695d1ec58",
+    "quantfit/safety/calibration_paired.py": "7be37a8832ffdda063ddd582ceae233cb15bcc1042fd645305c23e7c71a66317",
+    "quantfit/safety/calibration_strata.py": "191766d034cbfec12c0e7c512786ceba4eadd143d9dbf22f10b95e2065f297f2",
+    "quantfit/safety/demo.py": "7041e5dd26cefe34da562f75784e0b98ae9a73bafe52c10d49161dca672e1659",
+    "quantfit/safety/gguf_arm.py": "7c6df1e0318207a7ec624ee010da50011c39cca64855435a1a87c946b526d53b",
+    "quantfit/safety/label_review.py": "6b7d1e067d8633dac7e300539c7f62ef79d42174ed5781fe5cd19312d15cbd1a",
+    "quantfit/safety/mde.py": "00d649f37218fcfbca4b12f6403335f009131fd0e766b329b28d39e1dd9a99e0",
+    "quantfit/safety/reconcile.py": "2c7b2d49c756ec8f9b8e6bb595a040b6ad90e428d5c8ed057aac3d8faab65e47",
+    "quantfit/safety/report.py": "45f1d35a3f06f486119f16e002d0df2f2376a3867d491c5dc903b9513c0f9c74",
+    "quantfit/safety/retained_labels.py": "c44f11d608702aec9b770a3b381fd44fba09220d9538d08d688c3bf7771208a5",
+    "quantfit/safety/retained_review.py": "fe2401338a5f46fcb3380142a45a06e4586f3e73bec3b8c24d51f7f0998eeb21",
+    "quantfit/safety/retention_io.py": "a7dc49b2bba071283256ea64402240b9006bfcaa9df3f3d25f482e5293c682cd",
+    "quantfit/safety/verify.py": "91328751073ac932b2969970913b495cce3cf8cb0ec05e864bd07ca4c3ab2d38",
+    "quantfit/saved_gate.py": "6bdabd59ba7b7703019d77c51ad45a4b2ab2c9bc1f2c01cb898a858507cc0477",
+    "quantfit/saved_screen.py": "5f0994a0d0914f480623df96941cb3e0cf9698d8d303eb64c97be8f3ed6adfe6",
+    "quantfit/screen.py": "41198162c370a0f479e3426e810c571066bf11a04f238c1d17b2030f7427214c",
+    "quantfit/screen_adjudication.py": "541d40cab887ca9ff5dc5b8878e92f9f02427a7354b9a7177d175d9b3ec615c8",
+    "quantfit/screen_bundle.py": "53cab99f789120a570b1b8b80a895cfd85b6c1659b5bf2c0ea8f9f1984d8132e",
+    "quantfit/screen_bundle_inputs.py": "34612b144cfb306d75f5ee8f7f934cc2e14748ddba42aaad0a37d4357fde065f",
+    "quantfit/screen_bundle_publication.py": "59a36b7bb39e4a16686673c441ebb426fa731ba8aa636bfe2780232183135330",
+    "quantfit/screen_compare.py": "2082b2e364b07779e201da549686a497d90fd92b07d6259a5996344c14406cb1",
+    "quantfit/screen_compare_junit.py": "135202729f1bcd2c7fa9bb6b4cf3bc28cee516b06ee74081108f80d579030ba1",
+    "quantfit/screen_requirement.py": "5590a76421e4b6a412c20c2cec33e0e8a080c0aa72987af5aef710b3ba982fc3",
+    "quantfit/screen_resolution.py": "cb06aa78329205ce697ea26158fcf19b27011679f7f3566c70becd5556915b2a",
+    "quantfit/screen_resume.py": "2a8e072d929645c4647b4b1ae415c87b453041c59e5130d0bc68573c3e51e400",
+    "quantfit/spec.py": "dd5a6799ecec29b7ef6be8989d4237e560e706e2800ea581a9fd39674af9552b",
+    "quantfit/torchrt.py": "8bcb9d54e86d7683ae27d7a5fa3ba6baa67c2d786d25e92b0d0ed265447cb07b",
+    "quantfit/verify.py": "c9d31551df009d8f095f99788647b627109a420a5ed9bf24795b987745d77ad7",
+    "tests/test_annotation_packets.py": "193c4f63ab85f99fa9948e3ec4a5d375e50609b0801aa0b5b42246299932acbb",
+    "tests/test_ci_annotation_packets.py": "7c482da2db07c42e1a34bd4fa30b9937ab22b196fa7e816b06d2db60d4fcd364",
+    "tools/ci/pyproject.toml": "8f149313eb594a95037156e33c8b81732a6e263a2df894dfeab4042fe8ecaa00",
+    "tools/ci/uv.lock": "de55bd727b548d5a49dcb2babb15912790cbfcb231f1b724ca10558db092d532",
+    "tools/ci_annotation_packets.py": "0c868d8dfe90b46fc98e8cc53c1d6d1bfa8a60c462a4041f29a4366b8a8bf0e2",
+    "tools/ci_annotation_packets_browser.py": "6bbb740d9294164f7b4fbdc9d186c61702dfaa45d2ddcecc5c693bc0a8351b6d",
+    "tools/ci_annotation_packets_record.py": "8fe4ca839f21fcfc5abb98f2084b112e5aaf483cd1d230140e30a20fbb4b9639",
+    "tools/ci_installed.py": "e9bbccf72af3b2579aa74bd1657e3b9638c118fdb5c281e6682e19873240b86b"
+  },
+  "source_inputs_after_held": true,
+  "tool_version": "0.54.0"
+}

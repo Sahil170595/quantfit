@@ -1,7 +1,6 @@
-# Screen evidence bundles — 0.33.0 candidate
+# Screen evidence bundles — 0.33.0
 
-This unreleased interface transports a complete saved-screen population. It requires
-the candidate source or built wheel; published 0.31.0 does not provide these commands.
+Available since quantfit 0.33.0. Transport a complete saved-screen population.
 
 ```bash
 quantfit bundle screen-create --targets targets.json --reports-dir reports --out handoff --json

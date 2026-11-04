@@ -349,6 +349,44 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | **Evidence (of non-run)** | `docs/judge-calibration-v0.md` front matter — "machinery, **not started** … No completion has been labeled, no ε has been measured"; `CHANGELOG.md` §0.5.1. E3: `tests/test_calibrate.py` (53). |
 | **NOT validated** | The round trip through a real spreadsheet (the blinded CSV has never been opened by a labeler, and spreadsheet mangling is the documented threat model), and every ε‑consuming number downstream. |
 
+### Unreleased 0.37.0 candidate: retained-label extraction and ingestion (2026-10-23)
+
+| | |
+|---|---|
+| **Functional source evidence** | Actual `calibrate extract` → original synthetic sheet removal → `calibrate ingest --retained-labels` → native `resolution`, 40 fictional pairs / 80 rows / 24 unusable. Full-sheet schema-2 and retained schema-3 statistics match; complete retained population and original hash declarations are preserved. This is offline software evidence, not a human calibration study. |
+| **Hardware / runtime** | Windows 11, Intel64 Family 6 Model 183 Stepping 1, Python 3.12.13, source 0.37.0. No model, network, GPU or inference was used. |
+| **Evidence** | `validation/2026-10-23-retained-labels/`; `tests/test_retained_labels.py`; `tests/test_retained_labels_cli.py`; `tests/test_ci_retained_labels.py`. Existing installed wheel/sdist acceptance includes the native consumer; exact-head hosted qualification is pending on the candidate PR. |
+| **Not established** | Human truth, rater authentication, independent labeling/execution, sensitivity or scientific GO. The private CSV/key are not published; the native calibration file retains declared scope, including any supplied local model identifiers. |
+
+### Unreleased 0.41.0 candidate: required conditional screen resolution (2026-10-23)
+
+| Scope | Current evidence |
+| --- | --- |
+| **Functional source evidence** | Actual `screen-summary` default and explicit requirement over the same receiving primitives: native 120-probe/60-at-risk-per-axis positive 40 pp, coarse 30 pp, actual 40-probe saturation with unattainable power failing even at 100 pp, missing calibration, native flags/incomplete priority with simultaneous reasons, and native retained-schema-3 producer/consumer. |
+| **Limits** | Fictional aggregate labels/counts and offline software behavior only. No new inference, human calibration study, authenticated assumptions, sensitivity or scientific GO. Final-head installed/CPU hosted qualification is separate and pending until recorded on the PR. |
+| **Evidence** | `tests/test_screen_requirement.py`; `tests/test_screen_requirement_cli.py`; `tests/test_ci_screen_requirement.py`; `validation/2026-10-23-screen-requirement/` |
+
+### Unreleased 0.40.0 candidate: explicit local label review (2026-10-23)
+
+| | |
+|---|---|
+| **Functional source evidence** | Actual two full native sheets/key → `calibrate review prepare` → explicit fictional selected labels → `calibrate review apply` → unchanged `calibrate ingest`. Nine pairs/18 rows include every normalized A/B label combination once per arm: 12 selected, 6 agreed, 10 changes vs A, 4 final unusable. Native schema 2 has baseline/quantized usable counts 7/7 and unchanged directional/native Wilson arithmetic. |
+| **Evidence and limits** | `tests/test_label_review.py`; `tests/test_label_review_cli.py`; `tests/test_ci_label_review.py`; `validation/2026-10-23-label-review/`. Blank or filled-partial queues refuse native ingestion; a filled all-selected queue may already be a complete native sheet. No automatic adjudication/consensus, authentic blinding, rater authentication, independence, sensitivity or GO; final-head hosted installed qualification is separate and pending. |
+
+### Unreleased 0.39.0 candidate: paired calibration diagnostics (2026-10-23)
+
+| | |
+|---|---|
+| **Functional source evidence** | Actual native 24-pair capture/key/sheet → `calibrate paired` → extraction → owned original-sheet removal → retained paired diagnostics. All 16 judge/label cells are nonzero with asymmetric counts; 21 common-usable pairs remain separate from three unusable-coverage cases and whole-judge counts. Distinct expected-group/source-at-risk denominators and asymmetric/correlation controls are checked. |
+| **Evidence and limits** | `tests/test_calibration_paired.py`; `tests/test_calibration_paired_cli.py`; `tests/test_ci_calibration_paired.py`; `validation/2026-10-23-calibration-paired/`. Native loader and actual gate refuse replacement calibration. No independence test, bias correction, source authentication, sensitivity or GO; exact-head hosted installed qualification is separate and pending. |
+
+### Unreleased 0.38.0 candidate: descriptive calibration strata (2026-10-23)
+
+| | |
+|---|---|
+| **Functional source evidence** | Actual native capture/key/sheet → `calibrate strata` → private extraction → original synthetic sheet removal → explicit retained-mode `calibrate strata`. Eight fictional pairs / 16 rows include all three zones, both borderline expectations, asymmetric unusable labels and two pairs in each observed-at-risk cohort. Full/retained statistics match; the native bound loader refuses the diagnostic as replacement calibration. |
+| **Evidence and limits** | `tests/test_calibration_strata.py`; `tests/test_calibration_strata_cli.py`; `tests/test_ci_calibration_strata.py`; `validation/2026-10-23-calibration-strata/`. No human judgment, inference, source authenticity, independence, A1 transfer, sensitivity or GO is established; exact-head hosted installed acceptance is separate and pending. |
+
 ### `quantfit gate --baseline B --quant Q (--threshold PP | --tier T) [--eps-upper R --eps-source S]`
 
 | | |
@@ -391,6 +429,108 @@ cross-release runs have been compared; the 0.5 screen has not run).
 ---
 
 ## 3. Major flags
+
+### Selected-axis effect gates (unreleased 0.52.0 source candidate, 2026-11-02)
+
+| Flag surface | Command | Bounded source behavior | Evidence and limits |
+|---|---|---|---|
+| `--axis-threshold` | gate | Repeat 1..2 exact native axes with PP resolution targets; same native MDE/detection, complete selected 3 > 4 > 5 > 0, strict opted gate-v2 and per-axis/overall JUnit. Legacy threshold/tier remains. | `tests/test_axis_gate.py`; `tests/test_axis_gate_receiving.py`; `tests/test_axis_gate_cli.py`; `tests/test_ci_axis_gate.py`; `validation/2026-11-02-axis-effect-gates/`; synthetic native counts/API/actual controlled OSCLI, not model execution, human truth, sensitivity, joint error guarantee or scientific GO. Installed/hosted qualification is separate. |
+
+
+### Whole-target adjudication screen (0.48.0; source controls 2026-10-31)
+
+The regenerable native editable-source record in
+[`validation/2026-10-31-screen-adjudication/`](../validation/2026-10-31-screen-adjudication/)
+contains 24 positive API/CLI cases, 46 adverse cases and actual OS stdout byte
+parity. Genuine fictional N2/N3 prepare/fill/apply sources retain original order,
+missing reports, native 3/4/0 and complete 3N+1 JUnit. Available-source consistency
+and unauthenticated operator resolution remain separate. Scoped lower named
+budgets prove admission; this is not maximum-size/runtime evidence. No inference,
+human authentication, GPU result, sensitivity or scientific GO is established.
+Installed distributions and hosted CI remain separate qualifications. This workflow
+is available in 0.48.0, extending the capture-backed receiver introduced in 0.47.0.
+
+| Flag surface | Command | Bounded source behavior | Evidence and limits |
+|---|---|---|---|
+| `--adjudications-dir` | adjudicate screen | Optional closed target-named record root; supplied records are always validated, zero flags need no empty record. Declared counts never fill missing native report counts. | `tests/test_screen_adjudication.py`; `validation/2026-10-31-screen-adjudication/`; dated source controls, no human authentication |
+| `--captures-dir` | adjudicate screen | Optional closed target-named full capture root; all available native scope/population, byte/fingerprint and selected set/axis/hash declarations must agree before publication. | Same source record and `tests/test_ci_screen_adjudication.py`; installed/hosted qualification is separate |
+| `--require-source-complete` | adjudicate screen | Defaults off; incomplete source closure changes only native 0 to 4, never clears native 3/4. JUnit retains all 3N+1 cases; unresolved declarations may be source-complete. | `docs/screen-adjudication.md`; same fictional source record; no sensitivity or scientific GO |
+
+### Capture-backed adjudication source candidate (2026-10-31, unreleased 0.47.0)
+
+| Flag surface | Command | Bounded source behavior | Evidence and limits |
+|---|---|---|---|
+| `--report` / `--capture` / `--record` / `--out` / `--json` | adjudicate verify | Held-only whole-native tabulation, exact selected membership/axes/both UTF8 hashes; no queue/key/CSV. Consistency 0 includes zero/unresolved; refusal 2. | `tests/test_adjudication_verification.py`; `tests/test_ci_adjudication_verification.py`; `validation/2026-10-31-adjudication-verification/`; no source/human authentication |
+| `--adjudication-capture` / `--adjudication` / `--calibration-report` | emit model-card | Capture requires record before I/O; one held report feeds receiver/capture/calibration/render. Default/capture-free bytes and native math remain. | Same source consumer; actual hosted installed acceptance is separate, no human confirmation or scientific GO |
+
+
+### Source-bound adjudication source candidate (2026-10-25, unreleased 0.46.0)
+
+| Flags | Command | Source controls | Evidence and limits |
+|---|---|---|---|
+| `--report` / `--capture` / `--review` / `--receipt` / `--json` | adjudicate prepare | Actual held capture-v2 canonical binding, whole native typed tabulation, exact complete flagged population and blank private queue; zero/all/repeated text retained. | `tests/test_adjudication.py`; `tests/test_adjudication_adverse.py`; `docs/adjudication.md`; no human truth or new measurement |
+| `--report` / `--capture` / `--review` / `--preparation` / `--out` / `--json` | adjudicate apply | Held-once originals, regenerated blank preparation, explicit both-arm labels/class, complete selected protected text and strict NEW public hash/count record. Native exclusive alias/race checks. | `tests/test_adjudication_io.py`; `tests/test_ci_adjudication.py`; `validation/2026-10-25-adjudication/`; fictional labels only |
+| `--adjudication` / `--report` / `--calibration-report` / `--json` | emit model-card | Shared held/parsed report with strict capture-free record receiver and optional native calibration, deterministic declared section before unchanged footer, default bytes unchanged; no file-output option. | `tests/test_adjudication_adverse.py`; `tests/test_modelcard.py`; `tests/test_calibrated_modelcard.py`; source controls, final-head hosted pending; no human authentication, sensitivity or GO |
+
+### Calibration-choice source candidate (2026-10-25, unreleased 0.45.0)
+
+| Flag | Command | What is exercised | Evidence / limits |
+|---|---|---|---|
+| `--calibration-variant` / `--require-conditional-resolution` | screen-summary | Explicit named mode, one held native population, ALL-root global 64MiB inventory/actual bytes and combined n² work before conditional math. Every target×choice, pending/missing/unattainable rows, attainable envelopes/copies, frozen native3/4 priority; N+2NK+1 JUnit with no-ceiling skipped additions. | `tests/test_calibration_choices.py`; `tests/test_ci_calibration_choices.py`; `validation/2026-10-25-calibration-choices/`; no pooling/rater independence/GO; current-head hosted pending |
+
+### Finite resolution budget source candidate (2026-10-25, unreleased 0.44.0)
+
+| Flag | Command | What is exercised | Evidence / limits |
+|---|---|---|---|
+| `--plan-n-min` / `--plan-n-max` / `--plan-mde-pp` / `--plan-effect` | resolution | Complete inclusive hypothetical at-risk grid/options before IO; held original scope/counts; complete actual+planned native work before math; exact local thresholds, one native curve, sentinel guard, discrete feasible runs and finite suffix. Defaults and actual denominators remain unchanged. | `tests/test_resolution_budget.py`; `tests/test_ci_resolution_budget.py`; `validation/2026-10-25-resolution-budget/`; fictional source controls, hosted qualification pending; no future evidence or GO |
+
+### Capture-backed retained review source candidate (2026-10-25, unreleased 0.43.0)
+
+| Flag | Command | What is exercised | Evidence / limits |
+|---|---|---|---|
+| `--input-mode` | calibrate review prepare / apply | Explicit retained mode verifies held capture/key and both own retained receipts; default full-sheet calls/output remain unchanged. Mixed or missing roles refuse. | `tests/test_retained_review_cli.py`; `tests/test_label_review_cli.py`; `docs/retained-review.md`; final-head hosted qualification pending |
+| `--capture` / `--retained-labels-a` / `--retention-receipt-a` / `--retained-labels-b` / `--retention-receipt-b` | calibrate review prepare / apply | All six originals held once; actual capture scope/complete rows/judge flags/text digests and both role-specific receipts. Original-sheet digests are declarations only; complete inequality queue and native-validated new full output, followed by separate truthful extract/schema3. | `tests/test_retained_review.py`; `tests/test_ci_retained_review.py`; `validation/2026-10-25-retained-review/`; no human/source authentication or GO |
+
+### Annotation chunks source candidate (2026-10-25, unreleased 0.42.0)
+
+| Flag | Command | Scope validated | Evidence |
+|---|---|---|---|
+| `--out-dir` / `--rows-per-part` | calibrate chunks prepare | Complete blank native template/key admission; source-order partitions into an existing empty private directory, at most 128 parts. Native input/record limits bound work; generated bytes are checked before manifest-last exclusive publication. No automatic labeling or atomic-directory claim. | `tests/test_annotation_chunks.py`; `tests/test_ci_annotation_chunks.py`; `validation/2026-10-25-annotation-chunks/`; corrected-head hosted qualification pending |
+| `--annotator-role` / `--annotator-name` | calibrate chunks prepare | Explicit bounded maintainer or single named-second-annotator attribution; the second role requires a name. Identity remains unauthenticated and the tool grants no new sharing permission or recipient. | `tests/test_annotation_chunks.py::test_named_second_attribution_is_explicit_not_authenticated`; `docs/data-handling-completions.md` |
+| `--manifest` / `--part` | calibrate chunks collect | Hold original source/key/manifest/all returned parts once, regenerate blank partitions, validate exact assigned IDs/text and complete explicit labels, then publish a NEW complete native sheet and aggregate filled hashes. Separate unchanged schema-2 ingest; truthful extract/schema-3 and all-unusable native refusal controls. | `tests/test_annotation_chunks.py`; `tests/test_ci_annotation_chunks.py`; `validation/2026-10-25-annotation-chunks/`; corrected-head installed qualification pending |
+
+### Conditional-resolution requirement candidate (2026-10-23, unreleased 0.41.0)
+
+| Flag | Command | Current behavior | Evidence |
+| --- | --- | --- | --- |
+| `--require-conditional-resolution` / `--calibrations-dir` | screen-summary | Explicit finite `(0,100]` pp ceiling requires a matched report/calibration and both measurable, target-power-detectable native axes for every declared target. Native 3/4 priority, otherwise missing calibration 4, coarse/unattainable 5, all criteria/native0 satisfied 0; invalid 2. Default annotation/native JUnit unchanged; opt-in appends requirement failures, including missing calibration. | `tests/test_screen_requirement.py`; `tests/test_screen_requirement_cli.py`; `tests/test_ci_screen_requirement.py`; `validation/2026-10-23-screen-requirement/`; final-head installed qualification pending |
+
+### Label review candidate (2026-10-23, unreleased 0.40.0)
+
+| Flag | Command | Scope validated | Evidence |
+|---|---|---|---|
+| `--sheet-a` / `--sheet-b` / `--key` / `--sheet` / `--receipt` / `--json` | calibrate review prepare | Both original full native joins, every normalized inequality incl unusable, blank sorted private subset and closed aggregate role/queue bindings; zero selections produce a header-only subset. | `tests/test_label_review.py`; `tests/test_label_review_cli.py`; `validation/2026-10-23-label-review/` |
+| `--sheet-a` / `--sheet-b` / `--key` / `--review` / `--preparation` / `--out` / `--receipt` / `--json` | calibrate review apply | Exact original roles and regenerated preparation, selected IDs/text/explicit labels, new complete private sheet preserving agreed labels, aggregate application bindings and unchanged separate native ingestion. | `tests/test_label_review.py`; `tests/test_label_review_cli.py`; `tests/test_ci_label_review.py`; `validation/2026-10-23-label-review/`; final-head installed qualification pending |
+
+### Calibration paired candidate (2026-10-23, unreleased 0.39.0)
+
+| Flag | Command | Scope validated | Evidence |
+|---|---|---|---|
+| `--capture` / `--key` / `--sheet` / `--retained-labels` / `--retention-receipt` / `--out` / `--json` | calibrate paired | Unchanged held admission; complete pairs, fixed judge-row/human-column tables and baseline-row/quantized-column error tables on two usable labels; whole judge counts and per-source at-risk denominators remain separate. Empty/all-unusable groups complete descriptively. | `tests/test_calibration_paired.py`; `tests/test_calibration_paired_cli.py`; `tests/test_ci_calibration_paired.py`; `validation/2026-10-23-calibration-paired/`; final-head installed qualification pending |
+
+### Calibration strata candidate (2026-10-23, unreleased 0.38.0)
+
+| Flag | Command | Scope validated | Evidence |
+|---|---|---|---|
+| `--capture` / `--key` / `--sheet` / `--retained-labels` / `--retention-receipt` / `--out` / `--json` | calibrate strata | Exact held capture/key/header/row agreement, v2 key and honest full/retained provenance; descriptive per-zone/per-arm native Wilson diagnostics with selected-pair counts separate from usable denominators. Empty/all-unusable groups complete without replacement calibration or scientific GO. | `tests/test_calibration_strata.py`; `tests/test_calibration_strata_cli.py`; `validation/2026-10-23-calibration-strata/`; final-head installed qualification pending |
+
+### Retained-label candidate (2026-10-23, unreleased 0.37.0)
+
+| Flag | Command | Scope validated | Evidence |
+|---|---|---|---|
+| `--receipt` | calibrate extract | New aggregate hash/size/count/fingerprint receipt alongside private two-column CSV; native original-sheet admission, staged exclusive publication, categorical partial failure. No source deletion or transaction claim. | `tests/test_retained_labels.py`; `tests/test_retained_labels_cli.py`; `validation/2026-10-23-retained-labels/` |
+| `--retained-labels` | calibrate ingest | Explicit mode mutually exclusive with legacy `--sheet`; exact bounded CSV/key population and label bindings; native per-arm Wilson/null behavior, closed schema 3 and actual resolution after original sheet is unavailable. | `tests/test_retained_labels.py`; `tests/test_ci_retained_labels.py`; exact-head installed qualification pending |
+| `--retention-receipt` | calibrate ingest | Required exactly with retained mode; strict JSON/count/hash/fingerprint/key binding, honest original-sheet and declared-capture provenance; new stdout summary excludes caller paths and native identity strings. | `tests/test_retained_labels_cli.py`; `tests/test_retained_labels.py`; `docs/retained-labels.md` |
 
 ### Cold native replicates (2026-10-08)
 
@@ -499,6 +639,8 @@ only required argument that command has.
 | `--bundle` / `--target` / `--out` / `--json` | references assess | **E3 source controls, 0.29.0 candidate.** Held-byte campaign parity, target/pin/cap/T0/payload/axis/flag decisions, categorical privacy and protected receiving output. Original Phi4 flags remain blocked; synthetic controls establish instrument behavior only. Existing installed consumers carry offline cases; exact-head hosted qualification is recorded on the PR | `tests/test_reference_assessment.py`; `tests/test_reference_campaign.py`; candidate review/CI receipt |
 | `--bundle` / `--target` / `--out` / `--timeout-seconds` / `--json` | evidence rerun | **E3 source controls, 0.30.0 candidate.** Frozen recipe/read-once behavior, pre-server asset/control checks, original/fresh native outcomes, protected closed publication and owned timeout/cancellation/cleanup cases. Existing Smol native job and installed mocked controls provide exact-head hosted qualification recorded on the PR; no actual Phi4, human truth or scientific GO is inferred | `tests/test_reference_replay.py`; candidate review/CI receipt |
 | `--targets` / `--reports-dir` / `--out` / `--junit` / `--json` | screen-summary | **E3 source controls, 0.31.0 candidate.** Strict offline target/protocol/statistics bindings, duplicate refusal, measured-target axis denominators, preserved missing rows/XML skips, declaration-only sensitivity control and protected receiving outputs. Existing installed consumers provide exact-head qualification recorded on the PR; no fresh measurement, human confirmation or scientific GO is inferred | `tests/test_saved_screen.py`; candidate review/CI receipt |
+| `--calibrations-dir` | screen-summary | **Source controls, 0.35.0 candidate.** Optional held, target-named bound calibrations add direct conditional resolution and explicit coverage; native flags, denominators, exits and JUnit stay unchanged. Missing calibration does not create a new gate failure; valid orphan calibrations remain pending. Malformed or incompatible supplied evidence, unsafe outputs and excess analysis work refuse 2. Synthetic labels do not establish human truth, verified assumptions, sensitivity or scientific GO. Installed/real CPU qualification is separate and recorded on the exact-head PR | `tests/test_screen_resolution.py`; `tests/test_ci_screen_resolution.py`; `validation/2026-10-18-screen-resolution/` |
+| `--sheet-a` / `--sheet-b` | calibrate reconcile | **Source controls, 0.36.0 candidate.** Two private filled sheets share exact paired IDs and original hashes; separate per-arm 3×3 counts retain usable denominators, disagreement, unusable labels and explicit self-controls. Successful reconciliation exits 0 without rater authentication, independence, consensus calibration or scientific GO. Invalid/unsafe input or publication refuses categorical 2 without reflecting private diagnostics. Installed qualification is separate and recorded on the exact-head PR | `tests/test_label_reconciliation_cli.py`; `tests/test_label_reconciliation.py`; `docs/label-reconciliation.md` |
 | `--root` / `--json-out` | audit | **E0.** `audit` itself is E2 (§2), but it runs there with neither flag: `--root` on a foreign checkout, and `--json-out` consumed by anything, are both unexercised. **This row previously named the flag `--json`, which is a different flag on the same command** — `--json-out PATH` writes the findings file, `--json` emits the stdout envelope. One row described one flag under the other's name | `.github/workflows/validate.yml` runs the bare command; `quantfit/cli.py:286` |
 | `--json` | every leaf command, including t0 | **E1 on `audit`** (run locally 2026-08-14, 0 errors / 0 warnings across five checks); **E3 on t0**, synthetic CLI envelope consumption recorded 2026-10-05. Earlier fourteen-leaf reading was E0 on the other thirteen | `tests/` per-command envelope assertions are E3; `validation/2026-10-05-t0-replicates/` |
 | `--version` / `-V` | top level | **E2.** Executed by `tools/quickstart_check.py` as a clean-venv command on ubuntu **and** windows in `install-smoke`, green on run 31772386477 | `tools/quickstart_check.py` (`[PASS] L19 quantfit --version`) |
@@ -521,6 +663,14 @@ qualification remains pending for this candidate.
 | Flag | Command | What has actually run | Evidence |
 |---|---|---|---|
 | `--from-report` | gate | Local source CLI replay of preserved real Phi4 aggregates: dangerous-axis gate0 alongside the original2/20 over-refusal flags; bound synthetic policy refusal5 with matched recorded scope; exact report copies and relocated bundle checks. Synthetic adverse tests cover all decision states, alias/corruption rejection and real Bash action routing. No new inference, authenticated labels, sensitivity or GO | `validation/2026-10-09-saved-report-gate/functional.json`; `tests/test_saved_report_gate.py` |
+| `--capture-a` / `--key-a` / `--sheet-a` / `--retained-labels-a` / `--retention-receipt-a` / `--capture-b` / `--key-b` / `--sheet-b` / `--retained-labels-b` / `--retention-receipt-b` / `--out` / `--json` | calibrate compare-judges (since 0.49) | Two complete bound native populations and identical supplied ternary truth; whole per-arm flag/error tables, native Wilson blocks and honest all-unusable/null outcomes. Both mode suites precede IO; each aggregate output file and full CLI envelope <=256 KiB before exclusive publication. | `tests/test_calibration_judges.py`; `validation/2026-10-31-calibration-judges/`; installed/hosted qualification separate |
+| `--review` / `--preparation` / `--out` / `--json` | adjudicate review-page (since 0.50) | Actual blank/preparation consistency; all selected rows/private escaped source strings; bounded whole export; fixed native triplets; no source or human authentication. | `tests/test_adjudication_review.py`; `validation/2026-10-31-adjudication-review/`; actual hosted browser separate |
+
+
+| `--probe-dataset` | verify-safety, inspect-run (since 0.51); gate/screen/screen-summary (0.53 candidate) | Declared namespaced remote-only source; whole software-fixture population admitted before any observer/model. No real alternative corpus/model qualification. | `tests/test_probe_corpus.py`; `validation/2026-10-31-probe-corpus/`; new controlled native policy/receiving/OSCLI evidence in `validation/2026-11-02-pinned-corpus-gates/` |
+| `--probe-revision` | verify-safety, inspect-run (since 0.51); gate/screen/screen-summary (0.53 candidate) | Exact 40 lowercase-hex requested and resolved builder hash; no cached auto fallback. | Native loader fixtures, same-ID changed revision noncanonical |
+| `--probe-split` | verify-safety, inspect-run (since 0.51); gate/screen/screen-summary (0.53 candidate) | One literal whole named split; no union/slice/all; actual source propagated into all outputs/cache. | Native source/cache/Inspect fixtures; no curation/authenticity claim |
+| Explicit pinned-corpus gate/screen profile | gate, screen, screen-summary (0.53 candidate) | Actual expected-label census drives unchanged native resolution; one held population across targets/retries; saved/complete resume is offline under the explicit triple. Flat gate-v3 and summary-v2 carry typed source/census context. | `tests/test_corpus_gate.py`, `tests/test_corpus_boundaries.py`, `tests/test_corpus_calibration.py`, `tests/test_corpus_publication.py`, `tests/test_ci_corpus_gate.py`; `validation/2026-11-02-pinned-corpus-gates/functional-b.json` records the current controlled native API and seven OS CLI calls. No real Hub/model, remote completeness/authentication, transferred sensitivity or scientific GO; current installed/hosted qualification is separate. |
 
 ## 4. Advertised-but-unevidenced claims found while writing this
 
@@ -724,3 +874,11 @@ exist to catch. Sources, in the order they were consulted: `CHANGELOG.md` (all s
 `^def test_` per file). The `plan` run and the torch measurement in §5 were performed
 while writing it; nothing else here is a new run, and no row was upgraded on the
 strength of code review alone.
+
+
+### Blinded annotation packet source candidate (2026-11-02, unreleased 0.54.0)
+
+| Surface | Command | Scope and boundary | Evidence |
+| --- | --- | --- | --- |
+| `--sheet` / `--key` / `--manifest` / `--out-dir` / `--json` | calibrate chunks packets | All required, original held native blank/key/stored-version manifest; every part receives a fresh private page in an existing empty directory. No new labels, sharing authority or population selection. Worst complete returned CSV/full-sheet budgets and page/aggregate caps before publication. | `tests/test_annotation_packets.py`; `tests/test_ci_annotation_packets.py`; `validation/2026-11-02-annotation-packets/` controlled API/OS CLI/native receiving; hosted/installed qualification separate. |
+| Explicit recipient choices | Private offline page | Blank/refusal/compliance/unusable; frozen ID/string export, exact CSV, no hidden unblinding fields/network/storage. Unchanged complete native collection and separate schema2/schema3 ingestion. No human/source authentication or science claim. | Source controls and two hosted Linux installed browser profiles; no local browser. |

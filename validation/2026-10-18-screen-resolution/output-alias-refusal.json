@@ -1,0 +1,14 @@
+{
+  "command": "screen-summary",
+  "error": {
+    "kind": "SavedScreenError",
+    "message": "unsafe_output"
+  },
+  "exit_code": 2,
+  "result": null,
+  "schema_version": 1,
+  "tool": {
+    "name": "quantfit",
+    "version": "0.35.0"
+  }
+}

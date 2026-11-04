@@ -13,20 +13,206 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.54.0 — Unreleased (2026-11-02 candidate)
+
+- Add `prepare_annotation_packets` and `calibrate chunks packets`: one private
+  offline page for every original native chunk, containing only its assigned
+  opaque IDs/exact strings and initially blank explicit labels. Native complete
+  collection and separate schema-2/schema-3 ingestion remain authoritative.
+- Admit original blank/key/stored-version manifest, whole returned CSV budget,
+  reconstructed native sheet, every page and aggregate before publication.
+  Preserve all 2N rows, duplicate text, concordant and zero-flagged cases; never
+  reuse the unblinded flagged-pair page or silently truncate.
+- Controlled source/API/OS CLI evidence and its limitations are recorded in
+  `validation/2026-11-02-annotation-packets/`. Hosted browser/installed
+  qualification is separate. Structural blinding and hashes authenticate no
+  source, rater, human judgment, independence, sensitivity or scientific GO.
+
+## 0.53.0 — Unreleased (2026-11-02 candidate)
+
+- Complete opted native pinned-corpus forwarding through live/saved scalar and
+  selected-axis gates, whole screen/resume and saved summaries. One admitted
+  population/census is reused across targets/retries; defaults stay unchanged.
+- Add flat gate3 with native decision discriminator and strict source context;
+  native bundle/JUnit receiving and screen2/saved-summary2 preserve all outcomes,
+  missing rows, recorded-source identity and noncanonical sensitivity caveats.
+- Exercise actual API/OS CLI/native writers, calibration timing/fingerprints,
+  cache/capture identity and refusal boundaries with controlled fixtures. The
+  dated counts-only record does not establish real Hub/model/human/scientific
+  qualification; installed/hosted acceptance is separate.
+
+## 0.52.0 — Unreleased (2026-11-02 candidate)
+
+- Add opt-in `axis_thresholds` API / repeatable `--axis-threshold AXIS=PP` for either or both native axes, including enforceable over-refusal. Targets govern native detectable-effect resolution, not observed-rate ceilings; one paired run evaluates all selected axes before 3 > 4 > 5 > 0 reduction. Native MDE, conditional directional-max epsilon and floor/calibration limits remain unchanged.
+- Ship closed gate-v2 strict receiving in the existing aggregate bundle format, per-axis resolution/detection plus overall JUnit, complete pre-execution declaration admission, and canonical 40/12/28 saved-policy scope. Numeric zero is refused as Boolean epsilon metadata. Legacy `None` keeps valid gate-v1/default JSON/JUnit semantics; only normal software metadata changes.
+- Add source and all original/rebuilt installed-profile consumers using synthetic native counts, the existing controlled live CLI fixture, actual saved CLI and strict receiving; no model execution, human truth, sensitivity, joint-error guarantee or scientific GO. Counts-only reproducible evidence and explicit adverse scopes: `validation/2026-11-02-axis-effect-gates/`. Public install remains 0.51.0.
+
+## 0.51.0 — 2026-11-01
+
+Release context: 0.51.0 extends released 0.50.0. Candidate-stage installation/status
+statements retained below describe the dated 2026-10-31 source qualification.
+
+- Add frozen `ProbeCorpus` and all-or-none `--probe-dataset`, `--probe-revision`, `--probe-split` on `verify-safety`/`inspect-run`. Admit one entire ordered 1..4096 population from the qualified SDK remote-only Hub dataset route with an exact resolved 40-hex builder hash, before any model/observer/generation/judge. No filtering, coercion, expected-label inference or best subset.
+- Bound each actual prompt at 64KiB strict UTF8 and total selected prompt/zone/expected strings at 8MiB; late malformed rows/EOF/4097 reject. These are application retention bounds, not SDK/network/parser/heap or external-data authenticity guarantees. Exact default source/order/native math and report/capture/card behavior remain, apart from the explicit software version.
+- Carry actual source through reports/capture-only bindings, GGUF cache keys, Inspect dataset/log/completed runs and delayed report writers. Source-aware API summaries and plain/calibrated/adjudicated cards disclose noncanonical distributions without applying the default corpus's historical n<=34 detectability conclusion. No curation, judge-accuracy transfer, independence, sensitivity, null clearance or scientific GO.
+- Narrow public datasets to qualified 5.0.1: older advertised 3.0 source lacks its native remote-only URI dispatch. Installed SDK, private 174-node lock and 160 active externals remain unchanged; Hubfloor remains native >=0.25. Preserve every dated validation record. Regenerable controlled software/API/CLI/Inspect/cache evidence and limits: `validation/2026-10-31-probe-corpus/`; public install remains 0.46.0.
+
+## 0.50.0 — 2026-11-01
+
+Release context: 0.50.0 extends released 0.49.0. Candidate-stage installation/status
+statements retained below describe the dated 2026-10-31 source qualification.
+
+- Add `render_adjudication_review` and `adjudicate review-page`: held native blank nine-column queue/preparation consistency, complete selected population, fixed protected-field captions and explicitly blank decision controls. This does not reexecute source checks or authenticate an operator.
+- Freeze the six protected strings in escaped private JSON and export from that snapshot using native-derived allowed triplets, quote-all CSV, explicit CRLF records and UTF8 byte parts. Original CR/CRLF/LF, NUL, Unicode and quotes are preserved; no trimming, formula rewriting or DOM-derived source substitution. Native prepare/default queue/hash regeneration and authoritative apply/card arithmetic remain unchanged.
+- Admit worst-filled CSV under the native 16MiB profile and exact escaped HTML under 32MiB before new exclusive `*.adjudication.html` publication. A valid native queue need not fit the page/export profiles. Aggregate stdout only; private HTML/CSV/captures, browser traces/screenshots/video and uploads stay outside committed evidence.
+- Add the nondefault hosted-only pinned Playwright browser-ci group and actual download→unchanged native apply/cards checks to existing Linux installed profiles, preserving existing job population/budgets. Counts/hashes, source controls and explicit browser-proof limits: `validation/2026-10-31-adjudication-review/`. Public install remains 0.46.0.
+
+## 0.49.0 — 2026-11-01
+
+Release context: 0.49.0 extends released 0.48.0. Candidate-stage installation/status
+statements retained below describe the dated 2026-10-31 source qualification.
+
+- Add `analyze_calibration_judges` and `calibrate compare-judges`: independently hold two complete capture/key/full-or-retained suites, require matching canonical pair/arm strings, metadata and ternary truth, and permit only declared judge ID/revision differences in the common typed protocol identity.
+- Reuse native per-arm/directional Wilson/count blocks and publish whole-N judge-flag and per-arm usable-truth error-concordance tables. All-unusable diagnostics complete with null epsilon/native [0,1] intervals; existing calibration refusal stays unchanged. No pooled calibration, preferred judge, independent-rater inference, source authentication, sensitivity or scientific GO.
+- Bound logical inputs at 52 MiB and each aggregate file/actual CLI envelope at 256 KiB before native exclusive publication. Preserve native CSV admission without rebuilding retained capture text. Fictional regenerable controls and limitations: `validation/2026-10-31-calibration-judges/`; public install remains 0.46.0.
+
+## 0.48.0 — 2026-11-01
+
+Release context: 0.48.0 extends released 0.47.0. Candidate-stage installation/status
+statements retained below describe the dated 2026-10-31 source qualification.
+
+- **2026-10-31 inherited security baseline:** carry accepted 0.47 Python 3.11 minimum and universal-lock advisory audit into this candidate through a normal merge. Preserve all earlier validation records; fresh source/API/actual OS CLI controls and current workflow/audit/metadata hashes are in `validation/2026-10-31-screen-adjudication-python311/`.
+- Add `summarize_screen_adjudication` and `adjudicate screen`: hold the original manifest and closed report/record/capture roots once, admit every structural/source binding and combined logical-role n² work before native statistics, and retain all original rows/native outcomes.
+- Separate source closure, required record coverage and unauthenticated operator resolution. Missing reports keep null native counts; pending available sources must agree. Opt-in source completeness changes only native 0 to 4; native 3/4 priority remains. Complete JUnit is 3N+1, with whole JSON/envelope/XML admission before guarded per-file publication.
+- Keep native math/default summary/card behavior and public install 0.46.0; this candidate stacks on unreleased 0.47.0. Fictional API/CLI/privacy/alias/budget controls and limitations: `validation/2026-10-31-screen-adjudication/` and `docs/screen-adjudication.md`.
+
+## 0.47.0 — 2026-11-01
+
+- **2026-10-31 security compatibility correction:** withdraw Python 3.10 installation/source/CI support from this unreleased candidate. Both public and private projects require Python 3.11+; keep public filelock `>=4.2.1,<5` and private `4.2.1`, removing the affected conditional `3.20.3` branch without an unrelated upgrade. Existing flags/statistics/scientific limits stay unchanged; dated evidence and compatibility scope: `validation/2026-10-31-python311-security/`.
+- Extend the existing dependency audit to all universal-lock registry versions plus installed externals, partitioning conflicting versions into strict exact-pin layers without new jobs, environments, marker filtering or advisory suppressions. Preserve the sole Torch CPU/public lookup mapping; unknown inputs and any layer failure fail closed. This corrects dormant-branch audit coverage, not an observed exploit.
+- Add held-only `verify_adjudication` and `adjudicate verify` for an existing report/capture/record, without original queue/preparation or CSV/key inputs. Check whole native capture tabulation, exact selected pair set/axes and both UTF8 completion hashes. Return a 64 KiB aggregate proof; consistency 0 includes unresolved/zero-selected declarations, invalid/unsafe/excess evidence is 2.
+- Add optional capture-backed model cards sharing the same held report with record/capture/calibration, retaining default/capture-free bytes and original native math, flags and verdict. Supplied-source consistency does not authenticate human labels, origin or scientific GO. Native bounds, privacy limits and regenerable fictional controls: `validation/2026-10-31-adjudication-verification/` and `docs/adjudication.md`.
+
+## 0.46.0 — 2026-10-30
+
+- Add complete source-bound `adjudicate prepare` → explicit private labels/classes → `adjudicate apply`, plus strict optional `emit model-card --adjudication` receiving with/without native calibration. Recompute whole native capture/report correspondence, preserve all flagged pairs and four disjoint declared outcomes, and publish a new closed hash/count record.
+- Preserve original native counts/verdict/Wilson/MDE/calibration and default model-card bytes. Receiving lacks the private capture and cannot freshly authenticate selected membership, text, human reading or authorship; confirmation does not validate nulls. Correct demonstrated bool/int/float scope-equality collisions with native canonical fingerprints. Fictional complete CLI/API evidence and limits: `validation/2026-10-25-adjudication/`.
+
+## 0.45.0 — 2026-10-30
+
+- Add named calibration-choice sensitivity to native `screen-summary`: one held original population and native summary, complete all-choice admission under combined byte/work budgets, actual per-choice native analysis, attainable-value envelopes and explicit digest-copy groups.
+- Preserve missing/unattainable rows and original native outcomes; reuse the native per-axis criterion for an explicit all-choice ceiling with existing 3/4 priority. JUnit keeps native cases first and adds every choice/axis plus one overall; without a ceiling the additions are skipped. No pooling, best-rater selection, independent raters or scientific GO. Fictional complete CLI/API/JSON/JUnit evidence: `validation/2026-10-25-calibration-choices/`.
+
+## 0.44.0 — 2026-10-30
+
+- Add opt-in finite unit-grid budgeting to the existing `resolution` CLI/API. Preserve the held original report/calibration and actual axes, admit conservative complete actual-plus-planned work before native math, and reuse native exact thresholds/power/MDE for one hypothetical global-bound curve.
+- Distinguish first pass, discrete feasible runs, finite stable suffix and no feasible point without assuming monotonicity in n. Detectability guards the 1.0 MDE sentinel. No new verdict, sample collection, adaptive stopping or scientific GO. Regenerable native CLI/API evidence: `validation/2026-10-25-resolution-budget/`.
+
+## 0.43.0 — 2026-10-30
+
+- Add explicit capture-backed retained mode to both `calibrate review prepare` and `calibrate review apply`, with complete CLI/API workflows after the original filled sheets are unavailable. Verify the actual shared capture/key and both own retained receipts once, preserve every inequality including unusable, and native-validate a NEW full sheet before publication.
+- Preserve default full-sheet review calls/receipts, original-sheet hashes as declarations, unusable/native arithmetic, dependencies and separate truthful extract/schema-3 ingestion. No human authentication, new statistics, automatic labeling/sharing or scientific GO. Regenerable fictional evidence: `validation/2026-10-25-retained-review/`.
+
+- Refuse every reconstructed captured field outside the current native CSV reader domain before publishing retained-review outputs, including agreed rows absent from the queue. Exact-limit API/CLI controls retain complete native joins and separate schema-3 ingestion; no global reader/parser or native statistics change. Actual public-entrypoint RED/GREEN evidence: `validation/2026-10-30-retained-review-field-domain/`.
+
+## 0.42.0 — 2026-10-30
+
+- Add complete `calibrate chunks prepare` and `calibrate chunks collect`: bounded private partitions of a complete blank native template, exact regenerated preparation bindings, explicit returned labels and a new complete native sheet. Original native ingest remains separate and unchanged.
+- Retain all source rows, unusable judgments, role-specific source/filled hashes and operator-declared attribution. No automatic labeling/sharing, new annotator permission, independent samples or scientific GO. Regenerable fictional CLI/API/native-ingest evidence and limits: `validation/2026-10-25-annotation-chunks/`.
+
+## 0.41.0 — 2026-10-25
+
+- Add opt-in `screen-summary --require-conditional-resolution PP`: all declared targets and both native axes must have matched calibration, measurable denominators, attainable target power and effective MDE within the declared pp ceiling. Preserve native outcomes/flags/ordered evidence and native 3/4 priority; otherwise missing calibration exits 4 and unmet resolution exits 5.
+- Preserve default annotation/JUnit behavior, append explicit opt-in axis/overall JUnit failures, and exercise native positive/saturated/mixed/schema-3 receiving paths in installed qualification. Offline fictional command evidence and proof limits: `validation/2026-10-23-screen-requirement/`.
+
+Released independently from PR #145: opt-in conditional resolution requirements for saved screens.
+
+## 0.40.0 — 2026-10-25
+
+- Add complete `calibrate review prepare` and `calibrate review apply`: private disagreement subsets, explicit operator labels, exact role/receipt/text bindings, complete new native sheets and fixed aggregate receipts. No preferred rater, automatic ingestion, authentic blinding or independent adjudication.
+- Add actual installed prepare/fill/apply/unchanged schema-2 ingestion, partial-queue and all-unusable/zero-selection controls, strict receipt/CSV/privacy/filesystem tests and a fictional aggregate command record in `validation/2026-10-23-label-review/`.
+
+Released independently from PR #144: explicit local label review preparation and application.
+
+## 0.39.0 — 2026-10-25
+
+- Add `calibrate paired` fixed judge/label pair-state, paired-error and axis-flip diagnostics from held native capture/key and full or retained labels. Preserve whole/common populations, unusable coverage and source-specific at-risk denominators; no independence inference, bias correction or calibration replacement.
+- Add complete installed full/extract/retained consumer with native bound-loader and gate refusal, independent asymmetric cell/correlation controls, privacy/binding adversaries and a fictional aggregate command record in `validation/2026-10-23-calibration-paired/`.
+
+Released independently from PR #143: descriptive paired-label calibration diagnostics.
+
+## 0.38.0 — 2026-10-25
+
+- `calibrate strata` and `analyze_calibration_strata` compute descriptive per-zone/per-arm native Wilson diagnostics for all rows and the two native observed-at-risk pair cohorts. Selected-pair counts remain separate from each arm's usable/unusable and directional human-label denominators; empty and all-unusable groups complete with null rates and native full intervals.
+- Full-sheet and explicit retained-label modes share held, bounded admission. Require a v2 key and the exact original capture bytes, matching header/binding and every paired judge flag/completion digest; metadata must agree across arms. Zone never determines expected-safe/unsafe behavior. Native capture-1/v2-key input remains explicitly unbound.
+- Publish only fixed aggregate counts/statistics, input hashes and binding fingerprint through the existing write-once path. Zone grouping, conditional native selection and byte agreement establish neither authenticated labels, independent evidence, A1 transfer, replacement calibration, sensitivity nor scientific GO. See [calibration strata](docs/calibration-strata.md) and the fictional [command record](validation/2026-10-23-calibration-strata/).
+
+Released independently from PR #142: descriptive calibration strata diagnostics.
+
+## 0.37.0 — 2026-10-25
+
+- Complete retained-label workflow: `calibrate extract` validates an original filled sheet/key and writes a deterministic private `id,human_label` CSV plus an aggregate receipt; explicit `calibrate ingest --retained-labels --retention-receipt` recomputes the native per-arm Wilson calibration after the original sheet is unavailable.
+- Closed calibration schema 3 binds the original sheet, key, retained CSV and receipt hashes; the capture digest is explicitly declared, not verified. Native schema-2 ingestion and native scope/Wilson/unmeasured-arm checks remain strict. All-unusable extraction succeeds; ingestion still refuses an entirely unmeasured calibration.
+- Bounded held inputs and exclusive write-once outputs reject unsafe aliases/links and incomplete or changed evidence. New CLI summaries expose counts/hashes/fingerprints only; native calibration files retain declared measurement identity and may contain local model identifiers. Hashes authenticate neither human truth nor independent labeling. See [retained-label workflow](docs/retained-labels.md) and the fictional offline [command record](validation/2026-10-23-retained-labels/).
+- The fresh installed-graph audit rejected three filelock advisories and the setuptools namespace-packages path-escape advisory. The targeted hosted lock uses filelock 4.2.1 on Python 3.11+ and unaffected 3.20.3 on Python 3.10, plus setuptools 84.1.0. Public runtime/build bounds exclude the affected releases without changing the source/unit Python floor or the complete-runtime Python 3.11+ boundary. The manual constraints helper evaluates native PEP 508 markers for its interpreter and retains conflicting-active-bound refusal. See [dated dependency evidence](validation/2026-10-25-release-dependencies/).
+
+Released independently from PR #141: completion-free retained-label calibration.
+
 ## Unreleased
 
-## 0.33.0 — Unreleased
+## 0.36.0 — 2026-10-22
+
+- Add `calibrate reconcile` and `quantfit.safety.reconcile.reconcile_labels` for aggregate comparison of two private filled labeling sheets under one key. Reuse native ID/hash/label validation and require exact complete paired coverage; existing ingest behavior is unchanged.
+- Emit per-arm 3×3 counts, explicit usable denominators, missing agreement rates as null and original whole-input SHA256/size bindings. Descriptive disagreement/all-unusable/self-control results remain exit 0; malformed/private/unsafe failures use categorical exit 2 without reflecting private diagnostics.
+- Bound held bytes, paired population and CSV records before publication, and reuse input/output alias protection. No private sheets/keys/completions, automatic consensus or replacement calibration are emitted; rater identity, independence and scientific GO remain unverified. See `docs/label-reconciliation.md` and synthetic `validation/2026-10-18-label-reconciliation/` command evidence.
+
+Released independently from PR #140: aggregate private-labeling reconciliation.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/39105486827); publication separately qualifies the exact versioned distributions.
+
+## 0.35.0 — 2026-10-22
+
+- `screen-summary --calibrations-dir` and the matching optional `summarize_screen` keyword append per-target conditional resolution using original held native/calibration bytes and the existing authoritative calculator. Default saved-screen behavior and pure native aggregation remain unchanged.
+- Complete actual scope matching and a bounded aggregate work preflight happen before any analysis. Missing calibrations remain explicit; valid stored calibrations for missing native reports stay pending with a stored fingerprint, without fabricating an actual report match. Malformed, unsupported or incompatible supplied evidence refuses 2.
+- Calibration context never changes native flags, prevalence, control/sensitivity status, human-confirmation status, exit or JUnit. Byte hashes and declared bindings do not authenticate labels or assumptions. See `docs/screen-resolution.md` and the synthetic `validation/2026-10-18-screen-resolution/` record for behavior and limits.
+
+Released independently from PR #139: conditional saved-screen resolution.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/39104474216); publication separately qualifies the exact versioned distributions.
+
+## 0.34.0 — 2026-10-22
+
+- `screen-compare` and `quantfit.screen_compare.compare_screen_bundles` compare original screen observations offline over exact matching target-manifest bytes. Per-axis counts, raw bindings, missing/unmeasured evidence, known protocol/identity contradictions and native flags remain explicit; qualified transitions describe declarations only.
+- Unknown precision/identity metadata remains unavailable. Matching recorded hashes or pins does not establish actual same weights, execution independence or causal change. No pooled probe counts or new significance claim is introduced.
+- Any original flag on either side retains exit 3, including apparent clearance; otherwise incomplete/incompatible evidence exits 4 before conditional complete no-flag 0. Invalid evidence/output exits 2. Protected JSON/XML publication reuses per-file atomic replacement; two axis cases per target and overall preserve native failures before skips.
+- Shared held-byte capture charges both logical transports, bounded at 64 MiB per side, even for aliases. Existing installed and CPU lanes exercise receiving behavior without extra inference. See `docs/screen-comparison.md` and the synthetic `validation/2026-10-18-screen-comparison/` record for scope.
+
+Released independently from PR #138: offline native screen observation comparisons.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/39102971703); publication separately qualifies the exact versioned distributions.
+
+## 0.33.0 — 2026-10-22
 
 - `bundle screen-create` / `bundle screen-verify` and `quantfit.screen_bundle` preserve original target/native-report bytes, explicit missing targets and optional ignored producer-summary bytes in a closed portable handoff. Receiving summaries reuse strict native validation offline; producer locators never trigger asset access.
 - Both manifests and every member count toward a 64 MiB transport bound. Exclusive new directories publish the outer manifest last; ownership and byte checks constrain failure cleanup. This is not atomic directory publication or a hostile-filesystem transaction.
 - Valid content verification exits 0 separately from nested screen flags or incompleteness (3/4); malformed, mismatched or unsafe evidence exits 2. Byte binding does not authenticate execution, human labels, sensitivity or scientific GO. See `docs/screen-bundles.md` and `validation/2026-10-18-screen-bundle/` for command evidence and limits.
 
-## 0.32.0 — Unreleased
+Released independently from PR #137: portable native screen evidence bundles.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/39101178129); publication separately qualifies the exact versioned distributions.
+
+## 0.32.0 — 2026-10-22
 
 - `screen --resume` preflights held present native reports against the complete target manifest before model contact or output mutation. Malformed, incompatible, private or duplicate evidence refuses instead of silently triggering regeneration.
 - Missing reports alone remain runnable; valid flagged and unmeasured evidence is skipped with original target identities, raw byte hashes, denominators and caveats retained. Original producer summaries do not supply trusted results.
 - Screen progress no longer corrupts `--json` stdout. Valid partial screens containing operational-error rows exit incomplete 4 rather than silently passing when another target has measured axes; flags retain precedence at 3. Strict-resume JUnit publication shares the held-input protection boundary.
 - Installed acceptance exercises generation traps and adverse receiving inputs. The CPU lane reuses an existing cold-run report offline without additional inference. See the [strict-resume validation record](validation/2026-10-18-screen-resume/README.md) for command evidence and its limits; this candidate does not establish sensitivity, human confirmations, independent execution or scientific GO.
+
+- Advisory-driven CI maintenance upgrades aiohttp, certifi, opentelemetry-api, Pillow and the llm-compressor Pillow-cap hotfix. The complete locked runtime now requires Python 3.11+ (hosted qualification uses 3.12); the Python 3.10 matrix remains hermetic source validation. Package Python metadata and measurement pins are unchanged; direct datasets<=5.0.1 / accelerate<=1.15.0 ceilings preserve the admitted bounds removed by the compressor hotfix.
+
+Released independently from PR #136: strict native screen resume.
+
+The introduced implementation passed [exact-head hosted source acceptance](https://github.com/Sahil170595/quantfit/actions/runs/39100402840); publication separately qualifies the exact versioned distributions.
 
 ## 0.31.0 — 2026-10-17
 

@@ -1,0 +1,530 @@
+{
+  "human_labels_authenticated": false,
+  "independent_adjudication": false,
+  "interfaces": {
+    "api": {
+      "application": {
+        "binding_fingerprint": "72dae777b1a8a024a2427a094bde8ec8be7c8fa2bb4d5084db9429a2672ad14c",
+        "capture_sha256_declared": "01afe4da31890cfcf74e5a7f6eed475693251e070206a46e6be27c2b783535e4",
+        "capture_verification": {
+          "complete_population_and_row_facts_verified": true,
+          "effective_binding_verified": true,
+          "held_and_validated": true,
+          "source_authenticity_verified": false
+        },
+        "input_mode": "retained_labels",
+        "inputs": {
+          "capture": {
+            "sha256": "01afe4da31890cfcf74e5a7f6eed475693251e070206a46e6be27c2b783535e4",
+            "size_bytes": 5698
+          },
+          "key": {
+            "sha256": "142075fc8639d5fa702f408cb807cb8322b650357d2e9557ce66a02781e0cee0",
+            "size_bytes": 6248
+          },
+          "preparation": {
+            "sha256": "de0f18199f8d667bab84af7d965b9d74d7ed754bb572fab0ffb1a411371710f6",
+            "size_bytes": 3187
+          },
+          "retained_labels_a": {
+            "sha256": "a7e6f802b6e49914bbb149bb4a7892576c57e8a38ac474053e1fba664a737cd8",
+            "size_bytes": 507
+          },
+          "retained_labels_b": {
+            "sha256": "b66f46309ca21a97964068d66511650c256b703f729d7b2d5325327463c16349",
+            "size_bytes": 507
+          },
+          "retention_receipt_a": {
+            "sha256": "e3e85e5d47155a1e8714061fe7689aa872d0a16c90b1a191a70ce1d28fc62d33",
+            "size_bytes": 711
+          },
+          "retention_receipt_b": {
+            "sha256": "cfa49ed6a40ac69627d6243782b4ca5e183bed8f6925976f6021752102445e39",
+            "size_bytes": 711
+          },
+          "review": {
+            "sha256": "b9e47cb0cb9506c11dc2e2bd7bb2ab36bc12f40b484ea1c930a34cd7628b0359",
+            "size_bytes": 1474
+          }
+        },
+        "limits": {
+          "authentic_blinding": false,
+          "human_labels_authenticated": false,
+          "independent_adjudication": false,
+          "post_review_agreement_is_independent": false,
+          "rater_identity_verified": false,
+          "scientific_go": false,
+          "source_authenticity_verified": false
+        },
+        "n_changed_vs_a": 10,
+        "n_pairs": 9,
+        "n_reviewed": 12,
+        "n_rows": 18,
+        "n_unusable": 4,
+        "original_sheets_declared": {
+          "a": {
+            "held_and_validated": false,
+            "sha256": "2251cbd01c38a1776109260dabe6e0c6876efaa0815899a70bda1bda97eb9754",
+            "size_bytes": 2201
+          },
+          "b": {
+            "held_and_validated": false,
+            "sha256": "78d9055edf39ba7529a09c8aaf14eb74e72f686ddab3879a4019a3922134ef53",
+            "size_bytes": 2201
+          }
+        },
+        "output_sheet": {
+          "sha256": "5280d4b6878e0699324e7cd8c756eb17c237f7b45ef7a0922617e434cf6ea493",
+          "size_bytes": 2199
+        },
+        "per_arm": {
+          "baseline": {
+            "n_changed_vs_a": 5,
+            "n_reviewed": 6,
+            "n_rows": 9,
+            "n_unusable": 2
+          },
+          "quantized": {
+            "n_changed_vs_a": 5,
+            "n_reviewed": 6,
+            "n_rows": 9,
+            "n_unusable": 2
+          }
+        },
+        "quantfit_version": "0.43.0",
+        "retained_review_application_schema": 1,
+        "scope": "Actual supplied capture bytes, effective measurement binding, complete pair/arm population, judge flags and completion digests are verified against the supplied key. Both retained label sets are verified against their own supplied receipts and that same held key. Original full-sheet digests are receipt declarations only; no original sheet is read. Local transformation only: queue membership reveals disagreement and a returning labeler may remember labels. No source authenticity, rater authentication, human truth, authentic blinding, independent adjudication, automatic ingestion, new calibration schema or scientific GO. Explicit judgments require an externally fixed operator rule; software supplies no preferred rater."
+      },
+      "native_counts": {
+        "baseline": {
+          "direction": {
+            "judge_compliance_human_refusal": 2,
+            "judge_refusal_human_compliance": 2
+          },
+          "directional": {
+            "false_compliance": {
+              "epsilon": 0.5,
+              "epsilon_wilson95": [
+                0.15003898915214947,
+                0.8499610108478506
+              ],
+              "errors": 2,
+              "n": 4
+            },
+            "false_refusal": {
+              "epsilon": 0.6666666666666666,
+              "epsilon_wilson95": [
+                0.2076596008020477,
+                0.9385080552796037
+              ],
+              "errors": 2,
+              "n": 3
+            }
+          },
+          "epsilon": 0.5714285714285714,
+          "epsilon_wilson95": [
+            0.2504583645276572,
+            0.8417801447485302
+          ],
+          "human_compliances": 3,
+          "human_refusals": 4,
+          "judge_errors": 4,
+          "mde_epsilon_upper": 0.9385080552796037,
+          "n": 7,
+          "n_unusable": 2
+        },
+        "calibration_schema": 3,
+        "n_labeled": 18,
+        "n_unusable": 4,
+        "quantized": {
+          "direction": {
+            "judge_compliance_human_refusal": 2,
+            "judge_refusal_human_compliance": 1
+          },
+          "directional": {
+            "false_compliance": {
+              "epsilon": 0.5,
+              "epsilon_wilson95": [
+                0.15003898915214947,
+                0.8499610108478506
+              ],
+              "errors": 2,
+              "n": 4
+            },
+            "false_refusal": {
+              "epsilon": 0.3333333333333333,
+              "epsilon_wilson95": [
+                0.06149194472039621,
+                0.7923403991979522
+              ],
+              "errors": 1,
+              "n": 3
+            }
+          },
+          "epsilon": 0.42857142857142855,
+          "epsilon_wilson95": [
+            0.15821985525146975,
+            0.7495416354723428
+          ],
+          "human_compliances": 3,
+          "human_refusals": 4,
+          "judge_errors": 3,
+          "mde_epsilon_upper": 0.8499610108478506,
+          "n": 7,
+          "n_unusable": 2
+        },
+        "unmeasured_arms": []
+      },
+      "original_retained_inputs_unchanged": true,
+      "original_synthetic_sheets_unavailable": true,
+      "partial_review_native_ingest_exit_code": 2,
+      "preparation": {
+        "binding_fingerprint": "72dae777b1a8a024a2427a094bde8ec8be7c8fa2bb4d5084db9429a2672ad14c",
+        "capture_sha256_declared": "01afe4da31890cfcf74e5a7f6eed475693251e070206a46e6be27c2b783535e4",
+        "capture_verification": {
+          "complete_population_and_row_facts_verified": true,
+          "effective_binding_verified": true,
+          "held_and_validated": true,
+          "source_authenticity_verified": false
+        },
+        "input_mode": "retained_labels",
+        "inputs": {
+          "capture": {
+            "sha256": "01afe4da31890cfcf74e5a7f6eed475693251e070206a46e6be27c2b783535e4",
+            "size_bytes": 5698
+          },
+          "key": {
+            "sha256": "142075fc8639d5fa702f408cb807cb8322b650357d2e9557ce66a02781e0cee0",
+            "size_bytes": 6248
+          },
+          "retained_labels_a": {
+            "sha256": "a7e6f802b6e49914bbb149bb4a7892576c57e8a38ac474053e1fba664a737cd8",
+            "size_bytes": 507
+          },
+          "retained_labels_b": {
+            "sha256": "b66f46309ca21a97964068d66511650c256b703f729d7b2d5325327463c16349",
+            "size_bytes": 507
+          },
+          "retention_receipt_a": {
+            "sha256": "e3e85e5d47155a1e8714061fe7689aa872d0a16c90b1a191a70ce1d28fc62d33",
+            "size_bytes": 711
+          },
+          "retention_receipt_b": {
+            "sha256": "cfa49ed6a40ac69627d6243782b4ca5e183bed8f6925976f6021752102445e39",
+            "size_bytes": 711
+          }
+        },
+        "limits": {
+          "authentic_blinding": false,
+          "human_labels_authenticated": false,
+          "independent_adjudication": false,
+          "post_review_agreement_is_independent": false,
+          "rater_identity_verified": false,
+          "scientific_go": false,
+          "source_authenticity_verified": false
+        },
+        "n_agreed": 6,
+        "n_pairs": 9,
+        "n_rows": 18,
+        "n_selected": 12,
+        "original_sheets_declared": {
+          "a": {
+            "held_and_validated": false,
+            "sha256": "2251cbd01c38a1776109260dabe6e0c6876efaa0815899a70bda1bda97eb9754",
+            "size_bytes": 2201
+          },
+          "b": {
+            "held_and_validated": false,
+            "sha256": "78d9055edf39ba7529a09c8aaf14eb74e72f686ddab3879a4019a3922134ef53",
+            "size_bytes": 2201
+          }
+        },
+        "per_arm": {
+          "baseline": {
+            "n_agreed": 3,
+            "n_rows": 9,
+            "n_selected": 6
+          },
+          "quantized": {
+            "n_agreed": 3,
+            "n_rows": 9,
+            "n_selected": 6
+          }
+        },
+        "quantfit_version": "0.43.0",
+        "retained_review_preparation_schema": 1,
+        "review_sheet": {
+          "sha256": "f8f4665bd95baa9059f665fe81368f526d94b3e21a905e353027e723fce21880",
+          "size_bytes": 1376
+        },
+        "scope": "Actual supplied capture bytes, effective measurement binding, complete pair/arm population, judge flags and completion digests are verified against the supplied key. Both retained label sets are verified against their own supplied receipts and that same held key. Original full-sheet digests are receipt declarations only; no original sheet is read. Local transformation only: queue membership reveals disagreement and a returning labeler may remember labels. No source authenticity, rater authentication, human truth, authentic blinding, independent adjudication, automatic ingestion, new calibration schema or scientific GO. Explicit judgments require an externally fixed operator rule; software supplies no preferred rater.",
+        "selection": "unequal_normalized_labels"
+      },
+      "separate_truthful_extract_and_schema3": true
+    },
+    "cli": {
+      "application": {
+        "binding_fingerprint": "72dae777b1a8a024a2427a094bde8ec8be7c8fa2bb4d5084db9429a2672ad14c",
+        "capture_sha256_declared": "e6bac1ef599079f8a0fe5f23397c62244859fb23c5ae1f12c5d272e1d9bcf13f",
+        "capture_verification": {
+          "complete_population_and_row_facts_verified": true,
+          "effective_binding_verified": true,
+          "held_and_validated": true,
+          "source_authenticity_verified": false
+        },
+        "input_mode": "retained_labels",
+        "inputs": {
+          "capture": {
+            "sha256": "e6bac1ef599079f8a0fe5f23397c62244859fb23c5ae1f12c5d272e1d9bcf13f",
+            "size_bytes": 5698
+          },
+          "key": {
+            "sha256": "b1e1953f4ece655f669ca24e1938795232eda32203cc189434ff3dd78826e49c",
+            "size_bytes": 6248
+          },
+          "preparation": {
+            "sha256": "c48ca4b60678ca14fdf27cf4d71352c2060c1a75eeca76e6236a3ff7934cc8f0",
+            "size_bytes": 3187
+          },
+          "retained_labels_a": {
+            "sha256": "d9a30ec588e2a01851a8d607ba3ae3a2a709a7aabee6c753902b31305be91073",
+            "size_bytes": 507
+          },
+          "retained_labels_b": {
+            "sha256": "41e17a28a13c537fa60d01198291e6cd2156e0d4c47eec151e722cd3433ca4af",
+            "size_bytes": 507
+          },
+          "retention_receipt_a": {
+            "sha256": "665152c0f74618fa5fc4bdb662bef874081bb7d439f408c48ae722a1772a8786",
+            "size_bytes": 711
+          },
+          "retention_receipt_b": {
+            "sha256": "64dace61a9f4c2f33c42ee85456684d7160d2d15062c696f451712f050af2174",
+            "size_bytes": 711
+          },
+          "review": {
+            "sha256": "bafdc020a2b2a45457d0daa34ef44e8e7a547d6cf514b0649a125170e97743e3",
+            "size_bytes": 1474
+          }
+        },
+        "limits": {
+          "authentic_blinding": false,
+          "human_labels_authenticated": false,
+          "independent_adjudication": false,
+          "post_review_agreement_is_independent": false,
+          "rater_identity_verified": false,
+          "scientific_go": false,
+          "source_authenticity_verified": false
+        },
+        "n_changed_vs_a": 10,
+        "n_pairs": 9,
+        "n_reviewed": 12,
+        "n_rows": 18,
+        "n_unusable": 4,
+        "original_sheets_declared": {
+          "a": {
+            "held_and_validated": false,
+            "sha256": "4547e5af38de757af284591bd0827f9af49e43a58e1b2e9d6d34a9f5afdbef45",
+            "size_bytes": 2201
+          },
+          "b": {
+            "held_and_validated": false,
+            "sha256": "3a0c1a374c440bcc84cdce01ee8f2e16cd214398c7caaaed11e4c17d023f2f23",
+            "size_bytes": 2201
+          }
+        },
+        "output_sheet": {
+          "sha256": "617c946dac8bc296f74dea881033a6bc4a9665be9947240f6d49648ac765ec46",
+          "size_bytes": 2199
+        },
+        "per_arm": {
+          "baseline": {
+            "n_changed_vs_a": 5,
+            "n_reviewed": 6,
+            "n_rows": 9,
+            "n_unusable": 2
+          },
+          "quantized": {
+            "n_changed_vs_a": 5,
+            "n_reviewed": 6,
+            "n_rows": 9,
+            "n_unusable": 2
+          }
+        },
+        "quantfit_version": "0.43.0",
+        "retained_review_application_schema": 1,
+        "scope": "Actual supplied capture bytes, effective measurement binding, complete pair/arm population, judge flags and completion digests are verified against the supplied key. Both retained label sets are verified against their own supplied receipts and that same held key. Original full-sheet digests are receipt declarations only; no original sheet is read. Local transformation only: queue membership reveals disagreement and a returning labeler may remember labels. No source authenticity, rater authentication, human truth, authentic blinding, independent adjudication, automatic ingestion, new calibration schema or scientific GO. Explicit judgments require an externally fixed operator rule; software supplies no preferred rater."
+      },
+      "native_counts": {
+        "baseline": {
+          "direction": {
+            "judge_compliance_human_refusal": 2,
+            "judge_refusal_human_compliance": 2
+          },
+          "directional": {
+            "false_compliance": {
+              "epsilon": 0.5,
+              "epsilon_wilson95": [
+                0.15003898915214947,
+                0.8499610108478506
+              ],
+              "errors": 2,
+              "n": 4
+            },
+            "false_refusal": {
+              "epsilon": 0.6666666666666666,
+              "epsilon_wilson95": [
+                0.2076596008020477,
+                0.9385080552796037
+              ],
+              "errors": 2,
+              "n": 3
+            }
+          },
+          "epsilon": 0.5714285714285714,
+          "epsilon_wilson95": [
+            0.2504583645276572,
+            0.8417801447485302
+          ],
+          "human_compliances": 3,
+          "human_refusals": 4,
+          "judge_errors": 4,
+          "mde_epsilon_upper": 0.9385080552796037,
+          "n": 7,
+          "n_unusable": 2
+        },
+        "calibration_schema": 3,
+        "n_labeled": 18,
+        "n_unusable": 4,
+        "quantized": {
+          "direction": {
+            "judge_compliance_human_refusal": 2,
+            "judge_refusal_human_compliance": 1
+          },
+          "directional": {
+            "false_compliance": {
+              "epsilon": 0.5,
+              "epsilon_wilson95": [
+                0.15003898915214947,
+                0.8499610108478506
+              ],
+              "errors": 2,
+              "n": 4
+            },
+            "false_refusal": {
+              "epsilon": 0.3333333333333333,
+              "epsilon_wilson95": [
+                0.06149194472039621,
+                0.7923403991979522
+              ],
+              "errors": 1,
+              "n": 3
+            }
+          },
+          "epsilon": 0.42857142857142855,
+          "epsilon_wilson95": [
+            0.15821985525146975,
+            0.7495416354723428
+          ],
+          "human_compliances": 3,
+          "human_refusals": 4,
+          "judge_errors": 3,
+          "mde_epsilon_upper": 0.8499610108478506,
+          "n": 7,
+          "n_unusable": 2
+        },
+        "unmeasured_arms": []
+      },
+      "original_retained_inputs_unchanged": true,
+      "original_synthetic_sheets_unavailable": true,
+      "partial_review_native_ingest_exit_code": 2,
+      "preparation": {
+        "binding_fingerprint": "72dae777b1a8a024a2427a094bde8ec8be7c8fa2bb4d5084db9429a2672ad14c",
+        "capture_sha256_declared": "e6bac1ef599079f8a0fe5f23397c62244859fb23c5ae1f12c5d272e1d9bcf13f",
+        "capture_verification": {
+          "complete_population_and_row_facts_verified": true,
+          "effective_binding_verified": true,
+          "held_and_validated": true,
+          "source_authenticity_verified": false
+        },
+        "input_mode": "retained_labels",
+        "inputs": {
+          "capture": {
+            "sha256": "e6bac1ef599079f8a0fe5f23397c62244859fb23c5ae1f12c5d272e1d9bcf13f",
+            "size_bytes": 5698
+          },
+          "key": {
+            "sha256": "b1e1953f4ece655f669ca24e1938795232eda32203cc189434ff3dd78826e49c",
+            "size_bytes": 6248
+          },
+          "retained_labels_a": {
+            "sha256": "d9a30ec588e2a01851a8d607ba3ae3a2a709a7aabee6c753902b31305be91073",
+            "size_bytes": 507
+          },
+          "retained_labels_b": {
+            "sha256": "41e17a28a13c537fa60d01198291e6cd2156e0d4c47eec151e722cd3433ca4af",
+            "size_bytes": 507
+          },
+          "retention_receipt_a": {
+            "sha256": "665152c0f74618fa5fc4bdb662bef874081bb7d439f408c48ae722a1772a8786",
+            "size_bytes": 711
+          },
+          "retention_receipt_b": {
+            "sha256": "64dace61a9f4c2f33c42ee85456684d7160d2d15062c696f451712f050af2174",
+            "size_bytes": 711
+          }
+        },
+        "limits": {
+          "authentic_blinding": false,
+          "human_labels_authenticated": false,
+          "independent_adjudication": false,
+          "post_review_agreement_is_independent": false,
+          "rater_identity_verified": false,
+          "scientific_go": false,
+          "source_authenticity_verified": false
+        },
+        "n_agreed": 6,
+        "n_pairs": 9,
+        "n_rows": 18,
+        "n_selected": 12,
+        "original_sheets_declared": {
+          "a": {
+            "held_and_validated": false,
+            "sha256": "4547e5af38de757af284591bd0827f9af49e43a58e1b2e9d6d34a9f5afdbef45",
+            "size_bytes": 2201
+          },
+          "b": {
+            "held_and_validated": false,
+            "sha256": "3a0c1a374c440bcc84cdce01ee8f2e16cd214398c7caaaed11e4c17d023f2f23",
+            "size_bytes": 2201
+          }
+        },
+        "per_arm": {
+          "baseline": {
+            "n_agreed": 3,
+            "n_rows": 9,
+            "n_selected": 6
+          },
+          "quantized": {
+            "n_agreed": 3,
+            "n_rows": 9,
+            "n_selected": 6
+          }
+        },
+        "quantfit_version": "0.43.0",
+        "retained_review_preparation_schema": 1,
+        "review_sheet": {
+          "sha256": "d20a60ae487dfd82ce88949d8e62ea2cd3b033535f554baa3435ab4776e91780",
+          "size_bytes": 1376
+        },
+        "scope": "Actual supplied capture bytes, effective measurement binding, complete pair/arm population, judge flags and completion digests are verified against the supplied key. Both retained label sets are verified against their own supplied receipts and that same held key. Original full-sheet digests are receipt declarations only; no original sheet is read. Local transformation only: queue membership reveals disagreement and a returning labeler may remember labels. No source authenticity, rater authentication, human truth, authentic blinding, independent adjudication, automatic ingestion, new calibration schema or scientific GO. Explicit judgments require an externally fixed operator rule; software supplies no preferred rater.",
+        "selection": "unequal_normalized_labels"
+      },
+      "separate_truthful_extract_and_schema3": true
+    }
+  },
+  "kind": "quantfit.retained-review-functional-acceptance",
+  "scientific_go": false,
+  "source_authenticity_verified": false,
+  "synthetic": true
+}

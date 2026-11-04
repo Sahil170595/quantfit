@@ -1,8 +1,37 @@
 # CLI reference — every command, every flag
 
-This reference covers published quantfit 0.31.0 and explicitly marked unreleased
-0.33.0 candidate workflows, including the 0.32.0 strict-resume interface. Candidate behavior requires that source or built wheel.
+This reference documents quantfit 0.51.0, including pinned alternative probe corpora,
+private offline adjudication review,
+descriptive two-judge diagnostics,
+capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
+capture-backed retained review, finite-grid budgets, calibration-choice sensitivity
+and source-bound flip adjudication.
 Software versions do not establish roadmap or scientific GO.
+
+The accepted **unreleased 0.53.0 source work** additionally accepts the
+same all-or-none `--probe-dataset ID --probe-revision FULL40 --probe-split SPLIT`
+on live/saved `gate`, `screen`/`--resume` and offline `screen-summary`.
+[The complete API/CLI/profile contract](pinned-corpus-gates.md) describes flat gate3
+with native decision discriminator1/2 and closed source census, live summary2,
+saved summary2, one held population and strict offline receiving. Default `None`
+paths retain their prior shapes. Thresholds remain native resolution targets;
+unknown/missing rows, control conditionality and human-verification limits stay.
+Published installation commands below remain 0.51.0, not an assumed candidate tag.
+
+The current **unreleased 0.54.0 source candidate** adds private full-population
+blinded recipient pages, distinct from the flagged-pair adjudication review page:
+
+```bash
+mkdir private-recipient-pages
+quantfit calibrate chunks packets --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --out-dir private-recipient-pages --json
+```
+
+All four paths are explicit and required; `--json` returns only counts/hashes.
+The existing empty output directory receives one `part-NNNN.annotation.html` per
+original native part. Keep the key/manifest/capture private and separate; do not
+send them with a page. [The complete SDK/CLI, byte-bound and trust contract](annotation-packets.md)
+explains native collection/ingestion, explicit labels and the unchanged narrow
+sharing permission. This is no automatic labeling, sharing or calibration.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,
@@ -70,7 +99,48 @@ resolved weights/executable and aliases; interrupted or cleanup-uncertain work c
 qualify success. Registration, authenticated human labels/weights/physical hosts,
 independent execution, sensitivity and scientific GO remain separate and unverified.
 
-The **0.33.0 candidate** adds `bundle screen-create --targets PATH --reports-dir DIR
+Quantfit 0.35.0 adds optional `--calibrations-dir DIR` to `screen-summary`:
+`screen-summary --targets targets.json --reports-dir reports --calibrations-dir
+calibrations --out receiving.json --junit receiving.xml --json`. The Python
+`summarize_screen` API gains the same optional `calibrations_dir` keyword.
+Per-target conditional resolution is appended; original native exits, prevalence,
+flags, sensitivity/control status and XML remain unchanged. Valid stored calibrations
+without a native report stay pending, and absent calibrations remain explicit.
+Malformed/incompatible supplied evidence or bounded-work refusal exits 2.
+See [Conditional saved-screen resolution](screen-resolution.md) for exact limits,
+coverage states, byte bindings and label/assumption boundaries.
+
+Quantfit 0.41.0 adds the opt-in `--require-conditional-resolution PP` to this same
+`screen-summary` command:
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --require-conditional-resolution 40 --out receiving.json --junit receiving.xml --json
+```
+
+The finite `(0,100]` percentage-point ceiling requires `--calibrations-dir`. Every
+declared target and both axes need matched report/calibration evidence, measurable
+at-risk denominators, native attainable target power and effective MDE within that
+ceiling. Native flags/missing evidence retain exits 3/4; otherwise missing calibration
+exits 4 and an unmet requirement exits 5. Native exit/outcome, all target rows and
+all reasons remain visible. JUnit preserves its native cases, then appends two axis
+cases per target and an overall requirement case. Omitting the option preserves
+default output, native exits and JUnit. The receiving APIs add the keyword
+`required_conditional_resolution_pp=None`; the requirement reuses each pair's same
+native analysis. No label authentication, independence, sensitivity or scientific
+GO is established, including at exit 0. Invoke `screen-summary` directly in a
+workflow step when requiring this ceiling. See [the complete requirement contract](screen-resolution.md#explicit-requirement-0410).
+
+Quantfit 0.34.0 adds `screen-compare --reference-bundle DIR
+--candidate-bundle DIR --out comparison.json --junit comparison.xml --json`.
+The optional JSON/XML outputs share source/alias protection; they do not form a
+transaction. Both bundles must contain the exact same target-manifest bytes.
+Native flags on either side retain exit 3 before incomplete/incompatible 4;
+conditional complete no-flag is 0, invalid/unsafe input or output failure is 2.
+Two axis cases per target plus overall retain failures and skips separately.
+See [Screen observation comparison](screen-comparison.md) for the API, declared
+identity availability, original denominators and descriptive-transition boundaries.
+
+Quantfit 0.33.0 adds `bundle screen-create --targets PATH --reports-dir DIR
 --out NEWDIR --json` and `bundle screen-verify --bundle DIR --json`. These package
 original bytes for the complete screen population and rebuild its strict receiving
 summary offline after relocation. Content verification exits 0 independently of
@@ -418,7 +488,7 @@ are local only, and are never committed or redistributed; the `*.capture.jsonl` 
 in `.gitignore` backstops that. See
 [`docs/data-handling-completions.md`](data-handling-completions.md).
 
-The **0.32.0 candidate** makes `--resume` validate the complete present native
+Quantfit 0.32.0 makes `--resume` validate the complete present native
 report population before any model contact or output mutation. Original target
 references, pinned protocol, native arithmetic, privacy, duplicate evidence and
 requested `--max-new-tokens` must match. Valid flagged or unmeasured reports remain
@@ -436,7 +506,7 @@ held evidence after execution; a later incompatibility preserves existing eviden
 without promising whole-run rollback. Progress goes to stderr under `--json`.
 Valid flags exit 3 before partial execution errors or unmeasured evidence exit 4;
 neither an operational-error row nor incomplete measurement becomes a clean result.
-This is an unreleased interface; published 0.31.0 has the older resume behavior.
+Strict resume is available since quantfit 0.32.0.
 
 `--attempts N` retries a target up to N times before recording it as an operational
 error (default `1`, meaning no retry). The absorbed failure class is mostly transient.
@@ -447,6 +517,25 @@ the prevalence bound. Retry is opt-in because the default must not silently trip
 screen's wall clock.
 
 ## Summarize a saved screen
+
+### Calibration-choice sensitivity — since 0.45.0
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir reports --calibration-variant first=calibrations-a --calibration-variant second=calibrations-b --require-conditional-resolution 40 --out choices.json --junit choices.xml --json
+# Omit the ceiling for descriptive-only native exit; NAME=- declares a missing choice.
+quantfit screen-summary --targets targets.json --reports-dir reports --calibration-variant first=calibrations-a --calibration-variant pending=- --out descriptive.json --junit descriptive.xml --json
+```
+
+Repeat `--calibration-variant NAME=DIR` for 1..8 explicit names; it is mutually
+exclusive with `--calibrations-dir`. All provided directories must exist; only
+`NAME=-` intentionally represents a wholly missing choice. One held native
+population and global calibration-byte/work admission precede every native
+analysis. All N×K rows, unavailable/unattainable states and copy groups remain.
+The attainable-value envelope describes only supplied choices. With a ceiling,
+native3/4 priority remains, otherwise missing calibration4, unmet criteria5, all
+met0. Without a ceiling, native exit stays and added criteria are skipped.
+JUnit always retains N native cases first, then2NK+1 additions. See [complete API,
+IO semantics and limits](calibration-choices.md). Existing published usage follows.
 
 Quantfit 0.31.0 adds a strictly offline receiving analysis:
 
@@ -505,6 +594,19 @@ contradictory historical verdicts are refused rather than silently repaired.
 
 ## Gate a release
 
+The threshold/tier examples in this section retain legacy dangerous-only gate
+schema 1. The unreleased 0.52.0 candidate also accepts a mutually exclusive,
+repeatable selected-axis policy:
+
+```bash
+quantfit gate --from-report drift.json --axis-threshold refusal-robustness=30 --axis-threshold over-refusal=15 --out selected.json --junit selected.xml --json
+```
+
+Use one or both exact hyphenated labels; values are detectable-effect resolution
+targets in percentage points `(0,30]`, not maximum observed rates. Selected axes
+use native MDE/detection at their own denominators, then 3 > 4 > 5 > 0. API rates
+are `(0,0.30]`. See [receiving, JUnit and limits](axis-effect-gates.md).
+
 ```bash
 quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out \
   --tier smoke --max-new-tokens 64 --token "$HF_TOKEN" \
@@ -541,7 +643,7 @@ Bound runs validate a private aggregate before publishing `--report`; shared out
 are never the provenance oracle. The calibration input must differ from report/decision
 outputs, including same-file aliases.
 
-`--junit` renders the gate as three cases rather than one. **Exit 5 fails as a refusal, not
+In the legacy threshold/tier mode, `--junit` renders three cases rather than one. **Exit 5 fails as a refusal, not
 as a breached threshold** — "I cannot resolve what you asked" and "you failed what you
 asked" are different facts that would otherwise share a colour and a message. The ungated
 over-refusal axis gets its own case: a regression there never fails the build, because the
@@ -562,7 +664,145 @@ quantfit calibrate ingest --sheet labels.labels.csv \
 `sheet` builds a blinded labeling sheet; the key file is what unblinds it and the labeler
 never receives it. `ingest` folds the filled labels into a per-arm judge-error report.
 
+Quantfit 0.36.0 adds aggregate reconciliation of two private filled sheets:
+
+```bash
+quantfit calibrate reconcile --sheet-a rater-a.labels.csv --sheet-b rater-b.labels.csv \
+  --key labels.labelkey.json --out reconciliation.json --json
+```
+
+All four paths are required. Both sheets must cover the key's same complete paired
+population, with original IDs, completion hashes and supported labels. Per-arm
+matrices use rows from sheet A and columns from B, ordered
+`refusal, compliance, unusable`. Only counts and whole-input byte bindings are
+published. Exit 0 includes disagreement/all-unusable results and establishes no
+rater authentication, independence or consensus calibration; invalid/unsafe input
+or publication exits 2. Operational JSON errors retain the existing `calibrate`
+parent-command envelope. See [Label reconciliation](label-reconciliation.md).
+
+Quantfit 0.37.0 adds completion-free retained labeling:
+
+```bash
+quantfit calibrate extract --sheet labels.labels.csv --key labels.labelkey.json --out retained.labels.csv --receipt retention.json --json
+quantfit calibrate ingest --retained-labels retained.labels.csv --retention-receipt retention.json --key labels.labelkey.json --out calibration.json --json
+```
+
+The retained CSV/key remain private. Extraction validates the full sheet and writes
+new retained-label and receipt paths; ingestion can then run without the original
+sheet. Neither command deletes source material or authenticates label truth. See
+[the retained-label contract](retained-labels.md).
+
+Quantfit 0.38.0 adds descriptive strata diagnostics, and 0.39.0 adds paired diagnostics:
+
+```bash
+quantfit calibrate strata --capture run.capture.jsonl --key labels.labelkey.json --sheet labels.labels.csv --out strata.json --json
+quantfit calibrate paired --capture run.capture.jsonl --key labels.labelkey.json --sheet labels.labels.csv --out paired.json --json
+```
+
+Both require the original capture and a complete key. Each accepts either the full
+sheet or the explicit retained-label/receipt mode, with a new output path. Strata
+retain per-group, per-arm usable denominators. Paired tables preserve whole-judge
+and common-usable populations, unusable coverage and source-specific at-risk
+denominators. Exit 0 means the descriptive analysis completed, including empty or
+unusable groups; invalid input or publication exits 2. Neither diagnostic is a
+replacement calibration or gate, and neither establishes independence, sensitivity
+or scientific GO. See [strata](calibration-strata.md) and [paired](calibration-paired.md)
+for the API, bounds and proof limits.
+
+Quantfit 0.40.0 adds explicit local review of disagreements between two complete sheets:
+
+```bash
+quantfit calibrate review prepare --sheet-a a.labels.csv --sheet-b b.labels.csv --key private.labelkey.json --sheet private.review.labels.csv --receipt review.json --json
+# Locally fill EVERY selected row with refusal, compliance, or unusable.
+quantfit calibrate review apply --sheet-a a.labels.csv --sheet-b b.labels.csv --key private.labelkey.json --review private.review.labels.csv --preparation review.json --out reviewed.labels.csv --receipt application.json --json
+# Ingestion is a separate explicit operation.
+quantfit calibrate ingest --sheet reviewed.labels.csv --key private.labelkey.json --out calibration.json --json
+```
+
+Prepare validates both complete sheets against their shared key and queues every
+unequal normalized label. Apply requires the exact selected subset, unchanged
+completion text and explicit labels; agreed rows are preserved in the new complete
+sheet. Both commands keep originals intact and require new output/receipt paths.
+Queues, sheets and keys stay private. Receipts expose fixed aggregates and byte
+bindings. These commands do not read the capture: its digest/scope remain key
+declarations. Exit 0 means the transformation completed; invalid input or publication
+exits 2. Native ingestion still refuses an entirely unusable measurement. Review
+counts establish no label truth, independent adjudication, authentic blinding,
+improved accuracy or scientific GO. See [the review contract](label-review.md) for
+API, bounds and publication limits.
+
+### Capture-backed retained review — since 0.43.0
+
+Both native review leaves accept an explicit retained mode. Default full-sheet
+calls and outputs above remain unchanged:
+
+```bash
+quantfit calibrate review prepare --input-mode retained --capture private.capture.jsonl --key private.labelkey.json --retained-labels-a a.labels.csv --retention-receipt-a a-retention.json --retained-labels-b b.labels.csv --retention-receipt-b b-retention.json --sheet private.review.labels.csv --receipt preparation.json --json
+# Explicitly supply every selected label locally; never change IDs or text.
+quantfit calibrate review apply --input-mode retained --capture private.capture.jsonl --key private.labelkey.json --retained-labels-a a.labels.csv --retention-receipt-a a-retention.json --retained-labels-b b.labels.csv --retention-receipt-b b-retention.json --review private.review.labels.csv --preparation preparation.json --out reviewed.labels.csv --receipt application.json --json
+quantfit calibrate extract --sheet reviewed.labels.csv --key private.labelkey.json --out new.labels.csv --receipt new-retention.json --json
+quantfit calibrate ingest --retained-labels new.labels.csv --retention-receipt new-retention.json --key private.labelkey.json --out calibration.json --json
+```
+
+Retained mode requires actual capture/shared bound key, both complete retained CSVs
+and **both own** extraction receipts. The original full-sheet digests remain
+receipt declarations (`held_and_validated=false`); those sheets are not read.
+Actual held capture facts/digests are checked without authenticating human truth.
+Every inequality including unusable is selected. Apply creates a complete NEW
+native-validated sheet; separate truthful extraction produces the schema-3 receipt.
+Mixed/missing roles and invalid native inputs exit 2, transformations 0. No
+automatic ingestion, extra sharing permission, independent adjudication or GO.
+See [the complete retained-review contract](retained-review.md) for APIs, held-once
+bounds, exclusive/partial publication and zero/all-unusable semantics.
+
+### Annotation chunks — since 0.42.0
+
+The workflow accepts only a complete **blank** native template
+and its original key. Create an empty private directory first, then prepare every
+bounded partition and its private manifest:
+
+```bash
+quantfit calibrate chunks prepare --sheet blank.labels.csv --key private.labelkey.json --out-dir annotation-parts --rows-per-part 100 --json
+```
+
+Explicitly fill every returned part, then collect them in manifest order:
+
+```bash
+quantfit calibrate chunks collect --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --part annotation-parts/part-0001.labels.csv --part annotation-parts/part-0002.labels.csv --out collected.labels.csv --receipt collection.json --json
+quantfit calibrate ingest --sheet collected.labels.csv --key private.labelkey.json --out calibration.json --json
+```
+
+The example assumes two actual parts; repeat `--part` for the complete assigned
+set. Collection binds exact unchanged source/key/manifest bytes, assigned IDs and
+text, records the **changed filled hashes** separately from original blank hashes,
+and native-validates a NEW complete sheet. Partially filled originals belong in
+the existing review workflow. All-unusable collection succeeds; unchanged native
+ingestion refuses the empty measurement. Missing/extra/overlapping parts, blank
+labels, text drift, aliases, existing outputs or publication failures exit 2.
+
+Only blinded parts fall within the existing one-named-second-annotator carve-out;
+keep the key and `*.chunkmanifest.json` private. `--annotator-role named_second`
+requires `--annotator-name`; attribution is declared, not authenticated. No
+automatic sending, labeling, ingestion, independence or scientific GO. See
+[the complete contract](annotation-chunks.md) for API, limits and manifest-last
+partial-publication behavior. This workflow is available since quantfit 0.42.0.
+
 ## Analyze an existing run's resolution
+
+Quantfit 0.44.0 adds explicit exhaustive finite budgeting:
+
+```bash
+quantfit resolution --report drift.json --calibration-report calibration.json --plan-n-min 0 --plan-n-max 128 --plan-mde-pp 50 --plan-effect 30 --out budget.json --json
+```
+
+All three range/ceiling options are required together; optional `--plan-effect`
+repeats up to eight distinct pp effects. The held original report/calibration,
+scope and distinct actual axes remain unchanged. One global-bound hypothetical
+**at-risk** curve exhausts every integer after complete work admission. First pass,
+feasible intervals and finite suffix ending at n_max remain distinct because
+native power/MDE are nonmonotone in n. No-feasible analysis exits 0; invalid/unsafe/
+budget refusal exits 2. No gate, future evidence or collection is created. See
+[the complete API and bounds](resolution-budget.md). Published default behavior:
 
 ```bash
 quantfit resolution --report drift.json --calibration-report calibration.json \
@@ -657,6 +897,47 @@ JSON result. Both outputs must be distinct from each other and every consumed
 input, including aliases. Loose positive T0 source reports receive the same
 protection; negative or legacy producer locators remain labels.
 
+### Source-bound flip adjudication — since 0.46.0
+
+```bash
+quantfit adjudicate prepare --report drift.json --capture private.capture.jsonl --review private.adjudication.csv --receipt private.adjudication-preparation.json --json
+# Explicitly fill both labels AND flip_class for EVERY selected pair.
+quantfit adjudicate apply --report drift.json --capture private.capture.jsonl --review private.adjudication.csv --preparation private.adjudication-preparation.json --out adjudication.json --json
+quantfit emit model-card --report drift.json --adjudication adjudication.json
+quantfit emit model-card --report drift.json --adjudication adjudication.json --calibration-report calibration.json --json
+```
+
+Prepare/apply require actual capture-v2 scope and whole native report tabulation,
+all original flagged pairs, exact protected text and explicit per-arm labels/class.
+They exclusively create NEW outputs, with possible earlier new files on a later
+publication failure. The private queue/preparation stay local. The public record
+has counts, unique pair indices and per-completion hashes, no text. The receiver
+checks report bytes, typed accounting and declarations; without capture it cannot
+freshly verify selected membership/text or authenticate human judgment. Native
+statistics and `human_confirmation_verified=false` remain unchanged. `emit` is
+stdout/string only, with no `--out`. Success is 0; invalid/unsafe/excess evidence is
+2, not a gate. See [the complete API, class matrix and bounds](adjudication.md).
+
+### Capture-backed adjudication receiving — since 0.47.0
+
+```bash
+quantfit adjudicate verify --report drift.json --capture private.capture.jsonl --record adjudication.json --out verification.json --json
+quantfit emit model-card --report drift.json --adjudication adjudication.json --adjudication-capture private.capture.jsonl --calibration-report calibration.json --json
+```
+
+`verify` holds only report/capture/existing record (8/16/4 MiB), checks the entire
+native tabulation and exact selected indices/axes/both UTF8 hashes, and optionally
+exclusively creates a NEW aggregate proof capped at 64 KiB. It needs no original
+queue/preparation, key or CSV; pair count remains 1..4096. Exit 0 is consistency,
+including unresolved/zero-selected cases; invalid evidence or unsafe output is 2.
+No original native verdict/statistic changes. `--adjudication-capture` requires
+`--adjudication` before input I/O. Optional calibration is another held 2 MiB role
+(total input profile 30 MiB) and retains native typed scope matching. `emit` still
+returns only string/stdout; JSON retains its existing `report_path` field, so the
+whole legacy envelope is not universally path-free. Human/source authentication,
+false-negative validation, sensitivity and scientific GO remain unestablished.
+See [the API, privacy and publication contract](adjudication.md#capture-backed-receiving--since-0470).
+
 ### Loose report inputs
 
 ```bash
@@ -701,3 +982,48 @@ quantfit audit --root . --json-out findings.json --json
 says *where this checkout is*, not *which checkout to audit* — three of the five checks read
 the parser and constants by import, so a root that is not the imported tree is refused as
 operational rather than answered.
+
+
+## Whole-target saved adjudication screen — since 0.48.0
+
+```bash
+quantfit adjudicate screen --targets targets.json --reports-dir reports --adjudications-dir adjudications --captures-dir captures --require-source-complete --out summary.json --junit summary.xml --json
+```
+
+`--targets` and `--reports-dir` are required. `--adjudications-dir` and
+`--captures-dir` are optional closed roots, defaulting to intentional absence.
+`--require-source-complete` defaults off. `--out`/`--junit` are optional guarded
+replacement sinks; `--json` emits the exact bounded native CLI envelope.
+Default native priority remains 3 > 4 > 0. Opt-in incomplete sources change only
+native 0 to 4; malformed/unsafe/excess evidence is 2. Original rows and complete
+3N+1 JUnit remain. See [API, schema and encoded/work bounds](screen-adjudication.md).
+Available in quantfit 0.48.0; capture-backed receiving was introduced in 0.47.0.
+
+
+## Two-judge calibration diagnostics — since 0.49.0
+
+```bash
+quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --sheet-a a.labels.csv --capture-b b.capture.jsonl --key-b b.labelkey.json --sheet-b b.labels.csv --out judges.json --json
+```
+
+```bash
+quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --retained-labels-a a.retained.labels.csv --retention-receipt-a a-retention.json --capture-b b.capture.jsonl --key-b b.labelkey.json --retained-labels-b b.retained.labels.csv --retention-receipt-b b-retention.json --out judges-retained.json --json
+```
+
+Each side independently accepts a full sheet OR retained labels plus its own retention receipt. Both capture/key suites and `--out` are required; receipt flags are valid exactly with the matching retained-label flag. Successful descriptive receiving is 0, including all-unusable truth; invalid/mismatched/unsafe evidence is 2. No normal artifact is published on admission/encoding refusal. Existing destinations and input aliases are refused; output is a new aggregate file, never a replacement calibration or a gate. See [API, denominators, bounds and limits](calibration-judges.md).
+
+
+## Private offline adjudication review — since 0.50.0
+
+```bash
+quantfit adjudicate review-page --review private.adjudication.csv --preparation preparation.json --out private.adjudication.html --json
+```
+
+The required new private output must end exactly in `.adjudication.html`; existing targets and input aliases are refused. Exit 0 is supplied blank/preparation consistency and page creation, not human/source authentication; invalid/unsafe/oversize exits 2. Every selected row is shown with fixed source captions and blank choices; export preserves the immutable six strings as quote-all UTF8 CSV for existing `adjudicate apply`. No private HTML/source/path appears in stdout. See [API, exact byte profiles, workflow and hosted proof limits](adjudication-review.md).
+
+
+## Pinned alternative probe corpus — since 0.51.0
+
+Available in quantfit 0.51.0: both `verify-safety` and `inspect-run` accept all-or-none `--probe-dataset namespace/repo --probe-revision <40-lowercase-hex> --probe-split validation`. No URLs/local paths/buckets/packaged aliases, moving revisions, sliced/concatenated/all splits or demo combinations are accepted. Invalid source/options/whole population are operational 2 before observer/model/judge work.
+
+The supplied population 1..4096 retains all actual prompt/zone/expected strings and order, including repeated/whitespace text. Per-prompt 64KiB and whole selected 8MiB UTF8 bounds are not SDK download/parser/heap limits. Source identities are recorded in reports/capture-only bindings, GGUF cache and Inspect logs/completed reports. Changed revision/split on the default ID is noncanonical. Default native math/0-3-4 priority and legacy Inspect judge/source-pin refusals stay; no implied corpus curation or accuracy transfer. Exact API, compatibility and evidence: [probe-corpus](probe-corpus.md).

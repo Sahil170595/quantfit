@@ -102,3 +102,39 @@ def test_actual_source_package_origin_is_rejected_before_pytest(tmp_path):
         timeout=10,
     )
     assert result.returncode != 0 and b"checkout root injected into pytest" in result.stderr
+
+
+def test_actual_packet_fixture_collection_needs_only_tests_directory(tmp_path):
+    checkout = Path(__file__).resolve().parents[1]
+    config = tmp_path / "pytest.ini"
+    config.write_text(f"[pytest]\npythonpath = {shlex.quote((checkout / 'tests').as_posix())}\n", encoding="utf-8")
+    code = f"""
+import importlib.util, pathlib, sys, pytest
+checkout = pathlib.Path({str(checkout)!r}).resolve()
+def guard():
+    assert checkout not in {{pathlib.Path(p or '.').resolve() for p in sys.path}}
+    assert importlib.util.find_spec('tools') is None
+class Guard:
+    def pytest_sessionstart(self, session): guard()
+    def pytest_sessionfinish(self, session, exitstatus): guard()
+guard()
+status = pytest.main(['-c', {str(config)!r}, '--rootdir', str(checkout / 'tests'),
+    '--import-mode=importlib', '--collect-only', '-q',
+    *[str(checkout / 'tests' / p) for p in ['test_annotation_packets.py', 'test_annotation_chunks.py', 'test_ci_annotation_packets.py']]], plugins=[Guard()])
+guard()
+raise SystemExit(status)
+"""
+    env = dict(os.environ)
+    env.pop("PYTHONPATH", None)
+    result = subprocess.run(
+        [sys.executable, "-I", "-B", "-X", "utf8", "-c", code],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        check=False,
+        timeout=120,
+    )
+    (tmp_path / "isolated.stdout.log").write_bytes(result.stdout)
+    (tmp_path / "isolated.stderr.log").write_bytes(result.stderr)
+    assert result.returncode == 0, (result.stdout + result.stderr).decode("utf-8", errors="replace")
+    assert b"collected" in result.stdout and b"no tests collected" not in result.stdout

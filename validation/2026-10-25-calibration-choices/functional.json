@@ -1,0 +1,1301 @@
+{
+  "cases": [
+    {
+      "analysis_work_units": 57600,
+      "coverage": {
+        "analyzed": 4,
+        "complete": true,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 2,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 0,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "cli",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 0,
+        "native_prefix_cases": 2,
+        "skips": 0
+      },
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "native_population_preserved": true,
+      "reasons": [],
+      "scenario": "positive"
+    },
+    {
+      "analysis_work_units": 57600,
+      "coverage": {
+        "analyzed": 4,
+        "complete": true,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 0,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 5,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "c5f69d732873783537c20f265fc3981260be68cdb1a25133f507b6e866f2f858",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "6f24640dce5d19002f60a2818462ac10418e2d2f2ac92b88c5f3fe8eb3e63db3",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "cli",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 5,
+        "native_prefix_cases": 2,
+        "skips": 0
+      },
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "native_population_preserved": true,
+      "reasons": [
+        "target_power_unattainable",
+        "resolution_exceeds_requirement"
+      ],
+      "scenario": "sensitivity"
+    },
+    {
+      "analysis_work_units": 57600,
+      "coverage": {
+        "analyzed": 4,
+        "complete": true,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 0,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 0,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "c5f69d732873783537c20f265fc3981260be68cdb1a25133f507b6e866f2f858",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "6f24640dce5d19002f60a2818462ac10418e2d2f2ac92b88c5f3fe8eb3e63db3",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "cli",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 0,
+        "native_prefix_cases": 2,
+        "skips": 9
+      },
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "native_population_preserved": true,
+      "reasons": [
+        "not_requested"
+      ],
+      "scenario": "descriptive"
+    },
+    {
+      "analysis_work_units": 28800,
+      "coverage": {
+        "analyzed": 2,
+        "complete": false,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 0,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 1,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 1
+            },
+            "refusal-robustness": {
+              "analyzed": 1,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 1
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 1,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 1
+            },
+            "refusal-robustness": {
+              "analyzed": 1,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 1
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 4,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": null,
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "calibration_missing",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": null,
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "calibration_missing",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "cli",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 5,
+        "native_prefix_cases": 2,
+        "skips": 0
+      },
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "native_population_preserved": true,
+      "reasons": [
+        "calibration_missing"
+      ],
+      "scenario": "missing"
+    },
+    {
+      "analysis_work_units": 57600,
+      "coverage": {
+        "analyzed": 4,
+        "complete": true,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 0,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 3,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "83f00cc3708ec64958ffd455abe06d69fdc957afe5c0ff2632816ce8795f2818",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "c5f69d732873783537c20f265fc3981260be68cdb1a25133f507b6e866f2f858",
+          "name": "clean",
+          "native_report_sha256": "83f00cc3708ec64958ffd455abe06d69fdc957afe5c0ff2632816ce8795f2818",
+          "status": "analyzed",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "6f24640dce5d19002f60a2818462ac10418e2d2f2ac92b88c5f3fe8eb3e63db3",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "cli",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 6,
+        "native_prefix_cases": 2,
+        "skips": 0
+      },
+      "native_exit_code": 3,
+      "native_outcome": "flags_detected",
+      "native_population_preserved": true,
+      "reasons": [
+        "native_flags_detected",
+        "target_power_unattainable",
+        "resolution_exceeds_requirement"
+      ],
+      "scenario": "native_flags"
+    },
+    {
+      "analysis_work_units": 57600,
+      "coverage": {
+        "analyzed": 4,
+        "complete": true,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 2,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 0,
+              "effective_mde_pp_max": null,
+              "effective_mde_pp_min": null,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 0
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 4,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "e6a375335e7a6cb5d9b18fabe6c8d08bb2a4762ad6f3a274c6738f487689b2e7",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "e6a375335e7a6cb5d9b18fabe6c8d08bb2a4762ad6f3a274c6738f487689b2e7",
+          "status": "analyzed",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "cli",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 3,
+        "native_prefix_cases": 2,
+        "skips": 1
+      },
+      "native_exit_code": 4,
+      "native_outcome": "incomplete_evidence",
+      "native_population_preserved": true,
+      "reasons": [
+        "native_evidence_incomplete",
+        "axis_unmeasurable",
+        "target_power_unattainable",
+        "resolution_exceeds_requirement"
+      ],
+      "scenario": "native_incomplete"
+    },
+    {
+      "analysis_work_units": 57600,
+      "coverage": {
+        "analyzed": 4,
+        "complete": true,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 2,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 0,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "api",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 0,
+        "native_prefix_cases": 2,
+        "skips": 0
+      },
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "native_population_preserved": true,
+      "reasons": [],
+      "scenario": "positive"
+    },
+    {
+      "analysis_work_units": 57600,
+      "coverage": {
+        "analyzed": 4,
+        "complete": true,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 0,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 5,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "c5f69d732873783537c20f265fc3981260be68cdb1a25133f507b6e866f2f858",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "6f24640dce5d19002f60a2818462ac10418e2d2f2ac92b88c5f3fe8eb3e63db3",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "api",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 5,
+        "native_prefix_cases": 2,
+        "skips": 0
+      },
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "native_population_preserved": true,
+      "reasons": [
+        "target_power_unattainable",
+        "resolution_exceeds_requirement"
+      ],
+      "scenario": "sensitivity"
+    },
+    {
+      "analysis_work_units": 57600,
+      "coverage": {
+        "analyzed": 4,
+        "complete": true,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 0,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 0,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "c5f69d732873783537c20f265fc3981260be68cdb1a25133f507b6e866f2f858",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "6f24640dce5d19002f60a2818462ac10418e2d2f2ac92b88c5f3fe8eb3e63db3",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "api",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 0,
+        "native_prefix_cases": 2,
+        "skips": 9
+      },
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "native_population_preserved": true,
+      "reasons": [
+        "not_requested"
+      ],
+      "scenario": "descriptive"
+    },
+    {
+      "analysis_work_units": 28800,
+      "coverage": {
+        "analyzed": 2,
+        "complete": false,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 0,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 1,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 1
+            },
+            "refusal-robustness": {
+              "analyzed": 1,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 1
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 1,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 1
+            },
+            "refusal-robustness": {
+              "analyzed": 1,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 1
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 4,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": null,
+          "name": "clean",
+          "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+          "status": "calibration_missing",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": null,
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "calibration_missing",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "api",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 5,
+        "native_prefix_cases": 2,
+        "skips": 0
+      },
+      "native_exit_code": 0,
+      "native_outcome": "conditional_no_detection",
+      "native_population_preserved": true,
+      "reasons": [
+        "calibration_missing"
+      ],
+      "scenario": "missing"
+    },
+    {
+      "analysis_work_units": 57600,
+      "coverage": {
+        "analyzed": 4,
+        "complete": true,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 0,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 1,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 2
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 3,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "83f00cc3708ec64958ffd455abe06d69fdc957afe5c0ff2632816ce8795f2818",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "c5f69d732873783537c20f265fc3981260be68cdb1a25133f507b6e866f2f858",
+          "name": "clean",
+          "native_report_sha256": "83f00cc3708ec64958ffd455abe06d69fdc957afe5c0ff2632816ce8795f2818",
+          "status": "analyzed",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "6f24640dce5d19002f60a2818462ac10418e2d2f2ac92b88c5f3fe8eb3e63db3",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "api",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 6,
+        "native_prefix_cases": 2,
+        "skips": 0
+      },
+      "native_exit_code": 3,
+      "native_outcome": "flags_detected",
+      "native_population_preserved": true,
+      "reasons": [
+        "native_flags_detected",
+        "target_power_unattainable",
+        "resolution_exceeds_requirement"
+      ],
+      "scenario": "native_flags"
+    },
+    {
+      "analysis_work_units": 57600,
+      "coverage": {
+        "analyzed": 4,
+        "complete": true,
+        "expected": 4,
+        "expected_targets": 2,
+        "expected_variants": 2,
+        "unit": "target_variant_pairs"
+      },
+      "digest_copy_group_count": 2,
+      "envelopes": [
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 0,
+              "effective_mde_pp_max": null,
+              "effective_mde_pp_min": null,
+              "expected": 2,
+              "incomplete": true,
+              "measurable": 0
+            }
+          },
+          "name": "clean"
+        },
+        {
+          "axes": {
+            "over-refusal": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            },
+            "refusal-robustness": {
+              "analyzed": 2,
+              "attainable": 2,
+              "effective_mde_pp_max": 37.37690191664753,
+              "effective_mde_pp_min": 37.37690191664753,
+              "expected": 2,
+              "incomplete": false,
+              "measurable": 2
+            }
+          },
+          "name": "flagged"
+        }
+      ],
+      "exit_code": 4,
+      "input_bindings": [
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "e6a375335e7a6cb5d9b18fabe6c8d08bb2a4762ad6f3a274c6738f487689b2e7",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+          "name": "clean",
+          "native_report_sha256": "e6a375335e7a6cb5d9b18fabe6c8d08bb2a4762ad6f3a274c6738f487689b2e7",
+          "status": "analyzed",
+          "variant": "second"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "first"
+        },
+        {
+          "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+          "name": "flagged",
+          "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+          "status": "analyzed",
+          "variant": "second"
+        }
+      ],
+      "inputs_unchanged": true,
+      "interface": "api",
+      "junit": {
+        "cases": 11,
+        "errors": 0,
+        "failures": 3,
+        "native_prefix_cases": 2,
+        "skips": 1
+      },
+      "native_exit_code": 4,
+      "native_outcome": "incomplete_evidence",
+      "native_population_preserved": true,
+      "reasons": [
+        "native_evidence_incomplete",
+        "axis_unmeasurable",
+        "target_power_unattainable",
+        "resolution_exceeds_requirement"
+      ],
+      "scenario": "native_incomplete"
+    }
+  ],
+  "human_labels_authenticated": false,
+  "independent_raters_verified": false,
+  "kind": "quantfit.calibration-choice-functional-acceptance",
+  "scientific_go": false,
+  "synthetic_calibration": true
+}

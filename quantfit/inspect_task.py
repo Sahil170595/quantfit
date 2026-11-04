@@ -238,8 +238,8 @@ arm carries the provider's verified greedy model args) and therefore states as a
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from dataclasses import InitVar, dataclass, field, replace
+from typing import TYPE_CHECKING, Any, cast
 
 from quantfit.inspect_errors import InspectTaskError, _require
 from quantfit.safety.verify import (
@@ -253,7 +253,12 @@ from quantfit.safety.verify import (
     PROBE_DATASET_REVISION,
     PROBE_SPLIT,
     Probe,
+    ProbeCorpus,
     SafetyDrift,
+    _canonical_source,
+    _corpus,
+    _prepare_probes,
+    _source_kwargs,
     _tabulate,
 )
 
@@ -1343,6 +1348,7 @@ def write_drift_report(
     max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
     *,
     protected_inputs: tuple[str, ...] = (),
+    probe_corpus: ProbeCorpus | None = None,
 ) -> Path:
     """Emit this Inspect run as a schema-v2 `DriftReport` — the comparability deliverable.
 
@@ -1384,6 +1390,7 @@ def write_drift_report(
     from quantfit.safety import verify as verify_mod
     from quantfit.safety.report import DriftReport
 
+    _corpus(probe_corpus)
     check_max_new_tokens(max_new_tokens)
     provider = check_run_arms(outcomes, baseline.model, quantized.model)
     if provider == "quantfit_gguf":
@@ -1404,7 +1411,13 @@ def write_drift_report(
     os.close(fd)
     try:
         verify_mod._write_report(
-            tmp_name, drift, arms[0], arms[1], judge_runtime_from_outcomes(outcomes), max_new_tokens
+            tmp_name,
+            drift,
+            arms[0],
+            arms[1],
+            judge_runtime_from_outcomes(outcomes),
+            max_new_tokens,
+            **_source_kwargs(probe_corpus),
         )
         _replace(DriftReport.from_json(tmp_name), decode=inspect_decode(provider, max_new_tokens)).to_json(tmp_name)
         with open(tmp_name, "r+b") as handle:  # the bytes are on the device before the name points at them
@@ -1464,49 +1477,37 @@ def inspect_arm(
 # --- the Inspect components -------------------------------------------------------
 
 
-def qsr_samples(token: str | None = None) -> list[Sample]:
-    """The pinned probe set as Inspect `Sample`s, one per probe, in dataset order.
-
-    Loaded through `verify._load_probes`, so the dataset id, revision and split are the
-    pinned ones by construction (§2.6) — a second loader would be a second place the
-    revision could drift.
-
-    `target` is the probe's ground truth (`safe`/`unsafe`), which is what a correct model
-    would do; the scorer does not compare against it directly, because a QSR verdict is
-    about the DIFFERENCE between the arms, not about either arm's absolute correctness.
-    It rides along so the Inspect viewer shows the probe's intent.
-    """
-    from quantfit.safety import verify as verify_mod
-
+def _samples_from_probes(probes: list[Probe]) -> list[Sample]:
     api = _inspect_api()
-    probes = verify_mod._load_probes(token)
     return [
         api["Sample"](
             input=probe.prompt,
             target=probe.expected,
             id=f"{TASK_NAME}-{index:03d}",
-            metadata={
-                PAIR_INDEX_KEY: index,
-                PROBE_ZONE_KEY: probe.zone,
-                PROBE_EXPECTED_KEY: probe.expected,
-            },
+            metadata={PAIR_INDEX_KEY: index, PROBE_ZONE_KEY: probe.zone, PROBE_EXPECTED_KEY: probe.expected},
         )
         for index, probe in enumerate(probes)
     ]
 
 
-def qsr_dataset(token: str | None = None) -> MemoryDataset:
-    """The pinned probe set as an Inspect `Dataset`, named with its revision pin.
+def qsr_samples(token: str | None = None, *, probe_corpus: ProbeCorpus | None = None) -> list[Sample]:
+    """One whole admitted population; expected is a declared label, not inferred from zone."""
+    _, probes = _prepare_probes(token, probe_corpus)
+    return _samples_from_probes(probes)
 
-    The name carries the revision so a log read on its own says which probe set produced
-    it — the same discipline the report's `probe_dataset.revision` field enforces.
-    """
-    api = _inspect_api()
-    return api["MemoryDataset"](
-        samples=qsr_samples(token),
-        name=f"{PROBE_DATASET_ID}@{PROBE_DATASET_REVISION}",
-        location=f"{PROBE_DATASET_ID}:{PROBE_SPLIT}",
+
+def _dataset_from_probes(source: ProbeCorpus, probes: list[Probe]) -> MemoryDataset:
+    return _inspect_api()["MemoryDataset"](
+        samples=_samples_from_probes(probes),
+        name=f"{source.id}@{source.revision}",
+        location=f"{source.id}:{source.split}",
     )
+
+
+def qsr_dataset(token: str | None = None, *, probe_corpus: ProbeCorpus | None = None) -> MemoryDataset:
+    """The effective pinned source and all admitted samples, loaded exactly once."""
+    source, probes = _prepare_probes(token, probe_corpus)
+    return _dataset_from_probes(source, probes)
 
 
 def _registry() -> dict[str, Any]:
@@ -1739,34 +1740,23 @@ def _registry() -> dict[str, Any]:
 
         return _score_factory()
 
-    @api["task"]
-    def qsr_paired_diff(
-        baseline: str,
-        quantized: str,
-        token: str | None = None,
-        max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
-        baseline_args: dict[str, Any] | None = None,
-        quantized_args: dict[str, Any] | None = None,
-        config: Any = None,
-        epochs: Any = None,
-        labels: Any = None,
-        probe_dataset_id: str = PROBE_DATASET_ID,
-        probe_dataset_revision: str = PROBE_DATASET_REVISION,
-        probe_split: str = PROBE_SPLIT,
-        judge_id: str = JUDGE_MODEL_ID,
-        judge_revision: str = JUDGE_REVISION,
+    def prepared_task(
+        baseline,
+        quantized,
+        token,
+        max_new_tokens,
+        baseline_args,
+        quantized_args,
+        config,
+        epochs,
+        labels,
+        source,
+        probes,
         _hf_observer=None,
     ):
-        """The QSR paired-diff task. See `qsr_paired_diff` in this module for the docs."""
+        # Private native build seam. Public task always admits; qsr_eval admits before observers.
         api_ = _inspect_api()
-        check_pins(probe_dataset_id, probe_dataset_revision, probe_split, judge_id, judge_revision)
-        check_max_new_tokens(max_new_tokens)
-        check_epochs(epochs)
-        check_generate_config(config)
         provider = check_arms(baseline, quantized)
-        # `check_model_args` is called here as well as inside `qsr_arm` — it is pure, so
-        # the second call cannot disagree with the first, and the RECORD has to be the args
-        # that were actually applied rather than the ones the caller passed in.
         baseline_applied = check_model_args(provider, baseline_args)
         quantized_applied = check_model_args(provider, quantized_args)
         if _hf_observer is None:
@@ -1780,7 +1770,7 @@ def _registry() -> dict[str, Any]:
             _require(_hf_observer.specs == (baseline, quantized), "observed HF arm specs differ from vetted arms")
             baseline_model, quantized_model = _hf_observer.models
         return api_["Task"](
-            dataset=qsr_dataset(token),
+            dataset=_dataset_from_probes(source, probes),
             # The registered closures directly, not through `_registry()`: this body runs
             # inside the same lazy build, so the cache is not populated yet. The solver
             # gets the vetted Model OBJECTS, which is what makes an eval-level
@@ -1806,12 +1796,12 @@ def _registry() -> dict[str, Any]:
             epochs=1,
             name=TASK_NAME,
             metadata={
-                "conforms_to": CONFORMS_TO,
+                "conforms_to": CONFORMS_TO if _canonical_source(source) else None,
                 "judge": {"id": JUDGE_MODEL_ID, "revision": JUDGE_REVISION, "input_contract": JUDGE_INPUT_CONTRACT},
                 "probe_dataset": {
-                    "id": PROBE_DATASET_ID,
-                    "revision": PROBE_DATASET_REVISION,
-                    "split": PROBE_SPLIT,
+                    "id": source.id,
+                    "revision": source.revision,
+                    "split": source.split,
                 },
                 "decode": inspect_decode(provider, max_new_tokens),
                 "arms": {BASELINE_ROLE: baseline, QUANTIZED_ROLE: quantized},
@@ -1826,11 +1816,53 @@ def _registry() -> dict[str, Any]:
             },
         )
 
+    @api["task"]
+    def qsr_paired_diff(
+        baseline: str,
+        quantized: str,
+        token: str | None = None,
+        max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
+        baseline_args: dict[str, Any] | None = None,
+        quantized_args: dict[str, Any] | None = None,
+        config: Any = None,
+        epochs: Any = None,
+        labels: Any = None,
+        probe_dataset_id: str = PROBE_DATASET_ID,
+        probe_dataset_revision: str = PROBE_DATASET_REVISION,
+        probe_split: str = PROBE_SPLIT,
+        judge_id: str = JUDGE_MODEL_ID,
+        judge_revision: str = JUDGE_REVISION,
+        *,
+        probe_corpus: ProbeCorpus | None = None,
+    ):
+        check_pins(probe_dataset_id, probe_dataset_revision, probe_split, judge_id, judge_revision)
+        check_max_new_tokens(max_new_tokens)
+        check_epochs(epochs)
+        check_generate_config(config)
+        provider = check_arms(baseline, quantized)
+        check_model_args(provider, baseline_args)
+        check_model_args(provider, quantized_args)
+        source, probes = _prepare_probes(token, probe_corpus)
+        return prepared_task(
+            baseline,
+            quantized,
+            token,
+            max_new_tokens,
+            baseline_args,
+            quantized_args,
+            config,
+            epochs,
+            labels,
+            source,
+            probes,
+        )
+
     _REGISTRY.update(
         metric=qsr_drift_metric,
         solver=qsr_paired_solver,
         scorer=qsr_paired_scorer,
         task=qsr_paired_diff,
+        prepared_task=prepared_task,
     )
     return _REGISTRY
 
@@ -1927,6 +1959,8 @@ def qsr_paired_diff(
     probe_split: str = PROBE_SPLIT,
     judge_id: str = JUDGE_MODEL_ID,
     judge_revision: str = JUDGE_REVISION,
+    *,
+    probe_corpus: ProbeCorpus | None = None,
 ) -> Task:
     """Build the QSR-conformant paired-diff `Task` for one baseline/quantized pair.
 
@@ -1962,6 +1996,7 @@ def qsr_paired_diff(
         probe_split=probe_split,
         judge_id=judge_id,
         judge_revision=judge_revision,
+        **_source_kwargs(probe_corpus),
     )
 
 
@@ -1980,11 +2015,25 @@ class QsrRun:
     observed_arms: tuple[ArmRun, ArmRun] | None = None
     observation_receipt: dict | None = None
     protected_report_inputs: tuple[str, ...] = ()
+    _probe_corpus: InitVar[ProbeCorpus | None] = None
+
+    def __post_init__(self, _probe_corpus: ProbeCorpus | None) -> None:
+        object.__setattr__(self, "_probe_corpus", _probe_corpus)
+
+    @property
+    def probe_corpus(self) -> ProbeCorpus | None:
+        return cast(ProbeCorpus | None, object.__getattribute__(self, "_probe_corpus"))
 
     def write_report(self, path: str, baseline: ArmRun, quantized: ArmRun, max_new_tokens: int) -> Path:
         """Emit this run as a schema-v2 `DriftReport` (see `write_drift_report`)."""
         return write_drift_report(
-            path, self.outcomes, baseline, quantized, max_new_tokens, protected_inputs=self.protected_report_inputs
+            path,
+            self.outcomes,
+            baseline,
+            quantized,
+            max_new_tokens,
+            protected_inputs=self.protected_report_inputs,
+            **_source_kwargs(self.probe_corpus),
         )
 
 
@@ -1997,6 +2046,8 @@ def qsr_eval(
     quantized_args: dict[str, Any] | None = None,
     hf_revisions: tuple[str, str] | None = None,
     gguf_revisions: tuple[str | None, str | None] | None = None,
+    *,
+    probe_corpus: ProbeCorpus | None = None,
     **eval_args: Any,
 ) -> QsrRun:
     """Build the QSR task AND run it — the supported entry point, and the enforcement layer.
@@ -2023,7 +2074,7 @@ def qsr_eval(
     and gets `verify.CAPTURE_WARNING` handling, never a report attachment.
     """
 
-    api = _inspect_api()
+    _corpus(probe_corpus)
     passthrough = check_eval_args(eval_args)
     check_max_new_tokens(max_new_tokens)
     provider = check_arms(baseline, quantized)
@@ -2035,6 +2086,41 @@ def qsr_eval(
         if gguf_revisions is None:
             gguf_revisions = (None, None)
     _require(hf_revisions is None or gguf_revisions is None, "HF and GGUF observation modes are mutually exclusive")
+    check_model_args(provider, baseline_args)
+    check_model_args(provider, quantized_args)
+    if hf_revisions is not None:
+        _require(provider == "hf", "observed runner supports HF only")
+        _require(isinstance(hf_revisions, (tuple, list)) and len(hf_revisions) == 2, "both HF revisions required")
+        import re
+
+        _require(all(type(x) is str and re.fullmatch(r"[0-9a-f]{40}", x) for x in hf_revisions), "invalid HF revisions")
+    if gguf_revisions is not None:
+        _require(provider == "quantfit_gguf", "observed GGUF requires matching GGUF providers")
+        _require(isinstance(gguf_revisions, (tuple, list)) and len(gguf_revisions) == 2, "both GGUF pin slots required")
+        from quantfit.inspect_gguf import _validate_source
+
+        for spec, pin in zip((baseline, quantized), gguf_revisions, strict=True):
+            _validate_source(spec, pin)
+    if hf_revisions is not None or gguf_revisions is not None:
+        _require(passthrough.get("max_samples", 1) == 1, "observed runner requires max_samples=1")
+    source, probes = _prepare_probes(token, probe_corpus)
+    api = _inspect_api()
+
+    def build(observer=None):
+        return _registry()["prepared_task"](
+            baseline,
+            quantized,
+            token,
+            max_new_tokens,
+            baseline_args,
+            quantized_args,
+            None,
+            None,
+            None,
+            source,
+            probes,
+            observer,
+        )
 
     if gguf_revisions is not None:
         from quantfit.inspect_gguf import RUN_LOCK as GGUF_RUN_LOCK
@@ -2049,16 +2135,8 @@ def qsr_eval(
         observer = None
         try:
             observer = GgufRunObserver((baseline, quantized), gguf_revisions, api["get_model"], token)
-            task_obj = _registry()["task"](
-                baseline,
-                quantized,
-                token=token,
-                max_new_tokens=max_new_tokens,
-                baseline_args=baseline_args,
-                quantized_args=quantized_args,
-                _hf_observer=observer,
-            )
-            return _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer)
+            task_obj = build(observer)
+            return _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer, probe_corpus=source)
         finally:
             try:
                 if observer is not None:
@@ -2069,15 +2147,8 @@ def qsr_eval(
     # Opt-in observed mode is deliberately narrower than the library's operator-
     # supplied ArmRun route. No unsafe args enter check_model_args's allowlist.
     if hf_revisions is None:
-        task_obj = qsr_paired_diff(
-            baseline,
-            quantized,
-            token=token,
-            max_new_tokens=max_new_tokens,
-            baseline_args=baseline_args,
-            quantized_args=quantized_args,
-        )
-        return _eval_task(api, task_obj, passthrough, baseline, quantized, token)
+        task_obj = build()
+        return _eval_task(api, task_obj, passthrough, baseline, quantized, token, probe_corpus=source)
 
     from quantfit.inspect_hf import RUN_LOCK, HfRunObserver
 
@@ -2093,23 +2164,15 @@ def qsr_eval(
     observer = None
     try:
         observer = HfRunObserver((baseline, quantized), hf_revisions, api["get_model"], token)
-        task_obj = _registry()["task"](
-            baseline,
-            quantized,
-            token=token,
-            max_new_tokens=max_new_tokens,
-            baseline_args=baseline_args,
-            quantized_args=quantized_args,
-            _hf_observer=observer,
-        )
-        return _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer)
+        task_obj = build(observer)
+        return _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer, probe_corpus=source)
     finally:
         if observer is not None:
             observer.close()
         RUN_LOCK.release()
 
 
-def _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer=None) -> QsrRun:
+def _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer=None, *, probe_corpus=None) -> QsrRun:
     """Shared complete-corpus generation / one judge batch / scoring pipeline."""
     from quantfit.safety import verify as verify_mod
 
@@ -2155,7 +2218,8 @@ def _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer=
     return QsrRun(
         log=scored,
         outcomes=outcomes,
-        drift=drift_from_outcomes(outcomes),
+        drift=replace(drift_from_outcomes(outcomes), _probe_corpus=probe_corpus),
+        _probe_corpus=probe_corpus,
         judge_runtime_s=judge_runtime_from_outcomes(outcomes),
         arms=(baseline, quantized),
         observed_arms=observer.finish(n_probes) if observer is not None else None,
