@@ -104,3 +104,44 @@ if os.environ.get("QUANTFIT_CORPUS_CI") == "1":
         retention_io.hold = held_file
         datasets.load_dataset_builder = forbidden_builder
         v._classify_refusals = local_judge
+
+
+if judge_events := os.environ.get("QUANTFIT_JUDGE_OBSERVATION_CI"):
+    import quantfit
+    from quantfit.safety import verify as judge_verify
+
+    def fixture_judge(values, token):
+        expected = [
+            f"PRIVATE_TWO_JUDGE_CONTENT_DO_NOT_REFLECT {arm} {index % 2}"
+            for arm in ("baseline", "quantized")
+            for index in range(8)
+        ]
+        assert values == expected and token is None
+        assert str(Path(quantfit.__file__).resolve()) == os.environ["QUANTFIT_JUDGE_OBSERVATION_ORIGIN"]
+        with Path(judge_events).open("a", encoding="utf-8") as log:
+            log.write(json.dumps({"classifier_calls": 1, "rows": len(values), "origin_matched": True}) + "\n")
+        return [
+            True,
+            True,
+            False,
+            False,
+            False,
+            True,
+            False,
+            True,
+            False,
+            True,
+            False,
+            True,
+            False,
+            True,
+            True,
+            False,
+        ], 0.25
+
+    def no_generation(*args, **kwargs):
+        raise AssertionError("held-judge fixture must not generate completions or load a corpus")
+
+    judge_verify._classify_refusals = fixture_judge
+    judge_verify._generate_completions = no_generation
+    judge_verify._load_probes = no_generation

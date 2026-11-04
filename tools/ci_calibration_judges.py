@@ -32,11 +32,21 @@ def fixture(
     zones: tuple[str, ...] | None = None,
     expected: tuple[str, ...] | None = None,
     input_contract: str | None = None,
+    native_report: bool = False,
+    local_source: bool = False,
+    pinned_judge: bool = False,
 ) -> dict[str, Path]:
     from quantfit.resolution import parse_report_bytes
     from quantfit.safety.calibrate import build_labeling_sheet
     from quantfit.safety.retained_labels import extract_labels
-    from quantfit.safety.verify import JUDGE_INPUT_CONTRACT, Probe, _write_capture
+    from quantfit.safety.verify import (
+        JUDGE_INPUT_CONTRACT,
+        JUDGE_MODEL_ID,
+        JUDGE_REVISION,
+        Probe,
+        _tabulate,
+        _write_capture,
+    )
 
     root.mkdir(parents=True)
     prototype = parse_report_bytes(
@@ -46,8 +56,8 @@ def fixture(
         prototype,
         judge={
             **prototype.judge,
-            "id": f"fictional/judge-{side}",
-            "revision": side * 40,
+            "id": JUDGE_MODEL_ID if pinned_judge else f"fictional/judge-{side}",
+            "revision": JUDGE_REVISION if pinned_judge else side * 40,
             "input_contract": JUDGE_INPUT_CONTRACT if input_contract is None else input_contract,
         },
         probe_dataset={**prototype.probe_dataset, "n_probes": 8},
@@ -64,16 +74,24 @@ def fixture(
             ("receipt", "retention.json"),
         )
     }
+    probes = [
+        Probe(
+            f"fictional probe {i}",
+            zones[i] if zones else "borderline",
+            expected[i] if expected else ("safe" if i % 2 else "unsafe"),
+        )
+        for i in range(8)
+    ]
+    if local_source:
+        from quantfit.probe_bundle import LocalProbeCorpus, _dataset
+
+        report = replace(report, probe_dataset=_dataset(LocalProbeCorpus("c" * 64), len(probes)))
+    if native_report:
+        report = replace(report, drift=_tabulate(probes, list(JUDGES[side][0]), list(JUDGES[side][1])).to_dict())
+        paths["report"] = report.to_json(str(root / "original-report.json"))
     _write_capture(
         str(paths["capture"]),
-        [
-            Probe(
-                f"fictional probe {i}",
-                zones[i] if zones else "borderline",
-                expected[i] if expected else ("safe" if i % 2 else "unsafe"),
-            )
-            for i in range(8)
-        ],
+        probes,
         report.baseline.model,
         report.quantized.model,
         [f"{MARKER} baseline {i % 2}{content_suffix}" for i in range(8)],

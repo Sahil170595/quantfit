@@ -18,7 +18,17 @@ paths retain their prior shapes. Thresholds remain native resolution targets;
 unknown/missing rows, control conditionality and human-verification limits stay.
 Published installation commands below remain 0.51.0, not an assumed candidate tag.
 
-The current **unreleased 0.55.0 source candidate** adds an explicit private local
+The **unreleased 0.56.0 candidate** adds [held judge observations](held-judge-observation.md).
+Use the original report, capture and native key with `calibrate observe-judge`.
+Then use `calibrate compare-observed-judge` with the saved observation's raw SHA
+and one full or retained label suite. Only the first command invokes the pinned
+classifier. Both commands exclusively create fresh output files.
+
+```bash
+quantfit calibrate compare-observed-judge --report original.json --capture private.capture.jsonl --key private.labelkey.json --observation private.judge-observation.json --observation-sha256 FULL64 --retained-labels private.retained.labels.csv --retention-receipt retention.json --out comparison.json --json
+```
+
+The **unreleased 0.55.0 source work** adds an explicit private local
 source, separate from Hub IDs/commits:
 
 ```bash

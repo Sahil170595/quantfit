@@ -29,6 +29,7 @@ cases/
 # Artifacts that carry completion text (docs/data-handling-completions.md: local-only,
 # never committed). Backstops the doc-mandated filename conventions.
 *.capture.jsonl
+*.judge-observation.json
 *.labels.csv
 *.labelkey.json
 *.chunkmanifest.json

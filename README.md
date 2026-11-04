@@ -41,7 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This branch targets the **unreleased 0.55.0 candidate**, adding private
+This branch targets the **unreleased 0.56.0 candidate**, adding a
+[held-completion judge rerun and offline comparison](docs/held-judge-observation.md).
+It includes 0.55's private
 [whole local hash-pinned probe bundles](docs/offline-probe-bundles.md) to native
 verification, Inspect, gates, screens and offline saved receiving. The live path
 is separate from the complete raw-byte identity; all rows are held before model
@@ -106,6 +108,8 @@ The **0.49.0 release** adds [two-judge calibration diagnostics](docs/calibration
 
 ```bash
 quantfit calibrate compare-judges --capture-a a.capture.jsonl --key-a a.labelkey.json --sheet-a a.labels.csv --capture-b b.capture.jsonl --key-b b.labelkey.json --retained-labels-b b.retained.labels.csv --retention-receipt-b b-retention.json --out judges.json --json
+quantfit calibrate observe-judge --report original.json --capture private.capture.jsonl --key private.labelkey.json --out private.judge-observation.json --json
+quantfit calibrate compare-observed-judge --report original.json --capture private.capture.jsonl --key private.labelkey.json --observation private.judge-observation.json --observation-sha256 FULL64 --sheet filled.labels.csv --out comparison.json --json
 ```
 
 Whole-N flag tables include unusable truth; error tables use each arm's usable truth. All-unusable input completes descriptively with null epsilon and native full intervals. This does not establish equal judge tokenization/truncation, real execution, human truth, independence or scientific GO. These diagnostics are available in this version; Python 3.11 and the inherited all-version dependency audit baseline remain.

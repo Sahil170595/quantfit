@@ -821,6 +821,7 @@ def main() -> None:
             "test_ci_calibration_strata.py",
             "test_ci_calibration_paired.py",
             "test_ci_calibration_judges.py",
+            "test_judge_observation.py",
             "test_ci_label_review.py",
             "test_ci_annotation_chunks.py",
             "test_annotation_packets.py",
