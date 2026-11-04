@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, TypedDict
 from quantfit import saved_screen as saved
 from quantfit.bundle import _no_links, _read
 from quantfit.junit import screen_to_junit
+from quantfit.probe_bundle import LocalProbeCorpus
 from quantfit.reproduce import (
     _canonical_receiving_path,
     _publish_reproduction_outputs,
@@ -40,7 +41,7 @@ if TYPE_CHECKING:
 
 
 class _SourceOptions(TypedDict, total=False):
-    probe_corpus: ProbeCorpus
+    probe_corpus: ProbeCorpus | LocalProbeCorpus
     _prepared_population: _PreparedPopulation | None
 
 
@@ -90,6 +91,7 @@ class _Prepared:
     held: dict[str, bytes]
     received: dict[str, Any]
     local_model_inputs: tuple[Path, ...] = ()
+    corpus_input: Path | None = None
 
     @property
     def reports(self) -> tuple[Path, ...]:
@@ -128,6 +130,18 @@ class _Prepared:
 
 def _paths(prepared: _Prepared) -> None:
     """Check future output paths before mkdir, then again before each contact/write."""
+    if prepared.corpus_input is not None:
+        from quantfit.corpus_gate import _admit_publication_paths
+        from quantfit.gate import validate_replay_outputs
+
+        sources = (prepared.manifest_path, prepared.corpus_input, *prepared.local_model_inputs)
+        targets = (*prepared.reports, prepared.summary, *prepared.captures, prepared.junit)
+        # The native screen admits future directory parents before mkdir. Native
+        # reproduction publication requires existing parents, so use its alias
+        # projection now and its complete publication check once parents exist.
+        validate_replay_outputs(sources, targets)
+        if all(p is None or p.parent.is_dir() for p in targets):
+            _admit_publication_paths(sources, targets)
     directories = (prepared.root, *((prepared.capture,) if prepared.capture else ()))
     for directory in directories:
         _no_links(directory)
@@ -158,7 +172,11 @@ def _current_protocol(received: dict[str, Any], max_new_tokens: int) -> None:
 
 
 def _receive(
-    prepared: _Prepared, held: dict[str, bytes], max_new_tokens: int, *, probe_corpus: ProbeCorpus | None = None
+    prepared: _Prepared,
+    held: dict[str, bytes],
+    max_new_tokens: int,
+    *,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> dict[str, Any]:
     received = saved._summarize_held(
         prepared.manifest,
@@ -178,7 +196,8 @@ def _prepare(
     junit_path: str | None,
     cap: int,
     *,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    probe_bundle_path: str | None = None,
 ) -> _Prepared:
     _require(type(cap) is int and cap > 0, "invalid_max_new_tokens")
     manifest_path, out_dir = (_canonical_receiving_path(path) for path in (manifest_path, out_dir))
@@ -192,7 +211,20 @@ def _prepare(
         from quantfit.corpus_gate import _local_model_inputs
 
         models = _local_model_inputs([ref for target in targets for ref in (target.baseline, target.quant)])
-    prepared = _Prepared(Path(manifest_path), manifest, name, targets, control, root, capture, junit, {}, {}, models)
+    prepared = _Prepared(
+        Path(manifest_path),
+        manifest,
+        name,
+        targets,
+        control,
+        root,
+        capture,
+        junit,
+        {},
+        {},
+        models,
+        Path(probe_bundle_path) if probe_bundle_path is not None else None,
+    )
     _paths(prepared)
     allowed = {path.name for path in prepared.reports} | {SUMMARY_FILENAME}
     members = saved._inventory(root, allowed) if _exists(root) else []
@@ -205,7 +237,18 @@ def _prepare(
         remaining -= len(raw)
     received = _receive(prepared, held, cap, probe_corpus=probe_corpus)
     return _Prepared(
-        Path(manifest_path), manifest, name, targets, control, root, capture, junit, held, received, models
+        Path(manifest_path),
+        manifest,
+        name,
+        targets,
+        control,
+        root,
+        capture,
+        junit,
+        held,
+        received,
+        models,
+        prepared.corpus_input,
     )
 
 
@@ -265,7 +308,8 @@ def run_resumed_screen(
     capture_dir: str | None,
     attempts: int,
     junit_path: str | None,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    probe_bundle_path: str | None = None,
     _fresh: bool = False,
 ) -> dict[str, Any]:
     """Admit all present evidence once; execute only absent native report members."""
@@ -273,13 +317,22 @@ def run_resumed_screen(
     try:
         source_options: _SourceOptions = {}
         corpus_context = None
+        held_population = None
         if probe_corpus is not None:
             from quantfit import probe_population as population
             from quantfit.safety import verify
             from quantfit.safety.calibration_binding import _same_numbers
 
             probe_corpus = verify._corpus(probe_corpus)
-        prepared = _prepare(manifest_path, out_dir, capture_dir, junit_path, max_new_tokens, probe_corpus=probe_corpus)
+        prepared = _prepare(
+            manifest_path,
+            out_dir,
+            capture_dir,
+            junit_path,
+            max_new_tokens,
+            probe_corpus=probe_corpus,
+            probe_bundle_path=probe_bundle_path,
+        )
         if probe_corpus is not None:
             _require(type(attempts) is int and attempts >= 1, "invalid_attempts")
             for target in prepared.targets:
@@ -300,7 +353,7 @@ def run_resumed_screen(
             missing = [t for t in prepared.targets if f"{t.name}.json" not in prepared.held]
             corpus_context = prepared.received["probe_corpus"]
             if missing:
-                held_population = population.prepare(token, probe_corpus)
+                held_population = population.prepare(token, probe_corpus, probe_bundle_path=probe_bundle_path)
                 resolved_context = population.context(held_population)
                 if corpus_context["population_basis"] != "unavailable_no_reports":
                     _same_numbers(
@@ -310,6 +363,13 @@ def run_resumed_screen(
                     )
                 corpus_context = resolved_context
                 source_options = {"probe_corpus": probe_corpus, "_prepared_population": held_population}
+            elif probe_bundle_path is not None:
+                raise ScreenError("complete_resume_requires_identity_only")
+
+        def current_paths() -> None:
+            _paths(prepared)
+            if held_population is not None and held_population.held_file is not None:
+                held_population.held_file.check()
 
         # No filesystem mutation or model call occurs before the complete preflight.
         from quantfit.safety.verify import verify_safety
@@ -325,7 +385,7 @@ def run_resumed_screen(
         held = dict(prepared.held)
         received = prepared.received
         for index, target in enumerate(prepared.targets):
-            _paths(prepared)
+            current_paths()
             member = f"{target.name}.json"
             path = prepared.root / member
             if member in prepared.held:
@@ -334,7 +394,7 @@ def run_resumed_screen(
                 print(f"resume: {target.name} already measured")
             else:
                 for attempt in range(1, max(1, attempts) + 1):
-                    _paths(prepared)
+                    current_paths()
                     _require(not _exists(path), "unexpected_report_member")
                     phase = "execution_failed"
                     try:
@@ -415,13 +475,13 @@ def run_resumed_screen(
             )
             phase = "output_failure"
             _publish_reproduction_outputs(
-                prepared.output_plan(), [(prepared.summary, raw_summary)], recheck=lambda: _paths(prepared)
+                prepared.output_plan(), [(prepared.summary, raw_summary)], recheck=lambda: current_paths()
             )
         if prepared.junit is not None:
             _publish_reproduction_outputs(
                 prepared.junit_plan(),
                 [(prepared.junit, screen_to_junit(summary).encode())],
-                recheck=lambda: _paths(prepared),
+                recheck=lambda: current_paths(),
             )
         return summary
     except ScreenError:

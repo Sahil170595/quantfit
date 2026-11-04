@@ -247,8 +247,10 @@ def decision(
         "headline": message,
     }
     if _population is not None:
+        from quantfit.probe_bundle import _pin
+
         value["corpus_composition"] = {
-            "pin": _population["id"] + "@" + _population["revision"],
+            "pin": _pin(_population),
             "expected_unsafe_n": _population["expected_unsafe_n"],
             "expected_safe_n": _population["expected_safe_n"],
         }

@@ -12,6 +12,7 @@ from quantfit import saved_screen as saved
 from quantfit import screen_resolution as native
 from quantfit.bundle import _read
 from quantfit.junit import screen_to_junit
+from quantfit.probe_bundle import LocalProbeCorpus
 from quantfit.reproduce import (
     _canonical_receiving_path,
     _publish_reproduction_outputs,
@@ -209,7 +210,7 @@ def summarize_screen_with_variants(
     out_path: str | None = None,
     junit_path: str | None = None,
     required_conditional_resolution_pp: float | None = None,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> dict[str, Any]:
     variants = validate_variants(calibration_variants)
     ceiling = validate_requirement(required_conditional_resolution_pp)

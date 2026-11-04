@@ -30,13 +30,14 @@ def _json_document(command: str, code: int, result: dict) -> dict:
 
 
 def _probe_metadata(options, drift):
+    from quantfit.probe_bundle import _dataset
     from quantfit.safety.verify import _canonical_source
 
     source = options.get("probe_corpus")
     if source is None or _canonical_source(source):
         return {}
     return {
-        "probe_dataset": {"id": source.id, "revision": source.revision, "split": source.split, "n_probes": drift.n},
+        "probe_dataset": _dataset(source, drift.n),
         "probe_scope": "supplied noncanonical; no curation or judge-accuracy qualification",
     }
 
@@ -125,6 +126,23 @@ def _positive_int(text: str) -> int:
 
 def _probe_source_options(args):
     source_values = tuple(getattr(args, name, None) for name in ("probe_dataset", "probe_revision", "probe_split"))
+    pin, path = getattr(args, "probe_sha256", None), getattr(args, "probe_bundle", None)
+    if pin is not None or path is not None:
+        from quantfit.probe_bundle import LocalProbeCorpus
+
+        if (
+            pin is None
+            or any(v is not None for v in source_values)
+            or getattr(args, "demo", False)
+            or getattr(args, "_execution_recipe", None) is not None
+        ):
+            raise RuntimeError("invalid_probe_corpus_options")
+        offline = args.cmd == "screen-summary" or args.cmd == "gate" and getattr(args, "from_report", None) is not None
+        resume = args.cmd == "screen" and getattr(args, "resume", False)
+        if offline and path is not None or not offline and not resume and path is None:
+            raise RuntimeError("invalid_probe_corpus_options")
+        return {"probe_corpus": LocalProbeCorpus(pin), **({"probe_bundle_path": path} if path is not None else {})}
+
     if not any(value is not None for value in source_values):
         return {}
     if any(value is None for value in source_values) or getattr(args, "demo", False):
@@ -135,6 +153,30 @@ def _probe_source_options(args):
     if getattr(args, "_execution_recipe", None) is not None and not _canonical_source(source):
         raise RuntimeError("execution_recipe_mismatch")
     return {"probe_corpus": source}
+
+
+def _local_cli_paths(args, options):
+    """Admit every known local-source CLI sink before native execution and publication."""
+    from quantfit.probe_bundle import LocalProbeCorpus, _paths, _roots
+
+    if type(options.get("probe_corpus")) is not LocalProbeCorpus or "probe_bundle_path" not in options:
+        return
+    if args.cmd == "screen":
+        return  # Native strict screen owns all target/future-directory/JUnit roles.
+    path = options["probe_bundle_path"]
+    if args.cmd == "inspect-run":
+        from quantfit.inspect_task import local_gguf_inputs
+
+        inputs = (path, *local_gguf_inputs(tuple(p for p in (args.baseline, args.quant) if p is not None)))
+        _paths(inputs, (args.report,))
+        if args.log_dir is not None:
+            _roots(inputs, (args.log_dir,))
+    elif args.cmd in {"verify-safety", "gate"}:
+        from quantfit.corpus_gate import _local_model_inputs
+
+        inputs = (path, *_local_model_inputs((args.baseline, args.quant)))
+        outputs = (args.report, args.junit, getattr(args, "capture", None), getattr(args, "out", None))
+        _paths(inputs, outputs, getattr(args, "baseline_cache", None))
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -160,6 +202,14 @@ def _build_parser() -> argparse.ArgumentParser:
     pc.add_argument("--model", required=True, help="HF model id")
 
     sub.add_parser("list", help="list supported methods + schemes")
+
+    probes = sub.add_parser("probes", help="private offline whole probe populations")
+    probes_sub = probes.add_subparsers(dest="probes_cmd", required=True)
+    probe_bundle = probes_sub.add_parser(
+        "bundle", help="validate every private JSON row and create one hash-pinned bundle"
+    )
+    probe_bundle.add_argument("--rows", required=True, help="private native row JSON array")
+    probe_bundle.add_argument("--out", required=True, help="new exclusive private .probe-bundle.json")
 
     # No --token: `plan` reads the local device and the frozen spec only — detect_target(),
     # Engine.feasible(target) and route() never reach the Hub — so a token flag here would
@@ -910,6 +960,20 @@ def _build_parser() -> argparse.ArgumentParser:
         source_parser.add_argument(
             "--probe-split", default=None, metavar="SPLIT", help="one native literal whole split"
         )
+    for source_parser in (pvs, pinspect, pg, ps, psaved):
+        source_parser.add_argument(
+            "--probe-sha256",
+            default=None,
+            metavar="FULL64",
+            help="expected whole RAW local probe-bundle SHA256; distinct from Hub revisions",
+        )
+        if source_parser is not psaved:
+            source_parser.add_argument(
+                "--probe-bundle",
+                default=None,
+                metavar="PATH",
+                help="private whole local bundle; requires --probe-sha256; live only",
+            )
     return p
 
 
@@ -937,6 +1001,18 @@ def _add_json_flag(parser: argparse.ArgumentParser) -> None:
 
 
 def _dispatch(args: argparse.Namespace) -> int:
+    if args.cmd == "probes":
+        from quantfit.probe_bundle import prepare_probe_bundle
+
+        result = prepare_probe_bundle(args.rows, out_path=args.out)
+        return _emit(
+            args,
+            "probes/bundle",
+            0,
+            result,
+            lambda: print(f"Whole private population: n={result['n_probes']}; sha256={result['sha256']}"),
+        )
+
     if args.cmd == "adjudicate":
         if args.adjudicate_cmd == "screen":
             from quantfit.screen_adjudication import _receive
@@ -1241,6 +1317,7 @@ def _dispatch(args: argparse.Namespace) -> int:
     source_options = (
         _probe_source_options(args) if args.cmd in {"verify-safety", "inspect-run", "gate", "screen"} else {}
     )
+    _local_cli_paths(args, source_options)
 
     if args.cmd == "inspect-run":
         import contextlib
@@ -1382,6 +1459,9 @@ def _dispatch(args: argparse.Namespace) -> int:
             if args.capture or args.baseline_cache or args.demo or args.max_new_tokens != 64:
                 raise RuntimeError("execution_recipe_mismatch")
             revisions["_execution_guard"] = _load_execution_guard(args._execution_recipe, args._execution_recipe_sha256)
+        live_options = dict(source_options)
+        if "probe_bundle_path" in source_options and args.junit is not None:
+            live_options["_publication_outputs"] = (args.junit,)
         drift = verify_safety(
             args.baseline,
             args.quant,
@@ -1391,7 +1471,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             capture_path=args.capture,
             baseline_cache_dir=args.baseline_cache,
             **revisions,
-            **source_options,
+            **live_options,
         )
         # Exit codes are the CI contract; they must not collide with 2 (operational
         # failure, from main's handler) or an unmeasured run would read as a verdict.
@@ -1403,6 +1483,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             code = 0
 
         if args.junit:
+            _local_cli_paths(args, source_options)
             from pathlib import Path
 
             from quantfit.junit import drift_to_junit
@@ -1546,7 +1627,12 @@ def _dispatch(args: argparse.Namespace) -> int:
             from quantfit.corpus_gate import _admit_publication_paths, _local_model_inputs
 
             model_inputs = _local_model_inputs((args.baseline, args.quant)) if args.from_report is None else ()
-            opted_inputs = [args.calibration_report, args.from_report, *model_inputs]
+            opted_inputs = [
+                args.calibration_report,
+                args.from_report,
+                getattr(args, "probe_bundle", None),
+                *model_inputs,
+            ]
             _admit_publication_paths(opted_inputs, [args.report, args.out, args.junit])
         if args.axis_threshold is not None:
             from quantfit.axis_gate import cli_thresholds
@@ -1564,6 +1650,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         else:
             if args.baseline is None or args.quant is None:
                 raise GateError("live gate requires both --baseline and --quant (or use --from-report)")
+            if "probe_bundle_path" in source_options and args.junit is not None:
+                options["_publication_outputs"] = (args.junit,)
             decision = run_gate(
                 args.baseline,
                 args.quant,

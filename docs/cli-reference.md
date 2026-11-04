@@ -18,7 +18,27 @@ paths retain their prior shapes. Thresholds remain native resolution targets;
 unknown/missing rows, control conditionality and human-verification limits stay.
 Published installation commands below remain 0.51.0, not an assumed candidate tag.
 
-The current **unreleased 0.54.0 source candidate** adds private full-population
+The current **unreleased 0.55.0 source candidate** adds an explicit private local
+source, separate from Hub IDs/commits:
+
+```bash
+quantfit probes bundle --rows private.probe-rows.json --out private.probe-bundle.json --json
+quantfit verify-safety --baseline org/base --quant ./out --probe-bundle private.probe-bundle.json --probe-sha256 FULL64 --report drift.json --json
+quantfit gate --from-report drift.json --threshold 30 --probe-sha256 FULL64 --json
+```
+
+`probes bundle` requires the two explicit paths, validates the entire closed row
+array and exclusively creates the complete private bundle. Live `verify-safety`,
+`inspect-run`, `gate` and `screen` require both local flags, mutually exclusive with
+the Hub triplet. Saved `gate`, `screen-summary` and complete `screen --resume`
+require the expected hash alone and read no local bundle/Hub. Partial resume needs
+the live pair. [Exact SDK/wire/bounds/privacy and native exit semantics](offline-probe-bundles.md)
+include 64 MiB raw files, native 8 MiB selected strings, all 1–4096 rows, and
+strict source/census receiving. Local identity grants no source authentication,
+calibration transfer or canonical-protocol authority. Older published install
+examples remain 0.51.0.
+
+The accepted **unreleased 0.54.0 source work** adds private full-population
 blinded recipient pages, distinct from the flagged-pair adjudication review page:
 
 ```bash

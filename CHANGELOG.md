@@ -13,6 +13,24 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.55.0 — Unreleased (2026-11-02 candidate)
+
+- Add private whole local probe bundles, `LocalProbeCorpus(sha256)`,
+  `prepare_probe_bundle` and `probes bundle`. Admit the complete closed source
+  before model work; preserve all rows, duplicates and exact strings. Keep
+  explicit local identity and its private live path separate from Hub commits.
+- Propagate full raw source identity/census through native verification, Inspect,
+  gates/screens/resume, strict saved bundles, GGUF cache/T1 and non-null
+  capture/key/calibration schema-2/schema-3 binding. Saved receiving and complete
+  resume require the expected identity but no local source file or network.
+- Protect known local input/output roles including dynamically derived cache
+  entries and all simultaneous sinks. Keep native statistics, None/Hub default
+  domains and fixed-protocol limits; local sources receive no canonical/FPR,
+  sensitivity, curation, authenticity or scientific clearance.
+- Controlled software evidence and exact scope are recorded in
+  `validation/2026-11-02-offline-probe-bundles/`. Four installed profiles, real
+  model/native inference and hosted qualification are separate evidence.
+
 ## 0.54.0 — Unreleased (2026-11-02 candidate)
 
 - Add `prepare_annotation_packets` and `calibrate chunks packets`: one private

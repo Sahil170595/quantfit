@@ -512,6 +512,30 @@ def fingerprint_inputs(
     }
 
 
+def _local_fingerprint_inputs(arm, *, source, prompts, max_new_tokens, do_sample, chat_template_policy, env) -> dict:
+    """The same native cache record/digest, with a disjoint explicit local probe source."""
+    from quantfit.probe_bundle import LocalProbeCorpus, _identity
+
+    _require(type(source) is LocalProbeCorpus, "invalid local cache source")
+    source.__post_init__()
+    _require(
+        isinstance(prompts, (list, tuple)) and bool(prompts) and all(type(p) is str for p in prompts),
+        "invalid local cache prompts",
+    )
+    value = {
+        "capture_protocol_version": CAPTURE_PROTOCOL_VERSION,
+        "arm": _arm_identity(_normalize_arm(arm, "arm")),
+        "env": _env_identity(env),
+        "probe": {
+            **_identity(source),
+            "n_prompts": len(prompts),
+            "prompts_sha256": _digest(_DOMAIN_PROMPTS, list(prompts)),
+        },
+        "decode": {"max_new_tokens": max_new_tokens, "do_sample": do_sample, "chat_template": chat_template_policy},
+    }
+    return _validated_inputs(value, "local fingerprint inputs")
+
+
 def baseline_fingerprint(
     arm: ArmRun | Mapping,
     *,
@@ -560,9 +584,13 @@ def _validated_inputs(inputs, where: str) -> dict:
     missing = sorted(_INPUT_SECTIONS - set(inputs))
     _require(not missing, f"{where} is missing {missing}")
 
+    from quantfit.probe_bundle import LOCAL_FIELDS, _admit_local_dataset
+
+    local_probe = isinstance(inputs["probe"], Mapping) and "source_kind" in inputs["probe"]
+    probe_fields = LOCAL_FIELDS | {"n_prompts", "prompts_sha256"} if local_probe else _PROBE_INPUT_FIELDS
     for section, allowed in (
         ("arm", _ARM_INPUT_FIELDS),
-        ("probe", _PROBE_INPUT_FIELDS),
+        ("probe", probe_fields),
         ("decode", _DECODE_INPUT_FIELDS),
     ):
         block = inputs[section]
@@ -586,18 +614,22 @@ def _validated_inputs(inputs, where: str) -> dict:
         isinstance(probe["prompts_sha256"], str) and len(probe["prompts_sha256"]) == 64,
         f"{where}.probe.prompts_sha256 must be a sha256 digest",
     )
-    for field in ("dataset_id", "split"):
+    if local_probe:
+        _admit_local_dataset({**{k: probe[k] for k in LOCAL_FIELDS}, "n_probes": probe["n_prompts"]})
+        _require(_is_hex_digest(probe["prompts_sha256"], 64), "invalid local ordered-prompt digest")
+    else:
+        for field in ("dataset_id", "split"):
+            _require(
+                isinstance(probe[field], str) and bool(probe[field].strip()),
+                f"{where}.probe.{field} must be a non-empty string",
+            )
+        # Same pinning rule as `fingerprint_inputs`, applied to entries read off disk too:
+        # an entry keyed on a floating probe revision cannot be re-derived, so it is refused
+        # here rather than served.
         _require(
-            isinstance(probe[field], str) and bool(probe[field].strip()),
-            f"{where}.probe.{field} must be a non-empty string",
+            _is_hex_digest(probe["dataset_revision"], *_REVISION_DIGEST_LENS),
+            f"{where}.probe.dataset_revision {probe['dataset_revision']!r} {_UNPINNED_REVISION}",
         )
-    # Same pinning rule as `fingerprint_inputs`, applied to entries read off disk too:
-    # an entry keyed on a floating probe revision cannot be re-derived, so it is refused
-    # here rather than served.
-    _require(
-        _is_hex_digest(probe["dataset_revision"], *_REVISION_DIGEST_LENS),
-        f"{where}.probe.dataset_revision {probe['dataset_revision']!r} {_UNPINNED_REVISION}",
-    )
     decode = dict(inputs["decode"])
     _require(
         isinstance(decode["max_new_tokens"], int)
@@ -630,11 +662,34 @@ def entry_path(cache_dir: str | os.PathLike, fingerprint: str) -> Path:
 # --- store -----------------------------------------------------------------------
 
 
+def _check_local_entry(held, target: Path, *, inputs=(), outputs=()) -> None:
+    """Jointly protect every known source/output at the actual derived entry."""
+    from quantfit.bundle import _no_links
+    from quantfit.gate import validate_replay_outputs
+    from quantfit.probe_bundle import ProbeBundleError, _paths
+
+    try:
+        held.check()
+        sources = (str(held.path), *inputs)
+        targets = (str(target), *outputs)
+        validate_replay_outputs(sources, targets)
+        for p in (target, *(Path(p) for p in outputs)):
+            _no_links(p)
+        if all(Path(p).parent.is_dir() for p in targets):
+            _paths(sources, targets)
+    except (OSError, RuntimeError, ValueError, TypeError):
+        raise ProbeBundleError("invalid_probe_bundle_paths") from None
+
+
 def store(
     cache_dir: str | os.PathLike,
     fingerprint_inputs_record: Mapping,
     completions: list[str] | tuple[str, ...],
     arm_record: ArmRun | Mapping,
+    *,
+    _probe_bundle=None,
+    _probe_inputs=(),
+    _probe_outputs=(),
 ) -> Path:
     """Write one baseline arm's completions under the key derived from its identity.
 
@@ -707,12 +762,26 @@ def store(
         raise CacheError(f"cannot create cache directory {directory}: {exc}") from exc
 
     final = entry_path(directory, fingerprint)
+    if _probe_bundle is not None:
+        from quantfit.safety.retention_io import HeldFile
+
+        _require(
+            type(_probe_bundle) is HeldFile and inputs["probe"].get("source_kind") == "local",
+            "invalid local cache input guard",
+        )
+        _require(
+            hashlib.sha256(_probe_bundle.data).hexdigest() == inputs["probe"]["sha256"],
+            "local cache source guard identity mismatch",
+        )
+        _check_local_entry(_probe_bundle, final, inputs=_probe_inputs, outputs=_probe_outputs)
     fd, tmp_name = tempfile.mkstemp(dir=str(directory), prefix=_TMP_PREFIX, suffix=_TMP_SUFFIX)
     try:
         with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
             fh.write(text)
             fh.flush()
             os.fsync(fh.fileno())  # the bytes are on the device before the name points at them
+        if _probe_bundle is not None:
+            _check_local_entry(_probe_bundle, final, inputs=_probe_inputs, outputs=_probe_outputs)
         os.replace(tmp_name, final)
     except OSError as exc:
         raise CacheError(f"cannot write cache entry {final}: {exc}") from exc

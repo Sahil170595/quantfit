@@ -313,13 +313,22 @@ def _measurement_identity(report: DriftReport, *, require_observation: bool) -> 
         bool(_REVISION.fullmatch(_text(judge["revision"], "judge.revision"))),
         "judge revision must be an immutable commit",
     )
-    probes = {key: report.probe_dataset.get(key) for key in ("id", "revision", "split", "n_probes")}
-    for key in ("id", "revision", "split"):
-        _text(probes[key], f"probe_dataset.{key}")
-    _require(
-        bool(_REVISION.fullmatch(_text(probes["revision"], "probe_dataset.revision"))),
-        "probe dataset revision must be an immutable commit",
-    )
+    from quantfit.probe_bundle import _admit_local_dataset
+
+    local = "source_kind" in report.probe_dataset
+    if local:
+        try:
+            probes = _admit_local_dataset(report.probe_dataset)
+        except RuntimeError:
+            raise CalibrationBindingError("invalid local probe identity") from None
+    else:
+        probes = {key: report.probe_dataset.get(key) for key in ("id", "revision", "split", "n_probes")}
+        for key in ("id", "revision", "split"):
+            _text(probes[key], f"probe_dataset.{key}")
+        _require(
+            bool(_REVISION.fullmatch(_text(probes["revision"], "probe_dataset.revision"))),
+            "probe dataset revision must be an immutable commit",
+        )
     _require(_count(probes["n_probes"], "probe_dataset.n_probes") > 0, "probe count must be positive")
     decode = dict(report.decode)
     _require(_count(decode.get("max_new_tokens"), "decode.max_new_tokens") > 0, "token budget must be positive")
@@ -340,7 +349,7 @@ def _measurement_identity(report: DriftReport, *, require_observation: bool) -> 
         "env.cuda must be a non-empty version or null",
     )
     identity = {
-        "identity_schema": IDENTITY_SCHEMA,
+        "identity_schema": 2 if local else IDENTITY_SCHEMA,
         "schema_version": 2,
         "judge": judge,
         "probe_dataset": probes,
@@ -367,7 +376,7 @@ def validate_binding(binding: dict) -> dict:
     keys = {"identity_schema", "schema_version", "judge", "probe_dataset", "decode", "baseline", "quantized", "env"}
     _require(isinstance(identity, dict) and set(identity) == keys, "binding identity has an unsupported shape")
     _require(
-        type(identity["identity_schema"]) is int and identity["identity_schema"] == IDENTITY_SCHEMA,
+        type(identity["identity_schema"]) is int and identity["identity_schema"] in (IDENTITY_SCHEMA, 2),
         "unsupported identity schema",
     )
     _require(

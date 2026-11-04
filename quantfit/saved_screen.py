@@ -17,6 +17,7 @@ from quantfit import __version__
 from quantfit.bundle import _json, _no_links, _read, _report, _report_from_parsed
 from quantfit.junit import screen_to_junit
 from quantfit.modelcard import _check_original_statistics
+from quantfit.probe_bundle import LocalProbeCorpus
 from quantfit.reproduce import (
     _canonical_receiving_path,
     _chat_template_policy,
@@ -110,7 +111,7 @@ def _nonempty(value: object) -> bool:
 
 
 def _protocol(
-    report: DriftReport, target: Target, raw: bytes, *, probe_corpus: ProbeCorpus | None = None
+    report: DriftReport, target: Target, raw: bytes, *, probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None
 ) -> dict[str, Any]:
     """Protocol/context common within one stratum; arm weight identities stay per-row."""
     _require(type(report.schema_version) is int and report.schema_version == 2, "invalid_report")
@@ -172,7 +173,7 @@ def _protocol_fields(
     chat_canonical: bool,
     greedy: bool | None,
     observed: bool = True,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> dict[str, Any]:
     """Shared native protocol fields; a pending capture is not a fabricated report."""
     judge = {key: judge.get(key) for key in ("id", "revision", "input_contract")}
@@ -189,13 +190,21 @@ def _protocol_fields(
             "unsupported_protocol",
         )
     else:
+        from quantfit.probe_bundle import LocalProbeCorpus, _admit_local_dataset, _dataset
+        from quantfit.safety.calibration_binding import _same_numbers
         from quantfit.safety.verify import _corpus
 
         source = _corpus(probe_corpus)
-        _require(
-            all(type(probes.get(k)) is str and probes[k] == getattr(source, k) for k in ("id", "revision", "split")),
-            "unexpected_probe_corpus",
-        )
+        if type(source) is LocalProbeCorpus:
+            admitted = _admit_local_dataset(probes)
+            _same_numbers(admitted, _dataset(source, admitted["n_probes"]), "expected local corpus")
+        else:
+            _require(
+                all(
+                    type(probes.get(k)) is str and probes[k] == getattr(source, k) for k in ("id", "revision", "split")
+                ),
+                "unexpected_probe_corpus",
+            )
     _require(type(probes.get("n_probes")) is int and probes["n_probes"] > 0, "unsupported_protocol")
     _require(
         type(decode.get("max_new_tokens")) is int and decode["max_new_tokens"] > 0 and chat_canonical,
@@ -289,7 +298,7 @@ def _summarize_held(
     manifest_path: str,
     reports_dir: str,
     _prepared: dict[str, DriftReport] | None = None,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> dict[str, object]:
     """Pure receiving core: source labels are never opened or resolved."""
     name, targets, control = _manifest(manifest_bytes)
@@ -495,7 +504,7 @@ def summarize_screen(
     calibrations_dir: str | None = None,
     calibration_variants: dict[str, str | None] | None = None,
     required_conditional_resolution_pp: float | None = None,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> dict[str, object]:
     """Hold once; annotate native resolution, or explicitly require its declared ceiling."""
     if calibration_variants is not None:

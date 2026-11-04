@@ -41,14 +41,15 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This branch targets the **unreleased 0.54.0 candidate**, adding private
-[full-population blinded annotation packets](docs/annotation-packets.md) from the
-original native blank/key/chunk manifest. Every part gets a fresh recipient page;
-unchanged native collection and separate calibration ingestion remain required.
-It also includes accepted but unreleased [0.53 pinned-corpus gates](docs/pinned-corpus-gates.md)
-and [0.52 selected-axis gates](docs/axis-effect-gates.md). The latest public release
-remains 0.51.0. No candidate availability, authenticated human judgment, new
-sensitivity evidence or scientific GO is implied.
+This branch targets the **unreleased 0.55.0 candidate**, adding private
+[whole local hash-pinned probe bundles](docs/offline-probe-bundles.md) to native
+verification, Inspect, gates, screens and offline saved receiving. The live path
+is separate from the complete raw-byte identity; all rows are held before model
+work. This includes accepted but unreleased [0.54 annotation packets](docs/annotation-packets.md),
+[0.53 pinned-corpus gates](docs/pinned-corpus-gates.md) and
+[0.52 selected-axis gates](docs/axis-effect-gates.md). The latest public release
+remains 0.51.0. Candidate source availability is not a public release, authenticated
+curation, sensitivity evidence or scientific GO.
 
 This README documents [quantfit 0.51.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.51.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
 

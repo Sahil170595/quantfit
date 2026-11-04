@@ -89,6 +89,7 @@ from dataclasses import InitVar, dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
+from quantfit.probe_bundle import LocalProbeCorpus
 from quantfit.torchrt import free_gpu, pick_device
 
 if TYPE_CHECKING:  # runtime import stays lazy (torch-adjacent module)
@@ -224,31 +225,48 @@ class ProbeCorpus:
             raise RuntimeError("invalid_probe_corpus") from None
 
 
-def _corpus(value: ProbeCorpus | None) -> ProbeCorpus:
+def _corpus(value: ProbeCorpus | LocalProbeCorpus | None) -> ProbeCorpus | LocalProbeCorpus:
     if value is None:
         return ProbeCorpus(PROBE_DATASET_ID, PROBE_DATASET_REVISION, PROBE_SPLIT)
-    if type(value) is not ProbeCorpus:
+    if type(value) not in (ProbeCorpus, LocalProbeCorpus):
         raise RuntimeError("invalid_probe_corpus")
     value.__post_init__()
     return value
 
 
-def _canonical_source(value: ProbeCorpus | None) -> bool:
-    return value is None or (value.id, value.revision, value.split) == (
-        PROBE_DATASET_ID,
-        PROBE_DATASET_REVISION,
-        PROBE_SPLIT,
+def _canonical_source(value: ProbeCorpus | LocalProbeCorpus | None) -> bool:
+    return (
+        value is None
+        or type(value) is ProbeCorpus
+        and (value.id, value.revision, value.split)
+        == (
+            PROBE_DATASET_ID,
+            PROBE_DATASET_REVISION,
+            PROBE_SPLIT,
+        )
     )
 
 
-def _source_kwargs(value: ProbeCorpus | None) -> dict:
+def _source_kwargs(value: ProbeCorpus | LocalProbeCorpus | None) -> dict:
     if value is not None:
         value = _corpus(value)
     return {} if _canonical_source(value) else {"probe_corpus": value}
 
 
-def _prepare_probes(token: str | None, probe_corpus: ProbeCorpus | None = None) -> tuple[ProbeCorpus, list[Probe]]:
+def _prepare_probes(
+    token: str | None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    *,
+    probe_bundle_path: str | None = None,
+) -> tuple[ProbeCorpus | LocalProbeCorpus, list[Probe]]:
     source = _corpus(probe_corpus)
+    if type(source) is LocalProbeCorpus:
+        from quantfit.probe_bundle import _load
+
+        probes, _ = _load(probe_bundle_path, source)
+        return source, probes
+    if probe_bundle_path is not None:
+        raise RuntimeError("invalid_probe_corpus_options")
     # Keep the existing default private adapter seam; custom sources are explicit.
     probes = _load_probes(token) if probe_corpus is None else _load_probes(token, probe_corpus=source)
     return source, probes
@@ -278,14 +296,14 @@ class SafetyDrift:
     overrefusal_regressions: int  # expected-safe: baseline complied, quant refused (usability drift)
     # per-zone refusal counts for transparency.
     by_zone: dict
-    _probe_corpus: InitVar[ProbeCorpus | None] = None
+    _probe_corpus: InitVar[ProbeCorpus | LocalProbeCorpus | None] = None
 
-    def __post_init__(self, _probe_corpus: ProbeCorpus | None) -> None:
+    def __post_init__(self, _probe_corpus: ProbeCorpus | LocalProbeCorpus | None) -> None:
         object.__setattr__(self, "_probe_corpus", _probe_corpus)
 
     @property
-    def probe_corpus(self) -> ProbeCorpus | None:
-        return cast(ProbeCorpus | None, object.__getattribute__(self, "_probe_corpus"))
+    def probe_corpus(self) -> ProbeCorpus | LocalProbeCorpus | None:
+        return cast(ProbeCorpus | LocalProbeCorpus | None, object.__getattribute__(self, "_probe_corpus"))
 
     @property
     def dangerous_at_risk(self) -> int:
@@ -416,18 +434,20 @@ def _admit_verify_options(
     baseline_model_id: str,
     quant_path: str,
     *,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
     baseline_revision: str | None = None,
     quant_revision: str | None = None,
     baseline_cache_dir: str | None = None,
     capture_path: str | None = None,
     max_new_tokens: int = 64,
     _execution_guard: object = None,
-) -> tuple[ProbeCorpus, bool]:
+) -> tuple[ProbeCorpus | LocalProbeCorpus, bool]:
     """The native local arm/config boundary, reusable before a held population load."""
     from quantfit.safety.gguf_arm import is_gguf_ref, validate_revision
 
     source = _corpus(probe_corpus)
+    if type(source) is LocalProbeCorpus and (type(max_new_tokens) is not int or max_new_tokens <= 0):
+        raise RuntimeError("invalid_local_probe_options")
     if _execution_guard is not None and not _canonical_source(source):
         raise RuntimeError("execution_recipe_mismatch")
     validate_revision(baseline_model_id, baseline_revision)
@@ -478,8 +498,10 @@ def verify_safety(
     quant_revision: str | None = None,
     _execution_guard: Callable[[ResolvedGguf, Path, int], None] | None = None,
     *,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    probe_bundle_path: str | None = None,
     _prepared_population=None,
+    _publication_outputs: tuple[str, ...] = (),
 ) -> SafetyDrift:
     """Compare refusal behavior of the unquantized baseline vs a quantized artifact.
 
@@ -521,7 +543,36 @@ def verify_safety(
         _execution_guard=_execution_guard,
     )
 
-    if _prepared_population is None:
+    held_bundle = None
+    local_inputs = local_outputs = ()
+    if type(source) is LocalProbeCorpus:
+        from quantfit.corpus_gate import _local_model_inputs
+        from quantfit.probe_bundle import _load, _paths
+
+        if type(_publication_outputs) is not tuple or any(type(p) is not str for p in _publication_outputs):
+            raise RuntimeError("invalid_probe_bundle_paths")
+        models = _local_model_inputs((baseline_model_id, quant_path))
+        local_outputs = tuple(p for p in (report_path, capture_path, *_publication_outputs) if p is not None)
+        if _prepared_population is None:
+            local_inputs = tuple(str(p) for p in (probe_bundle_path, *models) if p is not None)
+            _paths(local_inputs, local_outputs, baseline_cache_dir)
+            probes, held_bundle = _load(probe_bundle_path, source)
+        else:
+            from quantfit.probe_population import _PreparedPopulation
+
+            if type(_prepared_population) is not _PreparedPopulation or _prepared_population.source != source:
+                raise RuntimeError("invalid_prepared_probe_population")
+            held_bundle = _prepared_population.held_file
+            if held_bundle is None:
+                raise RuntimeError("invalid_prepared_probe_population")
+            held_bundle.check()
+            local_inputs = tuple(str(p) for p in (held_bundle.path, *models, *_prepared_population.publication_inputs))
+            local_outputs = (*local_outputs, *_prepared_population.publication_outputs)
+            _paths(local_inputs, local_outputs, baseline_cache_dir)
+            probes = _prepared_population.probes
+    elif probe_bundle_path is not None:
+        raise RuntimeError("invalid_probe_corpus_options")
+    elif _prepared_population is None:
         source, probes = _prepare_probes(token, probe_corpus)
     else:
         from quantfit.probe_population import _PreparedPopulation
@@ -550,18 +601,38 @@ def verify_safety(
             from quantfit.safety.report import ArmRun
 
             identity = gguf_arm.arm_identity(baseline_res)
-            key_facts = {
-                "probe_dataset_id": source.id,
-                "probe_dataset_revision": source.revision,
-                "probe_split": source.split,
-                "prompts": prompts,
-                "max_new_tokens": max_new_tokens,
-                "do_sample": False,
-                "chat_template_policy": DECODE_CHAT_TEMPLATE_POLICY,
-                "env": cache.environment_identity(),
-            }
-            cache_inputs = cache.fingerprint_inputs(identity, **key_facts)
-            fingerprint = cache.baseline_fingerprint(identity, **key_facts)
+            if type(source) is LocalProbeCorpus:
+                cache_inputs = cache._local_fingerprint_inputs(
+                    identity,
+                    source=source,
+                    prompts=prompts,
+                    max_new_tokens=max_new_tokens,
+                    do_sample=False,
+                    chat_template_policy=DECODE_CHAT_TEMPLATE_POLICY,
+                    env=cache.environment_identity(),
+                )
+                fingerprint = cache._digest(cache._DOMAIN_FINGERPRINT, cache_inputs)
+                assert held_bundle is not None
+                held_bundle.check()
+                cache._check_local_entry(
+                    held_bundle,
+                    cache.entry_path(baseline_cache_dir, fingerprint),
+                    inputs=local_inputs,
+                    outputs=local_outputs,
+                )
+            else:
+                key_facts = {
+                    "probe_dataset_id": source.id,
+                    "probe_dataset_revision": source.revision,
+                    "probe_split": source.split,
+                    "prompts": prompts,
+                    "max_new_tokens": max_new_tokens,
+                    "do_sample": False,
+                    "chat_template_policy": DECODE_CHAT_TEMPLATE_POLICY,
+                    "env": cache.environment_identity(),
+                }
+                cache_inputs = cache.fingerprint_inputs(identity, **key_facts)
+                fingerprint = cache.baseline_fingerprint(identity, **key_facts)
             # CacheError on a tampered entry. A served arm's engine records the hit, so the
             # report says the baseline was not generated by this run.
             cached = cache.load_served(baseline_cache_dir, fingerprint)
@@ -578,7 +649,25 @@ def verify_safety(
                 # store() re-derives the key and cross-checks the arm it is handed against
                 # the identity the key was built from — the pre-generation identity must equal
                 # the post-generation provenance, or nothing is written.
-                cache.store(baseline_cache_dir, cache_inputs, baseline_completions, baseline_arm)
+                if held_bundle is not None:
+                    held_bundle.check()
+                    cache._check_local_entry(
+                        held_bundle,
+                        cache.entry_path(baseline_cache_dir, fingerprint),
+                        inputs=local_inputs,
+                        outputs=local_outputs,
+                    )
+                cache.store(
+                    baseline_cache_dir,
+                    cache_inputs,
+                    baseline_completions,
+                    baseline_arm,
+                    **(
+                        {"_probe_bundle": held_bundle, "_probe_inputs": local_inputs, "_probe_outputs": local_outputs}
+                        if held_bundle is not None
+                        else {}
+                    ),
+                )
         guards = {"_execution_guard": _execution_guard} if _execution_guard is not None else {}
         quant_completions, quant_arm = gguf_arm.generate_completions(quant_res, prompts, max_new_tokens, **guards)
     else:
@@ -592,6 +681,9 @@ def verify_safety(
     quant_ref = flags[len(probes) :]
 
     drift = replace(_tabulate(probes, baseline_ref, quant_ref), _probe_corpus=source)
+    if held_bundle is not None:
+        held_bundle.check()
+        _paths(local_inputs, local_outputs, baseline_cache_dir)
     actual_report = None
     if report_path:
         actual_report = _write_report(
@@ -624,7 +716,10 @@ def verify_safety(
                 ),
             )
         except OSError as exc:
-            print(f"warning: capture not written to {capture_path}: {exc}")
+            if held_bundle is not None:
+                print("warning: private capture could not be written")
+            else:
+                print(f"warning: capture not written to {capture_path}: {exc}")
     return drift
 
 
@@ -676,7 +771,7 @@ def _write_report(
     judge_runtime_s: float,
     max_new_tokens: int,
     *,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> DriftReport:
     """Write and return the same observed report used by optional capture binding."""
     report = _make_report(drift, baseline, quantized, judge_runtime_s, max_new_tokens, **_source_kwargs(probe_corpus))
@@ -691,12 +786,13 @@ def _make_report(
     judge_runtime_s: float,
     max_new_tokens: int,
     *,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> DriftReport:
     """Assemble the schema-v2 report for one completed run."""
     from datetime import datetime, timezone
 
     import quantfit
+    from quantfit.probe_bundle import _dataset
     from quantfit.safety.report import SCHEMA_VERSION, DriftReport, environment_fingerprint
 
     source = _corpus(probe_corpus)
@@ -714,14 +810,7 @@ def _make_report(
             "card_xstest_accuracy": JUDGE_CARD_XSTEST_ACCURACY,
             "card_xstest_accuracy_label": label,
         },
-        probe_dataset={
-            "id": source.id,
-            "revision": source.revision,
-            "split": source.split,
-            # Sourced from the tabulation, not passed separately — one fact, one copy
-            # (a redundant parameter was a divergence channel between the two).
-            "n_probes": drift.n,
-        },
+        probe_dataset=_dataset(source, drift.n),
         decode={
             "max_new_tokens": max_new_tokens,
             "do_sample": False,
@@ -838,28 +927,18 @@ def _tabulate(probes: list[Probe], baseline_ref: list[bool], quant_ref: list[boo
     )
 
 
-def _load_probes(token: str | None, *, probe_corpus: ProbeCorpus | None = None) -> list[Probe]:
-    """Admit one entire pinned remote population before any model work.
-
-    Limits selected UTF-8 retention, not SDK downloads/parser/chunk memory.
-    A matching builder hash is module revision evidence, not external-data authentication.
-    """
-    source = _corpus(probe_corpus)
-    from datasets import load_dataset_builder
-
+def _admit_probe_rows(rows, *, closed: bool = False) -> list[Probe]:
     from quantfit.resolution import MAX_PROBES
 
     try:
-        builder = load_dataset_builder("hf://datasets/" + source.id, revision=source.revision, token=token)
-        if type(builder.hash) is not str or builder.hash != source.revision:
-            raise ValueError
-        dataset = builder.as_streaming_dataset(split=source.split).select_columns(
-            [PROBE_PROMPT_COLUMN, PROBE_ZONE_COLUMN, PROBE_EXPECTED_COLUMN]
-        )
         probes: list[Probe] = []
         total = 0
-        for row in dataset:
+        for row in rows:
             if len(probes) == MAX_PROBES:
+                raise ValueError
+            if closed and (
+                type(row) is not dict or set(row) != {PROBE_PROMPT_COLUMN, PROBE_ZONE_COLUMN, PROBE_EXPECTED_COLUMN}
+            ):
                 raise ValueError
             values = [row[key] for key in (PROBE_PROMPT_COLUMN, PROBE_ZONE_COLUMN, PROBE_EXPECTED_COLUMN)]
             if any(type(value) is not str for value in values):
@@ -879,6 +958,29 @@ def _load_probes(token: str | None, *, probe_corpus: ProbeCorpus | None = None) 
         if not probes:
             raise ValueError
         return probes
+    except Exception:  # noqa: BLE001 -- Refuse private row/iterator failures categorically.
+        raise RuntimeError("invalid_probe_corpus_population") from None
+
+
+def _load_probes(token: str | None, *, probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None) -> list[Probe]:
+    """Admit one entire pinned remote population before any model work.
+
+    Limits selected UTF-8 retention, not SDK downloads/parser/chunk memory.
+    A matching builder hash is module revision evidence, not external-data authentication.
+    """
+    source = _corpus(probe_corpus)
+    if not isinstance(source, ProbeCorpus):
+        raise RuntimeError("local_probe_bundle_requires_live_path")  # noqa: TRY004 -- Corpus admission is operational CLI2, not a programmer TypeError.
+    from datasets import load_dataset_builder
+
+    try:
+        builder = load_dataset_builder("hf://datasets/" + source.id, revision=source.revision, token=token)
+        if type(builder.hash) is not str or builder.hash != source.revision:
+            raise ValueError
+        dataset = builder.as_streaming_dataset(split=source.split).select_columns(
+            [PROBE_PROMPT_COLUMN, PROBE_ZONE_COLUMN, PROBE_EXPECTED_COLUMN]
+        )
+        return _admit_probe_rows(dataset)
     except Exception:  # noqa: BLE001 -- Refuse untrusted SDK/iterator failures without exposing their private text.
         raise RuntimeError("invalid_probe_corpus_population") from None
 

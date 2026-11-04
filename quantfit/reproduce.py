@@ -1060,7 +1060,20 @@ def _t1_same_measurement(ref: _View, cand: _View) -> dict:
     predicates: list[dict] = []
     absent_on_both: list[str] = []
 
-    for path in _T1_REPORT_FIELDS:
+    fields = _T1_REPORT_FIELDS
+    if any("source_kind" in view.raw["probe_dataset"] for view in (ref, cand)):
+        from quantfit.probe_bundle import _admit_local_dataset
+
+        for view in (ref, cand):
+            if "source_kind" in view.raw["probe_dataset"]:
+                try:
+                    _admit_local_dataset(view.raw["probe_dataset"])
+                except RuntimeError:
+                    raise ReproduceError("invalid local probe identity") from None
+        fields = tuple(p for p in fields if p[0] != "probe_dataset") + tuple(
+            ("probe_dataset", k) for k in ("source_kind", "format", "sha256", "n_probes")
+        )
+    for path in fields:
         dotted = ".".join(path)
         seen_ref, seen_cand = _dig(ref.raw, path), _dig(cand.raw, path)
         if not seen_ref[0] and not seen_cand[0]:
@@ -1606,6 +1619,10 @@ def _witnessed(ref: _View, cand: _View) -> dict:
     _, cand_policy, cand_canonical = _chat_template_policy(cand)
     template_comparable = ref_canonical and cand_canonical
     for factor, fields, detectable, covered_by in _DETECTION_TABLE:
+        if factor == "different probe set / split / size" and any(
+            "source_kind" in v.raw["probe_dataset"] for v in (ref, cand)
+        ):
+            fields = tuple("probe_dataset." + k for k in ("source_kind", "format", "sha256", "n_probes"))
         ref_values, cand_values, equal = {}, {}, None
         # `equal` is three-valued on purpose: False (the factor is visibly different),
         # True (visibly the same), None (the fields that would show it are absent-or-null
@@ -2583,6 +2600,8 @@ def _t0_identity(view: _View) -> tuple[dict, dict, str]:
     )
 
     raw = view.raw
+    if "source_kind" in raw["probe_dataset"]:
+        raise ReproduceError("T0 does not admit local probe bundles")
 
     def require(condition: bool, message: str) -> None:
         if not condition:

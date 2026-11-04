@@ -47,6 +47,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from quantfit.probe_bundle import LocalProbeCorpus
+
 if TYPE_CHECKING:
     from quantfit.safety.verify import ProbeCorpus
 
@@ -287,13 +289,16 @@ def run_screen(
     attempts: int = 1,
     junit_path: str | None = None,
     *,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    probe_bundle_path: str | None = None,
 ) -> dict:
     """Run every target in the manifest sequentially; aggregate per-stratum, per-axis bounds.
 
     Writes one schema-v2 DriftReport per completed target plus the screen summary
     (`<out_dir>/screen-summary.json`), and returns that summary.
     """
+    if probe_bundle_path is not None and probe_corpus is None:
+        raise ScreenError("invalid_probe_corpus_options")
     if probe_corpus is not None:
         from quantfit.screen_resume import run_resumed_screen
 
@@ -306,6 +311,7 @@ def run_screen(
             attempts=attempts,
             junit_path=junit_path,
             probe_corpus=probe_corpus,
+            probe_bundle_path=probe_bundle_path,
             _fresh=not resume,
         )
     if resume:

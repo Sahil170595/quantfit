@@ -53,3 +53,13 @@ Actual 5.0.1 metadata requires Hub>=0.25,<2; the existing application Hub>=0.25 
 ## Evidence boundary
 
 [Regenerable aggregate controls](../validation/2026-10-31-probe-corpus/README.md), native tests and installed original/rebuilt provenance gates use controlled SDK factories/fictional strings and synthetic generation/judging. Actual native Dataset/IterableDataset, Inspect pipeline, cache, report/capture/calibration/card and OS module entrypoint behavior are exercised. There is no actual Hub corpus download, real provider/model/judge inference, GPU/paid call, human review or scientific qualification. Raw captures, prompts, Inspect logs and temporary calibration inputs remain private and uncommitted.
+
+
+## Explicit local source — unreleased 0.55 candidate
+
+Private offline populations use the separate identity-only
+`LocalProbeCorpus(sha256)` and an explicitly supplied live bundle path. No local
+SHA is smuggled into the Hub ID/revision/split or inferred from hash length.
+See [whole local probe bundles](offline-probe-bundles.md) for exact raw/schema
+admission, full native identity propagation, offline saved receiving and limits.
+Existing Hub domains and historical source records above remain unchanged.

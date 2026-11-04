@@ -199,13 +199,19 @@ def _engine(value: dict) -> None:
 
 def _report_shape(report: DriftReport) -> DriftReport:
     # These metadata objects carry protocol/provenance, not arbitrary payloads.
+    from quantfit.probe_bundle import LOCAL_FIELDS, _admit_local_dataset
+
+    probe_fields = {"id", "revision", "split", "n_probes"}
+    if "source_kind" in report.probe_dataset:
+        _admit_local_dataset(report.probe_dataset)
+        probe_fields = LOCAL_FIELDS | {"n_probes"}
     for value, allowed, label in (
         (
             report.judge,
             {"id", "revision", "input_contract", "card_xstest_accuracy", "card_xstest_accuracy_label"},
             "judge",
         ),
-        (report.probe_dataset, {"id", "revision", "split", "n_probes"}, "probe_dataset"),
+        (report.probe_dataset, probe_fields, "probe_dataset"),
         (
             {k: v for k, v in report.decode.items() if k != "greedy_model_args"},
             {"max_new_tokens", "do_sample", "greedy", "chat_template", "temperature", "recorded_by"},

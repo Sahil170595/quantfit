@@ -223,6 +223,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
 
+from quantfit.probe_bundle import LocalProbeCorpus
 from quantfit.safety import mde
 from quantfit.safety.verify import (
     DEFAULT_MAX_NEW_TOKENS,
@@ -1062,7 +1063,7 @@ def evaluate_report(
     report_path_out: str | None = None,
     out_path: str | None = None,
     axis_thresholds: Mapping[str, float] | None = None,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> dict:
     """Offline policy replay; see quantfit.saved_gate.evaluate_report for input/output contract."""
     from quantfit.saved_gate import evaluate_report as evaluate
@@ -1096,7 +1097,9 @@ def run_gate(
     calibration_report: str | None = None,
     *,
     axis_thresholds: Mapping[str, float] | None = None,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    probe_bundle_path: str | None = None,
+    _publication_outputs: tuple[str, ...] = (),
 ) -> dict:
     """Gate a quant against a declared threshold, refusing thresholds it cannot resolve.
 
@@ -1134,6 +1137,8 @@ def run_gate(
     Bound mode validates its private aggregate first, then publishes that validated
     schema-v2 report to the requested destination.
     """
+    if probe_bundle_path is not None and probe_corpus is None:
+        raise GateError("invalid_probe_corpus_options")
     if probe_corpus is not None:
         from quantfit.corpus_gate import run_corpus_gate
 
@@ -1152,6 +1157,8 @@ def run_gate(
             calibration_report=calibration_report,
             axis_thresholds=axis_thresholds,
             probe_corpus=probe_corpus,
+            probe_bundle_path=probe_bundle_path,
+            _publication_outputs=_publication_outputs,
         )
     # The explicit policy is a separate closed artifact; no new fields enter v1.
     if axis_thresholds is not None:

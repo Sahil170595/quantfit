@@ -319,7 +319,7 @@ jobs:
           mypy --strict --follow-imports=silent quantfit/adjudication_record.py quantfit/safety/adjudication.py quantfit/screen_adjudication.py tools/ci_adjudication.py tools/ci_adjudication_verification.py tools/ci_screen_adjudication.py quantfit/safety/adjudication_review.py tools/ci_adjudication_review.py tools/ci_adjudication_review_browser.py
           mypy --strict --follow-imports=silent quantfit/screen_requirement.py tools/ci_screen_requirement.py
           mypy --strict --follow-imports=silent quantfit/axis_gate.py quantfit/gate_axis.py quantfit/axis_gate_live.py quantfit/axis_gate_receiving.py quantfit/axis_gate_junit.py quantfit/gate_receiving.py tools/ci_axis_gate.py tools/ci_axis_gate_record.py
-          mypy --strict --follow-imports=silent quantfit/probe_population.py quantfit/corpus_gate.py quantfit/corpus_gate_receiving.py tools/ci_corpus_gate.py tools/ci_corpus_gate_record.py
+          mypy --strict --follow-imports=silent quantfit/probe_population.py quantfit/corpus_gate.py quantfit/corpus_gate_receiving.py quantfit/probe_bundle.py tools/ci_corpus_gate.py tools/ci_corpus_gate_record.py tools/ci_probe_bundle.py tools/ci_probe_bundle_record.py
           quantfit audit
       - name: Verify and run actionlint
         run: |

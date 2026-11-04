@@ -242,6 +242,7 @@ from dataclasses import InitVar, dataclass, field, replace
 from typing import TYPE_CHECKING, Any, cast
 
 from quantfit.inspect_errors import InspectTaskError, _require
+from quantfit.probe_bundle import LocalProbeCorpus, _identity
 from quantfit.safety.verify import (
     ARM_BASELINE,
     ARM_QUANTIZED,
@@ -1348,7 +1349,8 @@ def write_drift_report(
     max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
     *,
     protected_inputs: tuple[str, ...] = (),
-    probe_corpus: ProbeCorpus | None = None,
+    _held_probe_bundle=None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> Path:
     """Emit this Inspect run as a schema-v2 `DriftReport` — the comparability deliverable.
 
@@ -1390,6 +1392,8 @@ def write_drift_report(
     from quantfit.safety import verify as verify_mod
     from quantfit.safety.report import DriftReport
 
+    if _held_probe_bundle is not None:
+        _held_probe_bundle.check()
     _corpus(probe_corpus)
     check_max_new_tokens(max_new_tokens)
     provider = check_run_arms(outcomes, baseline.model, quantized.model)
@@ -1424,6 +1428,8 @@ def write_drift_report(
             handle.flush()
             os.fsync(handle.fileno())
         check_report_output(path, inputs)  # Recheck after assembly, before atomic publication.
+        if _held_probe_bundle is not None:
+            _held_probe_bundle.check()
         os.replace(tmp_name, final)
     finally:
         # No-op after a successful replace (the temp name is gone); on any failure this is
@@ -1490,23 +1496,41 @@ def _samples_from_probes(probes: list[Probe]) -> list[Sample]:
     ]
 
 
-def qsr_samples(token: str | None = None, *, probe_corpus: ProbeCorpus | None = None) -> list[Sample]:
+def qsr_samples(
+    token: str | None = None,
+    *,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    probe_bundle_path: str | None = None,
+) -> list[Sample]:
     """One whole admitted population; expected is a declared label, not inferred from zone."""
-    _, probes = _prepare_probes(token, probe_corpus)
+    _, probes = _prepare_probes(
+        token, probe_corpus, **({"probe_bundle_path": probe_bundle_path} if probe_bundle_path is not None else {})
+    )
     return _samples_from_probes(probes)
 
 
-def _dataset_from_probes(source: ProbeCorpus, probes: list[Probe]) -> MemoryDataset:
+def _dataset_from_probes(source: ProbeCorpus | LocalProbeCorpus, probes: list[Probe]) -> MemoryDataset:
     return _inspect_api()["MemoryDataset"](
         samples=_samples_from_probes(probes),
-        name=f"{source.id}@{source.revision}",
-        location=f"{source.id}:{source.split}",
+        name=f"local:sha256:{source.sha256}"
+        if isinstance(source, LocalProbeCorpus)
+        else f"{source.id}@{source.revision}",
+        location="private-local-probe-bundle"
+        if isinstance(source, LocalProbeCorpus)
+        else f"{source.id}:{source.split}",
     )
 
 
-def qsr_dataset(token: str | None = None, *, probe_corpus: ProbeCorpus | None = None) -> MemoryDataset:
+def qsr_dataset(
+    token: str | None = None,
+    *,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    probe_bundle_path: str | None = None,
+) -> MemoryDataset:
     """The effective pinned source and all admitted samples, loaded exactly once."""
-    source, probes = _prepare_probes(token, probe_corpus)
+    source, probes = _prepare_probes(
+        token, probe_corpus, **({"probe_bundle_path": probe_bundle_path} if probe_bundle_path is not None else {})
+    )
     return _dataset_from_probes(source, probes)
 
 
@@ -1798,11 +1822,7 @@ def _registry() -> dict[str, Any]:
             metadata={
                 "conforms_to": CONFORMS_TO if _canonical_source(source) else None,
                 "judge": {"id": JUDGE_MODEL_ID, "revision": JUDGE_REVISION, "input_contract": JUDGE_INPUT_CONTRACT},
-                "probe_dataset": {
-                    "id": source.id,
-                    "revision": source.revision,
-                    "split": source.split,
-                },
+                "probe_dataset": _identity(source),
                 "decode": inspect_decode(provider, max_new_tokens),
                 "arms": {BASELINE_ROLE: baseline, QUANTIZED_ROLE: quantized},
                 # What each arm was actually BUILT with, after check_model_args refused the
@@ -1833,7 +1853,8 @@ def _registry() -> dict[str, Any]:
         judge_id: str = JUDGE_MODEL_ID,
         judge_revision: str = JUDGE_REVISION,
         *,
-        probe_corpus: ProbeCorpus | None = None,
+        probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+        probe_bundle_path: str | None = None,
     ):
         check_pins(probe_dataset_id, probe_dataset_revision, probe_split, judge_id, judge_revision)
         check_max_new_tokens(max_new_tokens)
@@ -1842,7 +1863,9 @@ def _registry() -> dict[str, Any]:
         provider = check_arms(baseline, quantized)
         check_model_args(provider, baseline_args)
         check_model_args(provider, quantized_args)
-        source, probes = _prepare_probes(token, probe_corpus)
+        source, probes = _prepare_probes(
+            token, probe_corpus, **({"probe_bundle_path": probe_bundle_path} if probe_bundle_path is not None else {})
+        )
         return prepared_task(
             baseline,
             quantized,
@@ -1960,7 +1983,8 @@ def qsr_paired_diff(
     judge_id: str = JUDGE_MODEL_ID,
     judge_revision: str = JUDGE_REVISION,
     *,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    probe_bundle_path: str | None = None,
 ) -> Task:
     """Build the QSR-conformant paired-diff `Task` for one baseline/quantized pair.
 
@@ -1997,6 +2021,7 @@ def qsr_paired_diff(
         judge_id=judge_id,
         judge_revision=judge_revision,
         **_source_kwargs(probe_corpus),
+        **({"probe_bundle_path": probe_bundle_path} if probe_bundle_path is not None else {}),
     )
 
 
@@ -2015,25 +2040,37 @@ class QsrRun:
     observed_arms: tuple[ArmRun, ArmRun] | None = None
     observation_receipt: dict | None = None
     protected_report_inputs: tuple[str, ...] = ()
-    _probe_corpus: InitVar[ProbeCorpus | None] = None
+    _probe_corpus: InitVar[ProbeCorpus | LocalProbeCorpus | None] = None
+    _held_probe_bundle: InitVar[Any] = None
 
-    def __post_init__(self, _probe_corpus: ProbeCorpus | None) -> None:
+    def __post_init__(self, _probe_corpus: ProbeCorpus | LocalProbeCorpus | None, _held_probe_bundle: Any) -> None:
         object.__setattr__(self, "_probe_corpus", _probe_corpus)
+        object.__setattr__(self, "_held_probe_bundle", _held_probe_bundle)
 
     @property
-    def probe_corpus(self) -> ProbeCorpus | None:
-        return cast(ProbeCorpus | None, object.__getattribute__(self, "_probe_corpus"))
+    def probe_corpus(self) -> ProbeCorpus | LocalProbeCorpus | None:
+        return cast(ProbeCorpus | LocalProbeCorpus | None, object.__getattribute__(self, "_probe_corpus"))
+
+    @property
+    def _bundle_state(self) -> Any:
+        return object.__getattribute__(self, "_held_probe_bundle")
 
     def write_report(self, path: str, baseline: ArmRun, quantized: ArmRun, max_new_tokens: int) -> Path:
         """Emit this run as a schema-v2 `DriftReport` (see `write_drift_report`)."""
+        if self._bundle_state is not None:
+            self._bundle_state.check()
         return write_drift_report(
             path,
             self.outcomes,
             baseline,
             quantized,
             max_new_tokens,
-            protected_inputs=self.protected_report_inputs,
+            protected_inputs=(
+                *self.protected_report_inputs,
+                *((str(self._bundle_state.path),) if self._bundle_state is not None else ()),
+            ),
             **_source_kwargs(self.probe_corpus),
+            **({"_held_probe_bundle": self._bundle_state} if self._bundle_state is not None else {}),
         )
 
 
@@ -2047,7 +2084,8 @@ def qsr_eval(
     hf_revisions: tuple[str, str] | None = None,
     gguf_revisions: tuple[str | None, str | None] | None = None,
     *,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    probe_bundle_path: str | None = None,
     **eval_args: Any,
 ) -> QsrRun:
     """Build the QSR task AND run it — the supported entry point, and the enforcement layer.
@@ -2103,7 +2141,23 @@ def qsr_eval(
             _validate_source(spec, pin)
     if hf_revisions is not None or gguf_revisions is not None:
         _require(passthrough.get("max_samples", 1) == 1, "observed runner requires max_samples=1")
-    source, probes = _prepare_probes(token, probe_corpus)
+    local_run_options = {}
+    source = _corpus(probe_corpus)
+    if isinstance(source, LocalProbeCorpus):
+        from quantfit.probe_bundle import _load, _paths, _roots
+
+        if probe_bundle_path is None:
+            raise InspectTaskError("local_probe_bundle_requires_live_path")
+        _paths((probe_bundle_path, *local_gguf_inputs((baseline, quantized))), ())
+        log_root = passthrough.get("log_dir")
+        if log_root is not None:
+            _roots((probe_bundle_path, *local_gguf_inputs((baseline, quantized))), (log_root,))
+        probes, held_bundle = _load(probe_bundle_path, source)
+        local_run_options = {"held_source": held_bundle}
+    else:
+        if probe_bundle_path is not None:
+            raise RuntimeError("invalid_probe_corpus_options")
+        source, probes = _prepare_probes(token, probe_corpus)
     api = _inspect_api()
 
     def build(observer=None):
@@ -2136,7 +2190,17 @@ def qsr_eval(
         try:
             observer = GgufRunObserver((baseline, quantized), gguf_revisions, api["get_model"], token)
             task_obj = build(observer)
-            return _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer, probe_corpus=source)
+            return _eval_task(
+                api,
+                task_obj,
+                passthrough,
+                baseline,
+                quantized,
+                token,
+                observer,
+                probe_corpus=source,
+                **local_run_options,
+            )
         finally:
             try:
                 if observer is not None:
@@ -2148,7 +2212,9 @@ def qsr_eval(
     # supplied ArmRun route. No unsafe args enter check_model_args's allowlist.
     if hf_revisions is None:
         task_obj = build()
-        return _eval_task(api, task_obj, passthrough, baseline, quantized, token, probe_corpus=source)
+        return _eval_task(
+            api, task_obj, passthrough, baseline, quantized, token, probe_corpus=source, **local_run_options
+        )
 
     from quantfit.inspect_hf import RUN_LOCK, HfRunObserver
 
@@ -2165,17 +2231,32 @@ def qsr_eval(
     try:
         observer = HfRunObserver((baseline, quantized), hf_revisions, api["get_model"], token)
         task_obj = build(observer)
-        return _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer, probe_corpus=source)
+        return _eval_task(
+            api, task_obj, passthrough, baseline, quantized, token, observer, probe_corpus=source, **local_run_options
+        )
     finally:
         if observer is not None:
             observer.close()
         RUN_LOCK.release()
 
 
-def _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer=None, *, probe_corpus=None) -> QsrRun:
+def _eval_task(
+    api,
+    task_obj,
+    passthrough,
+    baseline,
+    quantized,
+    token,
+    observer=None,
+    *,
+    probe_corpus=None,
+    held_source=None,
+) -> QsrRun:
     """Shared complete-corpus generation / one judge batch / scoring pipeline."""
     from quantfit.safety import verify as verify_mod
 
+    if held_source is not None:
+        held_source.check()
     n_probes = len(task_obj.dataset)
 
     logs = api["eval"](task_obj, score=False, **passthrough)
@@ -2215,6 +2296,8 @@ def _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer=
         "over fewer probes than the instrument has (QSR v0 §2.6, §4.4).",
     )
     check_run_arms(outcomes, baseline, quantized)
+    if held_source is not None:
+        held_source.check()
     return QsrRun(
         log=scored,
         outcomes=outcomes,
@@ -2227,6 +2310,7 @@ def _eval_task(api, task_obj, passthrough, baseline, quantized, token, observer=
         protected_report_inputs=observer.report_inputs()
         if observer is not None and hasattr(observer, "report_inputs")
         else (),
+        _held_probe_bundle=held_source,
     )
 
 
