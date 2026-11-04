@@ -46,7 +46,10 @@ def record_actual(tmp_path, entry, generated, code=None):
         (tmp_path / "actual-publication-counts.json").write_text(json.dumps(record), encoding="utf-8")
 
 
-def test_nonconflicting_native_cache_and_report_positive(pair, tmp_path):
+def test_nonconflicting_native_cache_and_report_positive(pair, tmp_path, monkeypatch):
+    from quantfit.safety import report as native_report
+
+    monkeypatch.setattr(native_report, "environment_fingerprint", lambda: dict(cache_fixtures._ENV))
     baseline, quant, generated, folder = pair
     source, path, entry = actual_entry(pair, tmp_path)
     report = tmp_path / "report.json"
