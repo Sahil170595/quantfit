@@ -412,48 +412,19 @@ class SafetyDrift:
         )
 
 
-def verify_safety(
+def _admit_verify_options(
     baseline_model_id: str,
     quant_path: str,
-    token: str | None = None,
-    max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
-    report_path: str | None = None,
-    capture_path: str | None = None,
-    baseline_cache_dir: str | None = None,
-    baseline_revision: str | None = None,
-    quant_revision: str | None = None,
-    _execution_guard: Callable[[ResolvedGguf, Path, int], None] | None = None,
     *,
     probe_corpus: ProbeCorpus | None = None,
-) -> SafetyDrift:
-    """Compare refusal behavior of the unquantized baseline vs a quantized artifact.
-
-    Arms are either both transformers (HF ids / local dirs) or both GGUF
-    (*.gguf paths or hf:<org>/<repo>/<file>.gguf) — GGUF pairs run under the
-    identical pinned llama.cpp binary on CPU, which is what lets an F16
-    baseline exceed VRAM. Mixing the two is refused: that diff would measure
-    engine + quantization at once (a deployment delta), never pooled with a
-    quantization diff.
-
-    With `report_path`, also writes the run as a schema-v2 `DriftReport` (JSON):
-    revision pins, resolved precisions, per-arm engine provenance, env
-    fingerprint, per-arm runtimes.
-
-    With `capture_path`, also writes every completion to a local JSONL file
-    (`CAPTURE_SCHEMA`) — the raw material judge calibration labels from. Opt-in
-    and off by default; see the module docstring for why completions are absent
-    from the report and what the capture may not be used for. A capture that
-    cannot be written warns and is skipped: it never costs the run its result.
-
-    With `baseline_cache_dir` (GGUF pairs only), the baseline arm's completions are served
-    from `safety/cache.py` when an entry for this exact arm, environment, probe set and decode
-    exists, and stored after generation when it does not. The key is derived from the arm's
-    identity BEFORE any server starts (`gguf_arm.arm_identity`), so a hit skips the baseline
-    generation entirely. A hit changes no measured number. The report records it: the baseline
-    arm's `engine` gains `cache.SERVED_ENGINE_KEY`, and its `runtime_s` is the stored
-    generation's. Budgets assume zero hits (`cache.BUDGET_RULE`). Entries hold completion
-    text and are local-only.
-    """
+    baseline_revision: str | None = None,
+    quant_revision: str | None = None,
+    baseline_cache_dir: str | None = None,
+    capture_path: str | None = None,
+    max_new_tokens: int = 64,
+    _execution_guard: object = None,
+) -> tuple[ProbeCorpus, bool]:
+    """The native local arm/config boundary, reusable before a held population load."""
     from quantfit.safety.gguf_arm import is_gguf_ref, validate_revision
 
     source = _corpus(probe_corpus)
@@ -492,7 +463,72 @@ def verify_safety(
             "generation. Drop --baseline-cache for this pair."
         )
 
-    source, probes = _prepare_probes(token, probe_corpus)
+    return source, baseline_gguf
+
+
+def verify_safety(
+    baseline_model_id: str,
+    quant_path: str,
+    token: str | None = None,
+    max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
+    report_path: str | None = None,
+    capture_path: str | None = None,
+    baseline_cache_dir: str | None = None,
+    baseline_revision: str | None = None,
+    quant_revision: str | None = None,
+    _execution_guard: Callable[[ResolvedGguf, Path, int], None] | None = None,
+    *,
+    probe_corpus: ProbeCorpus | None = None,
+    _prepared_population=None,
+) -> SafetyDrift:
+    """Compare refusal behavior of the unquantized baseline vs a quantized artifact.
+
+    Arms are either both transformers (HF ids / local dirs) or both GGUF
+    (*.gguf paths or hf:<org>/<repo>/<file>.gguf) — GGUF pairs run under the
+    identical pinned llama.cpp binary on CPU, which is what lets an F16
+    baseline exceed VRAM. Mixing the two is refused: that diff would measure
+    engine + quantization at once (a deployment delta), never pooled with a
+    quantization diff.
+
+    With `report_path`, also writes the run as a schema-v2 `DriftReport` (JSON):
+    revision pins, resolved precisions, per-arm engine provenance, env
+    fingerprint, per-arm runtimes.
+
+    With `capture_path`, also writes every completion to a local JSONL file
+    (`CAPTURE_SCHEMA`) — the raw material judge calibration labels from. Opt-in
+    and off by default; see the module docstring for why completions are absent
+    from the report and what the capture may not be used for. A capture that
+    cannot be written warns and is skipped: it never costs the run its result.
+
+    With `baseline_cache_dir` (GGUF pairs only), the baseline arm's completions are served
+    from `safety/cache.py` when an entry for this exact arm, environment, probe set and decode
+    exists, and stored after generation when it does not. The key is derived from the arm's
+    identity BEFORE any server starts (`gguf_arm.arm_identity`), so a hit skips the baseline
+    generation entirely. A hit changes no measured number. The report records it: the baseline
+    arm's `engine` gains `cache.SERVED_ENGINE_KEY`, and its `runtime_s` is the stored
+    generation's. Budgets assume zero hits (`cache.BUDGET_RULE`). Entries hold completion
+    text and are local-only.
+    """
+    source, baseline_gguf = _admit_verify_options(
+        baseline_model_id,
+        quant_path,
+        probe_corpus=probe_corpus,
+        baseline_revision=baseline_revision,
+        quant_revision=quant_revision,
+        baseline_cache_dir=baseline_cache_dir,
+        capture_path=capture_path,
+        max_new_tokens=max_new_tokens,
+        _execution_guard=_execution_guard,
+    )
+
+    if _prepared_population is None:
+        source, probes = _prepare_probes(token, probe_corpus)
+    else:
+        from quantfit.probe_population import _PreparedPopulation
+
+        if type(_prepared_population) is not _PreparedPopulation or _prepared_population.source != source:
+            raise RuntimeError("invalid_prepared_probe_population")
+        probes = _prepared_population.probes
     if _execution_guard is not None and len(probes) != 40:
         raise RuntimeError("execution_recipe_mismatch")
     prompts = [p.prompt for p in probes]

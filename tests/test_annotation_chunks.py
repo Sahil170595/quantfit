@@ -1,13 +1,17 @@
 """Complete private partition/return workflow; no manufactured human-truth claim."""
 
+import importlib.util
 import json
 from pathlib import Path
 
 import pytest
 
-from tools.ci_label_review import fixture, read_rows, write_rows
-
 ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location("annotation_chunk_label_fixture", ROOT / "tools/ci_label_review.py")
+assert SPEC is not None and SPEC.loader is not None
+HELPER = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(HELPER)
+fixture, read_rows, write_rows = HELPER.fixture, HELPER.read_rows, HELPER.write_rows
 
 
 def source(tmp_path):

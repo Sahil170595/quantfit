@@ -3,9 +3,8 @@
 # Every field below is copied from a file in this repository, named in the comment
 # above it. Nothing here is remembered, inferred, or filled in to look complete.
 #
-# Release metadata: date-released is supplied by the authorized release cut
-# and matches this software version's dated entry in CHANGELOG.md. The date
-# is quoted to preserve a string under both supported YAML readers.
+# This software candidate is unreleased; date-released is deliberately omitted.
+# An authorized release cut may add its actual quoted date from CHANGELOG.md.
 #
 # The following reference remains omitted deliberately:
 #
@@ -46,8 +45,7 @@ authors:
 # The actual version field matches pyproject.toml and quantfit/__init__.py.
 # tests/test_meta.py already pins those two to each other; tests/test_refreports.py
 # pins this line to both, so the citation cannot drift from what the tool ships.
-version: "0.51.0"
-date-released: "2026-11-01"
+version: "0.54.0"
 
 # pyproject.toml `license = "Apache-2.0"` (PEP 639 SPDX expression); LICENSE is Apache 2.0.
 license: "Apache-2.0"

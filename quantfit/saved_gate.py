@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from quantfit.gate import (
@@ -22,7 +23,7 @@ from quantfit.gate import (
 )
 
 
-def validate_replay_outputs(inputs, outputs):
+def validate_replay_outputs(inputs: Sequence[str | Path | None], outputs: Sequence[str | Path | None]) -> None:
     """Refuse direct, canonical and same-file aliases before publishing any output."""
     sources = [Path(path).resolve() for path in inputs if path is not None]
     destinations = [Path(path).resolve() for path in outputs if path is not None]
@@ -44,6 +45,8 @@ def evaluate_report(
     calibration_report: str | None = None,
     report_path_out: str | None = None,
     out_path: str | None = None,
+    axis_thresholds: Mapping[str, float] | None = None,
+    probe_corpus=None,
 ) -> dict:
     """Re-evaluate a saved aggregate under native gate policy, without new inference.
 
@@ -51,6 +54,22 @@ def evaluate_report(
     precedes observed-count evaluation; pre_run labels that policy phase only.
     Recorded scope is checkable, not fresh authentication of the host or labels.
     """
+    if probe_corpus is not None:
+        from quantfit.corpus_gate import evaluate_corpus_report
+
+        return evaluate_corpus_report(
+            source_path,
+            threshold=threshold,
+            tier=tier,
+            eps_upper=eps_upper,
+            eps_source=eps_source,
+            calibration_report=calibration_report,
+            report_path_out=report_path_out,
+            out_path=out_path,
+            axis_thresholds=axis_thresholds,
+            probe_corpus=probe_corpus,
+        )
+
     import hashlib
 
     from quantfit.bundle import _json, _read, _report
@@ -58,6 +77,11 @@ def evaluate_report(
     from quantfit.safety.calibrated_gate import calibration_epsilon
     from quantfit.safety.calibration_binding import MAX_CALIBRATION_BYTES, load_bound_calibration_bytes
 
+    policy = None
+    if axis_thresholds is not None:
+        from quantfit.axis_gate import admit_thresholds
+
+        policy = admit_thresholds(axis_thresholds, threshold, tier)
     validate_replay_outputs([source_path, calibration_report], [report_path_out, out_path])
     try:
         raw = _read(Path(source_path), MAX_REPORT_BYTES)
@@ -84,7 +108,12 @@ def evaluate_report(
             and decode.get("temperature", 0) == 0,
             "saved-report gate requires the recorded greedy decode contract",
         )
-        threshold_value, tier_row, declared_as = _declared(threshold, tier)
+        if policy is None:
+            threshold_value, tier_row, declared_as = _declared(threshold, tier)
+        else:
+            from quantfit.axis_gate import canonical_report
+
+            canonical_report(report)
         if calibration_report is None:
             eps = _eps(eps_upper, eps_source)
         else:
@@ -96,6 +125,25 @@ def evaluate_report(
             _json(cal_raw)
             bound = load_bound_calibration_bytes(cal_raw, report=report)
             eps = calibration_epsilon(bound, saved_report=True)
+        if policy is not None:
+            from quantfit.axis_gate import decision as axis_decision
+
+            decision = axis_decision(
+                baseline=report.baseline.model,
+                quant=report.quantized.model,
+                policy=policy,
+                eps=eps,
+                max_new_tokens=max_tokens,
+                report_path=report_path_out or source_path,
+                drift=report.drift,
+                report_sha256=hashlib.sha256(raw).hexdigest(),
+            )
+            validate_replay_outputs([source_path, calibration_report], [report_path_out, out_path])
+            if report_path_out is not None:
+                Path(report_path_out).write_bytes(raw)
+            if out_path is not None:
+                _write(out_path, decision)
+            return decision
         best = _block(eps, SHIPPED_EXPECTED_UNSAFE_N)
         pre = _resolution(STAGE_PRE_RUN, threshold_value, best, eps, SHIPPED_EXPECTED_UNSAFE_N)
         options = (

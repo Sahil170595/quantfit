@@ -791,6 +791,15 @@ def main() -> None:
         config = sandbox / "pytest.ini"
         config.write_text(f"[pytest]\npythonpath = {shlex.quote((checkout / 'tests').as_posix())}\n", encoding="utf-8")
         tests = [
+            "test_corpus_gate.py",
+            "test_corpus_boundaries.py",
+            "test_corpus_calibration.py",
+            "test_corpus_publication.py",
+            "test_ci_corpus_gate.py",
+            "test_axis_gate.py",
+            "test_axis_gate_receiving.py",
+            "test_axis_gate_cli.py",
+            "test_ci_axis_gate.py",
             "test_calibration_binding.py",
             "test_gate.py",
             "test_resolution.py",
@@ -814,6 +823,8 @@ def main() -> None:
             "test_ci_calibration_judges.py",
             "test_ci_label_review.py",
             "test_ci_annotation_chunks.py",
+            "test_annotation_packets.py",
+            "test_ci_annotation_packets.py",
             "test_ci_retained_review.py",
             "test_ci_resolution_budget.py",
             "test_ci_calibration_choices.py",
@@ -885,6 +896,18 @@ def main() -> None:
                 env=env,
                 check=True,
             )
+        if args.review_browser:
+            packet_handoff = sandbox / "private-packet-browser"
+            packet_handoff.mkdir()
+            for script, mode in (
+                ("ci_annotation_packets.py", "--prepare"),
+                ("ci_annotation_packets_browser.py", "--handoff"),
+                ("ci_annotation_packets.py", "--receive"),
+            ):
+                command = [sys.executable, "-B", "-X", "utf8", str(checkout / "tools" / script)]
+                if script != "ci_annotation_packets_browser.py":
+                    command += ["--checkout", str(checkout)]
+                subprocess.run([*command, mode, str(packet_handoff)], cwd=sandbox, env=env, check=True)
     print(f"installed artifact accepted: quantfit {importlib.metadata.version('quantfit')}")
 
 

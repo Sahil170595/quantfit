@@ -8,6 +8,31 @@ capture-backed retained review, finite-grid budgets, calibration-choice sensitiv
 and source-bound flip adjudication.
 Software versions do not establish roadmap or scientific GO.
 
+The accepted **unreleased 0.53.0 source work** additionally accepts the
+same all-or-none `--probe-dataset ID --probe-revision FULL40 --probe-split SPLIT`
+on live/saved `gate`, `screen`/`--resume` and offline `screen-summary`.
+[The complete API/CLI/profile contract](pinned-corpus-gates.md) describes flat gate3
+with native decision discriminator1/2 and closed source census, live summary2,
+saved summary2, one held population and strict offline receiving. Default `None`
+paths retain their prior shapes. Thresholds remain native resolution targets;
+unknown/missing rows, control conditionality and human-verification limits stay.
+Published installation commands below remain 0.51.0, not an assumed candidate tag.
+
+The current **unreleased 0.54.0 source candidate** adds private full-population
+blinded recipient pages, distinct from the flagged-pair adjudication review page:
+
+```bash
+mkdir private-recipient-pages
+quantfit calibrate chunks packets --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --out-dir private-recipient-pages --json
+```
+
+All four paths are explicit and required; `--json` returns only counts/hashes.
+The existing empty output directory receives one `part-NNNN.annotation.html` per
+original native part. Keep the key/manifest/capture private and separate; do not
+send them with a page. [The complete SDK/CLI, byte-bound and trust contract](annotation-packets.md)
+explains native collection/ingestion, explicit labels and the unchanged narrow
+sharing permission. This is no automatic labeling, sharing or calibration.
+
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,
 deadline/cleanup and 0/3/2 semantics are in [GGUF verification](gguf-verification.md).
@@ -569,6 +594,19 @@ contradictory historical verdicts are refused rather than silently repaired.
 
 ## Gate a release
 
+The threshold/tier examples in this section retain legacy dangerous-only gate
+schema 1. The unreleased 0.52.0 candidate also accepts a mutually exclusive,
+repeatable selected-axis policy:
+
+```bash
+quantfit gate --from-report drift.json --axis-threshold refusal-robustness=30 --axis-threshold over-refusal=15 --out selected.json --junit selected.xml --json
+```
+
+Use one or both exact hyphenated labels; values are detectable-effect resolution
+targets in percentage points `(0,30]`, not maximum observed rates. Selected axes
+use native MDE/detection at their own denominators, then 3 > 4 > 5 > 0. API rates
+are `(0,0.30]`. See [receiving, JUnit and limits](axis-effect-gates.md).
+
 ```bash
 quantfit gate --baseline Qwen/Qwen2.5-1.5B-Instruct --quant ./out \
   --tier smoke --max-new-tokens 64 --token "$HF_TOKEN" \
@@ -605,7 +643,7 @@ Bound runs validate a private aggregate before publishing `--report`; shared out
 are never the provenance oracle. The calibration input must differ from report/decision
 outputs, including same-file aliases.
 
-`--junit` renders the gate as three cases rather than one. **Exit 5 fails as a refusal, not
+In the legacy threshold/tier mode, `--junit` renders three cases rather than one. **Exit 5 fails as a refusal, not
 as a breached threshold** — "I cannot resolve what you asked" and "you failed what you
 asked" are different facts that would otherwise share a colour and a message. The ungated
 over-refusal axis gets its own case: a regression there never fails the build, because the

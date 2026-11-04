@@ -45,6 +45,11 @@ partway leaves the targets that ran, marked incomplete.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from quantfit.safety.verify import ProbeCorpus
+
 import json
 import re
 from dataclasses import dataclass
@@ -281,12 +286,28 @@ def run_screen(
     resume: bool = False,
     attempts: int = 1,
     junit_path: str | None = None,
+    *,
+    probe_corpus: ProbeCorpus | None = None,
 ) -> dict:
     """Run every target in the manifest sequentially; aggregate per-stratum, per-axis bounds.
 
     Writes one schema-v2 DriftReport per completed target plus the screen summary
     (`<out_dir>/screen-summary.json`), and returns that summary.
     """
+    if probe_corpus is not None:
+        from quantfit.screen_resume import run_resumed_screen
+
+        return run_resumed_screen(
+            manifest_path,
+            out_dir,
+            token=token,
+            max_new_tokens=max_new_tokens,
+            capture_dir=capture_dir,
+            attempts=attempts,
+            junit_path=junit_path,
+            probe_corpus=probe_corpus,
+            _fresh=not resume,
+        )
     if resume:
         from quantfit.screen_resume import run_resumed_screen
 

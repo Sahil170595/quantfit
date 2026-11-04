@@ -430,6 +430,13 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+### Selected-axis effect gates (unreleased 0.52.0 source candidate, 2026-11-02)
+
+| Flag surface | Command | Bounded source behavior | Evidence and limits |
+|---|---|---|---|
+| `--axis-threshold` | gate | Repeat 1..2 exact native axes with PP resolution targets; same native MDE/detection, complete selected 3 > 4 > 5 > 0, strict opted gate-v2 and per-axis/overall JUnit. Legacy threshold/tier remains. | `tests/test_axis_gate.py`; `tests/test_axis_gate_receiving.py`; `tests/test_axis_gate_cli.py`; `tests/test_ci_axis_gate.py`; `validation/2026-11-02-axis-effect-gates/`; synthetic native counts/API/actual controlled OSCLI, not model execution, human truth, sensitivity, joint error guarantee or scientific GO. Installed/hosted qualification is separate. |
+
+
 ### Whole-target adjudication screen (0.48.0; source controls 2026-10-31)
 
 The regenerable native editable-source record in
@@ -660,9 +667,10 @@ qualification remains pending for this candidate.
 | `--review` / `--preparation` / `--out` / `--json` | adjudicate review-page (since 0.50) | Actual blank/preparation consistency; all selected rows/private escaped source strings; bounded whole export; fixed native triplets; no source or human authentication. | `tests/test_adjudication_review.py`; `validation/2026-10-31-adjudication-review/`; actual hosted browser separate |
 
 
-| `--probe-dataset` | verify-safety, inspect-run (since 0.51) | Declared namespaced remote-only source; whole software-fixture population admitted before any observer/model. No real alternative corpus/model qualification. | `tests/test_probe_corpus.py`; `validation/2026-10-31-probe-corpus/` |
-| `--probe-revision` | verify-safety, inspect-run (since 0.51) | Exact 40 lowercase-hex requested and resolved builder hash; no cached auto fallback. | Native loader fixtures, same-ID changed revision noncanonical |
-| `--probe-split` | verify-safety, inspect-run (since 0.51) | One literal whole named split; no union/slice/all; actual source propagated into all outputs/cache. | Native source/cache/Inspect fixtures; no curation/authenticity claim |
+| `--probe-dataset` | verify-safety, inspect-run (since 0.51); gate/screen/screen-summary (0.53 candidate) | Declared namespaced remote-only source; whole software-fixture population admitted before any observer/model. No real alternative corpus/model qualification. | `tests/test_probe_corpus.py`; `validation/2026-10-31-probe-corpus/`; new controlled native policy/receiving/OSCLI evidence in `validation/2026-11-02-pinned-corpus-gates/` |
+| `--probe-revision` | verify-safety, inspect-run (since 0.51); gate/screen/screen-summary (0.53 candidate) | Exact 40 lowercase-hex requested and resolved builder hash; no cached auto fallback. | Native loader fixtures, same-ID changed revision noncanonical |
+| `--probe-split` | verify-safety, inspect-run (since 0.51); gate/screen/screen-summary (0.53 candidate) | One literal whole named split; no union/slice/all; actual source propagated into all outputs/cache. | Native source/cache/Inspect fixtures; no curation/authenticity claim |
+| Explicit pinned-corpus gate/screen profile | gate, screen, screen-summary (0.53 candidate) | Actual expected-label census drives unchanged native resolution; one held population across targets/retries; saved/complete resume is offline under the explicit triple. Flat gate-v3 and summary-v2 carry typed source/census context. | `tests/test_corpus_gate.py`, `tests/test_corpus_boundaries.py`, `tests/test_corpus_calibration.py`, `tests/test_corpus_publication.py`, `tests/test_ci_corpus_gate.py`; `validation/2026-11-02-pinned-corpus-gates/functional-b.json` records the current controlled native API and seven OS CLI calls. No real Hub/model, remote completeness/authentication, transferred sensitivity or scientific GO; current installed/hosted qualification is separate. |
 
 ## 4. Advertised-but-unevidenced claims found while writing this
 
@@ -866,3 +874,11 @@ exist to catch. Sources, in the order they were consulted: `CHANGELOG.md` (all s
 `^def test_` per file). The `plan` run and the torch measurement in §5 were performed
 while writing it; nothing else here is a new run, and no row was upgraded on the
 strength of code review alone.
+
+
+### Blinded annotation packet source candidate (2026-11-02, unreleased 0.54.0)
+
+| Surface | Command | Scope and boundary | Evidence |
+| --- | --- | --- | --- |
+| `--sheet` / `--key` / `--manifest` / `--out-dir` / `--json` | calibrate chunks packets | All required, original held native blank/key/stored-version manifest; every part receives a fresh private page in an existing empty directory. No new labels, sharing authority or population selection. Worst complete returned CSV/full-sheet budgets and page/aggregate caps before publication. | `tests/test_annotation_packets.py`; `tests/test_ci_annotation_packets.py`; `validation/2026-11-02-annotation-packets/` controlled API/OS CLI/native receiving; hosted/installed qualification separate. |
+| Explicit recipient choices | Private offline page | Blank/refusal/compliance/unusable; frozen ID/string export, exact CSV, no hidden unblinding fields/network/storage. Unchanged complete native collection and separate schema2/schema3 ingestion. No human/source authentication or science claim. | Source controls and two hosted Linux installed browser profiles; no local browser. |

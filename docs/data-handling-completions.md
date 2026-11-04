@@ -391,3 +391,24 @@ annotator is asked at all — belongs to the 0.6 GO, not to this document.
 The explicitly requested `adjudicate review-page` output contains the protected completion strings from the supplied private blank queue. ASCII/less-than escaping is safe transport, not redaction. Keep `*.adjudication.html` and downloaded `*.adjudication.csv` under the same private handling as their source capture; never commit, attach, upload or record browser screenshots/traces/video. The narrow ignore is only an accidental-add backstop, not confidentiality. Product stdout is a bounded aggregate/hash receipt. Hosted fictional browser fixtures persist only inside the parent-owned private temporary handoff until native receiving finishes, with no private artifact upload.
 
 The page has no requests, remote assets, storage or automatic judgments. Its six frozen source strings remain authoritative for byte-preserving export even after display DOM changes. Both labels/class are explicit unauthenticated operator declarations; unchanged apply with actual report/capture and the original preparation remains the source authority. Functional validation is synthetic software evidence, not real human reading, source authenticity or scientific clearance.
+
+
+## 2026-11-02 source addendum: blinded annotation packets (unreleased 0.54)
+
+`calibrate chunks packets` locally produces every original blinded native part,
+including concordant pairs. Each `*.annotation.html` holds only that part's
+opaque IDs, exact completion strings and initially blank explicit choices. The
+original key/salt/capture/unblinding manifest stay with the maintainer and must
+never accompany a recipient page. All pages and filled `*.labels.csv` are as
+private as the source capture: no commits, issue/PR attachments, browser media,
+traces/video, uploads or onward sharing. The narrow ignore grants no protection
+against intentional publication.
+
+This does **not** expand the existing one named second-annotator / explicitly
+approved subsample carve-out or terminal retention/deletion policy above. Full
+local 2N production is not permission to share all rows. Keep the original blank,
+key and manifest separate for native complete collection; extraction and
+schema-3 ingestion remain separate explicit steps. Page choices and hashes do
+not authenticate a person, source, label truth or independence. Software-only
+fictional hosted fixtures must remain in their parent-owned private handoff until
+native receiving closes; only aggregate logs may leave that handoff.

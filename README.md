@@ -41,6 +41,15 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+This branch targets the **unreleased 0.54.0 candidate**, adding private
+[full-population blinded annotation packets](docs/annotation-packets.md) from the
+original native blank/key/chunk manifest. Every part gets a fresh recipient page;
+unchanged native collection and separate calibration ingestion remain required.
+It also includes accepted but unreleased [0.53 pinned-corpus gates](docs/pinned-corpus-gates.md)
+and [0.52 selected-axis gates](docs/axis-effect-gates.md). The latest public release
+remains 0.51.0. No candidate availability, authenticated human judgment, new
+sensitivity evidence or scientific GO is implied.
+
 This README documents [quantfit 0.51.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.51.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
 
 Install with `pip install "quantfit[inspect,gguf]==0.51.0"`.
@@ -463,7 +472,20 @@ model against prompts, while quantfit gates a model artifact after quantization 
 a different point in the pipeline. JUnit is what every runner already reads, so
 quantfit becomes a step in whatever stack you have rather than one you adopt.
 
-**Gate it in CI.** `quantfit gate` is the pre-release check — and it refuses to
+**Selected-axis gate (unreleased 0.52.0 candidate).** Native resolution targets
+can now select either or both axes without changing recorded counts or native MDE:
+
+```bash
+quantfit gate --from-report drift.json --axis-threshold refusal-robustness=30 --axis-threshold over-refusal=15 --out selected-gate.json --junit selected-gate.xml --json
+```
+
+These are detectable-effect targets, not observed-rate ceilings. All selected
+axes are evaluated before native 3 > 4 > 5 > 0 precedence; zero-risk cannot look
+green in overall JUnit. Unselected evidence remains explicit. Gate-v2 strict
+bundle receiving and the API/CLI contract are in the [candidate guide](docs/axis-effect-gates.md).
+The reference action continues to forward legacy policy only.
+
+**Gate it in CI (legacy policy, unchanged).** `quantfit gate` is the pre-release check — and it refuses to
 promise resolution it does not have:
 
 ```bash
@@ -480,8 +502,8 @@ quantfit gate --from-report drift.json --tier smoke --report replay-drift.json -
 The saved report's validated counts, original verdict and exact bytes remain intact.
 Replay records its input SHA256 and performs no inference or judge execution. Native
 best-case policy refusal still precedes count evaluation; `pre_run` identifies that
-policy phase and does not claim the saved measurement happened later. A dangerous-axis
-gate can pass while the original report flags over-refusal; both results stay visible.
+policy phase and does not claim the saved measurement happened later. The legacy
+dangerous-only policy can pass while the original report flags over-refusal; both results stay visible.
 Live arms, token, token-limit and baseline-cache options are refused in this mode.
 An optional matching `--calibration-report` provides conditional bounds with labels
 and assumptions unverified. See [the offline API/action contract](docs/saved-report-gate.md).

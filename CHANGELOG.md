@@ -13,6 +13,40 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.54.0 — Unreleased (2026-11-02 candidate)
+
+- Add `prepare_annotation_packets` and `calibrate chunks packets`: one private
+  offline page for every original native chunk, containing only its assigned
+  opaque IDs/exact strings and initially blank explicit labels. Native complete
+  collection and separate schema-2/schema-3 ingestion remain authoritative.
+- Admit original blank/key/stored-version manifest, whole returned CSV budget,
+  reconstructed native sheet, every page and aggregate before publication.
+  Preserve all 2N rows, duplicate text, concordant and zero-flagged cases; never
+  reuse the unblinded flagged-pair page or silently truncate.
+- Controlled source/API/OS CLI evidence and its limitations are recorded in
+  `validation/2026-11-02-annotation-packets/`. Hosted browser/installed
+  qualification is separate. Structural blinding and hashes authenticate no
+  source, rater, human judgment, independence, sensitivity or scientific GO.
+
+## 0.53.0 — Unreleased (2026-11-02 candidate)
+
+- Complete opted native pinned-corpus forwarding through live/saved scalar and
+  selected-axis gates, whole screen/resume and saved summaries. One admitted
+  population/census is reused across targets/retries; defaults stay unchanged.
+- Add flat gate3 with native decision discriminator and strict source context;
+  native bundle/JUnit receiving and screen2/saved-summary2 preserve all outcomes,
+  missing rows, recorded-source identity and noncanonical sensitivity caveats.
+- Exercise actual API/OS CLI/native writers, calibration timing/fingerprints,
+  cache/capture identity and refusal boundaries with controlled fixtures. The
+  dated counts-only record does not establish real Hub/model/human/scientific
+  qualification; installed/hosted acceptance is separate.
+
+## 0.52.0 — Unreleased (2026-11-02 candidate)
+
+- Add opt-in `axis_thresholds` API / repeatable `--axis-threshold AXIS=PP` for either or both native axes, including enforceable over-refusal. Targets govern native detectable-effect resolution, not observed-rate ceilings; one paired run evaluates all selected axes before 3 > 4 > 5 > 0 reduction. Native MDE, conditional directional-max epsilon and floor/calibration limits remain unchanged.
+- Ship closed gate-v2 strict receiving in the existing aggregate bundle format, per-axis resolution/detection plus overall JUnit, complete pre-execution declaration admission, and canonical 40/12/28 saved-policy scope. Numeric zero is refused as Boolean epsilon metadata. Legacy `None` keeps valid gate-v1/default JSON/JUnit semantics; only normal software metadata changes.
+- Add source and all original/rebuilt installed-profile consumers using synthetic native counts, the existing controlled live CLI fixture, actual saved CLI and strict receiving; no model execution, human truth, sensitivity, joint-error guarantee or scientific GO. Counts-only reproducible evidence and explicit adverse scopes: `validation/2026-11-02-axis-effect-gates/`. Public install remains 0.51.0.
+
 ## 0.51.0 — 2026-11-01
 
 Release context: 0.51.0 extends released 0.50.0. Candidate-stage installation/status

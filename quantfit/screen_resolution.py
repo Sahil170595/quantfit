@@ -23,6 +23,7 @@ from quantfit.reproduce import (
 from quantfit.safety.calibration_binding import MAX_CALIBRATION_BYTES, BoundCalibration, load_bound_calibration_bytes
 from quantfit.safety.gguf_arm import UNQUANTIZED_FILE_TYPES, is_gguf_ref
 from quantfit.safety.report import DriftReport
+from quantfit.safety.verify import ProbeCorpus
 from quantfit.screen import Target
 from quantfit.screen_requirement import qualify_screen, validate_requirement
 
@@ -218,10 +219,16 @@ def _analyze_rows(prepared: _PreparedResolution, *, use_prepared: bool = False) 
     return rows
 
 
-def _summarize_inputs(native: saved._HeldScreenInputs, calibrations: _HeldCalibrations) -> dict[str, Any]:
+def _summarize_inputs(
+    native: saved._HeldScreenInputs, calibrations: _HeldCalibrations, *, probe_corpus: ProbeCorpus | None = None
+) -> dict[str, Any]:
     """Pure held receiving/preflight followed by the single authoritative analysis path."""
     result: dict[str, Any] = saved._summarize_held(
-        native.manifest, dict(native.members), manifest_path=native.manifest_path, reports_dir=native.reports_dir
+        native.manifest,
+        dict(native.members),
+        manifest_path=native.manifest_path,
+        reports_dir=native.reports_dir,
+        probe_corpus=probe_corpus,
     )
     prepared = _prepare_rows(native, result, calibrations)
     rows = _analyze_rows(prepared)
@@ -260,6 +267,7 @@ def summarize_screen_with_resolution(
     out_path: str | None = None,
     junit_path: str | None = None,
     required_conditional_resolution_pp: float | None = None,
+    probe_corpus: ProbeCorpus | None = None,
 ) -> dict[str, Any]:
     required_conditional_resolution_pp = validate_requirement(required_conditional_resolution_pp)
     phase = "invalid_resolution_input"
@@ -278,7 +286,7 @@ def summarize_screen_with_resolution(
         _validate_reproduction_outputs(plan)
         phase = "invalid_calibration"
         calibrations = _hold_calibrations(root, allowed)
-        result = _summarize_inputs(native, calibrations)
+        result = _summarize_inputs(native, calibrations, probe_corpus=probe_corpus)
         if required_conditional_resolution_pp is not None:
             qualify_screen(result, required_conditional_resolution_pp)
         phase = "output_failure"
