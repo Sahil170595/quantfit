@@ -22,5 +22,10 @@ def test_installed_cli_api_chunks_collect_and_native_ingest(tmp_path, monkeypatc
     assert result["native_counts"]["calibration_schema"] == 2 and result["retained_calibration_schema"] == 3
     assert result["native_counts"]["n_unusable"] == 4
     assert result["missing_part_exit_code"] == 2
+    returned = result["return_validation"]
+    assert returned["partial"]["received_part_indices"] == [2, 4]
+    assert returned["partial"]["missing_part_indices"] == [1, 3]
+    assert returned["complete"]["complete"] and returned["complete"]["n_received_rows"] == 18
+    assert returned["api_unusable_subset"]["n_received_rows"] == 7
     assert result["api_all_unusable"] == {"n_rows": 18, "n_unusable": 18, "native_ingest_refused": True}
     assert result["originals_unchanged"] and not result["scientific_go"]

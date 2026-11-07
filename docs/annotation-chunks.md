@@ -55,6 +55,53 @@ Both return only aggregate counts, hashes, explicit attribution and limits.
 Failures raise categorical `AnnotationChunksError("invalid_annotation_chunks")`;
 CLI operational refusals emit the native envelope and exit 2, success exits 0.
 
+## Inspect indexed returns (0.58.0 candidate)
+
+The unreleased 0.58 source candidate can inspect complete returned parts before
+all other parts arrive. Public installation remains 0.56.0. Assign each returned
+CSV its **original manifest index** explicitly; arrival order is irrelevant:
+
+```bash
+quantfit calibrate chunks validate --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --part 4=returned-part-4.labels.csv --part 2=returned-part-2.labels.csv --out inspection.json --json
+```
+
+This example assumes an actual four-part preparation. A valid subset exits 0
+as an inspection, with `complete: false`, received `[2, 4]` and missing `[1, 3]`.
+Each supplied part must itself be complete, with native valid explicit labels
+and unchanged text. No incomplete part, unknown index or substituted partition
+is admitted. Repeat the command with a **new output path** as other parts arrive.
+Even `complete: true` only describes part coverage: run the original `collect`
+in manifest order and then `ingest` separately. No labels are inferred, dropped
+or combined into an epsilon by inspection; `unusable` is a valid explicit label.
+
+The API is `quantfit.safety.annotation_chunks.validate_annotation_returns`:
+
+```python
+result = validate_annotation_returns(
+    "blank.labels.csv", "private.labelkey.json", "annotation.chunkmanifest.json",
+    ((4, "returned-part-4.labels.csv"), (2, "returned-part-2.labels.csv")),
+    out_path="inspection.json",  # optional for the API; required by CLI
+)
+```
+
+Use a nonempty tuple of `(int, str)` pairs (maximum 128); indices are strict
+positive integers, not bools, floats or inferred filenames. CLI index spelling
+is canonical ASCII decimal (`2=PATH`, not `02=PATH`). Duplicate indices and file
+roles are rejected. The original source, key and exact stored-version manifest
+are required on every inspection. Preparation is fully regenerated before any
+supplied partition is joined through the native receiver. All native input,
+record and aggregate byte limits below still apply; inspection receipts are
+bounded by the existing 64 KiB receipt cap and use exclusive checked publication.
+
+The closed receipt contains counts, expected/received/missing indices and raw
+byte SHA-256/size bindings. It excludes private paths, row IDs, text, label values
+and annotator names. Categorical failure is
+`AnnotationChunksError("invalid_annotation_returns")` or CLI exit 2; no partial
+receipt is published after a late-invalid row. Byte agreement does not verify
+human identity or truth, rater independence, sensitivity, safety or scientific GO.
+Current fictional [regressions](../validation/2026-11-07-annotation-returns/README.md)
+cover API and actual CLI receiving; hosted installed proof is separate.
+
 ## Integrity and private handling
 
 Preparation validates all blank IDs, unique full-key coverage and completion

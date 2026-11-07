@@ -1,0 +1,486 @@
+{
+  "base_commit": "6cc50a70425ba305313151df4409fcbeb54c1d9a",
+  "functional": {
+    "api_all_unusable": {
+      "n_rows": 18,
+      "n_unusable": 18,
+      "native_ingest_refused": true
+    },
+    "collection": {
+      "annotation_chunks_schema": 1,
+      "annotator_declared": {
+        "name": null,
+        "role": "maintainer"
+      },
+      "inputs": {
+        "key": {
+          "sha256": "9cc1618a5adf597caf89ab05d85a9fd2471ac791750bdc0af2ca6995168e4c11",
+          "size_bytes": 6248
+        },
+        "sheet": {
+          "sha256": "cc35dbd1ccb02fbe865412b90ddd9aa0fb161fbed82c2ae221c4b8dba74f1647",
+          "size_bytes": 2054
+        }
+      },
+      "limits": {
+        "human_labels_authenticated": false,
+        "rater_identity_verified": false,
+        "scientific_go": false
+      },
+      "manifest": {
+        "sha256": "e85c8013bc74c4078916bab777a93cf2490a7c5339c3039284950b1e60ccefa2",
+        "size_bytes": 2798
+      },
+      "n_pairs": 9,
+      "n_parts": 4,
+      "n_rows": 18,
+      "n_unusable": 4,
+      "output_sheet": {
+        "sha256": "175fd54f384e6d3049fb63231780513c1ca46f11ef64520656ccac2901474419",
+        "size_bytes": 2199
+      },
+      "parts": [
+        {
+          "blank_sheet": {
+            "sha256": "c24db109500daa29b418b91a276838302a472b938df92a3d77e9fd7367028df3",
+            "size_bytes": 588
+          },
+          "filled_sheet": {
+            "sha256": "7f4a99a81920de7b72f29c651dd547246c0a4e12be442d7f73f02b2049e924d7",
+            "size_bytes": 628
+          },
+          "index": 1,
+          "n_rows": 5
+        },
+        {
+          "blank_sheet": {
+            "sha256": "9ba07a4aacbe2b79e7b06d45d72cabb5185e6b90313d432d25e57b5ee2b41862",
+            "size_bytes": 589
+          },
+          "filled_sheet": {
+            "sha256": "1dfc949e97a732ca96135f9f688a12e311838156e6764e2acdc17f70abdd9da8",
+            "size_bytes": 631
+          },
+          "index": 2,
+          "n_rows": 5
+        },
+        {
+          "blank_sheet": {
+            "sha256": "3fe6910d14df273c8d5584ecc1952bbddf65c1f361ee156cc348e429221d384a",
+            "size_bytes": 588
+          },
+          "filled_sheet": {
+            "sha256": "0246949f7effdf512b04efe257f594fed4ef6752092ca5d84e2c64082f4aff07",
+            "size_bytes": 629
+          },
+          "index": 3,
+          "n_rows": 5
+        },
+        {
+          "blank_sheet": {
+            "sha256": "d7b5f20bd50210d1c7fdd26609d02758fa0359794b2bc36d6dfd9d3ffec5f424",
+            "size_bytes": 364
+          },
+          "filled_sheet": {
+            "sha256": "fcb8b393cb4488ff18e8238583b615cc950209830e86c2347196859b78182a8b",
+            "size_bytes": 389
+          },
+          "index": 4,
+          "n_rows": 3
+        }
+      ],
+      "quantfit_version": "0.58.0",
+      "scope": "Local partition and collection of supplied native labeling sheets only. No capture is read; capture scope/digest are key declarations. Only blinded parts may be shared under the existing single named second-annotator carve-out; never share this manifest or key. No automatic labeling, sending, ingestion, rater authentication, independence, human truth or scientific GO. Manifest-last exclusive publication is not a directory transaction; earlier new outputs may remain after failure."
+    },
+    "human_labels_authenticated": false,
+    "kind": "quantfit.annotation-chunks-functional-acceptance",
+    "missing_part_exit_code": 2,
+    "native_counts": {
+      "calibration_schema": 2,
+      "n_labeled": 18,
+      "n_unusable": 4,
+      "unmeasured_arms": []
+    },
+    "native_ingest_exit_code": 0,
+    "originals_unchanged": true,
+    "preparation": {
+      "annotation_chunks_schema": 1,
+      "annotator_declared": {
+        "name": null,
+        "role": "maintainer"
+      },
+      "inputs": {
+        "key": {
+          "sha256": "9cc1618a5adf597caf89ab05d85a9fd2471ac791750bdc0af2ca6995168e4c11",
+          "size_bytes": 6248
+        },
+        "sheet": {
+          "sha256": "cc35dbd1ccb02fbe865412b90ddd9aa0fb161fbed82c2ae221c4b8dba74f1647",
+          "size_bytes": 2054
+        }
+      },
+      "limits": {
+        "human_labels_authenticated": false,
+        "rater_identity_verified": false,
+        "scientific_go": false
+      },
+      "manifest": {
+        "sha256": "e85c8013bc74c4078916bab777a93cf2490a7c5339c3039284950b1e60ccefa2",
+        "size_bytes": 2798
+      },
+      "n_pairs": 9,
+      "n_parts": 4,
+      "n_rows": 18,
+      "parts": [
+        {
+          "blank_sheet": {
+            "sha256": "c24db109500daa29b418b91a276838302a472b938df92a3d77e9fd7367028df3",
+            "size_bytes": 588
+          },
+          "index": 1,
+          "n_rows": 5
+        },
+        {
+          "blank_sheet": {
+            "sha256": "9ba07a4aacbe2b79e7b06d45d72cabb5185e6b90313d432d25e57b5ee2b41862",
+            "size_bytes": 589
+          },
+          "index": 2,
+          "n_rows": 5
+        },
+        {
+          "blank_sheet": {
+            "sha256": "3fe6910d14df273c8d5584ecc1952bbddf65c1f361ee156cc348e429221d384a",
+            "size_bytes": 588
+          },
+          "index": 3,
+          "n_rows": 5
+        },
+        {
+          "blank_sheet": {
+            "sha256": "d7b5f20bd50210d1c7fdd26609d02758fa0359794b2bc36d6dfd9d3ffec5f424",
+            "size_bytes": 364
+          },
+          "index": 4,
+          "n_rows": 3
+        }
+      ],
+      "quantfit_version": "0.58.0",
+      "scope": "Local partition and collection of supplied native labeling sheets only. No capture is read; capture scope/digest are key declarations. Only blinded parts may be shared under the existing single named second-annotator carve-out; never share this manifest or key. No automatic labeling, sending, ingestion, rater authentication, independence, human truth or scientific GO. Manifest-last exclusive publication is not a directory transaction; earlier new outputs may remain after failure."
+    },
+    "rater_identity_verified": false,
+    "retained_calibration_schema": 3,
+    "return_validation": {
+      "api_unusable_subset": {
+        "annotation_returns_schema": 1,
+        "complete": false,
+        "expected_part_indices": [
+          1,
+          2,
+          3
+        ],
+        "inputs": {
+          "key": {
+            "sha256": "9cc1618a5adf597caf89ab05d85a9fd2471ac791750bdc0af2ca6995168e4c11",
+            "size_bytes": 6248
+          },
+          "sheet": {
+            "sha256": "cc35dbd1ccb02fbe865412b90ddd9aa0fb161fbed82c2ae221c4b8dba74f1647",
+            "size_bytes": 2054
+          }
+        },
+        "limits": {
+          "human_labels_authenticated": false,
+          "rater_identity_verified": false,
+          "scientific_go": false
+        },
+        "manifest": {
+          "sha256": "e2b2c97ca7f2fa549d891025c0f0ea0554de7719f0c836b6f925dd69386ca50a",
+          "size_bytes": 2559
+        },
+        "missing_part_indices": [
+          1,
+          3
+        ],
+        "n_missing_rows": 11,
+        "n_pairs": 9,
+        "n_parts": 3,
+        "n_received_rows": 7,
+        "n_rows": 18,
+        "parts": [
+          {
+            "blank_sheet": {
+              "sha256": "7cfa9e889a25a5a7ec980f71a2d8d83fd6e0105063b6b10f9714351fa0358c1a",
+              "size_bytes": 813
+            },
+            "filled_sheet": {
+              "sha256": "061fc0419bbfbcbe355c98072d6b4cfe4036b4659dcd71b64de5cca5310547d0",
+              "size_bytes": 869
+            },
+            "index": 2,
+            "n_rows": 7
+          }
+        ],
+        "quantfit_version": "0.58.0",
+        "received_part_indices": [
+          2
+        ],
+        "scope": "Inspection of supplied native parts only; complete collection and ingestion remain separate. No label values, source text, IDs, paths, automatic labels or calibration are returned. Byte agreement does not authenticate a rater, human truth, sensitivity or scientific GO."
+      },
+      "complete": {
+        "annotation_returns_schema": 1,
+        "complete": true,
+        "expected_part_indices": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "inputs": {
+          "key": {
+            "sha256": "9cc1618a5adf597caf89ab05d85a9fd2471ac791750bdc0af2ca6995168e4c11",
+            "size_bytes": 6248
+          },
+          "sheet": {
+            "sha256": "cc35dbd1ccb02fbe865412b90ddd9aa0fb161fbed82c2ae221c4b8dba74f1647",
+            "size_bytes": 2054
+          }
+        },
+        "limits": {
+          "human_labels_authenticated": false,
+          "rater_identity_verified": false,
+          "scientific_go": false
+        },
+        "manifest": {
+          "sha256": "e85c8013bc74c4078916bab777a93cf2490a7c5339c3039284950b1e60ccefa2",
+          "size_bytes": 2798
+        },
+        "missing_part_indices": [],
+        "n_missing_rows": 0,
+        "n_pairs": 9,
+        "n_parts": 4,
+        "n_received_rows": 18,
+        "n_rows": 18,
+        "parts": [
+          {
+            "blank_sheet": {
+              "sha256": "c24db109500daa29b418b91a276838302a472b938df92a3d77e9fd7367028df3",
+              "size_bytes": 588
+            },
+            "filled_sheet": {
+              "sha256": "7f4a99a81920de7b72f29c651dd547246c0a4e12be442d7f73f02b2049e924d7",
+              "size_bytes": 628
+            },
+            "index": 1,
+            "n_rows": 5
+          },
+          {
+            "blank_sheet": {
+              "sha256": "9ba07a4aacbe2b79e7b06d45d72cabb5185e6b90313d432d25e57b5ee2b41862",
+              "size_bytes": 589
+            },
+            "filled_sheet": {
+              "sha256": "1dfc949e97a732ca96135f9f688a12e311838156e6764e2acdc17f70abdd9da8",
+              "size_bytes": 631
+            },
+            "index": 2,
+            "n_rows": 5
+          },
+          {
+            "blank_sheet": {
+              "sha256": "3fe6910d14df273c8d5584ecc1952bbddf65c1f361ee156cc348e429221d384a",
+              "size_bytes": 588
+            },
+            "filled_sheet": {
+              "sha256": "0246949f7effdf512b04efe257f594fed4ef6752092ca5d84e2c64082f4aff07",
+              "size_bytes": 629
+            },
+            "index": 3,
+            "n_rows": 5
+          },
+          {
+            "blank_sheet": {
+              "sha256": "d7b5f20bd50210d1c7fdd26609d02758fa0359794b2bc36d6dfd9d3ffec5f424",
+              "size_bytes": 364
+            },
+            "filled_sheet": {
+              "sha256": "fcb8b393cb4488ff18e8238583b615cc950209830e86c2347196859b78182a8b",
+              "size_bytes": 389
+            },
+            "index": 4,
+            "n_rows": 3
+          }
+        ],
+        "quantfit_version": "0.58.0",
+        "received_part_indices": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "scope": "Inspection of supplied native parts only; complete collection and ingestion remain separate. No label values, source text, IDs, paths, automatic labels or calibration are returned. Byte agreement does not authenticate a rater, human truth, sensitivity or scientific GO."
+      },
+      "partial": {
+        "annotation_returns_schema": 1,
+        "complete": false,
+        "expected_part_indices": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "inputs": {
+          "key": {
+            "sha256": "9cc1618a5adf597caf89ab05d85a9fd2471ac791750bdc0af2ca6995168e4c11",
+            "size_bytes": 6248
+          },
+          "sheet": {
+            "sha256": "cc35dbd1ccb02fbe865412b90ddd9aa0fb161fbed82c2ae221c4b8dba74f1647",
+            "size_bytes": 2054
+          }
+        },
+        "limits": {
+          "human_labels_authenticated": false,
+          "rater_identity_verified": false,
+          "scientific_go": false
+        },
+        "manifest": {
+          "sha256": "e85c8013bc74c4078916bab777a93cf2490a7c5339c3039284950b1e60ccefa2",
+          "size_bytes": 2798
+        },
+        "missing_part_indices": [
+          1,
+          3
+        ],
+        "n_missing_rows": 10,
+        "n_pairs": 9,
+        "n_parts": 4,
+        "n_received_rows": 8,
+        "n_rows": 18,
+        "parts": [
+          {
+            "blank_sheet": {
+              "sha256": "9ba07a4aacbe2b79e7b06d45d72cabb5185e6b90313d432d25e57b5ee2b41862",
+              "size_bytes": 589
+            },
+            "filled_sheet": {
+              "sha256": "1dfc949e97a732ca96135f9f688a12e311838156e6764e2acdc17f70abdd9da8",
+              "size_bytes": 631
+            },
+            "index": 2,
+            "n_rows": 5
+          },
+          {
+            "blank_sheet": {
+              "sha256": "d7b5f20bd50210d1c7fdd26609d02758fa0359794b2bc36d6dfd9d3ffec5f424",
+              "size_bytes": 364
+            },
+            "filled_sheet": {
+              "sha256": "fcb8b393cb4488ff18e8238583b615cc950209830e86c2347196859b78182a8b",
+              "size_bytes": 389
+            },
+            "index": 4,
+            "n_rows": 3
+          }
+        ],
+        "quantfit_version": "0.58.0",
+        "received_part_indices": [
+          2,
+          4
+        ],
+        "scope": "Inspection of supplied native parts only; complete collection and ingestion remain separate. No label values, source text, IDs, paths, automatic labels or calibration are returned. Byte agreement does not authenticate a rater, human truth, sensitivity or scientific GO."
+      }
+    },
+    "scientific_go": false,
+    "synthetic": true,
+    "synthetic_operator_labels": true
+  },
+  "kind": "quantfit.annotation-return-validation-source-checks",
+  "legacy_bindings": {
+    "all_old_annotation_chunk_functions_AST_held": [
+      "AnnotationChunksError",
+      "_held",
+      "_blank",
+      "_annotator",
+      "_preparation",
+      "_summary",
+      "prepare_annotation_chunks",
+      "collect_annotation_chunks"
+    ],
+    "base": "6cc50a70425ba305313151df4409fcbeb54c1d9a",
+    "native_receiver_files_and_lock_and_workflows_held": true,
+    "published_056_changelog_suffix_held": true
+  },
+  "limits": [
+    "Source tests use existing Python 3.12.13 editable source; this is not installed-wheel/sdist qualification.",
+    "No model, judge, human, GPU, Hub or browser ran.",
+    "Four existing hosted installed profiles are extended, not locally executed.",
+    "No full local suite or hosted CI result is claimed.",
+    "First initial GREEN was console-only 3 PASS; original RED and later expanded/focused have raw logs and JUnit.",
+    "Partial success confirms complete supplied parts only; final collect/ingest remain authoritative."
+  ],
+  "scientific_go": false,
+  "source_bindings": {
+    "quantfit/annotation_chunks_cli.py": {
+      "git_LF_sha256": "cc48b26496a93e85bdcd9a3df06e4b0c6fd82c97ca132d423a22fca25e374255"
+    },
+    "quantfit/cli.py": {
+      "git_LF_sha256": "f3cfa8a8cdc91050864bf1a949efe25b8f917ef5ab27f974979d24d5c82552b9"
+    },
+    "quantfit/safety/annotation_chunks.py": {
+      "git_LF_sha256": "38539cc0e084205ed1572fa9799876dd1cbbb29a137c0cb97d64c0a3c15ce6df"
+    },
+    "quantfit/safety/calibrate.py": {
+      "git_LF_sha256": "1d56a5d042971c4eb2bb1c1a3e3df8bae0dd9a8a22603401cfa71770d7327406"
+    },
+    "quantfit/safety/retention_io.py": {
+      "git_LF_sha256": "531c9a7328a01bfea82846958b856166c9db96707d6f2c228e5a0f86a763f88c"
+    },
+    "tests/test_annotation_chunks.py": {
+      "git_LF_sha256": "d58aacc9ef8de7f889dfac9b8183a77137c1ec17ffad49d0d5c8155f3884db19"
+    },
+    "tests/test_annotation_returns.py": {
+      "git_LF_sha256": "031caef53845e73fd72c69f0007c8c2745d85715c62b67a1f8bd911ebb5f6a8f"
+    },
+    "tests/test_ci_annotation_chunks.py": {
+      "git_LF_sha256": "9d84b574104c3d1207eea8005e2d1ccb2961238c79fbc99b6ab747b73d5d3d47"
+    },
+    "tools/ci_annotation_chunks.py": {
+      "git_LF_sha256": "8f7886250624a3ec387a741b3d00d2cf626d7c91a87f7457320194910bbff91f"
+    },
+    "tools/ci_installed.py": {
+      "git_LF_sha256": "439523ed698ccfb3c710ecf43449c17b479bc93a1720990c9940203d511d7838"
+    }
+  },
+  "source_checks": {
+    "expanded": {
+      "cases": 34,
+      "errors": 0,
+      "failed": 0,
+      "passed": 34,
+      "skipped": 0
+    },
+    "first-red": {
+      "cases": 3,
+      "errors": 0,
+      "failed": 2,
+      "passed": 1,
+      "skipped": 0
+    },
+    "focused": {
+      "cases": 268,
+      "errors": 0,
+      "failed": 0,
+      "passed": 268,
+      "skipped": 0
+    }
+  },
+  "static": {
+    "mypy": "existing affected 7-file strict follow-imports-silent lane: exit 0",
+    "quantfit_audit": "exit 0",
+    "ruff_check": "quantfit tests tools: exit 0",
+    "ruff_format": "native CI paths: exit 0"
+  },
+  "synthetic": true,
+  "version": "0.58.0"
+}
