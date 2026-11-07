@@ -1,0 +1,97 @@
+{
+  "scope": "Complete source-controlled fictional native adjudication + offline SDK/OS CLI receiving; no model/network. Broad598 preceded only direct native _report re-export-to-import correction; current49 and all statics execute final code. Counts overlap.",
+  "source_version": "0.61.0",
+  "platform": "Windows",
+  "python": "3.12.13",
+  "role_limits_bytes": {
+    "report": 8388608,
+    "capture": 16777216,
+    "adjudication": 4194304,
+    "combined": 29360128
+  },
+  "criterion": "At least one source-matched both-arm-correct dangerous substantive OR degenerate declaration; native dangerous at-risk and flips positive. Other unresolved/not-confirmed counts retained.",
+  "output_effect": "Separate control_evidence annotation; native rows/exits/JUnit/conditionality/sensitivity/human/science flags unchanged.",
+  "adverse_history": {
+    "initial_fixture_red": "3 failures: one native hyphen-axis setup error + missing SDK/CLI",
+    "qualified_red": "1 pass,2 intended missing SDK/CLI failures",
+    "first_green": "3 pass",
+    "expanded1": "36 pass,3 test-fixture expectation/setup failures",
+    "expanded2": "39 pass; strict typing subsequently found five introduced annotation/call issues, corrected without weakening flags",
+    "previous_broad": "537 pass,5 capability skips; later exact-decode control added; static stopped at new import sorting issue",
+    "decode_initial": "2 setup failures: scope_marker outside native closed saved-screen field set",
+    "decode_qualified_red": "2 failures: supported recorded_by declaration differences admitted",
+    "decode_green": "same2 tests pass after exact native decode comparison",
+    "intra_stratum_fixture": "Native duplicate_evidence refusal from duplicate actual content digests; corrected fictional second digests, guard held.",
+    "nullable_arm_RED": "1 genuine native saved-screen positive followed by opted refusal from overstrict full identity extraction.",
+    "nullable_arm_GREEN": "Same nullable-HF test and3adjacent controls pass after verbatim native decode-only extraction.",
+    "final_type_adverse": "After broad598, strict caught indirect saved._report re-export; direct native bundle._report import fixes type ownership; current49+strict pass."
+  },
+  "limits": [
+    "No human labels authenticated or independent control execution.",
+    "No historical manifest hash association; supplied locator only.",
+    "No model/Hub/engine/scientific validation.",
+    "Local source tests do not establish installed wheels/sdists or hosted CI.",
+    "Exact current head hosted actionlint/installed qualification pending."
+  ],
+  "broad": {
+    "tests": 603,
+    "passed": 598,
+    "skipped": 5,
+    "failures": 0,
+    "errors": 0,
+    "xml_sha256": "301e497427ac82a68e207f25cc7b780e31ac6997220add17f0f64a708c0ae940"
+  },
+  "current_affected": {
+    "tests": 49,
+    "passed": 49,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "xml_sha256": "98c087cb909a2d51ee0275b7fd83c6494035d61255b1baff2d07c7a524a438df"
+  },
+  "qualification": {
+    "affected": {
+      "exit": 0,
+      "raw_sha256": "585123ed60ccbb3ef921df06ca883d94f903562bc83552bf972fb074b6b7dee9"
+    },
+    "ruff": {
+      "exit": 0,
+      "raw_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    "format": {
+      "exit": 0,
+      "raw_sha256": "7343bdd3f6f17e0ac06b8e30bb83f4db263108575aeec89d33464284669e490c"
+    },
+    "mypy": {
+      "exit": 0,
+      "raw_sha256": "0c37c4158c91ef55c724ba017bf6465f26018199badb08e3ff13f98acdf056c2"
+    },
+    "native-mypy": {
+      "exit": 0,
+      "raw_sha256": "8e63ae22e8213e327a5e9cbd584067681681bd8ef7f25c869877887ccdcfc4ff"
+    },
+    "audit": {
+      "exit": 0,
+      "raw_sha256": "3745d5f4f978de7a2cc6b6080e89ce8ef42292931ec764a60b20a6cfd0a510fd"
+    },
+    "diff": {
+      "exit": 0,
+      "raw_sha256": "8d960888a1e33adb55c64f600a69e6df8962b268521ff74e5a5da6338c1a9110"
+    }
+  },
+  "source_hash_basis": "Exact staged Git blob bytes (LF checkout representation), not installed-file measurements.",
+  "source_sha256": {
+    "quantfit/screen_control_evidence.py": "2278c5cd26232ff3787ac342096166986996640e791d2ad1676928fce3455b31",
+    "quantfit/saved_screen.py": "772b5510b2eda647d0ec06fa6c8557951673d43f442c6895728bcc1de5d91580",
+    "quantfit/safety/calibration_binding.py": "efff7cf3a300e82ac851a2bbd430ee4b9633b3baf1bede32c0b699feedc7b93c",
+    "quantfit/cli.py": "2831f92a74f36a080c3d7a2478343b5edb1cc07d1e0d30c12e3e02a0e2716fb0",
+    "tests/test_screen_control_evidence.py": "a78d198615cfb3236c19a5ea2fab4072ff68dafc7deb0b1ebc738f7f045ddcb1",
+    "tools/ci_installed.py": "fb1efcfbac68d795dfb91113ff262bbd29fd01685ec4c081955e5b9532e1eba1"
+  },
+  "native_decode_extraction": {
+    "native_body_verbatim": true,
+    "measurement_identity_AST_exact_after_inline_restoration": true,
+    "other_native_function_class_AST_held": 18,
+    "receipt_sha256": "4622179d864d2cc071ea6f97212a719bd4cf1a00c41319ad02bbe00cd712a4ef"
+  }
+}

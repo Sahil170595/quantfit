@@ -1,6 +1,9 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.56.0, including pinned alternative probe corpora,
+This reference includes the unreleased quantfit 0.61.0 source candidate; public installation remains 0.56.0.
+The candidate adds the all-or-none `screen-summary --control-report PATH --control-capture PATH --control-adjudication PATH`
+[supplied-control annotation](saved-screen-control-evidence.md), separately from native screen results.
+Existing supported surfaces include pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,

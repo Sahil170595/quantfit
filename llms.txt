@@ -71,6 +71,8 @@ Additional released workflows (see the versioned README install pin):
 
 ## Optional
 
+- [Supplied saved-screen control evidence (unreleased 0.61.0 source)](https://github.com/Sahil170595/quantfit/blob/codex/saved-screen-control-evidence061/docs/saved-screen-control-evidence.md): `quantfit screen-summary --targets targets.json --reports-dir saved-reports --control-report private.control.json --control-capture private.control.capture.jsonl --control-adjudication private.control.adjudication.json --out receiving.json --json` verifies supplied bytes and annotates dangerous-control consistency per stratum. All three roles required; calibration combinations refuse before IO. Native verdicts/conditionality stay unchanged. Keep capture and receiving artifacts private; no human authentication, historical hash association, sensitivity or scientific GO. Public installation remains 0.56.0.
+
 - [Contributing](https://github.com/Sahil170595/quantfit/blob/main/CONTRIBUTING.md): the hermetic-test rule, the exit-code taxonomy, and the pinning discipline.
 - [Bus factor](https://github.com/Sahil170595/quantfit/blob/main/docs/bus-factor.md): what breaks if the maintainer stops.
 - [Security](https://github.com/Sahil170595/quantfit/blob/main/SECURITY.md): the supply-chain posture, including what the llama.cpp SHA256 pin does and does not cover.
