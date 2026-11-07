@@ -4,7 +4,14 @@ from __future__ import annotations
 
 import argparse
 
-from quantfit.safety.calibration_judges import COMMAND, _analyze
+from quantfit.safety.calibration_judges import (
+    COMMAND,
+    COMPARE_OBSERVED_COMMAND,
+    OBSERVE_COMMAND,
+    _analyze,
+    _compare_observed,
+    _observe,
+)
 
 
 def dispatch_judges(args: argparse.Namespace) -> int:
@@ -30,3 +37,33 @@ def dispatch_judges(args: argparse.Namespace) -> int:
         print("No preferred judge, independence, calibration replacement, sensitivity or scientific GO.")
 
     return _emit(args, COMMAND, 0, result, human, encoded_json=encoded)
+
+
+def dispatch_observation(args: argparse.Namespace) -> int:
+    from quantfit.cli import _emit
+
+    if args.calibrate_cmd == "observe-judge":
+        command = OBSERVE_COMMAND
+        result, encoded = _observe(args.report, args.capture, args.key, out_path=args.out)
+    else:
+        command = COMPARE_OBSERVED_COMMAND
+        result, encoded = _compare_observed(
+            args.report,
+            args.capture,
+            args.key,
+            args.observation,
+            observation_sha256=args.observation_sha256,
+            sheet_path=args.sheet,
+            retained_labels_path=args.retained_labels,
+            retention_receipt_path=args.retention_receipt,
+            out_path=args.out,
+        )
+
+    def human() -> None:
+        print(f"{command}: {result['n_pairs']} complete pairs.")
+        if command == OBSERVE_COMMAND:
+            print(f"Private observation SHA256 {result['observation']['sha256']}")
+        else:
+            print("Descriptive comparison only. No calibration or gate decision.")
+
+    return _emit(args, command, 0, result, human, encoded_json=encoded)

@@ -41,11 +41,12 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-[Quantfit 0.55.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.55.0)
-adds private [whole local hash-pinned probe bundles](docs/offline-probe-bundles.md)
+[Quantfit 0.56.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.56.0)
+adds a [held-completion judge observation and offline comparison](docs/held-judge-observation.md).
+Version 0.55.0 introduced private [whole local hash-pinned probe bundles](docs/offline-probe-bundles.md)
 to native verification, Inspect, gates, screens and offline saved receiving.
 The live path is separate from the complete raw-byte identity. All rows are
-held before model work. This version also includes previously unpublished
+held before model work. Version 0.55.0 also shipped the earlier
 [blinded annotation packets](docs/annotation-packets.md),
 [pinned-corpus gates](docs/pinned-corpus-gates.md) and
 [selected-axis gates](docs/axis-effect-gates.md). A source pin identifies bytes.
@@ -53,7 +54,16 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-After publication, install with `pip install "quantfit[inspect,gguf]==0.55.0"`.
+After publication, install with `pip install "quantfit[inspect,gguf]==0.56.0"`.
+
+The observation runs the pinned judge over the original held completions.
+Use its receipt's raw SHA-256 for the offline comparison against one complete
+native label set. Keep both the inputs and the observation private.
+
+```bash
+quantfit calibrate observe-judge --report original.json --capture private.capture.jsonl --key private.labelkey.json --out private.judge-observation.json --json
+quantfit calibrate compare-observed-judge --report original.json --capture private.capture.jsonl --key private.labelkey.json --observation private.judge-observation.json --observation-sha256 FULL64 --sheet filled.labels.csv --out comparison.json --json
+```
 
 Quantfit 0.46.0 includes [annotation chunks](docs/annotation-chunks.md)
 (0.42), [capture-backed retained review](docs/retained-review.md) (0.43),

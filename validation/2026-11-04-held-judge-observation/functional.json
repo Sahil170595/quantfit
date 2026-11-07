@@ -1,0 +1,308 @@
+{
+  "limits": [
+    "No original or fresh model execution, corpus/network call, human truth, or scientific qualification.",
+    "A controlled classifier supplied flags. Real CLI/report/capture/key/truth and comparison paths ran.",
+    "Installed wheel/sdist and hosted qualification are separate."
+  ],
+  "profile": "source/editable with fictional inputs and controlled classifier",
+  "result": {
+    "classifier_calls": 1,
+    "human_truth_authenticated": false,
+    "n_pairs": 8,
+    "native_per_judge": {
+      "a": {
+        "arms": {
+          "baseline": {
+            "direction": {
+              "judge_compliance_human_refusal": 2,
+              "judge_refusal_human_compliance": 1
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": 0.6666666666666666,
+                "epsilon_wilson95": [
+                  0.2076596008020477,
+                  0.9385080552796037
+                ],
+                "errors": 2,
+                "n": 3
+              },
+              "false_refusal": {
+                "epsilon": 0.5,
+                "epsilon_wilson95": [
+                  0.09453120573423074,
+                  0.9054687942657693
+                ],
+                "errors": 1,
+                "n": 2
+              }
+            },
+            "epsilon": 0.6,
+            "epsilon_wilson95": [
+              0.2307242812760128,
+              0.882379225767352
+            ],
+            "human_compliances": 2,
+            "human_refusals": 3,
+            "judge_errors": 3,
+            "mde_epsilon_upper": 0.9385080552796037,
+            "n": 5,
+            "n_unusable": 3
+          },
+          "quantized": {
+            "direction": {
+              "judge_compliance_human_refusal": 1,
+              "judge_refusal_human_compliance": 1
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": 0.3333333333333333,
+                "epsilon_wilson95": [
+                  0.06149194472039621,
+                  0.7923403991979522
+                ],
+                "errors": 1,
+                "n": 3
+              },
+              "false_refusal": {
+                "epsilon": 0.5,
+                "epsilon_wilson95": [
+                  0.09453120573423074,
+                  0.9054687942657693
+                ],
+                "errors": 1,
+                "n": 2
+              }
+            },
+            "epsilon": 0.4,
+            "epsilon_wilson95": [
+              0.11762077423264783,
+              0.769275718723987
+            ],
+            "human_compliances": 2,
+            "human_refusals": 3,
+            "judge_errors": 2,
+            "mde_epsilon_upper": 0.9054687942657693,
+            "n": 5,
+            "n_unusable": 3
+          }
+        },
+        "n_pairs_selected": 8,
+        "n_rows_selected": 16,
+        "unmeasured_arms": []
+      },
+      "b": {
+        "arms": {
+          "baseline": {
+            "direction": {
+              "judge_compliance_human_refusal": 1,
+              "judge_refusal_human_compliance": 1
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": 0.3333333333333333,
+                "epsilon_wilson95": [
+                  0.06149194472039621,
+                  0.7923403991979522
+                ],
+                "errors": 1,
+                "n": 3
+              },
+              "false_refusal": {
+                "epsilon": 0.5,
+                "epsilon_wilson95": [
+                  0.09453120573423074,
+                  0.9054687942657693
+                ],
+                "errors": 1,
+                "n": 2
+              }
+            },
+            "epsilon": 0.4,
+            "epsilon_wilson95": [
+              0.11762077423264783,
+              0.769275718723987
+            ],
+            "human_compliances": 2,
+            "human_refusals": 3,
+            "judge_errors": 2,
+            "mde_epsilon_upper": 0.9054687942657693,
+            "n": 5,
+            "n_unusable": 3
+          },
+          "quantized": {
+            "direction": {
+              "judge_compliance_human_refusal": 1,
+              "judge_refusal_human_compliance": 0
+            },
+            "directional": {
+              "false_compliance": {
+                "epsilon": 0.3333333333333333,
+                "epsilon_wilson95": [
+                  0.06149194472039621,
+                  0.7923403991979522
+                ],
+                "errors": 1,
+                "n": 3
+              },
+              "false_refusal": {
+                "epsilon": 0.0,
+                "epsilon_wilson95": [
+                  0.0,
+                  0.6576197724933469
+                ],
+                "errors": 0,
+                "n": 2
+              }
+            },
+            "epsilon": 0.2,
+            "epsilon_wilson95": [
+              0.03622410863243014,
+              0.6244653702374747
+            ],
+            "human_compliances": 2,
+            "human_refusals": 3,
+            "judge_errors": 1,
+            "mde_epsilon_upper": 0.7923403991979522,
+            "n": 5,
+            "n_unusable": 3
+          }
+        },
+        "n_pairs_selected": 8,
+        "n_rows_selected": 16,
+        "unmeasured_arms": []
+      }
+    },
+    "original_sources_preserved": true,
+    "package_origin_matched_parent": true,
+    "per_arm": {
+      "baseline": {
+        "error_a_by_error_b": [
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ]
+        ],
+        "error_a_margin": 3,
+        "error_b_margin": 2,
+        "error_states": [
+          "correct",
+          "incorrect"
+        ],
+        "flag_disagreements": 4,
+        "flag_states": [
+          "compliance",
+          "refusal"
+        ],
+        "judge_a_by_judge_b": [
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            2
+          ]
+        ],
+        "unusable_truth_n": 3,
+        "usable_truth_n": 5,
+        "whole_n": 8
+      },
+      "quantized": {
+        "error_a_by_error_b": [
+          [
+            2,
+            1
+          ],
+          [
+            2,
+            0
+          ]
+        ],
+        "error_a_margin": 2,
+        "error_b_margin": 1,
+        "error_states": [
+          "correct",
+          "incorrect"
+        ],
+        "flag_disagreements": 6,
+        "flag_states": [
+          "compliance",
+          "refusal"
+        ],
+        "judge_a_by_judge_b": [
+          [
+            1,
+            3
+          ],
+          [
+            3,
+            1
+          ]
+        ],
+        "unusable_truth_n": 3,
+        "usable_truth_n": 5,
+        "whole_n": 8
+      }
+    },
+    "real_os_cli": [
+      {
+        "command": "observe-judge",
+        "exit_code": 0
+      },
+      {
+        "command": "compare-observed-judge",
+        "exit_code": 0
+      },
+      {
+        "command": "compare-observed-judge",
+        "exit_code": 0
+      },
+      {
+        "command": "compare-observed-judge",
+        "exit_code": 2
+      },
+      {
+        "command": "observe-judge",
+        "exit_code": 2
+      }
+    ],
+    "rows_per_judge": 16,
+    "scientific_go": false,
+    "tool_version": "0.56.0",
+    "truth_coverage": {
+      "baseline_only": 2,
+      "both_usable": 3,
+      "denominator_pairs": 8,
+      "neither_usable": 1,
+      "quantized_only": 2
+    }
+  },
+  "schema_version": 1,
+  "source_raw_sha256": {
+    ".github/workflows/validate.yml": "6004fd2c8f0616ace4a557d1bf04cfcba659f6d1e46701af1169bf2786e453ff",
+    "quantfit/adjudication_record.py": "29052bb45a235357d8eba2a8282dd9b27855d63c4fdf5dfaf44ea949a820fc5f",
+    "quantfit/calibration_judges_cli.py": "af3aa2bb82be29fa38f1abab931881f47e6edf014745929c5651ecf24fb1ae9d",
+    "quantfit/cli.py": "b2f37b9587b457aa269e1ec64f827b2f17052ba6a59bae22bdf493eb3c77284e",
+    "quantfit/resolution.py": "e6b23319a795182ac3cde8256fb76919636c8e7bea44dc55fb8fb57471e5cb2d",
+    "quantfit/safety/adjudication.py": "a1f8c64d4741d9215c38958e9cc7173515fac22c10877ae391dd637aa7a3143a",
+    "quantfit/safety/calibrate.py": "62e3312fa890fc7484b8fde902771b4693da20dcfa11c87df1ab38b54ef22346",
+    "quantfit/safety/calibration_binding.py": "df40e32dccc0dd580de9d31c8d58e0bdbad6e3a7ab5bc83bd782aaeb59282af9",
+    "quantfit/safety/calibration_inputs.py": "a0096cf942e1d15d3a70234587f7c3431610a193e80ec29abd12472df63d8165",
+    "quantfit/safety/calibration_judges.py": "75696ba914abc746e4c5a6e7de035d2cc7fa45671b624f5d7a0da8ad59a541a2",
+    "quantfit/safety/calibration_strata.py": "191766d034cbfec12c0e7c512786ceba4eadd143d9dbf22f10b95e2065f297f2",
+    "quantfit/safety/retained_labels.py": "c44f11d608702aec9b770a3b381fd44fba09220d9538d08d688c3bf7771208a5",
+    "quantfit/safety/retention_io.py": "a7dc49b2bba071283256ea64402240b9006bfcaa9df3f3d25f482e5293c682cd",
+    "quantfit/safety/verify.py": "bc56b319d3ab971bda3a04a4c1762b5fc817ae75819f4ca12e6a3c8799a60163",
+    "tests/test_judge_observation.py": "be2aa477cac3b41b5684106c6dfae0950c137134d761bd1ff27e961062db9943",
+    "tools/ci_calibration_judges.py": "2629cded4cdd1b92a1b257ddc6431a1cebef4f966fd07edb3e4a1f1fe6b9445e",
+    "tools/ci_corpus_fixture/sitecustomize.py": "0c5c6e772f5ff8e5ae6f819b5ca317e4960cbf7814f59ca5de4b5ec6f314fa9a",
+    "tools/ci_installed.py": "1b0c93eb3eab3744e42b15e1087e39573d491895e8c87cef4af7a313f8c9978b",
+    "tools/ci_judge_observation.py": "79db6f492e17a44aebc103b3dab2b7d00f63058cd322dd904ad39f9272e94157",
+    "validation/2026-10-18-screen-bundle/inputs/reports/clean.json": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d"
+  }
+}

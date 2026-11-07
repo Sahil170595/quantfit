@@ -608,6 +608,24 @@ def _build_parser() -> argparse.ArgumentParser:
     pcjudges.add_argument(
         "--out", required=True, metavar="PATH", help="new aggregate diagnostic JSON; never calibration or a gate"
     )
+    observe_judge = csub.add_parser("observe-judge", help="rerun the pinned judge on held private completions")
+    compare_observed = csub.add_parser(
+        "compare-observed-judge", help="compare original and fresh judge flags with one truth suite offline"
+    )
+    for observed in (observe_judge, compare_observed):
+        observed.add_argument("--report", required=True, metavar="PATH", help="exact original native v2 report")
+        observed.add_argument("--capture", required=True, metavar="PATH", help="exact original private v2 capture")
+        observed.add_argument("--key", required=True, metavar="PATH", help="matching native bound v2 key")
+    observe_judge.add_argument("--out", required=True, metavar="PATH", help="new private *.judge-observation.json file")
+    compare_observed.add_argument("--observation", required=True, metavar="PATH", help="private fresh observation")
+    compare_observed.add_argument(
+        "--observation-sha256", required=True, metavar="SHA256", help="expected raw SHA256 from the observation receipt"
+    )
+    observed_mode = compare_observed.add_mutually_exclusive_group(required=True)
+    observed_mode.add_argument("--sheet", metavar="PATH", help="complete filled native labeling sheet")
+    observed_mode.add_argument("--retained-labels", metavar="PATH", help="private retained labels; requires receipt")
+    compare_observed.add_argument("--retention-receipt", metavar="PATH", help="required exactly with retained labels")
+    compare_observed.add_argument("--out", required=True, metavar="PATH", help="new descriptive aggregate JSON")
     pcreview = csub.add_parser(
         "review", help="local explicit review preparation/application; never automatic adjudication"
     )
@@ -1820,6 +1838,10 @@ def _dispatch(args: argparse.Namespace) -> int:
             from quantfit.calibration_judges_cli import dispatch_judges
 
             return dispatch_judges(args)
+        if args.calibrate_cmd in {"observe-judge", "compare-observed-judge"}:
+            from quantfit.calibration_judges_cli import dispatch_observation
+
+            return dispatch_observation(args)
         if args.calibrate_cmd == "extract" or (args.calibrate_cmd == "ingest" and args.retained_labels is not None):
             from quantfit.retained_labels_cli import dispatch_retained
 
@@ -2139,7 +2161,7 @@ def main(argv: list[str] | None = None) -> int:
                 parser.error(f"--retention-receipt-{side} is required exactly with --retained-labels-{side}")
     if (
         args.cmd == "calibrate"
-        and args.calibrate_cmd in {"ingest", "strata", "paired"}
+        and args.calibrate_cmd in {"ingest", "strata", "paired", "compare-observed-judge"}
         and (args.retained_labels is not None) != (args.retention_receipt is not None)
     ):
         parser.error("--retention-receipt is required exactly with --retained-labels")

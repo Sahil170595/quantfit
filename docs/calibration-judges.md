@@ -63,3 +63,6 @@ This does not authenticate human labels, source/weights, actual judge execution,
 rater independence, sensitivity, null clearance or scientific GO. No real models,
 providers, GPU, paid calls or uploads are needed by the fictional controls in
 `validation/2026-10-31-calibration-judges/`. Available in quantfit 0.49.0; install with `pip install "quantfit[inspect,gguf]==0.49.0"`.
+
+For a fresh pinned rerun of one original capture and an offline comparison against
+one truth population, see [held judge observations](held-judge-observation.md).

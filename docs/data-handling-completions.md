@@ -428,3 +428,12 @@ only the expected local identity and aggregate reports, never the original file.
 Operational held bundle carriers do not enter generic dataclass/asdict fields;
 this does not make arbitrary Inspect logs or user metadata safe to publish.
 Existing named-annotator/subsample/retention permissions remain unchanged.
+
+## 2026-11-04 source addendum: held judge observations
+
+Treat `*.judge-observation.json` as private. It contains positional flags and
+binding hashes that can link back to the capture. Keep it with the original
+capture/key and label suite, out of Git, uploads and logs. The observe command
+prints only a hash/count receipt. The offline comparison emits aggregate counts,
+source bindings and separate judge provenance without text, IDs, labels or paths.
+A retained raw SHA checks supplied bytes without authenticating their origin.

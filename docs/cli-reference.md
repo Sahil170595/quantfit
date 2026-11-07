@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.55.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.56.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -16,6 +16,16 @@ with native decision discriminator1/2 and closed source census, live summary2,
 saved summary2, one held population and strict offline receiving. Default `None`
 paths retain their prior shapes. Thresholds remain native resolution targets;
 unknown/missing rows, control conditionality and human-verification limits stay.
+
+Quantfit 0.56.0 adds [held judge observations](held-judge-observation.md).
+Use the original report, capture and native key with `calibrate observe-judge`.
+Then use `calibrate compare-observed-judge` with the saved observation's raw SHA
+and one full or retained label suite. Only the first command invokes the pinned
+classifier. Both commands exclusively create fresh output files.
+
+```bash
+quantfit calibrate compare-observed-judge --report original.json --capture private.capture.jsonl --key private.labelkey.json --observation private.judge-observation.json --observation-sha256 FULL64 --retained-labels private.retained.labels.csv --retention-receipt retention.json --out comparison.json --json
+```
 
 Quantfit 0.55.0 adds an explicit private local source, separate from Hub IDs
 and commits:
