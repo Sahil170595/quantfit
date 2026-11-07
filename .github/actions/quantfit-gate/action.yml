@@ -11,6 +11,8 @@ branding:
 
 # ---------------------------------------------------------------------------------
 # WHAT THIS ACTION IS
+# The dangerous-axis-only descriptions below refer to the default legacy policy.
+# axis-thresholds opts into native per-axis results and their separate summary.
 #
 # The reference integration a third-party quantizer copies into their own release
 # workflow. It is deliberately thin: install a pinned quantfit, run one `quantfit
@@ -147,6 +149,15 @@ inputs:
       when you use this.
     required: false
     default: ""
+  axis-thresholds:
+    description: >-
+      Optional selected-axis policy: one or two newline-separated AXIS=PP entries.
+      AXIS is refusal-robustness or over-refusal, each at most once. Set tier: ""
+      and leave threshold-pp empty. PP is a native detectable-effect resolution
+      target, not an observed-rate ceiling. Native numeric bounds and MDE refusals
+      apply. LF/CRLF and one final newline are accepted; at most 512 characters.
+    required: false
+    default: ""
   eps-upper:
     description: >-
       Per-arm UPPER BOUND on both directional judge-error rates (the max of that arm's
@@ -187,7 +198,7 @@ inputs:
       Pin it exactly for a reproducible gate — the instrument's version is part of the
       measurement. Ignored when `quantfit-path` is set.
     required: false
-    default: ">=0.56.0,<0.57"
+    default: ">=0.57.0,<0.58"
   quantfit-path:
     description: >-
       Install quantfit from this local path (e.g. `.` for a checked-out repo) instead of
@@ -204,13 +215,13 @@ inputs:
     default: quantfit-gate/junit.xml
   gate-out:
     description: >-
-      Where to write the gate decision artifact (JSON, `schema_version` 1) — passed as
+      Where to write the native gate decision artifact (legacy schema 1 or selected-axis schema 2/3) — passed as
       `quantfit gate --out`. Refusals are written too: "the gate would not answer this" is
       exactly the artifact a release checklist needs.
     required: false
     default: quantfit-gate/gate.json
   artifact-name:
-    description: Workflow-artifact name for the drift report + gate artifact.
+    description: Workflow-artifact name for the drift report + gate artifact; empty disables upload.
     required: false
     default: quantfit-gate
   retention-days:
@@ -240,12 +251,19 @@ outputs:
   verdict:
     description: The gate's verdict string, verbatim from the gate artifact (`unknown` if absent).
     value: ${{ steps.read.outputs.verdict }}
+  axis-results-json:
+    description: >-
+      Bounded native selected-axis fields as JSON, keyed by native axis name.
+      Empty object for legacy policy; null when selected fields are unavailable
+      or malformed. Includes native exit/verdict, observed counts and conditional
+      resolution. No aggregate MDE, joint-error or human-truth claim is inferred.
+    value: ${{ steps.read.outputs.axis-results-json }}
   printed-mde-pp:
     description: >-
       `resolution.printed_mde` converted to percentage points at one decimal (the artifact
       stores a rate; one decimal matches `gate.py:_pp`, which avoids printing a refusal
       whose two numbers read equal). `unknown` if the artifact did not carry it. Read it
-      together with `mde-is-floor`.
+      together with `mde-is-floor`. Selected policy has no single MDE and returns unknown.
     value: ${{ steps.read.outputs.printed-mde-pp }}
   mde-is-floor:
     description: >-
@@ -271,7 +289,7 @@ outputs:
     value: ${{ steps.read.outputs.resolution-proven }}
   ungated-axis-regressed:
     description: >-
-      The artifact's `ungated_axis_regressed`: the OVER-REFUSAL axis regressed. This axis
+      Legacy policy's `ungated_axis_regressed`: the OVER-REFUSAL axis regressed. This axis
       is measured and reported but NEVER gated, so it cannot move the exit code — a build
       can go green with this `true`. Read it before you publish. `unknown` when absent.
     value: ${{ steps.read.outputs.ungated-axis-regressed }}
@@ -319,7 +337,7 @@ outputs:
     description: Path to the gate artifact.
     value: ${{ inputs.gate-out }}
   artifact-url:
-    description: URL of the uploaded workflow artifact (empty if the upload found no files).
+    description: URL of the uploaded workflow artifact (empty when upload is disabled or found no files).
     value: ${{ steps.upload.outputs.artifact-url }}
 
 runs:
@@ -336,6 +354,7 @@ runs:
         QUANT: ${{ inputs.quant }}
         TIER: ${{ inputs.tier }}
         THRESHOLD_PP: ${{ inputs.threshold-pp }}
+        AXIS_THRESHOLDS: ${{ inputs.axis-thresholds }}
         EPS_UPPER: ${{ inputs.eps-upper }}
         EPS_SOURCE: ${{ inputs.eps-source }}
         CALIBRATION_REPORT: ${{ inputs.calibration-report }}
@@ -353,13 +372,42 @@ runs:
           [ -n "$BASELINE" ] && [ -n "$QUANT" ] || {
             echo "::error::baseline and quant are both required for a live gate"; exit 2; }
         fi
-        if [ -n "$TIER" ] && [ -n "$THRESHOLD_PP" ]; then
+        if [ -n "${AXIS_THRESHOLDS:-}" ]; then
+          if [ -n "$TIER" ] || [ -n "$THRESHOLD_PP" ]; then
+            echo '::error::axis-thresholds requires tier: "" and an empty threshold-pp'
+            exit 2
+          fi
+          if [ "${#AXIS_THRESHOLDS}" -gt 512 ]; then
+            echo '::error::axis-thresholds exceeds 512 characters'
+            exit 2
+          fi
+          axis_names=" "
+          axis_count=0
+          while IFS= read -r entry || [ -n "$entry" ]; do
+            entry=${entry%$'\r'}
+            if [[ ! "$entry" =~ ^(refusal-robustness|over-refusal)=(.+)$ ]]; then
+              echo '::error::axis-thresholds requires native AXIS=PP entries, one per line'
+              exit 2
+            fi
+            axis=${BASH_REMATCH[1]}
+            if [[ "$axis_names" == *" $axis "* ]]; then
+              echo '::error::axis-thresholds contains a duplicate axis'
+              exit 2
+            fi
+            axis_names+="$axis "
+            axis_count=$((axis_count + 1))
+            if [ "$axis_count" -gt 2 ]; then
+              echo '::error::axis-thresholds accepts at most two axes'
+              exit 2
+            fi
+          done <<< "${AXIS_THRESHOLDS%$'\n'}"
+        elif [ -n "$TIER" ] && [ -n "$THRESHOLD_PP" ]; then
           # A tier is a named resolution contract; a threshold is a number. Accepting
           # both would leave the report unable to say which one bound the verdict.
           echo "::error::set either tier or threshold-pp, not both (got tier='$TIER' threshold-pp='$THRESHOLD_PP')"
           exit 2
         fi
-        if [ -z "$TIER" ] && [ -z "$THRESHOLD_PP" ]; then
+        if [ -z "${AXIS_THRESHOLDS:-}" ] && [ -z "$TIER" ] && [ -z "$THRESHOLD_PP" ]; then
           echo "::error::one of tier or threshold-pp is required — a gate with no declared resolution is not a gate"
           exit 2
         fi
@@ -460,6 +508,7 @@ runs:
       env:
         CALIBRATION_REPORT: ${{ inputs.calibration-report }}
         FROM_REPORT: ${{ inputs.from-report }}
+        AXIS_THRESHOLDS: ${{ inputs.axis-thresholds }}
         REPORT: ${{ inputs.report }}
         GATE_OUT: ${{ inputs.gate-out }}
         JUNIT: ${{ inputs.junit }}
@@ -485,6 +534,9 @@ runs:
         done
         if [ -n "${FROM_REPORT:-}" ] && [[ ! "$gate_help" =~ (^|[^-])--from-report([^a-z-]|$) ]]; then
           missing+=(--from-report)
+        fi
+        if [ -n "${AXIS_THRESHOLDS:-}" ] && [[ ! "$gate_help" =~ (^|[^-])--axis-threshold([^a-z-]|$) ]]; then
+          missing+=(--axis-threshold)
         fi
         if [ -n "$CALIBRATION_REPORT" ] && [[ ! "$gate_help" =~ (^|[^-])--calibration-report([^a-z-]|$) ]]; then
           missing+=(--calibration-report)
@@ -531,6 +583,7 @@ runs:
         QUANT: ${{ inputs.quant }}
         TIER: ${{ inputs.tier }}
         THRESHOLD_PP: ${{ inputs.threshold-pp }}
+        AXIS_THRESHOLDS: ${{ inputs.axis-thresholds }}
         EPS_UPPER: ${{ inputs.eps-upper }}
         EPS_SOURCE: ${{ inputs.eps-source }}
         CALIBRATION_REPORT: ${{ inputs.calibration-report }}
@@ -558,6 +611,12 @@ runs:
         # `--threshold` is in PERCENTAGE POINTS at the CLI (it divides by 100 before calling
         # run_gate). The input carries the unit in its name so this line cannot drift.
         if [ -n "$THRESHOLD_PP" ]; then args+=(--threshold "$THRESHOLD_PP"); fi
+        if [ -n "${AXIS_THRESHOLDS:-}" ]; then
+          while IFS= read -r entry || [ -n "$entry" ]; do
+            entry=${entry%$'\r'}
+            args+=(--axis-threshold "$entry")
+          done <<< "${AXIS_THRESHOLDS%$'\n'}"
+        fi
         # Range/semantics of eps-upper belong to the CLI (which refuses 0 and >1); this
         # action only enforces that the number and its provenance travel together.
         if [ -n "$EPS_UPPER" ]; then args+=(--eps-upper "$EPS_UPPER" --eps-source "$EPS_SOURCE"); fi
@@ -584,10 +643,11 @@ runs:
         # perfect-judge floor the gate prints, with none of the gate's caveats attached.
         REPORT: ${{ inputs.report }}
         EXIT_CODE: ${{ steps.run.outputs.exit-code }}
+        AXIS_THRESHOLDS: ${{ inputs.axis-thresholds }}
       run: |
         set -euo pipefail
         python - <<'PY'
-        import json, os, secrets
+        import json, math, os, secrets
 
         # Named-field extraction only. This step never cats either file: their schemas are
         # the CLI's, not this action's, and a blind dump would print whatever a future
@@ -641,7 +701,65 @@ runs:
         res = sub(gate, "resolution")
         over = sub(gate, "over_refusal")
         eps = sub(gate, "eps")
-        if gate and not res:
+        selected = bool(os.environ.get("AXIS_THRESHOLDS")) or sub(gate, "policy").get("kind") == "selected_axis_effect_resolution"
+
+        def axis_projection():
+            if not selected:
+                return {}
+            schema = gate.get("decision_schema_version", gate.get("schema_version"))
+            rows = gate.get("axis_results")
+            axes = ("refusal-robustness", "over-refusal")
+            if type(schema) is not int or schema != 2 or type(rows) is not dict or not 1 <= len(rows) <= 2 or set(rows) - set(axes):
+                return None
+            result = {}
+            for axis in axes:
+                if axis not in rows:
+                    continue
+                row = rows[axis]
+                if type(row) is not dict or type(row.get("observed")) is not bool:
+                    return None
+                resolution = sub(row, "resolution")
+                code = row.get("exit_code")
+                verdict = row.get("verdict")
+                if code is not None and (type(code) is not int or code not in (0, 3, 4, 5)):
+                    return None
+                if verdict != {None: "UNOBSERVED", 0: "PASS", 3: "FAIL", 4: "UNMEASURABLE", 5: "UNRESOLVABLE"}[code]:
+                    return None
+                if type(resolution.get("resolution_proven")) is not bool or resolution.get("verdict") not in (
+                    "resolved", "not_refused_resolution_unproven", "refused"
+                ):
+                    return None
+                value = row.get("threshold")
+                if type(value) not in (int, float) or not 0 < value <= .30 or not math.isfinite(value):
+                    return None
+                printed = resolution.get("printed_mde")
+                printed_pp = None
+                if printed is not None:
+                    try:
+                        if type(printed) not in (int, float) or not math.isfinite(printed) or printed < 0:
+                            return None
+                        printed_pp = printed * 100
+                        if not math.isfinite(printed_pp):
+                            return None
+                    except OverflowError:
+                        return None
+                for field in ("n_at_risk", "flagged_flips", "detection_threshold_flips"):
+                    value = row.get(field)
+                    if value is not None and (type(value) is not int or value < 0 or value > 4096):
+                        return None
+                result[axis] = {
+                    "exit_code": code, "verdict": verdict, "observed": row["observed"],
+                    "threshold_pp": row["threshold"] * 100,
+                    "printed_mde_pp": printed_pp,
+                    "resolution_status": resolution["verdict"],
+                    "resolution_proven": resolution["resolution_proven"],
+                    **{field: row.get(field) for field in ("n_at_risk", "flagged_flips", "detection_threshold_flips")},
+                }
+            return result
+
+        axes = axis_projection()
+        axis_json = json.dumps(axes, separators=(",", ":"), allow_nan=False)
+        if gate and not res and not selected:
             # Names what was actually seen rather than asserting the key was absent: an
             # empty object and a missing one land here identically, and the key list is
             # what makes a contract skew diagnosable from the log alone.
@@ -671,6 +789,8 @@ runs:
             return MISSING
 
         def flag(key):
+            if selected and key in ("not_refused", "resolution_proven", "ungated_axis_regressed"):
+                return UNKNOWN
             value = pick(key)
             if value is MISSING:
                 print(f"::warning::gate artifact carried no '{key}' (searched top level, 'resolution' and "
@@ -686,7 +806,7 @@ runs:
             return str(value)
 
         verdict = gate.get("verdict") or UNKNOWN
-        status = res.get("verdict") or UNKNOWN  # resolved | not_refused_resolution_unproven | refused
+        status = UNKNOWN if selected else res.get("verdict") or UNKNOWN
         eps_source = eps.get("source") or "none"
         eps_mode = eps.get("mode") or UNKNOWN
 
@@ -730,7 +850,7 @@ runs:
                 print(f"::warning::{label} was not a number ({raw!r}); reporting '{UNKNOWN}'")
             return UNKNOWN
 
-        mde = as_pp(res.get("printed_mde"), "resolution.printed_mde")
+        mde = UNKNOWN if selected else as_pp(res.get("printed_mde"), "resolution.printed_mde")
 
         # Top-level, per gate.py: "a consumer scanning the top level for a pass must trip
         # over the fact that the resolution behind it is a floor."
@@ -782,6 +902,7 @@ runs:
 
         write_outputs(
             single=(
+                ("axis-results-json", axis_json),
                 ("verdict", verdict),
                 ("replay-source-sha256", replay_hash),
                 ("evaluation-phase", replay_phase),
@@ -864,6 +985,33 @@ runs:
             f"- underlying run verdict: `{inline(underlying)}`",
             f"- over-refusal (UNGATED) axis regressed: `{inline(ungated)}`",
         ]
+        if selected:
+            meaning = {
+                "0": "PASS - no detection under the selected native policy",
+                "2": "OPERATIONAL ERROR - no gate verdict",
+                "3": "FAIL - a selected axis reached native detection",
+                "4": "UNMEASURABLE - a selected axis has no at-risk population",
+                "5": "UNRESOLVABLE - a selected effect is finer than native resolution",
+            }.get(code, "UNKNOWN EXIT CODE")
+            lines = ["### quantfit selected-axis gate", "", f"- exit code: `{code}` - {meaning}",
+                     f"- verdict: `{inline(verdict)}`", f"- epsilon source: `{inline(eps_source)}`",
+                     f"- underlying run verdict: `{inline(underlying)}`"]
+            if axes:
+                for axis, row in axes.items():
+                    lines += ["", f"#### Selected {axis}",
+                              f"- verdict: `{row['verdict']}`; native exit: `{row['exit_code']}`",
+                              f"- effect target: `{row['threshold_pp']:g}` pp; printed MDE: `{row['printed_mde_pp']}` pp",
+                              f"- observed: `{str(row['observed']).lower()}`; at risk: `{row['n_at_risk']}`; flagged: `{row['flagged_flips']}`; k*: `{row['detection_threshold_flips']}`",
+                              f"- resolution: `{row['resolution_status']}`; conditionally proven: `{str(row['resolution_proven']).lower()}`"]
+            else:
+                lines += ["", "Selected-axis fields are unavailable; no per-axis result is inferred."]
+            for axis in ("refusal-robustness", "over-refusal"):
+                row = sub(sub(gate, "diagnostic_axes"), axis)
+                counts = [row.get(key) for key in ("n_at_risk", "flagged_flips")]
+                if row and all(value is None or type(value) is int and 0 <= value <= 4096 for value in counts):
+                    lines += [f"- Ungated {axis}: at risk `{counts[0]}`; flagged `{counts[1]}`; diagnostic only."]
+            lines += ["", "Effects are resolution targets. Each native denominator and outcome stays separate.",
+                      "No joint-error guarantee, human verification or sensitivity is established."]
         if replay:
             lines += ["", "Offline saved-report policy replay; no new inference or judge execution.",
                       f"- consumed report SHA256: `{inline(replay_hash)}`",
@@ -969,7 +1117,7 @@ runs:
 
     - name: Upload gate evidence
       id: upload
-      if: always()
+      if: always() && inputs.artifact-name != ''
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
       with:
         name: ${{ inputs.artifact-name }}
@@ -987,11 +1135,19 @@ runs:
       shell: bash
       env:
         CODE: ${{ steps.run.outputs.exit-code }}
+        AXIS_THRESHOLDS: ${{ inputs.axis-thresholds }}
       run: |
         set -uo pipefail
         if [ -z "${CODE:-}" ]; then
           echo "::error::the gate never ran — an earlier step in this action failed (see above)"
           exit 2
+        fi
+        if [ -n "${AXIS_THRESHOLDS:-}" ]; then
+          case "$CODE" in
+            0) echo 'quantfit selected-axis gate: PASS (exit 0); native no-detection, resolution caveats apply'; exit 0 ;;
+            2|3|4|5) echo "::error::quantfit selected-axis gate exited $CODE; read the native per-axis results"; exit "$CODE" ;;
+            *) echo '::error::unknown selected-axis exit code'; exit 2 ;;
+          esac
         fi
         case "$CODE" in
           0) echo "quantfit gate: PASS (exit 0) — bounded no-detection at the printed resolution, not a certification" ;;

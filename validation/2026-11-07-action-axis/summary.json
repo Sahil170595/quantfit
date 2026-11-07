@@ -1,0 +1,60 @@
+{
+  "baseline": "6cc50a70425ba305313151df4409fcbeb54c1d9a",
+  "caller_mode": "Actual action shell sections plus native CLI; setup/install/upload are exercised by hosted composite callers.",
+  "causal_first_run": {
+    "errors": 0,
+    "failed": 2,
+    "passed": 1,
+    "raw_sha256": "a5016da0d9a2317c61255dd23a4133f9af9883a36e470d910afbe2e0d867151a"
+  },
+  "limits": [
+    "Fictional counts",
+    "No new inference",
+    "No human truth or sensitivity",
+    "No scientific GO",
+    "No local platform uploader or hosted actionlint proof"
+  ],
+  "platform": "Windows",
+  "python": "3.12.13",
+  "saved_action_asserted_exits": [
+    0,
+    2,
+    3,
+    4,
+    5
+  ],
+  "scope": "Source software controls; hosted action and installed distributions remain separate.",
+  "source_raw_sha256": {
+    ".github/actions/quantfit-gate/action.yml": "be343382cbc7b9768ef6a583f17c7f1bf2aa8a2cadbc47f15e9ba6947ef28b40",
+    ".github/workflows/validate.yml": "299f000aad304c8e2f65ef65edd553a473812fcf673157a7b4102b398c6c7b65",
+    "pyproject.toml": "358e95bf64df8e859a151386bb6006e928ce7e26318c46c1500325e762b4549d",
+    "quantfit/__init__.py": "1933e8767bc063ba4d7229a6a672c65eeffb2cf9c2cf2934321bd79bb0438202",
+    "quantfit/axis_gate.py": "b4a15ee8325f83770d6d8c972cbc430a2b2eedea923e2637d2292aa13f93af5f",
+    "quantfit/axis_gate_junit.py": "5dc931b30957d101abc5e7923d5affca269335d0c29b1aa81bee5cec75b3b01d",
+    "quantfit/cli.py": "ba109b0e3e25904a0c18ca74d0f8dfbf569a25d60b35584d825b9cfa4fef0b89",
+    "quantfit/gate.py": "aa1f46da5192364cd7a933a6b287386997e0a4340f8e008445d526144078e569",
+    "tests/test_action_axis.py": "06e7c7f11a258fd1f9b9582925fc9b103c74df9c0b4a19e740f71d7f2ed35f32",
+    "tests/test_action_calibration.py": "226fb588d9c40f2bd50bb128cd6aaf167957aaab63fed798cb8067e9571ab029",
+    "tools/ci_action_axis.py": "462b55c716f244e272dcf3fe2d5b4685b5a8ccc90d98aeef038d467a6338ce22",
+    "tools/ci_axis_gate.py": "0faa1102e1a4c1194ad685e18d48e684ed5f3e754401902822fec84b8ed4c13a",
+    "tools/ci_installed.py": "6ecb637e7a5f75fc62e4d138646189ff4bdcf6a577aa0185e4366f28e47bbfce"
+  },
+  "source_tests": {
+    "errors": 0,
+    "failures": 0,
+    "junit_sha256": "7454c9178f171396998c28e0e470221680ee5b80fda67203c2bc897025318719",
+    "passed": 224,
+    "raw_sha256": "3d5308295abeffcc57b9d11990c9f2f18979ebb1d66c6a44b914026a56a8c041",
+    "skipped": 0,
+    "tests": 224,
+    "warnings": 0
+  },
+  "static": {
+    "audit_errors": 0,
+    "audit_warnings": 0,
+    "mypy_owned_lane": 0,
+    "ruff_check": 0,
+    "ruff_format": 0
+  },
+  "tool_version": "0.57.0"
+}

@@ -41,6 +41,11 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+This source tree is the **unreleased 0.57.0 candidate**. Its reference GitHub
+Action accepts an explicit [selected-axis policy](docs/ci-integration.md#selected-axis-action-source-candidate)
+and reports each selected axis. The current public package is **0.56.0**.
+Candidate acceptance installs the exact wheel through `quantfit-path`.
+
 [Quantfit 0.56.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.56.0)
 adds a [held-completion judge observation and offline comparison](docs/held-judge-observation.md).
 Version 0.55.0 introduced private [whole local hash-pinned probe bundles](docs/offline-probe-bundles.md)
@@ -494,7 +499,8 @@ These are detectable-effect targets, not observed-rate ceilings. All selected
 axes are evaluated before native 3 > 4 > 5 > 0 precedence; zero-risk cannot look
 green in overall JUnit. Unselected evidence remains explicit. Gate-v2 strict
 bundle receiving and the API/CLI contract are in the [selected-axis guide](docs/axis-effect-gates.md).
-The reference action continues to forward legacy policy only.
+The published 0.56 action forwards legacy policy. The 0.57 source candidate
+also forwards an explicit selected-axis policy.
 
 **Gate it in CI (legacy policy, unchanged).** `quantfit gate` is the pre-release check — and it refuses to
 promise resolution it does not have:
