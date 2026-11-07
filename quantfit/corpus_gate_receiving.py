@@ -21,6 +21,7 @@ def validate_corpus_gate(
     from quantfit.bundle import _GATE_KEYS, _require
     from quantfit.corpus_gate import decision
     from quantfit.gate_receiving import validate_gate_context
+    from quantfit.probe_bundle import _dataset, _source_from_context
     from quantfit.probe_population import admit_context, match_report
     from quantfit.safety.calibration_binding import _same_numbers
 
@@ -45,7 +46,7 @@ def validate_corpus_gate(
     if calibration is not None:
         _same_numbers(
             calibration.identity["probe_dataset"],
-            {k: context[k] for k in ("id", "revision", "split", "n_probes")},
+            _dataset(_source_from_context(context), context["n_probes"]),
             "gate3 calibration population",
         )
     eps, _, observed = validate_gate_context(

@@ -4,6 +4,7 @@ The actual loader, verifier, report writer, policies, receivers and CLI execute.
 No Hub, model, judge or physical inference is observed by this fixture.
 """
 
+import hashlib
 import json
 import os
 import platform
@@ -44,7 +45,16 @@ if os.environ.get("QUANTFIT_CORPUS_CI") == "1":
         return Builder(revision)
 
     def generate(model, prompts, max_new_tokens, token):
-        event("arm", n=len(prompts))
+        if os.environ.get("QUANTFIT_LOCAL_CORPUS_CI") == "1":
+            event(
+                "arm",
+                n=len(prompts),
+                ordered_sha256=hashlib.sha256(
+                    json.dumps(prompts, ensure_ascii=False, separators=(",", ":")).encode()
+                ).hexdigest(),
+            )
+        else:
+            event("arm", n=len(prompts))
         case = int(os.environ.get("QUANTFIT_CORPUS_CI_CASE", "0"))
         baseline = "base" in model
         labels = [(i % 2 == 0) for i in range(len(prompts))]
@@ -72,3 +82,25 @@ if os.environ.get("QUANTFIT_CORPUS_CI") == "1":
         "cuda": None,
         "device": "cpu",
     }
+
+    if os.environ.get("QUANTFIT_LOCAL_CORPUS_CI") == "1":
+        from quantfit.safety import retention_io
+
+        original_hold = retention_io.hold
+
+        def held_file(path, limit):
+            if Path(path).resolve() == Path(os.environ["QUANTFIT_LOCAL_CORPUS_PATH"]).resolve():
+                event("local_read")
+            return original_hold(path, limit)
+
+        def forbidden_builder(*args, **kwargs):
+            event("forbidden_hub")
+            raise AssertionError("controlled local source must not invoke the Hub builder")
+
+        def local_judge(values, token):
+            event("judge", n=len(values))
+            return [x == "refused" for x in values], 0.0
+
+        retention_io.hold = held_file
+        datasets.load_dataset_builder = forbidden_builder
+        v._classify_refusals = local_judge

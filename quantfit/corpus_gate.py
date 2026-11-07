@@ -10,6 +10,7 @@ from typing import Any
 
 from quantfit import gate
 from quantfit import probe_population as population
+from quantfit.probe_bundle import LocalProbeCorpus, _pin
 from quantfit.safety.verify import ProbeCorpus, _corpus
 
 SCOPE = (
@@ -82,7 +83,7 @@ def decision(
             message = (
                 f"REFUSED before loading any model or judge: native best-case n={n} for the "
                 f"declared {gate._pp(effect)} effect cannot resolve this policy on "
-                f"{context['id']}@{context['revision']}/{context['split']}; none was started."
+                f"{_pin(context, include_split=True)}; none was started."
             )
             options = {
                 "block": block,
@@ -186,7 +187,9 @@ def run_corpus_gate(
     baseline: str,
     quant: str,
     *,
-    probe_corpus: ProbeCorpus,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus,
+    probe_bundle_path: str | None = None,
+    _publication_outputs: tuple[str, ...] = (),
     threshold: float | None = None,
     tier: str | None = None,
     axis_thresholds: Mapping[str, float] | None = None,
@@ -212,7 +215,9 @@ def run_corpus_gate(
         gate._require(type(max_new_tokens) is int and max_new_tokens > 0, "invalid max_new_tokens")
         model_inputs = _local_model_inputs((baseline, quant))
         _admit_publication_paths(
-            [calibration_report, *model_inputs], [report_path, out_path], cache_dir=baseline_cache_dir
+            [calibration_report, probe_bundle_path, *model_inputs],
+            [report_path, out_path, *_publication_outputs],
+            cache_dir=baseline_cache_dir,
         )
         verify._admit_verify_options(
             baseline, quant, probe_corpus=source, baseline_cache_dir=baseline_cache_dir, max_new_tokens=max_new_tokens
@@ -224,7 +229,17 @@ def run_corpus_gate(
             eps = calibration_epsilon(bound)
         else:
             eps = gate._eps(eps_upper, eps_source)
-        held = population.prepare(token, source)
+        held = population.prepare(token, source, probe_bundle_path=probe_bundle_path)
+        if held.held_file is not None:
+            from dataclasses import replace
+
+            held = replace(
+                held,
+                publication_inputs=tuple(str(p) for p in (calibration_report, *model_inputs) if p is not None),
+                publication_outputs=tuple(
+                    str(p) for p in (report_path, out_path, *_publication_outputs) if p is not None
+                ),
+            )
         context = population.context(held)
         if bound is not None:
             _same_numbers(
@@ -273,8 +288,12 @@ def run_corpus_gate(
             drift=drift,
             context=context,
         )
+        if held.held_file is not None:
+            held.held_file.check()
         _admit_publication_paths(
-            [calibration_report, *model_inputs], [report_path, out_path], cache_dir=baseline_cache_dir
+            [calibration_report, probe_bundle_path, *model_inputs],
+            [report_path, out_path, *_publication_outputs],
+            cache_dir=baseline_cache_dir,
         )
         if raw is not None and report_path is not None:
             Path(report_path).write_bytes(raw)
@@ -290,7 +309,7 @@ def run_corpus_gate(
 def evaluate_corpus_report(
     source_path: str,
     *,
-    probe_corpus: ProbeCorpus,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus,
     threshold: float | None = None,
     tier: str | None = None,
     axis_thresholds: Mapping[str, float] | None = None,

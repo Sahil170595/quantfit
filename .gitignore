@@ -35,6 +35,8 @@ cases/
 *.adjudication.csv
 *.adjudication.html
 *.annotation.html
+*.probe-rows.json
+*.probe-bundle.json
 *.adjudication-preparation.json
 *.baseline-cache.json
 # Inspect eval logs hold model completions the same way a capture does.

@@ -672,6 +672,14 @@ qualification remains pending for this candidate.
 | `--probe-split` | verify-safety, inspect-run (since 0.51); gate/screen/screen-summary (0.53 candidate) | One literal whole named split; no union/slice/all; actual source propagated into all outputs/cache. | Native source/cache/Inspect fixtures; no curation/authenticity claim |
 | Explicit pinned-corpus gate/screen profile | gate, screen, screen-summary (0.53 candidate) | Actual expected-label census drives unchanged native resolution; one held population across targets/retries; saved/complete resume is offline under the explicit triple. Flat gate-v3 and summary-v2 carry typed source/census context. | `tests/test_corpus_gate.py`, `tests/test_corpus_boundaries.py`, `tests/test_corpus_calibration.py`, `tests/test_corpus_publication.py`, `tests/test_ci_corpus_gate.py`; `validation/2026-11-02-pinned-corpus-gates/functional-b.json` records the current controlled native API and seven OS CLI calls. No real Hub/model, remote completeness/authentication, transferred sensitivity or scientific GO; current installed/hosted qualification is separate. |
 
+### Private local corpus source flags (0.55 candidate)
+
+| Flag | Command | What has actually run | Evidence |
+|---|---|---|---|
+| `--rows` | probes bundle (0.55 candidate) | Private whole local JSON array, strict native rows/EOF/raw+selected bounds before exclusive output; no source curation. | `tests/test_probe_bundle.py`; `tests/test_probe_bundle_admission.py`; `validation/2026-11-02-offline-probe-bundles/` |
+| `--probe-bundle` | live verify-safety, inspect-run, gate, screen/partial resume (0.55 candidate) | Explicit private file paired with full raw SHA; one held complete native population before model/observer. Exclusive with Hub triplet. | `tests/test_probe_bundle_flows.py`; `tests/test_probe_bundle_cache_identity.py`; `tests/test_ci_probe_bundle.py` |
+| `--probe-sha256` | live pair and saved gate/screen-summary/complete resume (0.55 candidate) | Exact expected local identity, not a Hub revision. Saved complete work needs no local file/network; context/census remains typed and conditional. | `tests/test_probe_bundle_admission.py`; `tests/test_ci_probe_bundle.py`; `validation/2026-11-02-offline-probe-bundles/` |
+
 ## 4. Advertised-but-unevidenced claims found while writing this
 
 These are docs=code findings, not command rows. Each is a claim on a shipped surface
@@ -882,3 +890,17 @@ strength of code review alone.
 | --- | --- | --- | --- |
 | `--sheet` / `--key` / `--manifest` / `--out-dir` / `--json` | calibrate chunks packets | All required, original held native blank/key/stored-version manifest; every part receives a fresh private page in an existing empty directory. No new labels, sharing authority or population selection. Worst complete returned CSV/full-sheet budgets and page/aggregate caps before publication. | `tests/test_annotation_packets.py`; `tests/test_ci_annotation_packets.py`; `validation/2026-11-02-annotation-packets/` controlled API/OS CLI/native receiving; hosted/installed qualification separate. |
 | Explicit recipient choices | Private offline page | Blank/refusal/compliance/unusable; frozen ID/string export, exact CSV, no hidden unblinding fields/network/storage. Unchanged complete native collection and separate schema2/schema3 ingestion. No human/source authentication or science claim. | Source controls and two hosted Linux installed browser profiles; no local browser. |
+
+
+### Private whole local corpus source candidate (2026-11-02, unreleased 0.55.0)
+
+| Flag | Native commands | Software boundary | Current evidence |
+| --- | --- | --- | --- |
+| `--rows` / `--out` | probes bundle | Explicit private whole array, closed native rows; strict UTF-8/EOF/raw/selected limits, exclusive new bundle. No sampling/curation authority. | `tests/test_probe_bundle.py`; `tests/test_probe_bundle_admission.py`; `validation/2026-11-02-offline-probe-bundles/` |
+| `--probe-bundle` + `--probe-sha256` | live verify-safety, inspect-run, gate, screen/partial resume | All-or-none local pair exclusive with Hub triplet; one held complete population before model/observer, full raw identity and census across every native target/retry. | `tests/test_probe_bundle_flows.py`; `tests/test_probe_bundle_cache_identity.py`; `tests/test_probe_bundle_cache_roles.py` |
+| `--probe-sha256` alone | saved gate, screen-summary, complete screen resume | Explicit expected local identity, strict aggregate receiving and all-missing null context; source may already be deleted. No file/network read or authentication of chronology. | `tests/test_ci_probe_bundle.py`; API plus sixteen real fresh OS CLI commands, four refused; source-controlled fixtures only, installed/hosted separate. |
+
+Native preflight/post-run resolution and priority 3>4>5>0, conditional directional
+epsilon/MAX, calibration and judge assumptions are unchanged. Default Hub/None
+compatibility does not transfer default-distribution FPR, sensitivity, canonical
+T0/reference authority or scientific GO to these declared local rows.

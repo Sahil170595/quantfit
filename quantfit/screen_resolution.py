@@ -14,6 +14,7 @@ from quantfit import resolution
 from quantfit import saved_screen as saved
 from quantfit.bundle import _json, _no_links, _read
 from quantfit.junit import screen_to_junit
+from quantfit.probe_bundle import LocalProbeCorpus
 from quantfit.reproduce import (
     _canonical_receiving_path,
     _publish_reproduction_outputs,
@@ -220,7 +221,10 @@ def _analyze_rows(prepared: _PreparedResolution, *, use_prepared: bool = False) 
 
 
 def _summarize_inputs(
-    native: saved._HeldScreenInputs, calibrations: _HeldCalibrations, *, probe_corpus: ProbeCorpus | None = None
+    native: saved._HeldScreenInputs,
+    calibrations: _HeldCalibrations,
+    *,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> dict[str, Any]:
     """Pure held receiving/preflight followed by the single authoritative analysis path."""
     result: dict[str, Any] = saved._summarize_held(
@@ -267,7 +271,7 @@ def summarize_screen_with_resolution(
     out_path: str | None = None,
     junit_path: str | None = None,
     required_conditional_resolution_pp: float | None = None,
-    probe_corpus: ProbeCorpus | None = None,
+    probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> dict[str, Any]:
     required_conditional_resolution_pp = validate_requirement(required_conditional_resolution_pp)
     phase = "invalid_resolution_input"

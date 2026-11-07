@@ -7,11 +7,15 @@ nor curation. Saved contexts describe consumed native reports, without Hub I/O.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+from quantfit.probe_bundle import LOCAL_FIELDS, LocalProbeCorpus, _dataset, _identity, _load, _source_from_context
 from quantfit.resolution import MAX_PROBES
 from quantfit.safety.calibration_binding import BoundCalibration
 from quantfit.safety.verify import Probe, ProbeCorpus, _corpus
+
+if TYPE_CHECKING:
+    from quantfit.safety.retention_io import HeldFile
 
 ZONES = ("clear_safe", "clear_unsafe", "borderline")
 FIELDS = {
@@ -34,23 +38,32 @@ def _require(ok: bool, message: str) -> None:
 
 @dataclass(frozen=True, slots=True)
 class _PreparedPopulation:
-    source: ProbeCorpus
+    source: ProbeCorpus | LocalProbeCorpus
     probes: tuple[Probe, ...]
+    held_file: HeldFile | None = None
+    publication_inputs: tuple[str, ...] = ()
+    publication_outputs: tuple[str, ...] = ()
 
 
-def prepare(token: str | None, source: ProbeCorpus) -> _PreparedPopulation:
+def prepare(
+    token: str | None, source: ProbeCorpus | LocalProbeCorpus, *, probe_bundle_path: str | None = None
+) -> _PreparedPopulation:
     from quantfit.safety import verify
 
-    held_source, probes = verify._prepare_probes(token, _corpus(source))
+    source = _corpus(source)
+    if type(source) is LocalProbeCorpus:
+        probes, held = _load(probe_bundle_path, source)
+        return _PreparedPopulation(source, tuple(probes), held)
+    if probe_bundle_path is not None:
+        raise RuntimeError("invalid_probe_corpus_options")
+    held_source, probes = verify._prepare_probes(token, source)
     return _PreparedPopulation(held_source, tuple(probes))
 
 
 def context(population: _PreparedPopulation) -> dict[str, Any]:
     source, probes = population.source, population.probes
     return {
-        "id": source.id,
-        "revision": source.revision,
-        "split": source.split,
+        **_identity(source),
         "n_probes": len(probes),
         "expected_unsafe_n": sum(p.expected == "unsafe" for p in probes),
         "expected_safe_n": sum(p.expected == "safe" for p in probes),
@@ -59,12 +72,10 @@ def context(population: _PreparedPopulation) -> dict[str, Any]:
     }
 
 
-def unavailable(source: ProbeCorpus) -> dict[str, Any]:
+def unavailable(source: ProbeCorpus | LocalProbeCorpus) -> dict[str, Any]:
     source = _corpus(source)
     return {
-        "id": source.id,
-        "revision": source.revision,
-        "split": source.split,
+        **_identity(source),
         "n_probes": None,
         "expected_unsafe_n": None,
         "expected_safe_n": None,
@@ -74,8 +85,10 @@ def unavailable(source: ProbeCorpus) -> dict[str, Any]:
 
 
 def admit_context(value: Any, *, allow_missing: bool = False) -> dict[str, Any]:
-    _require(type(value) is dict and set(value) == FIELDS, "invalid_probe_corpus_context")
-    _corpus(ProbeCorpus(value["id"], value["revision"], value["split"]))
+    _require(type(value) is dict, "invalid_probe_corpus_context")
+    fields = (FIELDS - {"id", "revision", "split"}) | LOCAL_FIELDS if "source_kind" in value else FIELDS
+    _require(set(value) == fields, "invalid_probe_corpus_context")
+    _source_from_context(value)
     _require(type(value["population_basis"]) is str and value["population_basis"] in BASES, "invalid_population_basis")
     if value["population_basis"] == "unavailable_no_reports":
         _require(
@@ -104,7 +117,7 @@ def admit_context(value: Any, *, allow_missing: bool = False) -> dict[str, Any]:
     return {**value, "zone_counts": None if value["zone_counts"] is None else dict(value["zone_counts"])}
 
 
-def report_context(report: Any, source: ProbeCorpus) -> dict[str, Any]:
+def report_context(report: Any, source: ProbeCorpus | LocalProbeCorpus) -> dict[str, Any]:
     from quantfit.resolution import _axes
     from quantfit.safety.calibration_binding import _same_numbers
 
@@ -113,16 +126,14 @@ def report_context(report: Any, source: ProbeCorpus) -> dict[str, Any]:
     n = report.drift["n_probes"]
     _same_numbers(
         report.probe_dataset,
-        {"id": source.id, "revision": source.revision, "split": source.split, "n_probes": n},
+        _dataset(source, n),
         "expected pinned native probe dataset",
     )
     zones = report.drift["by_zone"]
     _require(set(zones) <= set(ZONES), "unsupported_native_probe_zone")
     return admit_context(
         {
-            "id": source.id,
-            "revision": source.revision,
-            "split": source.split,
+            **_identity(source),
             "n_probes": n,
             "expected_unsafe_n": report.drift["refusal_robustness"]["expected_unsafe_n"],
             "expected_safe_n": report.drift["over_refusal"]["expected_safe_n"],
@@ -136,7 +147,7 @@ def match_report(report: Any, expected: dict[str, Any]) -> None:
     from quantfit.safety.calibration_binding import _same_numbers
 
     expected = admit_context(expected)
-    actual = report_context(report, ProbeCorpus(expected["id"], expected["revision"], expected["split"]))
+    actual = report_context(report, _source_from_context(expected))
     _same_numbers(
         {k: v for k, v in actual.items() if k != "population_basis"},
         {k: v for k, v in expected.items() if k != "population_basis"},
@@ -145,7 +156,7 @@ def match_report(report: Any, expected: dict[str, Any]) -> None:
 
 
 def preflight_calibration(
-    path: str, source: ProbeCorpus, baseline: str, quant: str, max_tokens: int
+    path: str, source: ProbeCorpus | LocalProbeCorpus, baseline: str, quant: str, max_tokens: int
 ) -> BoundCalibration:
     from quantfit.safety import verify as v
     from quantfit.safety.calibration_binding import _same_numbers, load_bound_calibration
@@ -158,8 +169,8 @@ def preflight_calibration(
     )
     dataset = bound.identity["probe_dataset"]
     _same_numbers(
-        {k: dataset[k] for k in ("id", "revision", "split")},
-        {"id": source.id, "revision": source.revision, "split": source.split},
+        {k: v for k, v in dataset.items() if k != "n_probes"},
+        _identity(source),
         "requested calibration corpus",
     )
     _require(

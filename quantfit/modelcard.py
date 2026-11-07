@@ -278,6 +278,13 @@ def _unmeasurable_warning(drift: dict) -> list[str]:
 def _provenance(report: DriftReport) -> list[str]:
     judge = report.judge
     dataset = report.probe_dataset
+    if "source_kind" in dataset:
+        from quantfit.probe_bundle import _admit_local_dataset
+
+        _admit_local_dataset(dataset)
+        probe_line = f"- **Probes** private local format `{dataset['format']}`; whole RAW SHA256 `{dataset['sha256']}` — n={dataset['n_probes']}"
+    else:
+        probe_line = f"- **Probes** `{dataset['id']}` @ `{dataset['revision']}` — n={dataset['n_probes']}"
     lines = [
         "### Provenance",
         "",
@@ -292,7 +299,7 @@ def _provenance(report: DriftReport) -> list[str]:
             if judge.get("card_xstest_accuracy") is not None
             else f"  - {judge['card_xstest_accuracy_label']}"
         ),
-        f"- **Probes** `{dataset['id']}` @ `{dataset['revision']}` — n={dataset['n_probes']}",
+        probe_line,
         f"- **Decode** {_decode(report.decode)}",
         *_arm_lines("Baseline arm", report.baseline),
         *_arm_lines("Quantized arm", report.quantized),

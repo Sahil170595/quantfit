@@ -412,3 +412,19 @@ schema-3 ingestion remain separate explicit steps. Page choices and hashes do
 not authenticate a person, source, label truth or independence. Software-only
 fictional hosted fixtures must remain in their parent-owned private handoff until
 native receiving closes; only aggregate logs may leave that handoff.
+
+
+## 2026-11-02 source addendum: private local probe populations (unreleased 0.55)
+
+Both `*.probe-rows.json` and `*.probe-bundle.json` contain protected private input
+strings and explicit operator labels. Never commit, attach, upload or include
+them in browser artifacts; the narrow ignores are accidental-add backstops only.
+Keep captures, Inspect logs, keys and human worksheets under their existing
+private rules. A full raw SHA identifies bytes and can correlate sources across
+reports; it is no source authentication, curation or sharing permission.
+
+Use the builder's counts/hash receipt for reproducibility. Saved receiving needs
+only the expected local identity and aggregate reports, never the original file.
+Operational held bundle carriers do not enter generic dataclass/asdict fields;
+this does not make arbitrary Inspect logs or user metadata safe to publish.
+Existing named-annotator/subsample/retention permissions remain unchanged.
