@@ -1,5 +1,10 @@
 # CLI reference — every command, every flag
 
+The unreleased 0.57.0 source candidate adds [reference-action selected-axis
+forwarding](ci-integration.md#selected-axis-action-source-candidate). The existing
+CLI `--axis-threshold AXIS=PP` and its native policy are unchanged. Public
+installation commands below use 0.56.0.
+
 This reference documents quantfit 0.56.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,

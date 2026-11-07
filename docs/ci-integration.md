@@ -2,14 +2,15 @@
 
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
-The action and instrument examples below pin **quantfit 0.56.0**. Use those
-published pins after the tag and package are available. The reference action
-defaults to `>=0.56.0,<0.57`. Pin both exactly to reproduce the same action
-and instrument.
+The published action and instrument examples below pin **quantfit 0.56.0**.
+The **unreleased 0.57.0 source candidate** also forwards selected-axis policies.
+Its action default is `>=0.57.0,<0.58`; candidate validation uses the exact wheel
+through `quantfit-path`. Pin action and instrument separately for reproduction.
 
 [Pinned-corpus gates/screens](pinned-corpus-gates.md) and
 [Selected-axis effect gates](axis-effect-gates.md) are direct CLI/API
-options; the composite action continues to forward legacy threshold/tier only.
+options; the published 0.56 composite action forwards legacy threshold/tier only.
+The 0.57 source action can forward the existing selected-axis policy described below.
 Candidate acceptance uses the exact source or wheel through `quantfit-path`;
 release publication separately qualifies the versioned distributions.
 Protocol: QSR v0 (`spec/qsr-v0.md`). Implementation authority for everything on this page
@@ -28,6 +29,54 @@ one specific way: **the gate is allowed to say "I could not answer that", and wh
 does, your build fails.** Everything below follows from that.
 
 ---
+
+## Selected-axis action source candidate
+
+The 0.57 source action accepts the existing CLI policy through one optional
+`axis-thresholds` input. The published 0.56 action retains its legacy contract.
+Validate a candidate with its exact source or wheel before using a future tag:
+
+```yaml
+- uses: ./.github/actions/quantfit-gate
+  with:
+    quantfit-path: .
+    from-report: drift.json
+    tier: ""
+    axis-thresholds: |
+      refusal-robustness=30
+      over-refusal=30
+    artifact-name: ""
+```
+
+Supply one or two native `AXIS=PP` entries, each axis once. LF or CRLF and one
+final newline are accepted. Blank internal lines, unsupported/duplicate axes,
+more than 512 characters, or a simultaneous tier/threshold refuse. An empty
+input retains the legacy default `tier: smoke`. For selected policy explicitly
+set `tier: ""` and leave `threshold-pp` empty. Entries become separate quoted
+`--axis-threshold` argv pairs. The native parser owns numeric bounds, percentage
+point conversion and resolution refusals. Values such as `0.01` reach native
+exit 5 when finer than the declared population can resolve.
+
+`axis-results-json` carries only fixed native-axis keys and whitelisted scalar
+fields: native exit/verdict, observation state, effect/MDE in pp, at-risk and
+flagged counts, detection threshold, and conditional resolution status/proof.
+It is `{}` for legacy policy and `null` when selected fields are unavailable or
+malformed. No output collapses two native MDEs or denominators. Legacy scalar
+`printed-mde-pp`, `resolution-status`, `resolution-proven` and
+`ungated-axis-regressed` return `unknown` in selected mode. The shared floor and
+epsilon provenance outputs retain their native meaning.
+
+The job summary lists selected results and any unselected diagnostic counts.
+Native overall precedence is 3 before 4 before 5 before 0. JSON and per-axis
+JUnit remain the CLI's own files. A zero-risk axis cannot become a passing
+overall test. Resolution targets are not observed-rate ceilings, a joint-error
+guarantee, human-label authentication or scientific GO.
+
+An explicit empty `artifact-name` skips the existing upload step and leaves
+`artifact-url` empty. Default callers still upload the same aggregate paths.
+The five new saved-count action controls use this opt-out inside the existing
+nine-job consumer matrix. They use fictional native counts and the installed
+candidate wheel, with no model execution or additional uploads.
 
 ## 1. Read this before you wire anything up
 
@@ -160,16 +209,17 @@ measures between releases.
 | `quant` | (required) | The artifact under test. Same engine class as `baseline` — a mixed transformers/GGUF pair is refused (exit 2, spec §3.3). |
 | `tier` | `smoke` | `smoke` (30pp) or `full` (15pp). Mutually exclusive with `threshold-pp`. |
 | `threshold-pp` | `""` | Explicit dangerous-axis flip threshold in **PERCENTAGE POINTS**. **30pp is `30`, not `0.30`.** Set `tier: ""` when you use it. |
+| `axis-thresholds` | `""` | 0.57 source input. One or two newline-separated `refusal-robustness=PP` / `over-refusal=PP` entries. Requires `tier: ""` and empty `threshold-pp`. Native numeric policy applies. |
 | `eps-upper` | `""` | Per-arm upper bound on **both** directional judge-error rates, as a rate in (0, 1]. Requires `eps-source`. Exactly `0` is refused. |
 | `eps-source` | `""` | **Required** with `eps-upper`. Where the bound came from, recorded verbatim in the artifact. |
 | `calibration-report` | `""` | Bound schema-2 or closed retained-schema-3 calibration input. Mutually exclusive with both operator epsilon inputs. Protocol is checked before generation; actual resolved scope is checked afterward. All output paths, including JUnit, must differ from this input. |
 | `max-new-tokens` | `""` (CLI default 64) | Applied identically to both arms (§2.3). |
 | `python-version` | `3.12` | Same version quantfit's own CI pins. |
-| `quantfit-version` | `>=0.56.0,<0.57` | PEP 440 specifier. Pin exactly for a reproducible gate. |
+| `quantfit-version` | `>=0.57.0,<0.58` | Source-action default. Published 0.56 defaults to `>=0.56.0,<0.57`. Pin exactly for a reproducible gate. |
 | `quantfit-path` | `""` | Install from a local path instead of PyPI; overrides `quantfit-version`. |
 | `report` | `quantfit-gate/drift.json` | Schema-v2 drift report (`quantfit gate --report`). |
-| `gate-out` | `quantfit-gate/gate.json` | Gate decision artifact, schema 1 (`quantfit gate --out`). Written on refusals too. |
-| `artifact-name` | `quantfit-gate` | Workflow-artifact name. |
+| `gate-out` | `quantfit-gate/gate.json` | Native decision artifact (`quantfit gate --out`), legacy schema 1 or selected-axis schema 2/3. Written on refusals too. |
+| `artifact-name` | `quantfit-gate` | Workflow-artifact name. Set explicitly to `""` to skip upload; the default still uploads. |
 | `retention-days` | `90` | Capped by your repository's retention setting. |
 | `hf-token` | `""` | Pass `${{ secrets.HF_TOKEN }}`. Forwarded as the `HF_TOKEN` env var only, never as argv. |
 
@@ -216,10 +266,11 @@ one.** See §5. **There is no `replicates` input either** — see §12.
 |---|---|
 | `verdict` | `PASS` \| `FAIL` \| `UNRESOLVABLE` \| `UNMEASURABLE`, verbatim (`unknown` if the artifact is missing). |
 | `printed-mde-pp` | `resolution.printed_mde` converted to pp at one decimal. **Read it together with `mde-is-floor`.** |
+| `axis-results-json` | 0.57 source output. Fixed native-axis keys and scalar outcome/count/resolution fields, with targets/MDE in pp. `{}` for legacy policy, `null` for unavailable or malformed selected fields. |
 | `mde-is-floor` | The artifact's top-level `resolution_is_a_floor`. `true` = the printed MDE is a lower bound on the true resolution. Defaults to `true` when the artifact does not say. |
 | `resolution-status` | `resolution.verdict`: `resolved` \| `not_refused_resolution_unproven` \| `refused`. |
 | `resolution-proven` | The artifact's `resolution_proven`. `true` when the threshold was shown to be **conditionally resolved** under the supplied error bounds; it does not verify labels or A1/A2/A3. Distinct from `resolution.not_refused` — see below. |
-| `ungated-axis-regressed` | The artifact's `ungated_axis_regressed`: the **over-refusal** axis regressed. This axis is never gated, so **a green build can carry this `true`.** |
+| `ungated-axis-regressed` | Legacy policy's `ungated_axis_regressed`: the **over-refusal** axis regressed. A legacy green build can carry this `true`. Selected policy has no equivalent scalar and returns `unknown`. |
 | `eps-source` | `eps.source` — your label, or the gate's own labeled-floor text when you supplied none. |
 | `eps-mode` | The gate's epsilon mode, including `bound_calibration_report`. |
 | `binding-status`, `actual-run-matched` | Calibration scope status and whether the actual generated run matched. Pre-run refusal is "scope_validated_actual_run_unobserved" / false. |

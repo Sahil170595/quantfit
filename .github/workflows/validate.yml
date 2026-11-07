@@ -267,6 +267,37 @@ jobs:
           ACTION_ASSUMPTIONS: ${{ steps.gate.outputs.assumptions-verified }}
           ACTION_HUMAN: ${{ steps.gate.outputs.human-labels-verified }}
           ACTION_CALIBRATION_HASH: ${{ steps.gate.outputs.calibration-sha256 }}
+      - name: Prepare selected-axis saved fixture
+        if: matrix.calibration == 'none' && matrix.replay == 'none'
+        run: python tools/ci_action_axis.py prepare --root axis-cases/${{ matrix.code }} --code ${{ matrix.code }}
+      - id: axis-gate
+        if: matrix.calibration == 'none' && matrix.replay == 'none'
+        uses: ./.github/actions/quantfit-gate
+        continue-on-error: true
+        env:
+          PIP_NO_INDEX: '1'
+          HF_HUB_OFFLINE: '1'
+        with:
+          from-report: axis-cases/${{ matrix.code }}/source.json
+          quantfit-path: ${{ env.WHEEL }}
+          python-version: ''
+          tier: ''
+          axis-thresholds: ${{ matrix.code == 2 && 'over-refusal=nan' || (matrix.code == 5 && 'over-refusal=0.01' || 'over-refusal=30') }}
+          report: axis-cases/${{ matrix.code }}/drift.json
+          gate-out: axis-cases/${{ matrix.code }}/gate.json
+          junit: axis-cases/${{ matrix.code }}/junit.xml
+          artifact-name: ''
+      - name: Verify selected-axis action and native receiving
+        if: always() && matrix.calibration == 'none' && matrix.replay == 'none'
+        run: python tools/ci_action_axis.py check --root axis-cases/${{ matrix.code }} --code ${{ matrix.code }}
+        env:
+          ACTION_OUTCOME: ${{ steps.axis-gate.outcome }}
+          ACTION_CODE: ${{ steps.axis-gate.outputs.exit-code }}
+          ACTION_VERDICT: ${{ steps.axis-gate.outputs.verdict }}
+          ACTION_AXIS_RESULTS: ${{ steps.axis-gate.outputs.axis-results-json }}
+          ACTION_MDE: ${{ steps.axis-gate.outputs.printed-mde-pp }}
+          ACTION_PROVEN: ${{ steps.axis-gate.outputs.resolution-proven }}
+          ACTION_UNGATED: ${{ steps.axis-gate.outputs.ungated-axis-regressed }}
 
   lint-audit:
     runs-on: ubuntu-latest
@@ -318,7 +349,7 @@ jobs:
           mypy --strict --follow-imports=silent quantfit/calibration_choices.py tools/ci_calibration_choices.py
           mypy --strict --follow-imports=silent quantfit/adjudication_record.py quantfit/safety/adjudication.py quantfit/screen_adjudication.py tools/ci_adjudication.py tools/ci_adjudication_verification.py tools/ci_screen_adjudication.py quantfit/safety/adjudication_review.py tools/ci_adjudication_review.py tools/ci_adjudication_review_browser.py
           mypy --strict --follow-imports=silent quantfit/screen_requirement.py tools/ci_screen_requirement.py
-          mypy --strict --follow-imports=silent quantfit/axis_gate.py quantfit/gate_axis.py quantfit/axis_gate_live.py quantfit/axis_gate_receiving.py quantfit/axis_gate_junit.py quantfit/gate_receiving.py tools/ci_axis_gate.py tools/ci_axis_gate_record.py
+          mypy --strict --follow-imports=silent quantfit/axis_gate.py quantfit/gate_axis.py quantfit/axis_gate_live.py quantfit/axis_gate_receiving.py quantfit/axis_gate_junit.py quantfit/gate_receiving.py tools/ci_axis_gate.py tools/ci_axis_gate_record.py tools/ci_action_axis.py
           mypy --strict --follow-imports=silent quantfit/probe_population.py quantfit/corpus_gate.py quantfit/corpus_gate_receiving.py quantfit/probe_bundle.py tools/ci_corpus_gate.py tools/ci_corpus_gate_record.py tools/ci_probe_bundle.py tools/ci_probe_bundle_record.py
           quantfit audit
       - name: Verify and run actionlint
