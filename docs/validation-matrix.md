@@ -682,6 +682,8 @@ qualification remains pending for this candidate.
 | `--probe-bundle` | live verify-safety, inspect-run, gate, screen/partial resume (0.55 candidate) | Explicit private file paired with full raw SHA; one held complete native population before model/observer. Exclusive with Hub triplet. | `tests/test_probe_bundle_flows.py`; `tests/test_probe_bundle_cache_identity.py`; `tests/test_ci_probe_bundle.py` |
 | `--probe-sha256` | live pair and saved gate/screen-summary/complete resume (0.55 candidate) | Exact expected local identity, not a Hub revision. Saved complete work needs no local file/network; context/census remains typed and conditional. | `tests/test_probe_bundle_admission.py`; `tests/test_ci_probe_bundle.py`; `validation/2026-11-02-offline-probe-bundles/` |
 
+| `--recovery-out` / `--checkpoint` / `--sha256` / `--out` | inspect-run / inspect-recover (0.60 candidate) | Opt-in completed native observed Inspect checkpoint before final report replace; known CLI sinks before model work, SDK sinks before explicit write. Pinned offline exact-byte recovery with original native0/3/4, no raw EvalLog or rerun. Strict types/identity/counts/bounds/aliases, prior checkpoints preserved. | `tests/test_inspect_recovery.py`; `validation/2026-11-07-inspect-recovery/`; current hosted/installed qualification separate. |
+
 ## 4. Advertised-but-unevidenced claims found while writing this
 
 These are docs=code findings, not command rows. Each is a claim on a shipped surface

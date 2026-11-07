@@ -13,6 +13,20 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.60.0 — Unreleased
+
+- Add opt-in `inspect-run --recovery-out` and `QsrRun.write_report(recovery_out=...)`:
+  checkpoint the completed corrected native observed-HF/GGUF aggregate before
+  final report replacement. A final publication error returns the retained raw
+  checkpoint pin and count/runtime receipt with operational exit 2.
+- Add pinned offline `inspect-recover` / `recover_inspect_report` to restore those
+  exact aggregate bytes to a fresh exclusive file. Native source/observation
+  binding, original metadata and native 0/3/4 outcome are preserved without
+  evaluation, generation, scoring, judging or asset lookup. Checkpoints contain
+  no raw Inspect log, completions, probes or extra observer/protected-input paths.
+  The original report's model locators remain unchanged; this is not redaction
+  or authentication. [Controlled software evidence](validation/2026-11-07-inspect-recovery/).
+
 ## 0.56.0 — 2026-11-06
 
 - Add a pinned judge rerun over a held native capture and an offline comparison

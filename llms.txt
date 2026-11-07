@@ -74,3 +74,5 @@ Additional released workflows (see the versioned README install pin):
 - [Contributing](https://github.com/Sahil170595/quantfit/blob/main/CONTRIBUTING.md): the hermetic-test rule, the exit-code taxonomy, and the pinning discipline.
 - [Bus factor](https://github.com/Sahil170595/quantfit/blob/main/docs/bus-factor.md): what breaks if the maintainer stops.
 - [Security](https://github.com/Sahil170595/quantfit/blob/main/SECURITY.md): the supply-chain posture, including what the llama.cpp SHA256 pin does and does not cover.
+
+- [Inspect report recovery (unreleased 0.60.0 source)](https://github.com/Sahil170595/quantfit/blob/codex/inspect-report-recovery060/docs/inspect-run.md): `inspect-run --report REPORT --recovery-out CHECKPOINT` retains a completed corrected native aggregate before final replace; `inspect-recover --checkpoint CHECKPOINT --sha256 FULL64 --out NEWREPORT` restores exactly without redoing inference/judging. Native outcomes and unknowns remain. Public installation is 0.56.0.

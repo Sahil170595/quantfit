@@ -1351,6 +1351,8 @@ def write_drift_report(
     protected_inputs: tuple[str, ...] = (),
     _held_probe_bundle=None,
     probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    recovery_out: str | None = None,
+    _recovery_record: dict[str, Any] | None = None,
 ) -> Path:
     """Emit this Inspect run as a schema-v2 `DriftReport` — the comparability deliverable.
 
@@ -1411,8 +1413,13 @@ def write_drift_report(
 
     inputs = (*protected_inputs, *local_gguf_inputs((baseline.model, quantized.model)))
     final = check_report_output(path, inputs)
+    if recovery_out is not None:
+        from quantfit.inspect_recovery import admit_recovery_paths
+
+        admit_recovery_paths(path, recovery_out, inputs)
     fd, tmp_name = tempfile.mkstemp(dir=str(final.parent), prefix=".quantfit-inspect-report-", suffix=".tmp")
     os.close(fd)
+    saved_receipt: dict[str, Any] | None = None
     try:
         verify_mod._write_report(
             tmp_name,
@@ -1427,14 +1434,51 @@ def write_drift_report(
         with open(tmp_name, "r+b") as handle:  # the bytes are on the device before the name points at them
             handle.flush()
             os.fsync(handle.fileno())
-        check_report_output(path, inputs)  # Recheck after assembly, before atomic publication.
-        if _held_probe_bundle is not None:
-            _held_probe_bundle.check()
-        os.replace(tmp_name, final)
+        if recovery_out is None:
+            check_report_output(path, inputs)  # Recheck after assembly, before atomic publication.
+            if _held_probe_bundle is not None:
+                _held_probe_bundle.check()
+            os.replace(tmp_name, final)
+        else:
+            from quantfit.inspect_recovery import InspectPublicationError, _checkpoint_report
+            from quantfit.resolution import MAX_REPORT_BYTES
+            from quantfit.safety.retention_io import hold
+
+            if _held_probe_bundle is not None:
+                _held_probe_bundle.check()
+            check_report_output(recovery_out, inputs)
+            held_report = hold(tmp_name, MAX_REPORT_BYTES)
+            checkpoint, receipt = _checkpoint_report(held_report.data, recovery_out)
+            saved_receipt = receipt
+            if _recovery_record is not None:
+                _recovery_record.update(receipt)
+            try:
+                check_report_output(path, (*inputs, recovery_out))
+                checkpoint.check()
+                held_report.check()
+                if _held_probe_bundle is not None:
+                    _held_probe_bundle.check()
+                os.replace(tmp_name, final)
+            except (OSError, RuntimeError):
+                raise InspectPublicationError(receipt) from None
+            receipt["report_published"] = True
+            if _recovery_record is not None:
+                _recovery_record["report_published"] = True
     finally:
         # No-op after a successful replace (the temp name is gone); on any failure this is
         # what guarantees neither a partial nor an uncorrected report is left behind.
-        _Path(tmp_name).unlink(missing_ok=True)
+        if recovery_out is None or saved_receipt is None:
+            _Path(tmp_name).unlink(missing_ok=True)
+        else:
+            try:
+                _Path(tmp_name).unlink(missing_ok=True)
+            except OSError:
+                from quantfit.inspect_recovery import InspectPublicationError
+
+                retained = {**saved_receipt, "temporary_cleanup": "preserved"}
+                if _recovery_record is not None:
+                    _recovery_record.update(retained)
+                raise InspectPublicationError(retained) from None
     return final
 
 
@@ -2055,23 +2099,39 @@ class QsrRun:
     def _bundle_state(self) -> Any:
         return object.__getattribute__(self, "_held_probe_bundle")
 
-    def write_report(self, path: str, baseline: ArmRun, quantized: ArmRun, max_new_tokens: int) -> Path:
+    def write_report(
+        self, path: str, baseline: ArmRun, quantized: ArmRun, max_new_tokens: int, *, recovery_out: str | None = None
+    ) -> Path:
         """Emit this run as a schema-v2 `DriftReport` (see `write_drift_report`)."""
         if self._bundle_state is not None:
             self._bundle_state.check()
-        return write_drift_report(
-            path,
-            self.outcomes,
-            baseline,
-            quantized,
-            max_new_tokens,
-            protected_inputs=(
-                *self.protected_report_inputs,
-                *((str(self._bundle_state.path),) if self._bundle_state is not None else ()),
-            ),
-            **_source_kwargs(self.probe_corpus),
-            **({"_held_probe_bundle": self._bundle_state} if self._bundle_state is not None else {}),
-        )
+        receipt: dict[str, Any] = {}
+        try:
+            return write_drift_report(
+                path,
+                self.outcomes,
+                baseline,
+                quantized,
+                max_new_tokens,
+                protected_inputs=(
+                    *self.protected_report_inputs,
+                    *((str(self._bundle_state.path),) if self._bundle_state is not None else ()),
+                ),
+                **_source_kwargs(self.probe_corpus),
+                **({"_held_probe_bundle": self._bundle_state} if self._bundle_state is not None else {}),
+                **({"recovery_out": recovery_out, "_recovery_record": receipt} if recovery_out is not None else {}),
+            )
+        finally:
+            if recovery_out is not None and receipt:
+                object.__setattr__(self, "_recovery_receipt", receipt)
+
+    @property
+    def recovery_receipt(self) -> dict[str, Any] | None:
+        """Aggregate publication receipt, outside capture-class dataclass fields."""
+        import copy
+
+        value: dict[str, Any] | None = getattr(self, "_recovery_receipt", None)
+        return copy.deepcopy(value)
 
 
 def qsr_eval(
