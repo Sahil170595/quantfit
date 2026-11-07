@@ -525,68 +525,88 @@ def create_bundle(
         raise BundleError(str(exc)) from exc
 
 
+def _manifest(raw: bytes) -> dict:
+    """Admit the existing closed schema-1 directory/transport manifest."""
+    manifest = _json(raw)
+    _require(
+        set(manifest)
+        == {"bundle_schema", "quantfit_version", "created_utc", "scientific_claims_verified", "files", "scope"},
+        "unsupported bundle manifest fields",
+    )
+    _require(
+        type(manifest["bundle_schema"]) is int and manifest["bundle_schema"] == BUNDLE_SCHEMA,
+        "unsupported bundle schema",
+    )
+    _require(
+        manifest["scientific_claims_verified"] is False and manifest["scope"] == SCOPE,
+        "integrity cannot claim scientific proof",
+    )
+    for key in ("quantfit_version", "created_utc"):
+        _require(isinstance(manifest[key], str) and bool(manifest[key]), f"manifest {key} must be a string")
+    files = manifest["files"]
+    _require(isinstance(files, list) and 1 <= len(files) <= len(ROLES), "manifest needs 1..4 supported roles")
+    roles, names = set(), {"manifest.json"}
+    for entry in files:
+        _require(
+            isinstance(entry, dict) and set(entry) == {"role", "path", "sha256", "size_bytes"},
+            "unsupported file entry",
+        )
+        role = entry["role"]
+        _require(isinstance(role, str) and role in ROLES and role not in roles, "unsupported/duplicate bundle role")
+        _require(entry["path"] == ROLES[role], "member paths must be canonical relative role filenames")
+        _require(
+            isinstance(entry["sha256"], str) and bool(_SHA.fullmatch(entry["sha256"])),
+            "member SHA256 must be lowercase hex",
+        )
+        _require(
+            type(entry["size_bytes"]) is int and 0 < entry["size_bytes"] <= MAX_REPORT_BYTES,
+            "unsupported member size",
+        )
+        roles.add(role)
+        names.add(entry["path"])
+    return manifest
+
+
+def _checked_payloads(manifest: dict, data: dict[str, bytes]) -> tuple[dict, list]:
+    """Check exact held role bytes through the unchanged native relationship validator."""
+    _require(set(data) == {entry["role"] for entry in manifest["files"]}, "unlisted/missing roles are refused")
+    mismatches = []
+    for entry in manifest["files"]:
+        role = entry["role"]
+        raw = data[role]
+        actual = hashlib.sha256(raw).hexdigest()
+        if actual != entry["sha256"] or len(raw) != entry["size_bytes"]:
+            mismatches.append(
+                {
+                    "role": role,
+                    "expected_sha256": entry["sha256"],
+                    "actual_sha256": actual,
+                    "expected_bytes": entry["size_bytes"],
+                    "actual_bytes": len(raw),
+                }
+            )
+    if mismatches:
+        return {}, mismatches
+    return _validate(data), []
+
+
 def verify_bundle(bundle_path: str) -> dict:
     """Check local members after relocation; never follow any artifact's original paths."""
     root = Path(bundle_path).absolute()
     try:
         _no_links(root)
         _require(root.is_dir(), "bundle must be a directory")
-        manifest = _json(_read(root / "manifest.json", MAX_MANIFEST_BYTES))
-        _require(
-            set(manifest)
-            == {"bundle_schema", "quantfit_version", "created_utc", "scientific_claims_verified", "files", "scope"},
-            "unsupported bundle manifest fields",
-        )
-        _require(
-            type(manifest["bundle_schema"]) is int and manifest["bundle_schema"] == BUNDLE_SCHEMA,
-            "unsupported bundle schema",
-        )
-        _require(
-            manifest["scientific_claims_verified"] is False and manifest["scope"] == SCOPE,
-            "integrity cannot claim scientific proof",
-        )
-        for key in ("quantfit_version", "created_utc"):
-            _require(isinstance(manifest[key], str) and bool(manifest[key]), f"manifest {key} must be a string")
-        files = manifest["files"]
-        _require(isinstance(files, list) and 1 <= len(files) <= len(ROLES), "manifest needs 1..4 supported roles")
-        roles, names, data, mismatches = set(), {"manifest.json"}, {}, []
-        for entry in files:
-            _require(
-                isinstance(entry, dict) and set(entry) == {"role", "path", "sha256", "size_bytes"},
-                "unsupported file entry",
-            )
-            role = entry["role"]
-            _require(isinstance(role, str) and role in ROLES and role not in roles, "unsupported/duplicate bundle role")
-            _require(entry["path"] == ROLES[role], "member paths must be canonical relative role filenames")
-            _require(
-                isinstance(entry["sha256"], str) and bool(_SHA.fullmatch(entry["sha256"])),
-                "member SHA256 must be lowercase hex",
-            )
-            _require(
-                type(entry["size_bytes"]) is int and 0 < entry["size_bytes"] <= MAX_REPORT_BYTES,
-                "unsupported member size",
-            )
-            roles.add(role)
-            names.add(entry["path"])
+        manifest = _manifest(_read(root / "manifest.json", MAX_MANIFEST_BYTES))
+        names = {"manifest.json", *(entry["path"] for entry in manifest["files"])}
         _require({p.name for p in root.iterdir()} == names, "unlisted/missing files are refused")
-        for entry in files:
-            role = entry["role"]
-            raw = _read(root / entry["path"], MAX_CALIBRATION_BYTES if role == "calibration" else MAX_REPORT_BYTES)
-            actual = hashlib.sha256(raw).hexdigest()
-            if actual != entry["sha256"] or len(raw) != entry["size_bytes"]:
-                mismatches.append(
-                    {
-                        "role": role,
-                        "expected_sha256": entry["sha256"],
-                        "actual_sha256": actual,
-                        "expected_bytes": entry["size_bytes"],
-                        "actual_bytes": len(raw),
-                    }
-                )
-            data[role] = raw
-        if mismatches:
-            return _result(root, manifest, matched=False, mismatches=mismatches)
-        return _result(root, manifest, matched=True, declarations=_validate(data))
+        data = {
+            entry["role"]: _read(
+                root / entry["path"], MAX_CALIBRATION_BYTES if entry["role"] == "calibration" else MAX_REPORT_BYTES
+            )
+            for entry in manifest["files"]
+        }
+        declarations, mismatches = _checked_payloads(manifest, data)
+        return _result(root, manifest, matched=not mismatches, declarations=declarations, mismatches=mismatches)
     except (OSError, RuntimeError, RecursionError, TypeError, ValueError) as exc:
         if isinstance(exc, BundleError):
             raise
