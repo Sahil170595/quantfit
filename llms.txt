@@ -74,3 +74,5 @@ Additional released workflows (see the versioned README install pin):
 - [Contributing](https://github.com/Sahil170595/quantfit/blob/main/CONTRIBUTING.md): the hermetic-test rule, the exit-code taxonomy, and the pinning discipline.
 - [Bus factor](https://github.com/Sahil170595/quantfit/blob/main/docs/bus-factor.md): what breaks if the maintainer stops.
 - [Security](https://github.com/Sahil170595/quantfit/blob/main/SECURITY.md): the supply-chain posture, including what the llama.cpp SHA256 pin does and does not cover.
+
+- [Offline bundle transport (unreleased 0.59.0 source)](https://github.com/Sahil170595/quantfit/blob/codex/offline-bundle-transport059/docs/portable-evidence-bundles.md): `bundle pack --bundle DIR --out ARCHIVE`, `bundle archive-verify --archive ARCHIVE --sha256 FULL64`, and `bundle unpack --archive ARCHIVE --sha256 FULL64 --out NEWDIR`. Native verdicts remain declarations, not scientific PASS. Public installation is 0.56.0.
