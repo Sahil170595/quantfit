@@ -1,6 +1,7 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.56.0, including pinned alternative probe corpora,
+This reference includes the unreleased quantfit 0.58.0 source candidate. Public
+installation is 0.56.0. It covers pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -17,7 +18,7 @@ saved summary2, one held population and strict offline receiving. Default `None`
 paths retain their prior shapes. Thresholds remain native resolution targets;
 unknown/missing rows, control conditionality and human-verification limits stay.
 
-Quantfit 0.56.0 adds [held judge observations](held-judge-observation.md).
+The published Quantfit 0.56.0 adds [held judge observations](held-judge-observation.md).
 Use the original report, capture and native key with `calibrate observe-judge`.
 Then use `calibrate compare-observed-judge` with the saved observation's raw SHA
 and one full or retained label suite. Only the first command invokes the pinned
@@ -792,6 +793,14 @@ bounded partition and its private manifest:
 
 ```bash
 quantfit calibrate chunks prepare --sheet blank.labels.csv --key private.labelkey.json --out-dir annotation-parts --rows-per-part 100 --json
+```
+
+The unreleased 0.58 candidate can inspect an explicitly indexed returned subset
+first. Success means only that the supplied parts are valid; `complete: false`
+and missing part indices remain explicit. No labels are inferred or ingested:
+
+```bash
+quantfit calibrate chunks validate --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --part 2=returned-part-2.labels.csv --out inspection.json --json
 ```
 
 Explicitly fill every returned part, then collect them in manifest order:

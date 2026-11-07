@@ -41,6 +41,12 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The **unreleased 0.58.0 source candidate** adds
+[indexed returned-part inspection](docs/annotation-chunks.md#inspect-indexed-returns-0580-candidate)
+before complete collection. A valid subset reports missing coverage explicitly;
+it does not ingest labels or establish calibration. Public installation remains
+0.56.0.
+
 [Quantfit 0.56.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.56.0)
 adds a [held-completion judge observation and offline comparison](docs/held-judge-observation.md).
 Version 0.55.0 introduced private [whole local hash-pinned probe bundles](docs/offline-probe-bundles.md)
@@ -54,7 +60,7 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-After publication, install with `pip install "quantfit[inspect,gguf]==0.56.0"`.
+Install the published release with `pip install "quantfit[inspect,gguf]==0.56.0"`.
 
 The observation runs the pinned judge over the original held completions.
 Use its receipt's raw SHA-256 for the offline comparison against one complete

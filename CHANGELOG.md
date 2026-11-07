@@ -13,6 +13,20 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.58.0 — Unreleased
+
+- Add `validate_annotation_returns` and `calibrate chunks validate` for explicit
+  index-to-returned-CSV roles. Regenerate the original native preparation and
+  validate each supplied complete part through unchanged native receiving.
+  Valid subsets succeed as inspection with explicit missing indices; complete
+  collection and ingestion remain authoritative and separate. Receipts contain
+  only counts, part indices and byte bindings, never private IDs, text or labels.
+- Extend the existing four installed consumers with out-of-order subset and
+  complete inspections before native collect/ingest. Local fictional
+  [regression evidence](validation/2026-11-07-annotation-returns/) does not
+  establish human truth, rater authentication, calibration or scientific GO.
+  Hosted installed qualification remains separate.
+
 ## 0.56.0 — 2026-11-06
 
 - Add a pinned judge rerun over a held native capture and an offline comparison
