@@ -408,6 +408,24 @@ def _build_parser() -> argparse.ArgumentParser:
     psaved.add_argument("--reports-dir", required=True, metavar="DIR", help="closed saved aggregate directory")
     psaved.add_argument("--out", default=None, metavar="PATH", help="separate receiving JSON output")
     psaved.add_argument("--junit", default=None, metavar="PATH", help="receiving XML; missing evidence is skipped")
+    psaved.add_argument(
+        "--control-report",
+        default=None,
+        metavar="PATH",
+        help="supplied positive-control report; requires capture and adjudication",
+    )
+    psaved.add_argument(
+        "--control-capture",
+        default=None,
+        metavar="PATH",
+        help="private native control capture; never included in output",
+    )
+    psaved.add_argument(
+        "--control-adjudication",
+        default=None,
+        metavar="PATH",
+        help="native source-matched adjudication record; operator labels, not human authentication",
+    )
     calibration_modes = psaved.add_mutually_exclusive_group()
     calibration_modes.add_argument(
         "--calibrations-dir",
@@ -1103,6 +1121,12 @@ def _dispatch(args: argparse.Namespace) -> int:
         from quantfit.saved_screen import summarize_screen
 
         options = {"out_path": args.out, "junit_path": args.junit, **_probe_source_options(args)}
+        if any(value is not None for value in (args.control_report, args.control_capture, args.control_adjudication)):
+            options.update(
+                control_report=args.control_report,
+                control_capture=args.control_capture,
+                control_adjudication=args.control_adjudication,
+            )
         if args.calibrations_dir is not None:
             options["calibrations_dir"] = args.calibrations_dir
         if args.calibration_variant is not None:

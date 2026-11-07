@@ -4,7 +4,7 @@ Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/a
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
 The action and instrument examples below pin **quantfit 0.56.0**. Use those
 published pins after the tag and package are available. The reference action
-defaults to `>=0.56.0,<0.57`. Pin both exactly to reproduce the same action
+source candidate defaults to `>=0.61.0,<0.62`; it is unreleased. Pin both exactly to reproduce the same action
 and instrument.
 
 [Pinned-corpus gates/screens](pinned-corpus-gates.md) and
@@ -165,7 +165,7 @@ measures between releases.
 | `calibration-report` | `""` | Bound schema-2 or closed retained-schema-3 calibration input. Mutually exclusive with both operator epsilon inputs. Protocol is checked before generation; actual resolved scope is checked afterward. All output paths, including JUnit, must differ from this input. |
 | `max-new-tokens` | `""` (CLI default 64) | Applied identically to both arms (§2.3). |
 | `python-version` | `3.12` | Same version quantfit's own CI pins. |
-| `quantfit-version` | `>=0.56.0,<0.57` | PEP 440 specifier. Pin exactly for a reproducible gate. |
+| `quantfit-version` | `>=0.61.0,<0.62` | Unreleased source default. PEP 440 specifier; use the published 0.56.0 pins above until publication. |
 | `quantfit-path` | `""` | Install from a local path instead of PyPI; overrides `quantfit-version`. |
 | `report` | `quantfit-gate/drift.json` | Schema-v2 drift report (`quantfit gate --report`). |
 | `gate-out` | `quantfit-gate/gate.json` | Gate decision artifact, schema 1 (`quantfit gate --out`). Written on refusals too. |

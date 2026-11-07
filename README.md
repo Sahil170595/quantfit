@@ -41,6 +41,11 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The independent unreleased **0.61.0** source candidate adds
+[supplied positive-control evidence for saved screens](docs/saved-screen-control-evidence.md).
+It checks a local report/capture/adjudication triplet and annotates protocol applicability,
+without changing screen verdicts or establishing sensitivity. Public installation remains 0.56.0.
+
 [Quantfit 0.56.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.56.0)
 adds a [held-completion judge observation and offline comparison](docs/held-judge-observation.md).
 Version 0.55.0 introduced private [whole local hash-pinned probe bundles](docs/offline-probe-bundles.md)

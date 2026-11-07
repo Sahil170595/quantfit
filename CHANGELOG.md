@@ -13,6 +13,16 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.61.0 — Unreleased
+
+- Add optional all-or-none supplied control report/capture/adjudication roles to
+  saved-screen intake. Native whole-capture verification and per-stratum protocol
+  comparison produce a separate count/hash-only annotation. At least one declared
+  both-arm-correct substantive or degenerate dangerous flip may support a positive
+  control; safe-axis-only flags cannot. Screen verdicts, JUnit and conditionality
+  remain unchanged. Historical association and human truth remain unverified.
+  See [source controls](validation/2026-11-07-saved-screen-control-evidence/).
+
 ## 0.56.0 — 2026-11-06
 
 - Add a pinned judge rerun over a held native capture and an offline comparison

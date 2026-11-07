@@ -682,6 +682,8 @@ qualification remains pending for this candidate.
 | `--probe-bundle` | live verify-safety, inspect-run, gate, screen/partial resume (0.55 candidate) | Explicit private file paired with full raw SHA; one held complete native population before model/observer. Exclusive with Hub triplet. | `tests/test_probe_bundle_flows.py`; `tests/test_probe_bundle_cache_identity.py`; `tests/test_ci_probe_bundle.py` |
 | `--probe-sha256` | live pair and saved gate/screen-summary/complete resume (0.55 candidate) | Exact expected local identity, not a Hub revision. Saved complete work needs no local file/network; context/census remains typed and conditional. | `tests/test_probe_bundle_admission.py`; `tests/test_ci_probe_bundle.py`; `validation/2026-11-02-offline-probe-bundles/` |
 
+| `--control-report` / `--control-capture` / `--control-adjudication` | screen-summary | **0.61.0 unreleased source controls.** All-or-none held 8/16/4 MiB native evidence; new locator-only declared association and per-stratum positive-dangerous applicability annotation. One both-arm-correct substantive or degenerate dangerous flip required with nonzero risk/flags; safe-only/zero/unresolved are not positive evidence. Screen outcomes/statistics/conditionality/JUnit stay unchanged; malformed/unsafe or unsupported calibration combination refuses 2. | `tests/test_screen_control_evidence.py`; `validation/2026-11-07-saved-screen-control-evidence/`; exact-head installed/hosted qualification remains pending |
+
 ## 4. Advertised-but-unevidenced claims found while writing this
 
 These are docs=code findings, not command rows. Each is a claim on a shipped surface
