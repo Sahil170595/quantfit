@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.56.0, including pinned alternative probe corpora,
+This reference includes the unreleased 0.60.0 source candidate; public installation remains 0.56.0. It covers including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -17,7 +17,7 @@ saved summary2, one held population and strict offline receiving. Default `None`
 paths retain their prior shapes. Thresholds remain native resolution targets;
 unknown/missing rows, control conditionality and human-verification limits stay.
 
-Quantfit 0.56.0 adds [held judge observations](held-judge-observation.md).
+The published Quantfit 0.56.0 adds [held judge observations](held-judge-observation.md).
 Use the original report, capture and native key with `calibrate observe-judge`.
 Then use `calibrate compare-observed-judge` with the saved observation's raw SHA
 and one full or retained label suite. Only the first command invokes the pinned
@@ -61,6 +61,12 @@ original native part. Keep the key/manifest/capture private and separate; do not
 send them with a page. [The complete SDK/CLI, byte-bound and trust contract](annotation-packets.md)
 explains native collection/ingestion, explicit labels and the unchanged narrow
 sharing permission. This is no automatic labeling, sharing or calibration.
+
+The unreleased 0.60 candidate adds opt-in `inspect-run --recovery-out` with
+`--report`, plus `inspect-recover --checkpoint CHECKPOINT --sha256 FULL64 --out NEWREPORT`.
+Only completed corrected native observed HF/GGUF aggregates qualify; raw Inspect
+logs are not inputs. Recovery preserves the original native 0/3/4 outcome and
+performs no model, judge or source lookup. [Complete contract and failure behavior](inspect-run.md#completed-report-recovery-0600-candidate).
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,

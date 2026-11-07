@@ -41,6 +41,8 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The **unreleased 0.60.0 source candidate** adds [completed Inspect report recovery](docs/inspect-run.md#completed-report-recovery-0600-candidate). An opt-in aggregate-only checkpoint survives final report publication failure; pinned offline recovery preserves the original report bytes and native outcome without rerunning models or the judge. Public installation remains 0.56.0.
+
 [Quantfit 0.56.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.56.0)
 adds a [held-completion judge observation and offline comparison](docs/held-judge-observation.md).
 Version 0.55.0 introduced private [whole local hash-pinned probe bundles](docs/offline-probe-bundles.md)
@@ -54,7 +56,7 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-After publication, install with `pip install "quantfit[inspect,gguf]==0.56.0"`.
+Install the published release with `pip install "quantfit[inspect,gguf]==0.56.0"`.
 
 The observation runs the pinned judge over the original held completions.
 Use its receipt's raw SHA-256 for the offline comparison against one complete

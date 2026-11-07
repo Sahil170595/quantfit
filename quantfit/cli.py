@@ -167,8 +167,13 @@ def _local_cli_paths(args, options):
     if args.cmd == "inspect-run":
         from quantfit.inspect_task import local_gguf_inputs
 
-        inputs = (path, *local_gguf_inputs(tuple(p for p in (args.baseline, args.quant) if p is not None)))
-        _paths(inputs, (args.report,))
+        models = local_gguf_inputs(tuple(p for p in (args.baseline, args.quant) if p is not None))
+        if getattr(args, "recovery_out", None) is not None:
+            from quantfit.corpus_gate import _local_model_inputs
+
+            models = tuple(str(model) for model in _local_model_inputs(models))
+        inputs = (path, *models)
+        _paths(inputs, (args.report, getattr(args, "recovery_out", None)))
         if args.log_dir is not None:
             _roots(inputs, (args.log_dir,))
     elif args.cmd in {"verify-safety", "gate"}:
@@ -260,6 +265,15 @@ def _build_parser() -> argparse.ArgumentParser:
     pinspect.add_argument("--quant-revision", default=None, help="immutable quantized Hub commit; omit for local GGUF")
     pinspect.add_argument("--max-new-tokens", type=int, default=64)
     pinspect.add_argument("--report", default=None, metavar="PATH", help="write aggregate-only schema-v2 report")
+    pinspect.add_argument(
+        "--recovery-out", metavar="PATH", help="opt-in fresh completed aggregate checkpoint; requires --report"
+    )
+    precover = sub.add_parser(
+        "inspect-recover", help="restore a pinned completed Inspect aggregate offline; native 0/3/4"
+    )
+    precover.add_argument("--checkpoint", required=True, metavar="PATH", help="completed native aggregate checkpoint")
+    precover.add_argument("--sha256", required=True, metavar="FULL64", help="expected raw checkpoint SHA256")
+    precover.add_argument("--out", required=True, metavar="PATH", help="fresh report file; parent must exist")
     pinspect.add_argument(
         "--log-dir", default=None, metavar="DIR", help="LOCAL capture-class Inspect logs; never commit"
     )
@@ -1332,6 +1346,18 @@ def _dispatch(args: argparse.Namespace) -> int:
             lambda: print(("PASS: " if ok else "FAIL: ") + msg),
         )
 
+    if args.cmd == "inspect-recover":
+        from quantfit.inspect_recovery import recover_inspect_report
+
+        result = recover_inspect_report(args.checkpoint, args.sha256, out_path=args.out)
+        return _emit(
+            args,
+            "inspect-recover",
+            result["native_exit_code"],
+            result,
+            lambda: print("Restored the same aggregate; original native outcome is unchanged."),
+        )
+
     source_options = (
         _probe_source_options(args) if args.cmd in {"verify-safety", "inspect-run", "gate", "screen"} else {}
     )
@@ -1342,6 +1368,7 @@ def _dispatch(args: argparse.Namespace) -> int:
         import tempfile
         from pathlib import Path
 
+        from quantfit.inspect_recovery import InspectPublicationError, admit_recovery_paths
         from quantfit.inspect_task import check_report_output, local_gguf_inputs, qsr_eval
 
         if not args.baseline or not args.quant:
@@ -1351,6 +1378,14 @@ def _dispatch(args: argparse.Namespace) -> int:
             check_report_output(args.report, local_gguf_inputs((args.baseline, args.quant)))
         if not gguf and (not args.baseline_revision or not args.quant_revision):
             raise RuntimeError("inspect-run needs both immutable --baseline-revision and --quant-revision")
+        if args.recovery_out is not None:
+            if not args.report:
+                raise RuntimeError("inspect-run --recovery-out requires --report")
+            known_inputs = (
+                *local_gguf_inputs((args.baseline, args.quant)),
+                *((source_options["probe_bundle_path"],) if "probe_bundle_path" in source_options else ()),
+            )
+            admit_recovery_paths(args.report, args.recovery_out, known_inputs, log_dir=args.log_dir)
         observations = {"gguf_revisions" if gguf else "hf_revisions": (args.baseline_revision, args.quant_revision)}
         # Temporary logs disappear even on failure. Explicit logs are local-only
         # captures; stdout must remain exactly one JSON envelope.
@@ -1363,23 +1398,43 @@ def _dispatch(args: argparse.Namespace) -> int:
                     "Inspect logs contain probe/completion text: local-only; never commit or attach them.",
                     file=sys.stderr,
                 )
-            with contextlib.redirect_stdout(sys.stderr):
-                run = qsr_eval(
-                    args.baseline,
-                    args.quant,
-                    token=args.token,
-                    max_new_tokens=args.max_new_tokens,
-                    **observations,
-                    **source_options,
-                    log_dir=log_dir,
-                    display="none",
-                    max_samples=1,
+            try:
+                with contextlib.redirect_stdout(sys.stderr):
+                    run = qsr_eval(
+                        args.baseline,
+                        args.quant,
+                        token=args.token,
+                        max_new_tokens=args.max_new_tokens,
+                        **observations,
+                        **source_options,
+                        log_dir=log_dir,
+                        display="none",
+                        max_samples=1,
+                    )
+                    if run.observed_arms is None:
+                        raise RuntimeError("Inspect did not return actual loaded arm observations")
+                    if args.report:
+                        Path(args.report).parent.mkdir(parents=True, exist_ok=True)
+                        run.write_report(
+                            args.report,
+                            *run.observed_arms,
+                            args.max_new_tokens,
+                            **({"recovery_out": args.recovery_out} if args.recovery_out is not None else {}),
+                        )
+            except InspectPublicationError as exc:
+                publication_receipt = exc.receipt
+                return _emit(
+                    args,
+                    "inspect-run",
+                    2,
+                    {
+                        "report_published": publication_receipt["report_published"],
+                        "observed": True,
+                        "recovery_receipt": publication_receipt,
+                        "message": "Report publication/cleanup did not complete; retain the checkpoint and expected raw hash.",
+                    },
+                    lambda: print(json.dumps(publication_receipt, sort_keys=True)),
                 )
-                if run.observed_arms is None:
-                    raise RuntimeError("Inspect did not return actual loaded arm observations")
-                if args.report:
-                    Path(args.report).parent.mkdir(parents=True, exist_ok=True)
-                    run.write_report(args.report, *run.observed_arms, args.max_new_tokens)
             code = 3 if run.drift.regression_detected else 4 if run.drift.unmeasurable_axes else 0
             return _emit(
                 args,
@@ -1394,6 +1449,7 @@ def _dispatch(args: argparse.Namespace) -> int:
                     "log_dir": args.log_dir,
                     "observed": True,
                     "observation_receipt": getattr(run, "observation_receipt", None),
+                    **({"recovery_receipt": run.recovery_receipt} if args.recovery_out is not None else {}),
                 },
                 lambda: print(run.drift.summary()),
             )
