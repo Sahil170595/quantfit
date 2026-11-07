@@ -13,7 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.55.0 — Unreleased (2026-11-02 candidate)
+## 0.55.0 — 2026-11-06
+
+This release includes the previously unpublished selected-axis gates (0.52.0),
+pinned-corpus gates and screens (0.53.0), and blinded annotation packets
+(0.54.0). Those entries retain their original candidate dates and evidence.
 
 - Add private whole local probe bundles, `LocalProbeCorpus(sha256)`,
   `prepare_probe_bundle` and `probes bundle`. Admit the complete closed source

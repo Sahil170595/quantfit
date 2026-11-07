@@ -1,11 +1,10 @@
-# Private whole local probe populations — unreleased 0.55.0
+# Private whole local probe populations — since 0.55.0
 
 `LocalProbeCorpus(sha256)` is an explicit alternative to the existing Hub
 `ProbeCorpus(id, revision, split)`. It identifies every byte of one private local
 bundle; it contains no path, Hub identifier or pretend commit. A pin authenticates
 neither the source nor curation, complete upstream provenance, label truth,
 sensitivity or scientific suitability. Even forty local rows remain noncanonical.
-The public release remains 0.51.0; these are source-candidate interfaces.
 
 ## Build and use the complete population
 

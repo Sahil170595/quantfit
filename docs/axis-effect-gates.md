@@ -1,7 +1,5 @@
-# Selected-axis effect gates — 0.52.0 candidate
+# Selected-axis effect gates — since 0.55.0
 
-This is an **unreleased source feature**. The public baseline remains 0.51.0;
-use this candidate checkout or its qualified distribution for these options.
 These are native detectable-effect **resolution targets**, not upper limits on
 an observed rate and not safety certifications.
 

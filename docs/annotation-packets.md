@@ -1,4 +1,4 @@
-# Private blinded annotation packets — 0.54.0 source candidate
+# Private blinded annotation packets — since 0.55.0
 
 This additive workflow renders **every native 2N row**, including concordant
 pairs, zero flagged pairs and duplicate completion strings. It is independent of

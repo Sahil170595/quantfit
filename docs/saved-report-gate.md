@@ -3,7 +3,7 @@
 Available since quantfit 0.22.0, this interface evaluates a saved schema-v2 aggregate
 without models, judge execution, downloads or completion caches.
 
-The unreleased 0.52.0 candidate adds opt-in `axis_thresholds` / repeated
+Quantfit 0.55.0 adds opt-in `axis_thresholds` / repeated
 `--axis-threshold AXIS=PP` for one or both native axes. Its [closed gate-v2
 contract](axis-effect-gates.md) requires the canonical complete pinned corpus and
 strictly revalidates per-axis/overall outcomes in the existing bundle receiver.

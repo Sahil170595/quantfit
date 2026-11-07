@@ -41,19 +41,19 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This branch targets the **unreleased 0.55.0 candidate**, adding private
-[whole local hash-pinned probe bundles](docs/offline-probe-bundles.md) to native
-verification, Inspect, gates, screens and offline saved receiving. The live path
-is separate from the complete raw-byte identity; all rows are held before model
-work. This includes accepted but unreleased [0.54 annotation packets](docs/annotation-packets.md),
-[0.53 pinned-corpus gates](docs/pinned-corpus-gates.md) and
-[0.52 selected-axis gates](docs/axis-effect-gates.md). The latest public release
-remains 0.51.0. Candidate source availability is not a public release, authenticated
-curation, sensitivity evidence or scientific GO.
+[Quantfit 0.55.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.55.0)
+adds private [whole local hash-pinned probe bundles](docs/offline-probe-bundles.md)
+to native verification, Inspect, gates, screens and offline saved receiving.
+The live path is separate from the complete raw-byte identity. All rows are
+held before model work. This version also includes previously unpublished
+[blinded annotation packets](docs/annotation-packets.md),
+[pinned-corpus gates](docs/pinned-corpus-gates.md) and
+[selected-axis gates](docs/axis-effect-gates.md). A source pin identifies bytes.
+It does not establish authenticated curation, sensitivity or scientific GO.
 
-This README documents [quantfit 0.51.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.51.0), including the complete [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410). The released workflows below are available in this version.
+This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-Install with `pip install "quantfit[inspect,gguf]==0.51.0"`.
+After publication, install with `pip install "quantfit[inspect,gguf]==0.55.0"`.
 
 Quantfit 0.46.0 includes [annotation chunks](docs/annotation-chunks.md)
 (0.42), [capture-backed retained review](docs/retained-review.md) (0.43),
@@ -194,7 +194,7 @@ The **0.51.0 release** adds [pinned alternative probe corpora](docs/probe-corpus
 quantfit verify-safety --baseline org/base --quant ./out --probe-dataset org/probes --probe-revision 1111111111111111111111111111111111111111 --probe-split validation --report drift.json --json
 ```
 
-This is an operator-supplied measurement request, not a corpus/model run recorded here. The candidate requires qualified `datasets==5.0.1`; selected UTF8 limits are 64KiB/prompt and 8MiB/whole population, 1..4096 probes. A valid one-axis population remains unmeasurable on its missing axis; zero means the detector did not fire, never safety.
+This is an operator-supplied measurement request, not a corpus/model run recorded here. The pinned Hub path requires `datasets==5.0.1`; selected UTF8 limits are 64KiB/prompt and 8MiB/whole population, 1..4096 probes. A valid one-axis population remains unmeasurable on its missing axis; zero means the detector did not fire, never safety.
 
 ## What it has found
 
@@ -473,7 +473,7 @@ model against prompts, while quantfit gates a model artifact after quantization 
 a different point in the pipeline. JUnit is what every runner already reads, so
 quantfit becomes a step in whatever stack you have rather than one you adopt.
 
-**Selected-axis gate (unreleased 0.52.0 candidate).** Native resolution targets
+**Selected-axis gate (available in 0.55.0).** Native resolution targets
 can now select either or both axes without changing recorded counts or native MDE:
 
 ```bash
@@ -483,7 +483,7 @@ quantfit gate --from-report drift.json --axis-threshold refusal-robustness=30 --
 These are detectable-effect targets, not observed-rate ceilings. All selected
 axes are evaluated before native 3 > 4 > 5 > 0 precedence; zero-risk cannot look
 green in overall JUnit. Unselected evidence remains explicit. Gate-v2 strict
-bundle receiving and the API/CLI contract are in the [candidate guide](docs/axis-effect-gates.md).
+bundle receiving and the API/CLI contract are in the [selected-axis guide](docs/axis-effect-gates.md).
 The reference action continues to forward legacy policy only.
 
 **Gate it in CI (legacy policy, unchanged).** `quantfit gate` is the pre-release check — and it refuses to
