@@ -114,9 +114,9 @@ its `version` to `pyproject.toml` and `quantfit/__init__.py` **[V]**.
 durable claim is the pin, not the digits: the test re-reads all three on every run, so the
 value here is a snapshot and the pin is the invariant. That is what makes the file exempt
 from step 9's ordering rule rather than a violation of it; see the exemption stated at step
-9. Its optional `date-released` is omitted for the current unreleased software
-candidate; a release cut may record the actual software release date, never a spec
-freeze or scientific milestone. It still omits its
+9. Its optional `date-released` records the 0.56.0 software release date from
+`CHANGELOG.md`. A software release date does not date the spec freeze or a
+scientific milestone. The citation still omits its
 `references` entry for arXiv 2606.10154 because CFF 1.2.0 requires an `authors` list it
 declines to invent — that omission remains written into the file as comments **[V]**.
 

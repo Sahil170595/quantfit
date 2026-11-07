@@ -1,8 +1,7 @@
-# Pinned-corpus gates and screens — 0.53.0 source candidate
+# Pinned-corpus gates and screens — since 0.55.0
 
-This unreleased candidate extends the native `ProbeCorpus` workflow introduced in
-0.51.0. The public release remains 0.51.0; build this candidate from its reviewed
-source. The accepted 0.52.0 selected-axis feature is an unreleased dependency.
+Quantfit 0.55.0 extends the native `ProbeCorpus` workflow introduced in 0.51.0.
+It includes [selected-axis effect gates](axis-effect-gates.md).
 No new population loader, statistics engine or sensitivity validator is added.
 
 ## Declare one source

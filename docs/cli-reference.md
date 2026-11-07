@@ -1,6 +1,6 @@
 # CLI reference — every command, every flag
 
-This reference documents quantfit 0.51.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.56.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -8,7 +8,7 @@ capture-backed retained review, finite-grid budgets, calibration-choice sensitiv
 and source-bound flip adjudication.
 Software versions do not establish roadmap or scientific GO.
 
-The accepted **unreleased 0.53.0 source work** additionally accepts the
+Quantfit 0.55.0 also accepts the
 same all-or-none `--probe-dataset ID --probe-revision FULL40 --probe-split SPLIT`
 on live/saved `gate`, `screen`/`--resume` and offline `screen-summary`.
 [The complete API/CLI/profile contract](pinned-corpus-gates.md) describes flat gate3
@@ -16,9 +16,8 @@ with native decision discriminator1/2 and closed source census, live summary2,
 saved summary2, one held population and strict offline receiving. Default `None`
 paths retain their prior shapes. Thresholds remain native resolution targets;
 unknown/missing rows, control conditionality and human-verification limits stay.
-Published installation commands below remain 0.51.0, not an assumed candidate tag.
 
-The **unreleased 0.56.0 candidate** adds [held judge observations](held-judge-observation.md).
+Quantfit 0.56.0 adds [held judge observations](held-judge-observation.md).
 Use the original report, capture and native key with `calibrate observe-judge`.
 Then use `calibrate compare-observed-judge` with the saved observation's raw SHA
 and one full or retained label suite. Only the first command invokes the pinned
@@ -28,12 +27,13 @@ classifier. Both commands exclusively create fresh output files.
 quantfit calibrate compare-observed-judge --report original.json --capture private.capture.jsonl --key private.labelkey.json --observation private.judge-observation.json --observation-sha256 FULL64 --retained-labels private.retained.labels.csv --retention-receipt retention.json --out comparison.json --json
 ```
 
-The **unreleased 0.55.0 source work** adds an explicit private local
-source, separate from Hub IDs/commits:
+Quantfit 0.55.0 adds an explicit private local source, separate from Hub IDs
+and commits:
 
 ```bash
 quantfit probes bundle --rows private.probe-rows.json --out private.probe-bundle.json --json
 quantfit verify-safety --baseline org/base --quant ./out --probe-bundle private.probe-bundle.json --probe-sha256 FULL64 --report drift.json --json
+quantfit inspect-run --baseline hf/org/base --quant hf/org/quant --baseline-revision 2222222222222222222222222222222222222222 --quant-revision 3333333333333333333333333333333333333333 --probe-bundle private.probe-bundle.json --probe-sha256 FULL64 --report inspect.json --json
 quantfit gate --from-report drift.json --threshold 30 --probe-sha256 FULL64 --json
 ```
 
@@ -45,10 +45,9 @@ require the expected hash alone and read no local bundle/Hub. Partial resume nee
 the live pair. [Exact SDK/wire/bounds/privacy and native exit semantics](offline-probe-bundles.md)
 include 64 MiB raw files, native 8 MiB selected strings, all 1–4096 rows, and
 strict source/census receiving. Local identity grants no source authentication,
-calibration transfer or canonical-protocol authority. Older published install
-examples remain 0.51.0.
+calibration transfer or canonical-protocol authority.
 
-The accepted **unreleased 0.54.0 source work** adds private full-population
+Quantfit 0.55.0 includes private full-population
 blinded recipient pages, distinct from the flagged-pair adjudication review page:
 
 ```bash
@@ -625,7 +624,7 @@ contradictory historical verdicts are refused rather than silently repaired.
 ## Gate a release
 
 The threshold/tier examples in this section retain legacy dangerous-only gate
-schema 1. The unreleased 0.52.0 candidate also accepts a mutually exclusive,
+schema 1. Quantfit 0.55.0 also accepts a mutually exclusive,
 repeatable selected-axis policy:
 
 ```bash

@@ -3,9 +3,6 @@
 # Every field below is copied from a file in this repository, named in the comment
 # above it. Nothing here is remembered, inferred, or filled in to look complete.
 #
-# This software candidate is unreleased; date-released is deliberately omitted.
-# An authorized release cut may add its actual quoted date from CHANGELOG.md.
-#
 # The following reference remains omitted deliberately:
 #
 #   references (arXiv 2606.10154) — NOT INCLUDED, and the reason is specific. The
@@ -46,6 +43,9 @@ authors:
 # tests/test_meta.py already pins those two to each other; tests/test_refreports.py
 # pins this line to both, so the citation cannot drift from what the tool ships.
 version: "0.56.0"
+
+# CHANGELOG.md, software release 0.56.0.
+date-released: "2026-11-06"
 
 # pyproject.toml `license = "Apache-2.0"` (PEP 639 SPDX expression); LICENSE is Apache 2.0.
 license: "Apache-2.0"
