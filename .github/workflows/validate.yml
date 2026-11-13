@@ -31,7 +31,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: '0.12.23'
+          version: '0.13.7'
           enable-cache: false
       - name: Install the locked validation graph
         env:
@@ -60,7 +60,7 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: '0.12.23'
+          version: '0.13.7'
           enable-cache: false
       - name: Install the locked validation graph
         env:
@@ -96,7 +96,7 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: '0.12.23'
+          version: '0.13.7'
           enable-cache: false
       - name: Install the locked validation graph
         env:
@@ -138,7 +138,7 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: '0.12.23'
+          version: '0.13.7'
           enable-cache: false
       - name: Install the locked validation graph
         env:
@@ -206,7 +206,7 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: '0.12.23'
+          version: '0.13.7'
           enable-cache: false
       - name: Install the locked validation graph
         env:
@@ -280,7 +280,7 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: '0.12.23'
+          version: '0.13.7'
           enable-cache: false
       - name: Install the locked validation graph
         env:
@@ -341,7 +341,7 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: '0.12.23'
+          version: '0.13.7'
           enable-cache: false
       - name: Install the locked validation graph
         env:
@@ -386,7 +386,7 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: '0.12.23'
+          version: '0.13.7'
           enable-cache: false
       - name: Install the locked validation graph
         env:
@@ -438,7 +438,7 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: '0.12.23'
+          version: '0.13.7'
           enable-cache: false
       - name: Install the locked validation graph
         env:
@@ -490,7 +490,7 @@ jobs:
           python-version: '3.12'
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: '0.12.23'
+          version: '0.13.7'
           enable-cache: false
       - name: Install the locked validation graph
         env:
