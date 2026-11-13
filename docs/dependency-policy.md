@@ -631,3 +631,32 @@ skipped.
 **Exemptions expire on their own.** If a dependency later gains a cap, its exemption
 becomes a dead entry and `test_exemption_table_has_no_dead_entries` fails until it is
 deleted. The table cannot silently accumulate.
+
+
+## 2026-11-13 dependency maintenance
+
+Fresh resolution selected ACP 1.0.0, which removed `acp.helpers` imported during
+the qualified Inspect 0.3.269 evaluation. The `inspect` extra now admits ACP
+0.12 through the 0.x series; the hosted unit graph keeps its qualified 0.12.1.
+[ACP distribution metadata](https://pypi.org/pypi/agent-client-protocol/1.0.0/json)
+and the native [failed drift run](https://github.com/Sahil170595/quantfit/actions/runs/43470340924)
+identify the incompatible distribution and import.
+
+The universal lock now selects Soup Sieve 4.1 and OpenTelemetry API 1.45.2 to
+resolve the advisories reported by the same drift run and the
+[scheduled dependency audit](https://github.com/Sahil170595/quantfit/actions/runs/43454933942).
+Patched Soup Sieve releases require Python 3.11.5 or newer, so public and private
+source metadata now declare that patch floor. The unit matrix keeps the
+3.11-3.14 minor series. [Soup Sieve metadata](https://pypi.org/pypi/soupsieve/4.1/json)
+and [OpenTelemetry metadata](https://pypi.org/pypi/opentelemetry-api/1.45.2/json)
+record the upstream requirements.
+
+The existing Dependabot security update rejected the former exact uv 0.12.23
+requirement as unsupported and reported uv 0.13.7 as supported. The validation
+manifest and every workflow consumer now select that supported tool release.
+[Failed updater](https://github.com/Sahil170595/quantfit/actions/runs/43366163689),
+[uv release](https://github.com/astral-sh/uv/releases/tag/0.13.7).
+
+The changes retain fresh resolution, installed graph checks, universal-lock
+advisory checks and all runtime tests. Hosted acceptance remains attached to
+the resulting commit and workflow runs.

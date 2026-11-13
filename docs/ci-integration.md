@@ -656,10 +656,11 @@ on a hosted CPU runner, and is worth copying into your own repo:
   its own resolution is a silent overclaim.
 - **quickstart install** — build the wheel with locked tooling, install it into a clean
   venv with the complete hash-locked runtime on Linux and Windows, and smoke the CLI.
-  The complete locked `runtime` group requires Python 3.11 or newer (Pillow 13 security
-  fixes); hosted runtime and numerical qualification use Python 3.12. From the
+  The complete locked `runtime` group requires Python 3.11.5 or newer (Pillow 13
+  and Soup Sieve security fixes); hosted runtime and numerical qualification use Python 3.12. From the
   0.47.0's 2026-10-31 security correction, public/private
-  minimum Python is 3.11 and the supported unit matrix is 3.11-3.14. Earlier 3.10
+  minimum Python was 3.11. The 2026-11-13 source correction raises the patch floor
+  to 3.11.5. The supported unit matrix remains 3.11-3.14. Earlier 3.10
   source-only checks are historical, not a current support or universal-security claim.
   The independent daily dependency-drift workflow resolves fresh versions and runs the
   suite plus its advisory audit. The canary preserves cold model/judge/probe downloads

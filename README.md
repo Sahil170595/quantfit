@@ -77,6 +77,11 @@ workflows are included in this version.
 
 The **0.47.0 release** adds [capture-backed adjudication
 verification](docs/adjudication.md#capture-backed-receiving--since-0470).
+**Unreleased dependency correction, 2026-11-13.** Source installation and hosted
+validation require Python 3.11.5 or newer because patched Soup Sieve releases
+require that interpreter patch floor. The qualified Inspect SDK retains ACP 0.x
+compatibility. See [dependency maintenance](docs/dependency-policy.md#2026-11-13-dependency-maintenance).
+
 **2026-10-31 compatibility correction, released in 0.47.0:** this version requires
 Python 3.11 or newer for installation and source/CI support. Python 3.10 support
 is withdrawn because the official patched filelock releases require 3.11 and the
