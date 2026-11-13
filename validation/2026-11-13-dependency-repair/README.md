@@ -38,3 +38,12 @@ qualification must run the complete locked candidate workflow and dispatch
 the existing fresh-resolution drift lane on the resulting commit. This
 record does not establish model behavior, measurement validity, judge
 accuracy, or scientific readiness.
+
+
+The first repaired hosted drift run passed 3992 tests and failed the controlled
+judge CLI origin check. Its noneditable install gave the source-test parent a
+checkout package and its child the installed package. `source-origin.json`
+records this exact failure locally with the existing origin assertion, followed
+by all 30 judge-observation cases passing after an editable install. The drift
+lane now uses that supported installation mode while resolving dependencies
+afresh. The existing wheel/sdist consumers retain artifact qualification.

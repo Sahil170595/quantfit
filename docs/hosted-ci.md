@@ -19,7 +19,10 @@ source-only matrix is withdrawn; its historical passing results did not establis
 universal dependency security. `uv sync --locked` selects these groups; package builds use the locked build tooling without
 PEP 517 isolation. Artifact installs use `--no-deps --no-build-isolation` into that
 graph, followed by `pip check`. The scheduled drift lane deliberately resolves the
-supported package graph afresh. The validation manifest does not alter PyPI metadata.
+supported package graph afresh and installs the candidate editably for source tests.
+This keeps parent and subprocess package origins equal for controlled CLI tests.
+The installed wheel/sdist jobs exercise artifact installation independently.
+The validation manifest does not alter PyPI metadata.
 
 The locked runtime uses Torch 2.13.0, llmcompressor 0.14.0.1, Accelerate 1.15.0 and
 Pillow 13.0.0, with advisory patches aiohttp 3.14.5, certifi 2026.10.19 and
