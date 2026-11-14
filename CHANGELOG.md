@@ -13,6 +13,20 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.59.0 — 2026-11-13
+
+- Add deterministic bounded single-file transport for existing schema-1 aggregate
+  bundles: `bundle pack`, expected-SHA256 `bundle archive-verify` and `bundle
+  unpack`. Native manifest/role validation operates on the exact held buffers;
+  stored role bytes and all adverse native declarations survive restoration.
+- Require the closed canonical ZIP_STORED format, pre-parser count/byte bounds,
+  CRC and whole-container agreement. Refuse extra/duplicate/unsafe members,
+  compression/encryption, altered metadata and invalid native relationships.
+  Archive publication is exclusive and atomic; fresh-directory restoration is
+  manifest-last with conservative owned-file cleanup and explicit preservation
+  when ownership is uncertain. Neither integrity nor a hash authenticates data
+  or establishes scientific PASS. [Fictional software regression evidence](validation/2026-11-07-bundle-transport/).
+
 ## 0.58.0 — 2026-11-13
 
 - Add `validate_annotation_returns` and `calibrate chunks validate` for explicit

@@ -17,8 +17,10 @@ are keyword arguments. Each input is consumed once; validation, hashing and copy
 that same byte buffer. The source files are never modified. The destination must be a
 new directory with an existing parent; existing destinations and input aliases fail.
 
-Four fixed roles are supported: schema-v2 `report.json`, bound schema-2
-`calibration.json`, schema-1 `gate.json`, and conditional `resolution.json`.
+Four fixed roles are supported: schema-v2 `report.json`, native bound
+`calibration.json`, native `gate.json`, and conditional `resolution.json`.
+The outer bundle remains schema 1; its native receiver also supports the existing
+bound retained calibration and selected-axis/corpus gate variants.
 The manifest declares relative role filenames, byte lengths and SHA-256 hashes.
 Unknown roles, extra files, absolute/traversing/noncanonical member paths, links and
 junctions fail closed. Renaming a capture, raw label sheet, baseline cache, or arbitrary
@@ -73,3 +75,79 @@ rules. QSR v1 remains unfrozen.
 
 Synthetic local functional records and their limitations are in
 `validation/2026-10-08-portable-evidence-bundles/`. The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37880847032); release publication separately qualifies the exact versioned distributions.
+
+<a id="single-file-transport-0590-candidate"></a>
+
+## Single-file transport (0.59.0)
+
+Quantfit 0.59.0 can carry this existing **outer schema-1**
+directory in one deterministic archive. Identical exact directory bytes produce
+identical archive bytes; a newly generated manifest can have a different clock.
+Replay/schema-2 and screen bundles have different receiving contracts and are
+not admitted as schema-1 archives.
+
+```bash
+quantfit bundle pack --bundle evidence --out evidence.zip --json
+quantfit bundle archive-verify --archive evidence.zip --sha256 FULL64 --json
+quantfit bundle unpack --archive evidence.zip --sha256 FULL64 --out received-evidence --json
+quantfit bundle verify --bundle received-evidence --json
+```
+
+Use the actual `archive.sha256` returned by pack as `FULL64` (lowercase 64 hex).
+Receiving always checks that complete raw hash before ZIP parsing. It is an
+expected integrity pin, not a signature or an authenticated publisher identity.
+A malformed pin, mismatched hash, unsupported archive, invalid native relationship
+or unsafe destination exits 2. Successful transport exits 0 only for container
+integrity; nested report/gate adverse and unknown outcomes remain unchanged,
+including a pre-run refusal with no report. Existing directory byte-mismatch
+exit 3 remains unchanged. No inferred PASS, synthetic generation or redaction is
+introduced.
+
+API functions in `quantfit.bundle_transport` are:
+
+```python
+packed = pack_bundle("evidence", "evidence.zip")
+checked = verify_bundle_archive("evidence.zip", packed["archive"]["sha256"])
+received = unpack_bundle("evidence.zip", packed["archive"]["sha256"], "received-evidence")
+```
+
+The closed format is ZIP_STORED, no compression, encryption or ZIP64; fixed member
+order is manifest, report, calibration, gate, resolution (omitting absent roles).
+Timestamps are 1980-01-01, creator is Unix, members are regular mode 0600, and
+comments/extra fields are empty. Every member name must be exact and flat; no
+normalization, duplicate, extra, nested, absolute, traversal, backslash, NUL or
+special/symlink entry is admitted. Declared entry count and central-directory
+bytes are bounded **before** SDK construction, including refusal of ZIP64
+locator overrides. The native ZIP reader checks headers, sizes, overlap and CRC;
+whole canonical reserialization equality then refuses alternate headers, ordering,
+metadata and trailers. An arbitrary ZIP from another tool is not this format.
+
+At most five members: manifest <=64 KiB, report/gate/resolution <=8 MiB each,
+calibration <=2 MiB, whole payload <=26 MiB +64 KiB and raw archive <=32 MiB.
+All roles and native relationships are validated from the same held buffers
+before destination creation. These are byte/work admission bounds, not a hard
+heap-allocation limit. No capture, raw labels, cache or model role is allowed;
+no producer URL or original artifact path is followed.
+
+Pack holds every directory member once and checks the exact inventory. Output
+anywhere inside that source directory is refused. It stages bytes in the final
+parent, then atomically creates an exclusive hard link; unsupported hard linking
+refuses without a replacing-rename fallback. Existing archives are never
+replaced, and failure before publication leaves no partial final archive.
+
+Unpack requires a **fresh, absent** directory with an existing parent. It reserves
+that directory exclusively and writes the exact original manifest last as a
+readiness marker. It is not an atomic directory transaction. On failure, cleanup
+only removes inode-attested regular files whose bytes are an expected prefix,
+then the empty owned directory. Replaced paths or unknown entries are preserved,
+never recursively deleted. `partial_destination_preserved` reports uncertain
+restoration ownership; `archive_stage_preserved` reports an unattested stage.
+Keep and inspect those resources rather than retrying destructive cleanup.
+Mode bits are requested where supported; Windows still uses inherited ACLs.
+Ordinary identity checks do not guarantee protection from every hostile rename
+or crash. The tool grants no new sharing permission and never deletes inputs.
+
+[Controlled source checks](../validation/2026-11-07-bundle-transport/README.md)
+include out-of-band expected-pin refusal, native adverse roundtrip, hostile ZIPs,
+parser admission and failure/cleanup/retry controls. Four hosted installed
+profiles are extended; their execution and public release are separate evidence.
