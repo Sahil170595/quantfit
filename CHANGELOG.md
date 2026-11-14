@@ -13,7 +13,7 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.59.0 — 2026-11-13
+## 0.59.0 — 2026-11-14
 
 - Add deterministic bounded single-file transport for existing schema-1 aggregate
   bundles: `bundle pack`, expected-SHA256 `bundle archive-verify` and `bundle
