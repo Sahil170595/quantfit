@@ -1,0 +1,241 @@
+{
+  "base_commit": "6cc50a70425ba305313151df4409fcbeb54c1d9a",
+  "functional": {
+    "archive": {
+      "sha256": "e64849b6fd973c6262b2a6272b0271d1a41b7b6f6c4360483c5dce4e39138d33",
+      "size_bytes": 25188
+    },
+    "calls": [
+      {
+        "command": "bundle",
+        "native_exit": 0
+      },
+      {
+        "command": "bundle pack",
+        "native_exit": 0
+      },
+      {
+        "command": "bundle pack",
+        "native_exit": 0
+      },
+      {
+        "command": "bundle archive-verify",
+        "native_exit": 0
+      },
+      {
+        "command": "bundle unpack",
+        "native_exit": 0
+      },
+      {
+        "command": "bundle",
+        "native_exit": 0
+      },
+      {
+        "command": "bundle",
+        "native_exit": 2
+      },
+      {
+        "command": "bundle",
+        "native_exit": 2
+      }
+    ],
+    "deterministic_archive": true,
+    "duplicate_destination_preserved": true,
+    "exact_roundtrip": true,
+    "kind": "quantfit.offline-bundle-transport-controlled-functional",
+    "native_declared_results": {
+      "calibration": {
+        "assumptions_verified": false,
+        "binding_fingerprint": "f0612bfade2a9c35bc0146a171985e7ce99369ff0ca57b9d32b195bd39eb8313",
+        "human_labels_verified": false
+      },
+      "gate": {
+        "actual_run_matched": false,
+        "assumptions_verified": false,
+        "exit_code": 5,
+        "human_labels_verified": false,
+        "resolution_is_a_floor": false,
+        "unmeasurable_axes": [],
+        "verdict": "UNRESOLVABLE"
+      },
+      "report": {
+        "regression_detected": true,
+        "unmeasurable_axes": [],
+        "verdict": "REGRESSION DETECTED (both axes)"
+      },
+      "resolution": {
+        "assumptions_verified": false,
+        "binding_status": "matched actual report scope; declared evidence not authenticated",
+        "human_confirmation_verified": false
+      }
+    },
+    "roles": {
+      "calibration.json": {
+        "sha256": "c4363820c83be74e7ae213ff3684818eaefffdbf171a2284f4149b14c18ad014",
+        "size_bytes": 3842
+      },
+      "gate.json": {
+        "sha256": "63626d2ac42a87a9f081ee666abecd4e3e40dabe8096efa7734c07c8f62561e1",
+        "size_bytes": 11945
+      },
+      "manifest.json": {
+        "sha256": "7c5004f25468a923c0cd444ae0e57a545cfcccf2c413046201857760ceb0f6a0",
+        "size_bytes": 1088
+      },
+      "report.json": {
+        "sha256": "20d75c66875de2c6461de1534cbc9520f0a7dd1ba23c270fc00e4f4cd2ce5eaa",
+        "size_bytes": 2707
+      },
+      "resolution.json": {
+        "sha256": "fd0570fafcdd297363f589fdd3f0337fa7a0e091d865a6ca186b539600815b01",
+        "size_bytes": 5076
+      }
+    },
+    "scientific_claims_verified": false,
+    "synthetic": true,
+    "version": "0.59.0"
+  },
+  "kind": "quantfit.offline-bundle-transport-source-checks",
+  "limits": [
+    "Source runs use the existing Python3.12.13 editable checkout; no current installed qualification.",
+    "No full suite, hosted CI, engine, model, judge, GPU, Hub, human or browser execution claimed.",
+    "Four existing installed profiles are extended; no new jobs or artifacts.",
+    "Initial focused249P5S1F was missing validation-matrix section3 rows; final250P5S passes after docs correction.",
+    "ZIP64 and fd/root attestation causal tests use safe constructor/syscall traps, not OOM or hostile-race proof.",
+    "Intact transport preserves adverse native declarations; no redaction, authenticity or scientific PASS claim.",
+    "Historical first/expanded/causal controls ran working 0.56 metadata; current focused/static/functional ran source0.59. Cohorts overlap and are not additive."
+  ],
+  "native_bindings": {
+    "base": "6cc50a70425ba305313151df4409fcbeb54c1d9a",
+    "held_old_bundle_functions": [
+      "BundleError",
+      "_require",
+      "_pairs",
+      "_constant",
+      "_float",
+      "_json",
+      "_private_fields",
+      "_no_links",
+      "_read",
+      "_scalars",
+      "_engine",
+      "_report_shape",
+      "_report_from_parsed",
+      "_report",
+      "_validate_gate",
+      "_validate",
+      "_result",
+      "create_bundle",
+      "create_replay_bundle",
+      "verify_replay_bundle"
+    ],
+    "native_math_calibration_resolution_lock_publisher_held": true,
+    "only_old_function_refactored": "verify_bundle: native manifest/held-buffer checks extracted and shared",
+    "published056_changelog_suffix_held": true
+  },
+  "scientific_claims_verified": false,
+  "source_bindings": {
+    ".github/workflows/validate.yml": {
+      "git_LF_sha256": "44d5245136dbc4b2651a4fe503ca6724fe8d0e87034a58956ade98f05a99e79f"
+    },
+    "quantfit/bundle.py": {
+      "git_LF_sha256": "eaef1da474dcb605bc343ccc9ca278b0328d3ded10c73c526dada867508af13e"
+    },
+    "quantfit/bundle_transport.py": {
+      "git_LF_sha256": "02e41b67067ad4832921720853cb701f08731b1ceb8baca99c6fc3d0692b75db"
+    },
+    "quantfit/cli.py": {
+      "git_LF_sha256": "90e3d416b88701c69348843c4ebf11737336d5f3da4aa5d27ff8de61472e7da3"
+    },
+    "tests/test_bundle.py": {
+      "git_LF_sha256": "98e5ec35383153083d2cef58fb7833f749ac1697aa6e9ecc8ece87013599fd18"
+    },
+    "tests/test_bundle_transport.py": {
+      "git_LF_sha256": "7626f0d4ab1e5af4b6e987b55766db2da295dfe7d9865d0759e8f543750c4fa4"
+    },
+    "tools/ci_installed.py": {
+      "git_LF_sha256": "0e8a530a4f46e57f47f06e5f9354a5d474e6db592bffabbdaa826aebbdcbd1a0"
+    }
+  },
+  "source_checks": {
+    "expanded": {
+      "cases": 106,
+      "errors": 0,
+      "failed": 0,
+      "passed": 101,
+      "skipped": 5,
+      "source_metadata_version": "0.56.0 working draft"
+    },
+    "fd-red": {
+      "cases": 2,
+      "errors": 0,
+      "failed": 2,
+      "passed": 0,
+      "skipped": 0,
+      "source_metadata_version": "0.56.0 working draft"
+    },
+    "first-green": {
+      "cases": 76,
+      "errors": 0,
+      "failed": 0,
+      "passed": 71,
+      "skipped": 5,
+      "source_metadata_version": "0.56.0 working draft"
+    },
+    "first-red": {
+      "cases": 3,
+      "errors": 0,
+      "failed": 2,
+      "passed": 1,
+      "skipped": 0,
+      "source_metadata_version": "0.56.0 working draft"
+    },
+    "focused": {
+      "cases": 255,
+      "errors": 0,
+      "failed": 1,
+      "passed": 249,
+      "skipped": 5,
+      "source_metadata_version": "0.59.0"
+    },
+    "focused-final": {
+      "cases": 255,
+      "errors": 0,
+      "failed": 0,
+      "passed": 250,
+      "skipped": 5,
+      "source_metadata_version": "0.59.0"
+    },
+    "parser-fd-green": {
+      "cases": 3,
+      "errors": 0,
+      "failed": 0,
+      "passed": 3,
+      "skipped": 0,
+      "source_metadata_version": "0.56.0 working draft"
+    },
+    "root-red": {
+      "cases": 1,
+      "errors": 0,
+      "failed": 1,
+      "passed": 0,
+      "skipped": 0,
+      "source_metadata_version": "0.56.0 working draft"
+    },
+    "zip64-red": {
+      "cases": 1,
+      "errors": 0,
+      "failed": 1,
+      "passed": 0,
+      "skipped": 0,
+      "source_metadata_version": "0.56.0 working draft"
+    }
+  },
+  "static": {
+    "mypy": "strict existing screen-bundle lane plus new transport4 files: exit0; earlier4 export diagnostics retained",
+    "quantfit_audit": "exit0",
+    "ruff": "native paths check/format: exit0"
+  },
+  "synthetic": true,
+  "version": "0.59.0"
+}

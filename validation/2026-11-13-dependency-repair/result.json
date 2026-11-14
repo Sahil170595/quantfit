@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-13",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.13.1",
+  "public_minimum_python": "3.11.5",
+  "uv": "0.13.7",
+  "upstream_failures": {
+    "scheduled_ci": 43454933942,
+    "dependency_drift": 43470340924,
+    "dependabot": 43366163689
+  },
+  "native_import_regression": {
+    "utc": "2026-11-13T21:17:25.539229+00:00",
+    "inspect_ai": "0.3.269",
+    "results": [
+      {
+        "distribution": "1.0.0",
+        "sha256": "179c14266997841438ee15245a2668d31b2c695c13bff87d01c36e016185ddd0",
+        "url": "https://files.pythonhosted.org/packages/30/a1/7e29d00f01fede44ffdc84099552720727f8bfda942fea79a4f7d5ef1294/agent_client_protocol-1.0.0-py3-none-any.whl",
+        "stderr_tail": [
+          "    from acp.helpers import (",
+          "    ...<4 lines>...",
+          "    )",
+          "ModuleNotFoundError: No module named 'acp.helpers'"
+        ],
+        "succeeded": false
+      },
+      {
+        "distribution": "0.12.1",
+        "sha256": "aaf3cc301ed87d9e2c4ccb91adfe1cd58784355f6ce7e513f50e7ca2391862ef",
+        "url": "https://files.pythonhosted.org/packages/21/61/0a2186c8ca53cf464767d4c4fb7fd9e23f48ce4547c2fa0d1c83a4d52410/agent_client_protocol-0.12.1-py3-none-any.whl",
+        "stderr_tail": [],
+        "succeeded": true
+      }
+    ],
+    "scope": "Native Inspect ACP event-mapping import using official wheel overlays with the same installed surrounding graph."
+  },
+  "universal_lock_advisory_regression": [
+    {
+      "scope": "old_universal_lock",
+      "pairs": 173,
+      "layers": 2,
+      "exits": [
+        1,
+        0
+      ]
+    },
+    {
+      "scope": "corrected_universal_lock",
+      "pairs": 173,
+      "layers": 2,
+      "exits": [
+        0,
+        0
+      ]
+    }
+  ],
+  "focused_pytest": {
+    "passed": 298,
+    "skipped": 3,
+    "failed": 0
+  },
+  "static": {
+    "ruff_check_exit": 0,
+    "ruff_format_exit": 0,
+    "mypy_strict_exit": 0,
+    "package_audit_exit": 0,
+    "uv_offline_lock_check_exit": 0
+  },
+  "full_pytest": {
+    "state": "stopped_after_visible_failures_in_pre_existing_global_graph",
+    "native_process_exit": -1,
+    "visible_failures": 2,
+    "progress_at_last_complete_line_percent": 7,
+    "installed_quantfit_metadata": "absent",
+    "failure_causes": "not_classified_before_stop",
+    "hosted_complete_suite": "required_separately"
+  },
+  "limits": [
+    "Local tests use the pre-existing surrounding installed graph.",
+    "Universal-lock advisory audit includes every locked external version and no installed-environment claim.",
+    "Fresh hosted resolution and complete locked installed consumers require separate exact-commit workflow evidence.",
+    "Measurement statistics, judge quality and model behavior have no new qualification from dependency maintenance."
+  ]
+}

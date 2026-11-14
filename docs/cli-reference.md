@@ -1,9 +1,13 @@
 # CLI reference — every command, every flag
 
-This reference includes the unreleased quantfit 0.61.0 source candidate; public installation remains 0.56.0.
-The candidate adds the all-or-none `screen-summary --control-report PATH --control-capture PATH --control-adjudication PATH`
-[supplied-control annotation](saved-screen-control-evidence.md), separately from native screen results.
-Existing supported surfaces include pinned alternative probe corpora,
+Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --control-capture PATH --control-adjudication PATH`
+[supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
+
+Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.61.0.
+See the [reference action](ci-integration.md#selected-axis-reference-action).
+
+This reference documents quantfit 0.61.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -20,7 +24,7 @@ saved summary2, one held population and strict offline receiving. Default `None`
 paths retain their prior shapes. Thresholds remain native resolution targets;
 unknown/missing rows, control conditionality and human-verification limits stay.
 
-Quantfit 0.56.0 adds [held judge observations](held-judge-observation.md).
+The published Quantfit 0.56.0 adds [held judge observations](held-judge-observation.md).
 Use the original report, capture and native key with `calibrate observe-judge`.
 Then use `calibrate compare-observed-judge` with the saved observation's raw SHA
 and one full or retained label suite. Only the first command invokes the pinned
@@ -64,6 +68,18 @@ original native part. Keep the key/manifest/capture private and separate; do not
 send them with a page. [The complete SDK/CLI, byte-bound and trust contract](annotation-packets.md)
 explains native collection/ingestion, explicit labels and the unchanged narrow
 sharing permission. This is no automatic labeling, sharing or calibration.
+
+Quantfit 0.60.0 adds opt-in `inspect-run --recovery-out` with
+`--report`, plus `inspect-recover --checkpoint CHECKPOINT --sha256 FULL64 --out NEWREPORT`.
+Only completed corrected native observed HF/GGUF aggregates qualify; raw Inspect
+logs are not inputs. Recovery preserves the original native 0/3/4 outcome and
+performs no model, judge or source lookup. [Complete contract and failure behavior](inspect-run.md#completed-report-recovery-0600).
+
+Quantfit 0.59.0 adds `bundle pack`, `bundle archive-verify`
+and `bundle unpack` for the existing schema-1 aggregate directory format.
+Receiving requires the expected full lowercase archive SHA256. Existing directory
+verification and native adverse outcomes are unchanged. See [closed transport
+format and failure behavior](portable-evidence-bundles.md#single-file-transport-0590).
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,
@@ -795,6 +811,14 @@ bounded partition and its private manifest:
 
 ```bash
 quantfit calibrate chunks prepare --sheet blank.labels.csv --key private.labelkey.json --out-dir annotation-parts --rows-per-part 100 --json
+```
+
+Quantfit 0.58.0 can inspect an explicitly indexed returned subset
+first. Success means only that the supplied parts are valid; `complete: false`
+and missing part indices remain explicit. No labels are inferred or ingested:
+
+```bash
+quantfit calibrate chunks validate --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --part 2=returned-part-2.labels.csv --out inspection.json --json
 ```
 
 Explicitly fill every returned part, then collect them in manifest order:

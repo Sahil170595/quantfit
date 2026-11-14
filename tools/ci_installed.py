@@ -671,8 +671,106 @@ def main() -> None:
         verified = json.loads(completed.stdout)["result"]
         assert verified["integrity_verified"] is True and verified["scientific_claims_verified"] is False
         assert verified["declared_results"] == created["declared_results"]
+        # Offline recovery also preserves a held historical native observed-HF
+        # aggregate byte-for-byte. New producer/failure controls run separately
+        # in the selected test_inspect_recovery.py over controlled native Inspect.
+        from quantfit.inspect_recovery import _checkpoint_report
+
+        original_inspect = (checkout / "validation/2026-10-05-inspect-cli/inspect-drift.json").read_bytes()
+        checkpoint = sandbox / "completed-inspect-checkpoint.json"
+        _, recovery = _checkpoint_report(original_inspect, str(checkpoint))
+        recovered = sandbox / "recovered-inspect.json"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "inspect-recover",
+                "--checkpoint",
+                str(checkpoint),
+                "--sha256",
+                recovery["checkpoint"]["sha256"],
+                "--out",
+                str(recovered),
+                "--json",
+            ],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        document = json.loads(completed.stdout)
+        assert completed.returncode == document["exit_code"] == recovery["native_exit_code"]
+        assert recovered.read_bytes() == original_inspect
+        assert document["result"]["report"]["sha256"] == hashlib.sha256(original_inspect).hexdigest()
+        assert document["result"]["report_published"] and document["result"]["scientific_claims_verified"] is False
         assert verified["declared_results"]["gate"]["exit_code"] == 5
         assert verified["declared_results"]["gate"]["actual_run_matched"] is False
+        # Single-file transport keeps exact aggregate bytes and native adverse
+        # declarations. No raw captures or producer paths are transported.
+        archive = sandbox / "aggregate.zip"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "bundle",
+                "pack",
+                "--bundle",
+                str(relocated),
+                "--out",
+                str(archive),
+                "--json",
+            ],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        transported = json.loads(completed.stdout)["result"]
+        pin = hashlib.sha256(archive.read_bytes()).hexdigest()
+        assert (
+            transported["archive"]["sha256"] == pin and transported["declared_results"] == verified["declared_results"]
+        )
+        received = sandbox / "restored-aggregate"
+        for action, extra in (("archive-verify", []), ("unpack", ["--out", str(received)])):
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "quantfit.cli",
+                    "bundle",
+                    action,
+                    "--archive",
+                    str(archive),
+                    "--sha256",
+                    pin,
+                    *extra,
+                    "--json",
+                ],
+                cwd=sandbox,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            result = json.loads(completed.stdout)["result"]
+            assert result["declared_results"] == verified["declared_results"]
+            assert result["scientific_claims_verified"] is False and result["integrity_verified"] is True
+        assert {p.name: p.read_bytes() for p in received.iterdir()} == {
+            p.name: p.read_bytes() for p in relocated.iterdir()
+        }
+        completed = subprocess.run(
+            [sys.executable, "-m", "quantfit.cli", "bundle", "verify", "--bundle", str(received), "--json"],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        assert json.loads(completed.stdout)["result"]["declared_results"] == verified["declared_results"]
         for member in verified["manifest"]["files"]:
             assert member["sha256"] == hashlib.sha256((relocated / member["path"]).read_bytes()).hexdigest()
         # Tampering changes the byte contract, even if the edited JSON still parses.
@@ -805,8 +903,11 @@ def main() -> None:
             "test_resolution.py",
             "test_calibrated_modelcard.py",
             "test_action_calibration.py",
+            "test_action_axis.py",
             "test_saved_report_gate.py",
             "test_replay_bundle.py",
+            "test_bundle_transport.py",
+            "test_inspect_recovery.py",
             "test_reproduce_bundles.py",
             "test_reproduce_junit.py",
             "test_reference_assessment.py",
@@ -825,6 +926,7 @@ def main() -> None:
             "test_judge_observation.py",
             "test_ci_label_review.py",
             "test_ci_annotation_chunks.py",
+            "test_annotation_returns.py",
             "test_annotation_packets.py",
             "test_ci_annotation_packets.py",
             "test_ci_retained_review.py",

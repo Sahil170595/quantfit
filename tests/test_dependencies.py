@@ -903,7 +903,8 @@ def test_requires_python_agrees_with_the_classifiers():
     lowers = [v for op, v in specs if op == ">="]
     assert len(lowers) == 1, f"expected exactly one `>=` lower bound in requires-python, got {sorted(specs)}"
     lower = tuple(int(p) for p in lowers[0].split("."))
-    assert lower == versions[0], (
+    # Classifiers express the minor series; Requires-Python can also require a patched interpreter.
+    assert lower[:2] == versions[0], (
         f"requires-python floor is {lowers[0]} but the lowest advertised classifier is "
         f"{'.'.join(map(str, versions[0]))}. One of the two is lying to installers."
     )

@@ -1,6 +1,6 @@
 # Supplied positive-control evidence for saved screens
 
-**Unreleased 0.61.0 source candidate. Public installation remains 0.56.0.**
+**Available since 0.61.0.**
 This adds a separate artifact-consistency annotation to the existing offline
 screen summary. It never changes native screen rows, exits, statistical bounds,
 conditionality, sensitivity declarations or human/scientific verification flags.
@@ -41,8 +41,10 @@ encoded byte policies, not heap or runtime guarantees. Native adjudication
 receiving validates the complete capture, tabulation, record membership and
 completion digests against the same report bytes; original queue and preparation
 remain unverified declarations. No CSV, labels or private strings are reconstructed
-for output. Inputs and both output roles are checked before receiving and rechecked
-before native per-file atomic publication; two outputs are not a pair transaction.
+for output. Input and output roles are admitted before receiving. Before native per-file
+atomic publication, the three held control roles receive explicit stamp rechecks;
+saved-screen inputs retain their existing held-buffer and inventory contract.
+Two outputs are not a pair transaction.
 
 The added `control_evidence` object contains only fixed status/limit declarations,
 input byte sizes/hashes, aggregate dangerous counts and enum-keyed stratum results.

@@ -1,0 +1,336 @@
+{
+  "base_commit": "6cc50a70425ba305313151df4409fcbeb54c1d9a",
+  "current_affected_skips": [
+    {
+      "module": "tests.test_inspect_recovery",
+      "reason": "Symlink privilege unavailable; hosted Linux exercises valid native source refs",
+      "test": "test_opted_known_model_symlink_roles_preserve_execution_ref_and_alias_protection[False]"
+    },
+    {
+      "module": "tests.test_inspect_recovery",
+      "reason": "Symlink privilege unavailable; hosted Linux exercises valid native source refs",
+      "test": "test_opted_known_model_symlink_roles_preserve_execution_ref_and_alias_protection[True]"
+    },
+    {
+      "module": "tests.test_inspect_cli",
+      "reason": "Symlink privilege unavailable; hosted Linux exercises report alias",
+      "test": "test_gguf_report_alias_refuses_before_contact[symlink]"
+    }
+  ],
+  "current_new_feature_tests": {
+    "cases": 46,
+    "passed": 44,
+    "skipped": 2
+  },
+  "current_skips": [
+    {
+      "module": "tests.test_inspect_task",
+      "reason": "inspect_ai is installed; the absent-dependency refusal is unreachable",
+      "test": "test_missing_inspect_ai_is_an_operational_error_naming_the_install"
+    },
+    {
+      "module": "tests.test_inspect_task",
+      "reason": "Symlink privilege unavailable; hosted Linux exercises resolved input alias",
+      "test": "test_library_report_refuses_resolved_protected_inputs[symlink]"
+    },
+    {
+      "module": "tests.test_inspect_cli",
+      "reason": "Symlink privilege unavailable; hosted Linux exercises report alias",
+      "test": "test_gguf_report_alias_refuses_before_contact[symlink]"
+    },
+    {
+      "module": "tests.test_inspect_gguf",
+      "reason": "owned Linux process-group test",
+      "test": "test_real_async_http_cancellation_closes_owned_group"
+    }
+  ],
+  "functional_offline_historical": {
+    "calls": [
+      {
+        "native_exit": 4,
+        "workflow": "recover"
+      },
+      {
+        "native_exit": 2,
+        "workflow": "wrong-pin"
+      },
+      {
+        "native_exit": 2,
+        "workflow": "duplicate-output"
+      }
+    ],
+    "current_tool_version": "0.60.0",
+    "exact_report_bytes_preserved": true,
+    "historical_measurement_not_rerun": true,
+    "kind": "quantfit.inspect-recovery-controlled-offline-functional",
+    "receipt": {
+      "baseline_generate_calls": 40,
+      "baseline_runtime_s": 165.70199609998963,
+      "checkpoint": {
+        "sha256": "1bd5590e3b8af1ebe7e7d640d8539b8410134265d1beee53743256e1086df3e0",
+        "size_bytes": 10605
+      },
+      "checkpoint_saved": true,
+      "inspect_recovery_receipt_schema": 1,
+      "judge_runtime_s": 8.54,
+      "n_probes": 40,
+      "native_exit_code": 4,
+      "quantized_generate_calls": 40,
+      "quantized_runtime_s": 165.47611239991966,
+      "report": {
+        "sha256": "8b090f3124bd1edf6c76fad3f704bfb55e819c251dd2f5f9b95640c3f7064ae0",
+        "size_bytes": 5749
+      },
+      "report_published": false,
+      "scientific_claims_verified": false,
+      "scope": "Completed corrected native Inspect aggregate only; no raw logs, prompts, completions, Probe objects or extra protected-input/observer paths are checkpointed. Native model locators remain unchanged. Source, loaded observation and runtime fields are preserved, not remeasured or authenticated. Recovery performs no evaluation, generation, scoring, judging or asset lookup. A hash binds bytes, not human truth, source authenticity, sensitivity or scientific GO."
+    },
+    "scientific_claims_verified": false,
+    "source_fixture": {
+      "original_created_utc": "2026-10-05T12:15:39+00:00",
+      "original_report_version": "0.15.1",
+      "path": "validation/2026-10-05-inspect-cli/inspect-drift.json",
+      "sha256": "8b090f3124bd1edf6c76fad3f704bfb55e819c251dd2f5f9b95640c3f7064ae0"
+    }
+  },
+  "kind": "quantfit.inspect-report-recovery-source-checks",
+  "limits": [
+    "Current source uses existing Python3.12.13 editable environment, not installed candidate distributions.",
+    "Controlled real Inspect orchestration uses fictional native GGUF server/files/judge; no real model, GPU, Hub or engine performance run.",
+    "Historical native0.15.1 aggregate is recovered byte-for-byte offline; no current measurement claim.",
+    "Four existing installed profiles are extended, not locally executed; no full local suite/hosted/browser qualification.",
+    "Cohorts overlap; historical failures remain and are not summed or relabeled.",
+    "SDK source/model execution API qsr_eval remains unchanged; writer sink admission is postrun, CLI known sinks preexecution.",
+    "Recovery checkpoint includes original aggregate model locators; not redaction/authentication or human/scientific validation.",
+    "Ruff preflight F821 was tool-console-only (then corrected local receipt capture); no fabricated historical native log.",
+    "Current new symlink compatibility cases are2 privilegeSKIP locally; hosted Linux execution remains required, no local symlink-pass claim.",
+    "Opted cleanup retains saved receipt when final replace and temporary cleanup both fail; ordinary None cleanup unchanged."
+  ],
+  "native_bindings": {
+    "QsrRun_declared_fields_AST_held": true,
+    "base": "6cc50a70425ba305313151df4409fcbeb54c1d9a",
+    "default_None_finally_unlink_branch_AST_held": true,
+    "default_report_assembler_correction_publication_branch_AST_held": true,
+    "held_old_inspect_functions": [
+      "_installed_inspect_ai_version",
+      "_import_refusal",
+      "_inspect_api",
+      "provider_of",
+      "check_arms",
+      "check_model_args",
+      "model_args_provenance",
+      "check_generate_config",
+      "check_pins",
+      "check_max_new_tokens",
+      "check_epochs",
+      "check_eval_args",
+      "outcomes_from_scores",
+      "_check_epoch",
+      "_check_arm_record",
+      "check_run_arms",
+      "judge_runtime_from_outcomes",
+      "run_model_args",
+      "drift_from_outcomes",
+      "inspect_decode",
+      "check_report_output",
+      "local_gguf_inputs",
+      "inspect_arm",
+      "_samples_from_probes",
+      "qsr_samples",
+      "_dataset_from_probes",
+      "qsr_dataset",
+      "_registry",
+      "_role_name",
+      "qsr_arm",
+      "qsr_drift_metric",
+      "qsr_paired_solver",
+      "qsr_paired_scorer",
+      "qsr_paired_diff",
+      "qsr_eval",
+      "_eval_task",
+      "_completion_records",
+      "scores_from_log"
+    ],
+    "native_math_report_source_binding_lock_publisher_held": true,
+    "opted_cleanup_only": "saved receipt retained if final error cleanup also fails",
+    "published056_history_held": true
+  },
+  "qualification_scope": "Broad source focus521P4S before final opted native known-model role normalization; current affected recovery/CLI61P3S after that fix. Counts overlap, not additive.",
+  "scientific_claims_verified": false,
+  "source_bindings": {
+    ".github/workflows/validate.yml": {
+      "git_LF_sha256": "b81737e944b052598b460ea1d2b7205b3515527b0d3da104ceb71646afe31acc"
+    },
+    "quantfit/cli.py": {
+      "git_LF_sha256": "7f06d4dbf4a431f855b5f5aa11fbabd337e4468ecd6f298b7efa342c47091bc4"
+    },
+    "quantfit/inspect_recovery.py": {
+      "git_LF_sha256": "6f3167f7c9e0551194d79362e77277c16dcb6eff4ab13c61a19fb2e10364b65f"
+    },
+    "quantfit/inspect_task.py": {
+      "git_LF_sha256": "0db9e7fa5f42d635edf341e1b48ec63efdc64e205fc00b0b829eff6f298e5f6e"
+    },
+    "tests/test_inspect_recovery.py": {
+      "git_LF_sha256": "c3cbb564314284335bda35e15835ebed369549fec4adb272696d71df6aa53df9"
+    },
+    "tests/test_inspect_task.py": {
+      "git_LF_sha256": "9bd1b9d0c14fb70235b5ebab1f4c41eddbcc19ad94354e5afcdcfc5003f6dbc2"
+    },
+    "tools/ci_installed.py": {
+      "git_LF_sha256": "c3c853342ed2cfac04652280c99a7edf56319ae31e5ffec9ae0576915af22752"
+    }
+  },
+  "source_checks": {
+    "compound-green": {
+      "cases": 1,
+      "errors": 0,
+      "failed": 0,
+      "passed": 1,
+      "skipped": 0,
+      "source_version": "0.60.0"
+    },
+    "compound-red": {
+      "cases": 1,
+      "errors": 0,
+      "failed": 1,
+      "passed": 0,
+      "skipped": 0,
+      "source_version": "0.60.0"
+    },
+    "current-cli": {
+      "cases": 60,
+      "errors": 0,
+      "failed": 0,
+      "passed": 59,
+      "skipped": 1,
+      "source_version": "0.60.0"
+    },
+    "exact-green": {
+      "cases": 3,
+      "errors": 0,
+      "failed": 0,
+      "passed": 3,
+      "skipped": 0,
+      "source_version": "0.56.0 working draft"
+    },
+    "exact-red": {
+      "cases": 3,
+      "errors": 0,
+      "failed": 3,
+      "passed": 0,
+      "skipped": 0,
+      "source_version": "0.56.0 working draft"
+    },
+    "expanded": {
+      "cases": 32,
+      "errors": 0,
+      "failed": 0,
+      "passed": 31,
+      "skipped": 1,
+      "source_version": "0.56.0 working draft"
+    },
+    "expanded2": {
+      "cases": 52,
+      "errors": 0,
+      "failed": 0,
+      "passed": 51,
+      "skipped": 1,
+      "source_version": "0.56.0 working draft"
+    },
+    "first-green": {
+      "cases": 3,
+      "errors": 0,
+      "failed": 0,
+      "passed": 3,
+      "skipped": 0,
+      "source_version": "0.56.0 working draft"
+    },
+    "first-red": {
+      "cases": 3,
+      "errors": 0,
+      "failed": 2,
+      "passed": 1,
+      "skipped": 0,
+      "source_version": "0.56.0 working draft"
+    },
+    "focused": {
+      "cases": 521,
+      "errors": 0,
+      "failed": 0,
+      "passed": 517,
+      "skipped": 4,
+      "source_version": "0.60.0"
+    },
+    "focused-complete": {
+      "cases": 525,
+      "errors": 0,
+      "failed": 0,
+      "passed": 521,
+      "skipped": 4,
+      "source_version": "0.60.0"
+    },
+    "focused-final": {
+      "cases": 524,
+      "errors": 0,
+      "failed": 0,
+      "passed": 520,
+      "skipped": 4,
+      "source_version": "0.60.0"
+    },
+    "last-affected": {
+      "cases": 64,
+      "errors": 0,
+      "failed": 0,
+      "passed": 61,
+      "skipped": 3,
+      "source_version": "0.60.0"
+    },
+    "repeat-red": {
+      "cases": 1,
+      "errors": 0,
+      "failed": 1,
+      "passed": 0,
+      "skipped": 0,
+      "source_version": "0.56.0 working draft"
+    },
+    "stage-green": {
+      "cases": 2,
+      "errors": 0,
+      "failed": 0,
+      "passed": 2,
+      "skipped": 0,
+      "source_version": "0.56.0 working draft"
+    },
+    "stage-red": {
+      "cases": 2,
+      "errors": 0,
+      "failed": 2,
+      "passed": 0,
+      "skipped": 0,
+      "source_version": "0.56.0 working draft"
+    },
+    "temp-green": {
+      "cases": 1,
+      "errors": 0,
+      "failed": 0,
+      "passed": 1,
+      "skipped": 0,
+      "source_version": "0.56.0 working draft"
+    },
+    "temp-red": {
+      "cases": 1,
+      "errors": 0,
+      "failed": 1,
+      "passed": 0,
+      "skipped": 0,
+      "source_version": "0.56.0 working draft"
+    }
+  },
+  "static": {
+    "audit": "current exit0",
+    "mypy": "current strict new module exit0",
+    "ruff": "current native check/format287files exit0"
+  },
+  "synthetic_producer_controls": true,
+  "version": "0.60.0"
+}

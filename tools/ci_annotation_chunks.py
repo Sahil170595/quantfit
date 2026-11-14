@@ -11,7 +11,11 @@ from typing import Any
 
 
 def run(checkout: Path, root: Path) -> dict[str, Any]:
-    from quantfit.safety.annotation_chunks import collect_annotation_chunks, prepare_annotation_chunks
+    from quantfit.safety.annotation_chunks import (
+        collect_annotation_chunks,
+        prepare_annotation_chunks,
+        validate_annotation_returns,
+    )
     from quantfit.safety.calibrate import ingest_labels
 
     spec = importlib.util.spec_from_file_location("private_chunk_fixture", checkout / "tools/ci_label_review.py")
@@ -35,6 +39,28 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
     for part in parts:
         helper.fill_fixture_review(part, key)
     manifest = directory / "annotation.chunkmanifest.json"
+    validate_args = ["calibrate", "chunks", "validate", *common, "--manifest", str(manifest)]
+    code, partial, stderr = helper.invoke(
+        [
+            *validate_args,
+            "--part",
+            f"4={parts[3]}",
+            "--part",
+            f"2={parts[1]}",
+            "--out",
+            str(root / "partial-inspection.json"),
+        ]
+    )
+    assert code == 0 and not stderr
+    assert partial["result"]["received_part_indices"] == [2, 4]
+    assert partial["result"]["missing_part_indices"] == [1, 3]
+    assert partial["result"]["n_received_rows"] == 8 and partial["result"]["complete"] is False
+    all_args = [*validate_args, "--out", str(root / "complete-inspection.json")]
+    for index in reversed(range(len(parts))):
+        all_args += ["--part", f"{index + 1}={parts[index]}"]
+    code, inspected, stderr = helper.invoke(all_args)
+    assert code == 0 and not stderr and inspected["result"]["complete"] is True
+    assert inspected["result"]["n_received_rows"] == 18 and inspected["result"]["missing_part_indices"] == []
     full, receipt = root / "collected.labels.csv", root / "collection.json"
     collect_args = [
         "calibrate",
@@ -101,6 +127,10 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
     api_parts = sorted(api_dir.glob("part-*.labels.csv"))
     for part in api_parts:
         helper.fill_fixture_review(part, key, labels=("unusable",) * 9)
+    api_inspected = validate_annotation_returns(
+        str(sheet), str(key), str(api_dir / "annotation.chunkmanifest.json"), ((2, str(api_parts[1])),)
+    )
+    assert api_inspected["complete"] is False and api_inspected["n_received_rows"] == 7
     api_full = root / "api-collected.labels.csv"
     api_collected = collect_annotation_chunks(
         str(sheet),
@@ -121,7 +151,7 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
         raise AssertionError("native all-unusable calibration was not refused")
     assert not (root / "empty-calibration.json").exists()
     assert [path.read_bytes() for path in (sheet, key)] == original
-    public = json.dumps([prepared, collected, api_prepared, api_collected])
+    public = json.dumps([prepared, partial, inspected, collected, api_prepared, api_inspected, api_collected])
     private = json.loads(key.read_bytes())
     assert "PRIVATE_" not in public and private["salt"] not in public and str(root) not in public
     assert all(ident not in public for ident in private["ids"])
@@ -130,6 +160,11 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
         "synthetic": True,
         "preparation": prepared["result"],
         "collection": collected["result"],
+        "return_validation": {
+            "partial": partial["result"],
+            "complete": inspected["result"],
+            "api_unusable_subset": api_inspected,
+        },
         "missing_part_exit_code": bad_code,
         "native_ingest_exit_code": code,
         "native_counts": {
