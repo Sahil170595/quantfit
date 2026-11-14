@@ -41,6 +41,11 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+Quantfit **0.61.0** adds
+[supplied positive-control evidence for saved screens](docs/saved-screen-control-evidence.md).
+It verifies an explicit local report/capture/adjudication triplet and adds
+a count/hash-only applicability annotation alongside the native screen results.
+
 Quantfit **0.60.0** adds [completed Inspect report recovery](docs/inspect-run.md#completed-report-recovery-0600).
 An opt-in checkpoint retains the completed aggregate before final report
 publication. Pinned offline recovery restores its exact bytes and native outcome.
@@ -72,7 +77,7 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-Install with `pip install "quantfit[inspect,gguf]==0.60.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.61.0"`.
 
 The observation runs the pinned judge over the original held completions.
 Use its receipt's raw SHA-256 for the offline comparison against one complete

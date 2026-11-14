@@ -300,6 +300,19 @@ def measurement_identity(report: DriftReport) -> dict:
     return _measurement_identity(report, require_observation=True)
 
 
+def _decode_identity(value: dict) -> dict:
+    """Native decode normalization, independent of model-arm pin eligibility."""
+    decode = dict(value)
+    _require(_count(decode.get("max_new_tokens"), "decode.max_new_tokens") > 0, "token budget must be positive")
+    _require(decode.get("do_sample") is False or decode.get("greedy") is True, "decode must declare greedy generation")
+    _require("do_sample" not in decode or decode["do_sample"] is False, "conflicting or invalid do_sample fact")
+    _require("greedy" not in decode or decode["greedy"] is True, "conflicting or invalid greedy fact")
+    _text(decode.get("chat_template"), "decode.chat_template")
+    decode.pop("do_sample", None)
+    decode["greedy"] = True
+    return decode
+
+
 def _measurement_identity(report: DriftReport, *, require_observation: bool) -> dict:
     _require(isinstance(report, DriftReport), "measurement_identity requires a DriftReport")
     _require(
@@ -330,14 +343,7 @@ def _measurement_identity(report: DriftReport, *, require_observation: bool) -> 
             "probe dataset revision must be an immutable commit",
         )
     _require(_count(probes["n_probes"], "probe_dataset.n_probes") > 0, "probe count must be positive")
-    decode = dict(report.decode)
-    _require(_count(decode.get("max_new_tokens"), "decode.max_new_tokens") > 0, "token budget must be positive")
-    _require(decode.get("do_sample") is False or decode.get("greedy") is True, "decode must declare greedy generation")
-    _require("do_sample" not in decode or decode["do_sample"] is False, "conflicting or invalid do_sample fact")
-    _require("greedy" not in decode or decode["greedy"] is True, "conflicting or invalid greedy fact")
-    _text(decode.get("chat_template"), "decode.chat_template")
-    decode.pop("do_sample", None)
-    decode["greedy"] = True
+    decode = _decode_identity(report.decode)
     env = dict(report.env)
     _require(
         set(env) == {"python", "torch", "transformers", "cuda", "device"}, "unsupported environment identity fields"

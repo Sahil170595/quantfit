@@ -461,7 +461,12 @@ class _HeldScreenInputs:
 
 
 def _hold_screen_inputs(
-    manifest_path: str, reports_dir: str, *, out_path: str | None = None, junit_path: str | None = None
+    manifest_path: str,
+    reports_dir: str,
+    *,
+    out_path: str | None = None,
+    junit_path: str | None = None,
+    protected_sources: tuple[Path, ...] = (),
 ) -> _HeldScreenInputs:
     """Existing native input boundary, held once for optional pure receiving consumers."""
     phase = "unsafe_output"
@@ -470,12 +475,16 @@ def _hold_screen_inputs(
         outputs = tuple(Path(_canonical_receiving_path(p)) for p in (out_path, junit_path) if p is not None)
         root = Path(reports_dir)
         _require(root.is_dir(), "invalid_reports_directory")
-        _validate_reproduction_outputs(_ReproductionOutputs((Path(manifest_path),), (root,), outputs))
+        _validate_reproduction_outputs(
+            _ReproductionOutputs((Path(manifest_path), *protected_sources), (root,), outputs)
+        )
         phase = "invalid_manifest"
         raw_manifest = _read(Path(manifest_path), MAX_MANIFEST_BYTES)
         _, targets, _ = _manifest(raw_manifest)
         allowed = {f"{target.name}.json" for target in targets} | {SUMMARY_FILENAME}
-        plan = _ReproductionOutputs((Path(manifest_path), *[root / name for name in sorted(allowed)]), (root,), outputs)
+        plan = _ReproductionOutputs(
+            (Path(manifest_path), *protected_sources, *[root / name for name in sorted(allowed)]), (root,), outputs
+        )
         _validate_reproduction_outputs(plan)
         phase = "invalid_report"
         held = {}
@@ -505,8 +514,35 @@ def summarize_screen(
     calibration_variants: dict[str, str | None] | None = None,
     required_conditional_resolution_pp: float | None = None,
     probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
+    control_report: str | None = None,
+    control_capture: str | None = None,
+    control_adjudication: str | None = None,
 ) -> dict[str, object]:
     """Hold once; annotate native resolution, or explicitly require its declared ceiling."""
+    if any(value is not None for value in (control_report, control_capture, control_adjudication)):
+        from quantfit.screen_control_evidence import summarize_with_control
+
+        _require(
+            all(
+                type(value) is str and bool(value) for value in (control_report, control_capture, control_adjudication)
+            ),
+            "control_roles_all_or_none",
+        )
+        _require(
+            calibrations_dir is None and calibration_variants is None and required_conditional_resolution_pp is None,
+            "control_calibration_combination_unsupported",
+        )
+        assert control_report is not None and control_capture is not None and control_adjudication is not None
+        return summarize_with_control(
+            manifest_path,
+            reports_dir,
+            control_report,
+            control_capture,
+            control_adjudication,
+            out_path=out_path,
+            junit_path=junit_path,
+            probe_corpus=probe_corpus,
+        )
     if calibration_variants is not None:
         from quantfit.calibration_choices import summarize_screen_with_variants
 

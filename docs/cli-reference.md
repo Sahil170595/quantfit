@@ -1,10 +1,13 @@
 # CLI reference — every command, every flag
 
+Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --control-capture PATH --control-adjudication PATH`
+[supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
+
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.60.0.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.61.0.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.60.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.61.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
