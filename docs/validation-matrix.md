@@ -919,3 +919,5 @@ Native preflight/post-run resolution and priority 3>4>5>0, conditional direction
 epsilon/MAX, calibration and judge assumptions are unchanged. Default Hub/None
 compatibility does not transfer default-distribution FPR, sensitivity, canonical
 T0/reference authority or scientific GO to these declared local rows.
+
+| `--sheet` / `--key` / `--manifest` / `--part` / `--out` / `--json` | calibrate chunks validate (0.58.0) | Explicit canonical `INDEX=PATH` roles, exact regenerated native manifest and complete supplied parts; valid partial inspection returns missing indices, no calibration. Duplicate/substituted roles, late-invalid rows, bounds and sink aliases refuse before publication. | `tests/test_annotation_returns.py`; `tests/test_ci_annotation_chunks.py`; `validation/2026-11-07-annotation-returns/`; current hosted installed proof separate. |

@@ -825,6 +825,7 @@ def main() -> None:
             "test_judge_observation.py",
             "test_ci_label_review.py",
             "test_ci_annotation_chunks.py",
+            "test_annotation_returns.py",
             "test_annotation_packets.py",
             "test_ci_annotation_packets.py",
             "test_ci_retained_review.py",

@@ -41,6 +41,11 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+Quantfit **0.58.0** adds
+[indexed returned-part inspection](docs/annotation-chunks.md#inspect-indexed-returns-0580)
+before complete collection. Valid subsets report missing coverage explicitly.
+Complete collection and ingestion remain separate native operations.
+
 Quantfit **0.57.0** adds an explicit selected-axis policy to the reference GitHub
 Action and reports each selected axis. Candidate acceptance installs the exact
 wheel through `quantfit-path`, and releases qualify the versioned distributions.
@@ -59,7 +64,7 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-Install with `pip install "quantfit[inspect,gguf]==0.57.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.58.0"`.
 
 The observation runs the pinned judge over the original held completions.
 Use its receipt's raw SHA-256 for the offline comparison against one complete
