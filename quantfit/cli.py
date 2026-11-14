@@ -696,7 +696,10 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     chunk_collect = chunk_sub.add_parser("collect", help="all explicit filled parts -> complete new native sheet")
     chunk_packets = chunk_sub.add_parser("packets", help="original blank/key/manifest -> all private recipient pages")
-    for chunk_parser in (chunk_prepare, chunk_collect, chunk_packets):
+    chunk_validate = chunk_sub.add_parser(
+        "validate", help="inspect explicitly indexed returned parts before collection"
+    )
+    for chunk_parser in (chunk_prepare, chunk_collect, chunk_packets, chunk_validate):
         chunk_parser.add_argument(
             "--sheet", required=True, metavar="PATH", help="unchanged original complete BLANK template"
         )
@@ -717,6 +720,15 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     chunk_collect.add_argument("--out", required=True, metavar="PATH", help="new complete private native sheet")
     chunk_collect.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate counts/hash receipt")
+    chunk_validate.add_argument("--manifest", required=True, metavar="PATH", help="original private chunk manifest")
+    chunk_validate.add_argument(
+        "--part",
+        required=True,
+        action="append",
+        metavar="INDEX=PATH",
+        help="complete returned part and its original index",
+    )
+    chunk_validate.add_argument("--out", required=True, metavar="PATH", help="new aggregate inspection receipt")
     chunk_packets.add_argument(
         "--manifest", required=True, metavar="PATH", help="original private chunk manifest; never share"
     )
@@ -924,6 +936,15 @@ def _build_parser() -> argparse.ArgumentParser:
         "verify", help="verify relocated bundle (0 intact, 3 byte mismatch, 2 unsupported/unsafe)"
     )
     bverify.add_argument("--bundle", required=True, metavar="DIR", help="local portable bundle directory")
+    bpack = bsub.add_parser("pack", help="canonical single-file schema-1 aggregate transport; no scientific PASS")
+    bpack.add_argument("--bundle", required=True, metavar="DIR", help="native schema-1 aggregate directory")
+    bpack.add_argument("--out", required=True, metavar="PATH", help="new canonical stored archive")
+    barchive = bsub.add_parser("archive-verify", help="offline expected-SHA256 container and native validation")
+    bunpack = bsub.add_parser("unpack", help="validate fully then restore to a fresh exclusive directory")
+    for receiving in (barchive, bunpack):
+        receiving.add_argument("--archive", required=True, metavar="PATH", help="canonical aggregate archive")
+        receiving.add_argument("--sha256", required=True, metavar="FULL64", help="expected whole raw archive SHA256")
+    bunpack.add_argument("--out", required=True, metavar="DIR", help="new destination; parent must exist")
     breplay = bsub.add_parser(
         "replay-create", help="package exactly three reports and original T0 (0 intact, 2 unsupported input)"
     )
@@ -1805,6 +1826,22 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _emit(args, "evidence", 0, result, human_evidence)
 
     if args.cmd == "bundle":
+        if args.bundle_cmd in {"pack", "archive-verify", "unpack"}:
+            from quantfit.bundle_transport import pack_bundle, unpack_bundle, verify_bundle_archive
+
+            if args.bundle_cmd == "pack":
+                result = pack_bundle(args.bundle, args.out)
+            elif args.bundle_cmd == "unpack":
+                result = unpack_bundle(args.archive, args.sha256, args.out)
+            else:
+                result = verify_bundle_archive(args.archive, args.sha256)
+
+            def human_transport():
+                print("Aggregate transport intact; original native verdicts remain declarations.")
+                print(result["scope"])
+
+            return _emit(args, "bundle " + args.bundle_cmd, 0, result, human_transport)
+
         if args.bundle_cmd in {"screen-create", "screen-verify"}:
             from quantfit.screen_bundle import create_screen_bundle, verify_screen_bundle
 

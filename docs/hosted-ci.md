@@ -13,16 +13,21 @@ workflow linting, and the installed dependency graph for known vulnerabilities.
 for the supported Python 3.11-3.14 unit/tooling domain on hosted Linux/Windows.
 The numerical and complete runtime jobs remain Python 3.12. From 0.47.0's
 2026-10-31 correction, both public installation and private
-validation require Python 3.11+. The earlier Python 3.10 source-only matrix is
-withdrawn; its historical passing results did not establish complete runtime or
+validation require Python 3.11+. The 2026-11-13 source correction raises the
+patch floor to 3.11.5, matching patched Soup Sieve. The earlier Python 3.10
+source-only matrix is withdrawn; its historical passing results did not establish complete runtime or
 universal dependency security. `uv sync --locked` selects these groups; package builds use the locked build tooling without
 PEP 517 isolation. Artifact installs use `--no-deps --no-build-isolation` into that
 graph, followed by `pip check`. The scheduled drift lane deliberately resolves the
-supported package graph afresh. The validation manifest does not alter PyPI metadata.
+supported package graph afresh and installs the candidate editably for source tests.
+This keeps parent and subprocess package origins equal for controlled CLI tests.
+The installed wheel/sdist jobs exercise artifact installation independently.
+The validation manifest does not alter PyPI metadata.
 
 The locked runtime uses Torch 2.13.0, llmcompressor 0.14.0.1, Accelerate 1.15.0 and
 Pillow 13.0.0, with advisory patches aiohttp 3.14.5, certifi 2026.10.19 and
-opentelemetry-api 1.45.1. The compressor hotfix removes the Pillow upper cap; direct
+opentelemetry-api 1.45.2 and Soup Sieve 4.1. The compressor hotfix removes the
+Pillow upper cap; direct
 package ceilings retain the previously admitted datasets 5.0.1 / Accelerate 1.15.0
 boundary. The dated security maintenance in `docs/dependency-policy.md` §5 preserves
 the hosted CPU evidence scope and keeps GPU AWQ/GPTQ qualification open. CPU Torch's local `+cpu` suffix is normalized

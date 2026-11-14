@@ -70,10 +70,12 @@ are described in [Inspect GGUF](inspect-gguf.md); HF is the existing provider pa
 Primary source: [official Inspect model documentation](https://inspect.aisi.org.uk/models.html)
 and [the exact official wheel](https://files.pythonhosted.org/packages/a2/85/216d937d1fd6d3f93f4f63d46defc9e8b11fa94ecafd83b80511cd4c7e71/inspect_ai-0.3.269-py3-none-any.whl).
 
-## Completed report recovery (0.60.0 candidate)
+<a id="completed-report-recovery-0600-candidate"></a>
 
-The unreleased 0.60 source candidate can preserve a completed corrected native
-aggregate if final report publication fails. Public installation remains 0.56.0.
+## Completed report recovery (0.60.0)
+
+Quantfit 0.60.0 can preserve a completed corrected native
+aggregate if final report publication fails.
 This is an explicit separate sink, not an Inspect log/scored-log import command:
 
 ```bash
