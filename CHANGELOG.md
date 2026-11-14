@@ -13,7 +13,7 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.58.0 — Unreleased
+## 0.58.0 — 2026-11-13
 
 - Add `validate_annotation_returns` and `calibrate chunks validate` for explicit
   index-to-returned-CSV roles. Regenerate the original native preparation and
