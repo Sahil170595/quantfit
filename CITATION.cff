@@ -44,7 +44,8 @@ authors:
 # pins this line to both, so the citation cannot drift from what the tool ships.
 version: "0.58.0"
 
-# CHANGELOG.md; software candidate 0.58.0 is unreleased, so no release date is declared.
+# Software release date from CHANGELOG.md.
+date-released: "2026-11-13"
 
 # pyproject.toml `license = "Apache-2.0"` (PEP 639 SPDX expression); LICENSE is Apache 2.0.
 license: "Apache-2.0"

@@ -805,6 +805,7 @@ def main() -> None:
             "test_resolution.py",
             "test_calibrated_modelcard.py",
             "test_action_calibration.py",
+            "test_action_axis.py",
             "test_saved_report_gate.py",
             "test_replay_bundle.py",
             "test_reproduce_bundles.py",

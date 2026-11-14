@@ -75,4 +75,4 @@ Additional released workflows (see the versioned README install pin):
 - [Bus factor](https://github.com/Sahil170595/quantfit/blob/main/docs/bus-factor.md): what breaks if the maintainer stops.
 - [Security](https://github.com/Sahil170595/quantfit/blob/main/SECURITY.md): the supply-chain posture, including what the llama.cpp SHA256 pin does and does not cover.
 
-- [Indexed annotation returns (unreleased 0.58.0 source)](https://github.com/Sahil170595/quantfit/blob/codex/annotation-return-validation058/docs/annotation-chunks.md): `calibrate chunks validate --sheet BLANK --key KEY --manifest MANIFEST --part INDEX=CSV --out RECEIPT --json` inspects complete supplied parts; missing coverage remains explicit. Public installation is 0.56.0; final collect and ingest remain separate.
+- [Indexed annotation returns (since 0.58.0)](https://github.com/Sahil170595/quantfit/blob/main/docs/annotation-chunks.md): `quantfit calibrate chunks validate --sheet BLANK --key KEY --manifest MANIFEST --part INDEX=CSV --out RECEIPT --json` inspects complete supplied parts; missing coverage remains explicit. Requires 0.58.0. Final collect and ingest remain separate.

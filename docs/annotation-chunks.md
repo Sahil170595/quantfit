@@ -55,10 +55,10 @@ Both return only aggregate counts, hashes, explicit attribution and limits.
 Failures raise categorical `AnnotationChunksError("invalid_annotation_chunks")`;
 CLI operational refusals emit the native envelope and exit 2, success exits 0.
 
-## Inspect indexed returns (0.58.0 candidate)
+## Inspect indexed returns (0.58.0)
 
-The unreleased 0.58 source candidate can inspect complete returned parts before
-all other parts arrive. Public installation remains 0.56.0. Assign each returned
+Quantfit 0.58.0 can inspect complete returned parts before all other parts
+arrive. Assign each returned
 CSV its **original manifest index** explicitly; arrival order is irrelevant:
 
 ```bash

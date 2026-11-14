@@ -11,6 +11,19 @@ and cites it. Nothing is included because it "obviously works". Where a run is
 *implied* by a bug fix rather than *recorded* with numbers, the row says so and does
 not count as validation.
 
+### Selected-axis reference action (0.57.0; source checks from 2026-11-07)
+
+| Surface | Software evidence | Boundary |
+| --- | --- | --- |
+| `axis-thresholds` | `tests/test_action_axis.py` executes the action's input, preflight, argv, reader and exit scripts against native saved reports. | Synthetic canonical counts. Quoted entries, LF/CRLF, mode conflicts, native 0/2/3/4/5 and original source preservation; no inference or human truth. |
+| `axis-results-json` / summary | Tests compare fixed per-axis output to the native artifact and assert per-axis JUnit, zero-risk handling, diagnostic flags and typed/private-field refusals. | Native math and verdicts remain authoritative. Per-axis resolution is conditional, with no combined MDE or joint-error claim. |
+| Empty `artifact-name` | Action structure tests assert the existing uploader's opt-out and default. | No new uploader or private content. Actual platform execution is qualified by hosted CI. |
+| Installed consumer | `tools/ci_action_axis.py`; five additional local-action calls inside the existing nine `consumer-action` jobs. | Candidate wheel, saved counts, unchanged input SHA and actual code/output/JUnit assertions. Hosted and public release evidence are recorded separately. |
+
+Reproduce local source checks as recorded in
+`validation/2026-11-07-action-axis/README.md`. Platform execution and installed
+distribution results require the current hosted runs.
+
 **Scope note, stated first — and partially superseded on 2026-08-14.** This document
 opened by observing that no run artifact of any kind was committed here, so every
 quantitative claim below was **transcribed CHANGELOG prose**, not a file you could
@@ -907,4 +920,4 @@ epsilon/MAX, calibration and judge assumptions are unchanged. Default Hub/None
 compatibility does not transfer default-distribution FPR, sensitivity, canonical
 T0/reference authority or scientific GO to these declared local rows.
 
-| `--sheet` / `--key` / `--manifest` / `--part` / `--out` / `--json` | calibrate chunks validate (0.58 candidate) | Explicit canonical `INDEX=PATH` roles, exact regenerated native manifest and complete supplied parts; valid partial inspection returns missing indices, no calibration. Duplicate/substituted roles, late-invalid rows, bounds and sink aliases refuse before publication. | `tests/test_annotation_returns.py`; `tests/test_ci_annotation_chunks.py`; `validation/2026-11-07-annotation-returns/`; current hosted installed proof separate. |
+| `--sheet` / `--key` / `--manifest` / `--part` / `--out` / `--json` | calibrate chunks validate (0.58.0) | Explicit canonical `INDEX=PATH` roles, exact regenerated native manifest and complete supplied parts; valid partial inspection returns missing indices, no calibration. Duplicate/substituted roles, late-invalid rows, bounds and sink aliases refuse before publication. | `tests/test_annotation_returns.py`; `tests/test_ci_annotation_chunks.py`; `validation/2026-11-07-annotation-returns/`; current hosted installed proof separate. |

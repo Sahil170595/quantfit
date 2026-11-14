@@ -1,7 +1,10 @@
 # CLI reference — every command, every flag
 
-This reference includes the unreleased quantfit 0.58.0 source candidate. Public
-installation is 0.56.0. It covers pinned alternative probe corpora,
+Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.58.0.
+See the [reference action](ci-integration.md#selected-axis-reference-action).
+
+This reference documents quantfit 0.58.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -795,7 +798,7 @@ bounded partition and its private manifest:
 quantfit calibrate chunks prepare --sheet blank.labels.csv --key private.labelkey.json --out-dir annotation-parts --rows-per-part 100 --json
 ```
 
-The unreleased 0.58 candidate can inspect an explicitly indexed returned subset
+Quantfit 0.58.0 can inspect an explicitly indexed returned subset
 first. Success means only that the supplied parts are valid; `complete: false`
 and missing part indices remain explicit. No labels are inferred or ingested:
 

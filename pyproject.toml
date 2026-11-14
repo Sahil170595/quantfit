@@ -7,7 +7,7 @@ name = "quantfit"
 version = "0.58.0"
 description = "Quantize an LLM and check it still refuses what it should — a GPU-aware quantization CLI that measures the safety drift of the quantization it just performed."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11.5"
 license = "Apache-2.0"
 authors = [{ name = "Sahil Kadadekar" }]
 keywords = ["llm", "quantization", "awq", "gptq", "gguf", "fp8", "gpu", "safety"]
@@ -62,7 +62,8 @@ awq = ["gptqmodel>=7.1,<8"]
 # The observed HF/GGUF contracts require the actual inspected SDK 0.3.269.
 # Admit exactly that verified version; changing the pin requires qualifying the
 # public model/score/lifecycle API and installed consumers on the new candidate.
-inspect = ["inspect-ai==0.3.269", "httpx>=0.28.1,<0.29"]
+# ACP 1.0 removed acp.helpers, imported by the qualified Inspect SDK during eval.
+inspect = ["inspect-ai==0.3.269", "agent-client-protocol>=0.12,<1", "httpx>=0.28.1,<0.29"]
 
 [project.urls]
 Homepage = "https://github.com/Sahil170595/quantfit"
