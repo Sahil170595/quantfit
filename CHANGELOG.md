@@ -13,6 +13,23 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.57.0 — 2026-11-13
+
+- Add optional `axis-thresholds` to the reference GitHub Action. Forward one or
+  two native `AXIS=PP` entries through quoted argv, with explicit exclusion of
+  legacy tier/threshold inputs. Native selected-axis statistics and decisions
+  remain authoritative.
+- Publish a bounded `axis-results-json` projection and per-axis job summary.
+  Preserve native JSON/JUnit, adverse exits and diagnostic unselected axes.
+  Legacy scalar resolution outputs remain unknown when no scalar is supplied.
+- An empty existing `artifact-name` disables its upload. Five saved-count
+  controls execute the real local action in the existing consumer job matrix
+  without additional uploads or model work. This is software integration
+  evidence, not human-label, sensitivity or scientific validation.
+
+- Require Python 3.11.5 or newer, bound the qualified Inspect SDK to ACP 0.x, and refresh the hosted lock to patched SoupSieve and OpenTelemetry releases.
+- Align hosted uv consumers with the supported 0.13.7 tool pin and use editable source installation for fresh-resolution CLI acceptance.
+
 ## 0.56.0 — 2026-11-06
 
 - Add a pinned judge rerun over a held native capture and an offline comparison
