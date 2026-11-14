@@ -76,6 +76,8 @@ rules. QSR v1 remains unfrozen.
 Synthetic local functional records and their limitations are in
 `validation/2026-10-08-portable-evidence-bundles/`. The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37880847032); release publication separately qualifies the exact versioned distributions.
 
+<a id="single-file-transport-0590-candidate"></a>
+
 ## Single-file transport (0.59.0)
 
 Quantfit 0.59.0 can carry this existing **outer schema-1**

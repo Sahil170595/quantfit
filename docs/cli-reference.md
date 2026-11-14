@@ -70,7 +70,7 @@ Quantfit 0.59.0 adds `bundle pack`, `bundle archive-verify`
 and `bundle unpack` for the existing schema-1 aggregate directory format.
 Receiving requires the expected full lowercase archive SHA256. Existing directory
 verification and native adverse outcomes are unchanged. See [closed transport
-format and failure behavior](portable-evidence-bundles.md#single-file-transport-0590-candidate).
+format and failure behavior](portable-evidence-bundles.md#single-file-transport-0590).
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,
