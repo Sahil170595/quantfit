@@ -202,6 +202,7 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     # quantfit.inspect_hf: immutable snapshots, HF model and real pinned judge.
     # Actual CPU qualification is tools/ci_inspect_acceptance.py; no GPU required.
     "inspect-run": (REQ_NETWORK, REQ_DOWNLOAD),
+    "inspect-recover": (REQ_ARTIFACT,),  # Offline held checkpoint + expected SHA; no Inspect/model replay.
     "gate": (REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),
     # Plus a target manifest that a clean venv does not have.
     "screen": (REQ_ARTIFACT, REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),

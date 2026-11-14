@@ -696,6 +696,7 @@ qualification remains pending for this candidate.
 | `--probe-sha256` | live pair and saved gate/screen-summary/complete resume (0.55 candidate) | Exact expected local identity, not a Hub revision. Saved complete work needs no local file/network; context/census remains typed and conditional. | `tests/test_probe_bundle_admission.py`; `tests/test_ci_probe_bundle.py`; `validation/2026-11-02-offline-probe-bundles/` |
 
 | `--bundle` / `--archive` / `--sha256` / `--out` / `--json` | bundle pack / archive-verify / unpack (0.59.0) | Closed stored schema-1 transport, whole raw SHA256 receiving and native held role validation before fresh restoration. Atomic exclusive archive, manifest-last directory, owned-only cleanup. Container integrity preserves native adverse/unknown outcomes. | `tests/test_bundle_transport.py`; `tests/test_bundle.py`; `validation/2026-11-07-bundle-transport/`; four current hosted installed profiles remain separate. |
+| `--recovery-out` / `--checkpoint` / `--sha256` / `--out` | inspect-run / inspect-recover (0.60.0) | Opt-in completed native observed Inspect checkpoint before final report replace; known CLI sinks before model work, SDK sinks before explicit write. Pinned offline exact-byte recovery with original native0/3/4, no raw EvalLog or rerun. Strict types/identity/counts/bounds/aliases, prior checkpoints preserved. | `tests/test_inspect_recovery.py`; `validation/2026-11-07-inspect-recovery/`; current hosted/installed qualification separate. |
 
 ## 4. Advertised-but-unevidenced claims found while writing this
 
