@@ -41,6 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+Quantfit **0.59.0** adds [single-file offline bundle transport](docs/portable-evidence-bundles.md#single-file-transport-0590).
+It supports deterministic stored archives, expected-SHA256 receiving and
+fresh-directory restoration with native adverse verdicts and unknowns retained.
+
 Quantfit **0.58.0** adds
 [indexed returned-part inspection](docs/annotation-chunks.md#inspect-indexed-returns-0580)
 before complete collection. Valid subsets report missing coverage explicitly.
@@ -64,7 +68,7 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-Install with `pip install "quantfit[inspect,gguf]==0.58.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.59.0"`.
 
 The observation runs the pinned judge over the original held completions.
 Use its receipt's raw SHA-256 for the offline comparison against one complete

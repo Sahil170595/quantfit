@@ -695,6 +695,8 @@ qualification remains pending for this candidate.
 | `--probe-bundle` | live verify-safety, inspect-run, gate, screen/partial resume (0.55 candidate) | Explicit private file paired with full raw SHA; one held complete native population before model/observer. Exclusive with Hub triplet. | `tests/test_probe_bundle_flows.py`; `tests/test_probe_bundle_cache_identity.py`; `tests/test_ci_probe_bundle.py` |
 | `--probe-sha256` | live pair and saved gate/screen-summary/complete resume (0.55 candidate) | Exact expected local identity, not a Hub revision. Saved complete work needs no local file/network; context/census remains typed and conditional. | `tests/test_probe_bundle_admission.py`; `tests/test_ci_probe_bundle.py`; `validation/2026-11-02-offline-probe-bundles/` |
 
+| `--bundle` / `--archive` / `--sha256` / `--out` / `--json` | bundle pack / archive-verify / unpack (0.59.0) | Closed stored schema-1 transport, whole raw SHA256 receiving and native held role validation before fresh restoration. Atomic exclusive archive, manifest-last directory, owned-only cleanup. Container integrity preserves native adverse/unknown outcomes. | `tests/test_bundle_transport.py`; `tests/test_bundle.py`; `validation/2026-11-07-bundle-transport/`; four current hosted installed profiles remain separate. |
+
 ## 4. Advertised-but-unevidenced claims found while writing this
 
 These are docs=code findings, not command rows. Each is a claim on a shipped surface
