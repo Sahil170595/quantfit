@@ -76,12 +76,11 @@ rules. QSR v1 remains unfrozen.
 Synthetic local functional records and their limitations are in
 `validation/2026-10-08-portable-evidence-bundles/`. The introduced source passed [hosted acceptance](https://github.com/Sahil170595/quantfit/actions/runs/37880847032); release publication separately qualifies the exact versioned distributions.
 
-## Single-file transport (0.59.0 candidate)
+## Single-file transport (0.59.0)
 
-The unreleased 0.59 source candidate can carry this existing **outer schema-1**
+Quantfit 0.59.0 can carry this existing **outer schema-1**
 directory in one deterministic archive. Identical exact directory bytes produce
 identical archive bytes; a newly generated manifest can have a different clock.
-Public installation remains 0.56.0.
 Replay/schema-2 and screen bundles have different receiving contracts and are
 not admitted as schema-1 archives.
 

@@ -1,6 +1,10 @@
 # CLI reference — every command, every flag
 
-This reference includes the unreleased 0.59.0 source candidate; public installation remains 0.56.0. It covers including pinned alternative probe corpora,
+Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.59.0.
+See the [reference action](ci-integration.md#selected-axis-reference-action).
+
+This reference documents quantfit 0.59.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -62,7 +66,7 @@ send them with a page. [The complete SDK/CLI, byte-bound and trust contract](ann
 explains native collection/ingestion, explicit labels and the unchanged narrow
 sharing permission. This is no automatic labeling, sharing or calibration.
 
-The unreleased 0.59 source candidate adds `bundle pack`, `bundle archive-verify`
+Quantfit 0.59.0 adds `bundle pack`, `bundle archive-verify`
 and `bundle unpack` for the existing schema-1 aggregate directory format.
 Receiving requires the expected full lowercase archive SHA256. Existing directory
 verification and native adverse outcomes are unchanged. See [closed transport
@@ -798,6 +802,14 @@ bounded partition and its private manifest:
 
 ```bash
 quantfit calibrate chunks prepare --sheet blank.labels.csv --key private.labelkey.json --out-dir annotation-parts --rows-per-part 100 --json
+```
+
+Quantfit 0.58.0 can inspect an explicitly indexed returned subset
+first. Success means only that the supplied parts are valid; `complete: false`
+and missing part indices remain explicit. No labels are inferred or ingested:
+
+```bash
+quantfit calibrate chunks validate --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --part 2=returned-part-2.labels.csv --out inspection.json --json
 ```
 
 Explicitly fill every returned part, then collect them in manifest order:

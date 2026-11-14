@@ -237,3 +237,99 @@ def collect_annotation_chunks(
         csv.Error,
     ):
         raise AnnotationChunksError("invalid_annotation_chunks") from None
+
+
+def validate_annotation_returns(
+    sheet_path: str,
+    key_path: str,
+    manifest_path: str,
+    indexed_parts: tuple[tuple[int, str], ...],
+    *,
+    out_path: str | None = None,
+) -> dict[str, Any]:
+    """Inspect complete supplied parts; missing original parts remain explicit."""
+    try:
+        require(type(indexed_parts) is tuple and 1 <= len(indexed_parts) <= MAX_PARTS)
+        indices = []
+        paths = []
+        for item in indexed_parts:
+            require(type(item) is tuple and len(item) == 2)
+            index, path = item
+            require(type(index) is int and 1 <= index <= MAX_PARTS and index not in indices)
+            require(type(path) is str and bool(path))
+            indices.append(index)
+            paths.append(path)
+        inputs = _held(
+            (sheet_path, key_path, manifest_path, *paths),
+            (MAX_SHEET_BYTES, MAX_KEY_BYTES, MAX_MANIFEST_BYTES, *(MAX_SHEET_BYTES for _ in paths)),
+        )
+        manifest = _json(inputs[2].data)
+        version = manifest["quantfit_version"]
+        require(type(version) is str and 0 < len(version) <= 64)
+        declared = manifest["annotator_declared"]
+        require(type(declared) is dict and set(declared) == {"role", "name"})
+        expected, _, rows = _preparation(
+            inputs, manifest["rows_per_part"], _annotator(declared["role"], declared["name"]), version
+        )
+        require(_encode(expected) == _encode(manifest))
+        require(all(index <= manifest["n_parts"] for index in indices))
+        key, _ = _key(inputs[1].data)
+        received = []
+        for index, held in zip(indices, inputs[3:], strict=True):
+            assigned = manifest["parts"][index - 1]
+            subset = {ident: key["ids"][ident] for ident in assigned["ids"]}
+            joined = calibrate._join(
+                "private returned part", "private key", subset, data=held.data, max_records=2 * len(subset) + 1
+            )
+            received.append(
+                {
+                    "index": index,
+                    "n_rows": len(joined),
+                    "blank_sheet": assigned["blank_sheet"],
+                    "filled_sheet": _binding(held.data),
+                }
+            )
+        expected_indices = list(range(1, manifest["n_parts"] + 1))
+        missing = [index for index in expected_indices if index not in indices]
+        n_received = sum(part["n_rows"] for part in received)
+        result = {
+            "annotation_returns_schema": 1,
+            "quantfit_version": __version__,
+            "inputs": manifest["inputs"],
+            "manifest": _binding(inputs[2].data),
+            "n_pairs": manifest["n_pairs"],
+            "n_rows": len(rows),
+            "n_parts": manifest["n_parts"],
+            "expected_part_indices": expected_indices,
+            "received_part_indices": sorted(indices),
+            "missing_part_indices": missing,
+            "complete": not missing,
+            "n_received_rows": n_received,
+            "n_missing_rows": len(rows) - n_received,
+            "parts": sorted(received, key=lambda part: part["index"]),
+            "limits": dict(LIMITS),
+            "scope": "Inspection of supplied native parts only; complete collection and ingestion remain separate. "
+            "No label values, source text, IDs, paths, automatic labels or calibration are returned. "
+            "Byte agreement does not authenticate a rater, human truth, sensitivity or scientific GO.",
+        }
+        raw = _encode(result)
+        require(len(raw) <= MAX_RECEIPT_BYTES)
+        if out_path is not None:
+            targets = admit_outputs((out_path,), inputs)
+            publish(((targets[0], raw),), inputs)
+        else:
+            for held in inputs:
+                held.check()
+        return result
+    except (
+        KeyboardInterrupt,
+        RuntimeError,
+        OSError,
+        ValueError,
+        TypeError,
+        KeyError,
+        RecursionError,
+        ImportError,
+        csv.Error,
+    ):
+        raise AnnotationChunksError("invalid_annotation_returns") from None

@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-13",
+  "native_failed_drift_run": 43510086144,
+  "native_failed_job": 132177764354,
+  "python": "3.13.1",
+  "platform": "Windows",
+  "local_environment": "scoped system-site-packages virtualenv with the same surrounding installed dependencies on both sides",
+  "source_base": "698527e8bb31810dfb3ca5e05e5bce85bd338720",
+  "before": {
+    "installation": "noneditable",
+    "parent_origin_is_checkout": true,
+    "child_origin_is_checkout": false,
+    "origins_match": false,
+    "actual_cli_exit": 2,
+    "stderr_bytes": 0,
+    "stdout_bytes": 267,
+    "stdout_sha256": "bdfd1a0c8a89d672bf35fd530167781a37d16657c5ce5391a2caf47555c038f7",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "event_file_exists": false,
+    "error_is_native_private_category": true
+  },
+  "after": {
+    "installation": "editable",
+    "parent_origin_is_checkout": true,
+    "child_origin_is_checkout": true,
+    "origins_match": true,
+    "cli_cases": [
+      {
+        "exit_code": 0,
+        "stdout_bytes": 340,
+        "stderr_bytes": 0
+      },
+      {
+        "exit_code": 0,
+        "stdout_bytes": 8797,
+        "stderr_bytes": 0
+      },
+      {
+        "exit_code": 0,
+        "stdout_bytes": 8962,
+        "stderr_bytes": 0
+      },
+      {
+        "exit_code": 2,
+        "stdout_bytes": 267,
+        "stderr_bytes": 0
+      },
+      {
+        "exit_code": 2,
+        "stdout_bytes": 267,
+        "stderr_bytes": 0
+      }
+    ],
+    "events": [
+      {
+        "classifier_calls": 1,
+        "rows": 16,
+        "origin_matched": true
+      }
+    ],
+    "test_result": {
+      "passed": 30,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "repair": "Use pip editable candidate installation for source tests in the existing fresh-resolution drift lane. Dependency resolution and the CLI origin assertion remain active.",
+  "limits": [
+    "The surrounding local graph differs from hosted fresh resolution.",
+    "The corrected hosted drift run is required for current-commit acceptance.",
+    "Installed wheel and sdist qualification remains in the existing independent candidate workflow."
+  ]
+}

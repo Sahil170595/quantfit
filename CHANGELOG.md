@@ -13,7 +13,7 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.59.0 — Unreleased
+## 0.59.0 — 2026-11-13
 
 - Add deterministic bounded single-file transport for existing schema-1 aggregate
   bundles: `bundle pack`, expected-SHA256 `bundle archive-verify` and `bundle
@@ -26,6 +26,37 @@
   manifest-last with conservative owned-file cleanup and explicit preservation
   when ownership is uncertain. Neither integrity nor a hash authenticates data
   or establishes scientific PASS. [Fictional software regression evidence](validation/2026-11-07-bundle-transport/).
+
+## 0.58.0 — 2026-11-13
+
+- Add `validate_annotation_returns` and `calibrate chunks validate` for explicit
+  index-to-returned-CSV roles. Regenerate the original native preparation and
+  validate each supplied complete part through unchanged native receiving.
+  Valid subsets succeed as inspection with explicit missing indices; complete
+  collection and ingestion remain authoritative and separate. Receipts contain
+  only counts, part indices and byte bindings, never private IDs, text or labels.
+- Extend the existing four installed consumers with out-of-order subset and
+  complete inspections before native collect/ingest. Local fictional
+  [regression evidence](validation/2026-11-07-annotation-returns/) does not
+  establish human truth, rater authentication, calibration or scientific GO.
+  Hosted installed qualification remains separate.
+
+## 0.57.0 — 2026-11-13
+
+- Add optional `axis-thresholds` to the reference GitHub Action. Forward one or
+  two native `AXIS=PP` entries through quoted argv, with explicit exclusion of
+  legacy tier/threshold inputs. Native selected-axis statistics and decisions
+  remain authoritative.
+- Publish a bounded `axis-results-json` projection and per-axis job summary.
+  Preserve native JSON/JUnit, adverse exits and diagnostic unselected axes.
+  Legacy scalar resolution outputs remain unknown when no scalar is supplied.
+- An empty existing `artifact-name` disables its upload. Five saved-count
+  controls execute the real local action in the existing consumer job matrix
+  without additional uploads or model work. This is software integration
+  evidence, not human-label, sensitivity or scientific validation.
+
+- Require Python 3.11.5 or newer, bound the qualified Inspect SDK to ACP 0.x, and refresh the hosted lock to patched SoupSieve and OpenTelemetry releases.
+- Align hosted uv consumers with the supported 0.13.7 tool pin and use editable source installation for fresh-resolution CLI acceptance.
 
 ## 0.56.0 — 2026-11-06
 

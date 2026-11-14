@@ -75,4 +75,6 @@ Additional released workflows (see the versioned README install pin):
 - [Bus factor](https://github.com/Sahil170595/quantfit/blob/main/docs/bus-factor.md): what breaks if the maintainer stops.
 - [Security](https://github.com/Sahil170595/quantfit/blob/main/SECURITY.md): the supply-chain posture, including what the llama.cpp SHA256 pin does and does not cover.
 
-- [Offline bundle transport (unreleased 0.59.0 source)](https://github.com/Sahil170595/quantfit/blob/codex/offline-bundle-transport059/docs/portable-evidence-bundles.md): `bundle pack --bundle DIR --out ARCHIVE`, `bundle archive-verify --archive ARCHIVE --sha256 FULL64`, and `bundle unpack --archive ARCHIVE --sha256 FULL64 --out NEWDIR`. Native verdicts remain declarations, not scientific PASS. Public installation is 0.56.0.
+- [Indexed annotation returns (since 0.58.0)](https://github.com/Sahil170595/quantfit/blob/main/docs/annotation-chunks.md): `quantfit calibrate chunks validate --sheet BLANK --key KEY --manifest MANIFEST --part INDEX=CSV --out RECEIPT --json` inspects complete supplied parts; missing coverage remains explicit. Requires 0.58.0. Final collect and ingest remain separate.
+
+- [Offline bundle transport (since 0.59.0)](https://github.com/Sahil170595/quantfit/blob/main/docs/portable-evidence-bundles.md): `quantfit bundle pack --bundle DIR --out ARCHIVE`, `quantfit bundle archive-verify --archive ARCHIVE --sha256 FULL64`, and `quantfit bundle unpack --archive ARCHIVE --sha256 FULL64 --out NEWDIR`. Native verdicts remain declarations, not scientific PASS. Requires 0.59.0.

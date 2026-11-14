@@ -682,7 +682,10 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     chunk_collect = chunk_sub.add_parser("collect", help="all explicit filled parts -> complete new native sheet")
     chunk_packets = chunk_sub.add_parser("packets", help="original blank/key/manifest -> all private recipient pages")
-    for chunk_parser in (chunk_prepare, chunk_collect, chunk_packets):
+    chunk_validate = chunk_sub.add_parser(
+        "validate", help="inspect explicitly indexed returned parts before collection"
+    )
+    for chunk_parser in (chunk_prepare, chunk_collect, chunk_packets, chunk_validate):
         chunk_parser.add_argument(
             "--sheet", required=True, metavar="PATH", help="unchanged original complete BLANK template"
         )
@@ -703,6 +706,15 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     chunk_collect.add_argument("--out", required=True, metavar="PATH", help="new complete private native sheet")
     chunk_collect.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate counts/hash receipt")
+    chunk_validate.add_argument("--manifest", required=True, metavar="PATH", help="original private chunk manifest")
+    chunk_validate.add_argument(
+        "--part",
+        required=True,
+        action="append",
+        metavar="INDEX=PATH",
+        help="complete returned part and its original index",
+    )
+    chunk_validate.add_argument("--out", required=True, metavar="PATH", help="new aggregate inspection receipt")
     chunk_packets.add_argument(
         "--manifest", required=True, metavar="PATH", help="original private chunk manifest; never share"
     )
