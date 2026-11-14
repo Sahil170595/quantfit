@@ -1,11 +1,11 @@
 [project]
 name = "quantfit-hosted-validation"
 version = "0.0.0"
-requires-python = ">=3.11,<3.15"
+requires-python = ">=3.11.5,<3.15"
 
 [dependency-groups]
 unit = [
-  "pytest==9.0.3", "hypothesis==6.152.5", "gguf==0.19.0", "inspect-ai==0.3.269",
+  "pytest==9.0.3", "hypothesis==6.152.5", "gguf==0.19.0", "inspect-ai==0.3.269", "agent-client-protocol==0.12.1",
   "huggingface-hub==1.31.0", "psutil==7.2.2", "tomli==2.4.0",
   "filelock==4.2.1", "datasets==5.0.1",
   "scipy==1.15.3; python_version < '3.14'", "scipy==1.17.1; python_version >= '3.14'",
@@ -28,13 +28,13 @@ browser-ci = ["playwright==1.64.1"]
 
 [tool.uv]
 package = false
-required-version = "==0.12.23"
+required-version = "==0.13.7"
 default-groups = []
 environments = ["sys_platform == 'linux'", "sys_platform == 'win32'"]
 
-# Public/private supported floor is 3.11; retain the explicit runtime-group floor.
+# Public/private support starts at 3.11.5, matching patched Soup Sieve.
 [tool.uv.dependency-groups]
-runtime = { requires-python = ">=3.11" }
+runtime = { requires-python = ">=3.11.5" }
 
 [tool.uv.sources]
 torch = { index = "pytorch-cpu" }

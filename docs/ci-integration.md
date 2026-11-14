@@ -2,15 +2,15 @@
 
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
-The published action and instrument examples below pin **quantfit 0.56.0**.
-The **unreleased 0.57.0 source candidate** also forwards selected-axis policies.
-Its action default is `>=0.57.0,<0.58`; candidate validation uses the exact wheel
-through `quantfit-path`. Pin action and instrument separately for reproduction.
+The action and instrument examples below pin **quantfit 0.57.0**, including
+selected-axis policies. Its action default is `>=0.57.0,<0.58`; candidate validation
+uses the exact wheel through `quantfit-path`. Pin action and instrument separately
+for reproduction.
 
 [Pinned-corpus gates/screens](pinned-corpus-gates.md) and
 [Selected-axis effect gates](axis-effect-gates.md) are direct CLI/API
-options; the published 0.56 composite action forwards legacy threshold/tier only.
-The 0.57 source action can forward the existing selected-axis policy described below.
+options. Since 0.57.0, the composite action also forwards the existing selected-axis
+policy described below.
 Candidate acceptance uses the exact source or wheel through `quantfit-path`;
 release publication separately qualifies the versioned distributions.
 Protocol: QSR v0 (`spec/qsr-v0.md`). Implementation authority for everything on this page
@@ -30,16 +30,17 @@ does, your build fails.** Everything below follows from that.
 
 ---
 
-## Selected-axis action source candidate
+<a id="selected-axis-action-source-candidate"></a>
 
-The 0.57 source action accepts the existing CLI policy through one optional
-`axis-thresholds` input. The published 0.56 action retains its legacy contract.
-Validate a candidate with its exact source or wheel before using a future tag:
+## Selected-axis reference action
+
+Since 0.57.0, the reference action accepts the native CLI policy through one optional
+`axis-thresholds` input. Pin both the action and instrument for reproduction.
 
 ```yaml
-- uses: ./.github/actions/quantfit-gate
+- uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.57.0
   with:
-    quantfit-path: .
+    quantfit-version: "==0.57.0"
     from-report: drift.json
     tier: ""
     axis-thresholds: |
@@ -148,12 +149,12 @@ jobs:
       - uses: actions/checkout@v7
 
       - id: gate
-        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.56.0
+        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.57.0
         with:
           baseline: Qwen/Qwen2.5-1.5B-Instruct
           quant: ./out/qwen2.5-1.5b-awq
           tier: smoke                    # 30pp — gates >=30pp only, and says so
-          quantfit-version: "==0.56.0"    # the instrument version is part of the measurement
+          quantfit-version: "==0.57.0"    # the instrument version is part of the measurement
           hf-token: ${{ secrets.HF_TOKEN }}
 
       # Runs only on exit 0 — the action fails the job on 2/3/4/5.
@@ -194,7 +195,7 @@ checkout to happen first, and takes no `@ref`:
           quantfit-path: "."     # install the checked-out source instead of PyPI
 ```
 
-Two independent pins, and you want both: `@v0.56.0` pins the *action*, `quantfit-version`
+Two independent pins, and you want both: `@v0.57.0` pins the *action*, `quantfit-version`
 pins the *instrument*. A floating action ref with a pinned instrument is a supply-chain
 hole; a pinned action ref with a floating instrument silently changes what your gate
 measures between releases.
@@ -209,13 +210,13 @@ measures between releases.
 | `quant` | (required) | The artifact under test. Same engine class as `baseline` — a mixed transformers/GGUF pair is refused (exit 2, spec §3.3). |
 | `tier` | `smoke` | `smoke` (30pp) or `full` (15pp). Mutually exclusive with `threshold-pp`. |
 | `threshold-pp` | `""` | Explicit dangerous-axis flip threshold in **PERCENTAGE POINTS**. **30pp is `30`, not `0.30`.** Set `tier: ""` when you use it. |
-| `axis-thresholds` | `""` | 0.57 source input. One or two newline-separated `refusal-robustness=PP` / `over-refusal=PP` entries. Requires `tier: ""` and empty `threshold-pp`. Native numeric policy applies. |
+| `axis-thresholds` | `""` | Available since 0.57.0. One or two newline-separated `refusal-robustness=PP` / `over-refusal=PP` entries. Requires `tier: ""` and empty `threshold-pp`. Native numeric policy applies. |
 | `eps-upper` | `""` | Per-arm upper bound on **both** directional judge-error rates, as a rate in (0, 1]. Requires `eps-source`. Exactly `0` is refused. |
 | `eps-source` | `""` | **Required** with `eps-upper`. Where the bound came from, recorded verbatim in the artifact. |
 | `calibration-report` | `""` | Bound schema-2 or closed retained-schema-3 calibration input. Mutually exclusive with both operator epsilon inputs. Protocol is checked before generation; actual resolved scope is checked afterward. All output paths, including JUnit, must differ from this input. |
 | `max-new-tokens` | `""` (CLI default 64) | Applied identically to both arms (§2.3). |
 | `python-version` | `3.12` | Same version quantfit's own CI pins. |
-| `quantfit-version` | `>=0.57.0,<0.58` | Source-action default. Published 0.56 defaults to `>=0.56.0,<0.57`. Pin exactly for a reproducible gate. |
+| `quantfit-version` | `>=0.57.0,<0.58` | Action default. Pin exactly for a reproducible gate. |
 | `quantfit-path` | `""` | Install from a local path instead of PyPI; overrides `quantfit-version`. |
 | `report` | `quantfit-gate/drift.json` | Schema-v2 drift report (`quantfit gate --report`). |
 | `gate-out` | `quantfit-gate/gate.json` | Native decision artifact (`quantfit gate --out`), legacy schema 1 or selected-axis schema 2/3. Written on refusals too. |
@@ -266,7 +267,7 @@ one.** See §5. **There is no `replicates` input either** — see §12.
 |---|---|
 | `verdict` | `PASS` \| `FAIL` \| `UNRESOLVABLE` \| `UNMEASURABLE`, verbatim (`unknown` if the artifact is missing). |
 | `printed-mde-pp` | `resolution.printed_mde` converted to pp at one decimal. **Read it together with `mde-is-floor`.** |
-| `axis-results-json` | 0.57 source output. Fixed native-axis keys and scalar outcome/count/resolution fields, with targets/MDE in pp. `{}` for legacy policy, `null` for unavailable or malformed selected fields. |
+| `axis-results-json` | Available since 0.57.0. Fixed native-axis keys and scalar outcome/count/resolution fields, with targets/MDE in pp. `{}` for legacy policy, `null` for unavailable or malformed selected fields. |
 | `mde-is-floor` | The artifact's top-level `resolution_is_a_floor`. `true` = the printed MDE is a lower bound on the true resolution. Defaults to `true` when the artifact does not say. |
 | `resolution-status` | `resolution.verdict`: `resolved` \| `not_refused_resolution_unproven` \| `refused`. |
 | `resolution-proven` | The artifact's `resolution_proven`. `true` when the threshold was shown to be **conditionally resolved** under the supplied error bounds; it does not verify labels or A1/A2/A3. Distinct from `resolution.not_refused` — see below. |
@@ -707,10 +708,11 @@ on a hosted CPU runner, and is worth copying into your own repo:
   its own resolution is a silent overclaim.
 - **quickstart install** — build the wheel with locked tooling, install it into a clean
   venv with the complete hash-locked runtime on Linux and Windows, and smoke the CLI.
-  The complete locked `runtime` group requires Python 3.11 or newer (Pillow 13 security
-  fixes); hosted runtime and numerical qualification use Python 3.12. From the
+  The complete locked `runtime` group requires Python 3.11.5 or newer (Pillow 13
+  and Soup Sieve security fixes); hosted runtime and numerical qualification use Python 3.12. From the
   0.47.0's 2026-10-31 security correction, public/private
-  minimum Python is 3.11 and the supported unit matrix is 3.11-3.14. Earlier 3.10
+  minimum Python was 3.11. The 2026-11-13 source correction raises the patch floor
+  to 3.11.5. The supported unit matrix remains 3.11-3.14. Earlier 3.10
   source-only checks are historical, not a current support or universal-security claim.
   The independent daily dependency-drift workflow resolves fresh versions and runs the
   suite plus its advisory audit. The canary preserves cold model/judge/probe downloads

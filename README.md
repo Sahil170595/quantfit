@@ -41,10 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-This source tree is the **unreleased 0.57.0 candidate**. Its reference GitHub
-Action accepts an explicit [selected-axis policy](docs/ci-integration.md#selected-axis-action-source-candidate)
-and reports each selected axis. The current public package is **0.56.0**.
-Candidate acceptance installs the exact wheel through `quantfit-path`.
+Quantfit **0.57.0** adds an explicit selected-axis policy to the reference GitHub
+Action and reports each selected axis. Candidate acceptance installs the exact
+wheel through `quantfit-path`, and releases qualify the versioned distributions.
+See the [selected-axis action contract](docs/ci-integration.md#selected-axis-reference-action).
 
 [Quantfit 0.56.0](https://github.com/Sahil170595/quantfit/releases/tag/v0.56.0)
 adds a [held-completion judge observation and offline comparison](docs/held-judge-observation.md).
@@ -59,7 +59,7 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-After publication, install with `pip install "quantfit[inspect,gguf]==0.56.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.57.0"`.
 
 The observation runs the pinned judge over the original held completions.
 Use its receipt's raw SHA-256 for the offline comparison against one complete
@@ -82,6 +82,11 @@ workflows are included in this version.
 
 The **0.47.0 release** adds [capture-backed adjudication
 verification](docs/adjudication.md#capture-backed-receiving--since-0470).
+**Dependency correction in 0.57.0, 2026-11-13.** Source installation and hosted
+validation require Python 3.11.5 or newer because patched Soup Sieve releases
+require that interpreter patch floor. The qualified Inspect SDK retains ACP 0.x
+compatibility. See [dependency maintenance](docs/dependency-policy.md#2026-11-13-dependency-maintenance).
+
 **2026-10-31 compatibility correction, released in 0.47.0:** this version requires
 Python 3.11 or newer for installation and source/CI support. Python 3.10 support
 is withdrawn because the official patched filelock releases require 3.11 and the
@@ -499,8 +504,7 @@ These are detectable-effect targets, not observed-rate ceilings. All selected
 axes are evaluated before native 3 > 4 > 5 > 0 precedence; zero-risk cannot look
 green in overall JUnit. Unselected evidence remains explicit. Gate-v2 strict
 bundle receiving and the API/CLI contract are in the [selected-axis guide](docs/axis-effect-gates.md).
-The published 0.56 action forwards legacy policy. The 0.57 source candidate
-also forwards an explicit selected-axis policy.
+Since 0.57.0, the reference action also forwards an explicit selected-axis policy.
 
 **Gate it in CI (legacy policy, unchanged).** `quantfit gate` is the pre-release check — and it refuses to
 promise resolution it does not have:

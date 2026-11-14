@@ -11,7 +11,7 @@ and cites it. Nothing is included because it "obviously works". Where a run is
 *implied* by a bug fix rather than *recorded* with numbers, the row says so and does
 not count as validation.
 
-### Selected-axis reference action source candidate (2026-11-07, unreleased 0.57.0)
+### Selected-axis reference action (0.57.0; source checks from 2026-11-07)
 
 | Surface | Software evidence | Boundary |
 | --- | --- | --- |
