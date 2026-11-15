@@ -30,3 +30,14 @@ def test_actual_installed_requirement_default_positive_adverse_and_schema3(tmp_p
     }
     assert result["retained_calibration_schema"] == 3 and result["original_sheet_unavailable_for_retained"]
     assert result["additional_native_inference_calls"] == 0 and not result["scientific_go"]
+    assert {name: case["exit_code"] for name, case in result["axis_cases"].items()} == {
+        "one_axis": 0,
+        "unequal_axes": 0,
+        "coarse": 5,
+        "saturated": 5,
+        "unselected_native_flag": 3,
+        "unselected_native_incomplete": 4,
+        "late_missing": 4,
+        "retained_schema3": 5,
+    }
+    assert len(result["axis_cases"]["late_missing"]["requirement"]["rows"]) == 3

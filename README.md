@@ -41,6 +41,12 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The **unreleased 0.62.0 source candidate** adds
+[per-axis saved-screen resolution ceilings](docs/screen-resolution.md#per-axis-requirements-source-candidate-0620).
+Select one or both native axes with separate percentage-point ceilings across
+every original target and calibration choice. Public installation remains
+**0.61.0**; the examples for this new option require candidate source.
+
 Quantfit **0.61.0** adds
 [supplied positive-control evidence for saved screens](docs/saved-screen-control-evidence.md).
 It verifies an explicit local report/capture/adjudication triplet and adds

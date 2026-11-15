@@ -1,5 +1,10 @@
 # CLI reference — every command, every flag
 
+The **unreleased 0.62.0 source candidate** adds repeatable
+`screen-summary --require-axis-conditional-resolution AXIS=PP` for separate
+selected-axis resolution ceilings. The public reference and installation commands
+below remain **0.61.0**; only this new option requires candidate source.
+
 Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --control-capture PATH --control-adjudication PATH`
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
@@ -177,6 +182,34 @@ default output, native exits and JUnit. The receiving APIs add the keyword
 native analysis. No label authentication, independence, sensitivity or scientific
 GO is established, including at exit 0. Invoke `screen-summary` directly in a
 workflow step when requiring this ceiling. See [the complete requirement contract](screen-resolution.md#explicit-requirement-0410).
+
+### Per-axis saved-screen requirements (unreleased 0.62.0 source)
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --require-axis-conditional-resolution refusal-robustness=40 --require-axis-conditional-resolution over-refusal=30 --out receiving.json --junit receiving.xml --json
+```
+
+Supply one or two unique canonical names, `refusal-robustness` / `over-refusal`,
+with exact finite numeric ceilings in `(0,100]` percentage points. The API keyword
+is `required_conditional_resolution_by_axis_pp: Mapping[str, float] | None`.
+Require either `--calibrations-dir` or declared `--calibration-variant NAME=DIR`
+choices. This option cannot be combined with the scalar
+`--require-conditional-resolution` or supplied-control report/capture/adjudication
+roles. Invalid, empty, duplicate or unknown options refuse exit 2 before input IO.
+
+Every original target and every named choice contributes to selected criteria;
+late missing evidence remains visible. Native adverse exits 3/4 retain priority,
+including on unselected axes. Otherwise missing calibration exits 4, an unmet
+selected requirement exits 5, and all selected criteria must pass for zero.
+Measurability and attainable target power are still required at a 100 pp ceiling;
+an unattainable native MDE saturation sentinel does not pass.
+
+Selected mode emits a separate schema-2 requirement projection with canonical
+`selected_axes` and the declared map. Human output names the axes/ceilings, and
+JUnit appends only selected requirement cases after its unchanged native prefix.
+Omitted and legacy scalar JSON, human stdout and JUnit retain their old behavior.
+There is no new analysis, reread, pooling, inference or source authentication.
+See [the complete per-axis contract](screen-resolution.md#per-axis-requirements-source-candidate-0620).
 
 Quantfit 0.34.0 adds `screen-compare --reference-bundle DIR
 --candidate-bundle DIR --out comparison.json --junit comparison.xml --json`.

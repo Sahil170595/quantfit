@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 from xml.etree import ElementTree as ET
@@ -22,7 +23,13 @@ from quantfit.reproduce import (
 from quantfit.safety.calibration_binding import MAX_CALIBRATION_BYTES
 from quantfit.safety.report import DriftReport
 from quantfit.safety.verify import ProbeCorpus
-from quantfit.screen_requirement import AXES, _check_axis, validate_requirement
+from quantfit.screen_requirement import (
+    AXES,
+    _check_axis,
+    axis_requirement,
+    validate_axis_requirements,
+    validate_requirement,
+)
 
 MAX_VARIANTS = 8
 MAX_OUTPUT_BYTES = 32 * 1024 * 1024
@@ -170,9 +177,9 @@ def _requirements(result: dict[str, Any], rows: list[dict[str, Any]], ceiling: f
 
 
 def append_variant_junit_cases(suite: ET.Element, requirement: dict[str, Any]) -> None:
-    requested = requirement["required_conditional_resolution_pp"] is not None
+    requested = "selected_axes" in requirement or requirement["required_conditional_resolution_pp"] is not None
     for row in requirement["rows"]:
-        for axis in AXES:
+        for axis in requirement.get("selected_axes", AXES):
             case = ET.SubElement(
                 suite,
                 "testcase",
@@ -210,10 +217,12 @@ def summarize_screen_with_variants(
     out_path: str | None = None,
     junit_path: str | None = None,
     required_conditional_resolution_pp: float | None = None,
+    required_conditional_resolution_by_axis_pp: Mapping[str, float] | None = None,
     probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> dict[str, Any]:
     variants = validate_variants(calibration_variants)
     ceiling = validate_requirement(required_conditional_resolution_pp)
+    axis_ceilings = validate_axis_requirements(required_conditional_resolution_by_axis_pp, scalar=ceiling)
     phase = "invalid_calibration_variants"
     try:
         held_native = saved._hold_screen_inputs(manifest_path, reports_dir, out_path=out_path, junit_path=junit_path)
@@ -303,7 +312,11 @@ def summarize_screen_with_variants(
             "scientific_go": False,
             "scope": SCOPE,
         }
-        result["calibration_choice_requirement"] = _requirements(result, rows, ceiling)
+        result["calibration_choice_requirement"] = (
+            axis_requirement(result, rows, axis_ceilings, variants=True)
+            if axis_ceilings is not None
+            else _requirements(result, rows, ceiling)
+        )
         result["exit_code"] = result["calibration_choice_requirement"]["qualification_exit_code"]
         phase = "output_failure"
         buffers = []

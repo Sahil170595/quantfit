@@ -171,10 +171,120 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
         "kind": "quantfit.calibration-choice-functional-acceptance",
         "synthetic_calibration": True,
         "cases": records,
+        "axis_cases": _axis_cases(checkout, root),
         "human_labels_authenticated": False,
         "independent_raters_verified": False,
         "scientific_go": False,
     }
+
+
+def _axis_cases(checkout: Path, root: Path) -> list[dict[str, Any]]:
+    from quantfit.cli import main
+    from quantfit.junit import screen_to_junit
+    from quantfit.saved_screen import summarize_screen
+    from quantfit.screen_requirement import AXES
+
+    records = []
+    expected = {
+        "positive": 0,
+        "unequal_axes": 0,
+        "sensitivity": 5,
+        "missing": 4,
+        "late_missing": 4,
+        "native_flags": 3,
+        "native_incomplete": 4,
+    }
+    for interface in ("cli", "api"):
+        for scenario, wanted in expected.items():
+            local = root / f"axis-{interface}-{scenario}"
+            manifest, reports, variants = _fixture(checkout, local, scenario)
+            if scenario == "late_missing":
+                last = json.loads(manifest.read_bytes())["targets"][-1]["name"]
+                second = variants["second"]
+                assert second is not None
+                (Path(second) / (last + ".json")).unlink()
+            before = {path: path.read_bytes() for path in local.rglob("*.json")}
+            native = summarize_screen(str(manifest), str(reports))
+            native_cases = list(ET.fromstring(screen_to_junit(native)).iter("testcase"))
+            ceilings = {"over-refusal": 40.0}
+            if scenario == "unequal_axes":
+                ceilings["refusal-robustness"] = 50.0
+            out, junit = local / "axis-receiving.json", local / "axis-receiving.xml"
+            if interface == "cli":
+                args = [
+                    "screen-summary",
+                    "--targets",
+                    str(manifest),
+                    "--reports-dir",
+                    str(reports),
+                    "--out",
+                    str(out),
+                    "--junit",
+                    str(junit),
+                    "--json",
+                ]
+                for name, path in variants.items():
+                    args += ["--calibration-variant", name + "=" + (path if path is not None else "-")]
+                for axis, ceiling in ceilings.items():
+                    args += ["--require-axis-conditional-resolution", f"{axis}={ceiling}"]
+                stdout, stderr = io.StringIO(), io.StringIO()
+                with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                    code = main(args)
+                assert code == wanted and not stderr.getvalue()
+                result = json.loads(stdout.getvalue())["result"]
+            else:
+                result = summarize_screen(
+                    str(manifest),
+                    str(reports),
+                    calibration_variants=variants,
+                    required_conditional_resolution_by_axis_pp=ceilings,
+                    out_path=str(out),
+                    junit_path=str(junit),
+                )
+            requirement = result["calibration_choice_requirement"]
+            assert result["exit_code"] == wanted and result == json.loads(out.read_bytes())
+            assert requirement["calibration_choice_requirement_schema_version"] == 2
+            selected_axes = [axis for axis in AXES if axis in ceilings]
+            assert requirement["selected_axes"] == selected_axes
+            assert requirement["required_conditional_resolution_by_axis_pp"] == ceilings
+            assert requirement["native_exit_code"] == native["exit_code"]
+            for field in (
+                "manifest",
+                "report_bindings",
+                "rows",
+                "by_stratum",
+                "coverage",
+                "caps",
+                "sensitivity_control",
+            ):
+                assert result[field] == native[field]
+            block = result["calibration_choice_sensitivity"]
+            assert block["coverage"]["expected"] == len(requirement["rows"]) == 4
+            assert all(set(row["axes"]) == set(selected_axes) for row in requirement["rows"])
+            cases = list(ET.fromstring(junit.read_bytes()).iter("testcase"))
+            assert len(cases) == len(native_cases) + 4 * len(selected_axes) + 1
+            assert [ET.tostring(case) for case in cases[: len(native_cases)]] == [
+                ET.tostring(case) for case in native_cases
+            ]
+            assert all(path.read_bytes() == raw for path, raw in before.items())
+            records.append(
+                {
+                    "interface": interface,
+                    "scenario": scenario,
+                    "exit_code": wanted,
+                    "native_exit_code": requirement["native_exit_code"],
+                    "selected_axes": selected_axes,
+                    "requirements": ceilings,
+                    "rows": requirement["rows"],
+                    "coverage": block["coverage"],
+                    "analysis_work_units": block["analysis_work_units"],
+                    "junit_cases": len(cases),
+                    "native_prefix_cases": len(native_cases),
+                    "inputs_unchanged": True,
+                    "scientific_go": False,
+                }
+            )
+    return records
 
 
 def main() -> None:
