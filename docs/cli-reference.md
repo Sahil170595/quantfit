@@ -1,5 +1,11 @@
 # CLI reference — every command, every flag
 
+The **unreleased 0.63.0 source candidate** combines the existing
+`--calibrations-dir` and complete supplied-control triplet for `screen-summary`,
+optionally with `--require-conditional-resolution PP`.
+See [single-calibration composition](saved-screen-control-evidence.md#single-calibration-composition-source-candidate-0630).
+Public installation and the original command reference below remain **0.61.0**.
+
 Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --control-capture PATH --control-adjudication PATH`
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 

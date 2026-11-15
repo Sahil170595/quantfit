@@ -41,6 +41,12 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The **unreleased 0.63.0 source candidate** composes
+[single saved-screen calibration and supplied-control evidence](docs/saved-screen-control-evidence.md#single-calibration-composition-source-candidate-0630)
+in one held receiving operation. The existing optional scalar resolution ceiling
+retains its native qualification; control remains an annotation. Public
+installation remains **0.61.0**.
+
 Quantfit **0.61.0** adds
 [supplied positive-control evidence for saved screens](docs/saved-screen-control-evidence.md).
 It verifies an explicit local report/capture/adjudication triplet and adds

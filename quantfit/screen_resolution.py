@@ -235,7 +235,13 @@ def _summarize_inputs(
         probe_corpus=probe_corpus,
     )
     prepared = _prepare_rows(native, result, calibrations)
-    rows = _analyze_rows(prepared)
+    _attach_resolution(result, prepared)
+    return result
+
+
+def _attach_resolution(result: dict[str, Any], prepared: _PreparedResolution, *, use_prepared: bool = False) -> None:
+    """Attach the same native analyses after all held receiving preflight completes."""
+    rows = _analyze_rows(prepared, use_prepared=use_prepared)
     work = prepared.work
     counts = {
         f"n_{status}": sum(row["status"] == status for row in rows)
@@ -260,7 +266,6 @@ def _summarize_inputs(
         "scientific_go": False,
         "scope": SCOPE,
     }
-    return result
 
 
 def summarize_screen_with_resolution(
