@@ -1,0 +1,471 @@
+{
+  "record_schema": 1,
+  "source_candidate": "0.66.0",
+  "public_install_version": "0.61.0",
+  "base_commit": "7a72944421d5c7d0087c6961728e8ff9f139e1f5",
+  "environment": {
+    "os": "Windows-11-10.0.26300-SP0",
+    "architecture": "AMD64",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python": "3.13.1",
+    "packages": {
+      "pytest": "9.0.3",
+      "ruff": "0.16.2",
+      "mypy": "2.0.0"
+    },
+    "quantfit_runtime_and_scoped_editable": "0.66.0",
+    "uv": "0.13.7",
+    "gpu_used": false,
+    "scope": "Existing scoped editable system-site environment; no new environment/dependency/global package changes; inherited checkout metadata shadow preserved"
+  },
+  "selected": {
+    "tests": 377,
+    "passed": 377,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "by_module": {
+      "tests.test_reference_assessment_junit": 123,
+      "tests.test_reference_assessment": 57,
+      "tests.test_cli": 33,
+      "tests.test_ci_installed_imports": 6,
+      "tests.test_meta": 6,
+      "tests.test_audit": 81,
+      "tests.test_refreports": 71
+    },
+    "new_junit_cases": 123,
+    "command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m pytest -q -p no:cacheprovider tests/test_reference_assessment_junit.py tests/test_reference_assessment.py tests/test_cli.py tests/test_ci_installed_imports.py tests/test_meta.py tests/test_audit.py tests/test_refreports.py --basetemp=C:\\tmp\\sequential-delivery-20261113\\qf-066-final-01 --junitxml=C:\\tmp\\sequential-delivery-20261113\\qf-066-final.xml",
+    "log_sha256": "29c62bc24fdeecfa27138e20280616458dd8254e7d2b46eae51c85d12be68e14",
+    "xml_sha256": "8aa9f083bcb73047eb19e486888164c048668fadb8d13a833e1968d40e2d3e22"
+  },
+  "prior_attempts": [
+    {
+      "record": "qf-066-red",
+      "counts": {
+        "tests": 8,
+        "passed": 0,
+        "failed": 8,
+        "errors": 0,
+        "skipped": 0
+      },
+      "cause": "New optional SDK/CLI JUnit and pure renderer absent on accepted base"
+    },
+    {
+      "record": "qf-066-green",
+      "counts": {
+        "tests": 65,
+        "passed": 65,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "scope": "Initial feature and all original reference-assessment controls"
+    },
+    {
+      "record": "qf-066-controls",
+      "counts": {
+        "tests": 120,
+        "passed": 120,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "scope": "Expanded native/nullable/canonical/forgery/privacy/cap/source/publication controls, overlapping counts not summed"
+    },
+    {
+      "record": "qf-066-type.log",
+      "cause": "Narrow initial-list tuple-length inference; corrected explicit variadic native rule-table type without casts/ignores or runtime change"
+    },
+    {
+      "record": "qf-066-lint.log",
+      "cause": "Import ordering; corrected"
+    }
+  ],
+  "original_criteria_projection": {
+    "criteria": 107,
+    "cases_including_overall": 108,
+    "canonical_names_sha256": "2105f067790dc08a30987c8443d5e24f56a30377d42b1a377d522ec9672f36d6",
+    "canonical_case_order": "overall then fixed source constant, independent of input JSON/criterion dictionary order",
+    "true": "pass",
+    "false": "failure",
+    "unknown": "error, never skip",
+    "overall_codes": {
+      "0": "pass",
+      "3": "failure",
+      "4": "error"
+    },
+    "consistency": "Native false outranks unknown; both child kinds preserved; no new decision or maximum over native_exits",
+    "nullable_native_fact_fields_exercised": 25,
+    "closed_core_and_full_receiving_shapes": true,
+    "per_name_reasons_and_exact_types_validated_before_ET": true,
+    "static_assurance_flags_false": true,
+    "sample_outputs": [
+      {
+        "case": "ready",
+        "native_exit": 0,
+        "native_exits": [
+          0,
+          0,
+          0
+        ],
+        "cases": 108,
+        "bytes": 11403,
+        "sha256": "48fd87c44913443526b42dcc300ded08c2b4b3e49ae1e985ed356bf71d39d519",
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "case": "historical",
+        "native_exit": 3,
+        "native_exits": [
+          3,
+          3,
+          3
+        ],
+        "cases": 108,
+        "bytes": 11613,
+        "sha256": "ff386cd718f5a0853528673e66229cc44fe0b630515dedbdd7a6d86bf7c8c935",
+        "failures": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "case": "unknown",
+        "native_exit": 4,
+        "native_exits": [
+          0,
+          0,
+          0
+        ],
+        "cases": 108,
+        "bytes": 11622,
+        "sha256": "0dfe0cc83535fa9b9576e1ee943a30a11d141867e2c60480aa6c4aebbbc0c0e0",
+        "failures": 0,
+        "errors": 2,
+        "skipped": 0
+      },
+      {
+        "case": "mixed",
+        "native_exit": 3,
+        "native_exits": [
+          3,
+          3,
+          3
+        ],
+        "cases": 108,
+        "bytes": 11720,
+        "sha256": "a22aa2fea87b9a3838f0b91c96ddadd7c6b8425cf0e9f4c563e359a31af49b97",
+        "failures": 2,
+        "errors": 1,
+        "skipped": 0
+      },
+      {
+        "case": "native4_excluded",
+        "native_exit": 0,
+        "native_exits": [
+          4,
+          4,
+          4
+        ],
+        "cases": 108,
+        "bytes": 11403,
+        "sha256": "1af34eec8b853db625ab4022e176e1a736555bb82c4bf5301e0a6c54424d3c7d",
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "XML_cap_bytes": 65536,
+    "requested_only_no_truncation": true
+  },
+  "legacy_parity": {
+    "schema": 1,
+    "source_candidate": "0.66.0",
+    "base": "7a72944421d5c7d0087c6961728e8ff9f139e1f5",
+    "all_equal": true,
+    "tool_version_freeze": "Only native/tool version0.61.0; same original held target/bundle inputs, report bytes/manifest/T0/producer versions unchanged",
+    "cases": [
+      {
+        "case": "ready",
+        "native_exit": 0,
+        "native_exits": [
+          0,
+          0,
+          0
+        ],
+        "checks": {
+          "SDK_default": true,
+          "SDK_with_junit": true,
+          "OSCLI_json": true,
+          "OSCLI_human": true
+        },
+        "native_call_counts": {
+          "_read": 1,
+          "_verified_bundle": 1,
+          "_assess_bundle_held": 1,
+          "assess_report_buffers": 1,
+          "_target": 2,
+          "_t0_from_views": 1,
+          "replay_alias_t0": 2
+        },
+        "XML_additional_native_calls": {
+          "_read": 0,
+          "_verified_bundle": 0,
+          "_assess_bundle_held": 0,
+          "assess_report_buffers": 0,
+          "_target": 0,
+          "_t0_from_views": 0,
+          "replay_alias_t0": 0
+        },
+        "JSON_sha256": "8f4a5c27a894e100541ff69b507e7364619f83fc6c5a9cec7189b4b394f64c53",
+        "human_sha256": "acca7dd0dd69609ac289b5d51b8c345383e7902f57e069831c418b5133fe1229",
+        "JUnit_sha256": "48fd87c44913443526b42dcc300ded08c2b4b3e49ae1e985ed356bf71d39d519",
+        "JUnit_bytes": 11403
+      },
+      {
+        "case": "historical",
+        "native_exit": 3,
+        "native_exits": [
+          3,
+          3,
+          3
+        ],
+        "checks": {
+          "SDK_default": true,
+          "SDK_with_junit": true,
+          "OSCLI_json": true,
+          "OSCLI_human": true
+        },
+        "native_call_counts": {
+          "_read": 1,
+          "_verified_bundle": 1,
+          "_assess_bundle_held": 1,
+          "assess_report_buffers": 1,
+          "_target": 2,
+          "_t0_from_views": 1,
+          "replay_alias_t0": 2
+        },
+        "XML_additional_native_calls": {
+          "_read": 0,
+          "_verified_bundle": 0,
+          "_assess_bundle_held": 0,
+          "assess_report_buffers": 0,
+          "_target": 0,
+          "_t0_from_views": 0,
+          "replay_alias_t0": 0
+        },
+        "JSON_sha256": "5968487b0d0e67f49609b3433349254243fb4480477187902e367e5aeb11b0c2",
+        "human_sha256": "4cdc45231e811ae16dc6ca8fbf765dbeb66272085f23fd68de160e57288dbc97",
+        "JUnit_sha256": "ff386cd718f5a0853528673e66229cc44fe0b630515dedbdd7a6d86bf7c8c935",
+        "JUnit_bytes": 11613
+      },
+      {
+        "case": "unknown",
+        "native_exit": 4,
+        "native_exits": [
+          0,
+          0,
+          0
+        ],
+        "checks": {
+          "SDK_default": true,
+          "SDK_with_junit": true,
+          "OSCLI_json": true,
+          "OSCLI_human": true
+        },
+        "native_call_counts": {
+          "_read": 1,
+          "_verified_bundle": 1,
+          "_assess_bundle_held": 1,
+          "assess_report_buffers": 1,
+          "_target": 2,
+          "_t0_from_views": 1,
+          "replay_alias_t0": 2
+        },
+        "XML_additional_native_calls": {
+          "_read": 0,
+          "_verified_bundle": 0,
+          "_assess_bundle_held": 0,
+          "assess_report_buffers": 0,
+          "_target": 0,
+          "_t0_from_views": 0,
+          "replay_alias_t0": 0
+        },
+        "JSON_sha256": "9d6f9916e3fd4c5355aa6948adf8942f95e64b0bbf08c00c049041f6c891bdbe",
+        "human_sha256": "4d7005cf0d146d13c42b2bce13c0c85d17555c0a293c637fba23469fe68a7744",
+        "JUnit_sha256": "0dfe0cc83535fa9b9576e1ee943a30a11d141867e2c60480aa6c4aebbbc0c0e0",
+        "JUnit_bytes": 11622
+      },
+      {
+        "case": "mixed",
+        "native_exit": 3,
+        "native_exits": [
+          3,
+          3,
+          3
+        ],
+        "checks": {
+          "SDK_default": true,
+          "SDK_with_junit": true,
+          "OSCLI_json": true,
+          "OSCLI_human": true
+        },
+        "native_call_counts": {
+          "_read": 1,
+          "_verified_bundle": 1,
+          "_assess_bundle_held": 1,
+          "assess_report_buffers": 1,
+          "_target": 2,
+          "_t0_from_views": 1,
+          "replay_alias_t0": 2
+        },
+        "XML_additional_native_calls": {
+          "_read": 0,
+          "_verified_bundle": 0,
+          "_assess_bundle_held": 0,
+          "assess_report_buffers": 0,
+          "_target": 0,
+          "_t0_from_views": 0,
+          "replay_alias_t0": 0
+        },
+        "JSON_sha256": "c906d5a6f0ace01df570d871b00bd6e7e2281f82c60fdf64ac69722eb48c3c37",
+        "human_sha256": "4cdc45231e811ae16dc6ca8fbf765dbeb66272085f23fd68de160e57288dbc97",
+        "JUnit_sha256": "a22aa2fea87b9a3838f0b91c96ddadd7c6b8425cf0e9f4c563e359a31af49b97",
+        "JUnit_bytes": 11720
+      },
+      {
+        "case": "native4_excluded",
+        "native_exit": 0,
+        "native_exits": [
+          4,
+          4,
+          4
+        ],
+        "checks": {
+          "SDK_default": true,
+          "SDK_with_junit": true,
+          "OSCLI_json": true,
+          "OSCLI_human": true
+        },
+        "native_call_counts": {
+          "_read": 1,
+          "_verified_bundle": 1,
+          "_assess_bundle_held": 1,
+          "assess_report_buffers": 1,
+          "_target": 2,
+          "_t0_from_views": 1,
+          "replay_alias_t0": 2
+        },
+        "XML_additional_native_calls": {
+          "_read": 0,
+          "_verified_bundle": 0,
+          "_assess_bundle_held": 0,
+          "assess_report_buffers": 0,
+          "_target": 0,
+          "_t0_from_views": 0,
+          "replay_alias_t0": 0
+        },
+        "JSON_sha256": "37080ed478e58e6743f42821c87172c8742727b74b79fe66fa47a7fd1ad10816",
+        "human_sha256": "acca7dd0dd69609ac289b5d51b8c345383e7902f57e069831c418b5133fe1229",
+        "JUnit_sha256": "1af34eec8b853db625ab4022e176e1a736555bb82c4bf5301e0a6c54424d3c7d",
+        "JUnit_bytes": 11403
+      }
+    ],
+    "scope": "Default and requestedXML SDK JSON/type/bytes; actual OSCLI JSON/human/saved-byte/exit parity withXML; same measured per-call native baseline and no extra calls"
+  },
+  "native_reuse": {
+    "functions_ast_identical": [
+      "_target",
+      "assess_report_buffers",
+      "_assess_bundle_held"
+    ],
+    "native_primitive_blobs_unchanged": {
+      "quantfit/replay_bundle.py": "f1265cacdbb74191d3459287a480a1592e1d3369",
+      "quantfit/reproduce.py": "14c8a690224286fd9389d987bca2fde851f25224",
+      "quantfit/report_comparison.py": "95dcaaa0fbf4f6db68e53f74fe6e81f4a70ca07d",
+      "quantfit/resolution.py": "0692b2eb534fb002a9564ece32031fee6427d7a1",
+      "quantfit/safety/verify.py": "569a33c8fcb8b2cc289497fe1fdf135ece6ed05f"
+    },
+    "target_content_read": 1,
+    "bundle_verification": 1,
+    "held_assessment": 1,
+    "assessment_core": 1,
+    "target_parses": 2,
+    "assessment_T0_alias_calls": 1,
+    "replay_T0_alias_calls": 2,
+    "T0_alias_calls_total": 3,
+    "bundle_role_read_alias_calls": 5,
+    "requested_XML_additional_source_reads_or_analysis_or_T0_calls": 0,
+    "scope": "Per-call actual native aliases. Owned output-stage verification still reads its own stages, not source evidence."
+  },
+  "publication_controls": [
+    "Both requested sinks admitted in original output plan before any input content read; target/all replay roles/manifest/closed root/missing roles and mutual/hardlink aliases protected",
+    "All requested JSON/XML buffers complete before one original reproduction publication call; JUnit-only produces no JSON output buffer while native internal normalization remains unchanged",
+    "Per-file atomic os.replace with layout/alias/stage-byte/ownership checks per replacement; pair is not a transaction",
+    "First replacement fault preserves old results; second replacement fault preserves first new native result; owned stages closed and foreign aliases preserved",
+    "Existing source mutation after consumption remains held-snapshot valid; no new source content stamps/rechecks or durability guarantee"
+  ],
+  "privacy": "Immutable admitted snapshot contains only fixed canonical names/categorical states/messages/caveat and whitelisted lowercase64hex digests/bounded counts. No pair/model/producer-or-receiving path/differing paths/rawT0/arbitrary metadata/reason prose/private exception is emitted.",
+  "installed_consumer_seam": "Exact existing tools/ci_installed references assess historical3/synthetic0/unknown4 OS subprocesses now request JUnit and compare unchanged SDK/JSON/false flags; new test module selected in same four installed profiles",
+  "static": {
+    "owned_typing_command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m mypy --strict --follow-imports=skip --cache-dir C:\\tmp\\sequential-delivery-20261113\\qf-066-type-final-01 quantfit/reference_assessment.py quantfit/reference_assessment_junit.py",
+    "owned_typing": "Success: no issues found in2source files; full canonical hosted typing remains required",
+    "ruff_check_command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m ruff check quantfit tests tools",
+    "ruff_check": "passed",
+    "ruff_format_command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m ruff format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture tools/ci_corpus_fixture",
+    "ruff_format": "296 files already formatted",
+    "audit_counts": {
+      "findings": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "independent_ci_lock": "UVlocked/offline174packages; tools/ci project+lock unchanged; no root lock exists",
+    "final_audit_counts": {
+      "findings": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "final_audit_sha256": "216ff6fa94f597b2030d7b0824a42105b19be836516c9910e1837ac397777b39"
+  },
+  "source_identities": [
+    {
+      "path": "quantfit/reference_assessment.py",
+      "sha256": "fe169529feaeaf707710bdb6335c6cd50566b3ba0551f75041f2427cc06478b1",
+      "git_blob": "75c3f2a6af4320448e52f45dd0a4e8391ce1d0da"
+    },
+    {
+      "path": "quantfit/reference_assessment_junit.py",
+      "sha256": "1f18b18a083dcbd379424da908cb561d4cb0f8e478e853e27ad193be1638dd83",
+      "git_blob": "b1bd3c7a8c389ed21c1e6029d8b135465e2443b3"
+    },
+    {
+      "path": "quantfit/cli.py",
+      "sha256": "3caa5ecfc209c82ae1be21963e4eb729f2647850161918c05d6c62435f1d8f7c",
+      "git_blob": "8bcb8544aaeecaf40153ae145d14c7830eea156a"
+    },
+    {
+      "path": "tools/ci_installed.py",
+      "sha256": "566832a9a5f6f85165b69fce0468d8cf960b40d8dedf6b7ff17f65f7ca229445",
+      "git_blob": "875bf6831b0aae08d7ba3c1ea48686a726cb5ce5"
+    },
+    {
+      "path": "tests/test_reference_assessment_junit.py",
+      "sha256": "655b5cd87430845d0afb50d59ae91403ef6e6e291d4dd2f54e0284bd436a6cdb",
+      "git_blob": "d00f82882309152f9f798cb00372b32a3e09c9ca"
+    },
+    {
+      "path": ".github/workflows/validate.yml",
+      "sha256": "5ee67be6c7e9aabcda1b55eb39adf13f62e1125593b6906e0390c599a6b17d00",
+      "git_blob": "111aaeda414bc4d0670deec07700c8590977ed54"
+    }
+  ],
+  "limits": [
+    "Fictional and historical saved native aggregates only; no model, judge, provider, Hub/source lookup, asset, new mathematical work or reference publication",
+    "Ready0 means publication-review eligibility, not registration, authenticated data/labels/weights/hosts/independence/sensitivity or scientific GO",
+    "Native per-run[4,4,4] can legitimately retain assessment0 with a measured eligible axis; no maximum-exit shortcut",
+    "Local editable-source proof; own hosted OS/matrix/CodeQL/canonical typing/audit and four clean installed profiles remain required",
+    "Native per-file replacement is atomic but the pair is not a transaction; prior/first results may remain on later failure, with no new source-stamp, crash-durability or hostile-rename guarantee",
+    "Named qf-066 before/red/native guard/cap/publication witnesses remain local; no private/raw producer data or native report paths are committed"
+  ]
+}

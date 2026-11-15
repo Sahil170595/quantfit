@@ -41,6 +41,12 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The **unreleased 0.66.0 source candidate** adds optional
+[JUnit for original reference-assessment criteria](docs/cli-reference.md#reference-assessment-junit-source-candidate-0660).
+Native decisions, JSON and mathematical work remain unchanged; unknown criteria
+are errors. Public installation
+remains **0.61.0**.
+
 Quantfit **0.61.0** adds
 [supplied positive-control evidence for saved screens](docs/saved-screen-control-evidence.md).
 It verifies an explicit local report/capture/adjudication triplet and adds

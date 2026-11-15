@@ -13,6 +13,18 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.66.0 — Unreleased
+
+- Add optional reference-assessment JUnit and a pure closed renderer over the
+  original 107 native criteria plus overall, with canonical order, exact per-name
+  states/reasons and privacy-safe messages/hash/count properties. Unknowns error;
+  native0/3/4 and all original JSON/math/T0/assurance flags remain unchanged.
+- Admit both outputs before input reads; materialize buffers before the existing
+  per-file atomic, non-pair-transaction publisher. XML adds no native assessment/T0 calls or source reads
+  or source content-stamp guarantee. Extend the existing four installed OS consumers.
+- Exact local fictional/historical evidence, negative controls and limits:
+  [validation](validation/2026-11-15-reference-assessment-junit/README.md).
+
 ## 0.61.0 — 2026-11-14
 
 - Add optional all-or-none supplied control report/capture/adjudication roles to

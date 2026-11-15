@@ -1,5 +1,10 @@
 # CLI reference — every command, every flag
 
+The **unreleased 0.66.0 source candidate** adds optional `--junit PATH` only to
+`references assess`, projecting every original native criterion without changing
+JSON, policy or mathematical work. See [reference assessment JUnit](#reference-assessment-junit-source-candidate-0660).
+Public installation and the original reference below remain **0.61.0**.
+
 Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --control-capture PATH --control-adjudication PATH`
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
@@ -328,6 +333,75 @@ weight/size/physical-host authentication, independent execution, sensitivity and
 scientific GO remain unverified even at exit 0. The public Phi4 candidate stays
 blocked with its original **2/20 unconfirmed over-refusal flags** and dangerous-axis
 **0/12 detector did not fire** result.
+
+### Reference assessment JUnit (source candidate 0.66.0)
+
+This requires **unreleased 0.66.0 source**; public installation remains **0.61.0**.
+Only the existing `references assess` command adds this optional output:
+
+```bash
+quantfit references assess --bundle candidate-handoff --target target.json --out receiving-assessment.json --junit receiving-assessment.xml --json
+```
+
+`quantfit.reference_assessment.assess_candidate` adds keyword-only
+`junit_path=None`. JSON and human output, `assess_report_buffers`, held assessment,
+T0, math, original criteria and all assurance flags remain unchanged. Without a
+JUnit request no renderer/XML cap runs; JUnit-only creates no JSON output buffer
+(native internal JSON normalization still occurs). The standalone pure renderer is:
+
+```python
+from quantfit.reference_assessment_junit import assessment_to_junit
+xml = assessment_to_junit(native_core_or_receiving_assessment)
+```
+
+Its closed input accepts the existing core or full receiving shape. It admits exactly
+all **107 original criteria**, each exact `{pass, reason}` with native boolean/null
+and per-name categorical reason rules, and a consistent exact integer native code /
+outcome. It refuses missing, extra or renamed criteria, `0`/`1` as booleans, invalid
+reason/nullability, contradictory code/outcome or promoted assurance flags. All native
+nullable arm/engine/judge/probe/decode facts remain unestablished. This is consistency
+projection only, with false before unknown, not a new qualification policy or statistic.
+
+JUnit has **108 cases**, overall followed by a fixed canonical criterion order,
+independent of input JSON key order. True passes, false fails, and unknown is an
+**error**, never a skip. Overall native 0 passes, 3 fails and 4 errors. A known blocker
+retains overall 3 while unknown child errors remain visible. Never take the maximum
+per-run exit: native `[4,4,4]` can legitimately produce assessment 0 when one measured
+axis remains eligible. Complete axis exclusions and native no-measured/over-cap,
+T0/payload/profile/flag adverse outcomes retain their existing interpretation.
+
+A validated immutable private snapshot precedes all ElementTree work. XML names,
+messages and caveat are fixed; only whitelisted lowercase 64-hex hashes and bounded
+counts enter properties. Pair/model names, producer/receiving paths, differing paths,
+raw T0, arbitrary metadata/reason prose and private exceptions do not enter XML.
+The full requested XML is capped to 64 KiB before publication, without truncation.
+Malformed projections, cap/renderer/input/output failures are categorical exit 2;
+valid native 3/4 JSON/XML are written before the CLI returns that unchanged code.
+
+Both requested sinks enter the existing reproduction output plan **before any input
+content reads**, protecting the target, closed root, manifest and every replay role,
+even a missing role, plus mutual/hardlink/link aliases. The target is read once, the
+bundle verified once and held assessment performed once. The measured existing native
+baseline has two target parses and **three T0 alias calls** (one assessment plus two
+replay verification calls); requesting XML adds **zero** analyses, T0 calls or source
+reads. No model, judge, Hub/source resolution or registry publication is added.
+
+All requested buffers finish before one existing reproduction publication call.
+Staging and per-output layout/alias/owned-byte checks precede each atomic `os.replace`;
+this is **per-file atomic**, not a pair transaction. Failure of the first replacement
+preserves prior output; failure of the second can leave the first newly published
+result. Unknown/substituted files are preserved and owned stages are closed. This
+publisher does not add HeldFile source content stamps: mutation after consumption
+can still produce the same held snapshot. No source reread, crash-durability or
+stronger hostile-concurrent-rename guarantee is promised.
+
+Fictional/historical native SDK and actual OS CLI, original JSON/human parity,
+canonical census, privacy, requested cap and publication evidence is recorded in
+[local validation](../validation/2026-11-15-reference-assessment-junit/README.md).
+The exact existing historical3/synthetic0/unknown4 OS consumers include JUnit in all
+four installed profiles. Hosted matrix/canonical typing/CodeQL/clean installed proof
+remain separate. No new jobs, dependencies, uploads, assets, reference registration,
+human/weight/host authentication, sensitivity or scientific GO are introduced.
 
 ## Quantize
 
