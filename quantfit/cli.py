@@ -747,6 +747,16 @@ def _build_parser() -> argparse.ArgumentParser:
         help="complete returned part and its original index",
     )
     chunk_validate.add_argument("--out", required=True, metavar="PATH", help="new aggregate inspection receipt")
+    chunk_validate.add_argument(
+        "--require-complete",
+        action="store_true",
+        help="require all original parts after native validation (valid missing coverage exits 4)",
+    )
+    chunk_validate.add_argument(
+        "--junit",
+        metavar="PATH",
+        help="optional bounded aggregate XML over every original part; missing skips or required errors",
+    )
     chunk_packets.add_argument(
         "--manifest", required=True, metavar="PATH", help="original private chunk manifest; never share"
     )

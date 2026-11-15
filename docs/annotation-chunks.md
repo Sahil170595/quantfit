@@ -161,3 +161,69 @@ Regenerable fictional CLI/API/native-consumer evidence, including adverse
 controls and privacy checks: [functional record](../validation/2026-10-25-annotation-chunks/README.md).
 Fixture judgments establish neither human truth, rater independence, sensitivity,
 safety, QSR v1 readiness nor scientific GO.
+
+
+## Complete-return requirement and JUnit (source candidate 0.65.0)
+
+This requires **unreleased 0.65.0 source**; public installation remains **0.61.0**.
+Only `calibrate chunks validate` adds these options:
+
+```bash
+quantfit calibrate chunks validate --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --part 2=returned-part-2.labels.csv --require-complete --junit inspection.xml --out inspection.json --json
+```
+
+The existing typed SDK function adds keyword-only `require_complete=False` and
+`junit_path=None`. Policy must be an exact boolean before private IO. Omitted and
+explicit False retain exact schema-1 JSON and human output, even when XML is requested.
+A valid partial default remains exit 0. Opt-in True emits a schema-2 receipt, preserving
+all original top-level expected/received/missing indices and row counts, with only
+this closed `completeness_requirement` block:
+
+```json
+{"requirement_schema":1,"require_complete":true,"native_validation_exit_code":0,"exit_code":4}
+```
+
+Native full manifest reconstruction uses its **stored producer version** and exact
+encoded equality. Every supplied part is then fully joined against its original
+assigned IDs, text and completion digest before completeness is considered. A late
+bad row exits 2 even when other original parts are missing, and publishes no fabricated
+success XML. Valid missing required coverage exits 4; complete coverage exits 0,
+including all-unusable returns. Inspection does not collect, ingest, discover files,
+compute an epsilon or authenticate labels/rater identity. Existing 1–128 explicit
+indexed roles, exact integer indices, native byte/CSV/work limits and assurance flags
+remain unchanged. Complete coverage describes a file census, not usable calibration.
+
+Requested JUnit has one fixed overall case and every original part index in numeric
+order (maximum 129 cases). Supplied native-valid parts pass. Missing parts skip when
+coverage is optional, with overall exit 0; required missing parts error, including the
+overall case, with exit 4. Complete all-unusable returns pass this coverage check.
+The renderer accepts only a validated frozen private projection of original per-part
+row counts, received indices, complete row census, exact policy and a safe manifest
+hash. Names/messages are fixed or numeric and properties contain only counts/hash;
+no annotator names, IDs, paths, CSV rows, salts, text, labels, arbitrary exceptions
+or raw manifest enter XML. Standard ElementTree serialization is bounded to 64 KiB
+without truncation. JSON-only inspection does not generate XML or apply the XML cap.
+
+All explicit roles are held once. **After those private bytes are held**, both requested
+sinks are admitted together against held sources, before CSV parsing or rendering.
+This is not a pre-read output-admission claim. Native validation, requirement and all
+requested buffers finish before one existing `retention_io.publish` call. With no
+outputs, the original held-file checks still run. Valid exit-4 JSON/XML are published
+before the CLI emits exit 4; any output failure takes operational exit 2 instead.
+
+Publication uses staged buffers and exclusive `O_EXCL` target creation. It is **not
+per-file atomic and not a pair transaction**: an interrupted file or a first output
+may remain if a later write fails. Native source stamps are checked after all staging,
+**before the first target creation**, with no source recheck between outputs. A source
+mutation before that checkpoint refuses before targets; a source-only mutation after
+it may still return the unchanged held snapshot. Target/ancestor substitution between
+outputs still refuses and preserves the first output and foreign work. No rollback,
+source deletion, target overwrite or stronger race guarantee is added.
+
+Fictional native SDK and actual OS CLI, original/stored-version parity, maximum
+population, privacy, cap and publication evidence is in
+[the local functional record](../validation/2026-11-14-annotation-return-completeness/README.md).
+The existing four installed consumers retain collection, native schema-2/schema-3
+ingest and the all-unusable ingest refusal. Hosted OS/matrix/canonical typing/CodeQL
+and clean installed proof remain separate gates; no jobs, uploads, dependencies,
+model/judge/provider work, label truth, sensitivity or scientific GO are introduced.

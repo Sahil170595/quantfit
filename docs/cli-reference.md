@@ -1,5 +1,11 @@
 # CLI reference — every command, every flag
 
+The **unreleased 0.65.0 source candidate** adds `--require-complete` and optional
+`--junit PATH` only to `calibrate chunks validate`. Valid missing coverage exits 4
+after all supplied parts validate; malformed inputs/output failures remain exit 2.
+See [complete-return requirements and XML](annotation-chunks.md#complete-return-requirement-and-junit-source-candidate-0650).
+Public installation and the original reference below remain **0.61.0**.
+
 Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --control-capture PATH --control-adjudication PATH`
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
@@ -820,6 +826,11 @@ and missing part indices remain explicit. No labels are inferred or ingested:
 ```bash
 quantfit calibrate chunks validate --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --part 2=returned-part-2.labels.csv --out inspection.json --json
 ```
+
+Unreleased 0.65.0 source also accepts `--require-complete --junit inspection.xml`
+on that validate command. The requirement covers every original manifest part;
+missing parts are XML errors/exit 4 when required and skipped/default exit 0 otherwise.
+Neither option collects or ingests labels.
 
 Explicitly fill every returned part, then collect them in manifest order:
 

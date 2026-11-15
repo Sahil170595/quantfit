@@ -41,6 +41,11 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The **unreleased 0.65.0 source candidate** adds an opt-in
+[complete annotation-return requirement and bounded JUnit output](docs/annotation-chunks.md#complete-return-requirement-and-junit-source-candidate-0650).
+Valid missing coverage exits 4 after native validation; default partial inspection
+remains unchanged. Public installation remains **0.61.0**.
+
 Quantfit **0.61.0** adds
 [supplied positive-control evidence for saved screens](docs/saved-screen-control-evidence.md).
 It verifies an explicit local report/capture/adjudication triplet and adds
