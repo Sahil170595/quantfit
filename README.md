@@ -41,6 +41,12 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The **unreleased 0.64.0 source candidate** adds explicit `--kind replay|screen`
+[closed archive transport](docs/portable-evidence-bundles.md#explicit-archive-kinds-source-candidate-0640).
+The default aggregate archive bytes, native adverse outcomes and separate scientific
+limits remain unchanged. Public installation remains **0.61.0**.
+
+
 Quantfit **0.61.0** adds
 [supplied positive-control evidence for saved screens](docs/saved-screen-control-evidence.md).
 It verifies an explicit local report/capture/adjudication triplet and adds

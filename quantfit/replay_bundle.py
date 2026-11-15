@@ -117,65 +117,78 @@ def create_replay_bundle(report_paths: list[str], t0_path: str, out_path: str) -
         raise BundleError(str(exc)) from exc
 
 
+def _manifest(raw: bytes) -> dict:
+    """Pure closed replay manifest admission, shared by directory and archive receiving."""
+    manifest = _json(raw)
+    _require(
+        set(manifest)
+        == {"bundle_schema", "quantfit_version", "created_utc", "scientific_claims_verified", "files", "scope"},
+        "unsupported replay manifest fields",
+    )
+    _require(
+        type(manifest["bundle_schema"]) is int and manifest["bundle_schema"] == BUNDLE_SCHEMA,
+        "unsupported replay schema",
+    )
+    _require(
+        manifest["scientific_claims_verified"] is False and manifest["scope"] == SCOPE,
+        "integrity cannot claim scientific proof",
+    )
+    for key in ("quantfit_version", "created_utc"):
+        _require(isinstance(manifest[key], str) and bool(manifest[key].strip()), f"manifest {key} must be a string")
+    entries = manifest["files"]
+    _require(isinstance(entries, list) and len(entries) == 4, "replay manifest needs exactly four roles")
+    roles = set()
+    for entry in entries:
+        _require(
+            isinstance(entry, dict) and set(entry) == {"role", "path", "sha256", "size_bytes"},
+            "unsupported file entry",
+        )
+        role = entry["role"]
+        _require(isinstance(role, str) and role in ROLES and role not in roles, "unsupported/duplicate replay role")
+        _require(entry["path"] == ROLES[role], "member paths must be canonical relative role filenames")
+        _require(isinstance(entry["sha256"], str) and bool(_SHA.fullmatch(entry["sha256"])), "invalid member SHA256")
+        _require(
+            type(entry["size_bytes"]) is int and 0 < entry["size_bytes"] <= MAX_REPORT_BYTES,
+            "unsupported member size",
+        )
+        roles.add(role)
+    return manifest
+
+
+def _checked_payloads(manifest: dict, data: dict[str, bytes]) -> list[dict]:
+    """Return the same byte/size mismatch facts without following any producer locator."""
+    _require(set(data) == set(ROLES), "unlisted/missing files are refused")
+    entries = manifest["files"]
+    mismatches = []
+    for entry in entries:
+        raw = data[entry["role"]]
+        actual = hashlib.sha256(raw).hexdigest()
+        if actual != entry["sha256"] or len(raw) != entry["size_bytes"]:
+            mismatches.append(
+                {
+                    "role": entry["role"],
+                    "expected_sha256": entry["sha256"],
+                    "actual_sha256": actual,
+                    "expected_bytes": entry["size_bytes"],
+                    "actual_bytes": len(raw),
+                }
+            )
+    return mismatches
+
+
 def _verified_bundle(bundle_path: str) -> tuple[dict, dict[str, bytes]]:
     """Return the result and its held buffers; producer locators are never accessed."""
     root = Path(bundle_path).absolute()
     try:
         _no_links(root)
         _require(root.is_dir(), "bundle must be a directory")
-        manifest = _json(_read(root / "manifest.json", MAX_MANIFEST_BYTES))
-        _require(
-            set(manifest)
-            == {"bundle_schema", "quantfit_version", "created_utc", "scientific_claims_verified", "files", "scope"},
-            "unsupported replay manifest fields",
-        )
-        _require(
-            type(manifest["bundle_schema"]) is int and manifest["bundle_schema"] == BUNDLE_SCHEMA,
-            "unsupported replay schema",
-        )
-        _require(
-            manifest["scientific_claims_verified"] is False and manifest["scope"] == SCOPE,
-            "integrity cannot claim scientific proof",
-        )
-        for key in ("quantfit_version", "created_utc"):
-            _require(isinstance(manifest[key], str) and bool(manifest[key].strip()), f"manifest {key} must be a string")
+        manifest = _manifest(_read(root / "manifest.json", MAX_MANIFEST_BYTES))
         entries = manifest["files"]
-        _require(isinstance(entries, list) and len(entries) == 4, "replay manifest needs exactly four roles")
-        roles = set()
-        for entry in entries:
-            _require(
-                isinstance(entry, dict) and set(entry) == {"role", "path", "sha256", "size_bytes"},
-                "unsupported file entry",
-            )
-            role = entry["role"]
-            _require(isinstance(role, str) and role in ROLES and role not in roles, "unsupported/duplicate replay role")
-            _require(entry["path"] == ROLES[role], "member paths must be canonical relative role filenames")
-            _require(
-                isinstance(entry["sha256"], str) and bool(_SHA.fullmatch(entry["sha256"])), "invalid member SHA256"
-            )
-            _require(
-                type(entry["size_bytes"]) is int and 0 < entry["size_bytes"] <= MAX_REPORT_BYTES,
-                "unsupported member size",
-            )
-            roles.add(role)
         _require(
             {p.name for p in root.iterdir()} == {"manifest.json", *ROLES.values()}, "unlisted/missing files are refused"
         )
-        data, mismatches = {}, []
-        for entry in entries:
-            raw = _read(root / entry["path"], MAX_REPORT_BYTES)
-            actual = hashlib.sha256(raw).hexdigest()
-            if actual != entry["sha256"] or len(raw) != entry["size_bytes"]:
-                mismatches.append(
-                    {
-                        "role": entry["role"],
-                        "expected_sha256": entry["sha256"],
-                        "actual_sha256": actual,
-                        "expected_bytes": entry["size_bytes"],
-                        "actual_bytes": len(raw),
-                    }
-                )
-            data[entry["role"]] = raw
+        data = {entry["role"]: _read(root / entry["path"], MAX_REPORT_BYTES) for entry in entries}
+        mismatches = _checked_payloads(manifest, data)
         if mismatches:
             return _result(root, manifest, mismatches=mismatches), data
         original, receiving = _validate(data, [str(root / ROLES[f"replicate-{i}"]) for i in range(1, 4)])

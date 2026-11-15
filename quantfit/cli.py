@@ -954,15 +954,29 @@ def _build_parser() -> argparse.ArgumentParser:
         "verify", help="verify relocated bundle (0 intact, 3 byte mismatch, 2 unsupported/unsafe)"
     )
     bverify.add_argument("--bundle", required=True, metavar="DIR", help="local portable bundle directory")
-    bpack = bsub.add_parser("pack", help="canonical single-file schema-1 aggregate transport; no scientific PASS")
-    bpack.add_argument("--bundle", required=True, metavar="DIR", help="native schema-1 aggregate directory")
+    bpack = bsub.add_parser("pack", help="canonical single-file native transport; no scientific PASS")
+    bpack.add_argument(
+        "--bundle",
+        required=True,
+        metavar="DIR",
+        help="native directory of the explicitly selected kind (default aggregate)",
+    )
     bpack.add_argument("--out", required=True, metavar="PATH", help="new canonical stored archive")
     barchive = bsub.add_parser("archive-verify", help="offline expected-SHA256 container and native validation")
     bunpack = bsub.add_parser("unpack", help="validate fully then restore to a fresh exclusive directory")
     for receiving in (barchive, bunpack):
-        receiving.add_argument("--archive", required=True, metavar="PATH", help="canonical aggregate archive")
+        receiving.add_argument(
+            "--archive", required=True, metavar="PATH", help="canonical archive of the explicitly selected kind"
+        )
         receiving.add_argument("--sha256", required=True, metavar="FULL64", help="expected whole raw archive SHA256")
     bunpack.add_argument("--out", required=True, metavar="DIR", help="new destination; parent must exist")
+    for transport in (bpack, barchive, bunpack):
+        transport.add_argument(
+            "--kind",
+            choices=("aggregate", "replay", "screen"),
+            default="aggregate",
+            help="explicit native archive kind; no autodetection (default: aggregate)",
+        )
     breplay = bsub.add_parser(
         "replay-create", help="package exactly three reports and original T0 (0 intact, 2 unsupported input)"
     )
@@ -1854,14 +1868,18 @@ def _dispatch(args: argparse.Namespace) -> int:
             from quantfit.bundle_transport import pack_bundle, unpack_bundle, verify_bundle_archive
 
             if args.bundle_cmd == "pack":
-                result = pack_bundle(args.bundle, args.out)
+                result = pack_bundle(args.bundle, args.out, kind=args.kind)
             elif args.bundle_cmd == "unpack":
-                result = unpack_bundle(args.archive, args.sha256, args.out)
+                result = unpack_bundle(args.archive, args.sha256, args.out, kind=args.kind)
             else:
-                result = verify_bundle_archive(args.archive, args.sha256)
+                result = verify_bundle_archive(args.archive, args.sha256, kind=args.kind)
 
             def human_transport():
-                print("Aggregate transport intact; original native verdicts remain declarations.")
+                print(
+                    "Aggregate transport intact; original native verdicts remain declarations."
+                    if args.kind == "aggregate"
+                    else f"{args.kind.capitalize()} transport intact; original native verdicts remain declarations."
+                )
                 print(result["scope"])
 
             return _emit(args, "bundle " + args.bundle_cmd, 0, result, human_transport)

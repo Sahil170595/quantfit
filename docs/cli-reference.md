@@ -1,5 +1,12 @@
 # CLI reference — every command, every flag
 
+The **unreleased 0.64.0 source candidate** adds `--kind aggregate|replay|screen`
+only to `bundle pack`, `bundle archive-verify` and `bundle unpack`. The default is
+`aggregate`; kinds are explicit and never autodetected. See [format, limits and
+ownership failures](portable-evidence-bundles.md#explicit-archive-kinds-source-candidate-0640).
+Public installation and the original reference below remain **0.61.0**.
+
+
 Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --control-capture PATH --control-adjudication PATH`
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 

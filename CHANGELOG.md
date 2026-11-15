@@ -13,6 +13,22 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.64.0 — Unreleased
+
+- Extend existing archive commands with an explicit aggregate/replay/screen kind.
+  Default and explicit aggregate keep the original schema-1 format and bounds;
+  replay and screen use separate closed profiles and schema-2 transport receipts.
+- Preserve original native T0, full screen populations, unknown/adverse verdicts and
+  optional untrusted producer summary bytes, with no source lookup or model work.
+  Restore screens through native nested manifest-last ownership publication;
+  an unattested newly created root is explicitly preserved on failure.
+- Fix the demonstrated retained-stage diagnostic uniformly across all kinds:
+  replaced, unattestable or unremovable stages report `archive_stage_preserved`;
+  any already linked output and uncertain stage are retained (dated 2026-11-14).
+- Extend the existing native SDK/OS CLI and four installed-profile consumers.
+  Local fictional evidence, exact boundaries and limits:
+  [validation](validation/2026-11-14-bundle-archive-kinds/README.md).
+
 ## 0.61.0 — 2026-11-14
 
 - Add optional all-or-none supplied control report/capture/adjudication roles to
