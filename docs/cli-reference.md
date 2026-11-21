@@ -380,6 +380,24 @@ scientific GO remain unverified even at exit 0. The public Phi4 candidate stays
 blocked with its original **2/20 unconfirmed over-refusal flags** and dangerous-axis
 **0/12 detector did not fire** result.
 
+### Reference assessment from a replay archive (0.70.0)
+
+Supply the expected lowercase SHA-256 with a canonical replay ZIP. The
+assessment holds and verifies its original members in memory.
+
+```bash
+quantfit bundle pack --bundle candidate-handoff --kind replay --out candidate.zip --json
+quantfit references assess --archive candidate.zip --archive-sha256 SHA256 --target target.json --out receiving-assessment.json --junit receiving-assessment.xml --json
+```
+
+Use the digest from the pack receipt in place of `SHA256`. The SDK accepts
+`assess_candidate(None, target, archive=(zip_path, sha256), out_path=..., junit_path=...)`.
+Native criteria, report digests, original T0 and overall codes carry through.
+JSON includes the ZIP digest and size under `replay_archive`, JUnit records
+them as properties, and JSON receiving labels use `archive::member`. The
+receiver creates only the explicitly requested outputs, and protects the
+archive and target from output aliases.
+
 ### Reference assessment JUnit (0.66.0)
 
 Available since **0.66.0**.

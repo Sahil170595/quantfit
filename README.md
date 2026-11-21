@@ -41,6 +41,8 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The **0.70.0 candidate** supports [reference assessment from a digest-pinned replay archive](docs/cli-reference.md#reference-assessment-from-a-replay-archive-0700).
+
 Quantfit **0.66.0** adds optional
 [JUnit for original reference-assessment criteria](docs/cli-reference.md#reference-assessment-junit-0660).
 Native decisions, JSON and mathematical work remain unchanged; unknown criteria

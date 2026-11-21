@@ -8,6 +8,7 @@ import math
 import re
 from pathlib import Path
 from typing import Any
+from zipfile import BadZipFile
 
 from quantfit import __version__
 from quantfit.bundle import MAX_MANIFEST_BYTES, _json, _read, _report
@@ -23,6 +24,7 @@ from quantfit.reproduce import (
 )
 from quantfit.resolution import MAX_REPORT_BYTES, _axes
 from quantfit.safety.gguf_arm import UNQUANTIZED_FILE_TYPES
+from quantfit.safety.retention_io import hold
 from quantfit.safety.verify import (
     DECODE_CHAT_TEMPLATE_POLICY,
     JUDGE_INPUT_CONTRACT,
@@ -346,11 +348,21 @@ def assess_report_buffers(
 
 
 def _assess_bundle_held(
-    bundle_path: str, target_bytes: bytes, verified: dict[str, Any], held: dict[str, bytes]
+    bundle_path: str,
+    target_bytes: bytes,
+    verified: dict[str, Any],
+    held: dict[str, bytes],
+    *,
+    replay_archive: dict[str, Any] | None = None,
 ) -> dict[str, object]:
     """Receiving provenance and assessment from already held inputs only."""
     buffers = tuple(held[f"replicate-{i}"] for i in range(1, 4))
-    labels = tuple(str(Path(bundle_path) / ROLES[f"replicate-{i}"]) for i in range(1, 4))
+    members = tuple(ROLES[f"replicate-{i}"] for i in range(1, 4))
+    labels = (
+        tuple(str(Path(bundle_path) / member) for member in members)
+        if replay_archive is None
+        else tuple(f"{bundle_path}::{member}" for member in members)
+    )
     result = assess_report_buffers(
         (buffers[0], buffers[1], buffers[2]), target_bytes, source_labels=(labels[0], labels[1], labels[2])
     )
@@ -372,27 +384,58 @@ def _assess_bundle_held(
             for i in range(1, 4)
         ],
     )
+    if replay_archive is not None:
+        result["replay_archive"] = replay_archive
     return result
 
 
 def assess_candidate(
-    bundle_path: str, target: str, *, out_path: str | None = None, junit_path: str | None = None
+    bundle_path: str | None,
+    target: str,
+    *,
+    archive: tuple[str, str] | None = None,
+    out_path: str | None = None,
+    junit_path: str | None = None,
 ) -> dict[str, object]:
-    """Read target once and verify one closed replay bundle once; publish a separate receiving result."""
-    phase = "unsafe_output"
+    """Verify one closed replay directory or (ZIP path, SHA-256) and assess its held bytes."""
+    phase = "invalid_bundle"
     try:
+        _require((bundle_path is None) != (archive is None), phase)
+        if archive is not None:
+            bundle_path, pin = archive
+        assert bundle_path is not None
+        phase = "unsafe_output"
         bundle_path = _canonical_receiving_path(bundle_path)
         target = _canonical_receiving_path(target)
-        plan = _prepare_reproduction_outputs(
-            [target], [bundle_path], [path for path in (out_path, junit_path) if path is not None]
+        outputs = [path for path in (out_path, junit_path) if path is not None]
+        plan = (
+            _prepare_reproduction_outputs([target], [bundle_path], outputs)
+            if archive is None
+            else _prepare_reproduction_outputs([target, bundle_path], [], outputs)
         )
         phase = "target_unreadable"
-        target_bytes = _read(Path(target), MAX_TARGET_BYTES)
+        target_input = hold(target, MAX_TARGET_BYTES) if archive is not None else None
+        target_bytes = _read(Path(target), MAX_TARGET_BYTES) if target_input is None else target_input.data
         _target(target_bytes)
         phase = "invalid_bundle"
-        verified, held = _verified_bundle(bundle_path)
-        _require(verified["integrity_verified"] is True, "invalid_bundle")
-        result = _assess_bundle_held(bundle_path, target_bytes, verified, held)
+        if archive is None:
+            verified, held = _verified_bundle(bundle_path)
+            _require(verified["integrity_verified"] is True, "invalid_bundle")
+            result = _assess_bundle_held(bundle_path, target_bytes, verified, held)
+        else:
+            from quantfit.bundle_archive_kinds import _receive
+
+            archive_input, files, receipt = _receive(bundle_path, pin, "replay")
+            held = {role: files[name] for role, name in ROLES.items()}
+            verified = {"manifest": receipt["manifest"], "original_t0": receipt["native_verification"]["original_t0"]}
+            result = _assess_bundle_held(bundle_path, target_bytes, verified, held, replay_archive=receipt["archive"])
+
+            def recheck() -> None:
+                archive_input.check()
+                assert target_input is not None
+                target_input.check()
+
+            recheck()
         buffers = []
         if out_path is not None:
             phase = "assessment_output_failure"
@@ -404,9 +447,12 @@ def assess_candidate(
             phase = "assessment_output_failure"
             buffers.append((plan.targets[-1], assessment_to_junit(result).encode("utf-8")))
         if buffers:
-            _publish_reproduction_outputs(plan, buffers)
+            if archive is None:
+                _publish_reproduction_outputs(plan, buffers)
+            else:
+                _publish_reproduction_outputs(plan, buffers, recheck=recheck)
         return result
     except ReferenceAssessmentError:
         raise
-    except (OSError, RuntimeError, RecursionError, TypeError, ValueError, KeyError):
+    except (OSError, RuntimeError, RecursionError, TypeError, ValueError, KeyError, BadZipFile):
         raise ReferenceAssessmentError(phase) from None
