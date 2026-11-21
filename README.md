@@ -41,11 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-The **unreleased 0.62.0 source candidate** adds
-[per-axis saved-screen resolution ceilings](docs/screen-resolution.md#per-axis-requirements-source-candidate-0620).
+Quantfit **0.62.0** adds
+[per-axis saved-screen resolution ceilings](docs/screen-resolution.md#per-axis-requirements-0620).
 Select one or both native axes with separate percentage-point ceilings across
-every original target and calibration choice. Public installation remains
-**0.61.0**; the examples for this new option require candidate source.
+every original target and calibration choice.
 
 Quantfit **0.61.0** adds
 [supplied positive-control evidence for saved screens](docs/saved-screen-control-evidence.md).
@@ -83,7 +82,7 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-Install with `pip install "quantfit[inspect,gguf]==0.61.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.62.0"`.
 
 The observation runs the pinned judge over the original held completions.
 Use its receipt's raw SHA-256 for the offline comparison against one complete

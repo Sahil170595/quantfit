@@ -1,18 +1,17 @@
 # CLI reference — every command, every flag
 
-The **unreleased 0.62.0 source candidate** adds repeatable
+Quantfit **0.62.0** adds repeatable
 `screen-summary --require-axis-conditional-resolution AXIS=PP` for separate
-selected-axis resolution ceilings. The public reference and installation commands
-below remain **0.61.0**; only this new option requires candidate source.
+selected-axis resolution ceilings.
 
 Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --control-capture PATH --control-adjudication PATH`
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.61.0.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.62.0.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.61.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.62.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -183,7 +182,7 @@ native analysis. No label authentication, independence, sensitivity or scientifi
 GO is established, including at exit 0. Invoke `screen-summary` directly in a
 workflow step when requiring this ceiling. See [the complete requirement contract](screen-resolution.md#explicit-requirement-0410).
 
-### Per-axis saved-screen requirements (unreleased 0.62.0 source)
+### Per-axis saved-screen requirements (0.62.0)
 
 ```bash
 quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --require-axis-conditional-resolution refusal-robustness=40 --require-axis-conditional-resolution over-refusal=30 --out receiving.json --junit receiving.xml --json
@@ -209,7 +208,7 @@ Selected mode emits a separate schema-2 requirement projection with canonical
 JUnit appends only selected requirement cases after its unchanged native prefix.
 Omitted and legacy scalar JSON, human stdout and JUnit retain their old behavior.
 There is no new analysis, reread, pooling, inference or source authentication.
-See [the complete per-axis contract](screen-resolution.md#per-axis-requirements-source-candidate-0620).
+See [the complete per-axis contract](screen-resolution.md#per-axis-requirements-0620).
 
 Quantfit 0.34.0 adds `screen-compare --reference-bundle DIR
 --candidate-bundle DIR --out comparison.json --junit comparison.xml --json`.

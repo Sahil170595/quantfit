@@ -4,8 +4,7 @@ Quantfit 0.45.0 adds [named calibration-choice sensitivity](calibration-choices.
 as a mutually exclusive input mode. The published single-calibration workflow
 below and its JSON/JUnit behavior stay unchanged.
 
-The [per-axis requirement](#per-axis-requirements-source-candidate-0620) needs
-unreleased **0.62.0 source**; public installation remains **0.61.0**.
+The [per-axis requirement](#per-axis-requirements-0620) is available since **0.62.0**.
 
 Available since quantfit 0.35.0. Native saved-screen summaries retain their existing
 behavior when the optional calibration directory is omitted.
@@ -136,9 +135,9 @@ unmet required evidence produces failures, so XML cannot look all-green when req
 calibration is absent; native missing/unmeasured cases remain their original skips.
 The overall case also fails on a native flag even when all resolution criteria pass.
 
-## Per-axis requirements (source candidate 0.62.0)
+## Per-axis requirements (0.62.0)
 
-This opt-in extension requires unreleased **0.62.0 source**. It assigns different
+This opt-in extension assigns different
 ceilings to one or both native axes, retaining every original target and every
 explicitly named calibration choice:
 

@@ -2,8 +2,6 @@
 
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
-The examples below track **unreleased quantfit 0.62.0 candidate source**; public
-installation remains **0.61.0** until that version is released.
 The action and instrument examples pin **quantfit 0.62.0**, including
 selected-axis policies. Its action default is `>=0.62.0,<0.63`; candidate validation
 uses the exact wheel through `quantfit-path`. Pin action and instrument separately

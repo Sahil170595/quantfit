@@ -1,12 +1,12 @@
 # Calibration-choice sensitivity — since 0.45.0
 
-The **unreleased 0.62.0 source candidate** also supports
-[per-axis resolution requirements](screen-resolution.md#per-axis-requirements-source-candidate-0620).
+Quantfit **0.62.0** also supports
+[per-axis resolution requirements](screen-resolution.md#per-axis-requirements-0620).
 For example, repeat `--require-axis-conditional-resolution refusal-robustness=40`
 and `--require-axis-conditional-resolution over-refusal=30` with the existing
 named variants. Every original target and every named choice contributes;
 missing late members stay missing. Omitted and legacy scalar projections remain
-unchanged. Public installation remains **0.61.0**.
+unchanged.
 
 Available since quantfit 0.45.0. The no-calibration and
 [single-calibration](screen-resolution.md) workflows are unchanged. Predeclare the supplied choices; the instrument selects
