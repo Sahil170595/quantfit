@@ -29,3 +29,12 @@ def test_installed_cli_api_chunks_collect_and_native_ingest(tmp_path, monkeypatc
     assert returned["api_unusable_subset"]["n_received_rows"] == 7
     assert result["api_all_unusable"] == {"n_rows": 18, "n_unusable": 18, "native_ingest_refused": True}
     assert result["originals_unchanged"] and not result["scientific_go"]
+
+    assert result["required_missing_exit_code"] == result["os_cli_required_exit_code"] == 4
+    assert returned["required_partial"]["missing_part_indices"] == [1, 3]
+    assert returned["required_partial"]["completeness_requirement"]["exit_code"] == 4
+    assert (
+        returned["api_unusable_complete"]["complete"]
+        and returned["api_unusable_complete"]["completeness_requirement"]["exit_code"] == 0
+    )
+    assert returned["os_cli_required_partial"]["received_part_indices"] == [2]

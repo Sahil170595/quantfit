@@ -151,3 +151,97 @@ or crash. The tool grants no new sharing permission and never deletes inputs.
 include out-of-band expected-pin refusal, native adverse roundtrip, hostile ZIPs,
 parser admission and failure/cleanup/retry controls. Four hosted installed
 profiles are extended; their execution and public release are separate evidence.
+
+
+## Explicit archive kinds (0.64.0)
+
+Available since **0.64.0**.
+Only the three existing archive commands accept `--kind aggregate|replay|screen`:
+
+```bash
+quantfit bundle pack --kind replay --bundle original-replay --out replay.zip --json
+quantfit bundle archive-verify --kind replay --archive replay.zip --sha256 FULL64 --json
+quantfit bundle unpack --kind replay --archive replay.zip --sha256 FULL64 --out new-replay --json
+quantfit bundle replay-verify --bundle new-replay --json
+quantfit bundle pack --kind screen --bundle original-screen --out screen.zip --json
+quantfit bundle archive-verify --kind screen --archive screen.zip --sha256 FULL64 --json
+quantfit bundle unpack --kind screen --archive screen.zip --sha256 FULL64 --out new-screen --json
+quantfit bundle screen-verify --bundle new-screen --json
+```
+
+The SDK adds the same keyword-only `kind="aggregate"` to `pack_bundle`,
+`verify_bundle_archive` and `unpack_bundle`. Admit an exact canonical string before
+path work. Omitted and explicit aggregate retain the original schema-1 ZIP bytes,
+result, default human output and limits. The dated ownership-diagnostic repair below
+applies to all kinds. Other kinds require explicit selection:
+wrong kinds refuse; there is no inference or fallback. Selected replay/screen results
+are a closed transport schema 2 with `kind`, raw `archive` hash/size, original
+`manifest`, `integrity_verified`, `scientific_claims_verified: false`,
+`native_verification` and `scope`.
+
+| Profile | ZIP members | Raw archive cap | Native payload cap | Maximum safe member name / central directory |
+| --- | --- | --- | --- | --- |
+| Aggregate (unchanged) | 2–5 | 32 MiB | 27,328,512 bytes | 16 / 310 bytes |
+| Replay | exactly 5 | 33 MiB | 33,619,968 bytes | 13 / 295 bytes |
+| Screen | 2–259 | 65 MiB | 64 MiB **including** outer manifest, targets, all reports and optional summary | 77 / 31,857 bytes |
+
+Replay contains original `manifest.json`, `report-1.json` through `report-3.json`
+and `t0.json`, in that canonical ZIP order. Each report/T0 is bounded to 8 MiB;
+the manifest is 64 KiB. Maximum canonical replay is exactly 33,620,488 bytes,
+including 520 bytes of stored-ZIP overhead. Native closed manifest/member hash
+validation and original `_validate`/T0 logic are reused. Producer locations remain
+unverified labels and are never read. Archive receiving T0 uses canonical relative
+report labels; native verification of the restored directory honestly relocates its
+receiving labels. Original T0 bytes, facts and adverse protocol outcomes are unchanged.
+
+Screen contains original `manifest.json`, `targets.json`, PRESENT reports in the
+original requested target order, then the optional original
+`reports/screen-summary.json`. There are no directory entries in the ZIP. Only native
+safe ASCII `reports/NAME.json` members are admitted; no arbitrary nested tree is
+transported. Outer manifest is bounded to 256 KiB, targets to 1 MiB, each report/summary
+to 8 MiB and all roles together to native 64 MiB. Maximum 256 targets and the optional
+summary produce at most 259 entries and 59,592 bytes of conservative ZIP overhead.
+Native held screen verification rebuilds all original target rows, including missing
+members and native exits 3/4. A producer summary remains untrusted bytes. All-missing
+screens still restore an empty `reports/` directory.
+
+Both profiles pin the full raw SHA256 before any ZIP parse. Final classic EOCD,
+single-disk/no-comment/count/central bounds precede `ZipFile` construction. ZIP64,
+compression, encryption, extras, descriptors, special files, duplicate/casefold names,
+traversal, backslashes, NUL/non-ASCII names, alternate headers/order/metadata, CRC/size
+mismatch, prefix polyglots and trailers refuse. Full canonical re-encoding equality
+closes alternate ZIP representations. Every declared size is admitted before large
+payload reads. Source roles are held once with native stability/ancestor guards and
+closed inventories; verification never follows original paths or rereads a directory
+through a creator.
+
+Archives retain exclusive atomic publication. Restore only into a fresh directory:
+replay uses native flat ownership; screen reuses the native nested publication with
+child identities and manifest last. Archive/ancestor checks continue through selected
+screen writes. Only attested owned files are eligible for cleanup; unknown members,
+substituted roots/reports or a successfully created but initially unattested root are
+preserved and reported as `partial_destination_preserved`. Preexisting destinations
+and failed mkdir remain ordinary categorical refusals. No recursive extraction,
+deletion, destination recreation, directory transaction, crash-durability or hostile
+concurrent-rename guarantee is offered.
+
+Outer transport exit 0 means integrity only. Native T0/screen adverse or unknown
+outcomes and all scientific/authentication caveats remain separate; no safety PASS,
+model/judge/provider work or new data assets are implied. Exact fictional SDK/OS CLI,
+maximum-boundary, adverse and ownership evidence lives under
+`validation/2026-11-14-bundle-archive-kinds/`. All four existing installed profiles
+select these controls and the native screen/CPU consumer; hosted qualification remains
+separate. No jobs, artifact uploads or dependencies are added.
+
+
+### Dated ownership-diagnostic repair (2026-11-14)
+
+A controlled real archive publication can create the final hard link and then fail
+stage cleanup because the stage was replaced, became unattestable or could not be
+unlinked. The existing implementation correctly retained the uncertain stage, but
+reported only `invalid_bundle_transport`. Quantfit 0.64.0 reports
+`archive_stage_preserved` uniformly for aggregate, replay and screen. No unknown
+stage is deleted and an already linked archive remains visible. Default aggregate
+success bytes, schema, results and caps and unrelated refusals are unchanged.
+The old nine-failure/new passing fault controls, including actual stage substitution
+and retained linked output, are recorded separately from ordinary functional passes.

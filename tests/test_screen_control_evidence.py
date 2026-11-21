@@ -420,9 +420,7 @@ def test_wrong_bound_inputs_refuse_without_publishing(tmp_path, change):
     assert output.read_bytes() == b"prior"
 
 
-@pytest.mark.parametrize(
-    "combination", ["partial", "calibrations_dir", "calibration_variants", "required_conditional_resolution_pp"]
-)
+@pytest.mark.parametrize("combination", ["partial", "calibration_variants", "required_conditional_resolution_pp"])
 def test_unsupported_combinations_refuse_before_io(tmp_path, monkeypatch, combination):
     from quantfit.saved_screen import SavedScreenError, summarize_screen
 

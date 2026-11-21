@@ -1,0 +1,2430 @@
+{
+  "generated_at": "2026-11-15T02:48:55.068975+00:00",
+  "source_candidate": "0.62.0",
+  "public_release": "0.61.0",
+  "base_commit": "7a72944421d5c7d0087c6961728e8ff9f139e1f5",
+  "base_tree": "07bf02518bc4a6b46bc0f5eb02320e07fed2ddfb",
+  "scope": "Local editable installed-source proof on fictional aggregates; clean hosted artifact qualification remains separate",
+  "environment": {
+    "python": "3.13.1 (tags/v3.13.1:0671451, Dec  3 2024, 19:06:28) [MSC v.1942 64 bit (AMD64)]",
+    "platform": "Windows",
+    "packages": {
+      "quantfit": "0.56.0",
+      "pytest": "9.0.3",
+      "ruff": "0.16.2",
+      "mypy": "2.0.0"
+    },
+    "installation": "Existing scoped environment; root editable only with --no-deps --no-build-isolation --no-cache-dir; no new dependencies"
+  },
+  "initial_red": {
+    "tests": 4,
+    "failures": 4,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 0
+  },
+  "adverse_attempts": [
+    {
+      "case": "Before witness setup",
+      "result": "before-01 stopped before native execution because caller omitted fixture parent directories; preserved, fresh before-02 succeeded"
+    },
+    {
+      "case": "No-replay spy",
+      "counts": {
+        "tests": 125,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 124
+      },
+      "cause": "Named prepared inputs call native resolution._analysis directly; changed only spy to actual shared unit of analysis"
+    },
+    {
+      "case": "Consumer assertion import",
+      "counts": {
+        "tests": 127,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "passed": 126
+      },
+      "cause": "Missing screen_to_junit import in new assertion, corrected without changing native receiving/math"
+    },
+    {
+      "case": "Required flag inventory",
+      "counts": {
+        "tests": 475,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 1,
+        "passed": 473
+      },
+      "cause": "Added the new flag row in validation-matrix section3 with candidate/pending evidence boundaries"
+    },
+    {
+      "case": "Audit invocation",
+      "result": "python -m quantfit is unsupported; actual scoped quantfit.exe audit was used"
+    },
+    {
+      "case": "Consumer typing",
+      "result": "Two diagnostics corrected with Mapping covariance and explicit non-None path admission; no cast/ignore"
+    },
+    {
+      "case": "Saved-screen typing comparison",
+      "result": "One-file shadow changed the import graph and produced5 diagnostics; preserved, then identical six-file baseline proved the3 current Any-return diagnostics unchanged"
+    },
+    {
+      "case": "Metadata encoding",
+      "cause": "Default Windows decoding corrupted non-ASCII metadata bytes and produced an audit citation warning; explicit UTF-8 evidence generation exposed it before commit",
+      "correction": "Six known metadata files regenerated from accepted Git UTF-8 with the same authorized edits; exact narrow diff verified; final audit0findings and post-correction metadata tests158passed",
+      "receipt": "qf-062-metadata-encoding-adverse.json"
+    }
+  ],
+  "selected_runtime_source": {
+    "counts": {
+      "tests": 475,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 474
+    },
+    "new_axis_controls": 67,
+    "modules": {
+      "tests.test_screen_axis_requirement": 28,
+      "tests.test_screen_axis_requirement_admission": 39,
+      "tests.test_screen_requirement": 27,
+      "tests.test_screen_requirement_cli": 4,
+      "tests.test_calibration_choices": 33,
+      "tests.test_ci_screen_requirement": 1,
+      "tests.test_ci_calibration_choices": 1,
+      "tests.test_screen_resolution": 43,
+      "tests.test_screen_resolution_cli": 6,
+      "tests.test_saved_screen": 46,
+      "tests.test_screen_control_evidence": 49,
+      "tests.test_junit_gate_screen": 18,
+      "tests.test_resolution": 22,
+      "tests.test_meta": 6,
+      "tests.test_audit": 81,
+      "tests.test_refreports": 71
+    },
+    "paths": [
+      "tests/test_screen_axis_requirement.py",
+      "tests/test_screen_axis_requirement_admission.py",
+      "tests/test_screen_requirement.py",
+      "tests/test_screen_requirement_cli.py",
+      "tests/test_calibration_choices.py",
+      "tests/test_ci_screen_requirement.py",
+      "tests/test_ci_calibration_choices.py",
+      "tests/test_screen_resolution.py",
+      "tests/test_screen_resolution_cli.py",
+      "tests/test_saved_screen.py",
+      "tests/test_screen_control_evidence.py",
+      "tests/test_junit_gate_screen.py",
+      "tests/test_resolution.py",
+      "tests/test_meta.py",
+      "tests/test_audit.py",
+      "tests/test_refreports.py"
+    ],
+    "skip": [
+      {
+        "module": "tests.test_screen_resolution",
+        "name": "test_unsafe_calibration_inventory_refuses_before_analysis[symlink]",
+        "reason": "host does not permit symbolic link creation"
+      }
+    ],
+    "native_source_unchanged_after_metadata_correction": true
+  },
+  "post_correction_metadata": {
+    "counts": {
+      "tests": 158,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 158
+    },
+    "paths": [
+      "tests/test_meta.py",
+      "tests/test_audit.py",
+      "tests/test_refreports.py"
+    ],
+    "overlap": "Included in earlier selection; not added to474 or any earlier attempt"
+  },
+  "native_reuse": {
+    "criterion": "Existing validate_requirement/_check_axis; range before conversion; measurable AND detectable_at_target_power AND inclusive native effective_mde ceiling",
+    "unit": "One native _analysis per target/calibration pair derives both axes",
+    "single_targets_and_native_analyses": 2,
+    "named_targets": 2,
+    "named_choices": 2,
+    "named_native_analyses": 4,
+    "unique_held_sources_in_each_alias_control": 5,
+    "logical_choice_work_charging_preserved": true,
+    "extra_provider_model_asset_or_inference_calls": 0,
+    "new_MDE_power_arithmetic_pooling_or_replay": false
+  },
+  "boundaries": {
+    "default_power_saved_screen": "Actual native effective_mde1.0 with unattainable target power stays exit5 at100pp",
+    "attainable_one_component": "Native mde_block(1,0.005,0.005,power=power_at(1,1,0.01)) produces attainable effective_mde1.0; _check_axis passes100pp and rejects99pp. Explicit-target native component proof, not a claim the fixed-default full pipeline produced it."
+  },
+  "original_output_parity": {
+    "source_candidate": "0.62.0",
+    "baseline_commit": "7a72944421d5c7d0087c6961728e8ff9f139e1f5",
+    "frozen_clock_and_version": {
+      "version": "0.61.0",
+      "created_utc": "2026-11-15T02:00:00+00:00"
+    },
+    "before_witness": "C:\\tmp\\sequential-delivery-20261113\\qf-062-before-02\\before.json",
+    "all_equal": true,
+    "cases": [
+      {
+        "case": "plain",
+        "omitted_and_explicit_None_equal": true,
+        "human_stdout_equal": true,
+        "JSON_stdout_equal": true,
+        "JUnit_equal": true,
+        "json_stdout_sha256": "4c4920e9a7fa52e2008f567774a843d8b133c15c334a7839efb482f4e9f52d84",
+        "human_stdout_sha256": "c90a76c12bbf7f1017271ea2e69968a4ba3ec9f67c95cfd911ff88e2749be1e5",
+        "junit_sha256": "4dcbbda5a14abea3a18942975c8c3440e3f6bef0ca40a35cc2edc2876fe5c754"
+      },
+      {
+        "case": "single-none",
+        "omitted_and_explicit_None_equal": true,
+        "human_stdout_equal": true,
+        "JSON_stdout_equal": true,
+        "JUnit_equal": true,
+        "json_stdout_sha256": "c85121498509cec2e152ce77ca6458dee39755c2d3dd3dad78b092f03a7ef079",
+        "human_stdout_sha256": "7f50198fed148f23815ee3acb32c4a66a19481a28f91491783c36a12e055f8bf",
+        "junit_sha256": "4dcbbda5a14abea3a18942975c8c3440e3f6bef0ca40a35cc2edc2876fe5c754"
+      },
+      {
+        "case": "single-scalar",
+        "omitted_and_explicit_None_equal": true,
+        "human_stdout_equal": true,
+        "JSON_stdout_equal": true,
+        "JUnit_equal": true,
+        "json_stdout_sha256": "89534914ab9c0240441133d63c721d6c2fff1fba3991d8f621f64f48d8d315f0",
+        "human_stdout_sha256": "c1e6509c31eaed12992191c0e1d9cb42ad5c5db98d046536de6a47b1ecb260ca",
+        "junit_sha256": "7a006fddd2df3f24d9eb304c684b3d1205ce141764ddc6e0073019a24799e6c2"
+      },
+      {
+        "case": "variants-none",
+        "omitted_and_explicit_None_equal": true,
+        "human_stdout_equal": true,
+        "JSON_stdout_equal": true,
+        "JUnit_equal": true,
+        "json_stdout_sha256": "58db71130ea063162fdff39095c1ba0fc83617a74df70432cc470d42346b1a12",
+        "human_stdout_sha256": "e65f1dc67e13d691f29bf69df36aa2c91acf8ffb89f09b20ebbb0ba59c972b26",
+        "junit_sha256": "ce3b4a262f454a064166da11113963a35121393c9ca6de3151c71642d0c28e82"
+      },
+      {
+        "case": "variants-scalar",
+        "omitted_and_explicit_None_equal": true,
+        "human_stdout_equal": true,
+        "JSON_stdout_equal": true,
+        "JUnit_equal": true,
+        "json_stdout_sha256": "bdc5cb1ab64b914bed109f0e34f7432ec8554837e0d4731e91c4ae29d7e8f40e",
+        "human_stdout_sha256": "e65f1dc67e13d691f29bf69df36aa2c91acf8ffb89f09b20ebbb0ba59c972b26",
+        "junit_sha256": "1ff4c8862762f3613fc3260c064b9305fb75191d534af10d15323bc99692a552"
+      }
+    ],
+    "scope": "Actual CLI/API native outputs on the exact held before inputs; source parity, not installed artifact or inference proof"
+  },
+  "source_consumers": {
+    "single_legacy_cases": 8,
+    "single_selected_cases": {
+      "one_axis": {
+        "exit_code": 0,
+        "native_exit_code": 0,
+        "native_outcome": "conditional_no_detection",
+        "requirement": {
+          "screen_resolution_requirement_schema_version": 2,
+          "selected_axes": [
+            "over-refusal"
+          ],
+          "required_conditional_resolution_by_axis_pp": {
+            "over-refusal": 40.0
+          },
+          "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+          "native_exit_code": 0,
+          "native_outcome": "conditional_no_detection",
+          "qualification_exit_code": 0,
+          "requirement_met": true,
+          "rows": [
+            {
+              "name": "clean",
+              "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+              "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+              "axes": {
+                "over-refusal": {
+                  "requirement_met": true,
+                  "measurable": true,
+                  "detectable_at_target_power": true,
+                  "effective_mde_pp": 37.37690191664753,
+                  "reasons": []
+                }
+              },
+              "requirement_met": true
+            }
+          ],
+          "reasons": [],
+          "human_labels_authenticated": false,
+          "assumptions_verified": false,
+          "independent_execution_verified": false,
+          "scientific_go": false,
+          "scope": "Explicit selected-axis conditional-resolution requirements on the same held supplied aggregates. Every original target and declared calibration choice contributes. Native outcomes, flags, evidence and analyses remain unchanged, including native adverse verdicts on unselected axes. Each selected axis requires matched evidence, a measurable denominator, attainable target power and finite effective MDE no greater than its declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO."
+        },
+        "native_axes": [
+          {
+            "name": "clean",
+            "axes": {
+              "refusal-robustness": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              },
+              "over-refusal": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              }
+            }
+          }
+        ],
+        "junit": {
+          "cases": 3,
+          "failures": 0,
+          "skips": 0
+        },
+        "inputs_unchanged": true
+      },
+      "unequal_axes": {
+        "exit_code": 0,
+        "native_exit_code": 0,
+        "native_outcome": "conditional_no_detection",
+        "requirement": {
+          "screen_resolution_requirement_schema_version": 2,
+          "selected_axes": [
+            "refusal-robustness",
+            "over-refusal"
+          ],
+          "required_conditional_resolution_by_axis_pp": {
+            "refusal-robustness": 40.0,
+            "over-refusal": 50.0
+          },
+          "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+          "native_exit_code": 0,
+          "native_outcome": "conditional_no_detection",
+          "qualification_exit_code": 0,
+          "requirement_met": true,
+          "rows": [
+            {
+              "name": "clean",
+              "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+              "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+              "axes": {
+                "refusal-robustness": {
+                  "requirement_met": true,
+                  "measurable": true,
+                  "detectable_at_target_power": true,
+                  "effective_mde_pp": 37.37690191664753,
+                  "reasons": []
+                },
+                "over-refusal": {
+                  "requirement_met": true,
+                  "measurable": true,
+                  "detectable_at_target_power": true,
+                  "effective_mde_pp": 37.37690191664753,
+                  "reasons": []
+                }
+              },
+              "requirement_met": true
+            }
+          ],
+          "reasons": [],
+          "human_labels_authenticated": false,
+          "assumptions_verified": false,
+          "independent_execution_verified": false,
+          "scientific_go": false,
+          "scope": "Explicit selected-axis conditional-resolution requirements on the same held supplied aggregates. Every original target and declared calibration choice contributes. Native outcomes, flags, evidence and analyses remain unchanged, including native adverse verdicts on unselected axes. Each selected axis requires matched evidence, a measurable denominator, attainable target power and finite effective MDE no greater than its declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO."
+        },
+        "native_axes": [
+          {
+            "name": "clean",
+            "axes": {
+              "refusal-robustness": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              },
+              "over-refusal": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              }
+            }
+          }
+        ],
+        "junit": {
+          "cases": 4,
+          "failures": 0,
+          "skips": 0
+        },
+        "inputs_unchanged": true
+      },
+      "coarse": {
+        "exit_code": 5,
+        "native_exit_code": 0,
+        "native_outcome": "conditional_no_detection",
+        "requirement": {
+          "screen_resolution_requirement_schema_version": 2,
+          "selected_axes": [
+            "over-refusal"
+          ],
+          "required_conditional_resolution_by_axis_pp": {
+            "over-refusal": 30.0
+          },
+          "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+          "native_exit_code": 0,
+          "native_outcome": "conditional_no_detection",
+          "qualification_exit_code": 5,
+          "requirement_met": false,
+          "rows": [
+            {
+              "name": "clean",
+              "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+              "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+              "axes": {
+                "over-refusal": {
+                  "requirement_met": false,
+                  "measurable": true,
+                  "detectable_at_target_power": true,
+                  "effective_mde_pp": 37.37690191664753,
+                  "reasons": [
+                    "resolution_exceeds_requirement"
+                  ]
+                }
+              },
+              "requirement_met": false
+            }
+          ],
+          "reasons": [
+            "resolution_exceeds_requirement"
+          ],
+          "human_labels_authenticated": false,
+          "assumptions_verified": false,
+          "independent_execution_verified": false,
+          "scientific_go": false,
+          "scope": "Explicit selected-axis conditional-resolution requirements on the same held supplied aggregates. Every original target and declared calibration choice contributes. Native outcomes, flags, evidence and analyses remain unchanged, including native adverse verdicts on unselected axes. Each selected axis requires matched evidence, a measurable denominator, attainable target power and finite effective MDE no greater than its declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO."
+        },
+        "native_axes": [
+          {
+            "name": "clean",
+            "axes": {
+              "refusal-robustness": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              },
+              "over-refusal": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              }
+            }
+          }
+        ],
+        "junit": {
+          "cases": 3,
+          "failures": 2,
+          "skips": 0
+        },
+        "inputs_unchanged": true
+      },
+      "saturated": {
+        "exit_code": 5,
+        "native_exit_code": 0,
+        "native_outcome": "conditional_no_detection",
+        "requirement": {
+          "screen_resolution_requirement_schema_version": 2,
+          "selected_axes": [
+            "refusal-robustness"
+          ],
+          "required_conditional_resolution_by_axis_pp": {
+            "refusal-robustness": 100.0
+          },
+          "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+          "native_exit_code": 0,
+          "native_outcome": "conditional_no_detection",
+          "qualification_exit_code": 5,
+          "requirement_met": false,
+          "rows": [
+            {
+              "name": "clean",
+              "native_report_sha256": "0e072f5bf1e6cdab05f58b9512e220c8b4f761e0dcc6754ebac56ce593ae87c5",
+              "calibration_sha256": "7735f44cc3e23bced0264d4bf170e44a6dcd612c026fadc4fee7376b8d6dcaea",
+              "axes": {
+                "refusal-robustness": {
+                  "requirement_met": false,
+                  "measurable": true,
+                  "detectable_at_target_power": false,
+                  "effective_mde_pp": 100.0,
+                  "reasons": [
+                    "target_power_unattainable"
+                  ]
+                }
+              },
+              "requirement_met": false
+            }
+          ],
+          "reasons": [
+            "target_power_unattainable"
+          ],
+          "human_labels_authenticated": false,
+          "assumptions_verified": false,
+          "independent_execution_verified": false,
+          "scientific_go": false,
+          "scope": "Explicit selected-axis conditional-resolution requirements on the same held supplied aggregates. Every original target and declared calibration choice contributes. Native outcomes, flags, evidence and analyses remain unchanged, including native adverse verdicts on unselected axes. Each selected axis requires matched evidence, a measurable denominator, attainable target power and finite effective MDE no greater than its declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO."
+        },
+        "native_axes": [
+          {
+            "name": "clean",
+            "axes": {
+              "refusal-robustness": {
+                "n_at_risk": 20,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 1.0,
+                "detectable_at_target_power": false
+              },
+              "over-refusal": {
+                "n_at_risk": 20,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 1.0,
+                "detectable_at_target_power": false
+              }
+            }
+          }
+        ],
+        "junit": {
+          "cases": 3,
+          "failures": 2,
+          "skips": 0
+        },
+        "inputs_unchanged": true
+      },
+      "unselected_native_flag": {
+        "exit_code": 3,
+        "native_exit_code": 3,
+        "native_outcome": "flags_detected",
+        "requirement": {
+          "screen_resolution_requirement_schema_version": 2,
+          "selected_axes": [
+            "over-refusal"
+          ],
+          "required_conditional_resolution_by_axis_pp": {
+            "over-refusal": 40.0
+          },
+          "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+          "native_exit_code": 3,
+          "native_outcome": "flags_detected",
+          "qualification_exit_code": 3,
+          "requirement_met": false,
+          "rows": [
+            {
+              "name": "clean",
+              "native_report_sha256": "83f00cc3708ec64958ffd455abe06d69fdc957afe5c0ff2632816ce8795f2818",
+              "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+              "axes": {
+                "over-refusal": {
+                  "requirement_met": true,
+                  "measurable": true,
+                  "detectable_at_target_power": true,
+                  "effective_mde_pp": 37.37690191664753,
+                  "reasons": []
+                }
+              },
+              "requirement_met": true
+            }
+          ],
+          "reasons": [
+            "native_flags_detected"
+          ],
+          "human_labels_authenticated": false,
+          "assumptions_verified": false,
+          "independent_execution_verified": false,
+          "scientific_go": false,
+          "scope": "Explicit selected-axis conditional-resolution requirements on the same held supplied aggregates. Every original target and declared calibration choice contributes. Native outcomes, flags, evidence and analyses remain unchanged, including native adverse verdicts on unselected axes. Each selected axis requires matched evidence, a measurable denominator, attainable target power and finite effective MDE no greater than its declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO."
+        },
+        "native_axes": [
+          {
+            "name": "clean",
+            "axes": {
+              "refusal-robustness": {
+                "n_at_risk": 60,
+                "flagged_flips": 1,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              },
+              "over-refusal": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              }
+            }
+          }
+        ],
+        "junit": {
+          "cases": 3,
+          "failures": 2,
+          "skips": 0
+        },
+        "inputs_unchanged": true
+      },
+      "unselected_native_incomplete": {
+        "exit_code": 4,
+        "native_exit_code": 4,
+        "native_outcome": "incomplete_evidence",
+        "requirement": {
+          "screen_resolution_requirement_schema_version": 2,
+          "selected_axes": [
+            "over-refusal"
+          ],
+          "required_conditional_resolution_by_axis_pp": {
+            "over-refusal": 40.0
+          },
+          "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+          "native_exit_code": 4,
+          "native_outcome": "incomplete_evidence",
+          "qualification_exit_code": 4,
+          "requirement_met": false,
+          "rows": [
+            {
+              "name": "clean",
+              "native_report_sha256": "e6a375335e7a6cb5d9b18fabe6c8d08bb2a4762ad6f3a274c6738f487689b2e7",
+              "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+              "axes": {
+                "over-refusal": {
+                  "requirement_met": true,
+                  "measurable": true,
+                  "detectable_at_target_power": true,
+                  "effective_mde_pp": 37.37690191664753,
+                  "reasons": []
+                }
+              },
+              "requirement_met": true
+            }
+          ],
+          "reasons": [
+            "native_evidence_incomplete"
+          ],
+          "human_labels_authenticated": false,
+          "assumptions_verified": false,
+          "independent_execution_verified": false,
+          "scientific_go": false,
+          "scope": "Explicit selected-axis conditional-resolution requirements on the same held supplied aggregates. Every original target and declared calibration choice contributes. Native outcomes, flags, evidence and analyses remain unchanged, including native adverse verdicts on unselected axes. Each selected axis requires matched evidence, a measurable denominator, attainable target power and finite effective MDE no greater than its declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO."
+        },
+        "native_axes": [
+          {
+            "name": "clean",
+            "axes": {
+              "refusal-robustness": {
+                "n_at_risk": 0,
+                "flagged_flips": 0,
+                "measurable": false,
+                "effective_mde": 1.0,
+                "detectable_at_target_power": false
+              },
+              "over-refusal": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              }
+            }
+          }
+        ],
+        "junit": {
+          "cases": 3,
+          "failures": 1,
+          "skips": 1
+        },
+        "inputs_unchanged": true
+      },
+      "late_missing": {
+        "exit_code": 4,
+        "native_exit_code": 0,
+        "native_outcome": "conditional_no_detection",
+        "requirement": {
+          "screen_resolution_requirement_schema_version": 2,
+          "selected_axes": [
+            "over-refusal"
+          ],
+          "required_conditional_resolution_by_axis_pp": {
+            "over-refusal": 40.0
+          },
+          "manifest_sha256": "331da1fcc395bfa51e5fda5d273c5a41e0a934314c7a64dc57ecc560425cdf18",
+          "native_exit_code": 0,
+          "native_outcome": "conditional_no_detection",
+          "qualification_exit_code": 4,
+          "requirement_met": false,
+          "rows": [
+            {
+              "name": "clean",
+              "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+              "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+              "axes": {
+                "over-refusal": {
+                  "requirement_met": true,
+                  "measurable": true,
+                  "detectable_at_target_power": true,
+                  "effective_mde_pp": 37.37690191664753,
+                  "reasons": []
+                }
+              },
+              "requirement_met": true
+            },
+            {
+              "name": "flagged",
+              "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+              "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+              "axes": {
+                "over-refusal": {
+                  "requirement_met": true,
+                  "measurable": true,
+                  "detectable_at_target_power": true,
+                  "effective_mde_pp": 37.37690191664753,
+                  "reasons": []
+                }
+              },
+              "requirement_met": true
+            },
+            {
+              "name": "unmeasured",
+              "native_report_sha256": "662aa996ed3e66bff3a88616678c6d873ee8e168e501802234dc6cc267e66e89",
+              "calibration_sha256": null,
+              "axes": {
+                "over-refusal": {
+                  "requirement_met": false,
+                  "measurable": null,
+                  "detectable_at_target_power": null,
+                  "effective_mde_pp": null,
+                  "reasons": [
+                    "calibration_missing"
+                  ]
+                }
+              },
+              "requirement_met": false
+            }
+          ],
+          "reasons": [
+            "calibration_missing"
+          ],
+          "human_labels_authenticated": false,
+          "assumptions_verified": false,
+          "independent_execution_verified": false,
+          "scientific_go": false,
+          "scope": "Explicit selected-axis conditional-resolution requirements on the same held supplied aggregates. Every original target and declared calibration choice contributes. Native outcomes, flags, evidence and analyses remain unchanged, including native adverse verdicts on unselected axes. Each selected axis requires matched evidence, a measurable denominator, attainable target power and finite effective MDE no greater than its declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO."
+        },
+        "native_axes": [
+          {
+            "name": "clean",
+            "axes": {
+              "refusal-robustness": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              },
+              "over-refusal": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              }
+            }
+          },
+          {
+            "name": "flagged",
+            "axes": {
+              "refusal-robustness": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              },
+              "over-refusal": {
+                "n_at_risk": 60,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 0.3737690191664753,
+                "detectable_at_target_power": true
+              }
+            }
+          },
+          {
+            "name": "unmeasured",
+            "axes": null
+          }
+        ],
+        "junit": {
+          "cases": 7,
+          "failures": 2,
+          "skips": 0
+        },
+        "inputs_unchanged": true
+      },
+      "retained_schema3": {
+        "exit_code": 5,
+        "native_exit_code": 0,
+        "native_outcome": "conditional_no_detection",
+        "requirement": {
+          "screen_resolution_requirement_schema_version": 2,
+          "selected_axes": [
+            "refusal-robustness"
+          ],
+          "required_conditional_resolution_by_axis_pp": {
+            "refusal-robustness": 100.0
+          },
+          "manifest_sha256": "37bf318647e8112fc61b8392da77196f0073008bc85a74c680f3421cd9d6a4fb",
+          "native_exit_code": 0,
+          "native_outcome": "conditional_no_detection",
+          "qualification_exit_code": 5,
+          "requirement_met": false,
+          "rows": [
+            {
+              "name": "clean",
+              "native_report_sha256": "ea3a14a62dfeae58f0508ea8df87a10d2e8e224145a9d8baf52d667ef265054d",
+              "calibration_sha256": "f7cc31a1a527a35fa2d934c42244870493b5c9539a50ce20879611d62ba6176c",
+              "axes": {
+                "refusal-robustness": {
+                  "requirement_met": false,
+                  "measurable": true,
+                  "detectable_at_target_power": false,
+                  "effective_mde_pp": 100.0,
+                  "reasons": [
+                    "target_power_unattainable"
+                  ]
+                }
+              },
+              "requirement_met": false
+            }
+          ],
+          "reasons": [
+            "target_power_unattainable"
+          ],
+          "human_labels_authenticated": false,
+          "assumptions_verified": false,
+          "independent_execution_verified": false,
+          "scientific_go": false,
+          "scope": "Explicit selected-axis conditional-resolution requirements on the same held supplied aggregates. Every original target and declared calibration choice contributes. Native outcomes, flags, evidence and analyses remain unchanged, including native adverse verdicts on unselected axes. Each selected axis requires matched evidence, a measurable denominator, attainable target power and finite effective MDE no greater than its declared percentage-point ceiling. No pooling, authenticated labels/assumptions, independence, source/weight authenticity, sensitivity or scientific GO."
+        },
+        "native_axes": [
+          {
+            "name": "clean",
+            "axes": {
+              "refusal-robustness": {
+                "n_at_risk": 12,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 1.0,
+                "detectable_at_target_power": false
+              },
+              "over-refusal": {
+                "n_at_risk": 28,
+                "flagged_flips": 0,
+                "measurable": true,
+                "effective_mde": 1.0,
+                "detectable_at_target_power": false
+              }
+            }
+          }
+        ],
+        "junit": {
+          "cases": 3,
+          "failures": 2,
+          "skips": 0
+        },
+        "inputs_unchanged": true
+      }
+    },
+    "choice_legacy_cases": 12,
+    "choice_selected_cases": [
+      {
+        "interface": "cli",
+        "scenario": "positive",
+        "exit_code": 0,
+        "native_exit_code": 0,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 4,
+          "complete": true,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 57600,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "cli",
+        "scenario": "unequal_axes",
+        "exit_code": 0,
+        "native_exit_code": 0,
+        "selected_axes": [
+          "refusal-robustness",
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0,
+          "refusal-robustness": 50.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "refusal-robustness": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              },
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "refusal-robustness": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              },
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "refusal-robustness": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              },
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "refusal-robustness": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              },
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 4,
+          "complete": true,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 57600,
+        "junit_cases": 11,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "cli",
+        "scenario": "sensitivity",
+        "exit_code": 5,
+        "native_exit_code": 0,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c5f69d732873783537c20f265fc3981260be68cdb1a25133f507b6e866f2f858",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": true,
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "reasons": [
+                  "target_power_unattainable",
+                  "resolution_exceeds_requirement"
+                ]
+              }
+            },
+            "requirement_met": false
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "6f24640dce5d19002f60a2818462ac10418e2d2f2ac92b88c5f3fe8eb3e63db3",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": true,
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "reasons": [
+                  "target_power_unattainable",
+                  "resolution_exceeds_requirement"
+                ]
+              }
+            },
+            "requirement_met": false
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 4,
+          "complete": true,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 57600,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "cli",
+        "scenario": "missing",
+        "exit_code": 4,
+        "native_exit_code": 0,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": null,
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": null,
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "reasons": [
+                  "calibration_missing"
+                ]
+              }
+            },
+            "requirement_met": false
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": null,
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": null,
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "reasons": [
+                  "calibration_missing"
+                ]
+              }
+            },
+            "requirement_met": false
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 2,
+          "complete": false,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 28800,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "cli",
+        "scenario": "late_missing",
+        "exit_code": 4,
+        "native_exit_code": 0,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": null,
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": null,
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "reasons": [
+                  "calibration_missing"
+                ]
+              }
+            },
+            "requirement_met": false
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 3,
+          "complete": false,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 43200,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "cli",
+        "scenario": "native_flags",
+        "exit_code": 3,
+        "native_exit_code": 3,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "83f00cc3708ec64958ffd455abe06d69fdc957afe5c0ff2632816ce8795f2818",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "83f00cc3708ec64958ffd455abe06d69fdc957afe5c0ff2632816ce8795f2818",
+            "calibration_sha256": "c5f69d732873783537c20f265fc3981260be68cdb1a25133f507b6e866f2f858",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": true,
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "reasons": [
+                  "target_power_unattainable",
+                  "resolution_exceeds_requirement"
+                ]
+              }
+            },
+            "requirement_met": false
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "6f24640dce5d19002f60a2818462ac10418e2d2f2ac92b88c5f3fe8eb3e63db3",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": true,
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "reasons": [
+                  "target_power_unattainable",
+                  "resolution_exceeds_requirement"
+                ]
+              }
+            },
+            "requirement_met": false
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 4,
+          "complete": true,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 57600,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "cli",
+        "scenario": "native_incomplete",
+        "exit_code": 4,
+        "native_exit_code": 4,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "e6a375335e7a6cb5d9b18fabe6c8d08bb2a4762ad6f3a274c6738f487689b2e7",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "e6a375335e7a6cb5d9b18fabe6c8d08bb2a4762ad6f3a274c6738f487689b2e7",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 4,
+          "complete": true,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 57600,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "api",
+        "scenario": "positive",
+        "exit_code": 0,
+        "native_exit_code": 0,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 4,
+          "complete": true,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 57600,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "api",
+        "scenario": "unequal_axes",
+        "exit_code": 0,
+        "native_exit_code": 0,
+        "selected_axes": [
+          "refusal-robustness",
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0,
+          "refusal-robustness": 50.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "refusal-robustness": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              },
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "refusal-robustness": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              },
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "refusal-robustness": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              },
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "refusal-robustness": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              },
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 4,
+          "complete": true,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 57600,
+        "junit_cases": 11,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "api",
+        "scenario": "sensitivity",
+        "exit_code": 5,
+        "native_exit_code": 0,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c5f69d732873783537c20f265fc3981260be68cdb1a25133f507b6e866f2f858",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": true,
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "reasons": [
+                  "target_power_unattainable",
+                  "resolution_exceeds_requirement"
+                ]
+              }
+            },
+            "requirement_met": false
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "6f24640dce5d19002f60a2818462ac10418e2d2f2ac92b88c5f3fe8eb3e63db3",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": true,
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "reasons": [
+                  "target_power_unattainable",
+                  "resolution_exceeds_requirement"
+                ]
+              }
+            },
+            "requirement_met": false
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 4,
+          "complete": true,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 57600,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "api",
+        "scenario": "missing",
+        "exit_code": 4,
+        "native_exit_code": 0,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": null,
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": null,
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "reasons": [
+                  "calibration_missing"
+                ]
+              }
+            },
+            "requirement_met": false
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": null,
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": null,
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "reasons": [
+                  "calibration_missing"
+                ]
+              }
+            },
+            "requirement_met": false
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 2,
+          "complete": false,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 28800,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "api",
+        "scenario": "late_missing",
+        "exit_code": 4,
+        "native_exit_code": 0,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "75f79f1687fa8d5ce2f476c479d8b9a7287cc5bf5eb85022c344de4549bab68f",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": null,
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": null,
+                "detectable_at_target_power": null,
+                "effective_mde_pp": null,
+                "reasons": [
+                  "calibration_missing"
+                ]
+              }
+            },
+            "requirement_met": false
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 3,
+          "complete": false,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 43200,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "api",
+        "scenario": "native_flags",
+        "exit_code": 3,
+        "native_exit_code": 3,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "83f00cc3708ec64958ffd455abe06d69fdc957afe5c0ff2632816ce8795f2818",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "83f00cc3708ec64958ffd455abe06d69fdc957afe5c0ff2632816ce8795f2818",
+            "calibration_sha256": "c5f69d732873783537c20f265fc3981260be68cdb1a25133f507b6e866f2f858",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": true,
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "reasons": [
+                  "target_power_unattainable",
+                  "resolution_exceeds_requirement"
+                ]
+              }
+            },
+            "requirement_met": false
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "6f24640dce5d19002f60a2818462ac10418e2d2f2ac92b88c5f3fe8eb3e63db3",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": false,
+                "measurable": true,
+                "detectable_at_target_power": false,
+                "effective_mde_pp": 100.0,
+                "reasons": [
+                  "target_power_unattainable",
+                  "resolution_exceeds_requirement"
+                ]
+              }
+            },
+            "requirement_met": false
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 4,
+          "complete": true,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 57600,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      },
+      {
+        "interface": "api",
+        "scenario": "native_incomplete",
+        "exit_code": 4,
+        "native_exit_code": 4,
+        "selected_axes": [
+          "over-refusal"
+        ],
+        "requirements": {
+          "over-refusal": 40.0
+        },
+        "rows": [
+          {
+            "name": "clean",
+            "variant": "first",
+            "native_report_sha256": "e6a375335e7a6cb5d9b18fabe6c8d08bb2a4762ad6f3a274c6738f487689b2e7",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "clean",
+            "variant": "second",
+            "native_report_sha256": "e6a375335e7a6cb5d9b18fabe6c8d08bb2a4762ad6f3a274c6738f487689b2e7",
+            "calibration_sha256": "c1929bc8e3ae05df734d485951d9c5a3e52ff07ac828564e1fc019d39753f162",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "first",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          },
+          {
+            "name": "flagged",
+            "variant": "second",
+            "native_report_sha256": "555bf1bea2a1b76d62c2f3e3a2975c86728d55d79c8da883cfd9b7875254b3b5",
+            "calibration_sha256": "df36e7a7bd98b028a5a138214585ad9a031d5c210dfdc959d2c5c630de0f786c",
+            "axes": {
+              "over-refusal": {
+                "requirement_met": true,
+                "measurable": true,
+                "detectable_at_target_power": true,
+                "effective_mde_pp": 37.37690191664753,
+                "reasons": []
+              }
+            },
+            "requirement_met": true
+          }
+        ],
+        "coverage": {
+          "expected": 4,
+          "expected_targets": 2,
+          "expected_variants": 2,
+          "analyzed": 4,
+          "complete": true,
+          "unit": "target_variant_pairs"
+        },
+        "analysis_work_units": 57600,
+        "junit_cases": 7,
+        "native_prefix_cases": 2,
+        "inputs_unchanged": true,
+        "scientific_go": false
+      }
+    ],
+    "retained_calibration_schema": 3,
+    "original_sheet_unavailable_for_retained": true,
+    "provider_model_asset_traps": true,
+    "hosted_profiles": "Existing Ubuntu/Windows x wheel/sdist; no new jobs/uploads; clean installed artifact acceptance pending"
+  },
+  "static": {
+    "ruff": "Exact required paths passed;296files formatted",
+    "typing": "Five owned files passed strict skip-import mypy;3 saved_screen Any-return diagnostics match accepted main at identical six-file shadow scope. Canonical hosted typing remains required.",
+    "repository_audit": {
+      "exit_code": 0,
+      "findings": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "locked_graph": "UV0.13.7 lock --check --offline --no-cache --directory tools/ci passed,174packages; lock and independent validation project byte-identical; no project-root lock exists",
+    "help": "Actual scoped screen-summary --help exposes the repeatable AXIS=PP option"
+  },
+  "metadata": {
+    "load_bearing_fields_only": true,
+    "CFF_date_released": "Omitted for unreleased candidate",
+    "public_README_and_central_CLI_install": "0.61.0",
+    "historical_JSON_samples_validation_and_spec_decisions": "Preserved"
+  },
+  "limits": "Fictional aggregate receiving, not authenticated labels/assumptions/independence/source or weight authenticity/sensitivity/model or judge execution/provider behavior/safety certification/scientific GO",
+  "source": {
+    "quantfit/screen_requirement.py": {
+      "raw_sha256": "e75f218fe164a3fe59105bb01af54963322ee5d1d4685441c80d6c8767e996e7",
+      "git_blob": "16d072697ac24e1bd272b2ef3a3b80236f2813ae"
+    },
+    "quantfit/screen_resolution.py": {
+      "raw_sha256": "ec4ad5eb2ceb29e2b617b6a0a5b28586c6e7f080e4e35957ca32e7ad2480e6ad",
+      "git_blob": "179b6a3f7b0b42b8754bd8e88392e774ea01392f"
+    },
+    "quantfit/calibration_choices.py": {
+      "raw_sha256": "9c228a809db4343e5446ab64b42d3e006d0ca023fbdf03ec8cc612732811b714",
+      "git_blob": "3336535f408819da0402107a2793f93ee12c1f0e"
+    },
+    "quantfit/saved_screen.py": {
+      "raw_sha256": "60c6e6968219c977448ba0b8a495a210f099bc9e03769c7a2d26c19a57a7129b",
+      "git_blob": "a95a379eaba6758a2d3d88d3b0c46193c8f431c8"
+    },
+    "quantfit/cli.py": {
+      "raw_sha256": "8bb2a91b3edbe601ceb14c1cff5d145052832b81c64f231ed9932a9162766de6",
+      "git_blob": "605d2eea5c6d53f7184c18e6c34dbb396fe40790"
+    },
+    "tools/ci_screen_requirement.py": {
+      "raw_sha256": "cc5f0e659ec96e231e419019f4fad6c9651f0490679912caa415c52f8e74a216",
+      "git_blob": "500d04b2476c50fce4566adf346dc808e34f9317"
+    },
+    "tools/ci_calibration_choices.py": {
+      "raw_sha256": "fba6305cc6794b52df7051cb28e96d72af718ec1e333817002fe9b06bf28e0f0",
+      "git_blob": "5036ccb1280516d3fbe2d1c13998fe0d5b09eaf1"
+    },
+    "tests/test_screen_axis_requirement.py": {
+      "raw_sha256": "f04af45af6a58c54c7a196dd122ad1d8bd6acbf534815dcab5f132be7383a0e1",
+      "git_blob": "e97311542fe29d3ca245128cc6408d8da6dcb878"
+    },
+    "tests/test_screen_axis_requirement_admission.py": {
+      "raw_sha256": "141d54c14ce054ca14e1aeecda280f9e72a317079f26874c4e5f8af0817d3471",
+      "git_blob": "c3c458b9924141a77a615869ee30eb20bb263151"
+    },
+    "tests/test_ci_screen_requirement.py": {
+      "raw_sha256": "d5bda659a075b772f902def98831ff6e4feb76f42fa3cef89b4ad89e56b89c52",
+      "git_blob": "3fbf7db3809c59d0625e15a4400b7b44d0f9eb7c"
+    },
+    "tests/test_ci_calibration_choices.py": {
+      "raw_sha256": "b6be6055c3a42b3cb8d8de44795da0277eeb49dd459b048eeb1d895cd05e4a83",
+      "git_blob": "783b78fa92d7e24848bf73f911e6e236ca1e97db"
+    }
+  },
+  "pending": [
+    "Independent source review",
+    "Exact-head full hosted test/numerical matrix",
+    "Canonical typing/audit/CodeQL",
+    "Four clean installed wheel/sdist profiles and all remaining required hosted jobs"
+  ],
+  "commands": [
+    [
+      "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_screen_axis_requirement.py",
+      "tests/test_screen_axis_requirement_admission.py",
+      "tests/test_screen_requirement.py",
+      "tests/test_screen_requirement_cli.py",
+      "tests/test_calibration_choices.py",
+      "tests/test_ci_screen_requirement.py",
+      "tests/test_ci_calibration_choices.py",
+      "tests/test_screen_resolution.py",
+      "tests/test_screen_resolution_cli.py",
+      "tests/test_saved_screen.py",
+      "tests/test_screen_control_evidence.py",
+      "tests/test_junit_gate_screen.py",
+      "tests/test_resolution.py",
+      "tests/test_meta.py",
+      "tests/test_audit.py",
+      "tests/test_refreports.py",
+      "--basetemp",
+      "C:\\tmp\\sequential-delivery-20261113\\qf-062-final-02",
+      "--junitxml",
+      "C:\\tmp\\sequential-delivery-20261113\\qf-062-final2.xml"
+    ],
+    [
+      "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_meta.py",
+      "tests/test_audit.py",
+      "tests/test_refreports.py",
+      "--basetemp",
+      "C:\\tmp\\sequential-delivery-20261113\\qf-062-metadata-final-01",
+      "--junitxml",
+      "C:\\tmp\\sequential-delivery-20261113\\qf-062-metadata-final.xml"
+    ],
+    [
+      "C:\\tmp\\qf-env-20261113\\Scripts\\quantfit.exe",
+      "audit",
+      "--json"
+    ],
+    [
+      "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "ruff",
+      "check",
+      "quantfit",
+      "tests",
+      "tools"
+    ],
+    [
+      "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "ruff",
+      "format",
+      "--check",
+      "quantfit",
+      "tests",
+      "tools/ci_*.py",
+      "tools/ci_gate_fixture",
+      "tools/ci_corpus_fixture"
+    ],
+    [
+      "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "mypy",
+      "--strict",
+      "--follow-imports",
+      "skip",
+      "--cache-dir",
+      "C:\\tmp\\sequential-delivery-20261113\\qf-062-type-final-01",
+      "quantfit/screen_requirement.py",
+      "quantfit/screen_resolution.py",
+      "quantfit/calibration_choices.py",
+      "tools/ci_screen_requirement.py",
+      "tools/ci_calibration_choices.py"
+    ],
+    [
+      "C:\\tmp\\sequential-delivery-20261113\\qf-uv0137\\bin\\uv.exe",
+      "lock",
+      "--check",
+      "--offline",
+      "--no-cache",
+      "--directory",
+      "tools/ci"
+    ]
+  ],
+  "actual_consumer_calls": [
+    {
+      "entry": "tools.ci_screen_requirement.run",
+      "checkout": "C:\\tmp\\qf-delivery-20261113",
+      "root": "C:\\tmp\\sequential-delivery-20261113\\qf-062-consumer-01\\requirements"
+    },
+    {
+      "entry": "tools.ci_calibration_choices.run",
+      "checkout": "C:\\tmp\\qf-delivery-20261113",
+      "root": "C:\\tmp\\sequential-delivery-20261113\\qf-062-consumer-01\\choices"
+    }
+  ]
+}

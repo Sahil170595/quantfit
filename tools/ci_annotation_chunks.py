@@ -5,9 +5,12 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
+from xml.etree import ElementTree as ET
 
 
 def run(checkout: Path, root: Path) -> dict[str, Any]:
@@ -55,6 +58,57 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
     assert partial["result"]["received_part_indices"] == [2, 4]
     assert partial["result"]["missing_part_indices"] == [1, 3]
     assert partial["result"]["n_received_rows"] == 8 and partial["result"]["complete"] is False
+    required_xml = root / "required-partial.xml"
+    required_args = [
+        *validate_args,
+        "--part",
+        f"4={parts[3]}",
+        "--part",
+        f"2={parts[1]}",
+        "--require-complete",
+        "--out",
+        str(root / "required-partial.json"),
+        "--junit",
+        str(required_xml),
+    ]
+    required_code, required_partial, stderr = helper.invoke(required_args)
+    assert required_code == 4 and not stderr
+    assert required_partial["result"]["completeness_requirement"]["exit_code"] == 4
+    assert [case.get("name") for case in ET.fromstring(required_xml.read_bytes()).iter("testcase")] == [
+        "overall",
+        "1",
+        "2",
+        "3",
+        "4",
+    ]
+    # Actual OS subprocess, distinct from this consumer's in-process dispatch seam.
+    os_cli = subprocess.run(
+        [
+            sys.executable,
+            "-B",
+            "-m",
+            "quantfit.cli",
+            *validate_args,
+            "--part",
+            f"2={parts[1]}",
+            "--require-complete",
+            "--out",
+            str(root / "os-cli-required.json"),
+            "--junit",
+            str(root / "os-cli-required.xml"),
+            "--json",
+        ],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=False,
+        timeout=30,
+    )
+    assert os_cli.returncode == 4 and not os_cli.stderr
+    os_required = json.loads(os_cli.stdout)
+    assert os_required["result"]["completeness_requirement"]["exit_code"] == os_required["exit_code"] == 4
+    assert os_required["result"] == json.loads((root / "os-cli-required.json").read_bytes())
     all_args = [*validate_args, "--out", str(root / "complete-inspection.json")]
     for index in reversed(range(len(parts))):
         all_args += ["--part", f"{index + 1}={parts[index]}"]
@@ -131,6 +185,17 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
         str(sheet), str(key), str(api_dir / "annotation.chunkmanifest.json"), ((2, str(api_parts[1])),)
     )
     assert api_inspected["complete"] is False and api_inspected["n_received_rows"] == 7
+    api_complete = validate_annotation_returns(
+        str(sheet),
+        str(key),
+        str(api_dir / "annotation.chunkmanifest.json"),
+        tuple((index + 1, str(part)) for index, part in reversed(list(enumerate(api_parts)))),
+        require_complete=True,
+        junit_path=str(root / "api-all-unusable.xml"),
+    )
+    assert api_complete["complete"] and api_complete["completeness_requirement"]["exit_code"] == 0
+    assert len(list(ET.fromstring((root / "api-all-unusable.xml").read_bytes()).iter("testcase"))) == len(api_parts) + 1
+
     api_full = root / "api-collected.labels.csv"
     api_collected = collect_annotation_chunks(
         str(sheet),
@@ -151,7 +216,24 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
         raise AssertionError("native all-unusable calibration was not refused")
     assert not (root / "empty-calibration.json").exists()
     assert [path.read_bytes() for path in (sheet, key)] == original
-    public = json.dumps([prepared, partial, inspected, collected, api_prepared, api_inspected, api_collected])
+    public = (
+        json.dumps(
+            [
+                prepared,
+                partial,
+                inspected,
+                collected,
+                api_prepared,
+                api_inspected,
+                api_collected,
+                required_partial,
+                os_required,
+                api_complete,
+            ]
+        )
+        + required_xml.read_text(encoding="utf-8")
+        + (root / "api-all-unusable.xml").read_text(encoding="utf-8")
+    )
     private = json.loads(key.read_bytes())
     assert "PRIVATE_" not in public and private["salt"] not in public and str(root) not in public
     assert all(ident not in public for ident in private["ids"])
@@ -164,8 +246,13 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
             "partial": partial["result"],
             "complete": inspected["result"],
             "api_unusable_subset": api_inspected,
+            "required_partial": required_partial["result"],
+            "api_unusable_complete": api_complete,
+            "os_cli_required_partial": os_required["result"],
         },
         "missing_part_exit_code": bad_code,
+        "required_missing_exit_code": required_code,
+        "os_cli_required_exit_code": os_cli.returncode,
         "native_ingest_exit_code": code,
         "native_counts": {
             name: native[name] for name in ("calibration_schema", "n_labeled", "n_unusable", "unmeasured_arms")

@@ -6,6 +6,7 @@ import contextlib
 import importlib.util
 import io
 import json
+from collections.abc import Mapping
 from pathlib import Path
 from types import ModuleType
 from typing import Any, cast
@@ -69,7 +70,12 @@ def fixture(
 
 
 def invoke(
-    paths: tuple[Path, Path, Path], *, ceiling: float | None = None, out: Path | None = None, junit: Path | None = None
+    paths: tuple[Path, Path, Path],
+    *,
+    ceiling: float | None = None,
+    by_axis: Mapping[str, float] | None = None,
+    out: Path | None = None,
+    junit: Path | None = None,
 ) -> tuple[int, dict[str, Any], str]:
     from quantfit.cli import main
 
@@ -86,6 +92,9 @@ def invoke(
     ]
     if ceiling is not None:
         args.extend(["--require-conditional-resolution", str(ceiling)])
+    if by_axis is not None:
+        for axis, value in by_axis.items():
+            args.extend(["--require-axis-conditional-resolution", f"{axis}={value}"])
     if out is not None:
         args.extend(["--out", str(out)])
     if junit is not None:
@@ -98,12 +107,21 @@ def invoke(
     return code, document, stderr.getvalue()
 
 
-def _case(paths: tuple[Path, Path, Path], ceiling: float, expected: int) -> dict[str, Any]:
+def _case(
+    paths: tuple[Path, Path, Path],
+    ceiling: float | None,
+    expected: int,
+    *,
+    by_axis: Mapping[str, float] | None = None,
+) -> dict[str, Any]:
+    from quantfit.junit import screen_to_junit
+
     before = {path: path.read_bytes() for path in paths[0].parent.rglob("*.json")}
     native_code, native, stderr = invoke(paths)
     assert not stderr and "conditional_resolution_requirement" not in native["result"]
-    out, xml = paths[0].parent / "receiving.json", paths[0].parent / "receiving.xml"
-    code, document, stderr = invoke(paths, ceiling=ceiling, out=out, junit=xml)
+    stem = "axis-receiving" if by_axis is not None else "receiving"
+    out, xml = paths[0].parent / (stem + ".json"), paths[0].parent / (stem + ".xml")
+    code, document, stderr = invoke(paths, ceiling=ceiling, by_axis=by_axis, out=out, junit=xml)
     assert not stderr and code == expected and document["result"] == json.loads(out.read_bytes())
     result = document["result"]
     requirement = result["conditional_resolution_requirement"]
@@ -111,7 +129,15 @@ def _case(paths: tuple[Path, Path, Path], ceiling: float, expected: int) -> dict
     for field in ("manifest", "report_bindings", "rows", "by_stratum", "coverage", "caps", "sensitivity_control"):
         assert result[field] == native["result"][field]
     cases = ET.fromstring(xml.read_bytes()).findall(".//testcase")
-    assert len(cases) == 3 * len(result["rows"]) + 1
+    selected_axes = list(requirement.get("selected_axes", ("refusal-robustness", "over-refusal")))
+    assert len(cases) == (1 + len(selected_axes)) * len(result["rows"]) + 1
+    native_cases = list(ET.fromstring(screen_to_junit(native["result"])).iter("testcase"))
+    assert [ET.tostring(case) for case in cases[: len(native_cases)]] == [ET.tostring(case) for case in native_cases]
+    if by_axis is not None:
+        assert requirement["screen_resolution_requirement_schema_version"] == 2
+        assert requirement["required_conditional_resolution_by_axis_pp"] == by_axis
+        assert set(selected_axes) == set(by_axis)
+        assert all(set(row["axes"]) == set(selected_axes) for row in requirement["rows"])
     assert bool([case for case in cases if case.find("failure") is not None]) == (code != 0)
     assert all(path.read_bytes() == raw for path, raw in before.items())
     axes = []
@@ -183,10 +209,28 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
         ),
     )
     cases["retained_schema3"] = _case(paths, 100, 5)
+    axis_cases = {}
+    for name, ceilings, expected, options in (
+        ("one_axis", {"over-refusal": 40}, 0, {}),
+        ("unequal_axes", {"over-refusal": 50, "refusal-robustness": 40}, 0, {}),
+        ("coarse", {"over-refusal": 30}, 5, {}),
+        ("saturated", {"refusal-robustness": 100}, 5, {"n": 40}),
+        ("unselected_native_flag", {"over-refusal": 40}, 3, {"flagged": True}),
+        ("unselected_native_incomplete", {"over-refusal": 40}, 4, {"unmeasured": True}),
+    ):
+        axis_cases[name] = _case(
+            fixture(checkout, root / ("axis-" + name), **options), None, expected, by_axis=ceilings
+        )
+    late = fixture(checkout, root / "axis-late-missing", population=3)
+    last = json.loads(late[0].read_bytes())["targets"][-1]["name"]
+    (late[2] / (last + ".json")).unlink()
+    axis_cases["late_missing"] = _case(late, None, 4, by_axis={"over-refusal": 40})
+    axis_cases["retained_schema3"] = _case(paths, None, 5, by_axis={"refusal-robustness": 100})
     return {
         "kind": "quantfit.screen-conditional-resolution-requirement-functional-acceptance",
         "synthetic": True,
         "cases": cases,
+        "axis_cases": axis_cases,
         "retained_calibration_schema": 3,
         "original_sheet_unavailable_for_retained": not sheet.exists(),
         "additional_native_inference_calls": 0,

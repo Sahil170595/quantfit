@@ -383,3 +383,15 @@ def test_committed_originals_bundle_members_and_receiving_bindings_are_literal()
                 assert row["status"] == ("missing_evidence" if row["name"] in missing else "validated")
     assert json.loads((artifact / "tampered-verify.json").read_bytes())["exit_code"] == 2
     assert json.loads((artifact / "corrupt-create.json").read_bytes())["exit_code"] == 2
+
+
+@pytest.mark.parametrize("missing", [(), ("clean", "flagged", "unmeasured")])
+def test_actual_sdk_and_cli_screen_archive_consumer_preserves_all_native_targets(tmp_path, originals, missing):
+    manifest_raw, reports = originals
+    reports = {name: raw for name, raw in reports.items() if name not in missing}
+    summary = b'{"scientific_go":true}'
+    manifest, directory = consumer.stage(tmp_path / "source", manifest_raw, reports, summary=summary)
+    bundle = tmp_path / "bundle"
+    consumer.create(manifest, directory, bundle)
+    result = consumer.archive_roundtrip(bundle, tmp_path / "roundtrip", manifest_raw, reports, summary=summary)
+    assert result["native_exit_code"] == (4 if missing else 3) and result["scientific_claims_verified"] is False

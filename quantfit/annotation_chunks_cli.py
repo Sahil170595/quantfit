@@ -17,6 +17,7 @@ Emit = Callable[[argparse.Namespace, str, int, dict[str, Any], Callable[[], None
 
 
 def dispatch_chunks(args: argparse.Namespace, emit: Emit) -> int:
+    code = 0
     if args.chunks_cmd == "prepare":
         result = prepare_annotation_chunks(
             args.sheet,
@@ -39,7 +40,16 @@ def dispatch_chunks(args: argparse.Namespace, emit: Emit) -> int:
             if str(int(index)) != index:
                 raise AnnotationChunksError("invalid_annotation_returns")
             parts.append((int(index), path))
-        result = validate_annotation_returns(args.sheet, args.key, args.manifest, tuple(parts), out_path=args.out)
+        result = validate_annotation_returns(
+            args.sheet,
+            args.key,
+            args.manifest,
+            tuple(parts),
+            out_path=args.out,
+            require_complete=args.require_complete,
+            junit_path=args.junit,
+        )
+        code = result.get("completeness_requirement", {}).get("exit_code", 0)
     else:
         from quantfit.safety.annotation_packets import prepare_annotation_packets
 
@@ -55,4 +65,4 @@ def dispatch_chunks(args: argparse.Namespace, emit: Emit) -> int:
             print(f"Annotation {args.chunks_cmd}: {result['n_rows']} rows across {result['n_parts']} parts.")
         print("Private text stays local; no automatic labeling, sharing, ingestion or scientific GO.")
 
-    return emit(args, f"calibrate chunks {args.chunks_cmd}", 0, result, human)
+    return emit(args, f"calibrate chunks {args.chunks_cmd}", code, result, human)

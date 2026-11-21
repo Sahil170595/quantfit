@@ -205,6 +205,86 @@ def main() -> None:
             assert json.loads(copied)["drift"]["over_refusal"]["overrefusal_regressions"] == 2
         check_repeatability(["--bundle", str(moved_replay)], "relocated-repeatability")
 
+        # Explicit replay archive roundtrip holds original T0/report bytes; it adds no inference.
+        from quantfit.bundle_transport import pack_bundle, unpack_bundle, verify_bundle_archive
+
+        replay_archive = sandbox / "replicates.zip"
+        replay_packed = pack_bundle(str(moved_replay), str(replay_archive), kind="replay")
+        replay_pin = hashlib.sha256(replay_archive.read_bytes()).hexdigest()
+        assert replay_packed["archive"]["sha256"] == replay_pin and replay_packed["scientific_claims_verified"] is False
+        assert (
+            verify_bundle_archive(str(replay_archive), replay_pin, kind="replay")["native_verification"]["original_t0"]
+            == replay["original_t0"]
+        )
+        replay_restored = sandbox / "restored-replicates"
+        unpack_bundle(str(replay_archive), replay_pin, str(replay_restored), kind="replay")
+        for action, extra in (("archive-verify", []), ("unpack", ["--out", str(sandbox / "cli-restored-replicates")])):
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "quantfit.cli",
+                    "bundle",
+                    action,
+                    "--kind",
+                    "replay",
+                    "--archive",
+                    str(replay_archive),
+                    "--sha256",
+                    replay_pin,
+                    *extra,
+                    "--json",
+                ],
+                cwd=sandbox,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            receipt = json.loads(completed.stdout)["result"]
+            assert receipt["native_verification"]["original_t0"] == replay["original_t0"]
+            assert receipt["scientific_claims_verified"] is False
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "bundle",
+                "pack",
+                "--kind",
+                "replay",
+                "--bundle",
+                str(replay_restored),
+                "--out",
+                str(sandbox / "cli-replicates.zip"),
+                "--json",
+            ],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        assert (sandbox / "cli-replicates.zip").read_bytes() == replay_archive.read_bytes()
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "quantfit.cli",
+                "bundle",
+                "replay-verify",
+                "--bundle",
+                str(replay_restored),
+                "--json",
+            ],
+            cwd=sandbox,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        assert json.loads(completed.stdout)["result"]["original_t0"] == replay["original_t0"]
+
         def check_reproduction(reference: Path, candidate: Path, label: str, expected: int) -> dict:
             out = sandbox / f"{label}-comparison.json"
             junit = sandbox / f"{label}-comparison.xml"
@@ -920,6 +1000,7 @@ def main() -> None:
             "test_saved_report_gate.py",
             "test_replay_bundle.py",
             "test_bundle_transport.py",
+            "test_bundle_archive_kinds.py",
             "test_inspect_recovery.py",
             "test_reproduce_bundles.py",
             "test_reproduce_junit.py",
@@ -928,6 +1009,7 @@ def main() -> None:
             "test_reference_replay.py",
             "test_saved_screen.py",
             "test_screen_control_evidence.py",
+            "test_screen_control_calibration.py",
             "test_ci_screen_resume.py",
             "test_ci_screen_bundle.py",
             "test_ci_screen_compare.py",
@@ -941,6 +1023,7 @@ def main() -> None:
             "test_ci_label_review.py",
             "test_ci_annotation_chunks.py",
             "test_annotation_returns.py",
+            "test_annotation_return_completeness.py",
             "test_annotation_packets.py",
             "test_ci_annotation_packets.py",
             "test_ci_retained_review.py",

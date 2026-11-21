@@ -1,0 +1,260 @@
+{
+  "record_schema": 1,
+  "source_candidate": "0.63.0",
+  "public_install_version": "0.61.0",
+  "base_commit": "7a72944421d5c7d0087c6961728e8ff9f139e1f5",
+  "environment": {
+    "os": "Windows-11-10.0.26300-SP0",
+    "python": "3.13.1",
+    "packages": {
+      "pytest": "9.0.3",
+      "ruff": "0.16.2",
+      "mypy": "2.0.0"
+    },
+    "uv": "0.13.7",
+    "fixture": "fictional native producer aggregates; editable source; no model/judge/provider execution",
+    "hardware": {
+      "architecture": "AMD64",
+      "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+      "gpu_used": false
+    },
+    "quantfit_identity": {
+      "runtime_source": "0.63.0",
+      "scoped_editable_dist_info": "0.63.0",
+      "checkout_first_metadata_lookup": "0.56.0",
+      "reason": "Ignored inherited quantfit.egg-info is visible first in checkout; runtime module and audit use the intended 0.63.0 source and scoped editable 0.63.0 is installed. Shared metadata is preserved; clean installed profiles remain required."
+    }
+  },
+  "selected_scope": {
+    "paths": [
+      "tests/test_screen_control_calibration.py",
+      "tests/test_screen_control_evidence.py",
+      "tests/test_ci_screen_resolution.py",
+      "tests/test_ci_screen_requirement.py",
+      "tests/test_screen_resolution.py",
+      "tests/test_screen_resolution_cli.py",
+      "tests/test_screen_requirement.py",
+      "tests/test_screen_requirement_cli.py",
+      "tests/test_saved_screen.py",
+      "tests/test_meta.py",
+      "tests/test_audit.py",
+      "tests/test_refreports.py"
+    ],
+    "tests": 418,
+    "passed": 417,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 1,
+    "new_composition_cases": 52,
+    "by_module": {
+      "tests.test_screen_control_calibration": 52,
+      "tests.test_screen_control_evidence": 48,
+      "tests.test_ci_screen_resolution": 32,
+      "tests.test_ci_screen_requirement": 2,
+      "tests.test_screen_resolution": 43,
+      "tests.test_screen_resolution_cli": 6,
+      "tests.test_screen_requirement": 27,
+      "tests.test_screen_requirement_cli": 4,
+      "tests.test_saved_screen": 46,
+      "tests.test_meta": 6,
+      "tests.test_audit": 81,
+      "tests.test_refreports": 71
+    },
+    "skip_reason": "Windows host does not permit symlink creation; canonical hosted test remains required",
+    "xml_sha256": "22e702c9cd74787858e2682a35deae0f6c6c19a2b8900b64fe92adfdd14c37df",
+    "log_sha256": "9340139b0e3c63bf7f04298ea58503793031e4021b7551bab8cbbe506129c71b"
+  },
+  "seal_consumer": {
+    "tests": 3,
+    "passed": 3,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m pytest -q -p no:cacheprovider tests/test_screen_control_calibration.py::test_actual_os_cli_composition_publishes_complete_native_json_and_junit tests/test_ci_screen_resolution.py::test_actual_cli_composes_existing_control_and_resolution_consumer tests/test_ci_screen_requirement.py::test_actual_retained_schema3_requirement_composes_with_verified_control --basetemp=C:\\tmp\\sequential-delivery-20261113\\qf-063-seal-consumer-01 --junitxml=C:\\tmp\\sequential-delivery-20261113\\qf-063-seal-consumer.xml",
+    "xml_sha256": "00f1c9c7656da3e4750715bbb3436e427ebf73754f0f10e8a0c45eac5a368892",
+    "log_sha256": "fc2ce2b6df6663acb9986908e87a7e9c7c696ea515e5277b1184a7676a863f9d",
+    "actual_os_cli": {
+      "exit_code": 3,
+      "control_status": "consistent",
+      "json_sha256": "e906283b1dedd027f6457b9081909f41d3cab68c069976a1c5fde5254c7249e9",
+      "junit_sha256": "2bfd24827d9740e10a54c97721c727e74099d4afb51c46c8d4c8b18ae03cbb18"
+    }
+  },
+  "legacy_parity": {
+    "base_commit": "7a72944421d5c7d0087c6961728e8ff9f139e1f5",
+    "frozen_clock_version": {
+      "time": "2026-11-15T03:00:00+00:00",
+      "version": "0.61.0"
+    },
+    "all_equal": true,
+    "cases": [
+      {
+        "case": "plain",
+        "all_equal": true,
+        "human_sha256": "4a87a2abbe92e57593e5b78a31462385e05e7703f9315759156073dfaf87d34f",
+        "JSON_sha256": "c823be85b87a1bbd8caeead4e24c23899b89366fb21ad508d9187447a58f12e3",
+        "JUnit_sha256": "ea413546ef87cdfb391c9953a2834108ccfaadf06b33922812ae05898f416fd5"
+      },
+      {
+        "case": "control",
+        "all_equal": true,
+        "human_sha256": "4a87a2abbe92e57593e5b78a31462385e05e7703f9315759156073dfaf87d34f",
+        "JSON_sha256": "3f7fbc35a0db1813a7d5bc05becbb50533f300c21ef3ecb5df7b3deaa3f44f91",
+        "JUnit_sha256": "ea413546ef87cdfb391c9953a2834108ccfaadf06b33922812ae05898f416fd5"
+      },
+      {
+        "case": "calibration",
+        "all_equal": true,
+        "human_sha256": "51a963fe4a1445539356db5bbc294a332bbb303b6d63d015f6bb1f03bb68ebb1",
+        "JSON_sha256": "f006f6035be3353a2cac8b4a115d8e158ee85563e07c096430132b3ed75e2ca2",
+        "JUnit_sha256": "ea413546ef87cdfb391c9953a2834108ccfaadf06b33922812ae05898f416fd5"
+      },
+      {
+        "case": "scalar",
+        "all_equal": true,
+        "human_sha256": "eaeac2dad1fb53e4f69afc9810d16bd4afd260e076e35c896effa1d84f9e1d4d",
+        "JSON_sha256": "ea46e1a7e86c23f88cb1961676190109b68d3f09a1bd45a5b59c7c624e53416e",
+        "JUnit_sha256": "2bfd24827d9740e10a54c97721c727e74099d4afb51c46c8d4c8b18ae03cbb18"
+      },
+      {
+        "case": "variants",
+        "all_equal": true,
+        "human_sha256": "f0e6b297281429a79ddb5023e2dc98e4f2bb70235a4ef4a1af4cd185d5a0a5db",
+        "JSON_sha256": "33217483302d38ef8df344fa69b242c41d759320dcfd8977e16f53a57fd47a03",
+        "JUnit_sha256": "467e7f5927ca618d2413ec16642b93a45d2c03fc51ac71ca14d3b3125d6a67fb"
+      },
+      {
+        "case": "variants-scalar",
+        "all_equal": true,
+        "human_sha256": "f0e6b297281429a79ddb5023e2dc98e4f2bb70235a4ef4a1af4cd185d5a0a5db",
+        "JSON_sha256": "b670e4a88745e9006312bba2c0bcbc67e5a79a78f63b59286525e8d5dbec695f",
+        "JUnit_sha256": "d2bae86347de1622397a6bf860740c5d37fe17bb8dc7b2afd27a429ca80d83d8"
+      }
+    ],
+    "proof": "Actual native JSON, human formatter and JUnit on identical held before-witness inputs; six paths are compared separately"
+  },
+  "native_reuse_control": {
+    "targets": 2,
+    "screen_and_calibration_reads": 5,
+    "private_control_holds": 3,
+    "target_report_parses": 2,
+    "control_report_parses": 1,
+    "native_base_summaries": 1,
+    "native_analyses": 2,
+    "bound_calibration_loads": 2,
+    "analysis_work_units": 288
+  },
+  "adverse_attempts": [
+    {
+      "record": "qf-063-red",
+      "result": {
+        "tests": 4,
+        "passed": 1,
+        "failed": 3,
+        "errors": 0,
+        "skipped": 0
+      },
+      "cause": "Previously unsupported complete single-calibration composition refuses before output; variants refusal remains correct"
+    },
+    {
+      "record": "qf-063-adverse",
+      "result": {
+        "tests": 16,
+        "passed": 15,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "cause": "Native control verification mutation reached MDE before the next ownership stamp check",
+      "repair": "Recheck all held control roles after calibration preparation and before native MDE"
+    },
+    {
+      "record": "qf-063-adverse2",
+      "result": {
+        "tests": 16,
+        "passed": 16,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "cause": "Narrow repaired controls pass"
+    },
+    {
+      "record": "qf-063-lint",
+      "cause": "New test import order; fixed without runtime change"
+    }
+  ],
+  "static": {
+    "ruff_check": "ruff check quantfit tests tools: passed",
+    "ruff_format": "ruff format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture tools/ci_corpus_fixture: 295 already formatted",
+    "audit": {
+      "findings": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "owned_typing": "strict skip-import screen_control_evidence.py and screen_resolution.py: no issues in 2 source files",
+    "bounded_typing_limitation": "Including saved_screen.py in the same strict skip-import scope produces the same three no-any-return diagnostics on accepted base and candidate (line offsets only); canonical hosted full typing remains required",
+    "independent_ci_lock": "uv lock --check --offline --no-cache --directory tools/ci; 174 packages; project and lock unchanged",
+    "final_audit": {
+      "findings": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "final_audit_sha256": "b363ab1fd352732f447603795501e4cc98ece787812b8c5be86952e912837735"
+  },
+  "source_identities": [
+    {
+      "path": "quantfit/saved_screen.py",
+      "sha256": "69234707689d84659e90b6c8f2f25eb329ae0f66f912eb5b6601c1a9f0270301",
+      "git_blob": "ef99a1b69fa6f97f5de11b12b6a0519486e75b99"
+    },
+    {
+      "path": "quantfit/screen_control_evidence.py",
+      "sha256": "0c6618417b828ad04e2ed396edc25cc5fadc4c9c2dbfabc1200d8b181c7c860d",
+      "git_blob": "f538c8a2e9e0a9a776e0606bf726cde0dbbb98f1"
+    },
+    {
+      "path": "quantfit/screen_resolution.py",
+      "sha256": "c93e5646127baf870cb794d977a0a199185ac28cf69d4028e67a8fe7ee043669",
+      "git_blob": "1b4dac82256e8d3a5c4a389da5ab818c18de9468"
+    },
+    {
+      "path": "tools/ci_screen_resolution.py",
+      "sha256": "f807070f40e5a32f6fdc113c87bc51c5e213e263b9a5f0f43942ecb89acd53d1",
+      "git_blob": "6689ea936855c7b73d302364f957852e9470cd5c"
+    },
+    {
+      "path": "tools/ci_installed.py",
+      "sha256": "e49d39fa1c2d5df874ce976c22f139bbfba1ddf6450ef10f7795539e51e0786f",
+      "git_blob": "9c432f1ffe386be88f818e3713fa6f577c67eead"
+    },
+    {
+      "path": "tests/test_screen_control_calibration.py",
+      "sha256": "e8ba6b3ef065133f1f8409e3d369edde4bc28fb859d5c49c3b4d8e50939a57a3",
+      "git_blob": "5348ea61dc6978e998d7364127da16c942b8d524"
+    },
+    {
+      "path": "tests/test_screen_control_evidence.py",
+      "sha256": "9f7f96d42e375fd4537f5f0599dd3872589b3023f7f18ee29d6782c0f94e00f8",
+      "git_blob": "fbf908dac87ff0bac330f4e27c96d9f9143ab6cb"
+    },
+    {
+      "path": "tests/test_ci_screen_resolution.py",
+      "sha256": "217d7fddb7cf81f327b70e0b7cd1661a52018c54403c9129cade3dfd24d7e9d9",
+      "git_blob": "b96c0cf5791a616d75e92c021683f383e4730eea"
+    },
+    {
+      "path": "tests/test_ci_screen_requirement.py",
+      "sha256": "fb7e277021e5e8513d09adced446a135c7230c1523371faf4396a346db66833e",
+      "git_blob": "5f1c3fd9b744363fdb5742c2a1009a44ad801edd"
+    }
+  ],
+  "limits": [
+    "Local editable-source functional evidence, not installed wheel/sdist or hosted matrix qualification",
+    "Control is annotation only; native/calibration/scalar priorities and JUnit remain unchanged",
+    "Actual native schema2 and retained schema3 source consumers run; no authenticated human labels, independence, source/weight authenticity, sensitivity or scientific GO claim",
+    "Both outputs are individually atomic; a second-write refusal can leave the first output published",
+    "Held private control stamps and both directory inventories are checked; no new content-stamp guarantee for original screen/calibration buffers",
+    "No provider/model/judge/Hub execution or new assets/dependencies/jobs; full hosted CI, CodeQL, canonical typing/audit and all four clean installed profiles remain required"
+  ]
+}

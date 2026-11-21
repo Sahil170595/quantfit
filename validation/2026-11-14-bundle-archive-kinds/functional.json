@@ -1,0 +1,312 @@
+{
+  "record_schema": 1,
+  "source_candidate": "0.64.0",
+  "public_install_version": "0.61.0",
+  "base_commit": "7a72944421d5c7d0087c6961728e8ff9f139e1f5",
+  "environment": {
+    "os": "Windows-11-10.0.26300-SP0",
+    "architecture": "AMD64",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python": "3.13.1",
+    "packages": {
+      "pytest": "9.0.3",
+      "ruff": "0.16.2",
+      "mypy": "2.0.0"
+    },
+    "quantfit_runtime_and_scoped_editable": "0.64.0",
+    "uv": "0.13.7",
+    "gpu_used": false,
+    "scope": "Existing scoped system-site editable source; inherited checkout metadata shadow is preserved; no new environment/dependencies"
+  },
+  "selected": {
+    "tests": 700,
+    "passed": 682,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 18,
+    "new_archive_kind_cases": 145,
+    "by_module": {
+      "tests.test_bundle_archive_kinds": 145,
+      "tests.test_bundle_transport": 33,
+      "tests.test_bundle": 73,
+      "tests.test_replay_bundle": 68,
+      "tests.test_screen_bundle": 36,
+      "tests.test_screen_bundle_cli": 6,
+      "tests.test_ci_screen_bundle": 32,
+      "tests.test_reproduce_bundles": 58,
+      "tests.test_reference_replay": 52,
+      "tests.test_cli": 33,
+      "tests.test_ci_installed_imports": 6,
+      "tests.test_meta": 6,
+      "tests.test_audit": 81,
+      "tests.test_refreports": 71
+    },
+    "skips_by_reason": {
+      "Symlink privilege unavailable; hosted Linux exercises this case": 1,
+      "POSIX FIFO contract; Windows has no os.mkfifo": 4,
+      "symlink creation unavailable to this account": 3,
+      "POSIX FIFO unavailable on this platform": 3,
+      "Windows uses inherited ACLs, not POSIX access-mode guarantees": 1,
+      "host does not permit symbolic link creation": 1,
+      "POSIX FIFO unavailable": 1,
+      "symlink creation unavailable": 3,
+      "creating symlinks requires platform support": 1
+    },
+    "command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m pytest -q -p no:cacheprovider tests/test_bundle_archive_kinds.py tests/test_bundle_transport.py tests/test_bundle.py tests/test_replay_bundle.py tests/test_screen_bundle.py tests/test_screen_bundle_cli.py tests/test_ci_screen_bundle.py tests/test_reproduce_bundles.py tests/test_reference_replay.py tests/test_cli.py tests/test_ci_installed_imports.py tests/test_meta.py tests/test_audit.py tests/test_refreports.py --basetemp=C:\\tmp\\sequential-delivery-20261113\\qf-064-final-01 --junitxml=C:\\tmp\\sequential-delivery-20261113\\qf-064-final.xml",
+    "log_sha256": "ca64000a0bebd50a39a519a5f9b889224192da2b0439c2e8451af9dc45ff500a",
+    "xml_sha256": "23a3fb9daf78a336c2ebf3f3f8c34693a79296781258088195ad51bba9903c26",
+    "scope_note": "All runtime/consumer source final; subsequent test-only strengthening of two positive dispatch controls and expected duplicate warnings is verified separately"
+  },
+  "test_only_followup": {
+    "tests": 8,
+    "passed": 8,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m pytest -q -p no:cacheprovider tests/test_bundle_archive_kinds.py::test_wrong_kind_never_autodetects_or_restores tests/test_bundle_archive_kinds.py::test_noncanonical_or_hostile_zip_never_restores[duplicate-replay] tests/test_bundle_archive_kinds.py::test_noncanonical_or_hostile_zip_never_restores[duplicate-screen] --basetemp=C:\\tmp\\sequential-delivery-20261113\\qf-064-dispatch-final-01 --junitxml=C:\\tmp\\sequential-delivery-20261113\\qf-064-dispatch-final.xml",
+    "xml_sha256": "1b83370a1f43617dff7c46126efb9c6a46ebed718f7562a29c443d5e46e2b371",
+    "reason": "Assert matching-kind positive controls explicitly and require intentional duplicate-name warnings; runtime source unchanged; overlapping counts are not added"
+  },
+  "maximum_native_payloads": [
+    {
+      "kind": "replay",
+      "archive_bytes": 33620488,
+      "payload_bytes": 33619968,
+      "archive_sha256": "f1cc3d69e2562d39c2aa0880cb33ee13700b156734486c68d7a7d3cbb0e7cf7a",
+      "members": 5,
+      "max_name_bytes": 13
+    },
+    {
+      "kind": "screen",
+      "archive_bytes": 67109936,
+      "payload_bytes": 67108864,
+      "archive_sha256": "662003a687bb3a828f4f1ca7029ad50d13d24124f7c1a13fdbadca86f84cb646",
+      "members": 10,
+      "max_name_bytes": 15
+    }
+  ],
+  "maximum_screen_population": {
+    "targets": 256,
+    "zip_members": 259,
+    "maximum_member_name_bytes": 77,
+    "raw_archive_sha256": "72a892b9b9f8b72a538ead89ba0c2654ae0c70b0e7fb6a72761ceb00c2ca7818",
+    "original_row_order_retained": true
+  },
+  "native_controls": {
+    "sdk_and_os_cli_replay_protocol_adverse_retained": true,
+    "sdk_screen_native_flagged3_retained": true,
+    "os_cli_all_missing_screen4_retained": true,
+    "empty_reports_directory_restored": true,
+    "optional_producer_summary_bytes_preserved_untrusted": true,
+    "one_source_hold_per_role": {
+      "replay": 5,
+      "screen_one_report_plus_summary": 4
+    },
+    "one_native_validation_per_capture": true,
+    "no_directory_verify_then_reload": true,
+    "replay_validate_ast_unchanged": true,
+    "unchanged_native_primitives": {
+      "quantfit/reproduce.py": "14c8a690224286fd9389d987bca2fde851f25224",
+      "quantfit/screen_bundle_inputs.py": "f3c6ebc9844eea447ae8de81c8b95e89129958a6",
+      "quantfit/saved_screen.py": "0ecce4595c4f0ceaf0a7004b27832faec1e4d0b3"
+    }
+  },
+  "aggregate_parity": {
+    "source_candidate": "0.64.0",
+    "base": "7a72944421d5c7d0087c6961728e8ff9f139e1f5",
+    "all_equal": true,
+    "cases": [
+      {
+        "mode": "default",
+        "checks": {
+          "ZIP_bytes": true,
+          "pack_result": true,
+          "verify_result": true,
+          "unpack_result": true,
+          "actual_CLI_stdout_frozen_tool_version": true,
+          "actual_CLI_stderr": true,
+          "actual_CLI_exit": true
+        },
+        "archive_sha256": "5a555ab51ccd433635a52d52cb8d250f02922086b7b1bfb2a4d5e8e8d31ebcec",
+        "archive_bytes": 26033,
+        "declared_gate_exit": 5
+      },
+      {
+        "mode": "explicit_aggregate",
+        "checks": {
+          "ZIP_bytes": true,
+          "pack_result": true,
+          "verify_result": true,
+          "unpack_result": true,
+          "actual_CLI_stdout_frozen_tool_version": true,
+          "actual_CLI_stderr": true,
+          "actual_CLI_exit": true
+        },
+        "archive_sha256": "5a555ab51ccd433635a52d52cb8d250f02922086b7b1bfb2a4d5e8e8d31ebcec",
+        "archive_bytes": 26033,
+        "declared_gate_exit": 5
+      }
+    ],
+    "tool_version_freeze": "Only CLI envelope version is frozen to baseline0.61.0; held source manifest/report bytes remain exact originals",
+    "intentional_dated_failure_category_change": "Demonstrated uncertain archive stage now reports archive_stage_preserved uniformly; success/other old controls remain unchanged"
+  },
+  "ownership_followup": {
+    "initial_root_attestation_red": {
+      "tests": 3,
+      "passed": 2,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "stage_red_all_kinds": {
+      "tests": 12,
+      "passed": 3,
+      "failed": 9,
+      "errors": 0,
+      "skipped": 0
+    },
+    "current_selected_passing_cases": {
+      "test_screen_initial_destination_attestation_preserves_owned_uncertainty": 3,
+      "test_archive_stage_ownership_uncertainty_is_explicit_for_every_kind": 9
+    },
+    "dated_diagnostic_fix": "2026-11-14: uncertain archive stages now uniformly report archive_stage_preserved, retaining stage and any already linked output; no caller policy flag or extra success-path filesystem operation",
+    "native_screen_created_unattested_root": "Retained as partial_destination_preserved; preexisting/mkdir-failed destination keeps ordinary refusal"
+  },
+  "prior_attempts": [
+    {
+      "record": "qf-064-red",
+      "counts": {
+        "tests": 4,
+        "passed": 0,
+        "failed": 4,
+        "errors": 0,
+        "skipped": 0
+      },
+      "cause": "Explicit SDK kind/CLI surface absent on accepted base"
+    },
+    {
+      "record": "qf-064-green",
+      "counts": {
+        "tests": 141,
+        "passed": 133,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 7
+      },
+      "cause": "New screen test fixture parent directory absent; old native controls passed"
+    },
+    {
+      "record": "qf-064-controls",
+      "counts": {
+        "tests": 133,
+        "passed": 124,
+        "failed": 9,
+        "errors": 0,
+        "skipped": 0
+      },
+      "cause": "Fixture-only errors: ZipInfo sanitized NUL into valid name; exact-screen cap fixture write_text added73CRLFbytes; six cases used wrong private parser name",
+      "repair": "Mutate both actual raw ZIP name headers; write exact bytes; use installed _build_parser"
+    },
+    {
+      "record": "qf-064-controls2",
+      "counts": {
+        "tests": 165,
+        "passed": 164,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 1
+      },
+      "scope": "Pre-ownership-followup native caps/hostile/consumer controls; overlapping earlier evidence preserved"
+    },
+    {
+      "record": "qf-064-type.log",
+      "cause": "Six diagnostics from implicit native constant re-export and skip-import Any cap returns; repaired direct native-origin import and typed profile limit fields without casts/ignores"
+    },
+    {
+      "record": "qf-064-lint.log",
+      "cause": "Import ordering and unused consumer receipt; corrected"
+    }
+  ],
+  "static": {
+    "owned_typing_command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m mypy --strict --follow-imports=skip --cache-dir C:\\tmp\\sequential-delivery-20261113\\qf-064-type-final-01 quantfit/bundle_archive_kinds.py quantfit/bundle_transport.py quantfit/screen_bundle_publication.py",
+    "owned_typing": "Success: no issues found in3source files; canonical hosted follow-imports=silent remains required",
+    "ruff_check_command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m ruff check quantfit tests tools",
+    "ruff_check": "passed",
+    "ruff_format_command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m ruff format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture tools/ci_corpus_fixture",
+    "ruff_format": "296 files already formatted",
+    "audit_counts": {
+      "findings": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "independent_ci_lock": "UV locked/offline check174packages; tools/ci project+lock Gitblobs unchanged; no root lock exists",
+    "sealed_static_sha256": "5f6cf703458c4d7145ccd09defab7a3148f575be629c5f26c10b87b42412e0dc",
+    "final_audit_counts": {
+      "findings": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "final_audit_sha256": "442b21e002664a368b1bee05f492b21d2eec0e309758d40a9895db5e034a9069"
+  },
+  "source_identities": [
+    {
+      "path": "quantfit/bundle_archive_kinds.py",
+      "sha256": "13359c594220cb4ffdecfea81d09463dbd87ce6aa6a6a66a6ae976568a0f91f1",
+      "git_blob": "b65ece26d81afbab6852aabd98fc92cd28cfea99"
+    },
+    {
+      "path": "quantfit/bundle_transport.py",
+      "sha256": "e472e9cbd84954c2d40a6c39867f05ae026566d243ed6db6814047f768722e6b",
+      "git_blob": "17faa6810cafe5ad3cc01dc66b4e57212b336d4c"
+    },
+    {
+      "path": "quantfit/replay_bundle.py",
+      "sha256": "47755886f602c1921b316dd817583b22ad1f40c2b2a5275749e00354c2a41495",
+      "git_blob": "53b8852b8800452998bba385b543bb3a08a855da"
+    },
+    {
+      "path": "quantfit/screen_bundle_publication.py",
+      "sha256": "bf62e0263f7069136989042615933cc04bf3349631d4867db7fa22bcdf1e1766",
+      "git_blob": "6d3f575f0223dedb41e3c035dbeec45a07b8a788"
+    },
+    {
+      "path": "quantfit/cli.py",
+      "sha256": "8e57efd8e50832bbe52fbbd1c2f82fa6024ea920b9b6a9a27366a1b968d1fa5b",
+      "git_blob": "a33b0818b8ee9327fadbc967573ea0005ad5a7b8"
+    },
+    {
+      "path": "tools/ci_installed.py",
+      "sha256": "2ded701f91a06288171c6e643419f398e0e94b19f496d74630d205ebaa30f85f",
+      "git_blob": "bd7923446abb792b0c337946cb6d36476291ac33"
+    },
+    {
+      "path": "tools/ci_screen_bundle.py",
+      "sha256": "0667fb75a87e9bb99c9d0ce14ada7c588e45e5e5fa99ff46c964e43600cdc35c",
+      "git_blob": "5e275250fd38df179da44610be1d0a669a29b7b9"
+    },
+    {
+      "path": "tests/test_bundle_archive_kinds.py",
+      "sha256": "4212aed96b3e4063e641f793e88c1826af42c7a7399583e20e93887ec9027f31",
+      "git_blob": "ad60b56857bbf5871fd9a385cd582853ee0cd601"
+    },
+    {
+      "path": "tests/test_ci_screen_bundle.py",
+      "sha256": "a083906db9b699bc1c4b98b6009a457cd32fe12c1879b6907c8fc2b3c4fffc0e",
+      "git_blob": "db70fbc6b9001a09c72daf13ea45613e9d55bab7"
+    },
+    {
+      "path": ".github/workflows/validate.yml",
+      "sha256": "909d0e0844bebbd1d81f6c3dd7cf3e6b5cca969d7bbeb2238ba70186d53c6336",
+      "git_blob": "5a7906a7249657f76ee66cf23d2bde6fb13f2bce"
+    }
+  ],
+  "limits": [
+    "Fictional and historical saved native aggregate receiving; no model, judge, provider, download or new asset work",
+    "Transport0 establishes integrity only; original T0/screen native adverse/unknown verdicts and false scientific/authentication flags remain",
+    "Local editable-source proof; all hosted OS/matrix/CodeQL/canonical typing and all four clean installed profiles remain required",
+    "Declared Windows symlink/FIFO/ACL capability skips are not counted as passes",
+    "Manifest-last restoration has partial visibility; no atomic-directory transaction/crash-durability/hostile-rename guarantee",
+    "Exclusive archive link can exist when later stage cleanup fails; uncertain source/output ownership is preserved, never recursively removed",
+    "Captured before/adverse/max-payload witnesses remain local under named qf-064 paths; no captures, labels, private producer content or locators are committed"
+  ]
+}

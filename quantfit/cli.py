@@ -460,6 +460,12 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="PP",
         help="opt-in finite (0,100] pp ceiling on both native conditional axes for every target and declared choice; requires a calibration mode",
     )
+    psaved.add_argument(
+        "--require-axis-conditional-resolution",
+        action="append",
+        metavar="AXIS=PP",
+        help="repeat for 1..2 selected native axes with separate finite (0,100] pp ceilings; requires a calibration mode; excludes scalar ceiling",
+    )
     pcompare = sub.add_parser(
         "screen-compare",
         help="offline declared screen observations (0 conditional no-flag, 3 retained flags, 4 incomplete, 2 refusal)",
@@ -747,6 +753,16 @@ def _build_parser() -> argparse.ArgumentParser:
         help="complete returned part and its original index",
     )
     chunk_validate.add_argument("--out", required=True, metavar="PATH", help="new aggregate inspection receipt")
+    chunk_validate.add_argument(
+        "--require-complete",
+        action="store_true",
+        help="require all original parts after native validation (valid missing coverage exits 4)",
+    )
+    chunk_validate.add_argument(
+        "--junit",
+        metavar="PATH",
+        help="optional bounded aggregate XML over every original part; missing skips or required errors",
+    )
     chunk_packets.add_argument(
         "--manifest", required=True, metavar="PATH", help="original private chunk manifest; never share"
     )
@@ -959,15 +975,29 @@ def _build_parser() -> argparse.ArgumentParser:
         "verify", help="verify relocated bundle (0 intact, 3 byte mismatch, 2 unsupported/unsafe)"
     )
     bverify.add_argument("--bundle", required=True, metavar="DIR", help="local portable bundle directory")
-    bpack = bsub.add_parser("pack", help="canonical single-file schema-1 aggregate transport; no scientific PASS")
-    bpack.add_argument("--bundle", required=True, metavar="DIR", help="native schema-1 aggregate directory")
+    bpack = bsub.add_parser("pack", help="canonical single-file native transport; no scientific PASS")
+    bpack.add_argument(
+        "--bundle",
+        required=True,
+        metavar="DIR",
+        help="native directory of the explicitly selected kind (default aggregate)",
+    )
     bpack.add_argument("--out", required=True, metavar="PATH", help="new canonical stored archive")
     barchive = bsub.add_parser("archive-verify", help="offline expected-SHA256 container and native validation")
     bunpack = bsub.add_parser("unpack", help="validate fully then restore to a fresh exclusive directory")
     for receiving in (barchive, bunpack):
-        receiving.add_argument("--archive", required=True, metavar="PATH", help="canonical aggregate archive")
+        receiving.add_argument(
+            "--archive", required=True, metavar="PATH", help="canonical archive of the explicitly selected kind"
+        )
         receiving.add_argument("--sha256", required=True, metavar="FULL64", help="expected whole raw archive SHA256")
     bunpack.add_argument("--out", required=True, metavar="DIR", help="new destination; parent must exist")
+    for transport in (bpack, barchive, bunpack):
+        transport.add_argument(
+            "--kind",
+            choices=("aggregate", "replay", "screen"),
+            default="aggregate",
+            help="explicit native archive kind; no autodetection (default: aggregate)",
+        )
     breplay = bsub.add_parser(
         "replay-create", help="package exactly three reports and original T0 (0 intact, 2 unsupported input)"
     )
@@ -1160,6 +1190,12 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "screen-summary":
         from quantfit.saved_screen import summarize_screen
 
+        axis_ceilings = None
+        if args.require_axis_conditional_resolution is not None:
+            from quantfit.screen_requirement import parse_axis_requirement_options, validate_axis_requirements
+
+            axis_ceilings = parse_axis_requirement_options(args.require_axis_conditional_resolution)
+            validate_axis_requirements(axis_ceilings, scalar=args.require_conditional_resolution)
         options = {"out_path": args.out, "junit_path": args.junit, **_probe_source_options(args)}
         if any(value is not None for value in (args.control_report, args.control_capture, args.control_adjudication)):
             options.update(
@@ -1175,6 +1211,8 @@ def _dispatch(args: argparse.Namespace) -> int:
             options["calibration_variants"] = parse_variant_options(args.calibration_variant)
         if args.require_conditional_resolution is not None:
             options["required_conditional_resolution_pp"] = args.require_conditional_resolution
+        if axis_ceilings is not None:
+            options["required_conditional_resolution_by_axis_pp"] = axis_ceilings
         result = summarize_screen(args.targets, args.reports_dir, **options)
 
         def human_screen_summary():
@@ -1190,6 +1228,10 @@ def _dispatch(args: argparse.Namespace) -> int:
             if "calibration_choice_sensitivity" in result:
                 coverage = result["calibration_choice_sensitivity"]["coverage"]
                 requirement = result["calibration_choice_requirement"]
+                if "selected_axes" in requirement:
+                    from quantfit.screen_requirement import print_requirement
+
+                    print_requirement(requirement)
                 print(
                     f"Calibration choices: {coverage['analyzed']}/{coverage['expected']} target-choice pairs analyzed; native exit {requirement['native_exit_code']}, receiving exit {result['exit_code']}."
                 )
@@ -1859,14 +1901,18 @@ def _dispatch(args: argparse.Namespace) -> int:
             from quantfit.bundle_transport import pack_bundle, unpack_bundle, verify_bundle_archive
 
             if args.bundle_cmd == "pack":
-                result = pack_bundle(args.bundle, args.out)
+                result = pack_bundle(args.bundle, args.out, kind=args.kind)
             elif args.bundle_cmd == "unpack":
-                result = unpack_bundle(args.archive, args.sha256, args.out)
+                result = unpack_bundle(args.archive, args.sha256, args.out, kind=args.kind)
             else:
-                result = verify_bundle_archive(args.archive, args.sha256)
+                result = verify_bundle_archive(args.archive, args.sha256, kind=args.kind)
 
             def human_transport():
-                print("Aggregate transport intact; original native verdicts remain declarations.")
+                print(
+                    "Aggregate transport intact; original native verdicts remain declarations."
+                    if args.kind == "aggregate"
+                    else f"{args.kind.capitalize()} transport intact; original native verdicts remain declarations."
+                )
                 print(result["scope"])
 
             return _emit(args, "bundle " + args.bundle_cmd, 0, result, human_transport)

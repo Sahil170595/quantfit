@@ -10,6 +10,7 @@ import stat
 import struct
 import tempfile
 import zipfile
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -134,7 +135,9 @@ def _receive(path: str, expected_sha256: str) -> tuple[HeldFile, dict[str, bytes
     return held, files, _result(held.data, manifest, declarations)
 
 
-def _publish_archive(out_path: str, raw: bytes, inputs: tuple[HeldFile, ...]) -> None:
+def _publish_archive(
+    out_path: str, raw: bytes, inputs: tuple[HeldFile, ...], *, recheck: Callable[[], None] | None = None
+) -> None:
     target = admit_outputs((out_path,), inputs)[0]
     stage: Path | None = None
     identity: tuple[int, int] | None = None
@@ -151,6 +154,8 @@ def _publish_archive(out_path: str, raw: bytes, inputs: tuple[HeldFile, ...]) ->
         _require(hold(stage, len(raw)).data == raw and _identity(stage) == identity)
         for held in inputs:
             held.check()
+        if recheck is not None:
+            recheck()
         target.check()
         # Same-parent hard link is atomic and no-replace on supported filesystems.
         # Unsupported linking refuses; never fall back to replacing rename.
@@ -160,12 +165,20 @@ def _publish_archive(out_path: str, raw: bytes, inputs: tuple[HeldFile, ...]) ->
             os.close(descriptor)
         if identity is None or stage is None:
             raise bundle.BundleError("archive_stage_preserved") from None
-        _require(_identity(stage) == identity)
-        stage.unlink()
+        try:
+            _require(_identity(stage) == identity)
+            stage.unlink()
+        except (OSError, RuntimeError):
+            raise bundle.BundleError("archive_stage_preserved") from None
 
 
-def pack_bundle(bundle_path: str, out_path: str) -> dict[str, Any]:
-    """Hold exactly one native directory and publish its canonical archive exclusively."""
+def pack_bundle(bundle_path: str, out_path: str, *, kind: str = "aggregate") -> dict[str, Any]:
+    """Hold one explicitly selected native kind; aggregate is the unchanged default."""
+    _require(type(kind) is str and kind in ("aggregate", "replay", "screen"))
+    if kind != "aggregate":
+        from quantfit.bundle_archive_kinds import pack
+
+        return pack(bundle_path, out_path, kind=kind)
     try:
         root = canonical(bundle_path)
         identity = _identity(root)
@@ -197,8 +210,13 @@ def pack_bundle(bundle_path: str, out_path: str) -> dict[str, Any]:
         raise bundle.BundleError("invalid_bundle_transport") from None
 
 
-def verify_bundle_archive(archive_path: str, expected_sha256: str) -> dict[str, Any]:
-    """Pin and validate the whole container offline, without restoration."""
+def verify_bundle_archive(archive_path: str, expected_sha256: str, *, kind: str = "aggregate") -> dict[str, Any]:
+    """Pin and validate the explicitly selected container offline, without restoration."""
+    _require(type(kind) is str and kind in ("aggregate", "replay", "screen"))
+    if kind != "aggregate":
+        from quantfit.bundle_archive_kinds import verify
+
+        return verify(archive_path, expected_sha256, kind=kind)
     try:
         held, _, result = _receive(archive_path, expected_sha256)
         held.check()
@@ -225,7 +243,7 @@ def _cleanup(root: Path, identity: tuple[int, int], owned: list[tuple[Path, tupl
         return False
 
 
-def _restore(root: Path, files: dict[str, bytes], held: HeldFile) -> None:
+def _restore(root: Path, files: dict[str, bytes], held: HeldFile, *, order: tuple[str, ...] = ORDER) -> None:
     target = admit_outputs((str(root),), (held,))[0]
     target.check()
     held.check()
@@ -235,7 +253,7 @@ def _restore(root: Path, files: dict[str, bytes], held: HeldFile) -> None:
     try:
         identity = _identity(root)
         # The exact original manifest is readiness and is published last.
-        for name in (*ORDER[1:], ORDER[0]):
+        for name in (*order[1:], order[0]):
             if name not in files:
                 continue
             _require(_directory(root, identity))
@@ -269,8 +287,13 @@ def _restore(root: Path, files: dict[str, bytes], held: HeldFile) -> None:
         raise
 
 
-def unpack_bundle(archive_path: str, expected_sha256: str, out_path: str) -> dict[str, Any]:
-    """Validate completely, then restore only into a newly reserved directory."""
+def unpack_bundle(archive_path: str, expected_sha256: str, out_path: str, *, kind: str = "aggregate") -> dict[str, Any]:
+    """Validate the selected kind, then restore into a newly reserved directory."""
+    _require(type(kind) is str and kind in ("aggregate", "replay", "screen"))
+    if kind != "aggregate":
+        from quantfit.bundle_archive_kinds import unpack
+
+        return unpack(archive_path, expected_sha256, out_path, kind=kind)
     try:
         held, files, result = _receive(archive_path, expected_sha256)
         _restore(canonical(out_path), files, held)
