@@ -1,0 +1,77 @@
+{
+  "cases": {
+    "candidate_ready": {
+      "archive_sha256": "6512954eaa699b4474c43bb1c372843c0659d1b9f9140576f8fe206035e8939f",
+      "archive_size_bytes": 17803,
+      "assessment_sha256": "06f9b5c448183b622bb65fe420b69481b58d60ace92a514f8c5b55f8115f02df",
+      "criteria_count": 107,
+      "exit_code": 0,
+      "junit_cases": 108,
+      "junit_errors": 0,
+      "junit_failures": 0,
+      "junit_sha256": "c273bcefb0f0f98e69402b2d7456d1e59a6f04752c9d3a107b7b65ce42a10890",
+      "native_criteria_match": true,
+      "native_exits": [
+        0,
+        0,
+        0
+      ],
+      "scientific_go": false
+    },
+    "historical_flags": {
+      "archive_sha256": "532a16c67d1b1c5f4a022a70b1291e65f38d4519ee8c7b8918e7ca74fd71a0c3",
+      "archive_size_bytes": 17728,
+      "assessment_sha256": "30b4cff711a0534eb93d6a5645c272f53c968254782ab14788dc4ce96a2a1905",
+      "criteria_count": 107,
+      "exit_code": 3,
+      "junit_cases": 108,
+      "junit_errors": 0,
+      "junit_failures": 2,
+      "junit_sha256": "e5a57d77b4e34fdfac3d6776c52a34984fbc001857806110ca1035dbd1fc9649",
+      "native_criteria_match": true,
+      "native_exits": [
+        3,
+        3,
+        3
+      ],
+      "scientific_go": false
+    },
+    "missing_declaration": {
+      "archive_sha256": "a992aba625a47ac45d1a00bacd8bea86f68cb80607e24c236f59bade3b9fd400",
+      "archive_size_bytes": 17815,
+      "assessment_sha256": "38fb157f0becc9066290318b5b867f5f8cbecbb6340fa81e9767ddef4037bace",
+      "criteria_count": 107,
+      "exit_code": 4,
+      "junit_cases": 108,
+      "junit_errors": 2,
+      "junit_failures": 0,
+      "junit_sha256": "3f39bd928092741f16bd8190304aa23fd0962f722712f94a17f6b489994de386",
+      "native_criteria_match": true,
+      "native_exits": [
+        0,
+        0,
+        0
+      ],
+      "scientific_go": false
+    },
+    "missing_pin": {
+      "exit_code": 2,
+      "receiving_files_created": false
+    },
+    "output_alias": {
+      "exit_code": 2,
+      "receiving_files_created": false
+    },
+    "wrong_pin": {
+      "exit_code": 2,
+      "receiving_files_created": false
+    }
+  },
+  "cpu_architecture": "AMD64",
+  "editable_distribution": "0.70.0",
+  "fixture": "Historical public aggregates and explicit synthetic variants from the offline assessment fixture",
+  "os": "Windows",
+  "python": "3.13.1",
+  "source_base": "602feec6927ee169e86ff2d4bed420195e9b4f85",
+  "tool_version": "0.70.0"
+}

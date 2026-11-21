@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Any
 from xml.etree import ElementTree as ET
 
+from quantfit.bundle_archive_kinds import MAX_REPLAY_CANONICAL_BYTES
 from quantfit.junit import _render
 from quantfit.resolution import MAX_REPORT_BYTES
 
@@ -163,7 +164,8 @@ def _reasons(value: object) -> frozenset[str]:
 
 
 def _snapshot(assessment: dict[str, object]) -> _Snapshot:
-    if type(assessment) is not dict or set(assessment) not in (_CORE_KEYS, _CORE_KEYS | _RECEIVING_KEYS):
+    receiving = _CORE_KEYS | _RECEIVING_KEYS
+    if type(assessment) is not dict or set(assessment) not in (_CORE_KEYS, receiving, receiving | {"replay_archive"}):
         raise ReferenceAssessmentJUnitError()
     _require(
         type(assessment["receiving_assessment_schema_version"]) is int
@@ -222,6 +224,13 @@ def _snapshot(assessment: dict[str, object]) -> _Snapshot:
         )
     if _RECEIVING_KEYS <= set(assessment):
         properties.append(("original_t0_sha256", _digest(assessment["original_t0_sha256"])))
+    if "replay_archive" in assessment:
+        archive = _object(assessment["replay_archive"], frozenset(("sha256", "size_bytes")))
+        size = archive["size_bytes"]
+        _require(type(size) is int and 0 < size <= MAX_REPLAY_CANONICAL_BYTES)
+        properties.extend(
+            (("replay_archive_sha256", _digest(archive["sha256"])), ("replay_archive_size_bytes", str(size)))
+        )
     return _Snapshot(code, tuple(rows), tuple(properties))
 
 

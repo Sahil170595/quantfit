@@ -1,6 +1,7 @@
 """Closed XML projection keeps original native assessment criteria and publication behavior."""
 
 import copy
+import hashlib
 import json
 import os
 import subprocess
@@ -744,3 +745,103 @@ def test_remaining_native_rule_branches_are_projected_with_no_private_diagnostic
     assert native["exit_code"] == code and reason in native["blocking_reasons"] + native["unknown_reasons"]
     rendered = assessment_to_junit(native)
     assert "PRIVATE" not in rendered and len(list(ET.fromstring(rendered).iter("testcase"))) == 108
+
+
+def archive_receiving_cli(root, bundle, target, *, expected, fault=None):
+    from quantfit.bundle_archive_kinds import pack
+
+    archive = root / "candidate-replay.zip"
+    pin = pack(str(bundle), str(archive), kind="replay")["archive"]["sha256"]
+    assert pin == hashlib.sha256(archive.read_bytes()).hexdigest()
+    output = archive if fault == "output_alias" else root / "archive-assessment.json"
+    junit = root / "archive-assessment.xml"
+    original = {item: item.read_bytes() for item in root.rglob("*") if item.is_file()}
+    pin_args = [] if fault == "missing_pin" else ["--archive-sha256", "a" * 64 if fault == "wrong_pin" else pin]
+    run = subprocess.run(
+        [
+            sys.executable,
+            "-I",
+            "-B",
+            "-m",
+            "quantfit.cli",
+            "references",
+            "assess",
+            "--archive",
+            str(archive),
+            *pin_args,
+            "--target",
+            str(target),
+            "--out",
+            str(output),
+            "--junit",
+            str(junit),
+            "--json",
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=False,
+        timeout=30,
+        cwd=root,
+    )
+    document = json.loads(run.stdout)
+    assert run.returncode == document["exit_code"] == expected and not run.stderr
+    if expected == 2:
+        assert not junit.exists() and (output == archive or not output.exists())
+        assert {item: item.read_bytes() for item in root.rglob("*") if item.is_file()} == original
+        return {"exit_code": run.returncode, "receiving_files_created": False}
+
+    result = document["result"]
+    assert result == json.loads(output.read_bytes())
+    assert result["replay_archive"] == {"sha256": pin, "size_bytes": len(original[archive])}
+    direct = assessment.assess_candidate(str(bundle), str(target))
+    for field in ("criteria", "exit_code", "original_t0", "original_t0_sha256", "native_exits", "target_sha256"):
+        assert result[field] == direct[field]
+    for report, native in zip(result["report_bindings"], direct["report_bindings"], strict=True):
+        assert report["report_sha256"] == native["report_sha256"]
+        assert report["receiving_path"] == f"{archive}::{report['member']}"
+    parsed = ET.fromstring(junit.read_bytes())
+    properties = {node.attrib["name"]: node.attrib["value"] for node in parsed.iter("property")}
+    assert properties["replay_archive_sha256"] == pin and int(properties["replay_archive_size_bytes"]) == len(
+        original[archive]
+    )
+    cases = list(parsed.iter("testcase"))
+    assert len(cases) == 108
+    assert {case.attrib["name"] for case in cases[1:]} == set(direct["criteria"])
+    assert (cases[0].find("failure") is not None) == (expected == 3)
+    assert (cases[0].find("error") is not None) == (expected == 4)
+    assert {item: item.read_bytes() for item in root.rglob("*") if item.is_file()} == {
+        **original,
+        output: output.read_bytes(),
+        junit: junit.read_bytes(),
+    }
+    return {
+        "exit_code": run.returncode,
+        "archive_sha256": pin,
+        "archive_size_bytes": len(original[archive]),
+        "native_exits": result["native_exits"],
+        "criteria_count": len(result["criteria"]),
+        "native_criteria_match": True,
+        "junit_cases": len(cases),
+        "junit_failures": len(list(parsed.iter("failure"))),
+        "junit_errors": len(list(parsed.iter("error"))),
+        "assessment_sha256": hashlib.sha256(output.read_bytes()).hexdigest(),
+        "junit_sha256": hashlib.sha256(junit.read_bytes()).hexdigest(),
+        "scientific_go": result["scientific_go"],
+    }
+
+
+@pytest.mark.parametrize("name,code", [("ready", 0), ("historical", 3), ("unknown", 4)])
+def test_actual_archive_cli_assesses_original_criteria_without_extraction(tmp_path, name, code):
+    bundle, target = scenario(tmp_path, name)
+    evidence = archive_receiving_cli(tmp_path, bundle, target, expected=code)
+    assert evidence["native_criteria_match"] and not evidence["scientific_go"]
+
+
+@pytest.mark.parametrize("fault", ["missing_pin", "wrong_pin", "output_alias"])
+def test_actual_archive_cli_refuses_unsafe_or_unpinned_inputs(tmp_path, fault):
+    bundle, target = scenario(tmp_path)
+    assert archive_receiving_cli(tmp_path, bundle, target, expected=2, fault=fault) == {
+        "exit_code": 2,
+        "receiving_files_created": False,
+    }
