@@ -21,9 +21,10 @@ result = summarize_screen(
 ```
 
 Supply all three roles or none. The default with no roles is unchanged.
-The new opted-in mode refuses `calibrations_dir`, `calibration_variants` and
-`required_conditional_resolution_pp` combinations before reading inputs;
-it does not silently discard them. Native source options (default, pinned Hub
+Published 0.61.0 refuses calibration/requirement combinations before reading
+inputs. [0.63.0 single-calibration composition](#single-calibration-composition-0630)
+adds the single directory and optional existing scalar ceiling; named variants
+remain refused. Native source options (default, pinned Hub
 triplet or local whole SHA256) remain supported without resolving a source.
 
 The manifest's `sensitivity_control.report` must name the supplied report.
@@ -82,3 +83,57 @@ Evidence: `tests/test_screen_control_evidence.py` covers the actual SDK and OS C
 with fictional native producer data and is selected by all four existing installed
 wheel/sdist consumers. Exact-head hosted qualification remains separate. No model,
 Hub, human labeling, sensitivity estimate or scientific qualification is established.
+
+## Single-calibration composition (0.63.0)
+
+Available since **0.63.0**.
+It uses the existing flags and API keywords, with no new mode flag:
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir saved-reports --calibrations-dir calibrations --control-report private.control.json --control-capture private.control.capture.jsonl --control-adjudication private.control.adjudication.json --require-conditional-resolution 40 --out receiving.json --junit receiving.xml --json
+```
+
+Provide all three controls and exactly the existing single calibration directory.
+The scalar ceiling is optional and keeps its finite `(0,100]` pp admission.
+Partial controls, named variants with controls, or a scalar without the single
+directory refuse categorically before input work. Existing default, control-only,
+calibration-only and scalar workflows retain their original output semantics.
+
+One held screen snapshot, parsed actual target-report set and native base summary
+serve both annotations. All provided control/calibration roles, actual and pending
+members, count checks and combined native work budgets are admitted before native
+conditional MDE. Each actual target/calibration pair is analyzed once through the
+existing prepared path. There is no locator follow, report/calibration reread,
+analysis replay, pooling, model/judge execution or Hub work.
+
+The original dangerous-positive criterion and native decode identity comparison
+still apply to every actual target, including targets without calibration.
+Nullable source pins and explicit custom/local source identities retain their
+existing native eligibility. A consistent control never changes a calibration
+verdict; conflicting or insufficient valid controls remain annotations.
+Native 3/4 priority, missing-calibration 4, unmet scalar 5 and qualified 0 are
+identical to the same single-calibration input without controls. The native
+unattainable MDE saturation sentinel remains unmet even at 100 pp. JUnit is exactly
+the calibration-only JUnit for those same data and scalar. No control case or
+stronger sensitivity/human/scientific assurance is appended.
+
+The original separate byte policies remain: controls 8/16/4 MiB per role and
+28 MiB combined; screen members 64 MiB total; calibrations 2 MiB per member and
+64 MiB total; native combined n-squared analysis work. One reproduction output
+plan protects both closed roots, every actual/declared/missing member, controls
+and mutual/link aliases. Held controls retain their native stamp/ancestor checks
+before MDE and through each publication. Screen and calibration buffers keep
+their existing inventory-only publication rechecks; no new content-stamp promise
+is made for them.
+
+Complete JSON and JUnit buffers are materialized before publication. Each file is
+atomic independently; they are not a pair transaction. A late control mutation
+after the first replacement can leave that first output visible while the call
+fails and the second output is not published. Inputs are never rolled back or
+deleted. Control output remains count/hash-only with all assurance flags held.
+
+Fictional native SDK/OS CLI, retained-schema-3 and source consumer evidence is
+recorded in `validation/2026-11-14-screen-control-calibration/`. The composition
+suite is selected in the existing four installed wheel/sdist profiles. Exact-head
+hosted qualification remains separate; no new job, artifact upload, dependency,
+source authentication, sensitivity estimate or scientific GO is introduced.

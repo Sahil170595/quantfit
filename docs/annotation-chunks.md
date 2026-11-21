@@ -163,9 +163,9 @@ Fixture judgments establish neither human truth, rater independence, sensitivity
 safety, QSR v1 readiness nor scientific GO.
 
 
-## Complete-return requirement and JUnit (source candidate 0.65.0)
+## Complete-return requirement and JUnit (0.65.0)
 
-This requires **unreleased 0.65.0 source**; public installation remains **0.61.0**.
+Available since **0.65.0**.
 Only `calibrate chunks validate` adds these options:
 
 ```bash

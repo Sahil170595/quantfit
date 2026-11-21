@@ -248,7 +248,44 @@ def accept_cpu(report_path: Path, out_root: Path) -> dict:
         source.rename(out_root / "producer-unavailable")
         verified = verify(moved)
         after = check(verified, moved, manifest_raw, {target["name"]: original})
+        archive_roundtrip(moved, out_root / "archive-roundtrip", manifest_raw, {target["name"]: original})
         for trap in traps:
             trap.assert_not_called()
     assert before == after and report_path.read_bytes() == original
     return {"kind": "existing native CPU receipt; offline screen bundle", "additional_native_calls": 0, **after}
+
+
+def archive_roundtrip(
+    bundle: Path, out_root: Path, manifest: bytes, reports: dict[str, bytes], *, summary: bytes | None = None
+) -> dict:
+    """Actual SDK and CLI receiver over the same held native screen; no new model work."""
+    from quantfit.bundle_transport import pack_bundle, unpack_bundle, verify_bundle_archive
+
+    out_root.mkdir()
+    archive = out_root / "screen.zip"
+    packed = pack_bundle(str(bundle), str(archive), kind="screen")
+    pin = binding(archive.read_bytes())["sha256"]
+    assert packed["archive"]["sha256"] == pin and packed["scientific_claims_verified"] is False
+    checked = verify_bundle_archive(str(archive), pin, kind="screen")
+    expected = expected_counts(manifest, reports)
+    assert checked["native_verification"]["receiving_summary"]["exit_code"] == expected["exit_code"]
+    restored = out_root / "sdk-restored"
+    unpack_bundle(str(archive), pin, str(restored), kind="screen")
+    native = check(verify(restored), restored, manifest, reports, summary=summary)
+    cli_archive = out_root / "cli-screen.zip"
+    document, stderr = invoke(["pack", "--kind", "screen", "--bundle", str(restored), "--out", str(cli_archive)])
+    assert document["exit_code"] == 0 and not stderr and cli_archive.read_bytes() == archive.read_bytes()
+    for action, extra in (("archive-verify", []), ("unpack", ["--out", str(out_root / "cli-restored")])):
+        document, stderr = invoke([action, "--kind", "screen", "--archive", str(archive), "--sha256", pin, *extra])
+        assert document["exit_code"] == 0 and not stderr
+        assert document["result"]["native_verification"]["receiving_summary"]["exit_code"] == expected["exit_code"]
+    assert (
+        check(verify(out_root / "cli-restored"), out_root / "cli-restored", manifest, reports, summary=summary)
+        == native
+    )
+    return {
+        "kind": "screen",
+        "archive": packed["archive"],
+        "native_exit_code": expected["exit_code"],
+        "scientific_claims_verified": False,
+    }
