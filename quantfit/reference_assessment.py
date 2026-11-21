@@ -375,13 +375,17 @@ def _assess_bundle_held(
     return result
 
 
-def assess_candidate(bundle_path: str, target: str, *, out_path: str | None = None) -> dict[str, object]:
+def assess_candidate(
+    bundle_path: str, target: str, *, out_path: str | None = None, junit_path: str | None = None
+) -> dict[str, object]:
     """Read target once and verify one closed replay bundle once; publish a separate receiving result."""
     phase = "unsafe_output"
     try:
         bundle_path = _canonical_receiving_path(bundle_path)
         target = _canonical_receiving_path(target)
-        plan = _prepare_reproduction_outputs([target], [bundle_path], [out_path] if out_path is not None else [])
+        plan = _prepare_reproduction_outputs(
+            [target], [bundle_path], [path for path in (out_path, junit_path) if path is not None]
+        )
         phase = "target_unreadable"
         target_bytes = _read(Path(target), MAX_TARGET_BYTES)
         _target(target_bytes)
@@ -389,10 +393,18 @@ def assess_candidate(bundle_path: str, target: str, *, out_path: str | None = No
         verified, held = _verified_bundle(bundle_path)
         _require(verified["integrity_verified"] is True, "invalid_bundle")
         result = _assess_bundle_held(bundle_path, target_bytes, verified, held)
+        buffers = []
         if out_path is not None:
             phase = "assessment_output_failure"
             raw = (json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
-            _publish_reproduction_outputs(plan, [(plan.targets[0], raw)])
+            buffers.append((plan.targets[0], raw))
+        if junit_path is not None:
+            from quantfit.reference_assessment_junit import assessment_to_junit
+
+            phase = "assessment_output_failure"
+            buffers.append((plan.targets[-1], assessment_to_junit(result).encode("utf-8")))
+        if buffers:
+            _publish_reproduction_outputs(plan, buffers)
         return result
     except ReferenceAssessmentError:
         raise

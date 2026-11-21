@@ -947,6 +947,11 @@ def _build_parser() -> argparse.ArgumentParser:
         "--target", required=True, metavar="PATH", help="closed schema-1 target declaration JSON, at most 64 KiB"
     )
     rassess.add_argument("--out", metavar="PATH", help="separate receiving assessment JSON")
+    rassess.add_argument(
+        "--junit",
+        metavar="PATH",
+        help="optional bounded XML of all original native criteria; false fails, unknown errors",
+    )
 
     pbundle = sub.add_parser(
         "bundle", help="offline portable aggregate evidence; integrity success is no scientific GO"
@@ -2210,7 +2215,7 @@ def _dispatch(args: argparse.Namespace) -> int:
         if args.references_cmd == "assess":
             from quantfit.reference_assessment import assess_candidate
 
-            result = assess_candidate(args.bundle, args.target, out_path=args.out)
+            result = assess_candidate(args.bundle, args.target, out_path=args.out, junit_path=args.junit)
             return _emit(args, "references assess", result["exit_code"], result, lambda: print(result["outcome"]))
         if args.references_cmd == "list":
             result = list_references(args.registry)

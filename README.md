@@ -41,6 +41,11 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+Quantfit **0.66.0** adds optional
+[JUnit for original reference-assessment criteria](docs/cli-reference.md#reference-assessment-junit-0660).
+Native decisions, JSON and mathematical work remain unchanged; unknown criteria
+are errors.
+
 Quantfit **0.65.0** adds an opt-in
 [complete annotation-return requirement and bounded JUnit output](docs/annotation-chunks.md#complete-return-requirement-and-junit-0650).
 Valid missing coverage exits 4 after native validation; default partial inspection
@@ -98,7 +103,7 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-Install with `pip install "quantfit[inspect,gguf]==0.65.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.66.0"`.
 
 The observation runs the pinned judge over the original held completions.
 Use its receipt's raw SHA-256 for the offline comparison against one complete

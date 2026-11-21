@@ -458,6 +458,10 @@ def main() -> None:
                 declared["arms"]["baseline"]["size_bytes"] = None
             target_path, receiving = sandbox / f"{label}-target.json", sandbox / f"{label}-receiving.json"
             target_path.write_text(json.dumps(declared), encoding="utf-8")
+            from quantfit.reference_assessment import assess_candidate
+
+            sdk_assessment = assess_candidate(str(bundle), str(target_path))
+            assessment_xml = sandbox / f"{label}-assessment.xml"
             completed = subprocess.run(
                 [
                     sys.executable,
@@ -471,6 +475,8 @@ def main() -> None:
                     str(target_path),
                     "--out",
                     str(receiving),
+                    "--junit",
+                    str(assessment_xml),
                     "--json",
                 ],
                 cwd=sandbox,
@@ -481,7 +487,14 @@ def main() -> None:
             )
             assert completed.returncode == expected, completed.stdout + completed.stderr
             assessed = json.loads(completed.stdout)["result"]
-            assert assessed == json.loads(receiving.read_bytes())
+            assert assessed == json.loads(receiving.read_bytes()) == sdk_assessment
+            xml_root = ET.fromstring(assessment_xml.read_bytes())
+            xml_cases = list(xml_root.iter("testcase"))
+            assert len(xml_cases) == 108 and xml_cases[0].get("name") == "overall"
+            assert {case.get("name") for case in xml_cases[1:]} == set(assessed["criteria"])
+            assert not any(case.find("skipped") is not None for case in xml_cases)
+            assert (xml_cases[0].find("failure") is not None) is (expected == 3)
+            assert (xml_cases[0].find("error") is not None) is (expected == 4)
             assert assessed["target_sha256"] == hashlib.sha256(target_path.read_bytes()).hexdigest()
             assert (
                 assessed["reference_registered"]
@@ -992,6 +1005,7 @@ def main() -> None:
             "test_reproduce_bundles.py",
             "test_reproduce_junit.py",
             "test_reference_assessment.py",
+            "test_reference_assessment_junit.py",
             "test_reference_replay.py",
             "test_saved_screen.py",
             "test_screen_control_evidence.py",
