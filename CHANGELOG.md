@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.71.0 — Unreleased
+
+- Protect replay-bundle publication and rollback with exclusive member creation and owned-file checks. See
+  `validation/2026-11-21-replay-bundle-publication/`.
+
 ## 0.66.0 — 2026-11-20
 
 - Add optional reference-assessment JUnit and a pure closed renderer over the
