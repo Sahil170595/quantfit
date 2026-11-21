@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import stat
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -99,7 +100,7 @@ def _cleanup(root: Path, root_id: tuple[int, int], reports_id: tuple[int, int] |
         return False
 
 
-def _publish(root: Path, files: tuple[tuple[str, bytes], ...]) -> None:
+def _publish(root: Path, files: tuple[tuple[str, bytes], ...], *, recheck: Callable[[], None] | None = None) -> None:
     """Reserve final root exclusively; original members first, outer manifest last.
 
     Mode bits are owner-only where supported; Windows uses inherited ACL behavior.
@@ -107,18 +108,23 @@ def _publish(root: Path, files: tuple[tuple[str, bytes], ...]) -> None:
     """
     _no_links(root)
     root.mkdir(mode=0o700)  # No exists-check/rename replacement boundary.
-    root_id = _identity(root)
+    root_id = None
     reports_id = None
     owned: list[_Owned] = []
     try:
+        root_id = _identity(root)
         (root / "reports").mkdir(mode=0o700)
         reports_id = _identity(root / "reports")
         for relative, raw in files:
+            if recheck is not None:
+                recheck()
             _require(
                 _directory_owned(root, root_id) and _directory_owned(root / "reports", reports_id),
                 "publication_ownership_changed",
             )
             _write_member(root / relative, raw, owned)
+        if recheck is not None:
+            recheck()
         _require(
             _directory_owned(root, root_id)
             and _directory_owned(root / "reports", reports_id)
@@ -128,7 +134,7 @@ def _publish(root: Path, files: tuple[tuple[str, bytes], ...]) -> None:
         _scan(root, {"manifest.json": False, "targets.json": False, "reports": True})
         _scan(root / "reports", {member.path.name: False for member in owned if member.path.parent == root / "reports"})
     except BaseException as exc:
-        cleaned = _cleanup(root, root_id, reports_id, owned)
+        cleaned = root_id is not None and _cleanup(root, root_id, reports_id, owned)
         if isinstance(exc, (KeyboardInterrupt, SystemExit)):
             raise
         raise ScreenBundleError("publication_failed" if cleaned else "publication_failed_preserved") from None
