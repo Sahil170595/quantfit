@@ -1,5 +1,9 @@
 # CLI reference — every command, every flag
 
+The **0.67.0 candidate** combines the complete supplied-control triplet, one
+`--calibrations-dir`, and `--require-axis-conditional-resolution AXIS=PP` for
+`screen-summary`. See [selected axes with controls](saved-screen-control-evidence.md#selected-axes-with-one-calibration-directory-0670).
+
 Quantfit **0.66.0** adds optional `--junit PATH` only to
 `references assess`, projecting every original native criterion without changing
 JSON, policy or mathematical work. See [reference assessment JUnit](#reference-assessment-junit-0660).
@@ -211,9 +215,9 @@ Supply one or two unique canonical names, `refusal-robustness` / `over-refusal`,
 with exact finite numeric ceilings in `(0,100]` percentage points. The API keyword
 is `required_conditional_resolution_by_axis_pp: Mapping[str, float] | None`.
 Require either `--calibrations-dir` or declared `--calibration-variant NAME=DIR`
-choices. This option cannot be combined with the scalar
-`--require-conditional-resolution` or supplied-control report/capture/adjudication
-roles. Invalid, empty, duplicate or unknown options refuse exit 2 before input IO.
+choices. Choose the per-axis map or the scalar `--require-conditional-resolution`.
+The 0.67.0 candidate also accepts the complete supplied-control triplet with the
+single calibration directory. Invalid, empty, duplicate or unknown options refuse exit 2 before input IO.
 
 Every original target and every named choice contributes to selected criteria;
 late missing evidence remains visible. Native adverse exits 3/4 retain priority,

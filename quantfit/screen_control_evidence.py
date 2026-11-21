@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -28,7 +29,12 @@ from quantfit.safety.report import DriftReport
 from quantfit.safety.retention_io import HeldFile, hold
 from quantfit.safety.verify import ProbeCorpus
 from quantfit.screen import SUMMARY_FILENAME, Target
-from quantfit.screen_requirement import qualify_screen, validate_requirement
+from quantfit.screen_requirement import (
+    qualify_screen,
+    qualify_screen_axes,
+    validate_axis_requirements,
+    validate_requirement,
+)
 
 MAX_CONTROL_BYTES = resolution.MAX_REPORT_BYTES + MAX_CAPTURE_BYTES + MAX_RECORD_BYTES
 SCOPE = (
@@ -171,10 +177,15 @@ def summarize_with_control(
     probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
     calibrations_dir: str | None = None,
     required_conditional_resolution_pp: float | None = None,
+    required_conditional_resolution_by_axis_pp: Mapping[str, float] | None = None,
 ) -> dict[str, object]:
     """Share one held native screen across control and optional single calibration."""
     ceiling = validate_requirement(required_conditional_resolution_pp)
-    saved._require(ceiling is None or calibrations_dir is not None, "conditional_resolution_requires_calibrations")
+    axis_ceilings = validate_axis_requirements(required_conditional_resolution_by_axis_pp, scalar=ceiling)
+    saved._require(
+        calibrations_dir is not None or (ceiling is None and axis_ceilings is None),
+        "conditional_resolution_requires_calibrations",
+    )
     phase = "invalid_control_evidence"
     try:
         paths = tuple(Path(_canonical_receiving_path(p)) for p in (report_path, capture_path, record_path))
@@ -224,6 +235,8 @@ def summarize_with_control(
             calibrated._attach_resolution(result, resolution_rows, use_prepared=True)
             if ceiling is not None:
                 qualify_screen(result, ceiling)
+            elif axis_ceilings is not None:
+                qualify_screen_axes(result, axis_ceilings)
         phase = "output_failure"
         buffers = []
         if out_path is not None:

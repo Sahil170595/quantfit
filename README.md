@@ -41,6 +41,9 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The **0.67.0 candidate** accepts [per-axis resolution ceilings with supplied controls](docs/saved-screen-control-evidence.md#selected-axes-with-one-calibration-directory-0670)
+in a single saved-screen operation. Control remains an annotation and selected axes use native qualification.
+
 Quantfit **0.66.0** adds optional
 [JUnit for original reference-assessment criteria](docs/cli-reference.md#reference-assessment-junit-0660).
 Native decisions, JSON and mathematical work remain unchanged; unknown criteria
