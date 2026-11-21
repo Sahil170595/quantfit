@@ -739,8 +739,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "--annotator-name", help="bounded operator-declared attribution; required for named_second"
     )
     chunk_collect.add_argument("--manifest", required=True, metavar="PATH", help="original private chunk manifest")
-    chunk_collect.add_argument(
-        "--part", required=True, action="append", metavar="PATH", help="filled part, repeated in manifest order"
+    collected_parts = chunk_collect.add_mutually_exclusive_group(required=True)
+    collected_parts.add_argument(
+        "--part", action="append", metavar="PATH", help="filled part, repeated in manifest order"
+    )
+    collected_parts.add_argument(
+        "--indexed-part", action="append", metavar="INDEX=PATH", help="filled part with original index, in any order"
     )
     chunk_collect.add_argument("--out", required=True, metavar="PATH", help="new complete private native sheet")
     chunk_collect.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate counts/hash receipt")

@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.69.0 — Unreleased
+
+- Collect all explicitly indexed annotation returns in any order while preserving the native sheet and receipt. See
+  `validation/2026-11-21-indexed-annotation-collection/`.
+
 ## 0.66.0 — 2026-11-20
 
 - Add optional reference-assessment JUnit and a pure closed renderer over the

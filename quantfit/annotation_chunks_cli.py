@@ -16,6 +16,18 @@ from quantfit.safety.annotation_chunks import (
 Emit = Callable[[argparse.Namespace, str, int, dict[str, Any], Callable[[], None]], int]
 
 
+def _parse_indexed_parts(entries: list[str], category: str) -> tuple[tuple[int, str], ...]:
+    parts = []
+    for entry in entries:
+        index, separator, path = entry.partition("=")
+        if not (separator and path and index.isascii() and index.isdecimal() and 1 <= len(index) <= 3):
+            raise AnnotationChunksError(category)
+        if str(int(index)) != index:
+            raise AnnotationChunksError(category)
+        parts.append((int(index), path))
+    return tuple(parts)
+
+
 def dispatch_chunks(args: argparse.Namespace, emit: Emit) -> int:
     code = 0
     if args.chunks_cmd == "prepare":
@@ -28,23 +40,26 @@ def dispatch_chunks(args: argparse.Namespace, emit: Emit) -> int:
             annotator_name=args.annotator_name,
         )
     elif args.chunks_cmd == "collect":
+        indexed_parts = (
+            _parse_indexed_parts(args.indexed_part, "invalid_annotation_chunks")
+            if args.indexed_part is not None
+            else None
+        )
         result = collect_annotation_chunks(
-            args.sheet, args.key, args.manifest, tuple(args.part), out_path=args.out, receipt_path=args.receipt
+            args.sheet,
+            args.key,
+            args.manifest,
+            tuple(args.part) if args.part is not None else None,
+            indexed_parts=indexed_parts,
+            out_path=args.out,
+            receipt_path=args.receipt,
         )
     elif args.chunks_cmd == "validate":
-        parts = []
-        for entry in args.part:
-            index, separator, path = entry.partition("=")
-            if not (separator and path and index.isascii() and index.isdecimal() and 1 <= len(index) <= 3):
-                raise AnnotationChunksError("invalid_annotation_returns")
-            if str(int(index)) != index:
-                raise AnnotationChunksError("invalid_annotation_returns")
-            parts.append((int(index), path))
         result = validate_annotation_returns(
             args.sheet,
             args.key,
             args.manifest,
-            tuple(parts),
+            _parse_indexed_parts(args.part, "invalid_annotation_returns"),
             out_path=args.out,
             require_complete=args.require_complete,
             junit_path=args.junit,

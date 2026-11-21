@@ -953,6 +953,10 @@ quantfit calibrate chunks collect --sheet blank.labels.csv --key private.labelke
 quantfit calibrate ingest --sheet collected.labels.csv --key private.labelkey.json --out calibration.json --json
 ```
 
+The 0.69.0 candidate adds `--indexed-part INDEX=PATH` for collecting all original
+parts in any arrival order. See [indexed collection](annotation-chunks.md#indexed-collection-0690).
+
+
 The example assumes two actual parts; repeat `--part` for the complete assigned
 set. Collection binds exact unchanged source/key/manifest bytes, assigned IDs and
 text, records the **changed filled hashes** separately from original blank hashes,
