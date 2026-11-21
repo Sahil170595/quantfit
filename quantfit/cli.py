@@ -460,6 +460,12 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="PP",
         help="opt-in finite (0,100] pp ceiling on both native conditional axes for every target and declared choice; requires a calibration mode",
     )
+    psaved.add_argument(
+        "--require-axis-conditional-resolution",
+        action="append",
+        metavar="AXIS=PP",
+        help="repeat for 1..2 selected native axes with separate finite (0,100] pp ceilings; requires a calibration mode; excludes scalar ceiling",
+    )
     pcompare = sub.add_parser(
         "screen-compare",
         help="offline declared screen observations (0 conditional no-flag, 3 retained flags, 4 incomplete, 2 refusal)",
@@ -1155,6 +1161,12 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "screen-summary":
         from quantfit.saved_screen import summarize_screen
 
+        axis_ceilings = None
+        if args.require_axis_conditional_resolution is not None:
+            from quantfit.screen_requirement import parse_axis_requirement_options, validate_axis_requirements
+
+            axis_ceilings = parse_axis_requirement_options(args.require_axis_conditional_resolution)
+            validate_axis_requirements(axis_ceilings, scalar=args.require_conditional_resolution)
         options = {"out_path": args.out, "junit_path": args.junit, **_probe_source_options(args)}
         if any(value is not None for value in (args.control_report, args.control_capture, args.control_adjudication)):
             options.update(
@@ -1170,6 +1182,8 @@ def _dispatch(args: argparse.Namespace) -> int:
             options["calibration_variants"] = parse_variant_options(args.calibration_variant)
         if args.require_conditional_resolution is not None:
             options["required_conditional_resolution_pp"] = args.require_conditional_resolution
+        if axis_ceilings is not None:
+            options["required_conditional_resolution_by_axis_pp"] = axis_ceilings
         result = summarize_screen(args.targets, args.reports_dir, **options)
 
         def human_screen_summary():
@@ -1185,6 +1199,10 @@ def _dispatch(args: argparse.Namespace) -> int:
             if "calibration_choice_sensitivity" in result:
                 coverage = result["calibration_choice_sensitivity"]["coverage"]
                 requirement = result["calibration_choice_requirement"]
+                if "selected_axes" in requirement:
+                    from quantfit.screen_requirement import print_requirement
+
+                    print_requirement(requirement)
                 print(
                     f"Calibration choices: {coverage['analyzed']}/{coverage['expected']} target-choice pairs analyzed; native exit {requirement['native_exit_code']}, receiving exit {result['exit_code']}."
                 )

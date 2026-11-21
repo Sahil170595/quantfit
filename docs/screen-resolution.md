@@ -4,6 +4,8 @@ Quantfit 0.45.0 adds [named calibration-choice sensitivity](calibration-choices.
 as a mutually exclusive input mode. The published single-calibration workflow
 below and its JSON/JUnit behavior stay unchanged.
 
+The [per-axis requirement](#per-axis-requirements-0620) is available since **0.62.0**.
+
 Available since quantfit 0.35.0. Native saved-screen summaries retain their existing
 behavior when the optional calibration directory is omitted.
 
@@ -132,6 +134,60 @@ requirement cases per declared target and an overall requirement case. Missing o
 unmet required evidence produces failures, so XML cannot look all-green when required
 calibration is absent; native missing/unmeasured cases remain their original skips.
 The overall case also fails on a native flag even when all resolution criteria pass.
+
+## Per-axis requirements (0.62.0)
+
+This opt-in extension assigns different
+ceilings to one or both native axes, retaining every original target and every
+explicitly named calibration choice:
+
+```bash
+quantfit screen-summary --targets targets.json --reports-dir reports --calibrations-dir calibrations --require-axis-conditional-resolution refusal-robustness=40 --require-axis-conditional-resolution over-refusal=30 --out receiving.json --junit receiving.xml --json
+```
+
+The API adds `required_conditional_resolution_by_axis_pp: Mapping[str, float] | None`
+to `quantfit.saved_screen.summarize_screen` and the existing single/variant
+calibration entry points. The original mapping is read once and copied in native
+order (`refusal-robustness`, then `over-refusal`) before input work. Supply one or
+two unique canonical names with exact finite numeric values in `(0,100]` pp;
+booleans, enormous integers, unknown/duplicate names, empty maps/values and
+non-finite numbers refuse categorically with exit 2. These are percentage-point
+resolution ceilings, distinct from the lower rate cap of an axis effect gate.
+
+Require either the single calibration directory or declared named variants. A
+scalar `required_conditional_resolution_pp` / `--require-conditional-resolution`
+cannot be combined with the map. Supplied-control report/capture/adjudication
+roles retain their existing refusal when combined with calibration requirements.
+Invalid combinations refuse before source/calibration reads or publication.
+
+The selected criteria reuse the existing `_check_axis` and already-computed
+native analyses. Every original target and target/variant pair contributes,
+including late missing evidence. There is no reread, analysis replay, pooling,
+new MDE/power rule, inference or asset resolution. Measurability and attainable
+target power remain required alongside the inclusive native MDE ceiling; an
+unattainable `effective_mde=1.0` sentinel cannot pass at 100 pp. A genuinely
+attainable native boundary at 1.0 is judged by those same facts.
+
+Native exits 3 and 4 keep priority, including adverse evidence on an unselected
+axis. Otherwise missing required calibration yields 4, an unmet selected
+criterion yields 5, and every selected criterion across the whole population
+must pass for zero. Original native outcomes, rows, flags, controls, coverage,
+budgets, inventories and conditional assumptions remain visible.
+
+Only selected map mode emits a schema-2 requirement projection under the existing
+single or choice requirement key. It records canonical `selected_axes`,
+`required_conditional_resolution_by_axis_pp`, manifest/input hashes and ordered
+rows containing only the selected criteria, plus native/qualification exits and
+fixed reasons. Human output identifies each selected axis/ceiling and MET/UNMET.
+JUnit retains its exact native case prefix, then adds one case per selected axis
+per target (and per variant in choice mode) plus the overall requirement case.
+
+Omitted/`None` and legacy scalar behavior retain their original JSON/schema,
+human output and JUnit. Output aliases and held-role protections are unchanged.
+Supplied human labels, assumptions, independence, sensitivity and source/weight
+authenticity remain unverified; native no-detection is not safety or scientific
+GO. Aggregate command evidence is recorded under
+`validation/2026-11-14-screen-axis-resolution/`.
 
 The same native input/analysis-work bounds, alias protections and per-file replacement
 publisher described above apply. Both JSON and XML use the qualification before their

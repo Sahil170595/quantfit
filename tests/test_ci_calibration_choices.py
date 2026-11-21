@@ -21,3 +21,7 @@ def test_actual_installed_calibration_choice_cli_api_and_junit(tmp_path, monkeyp
     assert len(result["cases"]) == 12
     assert {case["exit_code"] for case in result["cases"]} == {0, 3, 4, 5}
     assert all(case["native_population_preserved"] and case["inputs_unchanged"] for case in result["cases"])
+    assert len(result["axis_cases"]) == 14
+    assert {case["exit_code"] for case in result["axis_cases"]} == {0, 3, 4, 5}
+    assert all(case["coverage"]["expected"] == len(case["rows"]) == 4 for case in result["axis_cases"])
+    assert all(case["inputs_unchanged"] and not case["scientific_go"] for case in result["axis_cases"])
