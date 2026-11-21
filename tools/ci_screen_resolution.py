@@ -96,12 +96,18 @@ def invoke(
     *,
     out: Path | None = None,
     junit: Path | None = None,
+    controls: tuple[Path, Path, Path] | None = None,
 ) -> tuple[dict, str]:
     from quantfit.cli import main
 
     argv = ["screen-summary", "--targets", str(targets), "--reports-dir", str(reports), "--json"]
     if calibrations is not None:
         argv += ["--calibrations-dir", str(calibrations)]
+    if controls is not None:
+        for flag, path in zip(
+            ("--control-report", "--control-capture", "--control-adjudication"), controls, strict=True
+        ):
+            argv += [flag, str(path)]
     if out is not None:
         argv += ["--out", str(out)]
     if junit is not None:

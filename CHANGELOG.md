@@ -13,7 +13,7 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.64.0 — Unreleased
+## 0.64.0 — 2026-11-20
 
 - Extend existing archive commands with an explicit aggregate/replay/screen kind.
   Default and explicit aggregate keep the original schema-1 format and bounds;
@@ -28,6 +28,32 @@
 - Extend the existing native SDK/OS CLI and four installed-profile consumers.
   Local fictional evidence, exact boundaries and limits:
   [validation](validation/2026-11-14-bundle-archive-kinds/README.md).
+
+## 0.63.0 — 2026-11-20
+
+- Compose the existing complete supplied-control triplet with single saved-screen
+  calibration and optional scalar resolution requirement. Reuse one held screen,
+  parsed report set, native base summary and prepared conditional analyses.
+- Keep control as annotation only, with unchanged dangerous-positive/whole-target
+  decode applicability and single-calibration qualification/JUnit. Preserve role,
+  byte/work and publication ownership boundaries without new source-stamp promises.
+- Extend native SDK/OS CLI and the existing four installed-profile consumer
+  cohort. Fictional command evidence and limits:
+  [validation](validation/2026-11-14-screen-control-calibration/README.md).
+
+## 0.62.0 — 2026-11-20
+
+- Add `required_conditional_resolution_by_axis_pp` and repeatable
+  `--require-axis-conditional-resolution AXIS=PP` to saved screen-summary.
+  One or both canonical axes receive separate finite percentage-point ceilings
+  across every original target and named calibration choice.
+- Reuse native prepared analyses and `_check_axis`, retaining measurable/attainable
+  requirements, native adverse verdict priority and missing-evidence uncertainty.
+  Selected schema-2 JSON and JUnit project only selected criteria; omitted and
+  legacy scalar fields, stdout and native case prefixes remain unchanged.
+- Extend the existing single/choice source and installed consumers without
+  provider/model work, new jobs or dependencies. Synthetic command evidence and
+  its limits: [validation](validation/2026-11-14-screen-axis-resolution/README.md).
 
 ## 0.61.0 — 2026-11-14
 

@@ -153,9 +153,9 @@ parser admission and failure/cleanup/retry controls. Four hosted installed
 profiles are extended; their execution and public release are separate evidence.
 
 
-## Explicit archive kinds (source candidate 0.64.0)
+## Explicit archive kinds (0.64.0)
 
-This requires **unreleased 0.64.0 source**; public installation remains **0.61.0**.
+Available since **0.64.0**.
 Only the three existing archive commands accept `--kind aggregate|replay|screen`:
 
 ```bash
@@ -239,7 +239,7 @@ separate. No jobs, artifact uploads or dependencies are added.
 A controlled real archive publication can create the final hard link and then fail
 stage cleanup because the stage was replaced, became unattestable or could not be
 unlinked. The existing implementation correctly retained the uncertain stage, but
-reported only `invalid_bundle_transport`. This candidate reports
+reported only `invalid_bundle_transport`. Quantfit 0.64.0 reports
 `archive_stage_preserved` uniformly for aggregate, replay and screen. No unknown
 stage is deleted and an already linked archive remains visible. Default aggregate
 success bytes, schema, results and caps and unrelated refusals are unchanged.

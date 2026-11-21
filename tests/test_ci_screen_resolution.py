@@ -36,6 +36,27 @@ def test_actual_cli_empty_calibration_directory_preserves_native_verdict_and_jun
     assert native_xml.read_bytes() == annotated_xml.read_bytes()
 
 
+def test_actual_cli_composes_existing_control_and_resolution_consumer(tmp_path):
+    from test_screen_control_calibration import calibrated
+
+    paths = calibrated(tmp_path / "composition")
+    default_xml, combined_xml = tmp_path / "default.xml", tmp_path / "combined.xml"
+    controls = tuple(paths[2:5])
+    native, stderr = consumer.invoke(paths[0], paths[1], controls=controls, junit=default_xml)
+    assert not stderr
+    result, stderr = consumer.invoke(paths[0], paths[1], paths[5], controls=controls, junit=combined_xml)
+    assert not stderr
+    compact = consumer.check(
+        result,
+        native,
+        paths[0].read_bytes(),
+        {"target": (paths[1] / "target.json").read_bytes()},
+        {"target": (paths[5] / "target.json").read_bytes()},
+    )
+    assert compact["n_analyzed"] == 1 and result["result"]["control_evidence"]["status"] == "consistent"
+    assert default_xml.read_bytes() == combined_xml.read_bytes()
+
+
 @pytest.fixture
 def originals():
     manifest, reports = consumer.original_inputs(ROOT)

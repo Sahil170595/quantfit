@@ -1,10 +1,8 @@
 # CI integration — wiring `quantfit gate` into a release
 
-This page targets the **unreleased 0.64.0 source candidate**. Public installation remains **0.61.0** until release.
-
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
-The action and instrument examples below pin **quantfit 0.64.0**, including
+The action and instrument examples pin **quantfit 0.64.0**, including
 selected-axis policies. Its action default is `>=0.64.0,<0.65`; candidate validation
 uses the exact wheel through `quantfit-path`. Pin action and instrument separately
 for reproduction.
