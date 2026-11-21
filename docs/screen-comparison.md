@@ -11,6 +11,24 @@ candidate_bundle, *, out_path=None, junit_path=None)`. It returns a schema-1
 `quantfit.screen-comparison` dictionary. `ScreenComparisonError` is a categorical
 operational refusal, mapped to CLI exit 2. JSON and JUnit outputs are optional.
 
+## Digest-pinned archive inputs (0.68.0)
+
+Each side accepts a verified screen directory or one canonical screen ZIP with
+its lowercase SHA-256. The two sides can use different input forms.
+
+```bash
+quantfit bundle pack --bundle reference-screen --kind screen --out reference.zip --json
+quantfit screen-compare --reference-archive reference.zip --reference-sha256 SHA256 --candidate-bundle candidate-screen --out comparison.json --junit comparison.xml --json
+```
+
+Use the digest from the expected archive's pack receipt and substitute it for
+`SHA256`. The SDK accepts `reference_archive=(path, sha256)` and
+`candidate_archive=(path, sha256)` in place of the corresponding directory
+arguments. The receiver checks the archive digest and canonical screen
+transport before using its held members. JSON and JUnit retain the native
+manifest/report bindings and refuse outputs that alias an input. There is no
+extraction. A stale pin, wrong archive kind, or malformed option pair exits 2.
+
 Both sides are captured as original bytes and independently checked by the strict
 screen-bundle receiver. Their held target-manifest bytes must be identical; even
 reformatting is a different population declaration and refuses 2. Each closed bundle

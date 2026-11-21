@@ -41,6 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The **0.68.0 candidate** accepts
+[digest-pinned screen archives in comparisons](docs/screen-comparison.md#digest-pinned-archive-inputs-0680).
+Compare a canonical ZIP against another ZIP or a screen directory without extracting it.
+
 Quantfit **0.66.0** adds optional
 [JUnit for original reference-assessment criteria](docs/cli-reference.md#reference-assessment-junit-0660).
 Native decisions, JSON and mathematical work remain unchanged; unknown criteria

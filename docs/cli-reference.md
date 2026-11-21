@@ -231,6 +231,9 @@ See [the complete per-axis contract](screen-resolution.md#per-axis-requirements-
 
 Quantfit 0.34.0 adds `screen-compare --reference-bundle DIR
 --candidate-bundle DIR --out comparison.json --junit comparison.xml --json`.
+The 0.68.0 candidate adds a digest-pinned archive choice for each side, using
+`--reference-archive ZIP --reference-sha256 HEX` and
+`--candidate-archive ZIP --candidate-sha256 HEX`. The side choices can be mixed.
 The optional JSON/XML outputs share source/alias protection; they do not form a
 transaction. Both bundles must contain the exact same target-manifest bytes.
 Native flags on either side retain exit 3 before incomplete/incompatible 4;
