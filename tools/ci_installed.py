@@ -914,6 +914,7 @@ def main() -> None:
             "test_reference_replay.py",
             "test_saved_screen.py",
             "test_screen_control_evidence.py",
+            "test_screen_control_calibration.py",
             "test_ci_screen_resume.py",
             "test_ci_screen_bundle.py",
             "test_ci_screen_compare.py",

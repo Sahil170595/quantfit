@@ -4,6 +4,11 @@ Quantfit 0.45.0 adds [named calibration-choice sensitivity](calibration-choices.
 as a mutually exclusive input mode. The published single-calibration workflow
 below and its JSON/JUnit behavior stay unchanged.
 
+Quantfit **0.63.0** can also receive the complete supplied-control
+triplet with the single calibration directory and optional existing scalar
+ceiling. [Composition contract](saved-screen-control-evidence.md#single-calibration-composition-0630).
+Named variants continue to require a separate invocation.
+
 The [per-axis requirement](#per-axis-requirements-0620) is available since **0.62.0**.
 
 Available since quantfit 0.35.0. Native saved-screen summaries retain their existing

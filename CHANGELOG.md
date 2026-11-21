@@ -13,6 +13,18 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.63.0 — 2026-11-20
+
+- Compose the existing complete supplied-control triplet with single saved-screen
+  calibration and optional scalar resolution requirement. Reuse one held screen,
+  parsed report set, native base summary and prepared conditional analyses.
+- Keep control as annotation only, with unchanged dangerous-positive/whole-target
+  decode applicability and single-calibration qualification/JUnit. Preserve role,
+  byte/work and publication ownership boundaries without new source-stamp promises.
+- Extend native SDK/OS CLI and the existing four installed-profile consumer
+  cohort. Fictional command evidence and limits:
+  [validation](validation/2026-11-14-screen-control-calibration/README.md).
+
 ## 0.62.0 — 2026-11-20
 
 - Add `required_conditional_resolution_by_axis_pp` and repeatable

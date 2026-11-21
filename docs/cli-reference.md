@@ -1,5 +1,10 @@
 # CLI reference — every command, every flag
 
+Quantfit **0.63.0** combines the existing
+`--calibrations-dir` and complete supplied-control triplet for `screen-summary`,
+optionally with `--require-conditional-resolution PP`.
+See [single-calibration composition](saved-screen-control-evidence.md#single-calibration-composition-0630).
+
 Quantfit **0.62.0** adds repeatable
 `screen-summary --require-axis-conditional-resolution AXIS=PP` for separate
 selected-axis resolution ceilings.
@@ -8,10 +13,10 @@ Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --con
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.62.0.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.63.0.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.62.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.63.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
