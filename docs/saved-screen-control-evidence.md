@@ -22,7 +22,7 @@ result = summarize_screen(
 
 Supply all three roles or none. The default with no roles is unchanged.
 Published 0.61.0 refuses calibration/requirement combinations before reading
-inputs. Unreleased [0.63.0 single-calibration composition](#single-calibration-composition-source-candidate-0630)
+inputs. [0.63.0 single-calibration composition](#single-calibration-composition-0630)
 adds the single directory and optional existing scalar ceiling; named variants
 remain refused. Native source options (default, pinned Hub
 triplet or local whole SHA256) remain supported without resolving a source.
@@ -84,9 +84,9 @@ with fictional native producer data and is selected by all four existing install
 wheel/sdist consumers. Exact-head hosted qualification remains separate. No model,
 Hub, human labeling, sensitivity estimate or scientific qualification is established.
 
-## Single-calibration composition (source candidate 0.63.0)
+## Single-calibration composition (0.63.0)
 
-This requires **unreleased 0.63.0 source**; public installation remains **0.61.0**.
+Available since **0.63.0**.
 It uses the existing flags and API keywords, with no new mode flag:
 
 ```bash

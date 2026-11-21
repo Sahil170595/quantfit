@@ -13,7 +13,7 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.63.0 — Unreleased
+## 0.63.0 — 2026-11-20
 
 - Compose the existing complete supplied-control triplet with single saved-screen
   calibration and optional scalar resolution requirement. Reuse one held screen,
@@ -24,6 +24,20 @@
 - Extend native SDK/OS CLI and the existing four installed-profile consumer
   cohort. Fictional command evidence and limits:
   [validation](validation/2026-11-14-screen-control-calibration/README.md).
+
+## 0.62.0 — 2026-11-20
+
+- Add `required_conditional_resolution_by_axis_pp` and repeatable
+  `--require-axis-conditional-resolution AXIS=PP` to saved screen-summary.
+  One or both canonical axes receive separate finite percentage-point ceilings
+  across every original target and named calibration choice.
+- Reuse native prepared analyses and `_check_axis`, retaining measurable/attainable
+  requirements, native adverse verdict priority and missing-evidence uncertainty.
+  Selected schema-2 JSON and JUnit project only selected criteria; omitted and
+  legacy scalar fields, stdout and native case prefixes remain unchanged.
+- Extend the existing single/choice source and installed consumers without
+  provider/model work, new jobs or dependencies. Synthetic command evidence and
+  its limits: [validation](validation/2026-11-14-screen-axis-resolution/README.md).
 
 ## 0.61.0 — 2026-11-14
 

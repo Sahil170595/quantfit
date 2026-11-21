@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import stat
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -26,7 +27,12 @@ from quantfit.safety.gguf_arm import UNQUANTIZED_FILE_TYPES, is_gguf_ref
 from quantfit.safety.report import DriftReport
 from quantfit.safety.verify import ProbeCorpus
 from quantfit.screen import Target
-from quantfit.screen_requirement import qualify_screen, validate_requirement
+from quantfit.screen_requirement import (
+    axis_requirement,
+    qualify_screen,
+    validate_axis_requirements,
+    validate_requirement,
+)
 
 MAX_TOTAL_CALIBRATION_BYTES = 64 * 1024 * 1024
 MAX_ANALYSIS_WORK_UNITS = resolution.MAX_PROBES**2
@@ -276,9 +282,13 @@ def summarize_screen_with_resolution(
     out_path: str | None = None,
     junit_path: str | None = None,
     required_conditional_resolution_pp: float | None = None,
+    required_conditional_resolution_by_axis_pp: Mapping[str, float] | None = None,
     probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
 ) -> dict[str, Any]:
     required_conditional_resolution_pp = validate_requirement(required_conditional_resolution_pp)
+    axis_ceilings = validate_axis_requirements(
+        required_conditional_resolution_by_axis_pp, scalar=required_conditional_resolution_pp
+    )
     phase = "invalid_resolution_input"
     try:
         native = saved._hold_screen_inputs(manifest_path, reports_dir, out_path=out_path, junit_path=junit_path)
@@ -298,6 +308,10 @@ def summarize_screen_with_resolution(
         result = _summarize_inputs(native, calibrations, probe_corpus=probe_corpus)
         if required_conditional_resolution_pp is not None:
             qualify_screen(result, required_conditional_resolution_pp)
+        elif axis_ceilings is not None:
+            requirement = axis_requirement(result, result["conditional_resolution"]["rows"], axis_ceilings)
+            result["conditional_resolution_requirement"] = requirement
+            result["exit_code"] = requirement["qualification_exit_code"]
         phase = "output_failure"
         buffers = []
         if out_path is not None:

@@ -8,6 +8,7 @@ import math
 import os
 import re
 import stat
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -513,12 +514,18 @@ def summarize_screen(
     calibrations_dir: str | None = None,
     calibration_variants: dict[str, str | None] | None = None,
     required_conditional_resolution_pp: float | None = None,
+    required_conditional_resolution_by_axis_pp: Mapping[str, float] | None = None,
     probe_corpus: ProbeCorpus | LocalProbeCorpus | None = None,
     control_report: str | None = None,
     control_capture: str | None = None,
     control_adjudication: str | None = None,
 ) -> dict[str, object]:
     """Hold once; annotate native resolution, or explicitly require its declared ceiling."""
+    from quantfit.screen_requirement import validate_axis_requirements
+
+    axis_ceilings = validate_axis_requirements(
+        required_conditional_resolution_by_axis_pp, scalar=required_conditional_resolution_pp
+    )
     if any(value is not None for value in (control_report, control_capture, control_adjudication)):
         from quantfit.screen_control_evidence import summarize_with_control
 
@@ -529,7 +536,7 @@ def summarize_screen(
             "control_roles_all_or_none",
         )
         _require(
-            calibration_variants is None,
+            calibration_variants is None and axis_ceilings is None,
             "control_calibration_combination_unsupported",
         )
         if required_conditional_resolution_pp is not None:
@@ -561,12 +568,15 @@ def summarize_screen(
             out_path=out_path,
             junit_path=junit_path,
             required_conditional_resolution_pp=required_conditional_resolution_pp,
+            required_conditional_resolution_by_axis_pp=axis_ceilings,
             probe_corpus=probe_corpus,
         )
     if required_conditional_resolution_pp is not None:
         from quantfit.screen_requirement import validate_requirement
 
         required_conditional_resolution_pp = validate_requirement(required_conditional_resolution_pp)
+        _require(calibrations_dir is not None, "conditional_resolution_requires_calibrations")
+    if axis_ceilings is not None:
         _require(calibrations_dir is not None, "conditional_resolution_requires_calibrations")
     if calibrations_dir is not None:
         from quantfit.screen_resolution import summarize_screen_with_resolution
@@ -578,6 +588,7 @@ def summarize_screen(
             out_path=out_path,
             junit_path=junit_path,
             required_conditional_resolution_pp=required_conditional_resolution_pp,
+            required_conditional_resolution_by_axis_pp=axis_ceilings,
             probe_corpus=probe_corpus,
         )
     phase = "unsafe_output"
