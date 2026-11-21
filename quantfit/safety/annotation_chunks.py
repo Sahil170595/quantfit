@@ -203,7 +203,8 @@ def collect_annotation_chunks(
             paths = _indexed_part_paths(indexed_parts)
             indices = sorted(paths)
             part_paths = tuple(paths[index] for index in indices)
-        require(type(part_paths) is tuple and 1 <= len(part_paths) <= MAX_PARTS)
+        if part_paths is None or type(part_paths) is not tuple or not 1 <= len(part_paths) <= MAX_PARTS:
+            raise AnnotationChunksError("invalid_annotation_chunks")
         inputs = _held(
             (sheet_path, key_path, manifest_path, *part_paths),
             (MAX_SHEET_BYTES, MAX_KEY_BYTES, MAX_MANIFEST_BYTES, *(MAX_SHEET_BYTES for _ in part_paths)),
