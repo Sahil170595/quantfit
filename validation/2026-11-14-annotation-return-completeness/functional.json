@@ -1,0 +1,298 @@
+{
+  "record_schema": 1,
+  "source_candidate": "0.65.0",
+  "public_install_version": "0.61.0",
+  "base_commit": "7a72944421d5c7d0087c6961728e8ff9f139e1f5",
+  "environment": {
+    "os": "Windows-11-10.0.26300-SP0",
+    "architecture": "AMD64",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python": "3.13.1",
+    "packages": {
+      "pytest": "9.0.3",
+      "ruff": "0.16.2",
+      "mypy": "2.0.0"
+    },
+    "quantfit_runtime_and_scoped_editable": "0.65.0",
+    "uv": "0.13.7",
+    "gpu_used": false,
+    "scope": "Existing scoped system-site editable environment; inherited checkout metadata shadow preserved; no new environment/dependency/global package changes"
+  },
+  "selected_attempt": {
+    "tests": 309,
+    "passed": 308,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0,
+    "by_module": {
+      "tests.test_annotation_return_completeness": 70,
+      "tests.test_annotation_returns": 41,
+      "tests.test_ci_annotation_chunks": 1,
+      "tests.test_cli": 33,
+      "tests.test_ci_installed_imports": 6,
+      "tests.test_meta": 6,
+      "tests.test_audit": 81,
+      "tests.test_refreports": 71
+    },
+    "new_completeness_cases": 70,
+    "command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m pytest -q -p no:cacheprovider tests/test_annotation_return_completeness.py tests/test_annotation_returns.py tests/test_ci_annotation_chunks.py tests/test_cli.py tests/test_ci_installed_imports.py tests/test_meta.py tests/test_audit.py tests/test_refreports.py --basetemp=C:\\tmp\\sequential-delivery-20261113\\qf-065-final-01 --junitxml=C:\\tmp\\sequential-delivery-20261113\\qf-065-final.xml",
+    "log_sha256": "a8cedd7cc8dbb1fcad794021c9d7c7b705880032fb9fb68405a186337e94a0d0",
+    "xml_sha256": "d2096ddccceb3017514383efc30d457ec4e6724879c42c607f442593a12780b0",
+    "sole_failure": "tests.test_meta.test_every_cli_flag_has_a_row_in_the_validation_matrix",
+    "cause": "New flag was documented in the historical appendix rather than active section3 inventory; runtime controls all passed"
+  },
+  "doc_only_followup": {
+    "tests": 6,
+    "passed": 6,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m pytest -q -p no:cacheprovider tests/test_meta.py --basetemp=C:\\tmp\\sequential-delivery-20261113\\qf-065-meta-final-01 --junitxml=C:\\tmp\\sequential-delivery-20261113\\qf-065-meta-final.xml",
+    "xml_sha256": "fe0294b642bffb9b1f4c85365e1f17039333e9c7daaecb64bf5f8d6c729e8a17",
+    "repair": "Preserve historical appendix row; add current require-complete/JUnit row to active section3",
+    "runtime_source_unchanged": true,
+    "scope": "Six actual metadata controls pass after docs-only repair; overlapping counts are not summed and no synthetic merged JUnit is produced"
+  },
+  "prior_attempts": [
+    {
+      "record": "qf-065-red",
+      "counts": {
+        "tests": 5,
+        "passed": 0,
+        "failed": 5,
+        "errors": 0,
+        "skipped": 0
+      },
+      "cause": "New SDK policy/JUnit and CLI surface absent on accepted base"
+    },
+    {
+      "record": "qf-065-green",
+      "counts": {
+        "tests": 83,
+        "passed": 83,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "scope": "Initial feature plus all original native chunk/return/collection/ingest consumer controls"
+    },
+    {
+      "record": "qf-065-controls",
+      "counts": {
+        "tests": 70,
+        "passed": 70,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "scope": "Expanded private projection/census/actual consumer/publication controls before final version/static pass"
+    },
+    {
+      "record": "qf-065-type.log",
+      "cause": "Local skip-import rendered UTF8 bytes inferredAny; use real bytes(str,utf8) construction, no cast or ignore"
+    },
+    {
+      "record": "qf-065-lint.log",
+      "cause": "Import ordering; corrected"
+    }
+  ],
+  "legacy_parity": {
+    "schema": 1,
+    "source_candidate": "0.65.0",
+    "base": "7a72944421d5c7d0087c6961728e8ff9f139e1f5",
+    "all_equal": true,
+    "version_freeze": "Only native receipt/tool version0.61.0; original held sheets/keys/parts and stored manifest versions remain exact before-witness inputs",
+    "cases": [
+      {
+        "case": "complete",
+        "checks": {
+          "SDK_default": true,
+          "SDK_false": true,
+          "SDK_false_with_junit": true,
+          "OSCLI_json": true,
+          "OSCLI_human": true
+        },
+        "JSON_sha256": "560a36e3039662dbf03a255a5ac7993fa7ac8c8d5833ebb9158a06424c73ff64",
+        "human_sha256": "16da4bfd5dea7c9894bcf9acf07dbf4b3b21575a70a6f46c271be1851435029f",
+        "json_stdout_sha256": "2692503818e1f1a86e0a1c98bba6480e2e117e7211ab8cb011ce5d366ec2bf00"
+      },
+      {
+        "case": "partial",
+        "checks": {
+          "SDK_default": true,
+          "SDK_false": true,
+          "SDK_false_with_junit": true,
+          "OSCLI_json": true,
+          "OSCLI_human": true
+        },
+        "JSON_sha256": "037f15ec74dd9e376196ee6770234c9e878c03d0fd6568998f6ceb45ad3bdb6f",
+        "human_sha256": "67f20b2312c51c78935816602f8e94f9860b46ac0bbaec2240371e7d5e8e19df",
+        "json_stdout_sha256": "380dc55d8d99f486823ad4a70ce32952a5ad813a800a4be3665f15001d30ab5b"
+      },
+      {
+        "case": "out_of_order",
+        "checks": {
+          "SDK_default": true,
+          "SDK_false": true,
+          "SDK_false_with_junit": true,
+          "OSCLI_json": true,
+          "OSCLI_human": true
+        },
+        "JSON_sha256": "f75ad4cda7af62f0d1c023dcd402233cbc168780d411d4c15802dbc3fb2b2a9a",
+        "human_sha256": "16da4bfd5dea7c9894bcf9acf07dbf4b3b21575a70a6f46c271be1851435029f",
+        "json_stdout_sha256": "66503dc8a98a719ee0fc2ce4c7db7d384fba3be0d96b821dc40cf0ebc3467041"
+      },
+      {
+        "case": "all_unusable",
+        "checks": {
+          "SDK_default": true,
+          "SDK_false": true,
+          "SDK_false_with_junit": true,
+          "OSCLI_json": true,
+          "OSCLI_human": true
+        },
+        "JSON_sha256": "b75a97bec2b7fde6740535a0c29f05c7b34a4887a9e3d8a20175dca9243b99f9",
+        "human_sha256": "16da4bfd5dea7c9894bcf9acf07dbf4b3b21575a70a6f46c271be1851435029f",
+        "json_stdout_sha256": "d5eb258ecbe4f878d85fa1ba0527a69857770d6fe6b47b94fcf4a2517f141590"
+      },
+      {
+        "case": "stored_producer_version",
+        "checks": {
+          "SDK_default": true,
+          "SDK_false": true,
+          "SDK_false_with_junit": true,
+          "OSCLI_json": true,
+          "OSCLI_human": true
+        },
+        "JSON_sha256": "337e5c37d3c337f3680e2ffb9e65bab7e7ca5177658182962ea09808b935c76c",
+        "human_sha256": "16da4bfd5dea7c9894bcf9acf07dbf4b3b21575a70a6f46c271be1851435029f",
+        "json_stdout_sha256": "7305bcfad621342bba2bc1965d375d402b8f082e3f14fe075e94e259edfc32ba"
+      }
+    ],
+    "scope": "Default, explicitFalse and False-with-JUnit native JSON bytes; real OSCLI JSON/human/saved-byte/exit parity with added optional JUnit. No labels or calibration changed."
+  },
+  "native_controls": {
+    "full_original_manifest_stored_version_reconstruction": true,
+    "every_supplied_part_native_join_before_requirement": true,
+    "native_functions_ast_unchanged": [
+      "_held",
+      "_blank",
+      "_preparation",
+      "prepare_annotation_chunks",
+      "collect_annotation_chunks"
+    ],
+    "unchanged_publisher_git_blob": "9b4ff63dbfadda9fbccccbd5cfec4c848eb3df62",
+    "single_hold_per_explicit_role": true,
+    "two_returned_parts_held_roles": 5,
+    "two_returned_parts_native_joins": 2,
+    "both_sinks_admitted_after_holds_before_private_csv": true,
+    "one_publish_after_all_requested_buffers": true,
+    "no_outputs_still_check_held_inputs": true,
+    "schema2_and_schema3_ingest_consumer_retained": true,
+    "complete_all_unusable_requirement_exit": 0,
+    "all_unusable_native_ingest_still_refuses": true,
+    "actual_os_cli_late_xml_failure_exit": 2,
+    "first_published_receipt_requirement_exit": 4
+  },
+  "maximum_junit": {
+    "native_parts": 128,
+    "original_rows": 128,
+    "cases": 129,
+    "bytes": 22001,
+    "cap_bytes": 65536,
+    "sha256": "d4a3d8b20dd2aa68b2efe4db779eb045ce4267df6ddf2fa704a02de22d2c14c4",
+    "numeric_original_part_order": true,
+    "all_unusable_is_coverage_pass": true
+  },
+  "coverage_requirement_block": {
+    "requirement_schema": 1,
+    "require_complete": true,
+    "native_validation_exit_code": 0,
+    "exit_code_domain": [
+      0,
+      4
+    ]
+  },
+  "publication_boundaries": [
+    "All explicit private roles held once before both sink admissions; sink refusal is after private byte reads but before CSV parsing/rendering",
+    "One unchanged retention_io.publish call after all validation/gate/requested buffers; exclusive O_EXCL is not per-file atomic and not a pair transaction",
+    "Source stamps checked after staging before first creation; pre-checkpoint source mutation refuses before either target",
+    "Source-only mutation after checkpoint can return original held snapshot; no between-write source-stamp promise",
+    "Target/ancestor substitution and late second-output failure refuse, retaining first output/foreign work; actual CLI operational2 overrides valid coverage4"
+  ],
+  "static": {
+    "owned_typing_command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m mypy --strict --follow-imports=skip --cache-dir C:\\tmp\\sequential-delivery-20261113\\qf-065-type-final-01 quantfit/safety/annotation_chunks.py quantfit/safety/annotation_returns_junit.py quantfit/annotation_chunks_cli.py tools/ci_annotation_chunks.py",
+    "owned_typing": "Success: no issues found in4source files; full canonical hosted typing remains required",
+    "ruff_check_command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m ruff check quantfit tests tools",
+    "ruff_check": "passed",
+    "ruff_format_command": "C:\\tmp\\qf-env-20261113\\Scripts\\python.exe -B -m ruff format --check quantfit tests tools/ci_*.py tools/ci_gate_fixture tools/ci_corpus_fixture",
+    "ruff_format": "296 files already formatted",
+    "audit_counts": {
+      "findings": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "independent_ci_lock": "UVlocked/offline174packages; tools/ci project+lock unchanged; no root lock exists",
+    "final_audit_counts": {
+      "findings": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "final_audit_sha256": "8c56c16bd9376317cfd9e1133e84c4c07872a29c5f45de6da0958923c6f20a83"
+  },
+  "source_identities": [
+    {
+      "path": "quantfit/safety/annotation_chunks.py",
+      "sha256": "ef40109fa98fcdc6894bb4d024d28fb14927221907c41658471d72f68d799234",
+      "git_blob": "596ba31dee64f569e204f20385d509c39f106d2b"
+    },
+    {
+      "path": "quantfit/safety/annotation_returns_junit.py",
+      "sha256": "e9d7cc812c6bb22912b581993296cd662110c624b618ddc02fd6c53dc7a3f53f",
+      "git_blob": "792f6b1eec1fc6227fcb1602580e35327ed35d01"
+    },
+    {
+      "path": "quantfit/annotation_chunks_cli.py",
+      "sha256": "5ae951cdf46ca44801a3df6d3a5fab562f92ee7dec56e47de70c75dcacdb9be9",
+      "git_blob": "90f32baed02f478ee412fce6cb00ee614feeeb01"
+    },
+    {
+      "path": "quantfit/cli.py",
+      "sha256": "b56afe0dc61bbef75841a54241412da8f8ec84a9c659ad10aa26cee68a8201da",
+      "git_blob": "3837b2d212861eaceeda568a297c6284ca4218d1"
+    },
+    {
+      "path": "tools/ci_annotation_chunks.py",
+      "sha256": "ae4c9834db106c8536e47359a7312e2fb29e363eb34bd89f4e93d28d4e2c1385",
+      "git_blob": "34853de10982ce2c3bc916e3191d15fce3b2cc6a"
+    },
+    {
+      "path": "tools/ci_installed.py",
+      "sha256": "c9bf4307854f98607628c2fbf536e49b073b33dba1da9d0799128f567ac09aa8",
+      "git_blob": "66f10d657460aa9e63bdcc7cdfac8aa7f8ea1c50"
+    },
+    {
+      "path": "tests/test_annotation_return_completeness.py",
+      "sha256": "9c7455aec436b95958c7265f08c6bc8f6718be272c0aa92b6a0245ff5c0ae9cf",
+      "git_blob": "0a09b13196dda5846a360523c4282cde06033f89"
+    },
+    {
+      "path": "tests/test_ci_annotation_chunks.py",
+      "sha256": "f5a14448d34ab7320f50f58bc4e559019c098d023ce4ca59de10fe347d794c24",
+      "git_blob": "ef69818356d40737acfd032b917a0ce00f1c393d"
+    },
+    {
+      "path": ".github/workflows/validate.yml",
+      "sha256": "a065df6e49b04aa6dbb64ce622c1925a20f6bf83cf40b5f0f7c9b2356a1f7be5",
+      "git_blob": "439ac104483b7f4ddf9530ce755b8ec0c8d0c72d"
+    }
+  ],
+  "limits": [
+    "Fictional native sheets/keys/parts and explicit manufactured labels only; no model, judge, provider, Hub, new asset, human evaluation or mathematical/calibration work",
+    "Coverage PASS describes validated complete returned files, including unusable labels; it establishes no usable measurement, rater identity, label truth, independence, sensitivity or scientific GO",
+    "Default/False old schema1 bytes and human output remain exact; XML contains only safe counts/hash and fixed/numeric names after strict private crosscoverage validation",
+    "Local editable-source proof; own hosted OS/matrix/CodeQL/canonical typing/audit and all four clean installed profiles remain required",
+    "Native publication is exclusive and non-atomic; interruption or later output failure may leave earlier or partial output; no rollback/unknown-file deletion or stronger hostile-race guarantee",
+    "Original before/red/failed inventory and native fault witnesses stay under named qf-065 resources; no CSV rows, key salts, captures, labels, raw manifests or private paths are committed"
+  ]
+}

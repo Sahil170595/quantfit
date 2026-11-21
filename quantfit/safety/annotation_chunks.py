@@ -246,9 +246,12 @@ def validate_annotation_returns(
     indexed_parts: tuple[tuple[int, str], ...],
     *,
     out_path: str | None = None,
+    require_complete: bool = False,
+    junit_path: str | None = None,
 ) -> dict[str, Any]:
     """Inspect complete supplied parts; missing original parts remain explicit."""
     try:
+        require(type(require_complete) is bool)
         require(type(indexed_parts) is tuple and 1 <= len(indexed_parts) <= MAX_PARTS)
         indices = []
         paths = []
@@ -263,6 +266,8 @@ def validate_annotation_returns(
             (sheet_path, key_path, manifest_path, *paths),
             (MAX_SHEET_BYTES, MAX_KEY_BYTES, MAX_MANIFEST_BYTES, *(MAX_SHEET_BYTES for _ in paths)),
         )
+        # Admit both exclusive sinks after all holds, before private CSV parsing/rendering.
+        targets = admit_outputs(tuple(path for path in (out_path, junit_path) if path is not None), inputs)
         manifest = _json(inputs[2].data)
         version = manifest["quantfit_version"]
         require(type(version) is str and 0 < len(version) <= 64)
@@ -312,11 +317,33 @@ def validate_annotation_returns(
             "No label values, source text, IDs, paths, automatic labels or calibration are returned. "
             "Byte agreement does not authenticate a rater, human truth, sensitivity or scientific GO.",
         }
+        if require_complete:
+            result["annotation_returns_schema"] = 2
+            result["completeness_requirement"] = {
+                "requirement_schema": 1,
+                "require_complete": True,
+                "native_validation_exit_code": 0,
+                "exit_code": 4 if missing else 0,
+            }
         raw = _encode(result)
         require(len(raw) <= MAX_RECEIPT_BYTES)
+        buffers = []
         if out_path is not None:
-            targets = admit_outputs((out_path,), inputs)
-            publish(((targets[0], raw),), inputs)
+            buffers.append((targets[0], raw))
+        if junit_path is not None:
+            from quantfit.safety.annotation_returns_junit import _Coverage, _to_junit
+
+            coverage = _Coverage(
+                tuple(len(part["ids"]) for part in manifest["parts"]),
+                tuple(sorted(indices)),
+                len(rows),
+                n_received,
+                require_complete,
+                _binding(inputs[2].data)["sha256"],
+            )
+            buffers.append((targets[-1], _to_junit(coverage)))
+        if buffers:
+            publish(tuple(buffers), inputs)
         else:
             for held in inputs:
                 held.check()

@@ -1,5 +1,10 @@
 # CLI reference — every command, every flag
 
+Quantfit **0.65.0** adds `--require-complete` and optional
+`--junit PATH` only to `calibrate chunks validate`. Valid missing coverage exits 4
+after all supplied parts validate; malformed inputs/output failures remain exit 2.
+See [complete-return requirements and XML](annotation-chunks.md#complete-return-requirement-and-junit-0650).
+
 Quantfit **0.64.0** adds `--kind aggregate|replay|screen`
 only to `bundle pack`, `bundle archive-verify` and `bundle unpack`. The default is
 `aggregate`; kinds are explicit and never autodetected. See [format, limits and
@@ -18,10 +23,10 @@ Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --con
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.64.0.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.65.0.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.64.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.65.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -862,6 +867,11 @@ and missing part indices remain explicit. No labels are inferred or ingested:
 ```bash
 quantfit calibrate chunks validate --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --part 2=returned-part-2.labels.csv --out inspection.json --json
 ```
+
+Quantfit 0.65.0 also accepts `--require-complete --junit inspection.xml`
+on that validate command. The requirement covers every original manifest part;
+missing parts are XML errors/exit 4 when required and skipped/default exit 0 otherwise.
+Neither option collects or ingests labels.
 
 Explicitly fill every returned part, then collect them in manifest order:
 

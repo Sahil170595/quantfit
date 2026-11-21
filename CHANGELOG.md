@@ -13,6 +13,18 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.65.0 — 2026-11-20
+
+- Add opt-in complete original annotation-return coverage and requested bounded
+  aggregate JUnit to the existing native validator/CLI. Validate every supplied
+  part first; malformed/output errors2 outrank valid missing4, complete0 includes
+  all-unusable returns. Default/False schema-1 JSON and human output are unchanged.
+- Preserve native held-snapshot and exclusive non-atomic publication semantics;
+  no collection, ingestion, provider or new mathematical work. Extend the existing
+  four installed consumers with real OS CLI and native collection/ingest controls.
+- Exact fictional command evidence, negative controls and limits:
+  [validation](validation/2026-11-14-annotation-return-completeness/README.md).
+
 ## 0.64.0 — 2026-11-20
 
 - Extend existing archive commands with an explicit aggregate/replay/screen kind.
