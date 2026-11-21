@@ -1049,6 +1049,16 @@ all member paths, including manifests and hardlink aliases. An output cannot rep
 consumed evidence or appear inside either bundle. Both original native T0/report
 bytes and historical producer versions remain intact.
 
+### Replay bundle publication (0.71.0)
+
+`bundle replay-create` reserves a new destination, creates each member
+exclusively and writes the manifest last. If writing fails, it removes
+only files and the destination whose ownership it can verify. A collision
+with a foreign file or uncertain ownership leaves the destination for
+inspection and returns exit 2 with `partial_destination_preserved`.
+After an owned-only rollback, the same destination can be used again.
+The bundle format, original report bytes and original T0 stay compatible.
+
 ### Reproduction JUnit
 
 Quantfit 0.28.0 adds `--junit PATH` in both loose-report and bundle input

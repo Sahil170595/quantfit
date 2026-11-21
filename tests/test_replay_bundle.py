@@ -1,5 +1,7 @@
 """Offline T0 handoff of saved aggregates; no new model or independence proof."""
 
+import contextlib
+import io
 import json
 import os
 import subprocess
@@ -297,7 +299,8 @@ def test_held_input_substitution_cannot_change_copied_members(tmp_path, monkeypa
 def test_incomplete_staging_never_advertises_a_valid_bundle(tmp_path, monkeypatch, fault, member):
     paths, t0 = inputs(tmp_path)
     out = tmp_path / "bundle"
-    original_open = Path.open
+    original_open, original_fdopen = os.open, os.fdopen
+    pending = set()
 
     class Broken:
         def __init__(self, handle):
@@ -322,16 +325,29 @@ def test_incomplete_staging_never_advertises_a_valid_bundle(tmp_path, monkeypatc
             if fault == "flush":
                 raise OSError("synthetic flush failure")
 
+        def fileno(self):
+            return self.handle.fileno()
+
         def __exit__(self, *args):
             self.handle.close()
             if fault == "close":
                 raise OSError("synthetic close failure")
 
-    def failing(path, mode="r", *args, **kwargs):
-        h = original_open(path, mode, *args, **kwargs)
-        return Broken(h) if path.parent == out and path.name == member and mode == "xb" else h
+    def track(path, flags, *args, **kwargs):
+        fd = original_open(path, flags, *args, **kwargs)
+        if Path(path) == out / member and flags & os.O_EXCL:
+            pending.add(fd)
+        return fd
 
-    monkeypatch.setattr(Path, "open", failing)
+    def failing(fd, *args, **kwargs):
+        handle = original_fdopen(fd, *args, **kwargs)
+        if fd in pending:
+            pending.remove(fd)
+            return Broken(handle)
+        return handle
+
+    monkeypatch.setattr(os, "open", track)
+    monkeypatch.setattr(os, "fdopen", failing)
     with pytest.raises((BundleError, KeyboardInterrupt)):
         create_replay_bundle(paths, str(t0), str(out))
     assert not out.exists()
@@ -437,3 +453,69 @@ def test_private_loader_retains_exact_verified_buffers(tmp_path, monkeypatch):
     assert len(calls) == 5 and len(set(calls)) == 5
     assert held["replicate-1"] == Path(paths[0]).read_bytes()
     assert held["t0"] == t0.read_bytes()
+
+
+def replay_publication_case(root, fault):
+    paths, t0 = inputs(root)
+    out = root / "handoff"
+    originals = {Path(path): Path(path).read_bytes() for path in (*paths, t0)}
+    foreign_name = "report-2.json" if fault == "expected_name_collision" else "local-note"
+    foreign = out / foreign_name
+    sentinel = b"synthetic unrelated bytes"
+    original_open, original_fsync = os.open, os.fsync
+    writes = 0
+
+    def create_competing_file(path, flags, *args, **kwargs):
+        if Path(path) == foreign and flags & os.O_EXCL:
+            with foreign.open("xb") as stream:
+                stream.write(sentinel)
+        return original_open(path, flags, *args, **kwargs)
+
+    def controlled_fsync(fd):
+        nonlocal writes
+        writes += 1
+        if fault == "owned_interruption":
+            raise OSError("controlled owned write failure")
+        final_write = {"foreign_before_manifest": 4, "foreign_after_manifest": 5}.get(fault)
+        if writes == final_write:
+            with foreign.open("xb") as stream:
+                stream.write(sentinel)
+        return original_fsync(fd)
+
+    def invoke():
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            code = main(["bundle", "replay-create", "--reports", *paths, "--t0", str(t0), "--out", str(out), "--json"])
+        return code, json.loads(stdout.getvalue())
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(os, "open", create_competing_file)
+        patch.setattr(os, "fsync", controlled_fsync)
+        code, document = invoke()
+    assert code == document["exit_code"] == 2
+    manifest_present = (out / "manifest.json").exists()
+    assert not manifest_present
+    receipt = {"exit_code": code, "manifest_present_on_failure": manifest_present}
+    if fault == "owned_interruption":
+        assert not out.exists()
+        retry_code, retry_result = invoke()
+        assert retry_code == 0 and retry_result["result"]["integrity_verified"]
+        verified = verify_replay_bundle(str(out))
+        assert verified["integrity_verified"] and verified["original_t0"] == json.loads(t0.read_bytes())
+        for index, path in enumerate(paths, 1):
+            assert (out / f"report-{index}.json").read_bytes() == originals[Path(path)]
+        receipt.update(destination_removed=True, retry_exit_code=retry_code, originals_verified=True)
+    else:
+        assert document["error"]["message"] == "partial_destination_preserved"
+        assert foreign.read_bytes() == sentinel
+        receipt.update(destination_removed=False, foreign_bytes_preserved=True, category=document["error"]["message"])
+    assert all(path.read_bytes() == raw for path, raw in originals.items())
+    return receipt
+
+
+@pytest.mark.parametrize(
+    "fault", ["owned_interruption", "expected_name_collision", "foreign_before_manifest", "foreign_after_manifest"]
+)
+def test_replay_cli_removes_only_attested_owned_files(tmp_path, fault):
+    receipt = replay_publication_case(tmp_path, fault)
+    assert receipt["destination_removed"] == (fault == "owned_interruption")

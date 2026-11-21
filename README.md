@@ -41,6 +41,8 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The **0.71.0 candidate** adds [ownership-checked replay bundle publication](docs/cli-reference.md#replay-bundle-publication-0710) for interrupted writes and safe retries.
+
 Quantfit **0.66.0** adds optional
 [JUnit for original reference-assessment criteria](docs/cli-reference.md#reference-assessment-junit-0660).
 Native decisions, JSON and mathematical work remain unchanged; unknown criteria
