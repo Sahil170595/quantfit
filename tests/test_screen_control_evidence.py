@@ -420,7 +420,15 @@ def test_wrong_bound_inputs_refuse_without_publishing(tmp_path, change):
     assert output.read_bytes() == b"prior"
 
 
-@pytest.mark.parametrize("combination", ["partial", "calibration_variants", "required_conditional_resolution_pp"])
+@pytest.mark.parametrize(
+    "combination",
+    [
+        "partial",
+        "calibration_variants",
+        "required_conditional_resolution_pp",
+        "required_conditional_resolution_by_axis_pp",
+    ],
+)
 def test_unsupported_combinations_refuse_before_io(tmp_path, monkeypatch, combination):
     from quantfit.saved_screen import SavedScreenError, summarize_screen
 
@@ -431,6 +439,8 @@ def test_unsupported_combinations_refuse_before_io(tmp_path, monkeypatch, combin
         kwargs[combination] = (
             {"a": None}
             if combination == "calibration_variants"
+            else {"refusal-robustness": 1}
+            if combination == "required_conditional_resolution_by_axis_pp"
             else 1.0
             if combination == "required_conditional_resolution_pp"
             else "missing-dir"

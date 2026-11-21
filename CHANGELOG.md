@@ -13,6 +13,13 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.67.0 — Unreleased
+
+- Accept selected-axis `screen-summary` requirements with a complete supplied-control triplet
+  and a single calibration directory. Reuse the native requirements, exit priorities and JUnit.
+- Keep the original target census and control annotations in one held offline operation.
+  [Functional evidence](validation/2026-11-21-screen-control-axis/README.md).
+
 ## 0.66.0 — 2026-11-20
 
 - Add optional reference-assessment JUnit and a pure closed renderer over the

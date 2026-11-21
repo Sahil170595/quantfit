@@ -1,0 +1,118 @@
+{
+  "tool_version": "0.67.0",
+  "editable_distribution": "0.67.0",
+  "python": "3.13.1",
+  "os": "Windows",
+  "fixture": "qualified() from tests/test_screen_control_calibration.py and real OS CLI",
+  "source_base": "602feec6927ee169e86ff2d4bed420195e9b4f85",
+  "file_sha256": {
+    "quantfit/saved_screen.py": "10191ada1883c610a5992c8cd0f5e139b9f13dcb794ede38e03abc7d8fc7c580",
+    "quantfit/screen_control_evidence.py": "67a68f695916803638689dc10c8eba04c137876ecf10e4b5af6483e78f7b4ad4",
+    "quantfit/screen_requirement.py": "c2ee3c4d75d6ce529d63a91e194e37ddc563a69d31b12af0baf8e7333e1a1a72",
+    "quantfit/screen_resolution.py": "e5cd22bd124741e00c1c61621b21391092299b519ee9f76960dd0e796b6245f2"
+  },
+  "cases": [
+    {
+      "scenario": "qualified_two_axes",
+      "selected_axes": [
+        "refusal-robustness",
+        "over-refusal"
+      ],
+      "declared_settings": [
+        "refusal-robustness=40",
+        "over-refusal=40"
+      ],
+      "target_count": 1,
+      "control_status": "conflicting",
+      "native_exit": 0,
+      "exit_code": 0,
+      "requirement_met": true,
+      "junit_cases": 4,
+      "output_sha256": "a727fdcb5afb3c97b08e7fffac810179ee8558aed0f8bddb46cef33ada273c88",
+      "junit_sha256": "90e018450b5a9e1729aab043ede8fb45c277fe41a0bed834d1e2017bd405aabe",
+      "scientific_go": false,
+      "human_labels_authenticated": false,
+      "sensitivity_established": false
+    },
+    {
+      "scenario": "unmet_selected_axis",
+      "selected_axes": [
+        "refusal-robustness"
+      ],
+      "declared_settings": [
+        "refusal-robustness=1"
+      ],
+      "target_count": 1,
+      "control_status": "conflicting",
+      "native_exit": 0,
+      "exit_code": 5,
+      "requirement_met": false,
+      "junit_cases": 3,
+      "output_sha256": "cfe6b922171398fcbe97ed4cfb96d2f820433a3838945fa03e22dea231fea03c",
+      "junit_sha256": "bd3f366cd5af43899801bbc2aaec0d48291758c837dc722f8c614baa85db6cc1",
+      "scientific_go": false,
+      "human_labels_authenticated": false,
+      "sensitivity_established": false
+    },
+    {
+      "scenario": "native_flags",
+      "selected_axes": [
+        "refusal-robustness"
+      ],
+      "declared_settings": [
+        "refusal-robustness=1"
+      ],
+      "target_count": 1,
+      "control_status": "conflicting",
+      "native_exit": 3,
+      "exit_code": 3,
+      "requirement_met": false,
+      "junit_cases": 3,
+      "output_sha256": "f5147491aa08b2406d12b3a1d4a1d15ee842c4c19450e367edbe7e9712a44252",
+      "junit_sha256": "64377b34cbcb973164902a78318df63a277b64a598d770bc32bf53c6299a4c71",
+      "scientific_go": false,
+      "human_labels_authenticated": false,
+      "sensitivity_established": false
+    },
+    {
+      "scenario": "missing_calibration",
+      "selected_axes": [
+        "refusal-robustness"
+      ],
+      "declared_settings": [
+        "refusal-robustness=40"
+      ],
+      "target_count": 1,
+      "control_status": "conflicting",
+      "native_exit": 0,
+      "exit_code": 4,
+      "requirement_met": false,
+      "junit_cases": 3,
+      "output_sha256": "97303275950f8446da9533adee40874101e975f7a117921a947c24c581c2532f",
+      "junit_sha256": "5672938790ff663e250eb5b247e898fd467be1389d4f70dec1fc84f016e7af3b",
+      "scientific_go": false,
+      "human_labels_authenticated": false,
+      "sensitivity_established": false
+    },
+    {
+      "scenario": "native_incomplete",
+      "selected_axes": [
+        "refusal-robustness"
+      ],
+      "declared_settings": [
+        "refusal-robustness=1"
+      ],
+      "target_count": 1,
+      "control_status": "missing",
+      "native_exit": 4,
+      "exit_code": 4,
+      "requirement_met": false,
+      "junit_cases": 3,
+      "output_sha256": "ec28364376ac2e6231aa1cabd2e63fc30a65b13f6b5a5333eb40b8ca8220f683",
+      "junit_sha256": "9ece61e3c18c33fe3b8ce6ece5b9474d6509523028aaf0fa6308b18ffff45a48",
+      "scientific_go": false,
+      "human_labels_authenticated": false,
+      "sensitivity_established": false
+    }
+  ]
+}

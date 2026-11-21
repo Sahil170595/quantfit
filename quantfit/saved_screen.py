@@ -536,14 +536,17 @@ def summarize_screen(
             "control_roles_all_or_none",
         )
         _require(
-            calibration_variants is None and axis_ceilings is None,
+            calibration_variants is None,
             "control_calibration_combination_unsupported",
         )
         if required_conditional_resolution_pp is not None:
             from quantfit.screen_requirement import validate_requirement
 
             required_conditional_resolution_pp = validate_requirement(required_conditional_resolution_pp)
-            _require(calibrations_dir is not None, "conditional_resolution_requires_calibrations")
+        _require(
+            calibrations_dir is not None or (required_conditional_resolution_pp is None and axis_ceilings is None),
+            "conditional_resolution_requires_calibrations",
+        )
         assert control_report is not None and control_capture is not None and control_adjudication is not None
         return summarize_with_control(
             manifest_path,
@@ -556,6 +559,7 @@ def summarize_screen(
             probe_corpus=probe_corpus,
             calibrations_dir=calibrations_dir,
             required_conditional_resolution_pp=required_conditional_resolution_pp,
+            required_conditional_resolution_by_axis_pp=axis_ceilings,
         )
     if calibration_variants is not None:
         from quantfit.calibration_choices import summarize_screen_with_variants

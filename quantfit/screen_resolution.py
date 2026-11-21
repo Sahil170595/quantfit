@@ -28,8 +28,8 @@ from quantfit.safety.report import DriftReport
 from quantfit.safety.verify import ProbeCorpus
 from quantfit.screen import Target
 from quantfit.screen_requirement import (
-    axis_requirement,
     qualify_screen,
+    qualify_screen_axes,
     validate_axis_requirements,
     validate_requirement,
 )
@@ -309,9 +309,7 @@ def summarize_screen_with_resolution(
         if required_conditional_resolution_pp is not None:
             qualify_screen(result, required_conditional_resolution_pp)
         elif axis_ceilings is not None:
-            requirement = axis_requirement(result, result["conditional_resolution"]["rows"], axis_ceilings)
-            result["conditional_resolution_requirement"] = requirement
-            result["exit_code"] = requirement["qualification_exit_code"]
+            qualify_screen_axes(result, axis_ceilings)
         phase = "output_failure"
         buffers = []
         if out_path is not None:
