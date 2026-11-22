@@ -13,10 +13,12 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.71.0 — Unreleased
+## 0.66.1 — 2026-11-22
 
-- Protect replay-bundle publication and rollback with exclusive member creation and owned-file checks. See
-  `validation/2026-11-21-replay-bundle-publication/`.
+- Protect aggregate and replay bundle rollback with exclusive member creation and ownership checks.
+- Apply native aggregate admission to screen reports received with control evidence, including runs with calibration.
+- Refuse unrepresentable runtimes in reference assessment through the existing categorical error envelope.
+- See `validation/2026-11-22-independent-hotfix/` for the offline CLI checks and injected write failures.
 
 ## 0.66.0 — 2026-11-20
 

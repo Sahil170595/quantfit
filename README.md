@@ -41,7 +41,7 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-The **0.71.0 candidate** adds [ownership-checked replay bundle publication](docs/cli-reference.md#replay-bundle-publication-0710) for interrupted writes and safe retries.
+Quantfit **0.66.1** protects [bundle publication](docs/cli-reference.md#bundle-publication-0661) during interrupted writes, applies aggregate admission when receiving screens with controls, and rejects overflowing reference runtimes cleanly.
 
 Quantfit **0.66.0** adds optional
 [JUnit for original reference-assessment criteria](docs/cli-reference.md#reference-assessment-junit-0660).
@@ -105,7 +105,7 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-Install with `pip install "quantfit[inspect,gguf]==0.66.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.66.1"`.
 
 The observation runs the pinned judge over the original held completions.
 Use its receipt's raw SHA-256 for the offline comparison against one complete
