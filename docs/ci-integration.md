@@ -2,7 +2,7 @@
 
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
-The action and instrument examples pin **quantfit 0.66.0**, including
+The action and instrument examples pin **quantfit 0.66.1**, including
 selected-axis policies. Its action default is `>=0.68.0,<0.69`; candidate validation
 uses the exact wheel through `quantfit-path`. Pin action and instrument separately
 for reproduction.
@@ -38,9 +38,9 @@ Since 0.57.0, the reference action accepts the native CLI policy through one opt
 `axis-thresholds` input. Pin both the action and instrument for reproduction.
 
 ```yaml
-- uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.66.0
+- uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.66.1
   with:
-    quantfit-version: "==0.66.0"
+    quantfit-version: "==0.66.1"
     from-report: drift.json
     tier: ""
     axis-thresholds: |
@@ -149,12 +149,12 @@ jobs:
       - uses: actions/checkout@v7
 
       - id: gate
-        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.66.0
+        uses: Sahil170595/quantfit/.github/actions/quantfit-gate@v0.66.1
         with:
           baseline: Qwen/Qwen2.5-1.5B-Instruct
           quant: ./out/qwen2.5-1.5b-awq
           tier: smoke                    # 30pp — gates >=30pp only, and says so
-          quantfit-version: "==0.66.0"    # the instrument version is part of the measurement
+          quantfit-version: "==0.66.1"    # the instrument version is part of the measurement
           hf-token: ${{ secrets.HF_TOKEN }}
 
       # Runs only on exit 0 — the action fails the job on 2/3/4/5.
@@ -195,7 +195,7 @@ checkout to happen first, and takes no `@ref`:
           quantfit-path: "."     # install the checked-out source instead of PyPI
 ```
 
-Two independent pins, and you want both: `@v0.66.0` pins the *action*, `quantfit-version`
+Two independent pins, and you want both: `@v0.66.1` pins the *action*, `quantfit-version`
 pins the *instrument*. A floating action ref with a pinned instrument is a supply-chain
 hole; a pinned action ref with a floating instrument silently changes what your gate
 measures between releases.

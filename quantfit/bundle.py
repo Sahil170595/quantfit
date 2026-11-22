@@ -501,23 +501,11 @@ def create_bundle(
             ],
             "scope": SCOPE,
         }
-        target.mkdir()  # exclusive reservation; never replace an existing directory
-        written = []
-        try:
-            for role, raw in data.items():
-                path = target / ROLES[role]
-                with path.open("xb") as handle:
-                    written.append(path)
-                    handle.write(raw)
-            path = target / "manifest.json"
-            with path.open("xb") as handle:
-                written.append(path)
-                handle.write((json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8"))
-        except OSError:
-            for path in written:
-                path.unlink(missing_ok=True)
-            target.rmdir()
-            raise
+        from quantfit.bundle_transport import ORDER, _publish_flat_bundle
+
+        files = {ROLES[role]: raw for role, raw in data.items()}
+        files["manifest.json"] = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        _publish_flat_bundle(target, files, order=ORDER)
         return _result(target, manifest, matched=True, declarations=declarations)
     except (OSError, RuntimeError, RecursionError, TypeError, ValueError) as exc:
         if isinstance(exc, BundleError):

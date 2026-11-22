@@ -20,6 +20,13 @@
   observations and protected outputs for archived or directory inputs. See
   `validation/2026-11-21-screen-archive-comparison/`.
 
+## 0.66.1 — 2026-11-22
+
+- Protect aggregate and replay bundle rollback with exclusive member creation and ownership checks.
+- Apply native aggregate admission to screen reports received with control evidence, including runs with calibration.
+- Refuse unrepresentable runtimes in reference assessment through the existing categorical error envelope.
+- See `validation/2026-11-22-independent-hotfix/` for the offline CLI checks and injected write failures.
+
 ## 0.66.0 — 2026-11-20
 
 - Add optional reference-assessment JUnit and a pure closed renderer over the

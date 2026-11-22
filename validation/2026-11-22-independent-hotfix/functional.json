@@ -1,0 +1,73 @@
+{
+  "architecture": "AMD64",
+  "cases": {
+    "aggregate_replacement": {
+      "error_category": "partial_destination_preserved",
+      "exit_code": 2,
+      "foreign_bytes_preserved": true,
+      "manifest_present_on_failure": false
+    },
+    "control_and_calibration": {
+      "error_category": "invalid_report",
+      "exit_code": 2,
+      "json_written": false,
+      "junit_written": false
+    },
+    "control_only": {
+      "error_category": "invalid_report",
+      "exit_code": 2,
+      "json_written": false,
+      "junit_written": false
+    },
+    "replay_expected_name_collision": {
+      "category": "partial_destination_preserved",
+      "destination_removed": false,
+      "exit_code": 2,
+      "foreign_bytes_preserved": true,
+      "manifest_present_on_failure": false
+    },
+    "replay_foreign_after_manifest": {
+      "category": "partial_destination_preserved",
+      "destination_removed": false,
+      "exit_code": 2,
+      "foreign_bytes_preserved": true,
+      "manifest_present_on_failure": false
+    },
+    "replay_foreign_before_manifest": {
+      "category": "partial_destination_preserved",
+      "destination_removed": false,
+      "exit_code": 2,
+      "foreign_bytes_preserved": true,
+      "manifest_present_on_failure": false
+    },
+    "replay_owned_interruption": {
+      "destination_removed": true,
+      "exit_code": 2,
+      "manifest_present_on_failure": false,
+      "originals_verified": true,
+      "retry_exit_code": 0
+    },
+    "runtime_with_junit": {
+      "error_category": "invalid_reports",
+      "exit_code": 2,
+      "json_written": false,
+      "junit_written": false
+    },
+    "runtime_without_junit": {
+      "error_category": "invalid_reports",
+      "exit_code": 2,
+      "json_written": false,
+      "junit_written": false
+    },
+    "valid_control_and_calibration": {
+      "exit_code": 3,
+      "json_written": true,
+      "junit_written": true
+    }
+  },
+  "fixture": "Public aggregate and synthetic local test data only",
+  "os": "Windows",
+  "python": "3.13.1",
+  "shipped_base": "602feec6927ee169e86ff2d4bed420195e9b4f85",
+  "tool": "0.66.1"
+}
