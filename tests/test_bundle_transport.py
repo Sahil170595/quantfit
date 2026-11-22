@@ -359,3 +359,29 @@ def test_post_mkdir_attestation_failure_reports_preserved_unattested_root(tmp_pa
     with pytest.raises(BundleError, match="^partial_destination_preserved$"):
         transport.unpack_bundle(str(archive), hashlib.sha256(archive.read_bytes()).hexdigest(), str(target))
     assert target.is_dir() and not list(target.iterdir())
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX permission-bit check")
+def test_direct_creation_keeps_umask_while_archive_restore_is_private(tmp_path):
+    from test_replay_bundle import inputs as replay_inputs
+
+    from quantfit.bundle import create_replay_bundle
+    from quantfit.bundle_transport import pack_bundle, unpack_bundle
+
+    replay = tmp_path / "replay"
+    reports, t0 = replay_inputs(tmp_path)
+    previous = os.umask(0o027)
+    try:
+        source, _ = prepared(tmp_path)
+        create_replay_bundle(reports, str(t0), str(replay))
+        archive = tmp_path / "portable.zip"
+        pin = pack_bundle(str(source), str(archive))["archive"]["sha256"]
+        destination = tmp_path / "restored"
+        unpack_bundle(str(archive), pin, str(destination))
+    finally:
+        os.umask(previous)
+    for path in (source, replay):
+        assert stat.S_IMODE(path.stat().st_mode) == 0o750
+        assert all(stat.S_IMODE(item.stat().st_mode) == 0o640 for item in path.iterdir())
+    assert stat.S_IMODE(destination.stat().st_mode) == 0o700
+    assert all(stat.S_IMODE(item.stat().st_mode) == 0o600 for item in destination.iterdir())

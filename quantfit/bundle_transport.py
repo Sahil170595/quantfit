@@ -260,13 +260,19 @@ def _cleanup(root: Path, identity: tuple[int, int], owned: list[tuple[Path, tupl
 
 
 def _publish_flat_bundle(
-    root: Path, files: dict[str, bytes], *, order: tuple[str, ...], recheck: Callable[[], None] | None = None
+    root: Path,
+    files: dict[str, bytes],
+    *,
+    order: tuple[str, ...],
+    recheck: Callable[[], None] | None = None,
+    directory_mode: int = 0o777,
+    member_mode: int = 0o666,
 ) -> None:
     """Publish original flat members, then advertise readiness with the manifest."""
     bundle._no_links(root)
     identity: tuple[int, int] | None = None
     owned: list[tuple[Path, tuple[int, int], bytes]] = []
-    root.mkdir(mode=0o700)
+    root.mkdir(mode=directory_mode)
     try:
         identity = _identity(root)
         # The exact original manifest is readiness and is published last.
@@ -282,7 +288,7 @@ def _publish_flat_bundle(
             descriptor = os.open(
                 path,
                 os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0),
-                0o600,
+                member_mode,
             )
             try:
                 info = os.fstat(descriptor)
@@ -312,7 +318,7 @@ def _restore(root: Path, files: dict[str, bytes], held: HeldFile, *, order: tupl
     target = admit_outputs((str(root),), (held,))[0]
     target.check()
     held.check()
-    _publish_flat_bundle(root, files, order=order, recheck=held.check)
+    _publish_flat_bundle(root, files, order=order, recheck=held.check, directory_mode=0o700, member_mode=0o600)
 
 
 def unpack_bundle(archive_path: str, expected_sha256: str, out_path: str, *, kind: str = "aggregate") -> dict[str, Any]:
