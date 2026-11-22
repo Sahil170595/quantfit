@@ -1,0 +1,52 @@
+{
+  "actual_cli": {
+    "body_member_count": 4,
+    "create_exit_code": 0,
+    "file_sha256": {
+      "report-1.json": "d585720b1c73f289ef2fd8105af1ce76ebe89884b4c2c62f241380590f1223cf",
+      "report-2.json": "5edc7f6731c265291a5560dcde5a49c5ece389cdd4d533979ce95025ba73e6bd",
+      "report-3.json": "4f8d91c0a026bb0003d49d9d307cb563a91b5dc624484a5e8ea719d8f963a8f8",
+      "t0.json": "ae6fcec1289f8b45b89587716620b6b03df3c97217a354e303efb465af7867f2"
+    },
+    "manifest_sha256": "5c29bede8b8cebd9cea3aab4f32db9220fd661b73d0c6ec84dc6949e4a9e56e9",
+    "original_t0_unchanged": true,
+    "verify_exit_code": 0
+  },
+  "cpu_architecture": "AMD64",
+  "editable_distribution": "0.71.0",
+  "fault_cases": {
+    "expected_name_collision": {
+      "category": "partial_destination_preserved",
+      "destination_removed": false,
+      "exit_code": 2,
+      "foreign_bytes_preserved": true,
+      "manifest_present_on_failure": false
+    },
+    "foreign_after_manifest": {
+      "category": "partial_destination_preserved",
+      "destination_removed": false,
+      "exit_code": 2,
+      "foreign_bytes_preserved": true,
+      "manifest_present_on_failure": false
+    },
+    "foreign_before_manifest": {
+      "category": "partial_destination_preserved",
+      "destination_removed": false,
+      "exit_code": 2,
+      "foreign_bytes_preserved": true,
+      "manifest_present_on_failure": false
+    },
+    "owned_interruption": {
+      "destination_removed": true,
+      "exit_code": 2,
+      "manifest_present_on_failure": false,
+      "originals_verified": true,
+      "retry_exit_code": 0
+    }
+  },
+  "fixture": "Local copies of the public saved aggregate replay fixture with controlled I/O failures",
+  "os": "Windows",
+  "python": "3.13.1",
+  "source_base": "602feec6927ee169e86ff2d4bed420195e9b4f85",
+  "tool_version": "0.71.0"
+}
