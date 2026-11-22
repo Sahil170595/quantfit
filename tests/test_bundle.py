@@ -90,6 +90,32 @@ def test_exact_bytes_survive_move_and_original_failure_flags_are_only_declaratio
     assert result["declared_results"]["resolution"]["human_confirmation_verified"] is False
 
 
+def test_create_preserves_competing_replacement_after_manifest_write_failure(tmp_path, monkeypatch, capsys):
+    report, _ = card_fixture(tmp_path)
+    original = report.read_bytes()
+    out = tmp_path / "bundle"
+    member, manifest = out / "report.json", out / "manifest.json"
+    moved_copy = tmp_path / "moved-report.json"
+    foreign = b"separate writer's bytes"
+    open_descriptor = os.open
+
+    def fail_manifest_open(path, flags, *args, **kwargs):
+        if Path(path) == manifest and flags & os.O_EXCL:
+            member.rename(moved_copy)
+            with member.open("xb") as stream:
+                stream.write(foreign)
+            raise OSError("controlled manifest write refusal")
+        return open_descriptor(path, flags, *args, **kwargs)
+
+    monkeypatch.setattr(os, "open", fail_manifest_open)
+    code = main(["bundle", "create", "--report", str(report), "--out", str(out), "--json"])
+    assert code == 2
+    assert json.loads(capsys.readouterr().out)["error"]["message"] == "partial_destination_preserved"
+    assert member.read_bytes() == foreign
+    assert report.read_bytes() == moved_copy.read_bytes() == original
+    assert not manifest.exists()
+
+
 def test_unmeasurable_axes_are_retained_not_reinterpreted_as_a_pass(tmp_path):
     report, *_ = inputs(tmp_path, unmeasurable=True)
     result = create_bundle(str(report), str(tmp_path / "bundle"))
