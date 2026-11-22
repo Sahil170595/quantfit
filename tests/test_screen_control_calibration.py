@@ -528,3 +528,23 @@ def test_a_consistent_positive_control_does_not_change_native_zero_or_conditiona
     required = combined(paths, 100)
     assert required["control_evidence"]["status"] == "consistent" and required["exit_code"] == 5
     assert "target_power_unattainable" in required["conditional_resolution_requirement"]["reasons"]
+
+
+@pytest.mark.parametrize("with_calibrations", [False, True])
+def test_cli_control_refuses_nonaggregate_report_keys(tmp_path, with_calibrations):
+    paths = calibrated(tmp_path / "evidence")
+    report_path = paths[1] / "target.json"
+    report = json.loads(report_path.read_bytes())
+    zones = report["drift"]["by_zone"]
+    marker = "synthetic_responses_marker"
+    original = next(iter(zones))
+    zones[marker] = zones.pop(original)
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+    out, junit = tmp_path / "receiving.json", tmp_path / "receiving.xml"
+    args = [*command(paths), "--out", str(out), "--junit", str(junit)]
+    if with_calibrations:
+        args.extend(["--calibrations-dir", str(paths[5])])
+    run = subprocess.run(args, capture_output=True, text=True, encoding="utf-8", check=False, timeout=30)
+    assert run.returncode == 2 and not run.stderr
+    assert json.loads(run.stdout)["error"]["message"] == "invalid_report"
+    assert marker not in run.stdout and not out.exists() and not junit.exists()

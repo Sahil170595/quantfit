@@ -17,7 +17,7 @@ from typing import Any
 from quantfit import bundle
 from quantfit.resolution import MAX_REPORT_BYTES
 from quantfit.safety.calibration_binding import MAX_CALIBRATION_BYTES
-from quantfit.safety.retention_io import HeldFile, admit_outputs, canonical, hold
+from quantfit.safety.retention_io import HeldFile, _stamp, admit_outputs, canonical, hold
 
 MAX_PAYLOAD_BYTES = 3 * MAX_REPORT_BYTES + MAX_CALIBRATION_BYTES + bundle.MAX_MANIFEST_BYTES
 MAX_ARCHIVE_BYTES = 32 * 1024 * 1024
@@ -225,17 +225,33 @@ def verify_bundle_archive(archive_path: str, expected_sha256: str, *, kind: str 
         raise bundle.BundleError("invalid_bundle_transport") from None
 
 
+def _owned_bytes(root: Path, identity: tuple[int, int], member: tuple[Path, tuple[int, int], bytes]) -> bytes:
+    path, expected_id, raw = member
+    _require(_directory(root, identity) and _identity(path) == expected_id)
+    info = path.lstat()
+    _require((info.st_dev, info.st_ino) == expected_id and stat.S_ISREG(info.st_mode) and info.st_nlink == 1)
+    observed = bundle._read(path, len(raw))
+    _require(_directory(root, identity) and _identity(path) == expected_id and _stamp(path.lstat()) == _stamp(info))
+    return observed
+
+
+def _remove_owned(root: Path, identity: tuple[int, int], member: tuple[Path, tuple[int, int], bytes]) -> None:
+    path, _, raw = member
+    _require(raw.startswith(_owned_bytes(root, identity, member)))
+    path.unlink()
+
+
 def _cleanup(root: Path, identity: tuple[int, int], owned: list[tuple[Path, tuple[int, int], bytes]]) -> bool:
     """Only inode-attested expected-prefix files; never recurse or delete unknown entries."""
     try:
         _require(_directory(root, identity))
+        # Revoke an owned readiness manifest even if an unrelated entry prevents full rollback.
+        if owned and owned[-1][0].name == "manifest.json":
+            _remove_owned(root, identity, owned[-1])
+            owned = owned[:-1]
         _inventory(root, {path.name for path, _, _ in owned})
-        for path, expected_id, raw in reversed(owned):
-            _require(_directory(root, identity) and _identity(path) == expected_id)
-            info = path.lstat()
-            _require(stat.S_ISREG(info.st_mode) and info.st_nlink == 1)
-            _require(raw.startswith(bundle._read(path, len(raw))))
-            path.unlink()
+        for member in reversed(owned):
+            _remove_owned(root, identity, member)
         _require(_directory(root, identity))
         root.rmdir()
         return True
@@ -243,13 +259,20 @@ def _cleanup(root: Path, identity: tuple[int, int], owned: list[tuple[Path, tupl
         return False
 
 
-def _restore(root: Path, files: dict[str, bytes], held: HeldFile, *, order: tuple[str, ...] = ORDER) -> None:
-    target = admit_outputs((str(root),), (held,))[0]
-    target.check()
-    held.check()
+def _publish_flat_bundle(
+    root: Path,
+    files: dict[str, bytes],
+    *,
+    order: tuple[str, ...],
+    recheck: Callable[[], None] | None = None,
+    directory_mode: int = 0o777,
+    member_mode: int = 0o666,
+) -> None:
+    """Publish original flat members, then advertise readiness with the manifest."""
+    bundle._no_links(root)
     identity: tuple[int, int] | None = None
     owned: list[tuple[Path, tuple[int, int], bytes]] = []
-    root.mkdir(mode=0o700)
+    root.mkdir(mode=directory_mode)
     try:
         identity = _identity(root)
         # The exact original manifest is readiness and is published last.
@@ -257,12 +280,15 @@ def _restore(root: Path, files: dict[str, bytes], held: HeldFile, *, order: tupl
             if name not in files:
                 continue
             _require(_directory(root, identity))
-            held.check()
+            if recheck is not None:
+                recheck()
+            if name == order[0]:
+                _inventory(root, {path.name for path, _, _ in owned})
             path, raw = root / name, files[name]
             descriptor = os.open(
                 path,
                 os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0),
-                0o600,
+                member_mode,
             )
             try:
                 info = os.fstat(descriptor)
@@ -277,14 +303,22 @@ def _restore(root: Path, files: dict[str, bytes], held: HeldFile, *, order: tupl
                 if descriptor >= 0:
                     os.close(descriptor)
             _require(_directory(root, identity) and _identity(path) == owned[-1][1])
-        held.check()
+        if recheck is not None:
+            recheck()
         _inventory(root, set(files))
-        for path, expected_id, raw in owned:
-            _require(_identity(path) == expected_id and hold(path, len(raw)).data == raw)
+        for member in owned:
+            _require(_owned_bytes(root, identity, member) == member[2])
     except BaseException:
         if identity is None or not _cleanup(root, identity, owned):
             raise bundle.BundleError("partial_destination_preserved") from None
         raise
+
+
+def _restore(root: Path, files: dict[str, bytes], held: HeldFile, *, order: tuple[str, ...] = ORDER) -> None:
+    target = admit_outputs((str(root),), (held,))[0]
+    target.check()
+    held.check()
+    _publish_flat_bundle(root, files, order=order, recheck=held.check, directory_mode=0o700, member_mode=0o600)
 
 
 def unpack_bundle(archive_path: str, expected_sha256: str, out_path: str, *, kind: str = "aggregate") -> dict[str, Any]:

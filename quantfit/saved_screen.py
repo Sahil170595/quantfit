@@ -292,6 +292,12 @@ def _pair_tokens(report: DriftReport, stratum: str) -> set[tuple[object, ...]]:
     return {(stratum, base, quant) for base in arms[0] for quant in arms[1]}
 
 
+def _parse_screen_report(raw: bytes) -> DriftReport:
+    _json(raw)
+    report: DriftReport = _report(raw)
+    return report
+
+
 def _summarize_held(
     manifest_bytes: bytes,
     held: dict[str, bytes],
@@ -346,8 +352,7 @@ def _summarize_held(
             row = {**_base_row(target), "report": None, "status": "missing_evidence", "human_verified": None}
         else:
             if _prepared is None:
-                _json(raw)
-                report = _report(raw)
+                report = _parse_screen_report(raw)
             else:
                 report = _report_from_parsed(_prepared[member])
             canonical = _check_original_statistics(report)

@@ -12,7 +12,6 @@ from typing import Any
 from quantfit import resolution
 from quantfit import saved_screen as saved
 from quantfit.adjudication_record import MAX_RECORD_BYTES, load_adjudication_record_bytes
-from quantfit.bundle import _report
 from quantfit.junit import screen_to_junit
 from quantfit.probe_bundle import LocalProbeCorpus
 from quantfit.reproduce import (
@@ -212,7 +211,11 @@ def summarize_with_control(
             )
             _validate_reproduction_outputs(plan)
         control = _prepare_control(paths, targets, declaration)
-        prepared = {member: _report(raw) for member, raw in inputs.members if member != SUMMARY_FILENAME}
+        phase = "invalid_report"
+        prepared = {
+            member: saved._parse_screen_report(raw) for member, raw in inputs.members if member != SUMMARY_FILENAME
+        }
+        phase = "invalid_control_evidence"
         result: dict[str, Any] = saved._summarize_held(
             inputs.manifest,
             dict(inputs.members),

@@ -430,3 +430,29 @@ def test_publication_rechecks_output_substitution_against_target(tmp_path, monke
     with pytest.raises(ReferenceAssessmentError):
         assess_candidate(str(bundle), str(target), out_path=str(out))
     assert target.read_bytes() == out.read_bytes() == original
+
+
+@pytest.mark.parametrize("with_junit", [False, True])
+def test_receiving_cli_refuses_overflowing_runtime_in_a_bound_bundle(tmp_path, capsys, with_junit):
+    from test_replay_bundle import inputs
+
+    from quantfit.bundle import create_replay_bundle
+    from quantfit.reproduce import within_hardware_identical
+
+    paths, _ = inputs(tmp_path)
+    source = Path(paths[0])
+    report = json.loads(source.read_bytes())
+    report["baseline"]["runtime_s"] = 10**400
+    source.write_text(json.dumps(report), encoding="utf-8")
+    t0 = tmp_path / "rebound.json"
+    within_hardware_identical(paths, out_path=str(t0))
+    bundle, target = tmp_path / "handoff", write_target(tmp_path)
+    assert create_replay_bundle(paths, str(t0), str(bundle))["integrity_verified"]
+    output, xml = tmp_path / "receiving.json", tmp_path / "receiving.xml"
+    argv = ["references", "assess", "--bundle", str(bundle), "--target", str(target), "--out", str(output), "--json"]
+    if with_junit:
+        argv.extend(["--junit", str(xml)])
+    assert main(argv) == 2
+    captured = capsys.readouterr()
+    assert json.loads(captured.out)["error"]["message"] == "invalid_reports"
+    assert not captured.err and not output.exists() and not xml.exists()
