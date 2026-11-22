@@ -98,18 +98,11 @@ def create_replay_bundle(report_paths: list[str], t0_path: str, out_path: str) -
             ],
             "scope": SCOPE,
         }
-        target.mkdir()
-        try:
-            for role, raw in data.items():
-                _write_member(target / ROLES[role], raw)
-            _write_member(target / "manifest.json", (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode())
-        except BaseException:
-            # Revoke advertisement first; only remove files in this exclusively owned new directory.
-            (target / "manifest.json").unlink(missing_ok=True)
-            for name in ROLES.values():
-                (target / name).unlink(missing_ok=True)
-            target.rmdir()
-            raise
+        from quantfit.bundle_transport import _publish_flat_bundle
+
+        files = {ROLES[role]: raw for role, raw in data.items()}
+        files["manifest.json"] = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode()
+        _publish_flat_bundle(target, files, order=("manifest.json", *ROLES.values()))
         return _result(target, manifest, original=original, receiving=receiving)
     except (OSError, RuntimeError, RecursionError, TypeError, ValueError) as exc:
         if isinstance(exc, BundleError):

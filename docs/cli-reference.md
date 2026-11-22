@@ -27,10 +27,10 @@ Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --con
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.66.0.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.66.1.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.66.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.66.1, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -1048,6 +1048,16 @@ Output preflight and checked atomic publication protect both closed directories 
 all member paths, including manifests and hardlink aliases. An output cannot replace
 consumed evidence or appear inside either bundle. Both original native T0/report
 bytes and historical producer versions remain intact.
+
+### Bundle publication (0.66.1)
+
+`bundle create` and `bundle replay-create` reserve a new destination, create each
+member exclusively and write the manifest last. If writing fails, it removes
+only files and the destination whose ownership it can verify. A collision
+with a foreign file or uncertain ownership leaves the destination for
+inspection and returns exit 2 with `partial_destination_preserved`.
+After an owned-only rollback, the same destination can be used again.
+The bundle formats, original report bytes and original T0 stay compatible.
 
 ### Reproduction JUnit
 

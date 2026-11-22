@@ -181,7 +181,7 @@ def assess_report_buffers(
         ]
     except ReferenceAssessmentError:
         raise
-    except (RuntimeError, RecursionError, TypeError, ValueError, KeyError):
+    except (RuntimeError, RecursionError, OverflowError, TypeError, ValueError, KeyError):
         raise ReferenceAssessmentError("invalid_reports") from None
 
     criteria: dict[str, dict[str, Any]] = {}
