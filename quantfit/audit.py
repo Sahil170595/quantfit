@@ -2008,13 +2008,7 @@ def _check_schema_fields(root: Path) -> tuple[list[Finding], dict]:
     findings: list[Finding] = []
     coverage: dict[str, dict] = {}
 
-    # Every CLI dest and flag: a documented token that is a command-line option is not a
-    # schema field, and flagging it would be noise. NOT the whole package's symbol table —
-    # see `universe` below.
-    cli_names: set[str] = set()
-    for spec in _parser_surface().values():
-        cli_names |= {opt.lstrip("-").replace("-", "_") for opt in spec["options"]}
-        cli_names |= set(spec["positionals"])
+    surface = _parser_surface()
 
     for claim in SCHEMA_CLAIMS:
         emitted: set[str] = set()
@@ -2025,23 +2019,26 @@ def _check_schema_fields(root: Path) -> tuple[list[Finding], dict]:
                 raise AuditError(f"schema claim {claim.id} names a missing module: {module}")
             emitted |= set(_emitted_keys(path))
             claim_symbols |= set(_module_symbols(path) or ()) | _imported_names(path)
-        # The accepted universe is THIS artifact's vocabulary — the keys its emitters emit,
-        # the symbols those same emitters define or import (a document naming the function
-        # beside the field is writing correctly), the CLI's own names, and the stoplist.
-        # It used to be
-        # every symbol in every module of the package, which accepted a documented field
-        # whenever its name collided with any local, class or constant anywhere in the tree:
-        # a wrong field name passed because some unrelated module happened to define a
-        # variable with that spelling. A parity check whose accepted set is that much wider
-        # than the thing it checks is a check that mostly agrees.
-        universe = emitted | claim_symbols | cli_names | _FIELD_STOPWORDS
+        universe = emitted | claim_symbols | _FIELD_STOPWORDS
+        accepted = set(universe)
         tokens = exempted = 0
         for doc_rel in claim.docs:
             path = root / doc_rel
             if not path.is_file():
                 raise AuditError(f"schema claim {claim.id} names a missing document: {doc_rel}")
             doc = _load_doc(root, path)
-            exempt = universe | doc.not_fields
+            # Verifiable CLI references are scoped to the document that shows them.
+            cli_names: set[str] = set()
+            for invocation in _parse_invocations([doc], surface):
+                spec = surface.get(invocation.command)
+                if spec is None:
+                    continue
+                cli_names.update(
+                    flag.lstrip("-").replace("-", "_") for flag in invocation.flags if flag in spec["options"]
+                )
+                cli_names.update(spec["positionals"])
+            accepted.update(cli_names)
+            exempt = universe | cli_names | doc.not_fields
             for number, raw in _section_lines(doc, claim.sections):
                 if doc.suppressed(number):
                     continue
@@ -2081,7 +2078,7 @@ def _check_schema_fields(root: Path) -> tuple[list[Finding], dict]:
             "modules": list(claim.modules),
             "docs": list(claim.docs),
             "emitted_keys": len(emitted),
-            "accepted_universe": len(universe),
+            "accepted_universe": len(accepted),
             "tokens_checked": tokens,
             "tokens_marked_not_a_field": exempted,
         }

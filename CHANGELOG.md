@@ -18,6 +18,8 @@
 - Collect all explicitly indexed annotation returns in any order while preserving the native sheet and receipt. See
   `validation/2026-11-21-indexed-annotation-collection/`.
 
+- Audit schema fields against CLI options shown in the same document. Unrelated flags no longer exempt misspelled artifact fields.
+
 ## 0.68.0 — 2026-11-25
 
 - Accept independently SHA-256-pinned canonical screen ZIPs on either side of
