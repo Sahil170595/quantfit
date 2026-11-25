@@ -470,8 +470,11 @@ def _build_parser() -> argparse.ArgumentParser:
         "screen-compare",
         help="offline declared screen observations (0 conditional no-flag, 3 retained flags, 4 incomplete, 2 refusal)",
     )
-    pcompare.add_argument("--reference-bundle", required=True, metavar="DIR", help="original screen bundle")
-    pcompare.add_argument("--candidate-bundle", required=True, metavar="DIR", help="candidate screen bundle")
+    for side in ("reference", "candidate"):
+        source = pcompare.add_mutually_exclusive_group(required=True)
+        source.add_argument(f"--{side}-bundle", metavar="DIR", help=f"{side} screen bundle directory")
+        source.add_argument(f"--{side}-archive", metavar="ZIP", help=f"{side} canonical screen archive")
+        pcompare.add_argument(f"--{side}-sha256", metavar="HEX", help=f"required pin for the {side} archive")
     pcompare.add_argument("--out", default=None, metavar="PATH", help="separate receiving comparison JSON")
     pcompare.add_argument("--junit", default=None, metavar="PATH", help="two axes per target and overall XML case")
     pe.add_argument("what", choices=("model-card",), help="what to emit")
@@ -739,8 +742,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "--annotator-name", help="bounded operator-declared attribution; required for named_second"
     )
     chunk_collect.add_argument("--manifest", required=True, metavar="PATH", help="original private chunk manifest")
-    chunk_collect.add_argument(
-        "--part", required=True, action="append", metavar="PATH", help="filled part, repeated in manifest order"
+    collected_parts = chunk_collect.add_mutually_exclusive_group(required=True)
+    collected_parts.add_argument(
+        "--part", action="append", metavar="PATH", help="filled part, repeated in manifest order"
+    )
+    collected_parts.add_argument(
+        "--indexed-part", action="append", metavar="INDEX=PATH", help="filled part with original index, in any order"
     )
     chunk_collect.add_argument("--out", required=True, metavar="PATH", help="new complete private native sheet")
     chunk_collect.add_argument("--receipt", required=True, metavar="PATH", help="new aggregate counts/hash receipt")
@@ -1177,10 +1184,18 @@ def _dispatch(args: argparse.Namespace) -> int:
 
         return _emit(args, f"adjudicate {args.adjudicate_cmd}", 0, result, human_adjudication)
     if args.cmd == "screen-compare":
-        from quantfit.screen_compare import compare_screen_bundles
+        from quantfit.screen_compare import ScreenComparisonError, compare_screen_bundles
 
+        archives = {}
+        for side in ("reference", "candidate"):
+            path = getattr(args, f"{side}_archive")
+            pin = getattr(args, f"{side}_sha256")
+            if (path is None) != (pin is None):
+                raise ScreenComparisonError("invalid_screen_comparison_input")
+            if path is not None:
+                archives[f"{side}_archive"] = (path, pin)
         result = compare_screen_bundles(
-            args.reference_bundle, args.candidate_bundle, out_path=args.out, junit_path=args.junit
+            args.reference_bundle, args.candidate_bundle, out_path=args.out, junit_path=args.junit, **archives
         )
 
         def human_screen_compare():

@@ -384,3 +384,57 @@ def test_committed_comparison_originals_outer_manifests_and_receiving_bindings_a
         assert json.loads((data / f"{name}.json").read_bytes())["exit_code"] == 2
     # Recorded source hashes are historical provenance, never a future-current package assertion.
     assert len(receipt["runtime"]["source_files"]) == 8 and receipt["runtime"]["source_version"] == "0.34.0"
+
+
+@pytest.mark.parametrize("code", [0, 3, 4])
+def test_pinned_archive_inputs_preserve_native_decisions_without_extraction(tmp_path, measured, capsys, code):
+    from quantfit.bundle_archive_kinds import pack
+    from quantfit.cli import main
+
+    manifest, reports = measured
+    candidate_reports = dict(reports)
+    if code == 3:
+        candidate_reports["clean"] = consumer.observation(reports["clean"], dangerous=1)
+    elif code == 4:
+        candidate_reports.pop("clean")
+    reference, candidate = pair(tmp_path, manifest, reports, candidate_reports)
+    reference_zip, candidate_zip = tmp_path / "reference.zip", tmp_path / "candidate.zip"
+    ref_pin = pack(str(reference), str(reference_zip), kind="screen")["archive"]["sha256"]
+    cand_pin = pack(str(candidate), str(candidate_zip), kind="screen")["archive"]["sha256"]
+    baseline_xml, archived_xml = tmp_path / "direct.xml", tmp_path / "archive.xml"
+    direct, _ = consumer.invoke(reference, candidate, junit=baseline_xml)
+    sources = ["--reference-archive", str(reference_zip), "--reference-sha256", ref_pin]
+    sources += (
+        ["--candidate-bundle", str(candidate)]
+        if code == 4
+        else ["--candidate-archive", str(candidate_zip), "--candidate-sha256", cand_pin]
+    )
+    before = snapshot(tmp_path)
+    assert main(["screen-compare", *sources, "--junit", str(archived_xml), "--json"]) == code
+    document = json.loads(capsys.readouterr().out)
+    for result in (direct["result"], document["result"]):
+        result.pop("created_utc")
+        for screen in result["screens"].values():
+            screen.pop("created_utc")
+    assert document["result"] == direct["result"]
+    assert consumer.check_junit(archived_xml, document) == consumer.check_junit(baseline_xml, direct)
+    assert snapshot(tmp_path) == {**before, archived_xml: archived_xml.read_bytes()}
+
+
+@pytest.mark.parametrize("refusal", ["missing-pin", "wrong-pin", "archive-as-output", "directory-as-archive"])
+def test_pinned_archive_refuses_invalid_inputs_and_aliases(tmp_path, measured, capsys, refusal):
+    from quantfit.bundle_archive_kinds import pack
+    from quantfit.cli import main
+
+    manifest, reports = measured
+    reference, candidate = pair(tmp_path, manifest, reports, reports)
+    archive = tmp_path / "reference.zip"
+    pin = pack(str(reference), str(archive), kind="screen")["archive"]["sha256"]
+    argv = ["screen-compare", "--reference-archive", str(reference if refusal == "directory-as-archive" else archive)]
+    if refusal != "missing-pin":
+        argv += ["--reference-sha256", "a" * 64 if refusal == "wrong-pin" else pin]
+    output = archive if refusal == "archive-as-output" else tmp_path / "out.json"
+    before = snapshot(tmp_path)
+    assert main([*argv, "--candidate-bundle", str(candidate), "--out", str(output), "--json"]) == 2
+    assert json.loads(capsys.readouterr().out)["exit_code"] == 2
+    assert snapshot(tmp_path) == before

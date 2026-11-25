@@ -107,12 +107,15 @@ def _native(files: dict[str, bytes], kind: str) -> tuple[dict[str, Any], dict[st
     present = tuple(row["path"] for row in rows if row["status"] == "present")
     order = ("manifest.json", "targets.json", *present)
     transport._require(len(set(order)) == len(order) and set(files) == set(order))
-    held = screen._HeldScreen(
+    return manifest, screen._verify_held(_screen_payload(files)), order
+
+
+def _screen_payload(files: dict[str, bytes]) -> screen._HeldScreen:
+    return screen._HeldScreen(
         files["manifest.json"],
         files["targets.json"],
-        tuple((name.removeprefix("reports/"), files[name]) for name in present),
+        tuple((name.removeprefix("reports/"), raw) for name, raw in files.items() if name.startswith("reports/")),
     )
-    return manifest, screen._verify_held(held), order
 
 
 def _encode(files: dict[str, bytes], order: tuple[str, ...], kind: str) -> bytes:
@@ -237,12 +240,19 @@ def _capture(root: Path, kind: str) -> tuple[dict[str, bytes], tuple[HeldFile, .
     return files, tuple(inputs), recheck
 
 
-def _receive(path: str, pin: str, kind: str) -> tuple[HeldFile, dict[str, bytes], dict[str, Any]]:
+def _receive_contents(
+    path: str, pin: str, kind: str
+) -> tuple[HeldFile, dict[str, bytes], dict[str, Any], dict[str, Any]]:
     profile = _profile(kind)
     transport._require(type(pin) is str and re.fullmatch(r"[0-9a-f]{64}", pin) is not None)
     held = hold(path, profile.raw_bytes)
     transport._require(hashlib.sha256(held.data).hexdigest() == pin)
     files, manifest, native = _decode(held.data, kind)
+    return held, files, manifest, native
+
+
+def _receive(path: str, pin: str, kind: str) -> tuple[HeldFile, dict[str, bytes], dict[str, Any]]:
+    held, files, manifest, native = _receive_contents(path, pin, kind)
     return held, files, _result(held.data, kind, manifest, native)
 
 

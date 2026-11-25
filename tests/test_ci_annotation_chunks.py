@@ -22,6 +22,10 @@ def test_installed_cli_api_chunks_collect_and_native_ingest(tmp_path, monkeypatc
     assert result["native_counts"]["calibration_schema"] == 2 and result["retained_calibration_schema"] == 3
     assert result["native_counts"]["n_unusable"] == 4
     assert result["missing_part_exit_code"] == 2
+    indexed = result["indexed_collection"]
+    assert indexed["reversed"]["sheet_and_receipt_byte_parity"]
+    assert indexed["reversed"]["n_rows"] == 18 and indexed["reversed"]["n_unusable"] == 4
+    assert all(indexed[name]["exit_code"] == 2 for name in ("missing", "duplicate", "wrong_assignment"))
     returned = result["return_validation"]
     assert returned["partial"]["received_part_indices"] == [2, 4]
     assert returned["partial"]["missing_part_indices"] == [1, 3]

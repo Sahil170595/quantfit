@@ -91,7 +91,14 @@ def test_scalar_qualification_and_junit_ignore_control_annotation_state(tmp_path
     assert screen_to_junit(result) == screen_to_junit(calibration)
 
 
-def test_actual_os_cli_composition_publishes_complete_native_json_and_junit(tmp_path):
+@pytest.mark.parametrize(
+    "requirement,cases",
+    [
+        (("--require-conditional-resolution", "100"), 4),
+        (("--require-axis-conditional-resolution", "refusal-robustness=100"), 3),
+    ],
+)
+def test_actual_os_cli_composition_publishes_complete_native_json_and_junit(tmp_path, requirement, cases):
     paths = calibrated(tmp_path / "cli")
     out, xml = tmp_path / "receiving.json", tmp_path / "receiving.xml"
     result = subprocess.run(
@@ -99,8 +106,7 @@ def test_actual_os_cli_composition_publishes_complete_native_json_and_junit(tmp_
             *command(paths),
             "--calibrations-dir",
             str(paths[5]),
-            "--require-conditional-resolution",
-            "100",
+            *requirement,
             "--out",
             str(out),
             "--junit",
@@ -119,7 +125,7 @@ def test_actual_os_cli_composition_publishes_complete_native_json_and_junit(tmp_
     assert summary["control_evidence"]["status"] == "consistent"
     assert "conditional_resolution" in summary and "conditional_resolution_requirement" in summary
     assert xml.read_text(encoding="utf-8") == screen_to_junit(summary)
-    assert len(list(ET.fromstring(xml.read_bytes()).iter("testcase"))) == 4
+    assert len(list(ET.fromstring(xml.read_bytes()).iter("testcase"))) == cases
 
 
 def test_variants_remain_refused_before_io_even_with_full_control_roles(monkeypatch):
@@ -175,6 +181,35 @@ def test_combination_keeps_exact_native_scalar_priority_and_junit(tmp_path, scen
     assert result["conditional_resolution_requirement"] == calibration["conditional_resolution_requirement"]
     assert screen_to_junit(result) == screen_to_junit(calibration)
     assert result["control_evidence"]["status"] == "conflicting"
+    assert not any(result[key] for key in ("scientific_go", "human_labels_authenticated", "sensitivity_established"))
+
+
+@pytest.mark.parametrize(
+    "ceilings,expected,settings,drop_native",
+    [
+        ({"refusal-robustness": 40}, 0, {}, False),
+        ({"over-refusal": 40, "refusal-robustness": 40}, 0, {}, False),
+        ({"refusal-robustness": 1}, 5, {}, False),
+        ({"refusal-robustness": 1}, 3, {"flagged": True}, False),
+        ({"refusal-robustness": 40}, 4, {"missing": ("clean",)}, False),
+        ({"refusal-robustness": 1}, 4, {}, True),
+    ],
+)
+def test_selected_axes_keep_the_native_requirement_and_control_annotation(
+    tmp_path, ceilings, expected, settings, drop_native
+):
+    paths = qualified(tmp_path / "selected", **settings)
+    if drop_native:
+        (paths[1] / "clean.json").unlink()
+    selection = {"required_conditional_resolution_by_axis_pp": ceilings}
+    native = summarize_screen(str(paths[0]), str(paths[1]), calibrations_dir=str(paths[5]), **selection)
+    result = combined(paths, **selection)
+    requirement = result["conditional_resolution_requirement"]
+    assert result["exit_code"] == native["exit_code"] == expected
+    assert {key: value for key, value in result.items() if key != "control_evidence"} == native
+    assert requirement["selected_axes"] == [axis for axis in ("refusal-robustness", "over-refusal") if axis in ceilings]
+    assert screen_to_junit(result) == screen_to_junit(native)
+    assert result["control_evidence"]["status"] == ("missing" if drop_native else "conflicting")
     assert not any(result[key] for key in ("scientific_go", "human_labels_authenticated", "sensitivity_established"))
 
 

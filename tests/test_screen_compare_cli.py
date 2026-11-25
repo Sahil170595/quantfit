@@ -7,6 +7,7 @@ from types import SimpleNamespace
 import pytest
 
 from quantfit.cli import main
+from quantfit.screen_compare import ScreenComparisonError
 
 
 @pytest.mark.parametrize("code", [0, 3, 4])
@@ -19,7 +20,11 @@ def test_screen_compare_cli_delegates_protected_outputs_and_native_verdict(monke
         called.append((reference, candidate, out_path, junit_path))
         return result
 
-    monkeypatch.setitem(sys.modules, "quantfit.screen_compare", SimpleNamespace(compare_screen_bundles=compare))
+    monkeypatch.setitem(
+        sys.modules,
+        "quantfit.screen_compare",
+        SimpleNamespace(compare_screen_bundles=compare, ScreenComparisonError=ScreenComparisonError),
+    )
     args = ["screen-compare", "--reference-bundle", "ref", "--candidate-bundle", "cand"]
     if outputs:
         args += ["--out", "receiving.json", "--junit", "receiving.xml"]

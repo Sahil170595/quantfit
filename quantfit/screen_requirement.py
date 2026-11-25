@@ -222,6 +222,13 @@ def axis_requirement(
     }
 
 
+def qualify_screen_axes(result: dict[str, Any], ceilings: dict[str, float]) -> None:
+    """Attach selected requirements to the existing native screen and resolution rows."""
+    requirement = axis_requirement(result, result["conditional_resolution"]["rows"], ceilings)
+    result["conditional_resolution_requirement"] = requirement
+    result["exit_code"] = requirement["qualification_exit_code"]
+
+
 def append_junit_cases(suite: ET.Element, requirement: dict[str, Any]) -> None:
     """Append requirements after all native cases; missing evidence is a failure here."""
     for row in requirement["rows"]:

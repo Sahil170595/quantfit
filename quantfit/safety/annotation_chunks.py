@@ -173,12 +173,38 @@ def prepare_annotation_chunks(
         raise AnnotationChunksError("invalid_annotation_chunks") from None
 
 
+def _indexed_part_paths(indexed_parts: tuple[tuple[int, str], ...]) -> dict[int, str]:
+    require(type(indexed_parts) is tuple and 1 <= len(indexed_parts) <= MAX_PARTS)
+    paths: dict[int, str] = {}
+    for item in indexed_parts:
+        require(type(item) is tuple and len(item) == 2)
+        index, path = item
+        require(type(index) is int and 1 <= index <= MAX_PARTS and index not in paths)
+        require(type(path) is str and bool(path))
+        paths[index] = path
+    return paths
+
+
 def collect_annotation_chunks(
-    sheet_path: str, key_path: str, manifest_path: str, part_paths: tuple[str, ...], *, out_path: str, receipt_path: str
+    sheet_path: str,
+    key_path: str,
+    manifest_path: str,
+    part_paths: tuple[str, ...] | None = None,
+    *,
+    indexed_parts: tuple[tuple[int, str], ...] | None = None,
+    out_path: str,
+    receipt_path: str,
 ) -> dict[str, Any]:
-    """Verify every returned partition and publish a NEW complete native sheet and aggregate receipt."""
+    """Collect every partition, in manifest order or with explicit original indices."""
     try:
-        require(type(part_paths) is tuple and 1 <= len(part_paths) <= MAX_PARTS)
+        require((indexed_parts is None) != (part_paths is None))
+        indices = None
+        if indexed_parts is not None:
+            paths = _indexed_part_paths(indexed_parts)
+            indices = sorted(paths)
+            part_paths = tuple(paths[index] for index in indices)
+        if part_paths is None or type(part_paths) is not tuple or not 1 <= len(part_paths) <= MAX_PARTS:
+            raise AnnotationChunksError("invalid_annotation_chunks")
         inputs = _held(
             (sheet_path, key_path, manifest_path, *part_paths),
             (MAX_SHEET_BYTES, MAX_KEY_BYTES, MAX_MANIFEST_BYTES, *(MAX_SHEET_BYTES for _ in part_paths)),
@@ -193,6 +219,7 @@ def collect_annotation_chunks(
         )
         # Canonical JSON preserves bool/int/float distinctions, unlike dict equality.
         require(_encode(expected) == _encode(manifest) and len(part_paths) == manifest["n_parts"])
+        require(indices is None or indices == list(range(1, manifest["n_parts"] + 1)))
         key, _ = _key(inputs[1].data)
         labels: dict[str, str] = {}
         filled = []
@@ -252,16 +279,9 @@ def validate_annotation_returns(
     """Inspect complete supplied parts; missing original parts remain explicit."""
     try:
         require(type(require_complete) is bool)
-        require(type(indexed_parts) is tuple and 1 <= len(indexed_parts) <= MAX_PARTS)
-        indices = []
-        paths = []
-        for item in indexed_parts:
-            require(type(item) is tuple and len(item) == 2)
-            index, path = item
-            require(type(index) is int and 1 <= index <= MAX_PARTS and index not in indices)
-            require(type(path) is str and bool(path))
-            indices.append(index)
-            paths.append(path)
+        indexed = _indexed_part_paths(indexed_parts)
+        indices = list(indexed)
+        paths = tuple(indexed.values())
         inputs = _held(
             (sheet_path, key_path, manifest_path, *paths),
             (MAX_SHEET_BYTES, MAX_KEY_BYTES, MAX_MANIFEST_BYTES, *(MAX_SHEET_BYTES for _ in paths)),

@@ -1,0 +1,59 @@
+{
+  "all_unusable_collection_count": 18,
+  "all_unusable_native_ingest_refused": true,
+  "cases": {
+    "duplicate": {
+      "exit_code": 2,
+      "outputs_present": false,
+      "part_indices": [
+        4,
+        3,
+        2,
+        2
+      ]
+    },
+    "missing": {
+      "exit_code": 2,
+      "outputs_present": false,
+      "part_indices": [
+        4,
+        2,
+        1
+      ]
+    },
+    "reversed": {
+      "exit_code": 0,
+      "n_parts": 4,
+      "n_rows": 18,
+      "n_unusable": 4,
+      "part_indices": [
+        4,
+        3,
+        2,
+        1
+      ],
+      "sheet_and_receipt_byte_parity": true
+    },
+    "wrong_assignment": {
+      "exit_code": 2,
+      "outputs_present": false,
+      "part_indices": [
+        4,
+        3,
+        1,
+        2
+      ]
+    }
+  },
+  "consumer_sha256": "e1e3092ea50cdee261a7e85d070b6ba4026985a1dda3223f6a72504b6efbc858",
+  "cpu_architecture": "AMD64",
+  "editable_distribution": "0.69.0",
+  "fixture": "Synthetic local fixture defined in CI annotation consumer",
+  "human_labels_authenticated": false,
+  "original_inputs_unchanged": true,
+  "os": "Windows",
+  "python": "3.13.1",
+  "scientific_go": false,
+  "source_base": "602feec6927ee169e86ff2d4bed420195e9b4f85",
+  "tool_version": "0.69.0"
+}
