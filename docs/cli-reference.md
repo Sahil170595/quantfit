@@ -1045,11 +1045,23 @@ Quantfit 0.27.0 adds a bundle input mode to the existing command:
 quantfit reproduce --reference-bundle reference-handoff --candidate-bundle candidate-handoff --out comparison.json --json
 ```
 
-Use exactly both `--reference-bundle DIR` and `--candidate-bundle DIR`. They accept
-schema-2 three-report T0 handoffs made by `bundle replay-create`, not generic
-aggregate bundles. Either bundle flag mixed with `--reference`, `--candidate`,
-`--t0-reference` or `--t0-candidate` is an operational error before any input I/O.
+The directory flags accept schema-2 three-report T0 handoffs made by
+`bundle replay-create`. Each side accepts either its directory flag or one
+canonical `--kind replay` ZIP and its expected lowercase SHA-256.
+Replay inputs mixed with `--reference`, `--candidate`, `--t0-reference` or
+`--t0-candidate` are rejected before reading report or archive bytes.
 `--out PATH` and `--json` retain their existing command envelope and native exits.
+
+```bash
+quantfit reproduce --reference-archive reference.zip --reference-sha256 REFERENCE_SHA256 --candidate-archive candidate.zip --candidate-sha256 CANDIDATE_SHA256 --out comparison.json --junit reproduction.xml --json
+```
+
+Use the SHA-256 values from trusted `bundle pack` receipts. Directory and ZIP
+inputs can be mixed across sides. Archive input adds its digest and size to
+`bundle_evidence`; member labels use `archive.zip::report-1.json`. Both formats
+derive the same native decisions from held report bytes. Archive validation
+requires the exact digest and native replay shape before comparison and does
+not extract files. Output guards protect both archive files and closed directories.
 
 Both sides must verify their ordered held members and original T0. Selection is
 fixed to `replicate-1` / `report-1.json`; it is recorded, not chosen for a favorable
@@ -1065,6 +1077,8 @@ independence and scientific-claim verification remain false.
 
 The library API is
 `quantfit.reproduce.compare_bundles(reference_bundle_path, candidate_bundle_path, out_path=None)`.
+Use the keyword-only `reference_archive=(path, sha256)` or
+`candidate_archive=(path, sha256)` in place of the corresponding directory argument.
 The shared comparison performs no path I/O; loose-report inputs below retain their
 existing loader/T0 behavior. This is the current native tolerance/projection-based
 reproduction policy, not a new full-payload repeatability protocol. P1 retains its

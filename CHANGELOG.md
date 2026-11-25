@@ -13,6 +13,10 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.75.0 — Unreleased
+
+- Compare two replay handoffs directly from pinned canonical ZIPs or directories while retaining native T0, report bindings, and outcomes.
+
 ## 0.70.0 — 2026-11-25
 
 - Assess a digest-pinned replay ZIP directly and preserve original receiving criteria and JUnit. See
