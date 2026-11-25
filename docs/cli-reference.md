@@ -108,6 +108,16 @@ Receiving requires the expected full lowercase archive SHA256. Existing director
 verification and native adverse outcomes are unchanged. See [closed transport
 format and failure behavior](portable-evidence-bundles.md#single-file-transport-0590).
 
+Save the native verification result as a CI artifact without extracting the ZIP.
+
+```bash
+quantfit bundle archive-verify --kind replay --archive replay.zip --sha256 FULL64 --out verification.json --json
+```
+
+`--out` accepts a new file in an existing directory for any supported archive kind.
+Its contents equal the CLI JSON `result`, including the native verdict and scope.
+Verification and writing both have to succeed for exit `0`. Refusals return `2`.
+
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,
 deadline/cleanup and 0/3/2 semantics are in [GGUF verification](gguf-verification.md).

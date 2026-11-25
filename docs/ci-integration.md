@@ -3,7 +3,7 @@
 Status: **ROADMAP 0.7**. Reference integration: `.github/actions/quantfit-gate/action.yml`
 (composite action) and `.github/workflows/canary.yml` (the scheduled CPU smoke job).
 The action and instrument examples pin **quantfit 0.70.0**, including
-selected-axis policies. Its action default is `>=0.70.0,<0.71`; pre-publication validation
+selected-axis policies. Its action default is `>=0.72.0,<0.73`; pre-publication validation
 uses the exact wheel through `quantfit-path`. Pin action and instrument separately
 for reproduction.
 
@@ -216,7 +216,7 @@ measures between releases.
 | `calibration-report` | `""` | Bound schema-2 or closed retained-schema-3 calibration input. Mutually exclusive with both operator epsilon inputs. Protocol is checked before generation; actual resolved scope is checked afterward. All output paths, including JUnit, must differ from this input. |
 | `max-new-tokens` | `""` (CLI default 64) | Applied identically to both arms (§2.3). |
 | `python-version` | `3.12` | Same version quantfit's own CI pins. |
-| `quantfit-version` | `>=0.70.0,<0.71` | Action default. Pin exactly for a reproducible gate. |
+| `quantfit-version` | `>=0.72.0,<0.73` | Action default. Pin exactly for a reproducible gate. |
 | `quantfit-path` | `""` | Install from a local path instead of PyPI; overrides `quantfit-version`. |
 | `report` | `quantfit-gate/drift.json` | Schema-v2 drift report (`quantfit gate --report`). |
 | `gate-out` | `quantfit-gate/gate.json` | Native decision artifact (`quantfit gate --out`), legacy schema 1 or selected-axis schema 2/3. Written on refusals too. |
