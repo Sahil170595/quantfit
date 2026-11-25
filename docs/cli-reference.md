@@ -31,10 +31,10 @@ Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --con
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.67.0.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.68.0.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.67.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.68.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -235,6 +235,9 @@ See [the complete per-axis contract](screen-resolution.md#per-axis-requirements-
 
 Quantfit 0.34.0 adds `screen-compare --reference-bundle DIR
 --candidate-bundle DIR --out comparison.json --junit comparison.xml --json`.
+Quantfit 0.68.0 adds a digest-pinned archive choice for each side, using
+`--reference-archive ZIP --reference-sha256 HEX` and
+`--candidate-archive ZIP --candidate-sha256 HEX`. The side choices can be mixed.
 The optional JSON/XML outputs share source/alias protection; they do not form a
 transaction. Both bundles must contain the exact same target-manifest bytes.
 Native flags on either side retain exit 3 before incomplete/incompatible 4;

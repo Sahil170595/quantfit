@@ -13,6 +13,13 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.68.0 — 2026-11-25
+
+- Accept independently SHA-256-pinned canonical screen ZIPs on either side of
+  `screen-compare`. Direct receiving preserves native exit codes, per-axis
+  observations and protected outputs for archived or directory inputs. See
+  `validation/2026-11-21-screen-archive-comparison/`.
+
 ## 0.67.0 — 2026-11-25
 
 - Accept selected-axis `screen-summary` requirements with a complete supplied-control triplet
