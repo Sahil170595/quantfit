@@ -45,6 +45,7 @@ authors:
 version: "0.68.0"
 
 # Software release date from CHANGELOG.md.
+date-released: "2026-11-25"
 
 # pyproject.toml `license = "Apache-2.0"` (PEP 639 SPDX expression); LICENSE is Apache 2.0.
 license: "Apache-2.0"

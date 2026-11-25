@@ -41,9 +41,12 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
-The **0.68.0 candidate** accepts
+Quantfit **0.68.0** accepts
 [digest-pinned screen archives in comparisons](docs/screen-comparison.md#digest-pinned-archive-inputs-0680).
 Compare a canonical ZIP against another ZIP or a screen directory without extracting it.
+
+Quantfit **0.67.0** accepts [per-axis resolution ceilings with supplied controls](docs/saved-screen-control-evidence.md#selected-axes-with-one-calibration-directory-0670)
+in a single saved-screen operation. Control remains an annotation and selected axes use native qualification.
 
 Quantfit **0.66.1** protects [bundle publication](docs/cli-reference.md#bundle-publication-0661) during interrupted writes, applies aggregate admission when receiving screens with controls, and rejects overflowing reference runtimes cleanly.
 
@@ -109,7 +112,7 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-Install with `pip install "quantfit[inspect,gguf]==0.66.1"`.
+Install with `pip install "quantfit[inspect,gguf]==0.68.0"`.
 
 The observation runs the pinned judge over the original held completions.
 Use its receipt's raw SHA-256 for the offline comparison against one complete
