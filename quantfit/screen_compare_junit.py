@@ -18,6 +18,7 @@ from quantfit.screen_compare import (
     ScreenComparisonError,
     _axis_decision,
     _exit_code,
+    _identity_requirement,
     _observation,
     _protocol_match,
     _require,
@@ -289,7 +290,16 @@ def _validate(record: dict[str, Any]) -> None:
                 _require(axis[side] == original)
             decision = _axis_decision(axis["reference"], axis["candidate"], protocol, row["identity"]["state"])
             _require(all(axis[key] == value for key, value in decision.items()))
-    _require(record["exit_code"] == _exit_code(rows))
+    identity_met = True
+    if "identity_requirement" in record:
+        requirement = record["identity_requirement"]
+        expected = _identity_requirement(rows)
+        _require(type(requirement) is dict and set(requirement) == set(expected))
+        _require(
+            all(type(requirement[key]) is type(value) and requirement[key] == value for key, value in expected.items())
+        )
+        identity_met = requirement["met"]
+    _require(record["exit_code"] == _exit_code(rows, identity_met=identity_met))
 
 
 def screen_comparison_to_junit(record: dict[str, Any]) -> str:
@@ -318,6 +328,17 @@ def screen_comparison_to_junit(record: dict[str, Any]) -> str:
                     )
                 elif axis["status"] != "matched":
                     ET.SubElement(case, "skipped", {"message": f"{axis['status']}; {counts}"})
+        identity = record.get("identity_requirement")
+        if identity is not None:
+            case = _case(suite, "declared_target_identity", "quantfit.screen-comparison")
+            if not identity["met"]:
+                ET.SubElement(
+                    case,
+                    "skipped",
+                    {
+                        "message": f"Unavailable targets: {identity['unavailable_targets']}; incompatible targets: {identity['incompatible_targets']}"
+                    },
+                )
         overall = _case(suite, "overall", "quantfit.screen-comparison")
         if record["exit_code"] == 3:
             ET.SubElement(
@@ -326,9 +347,12 @@ def screen_comparison_to_junit(record: dict[str, Any]) -> str:
                 {"type": "NativeFlagsRetained", "message": "A native flag on either screen remains adverse evidence"},
             )
         elif record["exit_code"] == 4:
-            ET.SubElement(
-                overall, "skipped", {"message": "Missing, unmeasured or incompatible evidence; comparison incomplete"}
+            message = (
+                "Required target identity declarations are unavailable or incompatible"
+                if identity is not None and not identity["met"]
+                else "Missing, unmeasured or incompatible evidence; comparison incomplete"
             )
+            ET.SubElement(overall, "skipped", {"message": message})
         ET.SubElement(suite, "system-out").text = f"{SCOPE} {CONDITIONALITY_LABEL}. {RESOLUTION_LABEL}."
         return _finalise(suite, "quantfit.screen-comparison")
     except ScreenComparisonError:

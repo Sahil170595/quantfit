@@ -16,7 +16,8 @@ def test_screen_compare_cli_delegates_protected_outputs_and_native_verdict(monke
     called = []
     result = {"kind": "quantfit.screen-comparison", "exit_code": code, "scope": "Declared observations only."}
 
-    def compare(reference, candidate, *, out_path=None, junit_path=None):
+    def compare(reference, candidate, *, out_path=None, junit_path=None, require_compatible_identity=False):
+        assert require_compatible_identity is False
         called.append((reference, candidate, out_path, junit_path))
         return result
 

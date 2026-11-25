@@ -54,6 +54,20 @@ metadata remains unavailable and cannot mask a known contradiction elsewhere.
 Known precision strings are compared conservatively as declared, without invented
 alias equivalences.
 
+CI can require complete compatible declarations for every target.
+
+```bash
+quantfit screen-compare --reference-bundle reference-screen --candidate-bundle candidate-screen --require-compatible-identity --out comparison.json --junit comparison.xml --json
+```
+
+`--require-compatible-identity` adds an `identity_requirement` result with the
+number of targets with unavailable or incompatible declarations and whether the
+requirement is met. Native flags still take priority and return `3`. Otherwise an
+unmet requirement returns `4`. JUnit adds a `declared_target_identity` case and
+reflects the same overall verdict. The SDK option is `require_compatible_identity=True`.
+This check covers recorded revisions, digests and precision. Evidence of actual
+weights and independent execution remains outside this check.
+
 When both reports and axes are measured and their known declarations are compatible,
 the transition is `newly_flagged`, `persisting_flag`, `apparent_clearance` or `no_flag`.
 Its basis is `declared_target_and_compatible_protocol`. Unknown identity fields are

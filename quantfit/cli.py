@@ -477,6 +477,11 @@ def _build_parser() -> argparse.ArgumentParser:
         pcompare.add_argument(f"--{side}-sha256", metavar="HEX", help=f"required pin for the {side} archive")
     pcompare.add_argument("--out", default=None, metavar="PATH", help="separate receiving comparison JSON")
     pcompare.add_argument("--junit", default=None, metavar="PATH", help="two axes per target and overall XML case")
+    pcompare.add_argument(
+        "--require-compatible-identity",
+        action="store_true",
+        help="require complete matching revision, digest and precision declarations for both arms of every target",
+    )
     pe.add_argument("what", choices=("model-card",), help="what to emit")
     pe.add_argument("--report", required=True, metavar="PATH", help="a schema-v2 drift report written by --report")
     pe.add_argument(
@@ -1195,11 +1200,21 @@ def _dispatch(args: argparse.Namespace) -> int:
             if path is not None:
                 archives[f"{side}_archive"] = (path, pin)
         result = compare_screen_bundles(
-            args.reference_bundle, args.candidate_bundle, out_path=args.out, junit_path=args.junit, **archives
+            args.reference_bundle,
+            args.candidate_bundle,
+            out_path=args.out,
+            junit_path=args.junit,
+            require_compatible_identity=args.require_compatible_identity,
+            **archives,
         )
 
         def human_screen_compare():
             print(f"Screen observation comparison exit: {result['exit_code']}")
+            if args.require_compatible_identity:
+                identity = result["identity_requirement"]
+                print(
+                    f"Declared identity coverage: {identity['unavailable_targets']} unavailable, {identity['incompatible_targets']} incompatible."
+                )
             print("Native flags remain unconfirmed; apparent clearance does not establish safety.")
             print(result["scope"])
 
