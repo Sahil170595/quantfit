@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from zipfile import BadZipFile
 
 from quantfit import __version__
 from quantfit.bundle import _report
@@ -156,9 +159,12 @@ def _exit_code(rows: list[dict[str, Any]]) -> int:
     return 4 if any(axis["status"] != "matched" for axis in axes) else 0
 
 
-def _compare_held(reference: _HeldScreen, candidate: _HeldScreen) -> dict[str, Any]:
+def _compare_held(
+    reference: _HeldScreen, candidate: _HeldScreen, verified: dict[str, dict[str, Any]] | None = None
+) -> dict[str, Any]:
     _require(reference.targets == candidate.targets, "target_manifest_mismatch")
-    verified = {"reference": _verify_held(reference), "candidate": _verify_held(candidate)}
+    if verified is None:
+        verified = {"reference": _verify_held(reference), "candidate": _verify_held(candidate)}
     screens = {side: result["receiving_summary"] for side, result in verified.items()}
     native = {"reference": dict(reference.members), "candidate": dict(candidate.members)}
     rows = []
@@ -233,19 +239,64 @@ def _recheck(held: _HeldScreen) -> None:
     _scan(root / "reports", dict.fromkeys((name for name, _ in held.members), False))
 
 
+def _source(bundle_path: str | None, archive: tuple[str, str] | None) -> tuple[str, str | None]:
+    _require((bundle_path is None) != (archive is None), "invalid_screen_comparison_input")
+    if archive is not None:
+        path, pin = archive
+        _require(type(pin) is str, "invalid_screen_comparison_input")
+        return _canonical_receiving_path(path), pin
+    assert bundle_path is not None
+    return _canonical_receiving_path(bundle_path), None
+
+
+def _hold_comparison_input(
+    source: tuple[str, str | None], cache: _Cache
+) -> tuple[_HeldScreen, Callable[[], dict[str, Any]], Callable[[], None]]:
+    path, pin = source
+    if pin is None:
+        screen = _capture_bundle(path, cache=cache)
+        return screen, lambda: _verify_held(screen), lambda: _recheck(screen)
+
+    from quantfit.bundle_archive_kinds import _receive_contents, _screen_payload
+
+    held, files, _, verified = _receive_contents(path, pin, "screen")
+    screen = replace(_screen_payload(files), protected_paths=(held.path,))
+    return screen, lambda: verified, held.check
+
+
 def compare_screen_bundles(
-    reference_bundle: str, candidate_bundle: str, *, out_path: str | None = None, junit_path: str | None = None
+    reference_bundle: str | None = None,
+    candidate_bundle: str | None = None,
+    *,
+    reference_archive: tuple[str, str] | None = None,
+    candidate_archive: tuple[str, str] | None = None,
+    out_path: str | None = None,
+    junit_path: str | None = None,
 ) -> dict[str, Any]:
-    """Compare strict held originals; publish optional JSON/XML atomically per file."""
+    """Compare held directory or (screen ZIP path, SHA-256) inputs without extracting."""
     phase = "invalid_screen_comparison_input"
     try:
-        reference_path, candidate_path = (
-            _canonical_receiving_path(path) for path in (reference_bundle, candidate_bundle)
-        )
-        cache: _Cache = {}
-        reference = _capture_bundle(reference_path, cache=cache)
-        candidate = reference if reference_path == candidate_path else _capture_bundle(candidate_path, cache=cache)
+        ref_source = _source(reference_bundle, reference_archive)
+        cand_source = _source(candidate_bundle, candidate_archive)
         outputs = tuple(Path(_canonical_receiving_path(path)) for path in (out_path, junit_path) if path is not None)
+        if outputs and (reference_archive is not None or candidate_archive is not None):
+            sources = (ref_source, cand_source)
+            phase = "unsafe_output"
+            _validate_reproduction_outputs(
+                _ReproductionOutputs(
+                    tuple(Path(path) for path, pin in sources if pin is not None),
+                    tuple(Path(path) for path, pin in sources if pin is None),
+                    outputs,
+                )
+            )
+            phase = "invalid_screen_comparison_input"
+        cache: _Cache = {}
+        reference, verify_reference, check_reference = _hold_comparison_input(ref_source, cache)
+        candidate, verify_candidate, check_candidate = (
+            (reference, verify_reference, check_reference)
+            if ref_source == cand_source
+            else _hold_comparison_input(cand_source, cache)
+        )
         plan = _ReproductionOutputs(
             (*reference.protected_paths, *candidate.protected_paths),
             (*reference.protected_roots, *candidate.protected_roots),
@@ -254,7 +305,8 @@ def compare_screen_bundles(
         phase = "unsafe_output"
         _validate_reproduction_outputs(plan)
         phase = "invalid_screen_comparison_input"
-        result = _compare_held(reference, candidate)
+        _require(reference.targets == candidate.targets, "target_manifest_mismatch")
+        result = _compare_held(reference, candidate, {"reference": verify_reference(), "candidate": verify_candidate()})
         phase = "output_failure"
         buffers = []
         if out_path is not None:
@@ -268,13 +320,13 @@ def compare_screen_bundles(
         if buffers:
 
             def recheck() -> None:
-                _recheck(reference)
+                check_reference()
                 if candidate is not reference:
-                    _recheck(candidate)
+                    check_candidate()
 
             _publish_reproduction_outputs(plan, buffers, recheck=recheck)
         return result
     except ScreenComparisonError:
         raise
-    except (RuntimeError, OSError, ValueError, TypeError, KeyError, RecursionError, ImportError):
+    except (RuntimeError, OSError, ValueError, TypeError, KeyError, RecursionError, ImportError, BadZipFile):
         raise ScreenComparisonError(phase) from None

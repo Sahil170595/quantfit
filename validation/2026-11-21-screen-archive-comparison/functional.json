@@ -1,0 +1,67 @@
+{
+  "cases": [
+    {
+      "candidate_archive_sha256": "9d35bb5a449e5ad8a68145b4855c6bdb0e3fd015e0f9113cee8d75ce3d4f3213",
+      "directory_parity": true,
+      "emitted_json": true,
+      "emitted_junit": true,
+      "exit_code": 0,
+      "junit_cases": 7,
+      "junit_failures": 0,
+      "junit_sha256": "58bb186e4575a066c5d62b319b03d1b8c4c2237e823035165ac78ead7603eb77",
+      "junit_skips": 0,
+      "output_sha256": "1e78d8b60a36d8fa33f87f05e179d2b891b4aaadb243fac0d296f044ba6d659a",
+      "reference_archive_sha256": "9d35bb5a449e5ad8a68145b4855c6bdb0e3fd015e0f9113cee8d75ce3d4f3213",
+      "scenario": "complete",
+      "scientific_go": false,
+      "target_count": 3
+    },
+    {
+      "candidate_archive_sha256": "3bc7123ed02f0760bad65eba5eeb4f5b9b1a47ae610173224781b48b4a0cbd84",
+      "directory_parity": true,
+      "emitted_json": true,
+      "emitted_junit": true,
+      "exit_code": 3,
+      "junit_cases": 7,
+      "junit_failures": 2,
+      "junit_sha256": "172b698dfa2034d068497f4d3dc6f59ae89a96df674beb13466646c8893ffb75",
+      "junit_skips": 0,
+      "output_sha256": "7258678c100a8e24827b3a03fc3e5372aba892a6d35007187a453107e0020596",
+      "reference_archive_sha256": "9d35bb5a449e5ad8a68145b4855c6bdb0e3fd015e0f9113cee8d75ce3d4f3213",
+      "scenario": "flagged",
+      "scientific_go": false,
+      "target_count": 3
+    },
+    {
+      "candidate_archive_sha256": null,
+      "directory_parity": true,
+      "emitted_json": true,
+      "emitted_junit": true,
+      "exit_code": 4,
+      "junit_cases": 7,
+      "junit_failures": 0,
+      "junit_sha256": "be9ecc2e0aae2b976497c7e435693d5690e56a4850ce6a50224425484e402b99",
+      "junit_skips": 3,
+      "output_sha256": "9217b0f2f05e97b298b4068ffbb949169379a784d40b3bcc500da31fdfbd754c",
+      "reference_archive_sha256": "9d35bb5a449e5ad8a68145b4855c6bdb0e3fd015e0f9113cee8d75ce3d4f3213",
+      "scenario": "missing_member",
+      "scientific_go": false,
+      "target_count": 3
+    },
+    {
+      "candidate_archive_sha256": null,
+      "emitted_json": false,
+      "emitted_junit": false,
+      "exit_code": 2,
+      "reference_archive_sha256": "9d35bb5a449e5ad8a68145b4855c6bdb0e3fd015e0f9113cee8d75ce3d4f3213",
+      "scenario": "mismatched_pin"
+    }
+  ],
+  "cpu_architecture": "AMD64",
+  "editable_distribution": "0.68.0",
+  "fixture": "Public aggregate screen fixture with deliberately synthetic observations",
+  "platform": "Windows",
+  "python": "3.13.1",
+  "source_base": "602feec6927ee169e86ff2d4bed420195e9b4f85",
+  "tool_version": "0.68.0"
+}
