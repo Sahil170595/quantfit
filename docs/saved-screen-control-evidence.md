@@ -140,7 +140,7 @@ source authentication, sensitivity estimate or scientific GO is introduced.
 
 ## Selected axes with one calibration directory (0.67.0)
 
-The 0.67.0 candidate accepts repeatable `--require-axis-conditional-resolution AXIS=PP`
+Quantfit 0.67.0 accepts repeatable `--require-axis-conditional-resolution AXIS=PP`
 alongside all three control inputs and one `--calibrations-dir`. Supply one or two
 canonical axes and use the scalar flag or selected-axis flags for a given invocation.
 The requirement and JUnit are the native selected-axis projections for the same

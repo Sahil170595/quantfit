@@ -161,7 +161,7 @@ resolution ceilings, distinct from the lower rate cap of an axis effect gate.
 
 Require either the single calibration directory or declared named variants. A
 scalar `required_conditional_resolution_pp` / `--require-conditional-resolution`
-and the per-axis map are mutually exclusive. The 0.67.0 candidate also supports
+and the per-axis map are mutually exclusive. Quantfit 0.67.0 also supports
 the complete supplied-control report, capture and adjudication triplet with a
 single calibration directory. Named variants require their own receiving invocation.
 Invalid combinations refuse before source/calibration reads or publication.

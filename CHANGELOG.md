@@ -13,7 +13,7 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.67.0 — Unreleased
+## 0.67.0 — 2026-11-24
 
 - Accept selected-axis `screen-summary` requirements with a complete supplied-control triplet
   and a single calibration directory. Reuse the native requirements, exit priorities and JUnit.
