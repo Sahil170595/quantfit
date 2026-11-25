@@ -38,6 +38,22 @@ NEW complete native sheet and an aggregate counts/hash receipt. Ingestion is a
 separate command using the unchanged schema-2 consumer. A collected all-unusable
 sheet is valid, but native ingestion refuses it because nothing was measured.
 
+### Indexed collection (0.69.0)
+
+Use a repeated `--indexed-part INDEX=PATH` to assemble work returned in
+any order. Supply exactly one filled part for every original manifest index.
+Indices are explicit even if a file was renamed. A missing, repeated, invalid
+or mismatched index refuses collection before either output is written.
+
+```bash
+quantfit calibrate chunks collect --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --indexed-part 2=second-return.csv --indexed-part 1=first-return.csv --out collected.labels.csv --receipt collection.json --json
+```
+
+Use either all ordered `--part PATH` options or all `--indexed-part INDEX=PATH`
+options. The SDK alternative to positional paths is `indexed_parts=((2, second_path), (1, first_path))`.
+Collection still validates the returned rows against the original assignments
+and assembles the original manifest order. Part filenames are only path locators.
+
 For completion-free retention, explicitly extract the **collected** sheet and
 then use its truthful receipt with the existing schema-3 consumer:
 

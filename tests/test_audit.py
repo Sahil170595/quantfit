@@ -1197,6 +1197,25 @@ def test_a_symbol_from_an_unrelated_module_no_longer_launders_a_wrong_field(tmp_
     assert coverage["record"]["accepted_universe"] < 3 * coverage["record"]["emitted_keys"]
 
 
+def test_cli_flag_can_only_exempt_a_name_in_the_document_that_shows_it(tmp_path, surface, monkeypatch):
+    surface["check"]["options"]["--max-tokens"] = "--max-tokens"
+    root = _repo(
+        tmp_path,
+        **{
+            "quantfit__emit.py": _EMITTER,
+            "docs__f.md": "## Fields\n\n`quantfit check --max-tokens 64` sets `max_tokens`.\n",
+            "docs__g.md": "## Fields\n\n`max_tokens` is an emitted field.\n",
+        },
+    )
+    claims = (A.SchemaClaim(id="record", modules=("quantfit/emit.py",), docs=("docs/f.md", "docs/g.md")),)
+    monkeypatch.setattr(A, "SCHEMA_CLAIMS", claims)
+    monkeypatch.setattr(A, "_parser_surface", lambda: surface)
+
+    findings, _ = A._check_schema_fields(root)
+
+    assert [(f.doc, f.kind) for f in findings] == [("docs/g.md", "unknown_field")]
+
+
 def test_a_function_the_emitter_imports_is_still_its_vocabulary(tmp_path, surface, monkeypatch):
     """`screen.py` documents the `wilson_interval` it CALLS; that is correct writing.
 

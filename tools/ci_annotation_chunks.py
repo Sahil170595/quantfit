@@ -13,6 +13,71 @@ from typing import Any
 from xml.etree import ElementTree as ET
 
 
+def _indexed_collection(args: list[str], parts: list[Path], root: Path, sheet: Path, receipt: Path) -> dict[str, Any]:
+    renamed = []
+    for index, part in enumerate(parts, 1):
+        path = root / f"returned={index}.csv"
+        path.write_bytes(part.read_bytes())
+        renamed.append(path)
+
+    cases = (
+        ("reversed", tuple(reversed(range(1, len(renamed) + 1))), 0),
+        ("missing", (4, 2, 1), 2),
+        ("duplicate", (4, 3, 2, 2), 2),
+        ("wrong_assignment", (4, 3, 1, 2), 2),
+    )
+    recorded = {}
+    for name, indices, expected in cases:
+        output, evidence = root / f"{name}.labels.csv", root / f"{name}.json"
+        options: list[str] = []
+        sources = reversed(renamed) if name == "wrong_assignment" else (renamed[i - 1] for i in indices)
+        for index, source in zip(indices, sources, strict=True):
+            options.extend(["--indexed-part", f"{index}={source}"])
+        run = subprocess.run(
+            [
+                sys.executable,
+                "-I",
+                "-B",
+                "-m",
+                "quantfit.cli",
+                *args,
+                *options,
+                "--out",
+                str(output),
+                "--receipt",
+                str(evidence),
+                "--json",
+            ],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            check=False,
+            timeout=30,
+        )
+        document = json.loads(run.stdout)
+        assert run.returncode == document["exit_code"] == expected and not run.stderr
+        if expected == 0:
+            assert output.read_bytes() == sheet.read_bytes() and evidence.read_bytes() == receipt.read_bytes()
+            result = document["result"]
+            assert result == json.loads(evidence.read_bytes())
+            assert [part["index"] for part in result["parts"]] == list(range(1, len(parts) + 1))
+            recorded[name] = {
+                "exit_code": run.returncode,
+                "n_rows": result["n_rows"],
+                "n_parts": result["n_parts"],
+                "n_unusable": result["n_unusable"],
+                "part_indices": indices,
+                "sheet_and_receipt_byte_parity": True,
+            }
+        else:
+            assert document["error"]["message"] == "invalid_annotation_chunks"
+            assert not output.exists() and not evidence.exists()
+            recorded[name] = {"exit_code": run.returncode, "part_indices": indices, "outputs_present": False}
+    assert all(local.read_bytes() == part.read_bytes() for local, part in zip(renamed, parts, strict=True))
+    return recorded
+
+
 def run(checkout: Path, root: Path) -> dict[str, Any]:
     from quantfit.safety.annotation_chunks import (
         collect_annotation_chunks,
@@ -136,6 +201,9 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
     assert not full.exists() and not receipt.exists()
     code, collected, stderr = helper.invoke(collect_args)
     assert code == 0 and not stderr and collected["result"]["n_rows"] == 18
+    indexed = _indexed_collection(
+        ["calibrate", "chunks", "collect", *common, "--manifest", str(manifest)], parts, root, full, receipt
+    )
     code, ingested, stderr = helper.invoke(
         ["calibrate", "ingest", "--sheet", str(full), "--key", str(key), "--out", str(root / "native.json")]
     )
@@ -201,7 +269,7 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
         str(sheet),
         str(key),
         str(api_dir / "annotation.chunkmanifest.json"),
-        tuple(map(str, api_parts)),
+        indexed_parts=tuple((index, str(part)) for index, part in reversed(list(enumerate(api_parts, 1)))),
         out_path=str(api_full),
         receipt_path=str(root / "api-collection.json"),
     )
@@ -242,6 +310,7 @@ def run(checkout: Path, root: Path) -> dict[str, Any]:
         "synthetic": True,
         "preparation": prepared["result"],
         "collection": collected["result"],
+        "indexed_collection": indexed,
         "return_validation": {
             "partial": partial["result"],
             "complete": inspected["result"],

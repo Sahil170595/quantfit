@@ -31,10 +31,10 @@ Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --con
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.68.0.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.69.0.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.68.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.69.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -959,6 +959,10 @@ Explicitly fill every returned part, then collect them in manifest order:
 quantfit calibrate chunks collect --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --part annotation-parts/part-0001.labels.csv --part annotation-parts/part-0002.labels.csv --out collected.labels.csv --receipt collection.json --json
 quantfit calibrate ingest --sheet collected.labels.csv --key private.labelkey.json --out calibration.json --json
 ```
+
+Quantfit 0.69.0 adds `--indexed-part INDEX=PATH` for collecting all original
+parts in any arrival order. See [indexed collection](annotation-chunks.md#indexed-collection-0690).
+
 
 The example assumes two actual parts; repeat `--part` for the complete assigned
 set. Collection binds exact unchanged source/key/manifest bytes, assigned IDs and
