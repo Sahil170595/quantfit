@@ -1,0 +1,57 @@
+{
+  "cases": {
+    "selected_covered": {
+      "annotation_returns_schema": 3,
+      "completeness_requirement": {
+        "exit_code": 0,
+        "missing_required_part_indices": [],
+        "native_validation_exit_code": 0,
+        "required_part_indices": [
+          2,
+          4
+        ],
+        "requirement_schema": 2
+      },
+      "exit_code": 0,
+      "junit": {
+        "errors": 0,
+        "skipped": 2,
+        "tests": 5
+      },
+      "missing_part_indices": [
+        1,
+        3
+      ],
+      "scientific_go": false
+    },
+    "selected_missing": {
+      "annotation_returns_schema": 3,
+      "completeness_requirement": {
+        "exit_code": 4,
+        "missing_required_part_indices": [
+          1
+        ],
+        "native_validation_exit_code": 0,
+        "required_part_indices": [
+          1,
+          4
+        ],
+        "requirement_schema": 2
+      },
+      "exit_code": 4,
+      "junit": {
+        "errors": 2,
+        "skipped": 1,
+        "tests": 5
+      },
+      "missing_part_indices": [
+        1,
+        3
+      ],
+      "scientific_go": false
+    }
+  },
+  "platform": "Windows AMD64",
+  "python": "3.12.13",
+  "quantfit": "0.74.0"
+}
