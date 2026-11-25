@@ -949,7 +949,10 @@ def _build_parser() -> argparse.ArgumentParser:
         "assess",
         help="offline receiving publication-review assessment (0 ready, 3 blocked, 4 unestablished, 2 malformed)",
     )
-    rassess.add_argument("--bundle", required=True, metavar="DIR", help="schema-2 three-report replay bundle")
+    assessment_source = rassess.add_mutually_exclusive_group(required=True)
+    assessment_source.add_argument("--bundle", metavar="DIR", help="schema-2 three-report replay bundle")
+    assessment_source.add_argument("--archive", metavar="ZIP", help="canonical replay archive")
+    rassess.add_argument("--archive-sha256", metavar="HEX", help="required digest for the replay archive")
     rassess.add_argument(
         "--target", required=True, metavar="PATH", help="closed schema-1 target declaration JSON, at most 64 KiB"
     )
@@ -2228,9 +2231,20 @@ def _dispatch(args: argparse.Namespace) -> int:
         from quantfit.reference_cli import list_references, verify_reference
 
         if args.references_cmd == "assess":
-            from quantfit.reference_assessment import assess_candidate
+            from quantfit.reference_assessment import ReferenceAssessmentError, assess_candidate
 
-            result = assess_candidate(args.bundle, args.target, out_path=args.out, junit_path=args.junit)
+            if (args.archive is None) != (args.archive_sha256 is None):
+                raise ReferenceAssessmentError("invalid_bundle")
+            if args.archive is None:
+                result = assess_candidate(args.bundle, args.target, out_path=args.out, junit_path=args.junit)
+            else:
+                result = assess_candidate(
+                    None,
+                    args.target,
+                    archive=(args.archive, args.archive_sha256),
+                    out_path=args.out,
+                    junit_path=args.junit,
+                )
             return _emit(args, "references assess", result["exit_code"], result, lambda: print(result["outcome"]))
         if args.references_cmd == "list":
             result = list_references(args.registry)

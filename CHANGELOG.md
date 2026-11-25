@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.70.0 — 2026-11-25
+
+- Assess a digest-pinned replay ZIP directly and preserve original receiving criteria and JUnit. See
+  `validation/2026-11-21-reference-assessment-archive/`.
+
 ## 0.69.0 — 2026-11-25
 
 - Collect all explicitly indexed annotation returns in any order while preserving the native sheet and receipt. See
