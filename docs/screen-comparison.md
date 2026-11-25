@@ -19,6 +19,7 @@ its lowercase SHA-256. The two sides can use different input forms.
 ```bash
 quantfit bundle pack --bundle reference-screen --kind screen --out reference.zip --json
 quantfit screen-compare --reference-archive reference.zip --reference-sha256 SHA256 --candidate-bundle candidate-screen --out comparison.json --junit comparison.xml --json
+quantfit screen-compare --reference-bundle reference-screen --candidate-archive candidate.zip --candidate-sha256 SHA256 --json
 ```
 
 Use the digest from the expected archive's pack receipt and substitute it for
