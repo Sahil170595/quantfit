@@ -945,6 +945,9 @@ def _build_parser() -> argparse.ArgumentParser:
         )
     rverify.add_argument("--slug", required=True, help="registered reference slug")
     rverify.add_argument("--report", required=True, metavar="PATH", help="local artifact bytes to verify")
+    rtarget = rsub.add_parser("target-verify", help="verify a reference assessment target declaration before receiving")
+    rtarget.add_argument("--target", required=True, metavar="PATH", help="closed schema-1 target declaration JSON")
+    rtarget.add_argument("--sha256", metavar="HEX", help="expected lowercase SHA-256 of the exact target bytes")
     rassess = rsub.add_parser(
         "assess",
         help="offline receiving publication-review assessment (0 ready, 3 blocked, 4 unestablished, 2 malformed)",
@@ -2230,6 +2233,15 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "references":
         from quantfit.reference_cli import list_references, verify_reference
 
+        if args.references_cmd == "target-verify":
+            from quantfit.reference_assessment import verify_target
+
+            result = verify_target(args.target, expected_sha256=args.sha256)
+            if result["matches_expected_sha256"] is False:
+                code, message = 3, "Target declaration SHA-256 differs from the expected digest."
+            else:
+                code, message = 0, f"Valid reference target declaration. SHA-256 {result['target_sha256']}"
+            return _emit(args, "references target-verify", code, result, lambda: print(message))
         if args.references_cmd == "assess":
             from quantfit.reference_assessment import ReferenceAssessmentError, assess_candidate
 

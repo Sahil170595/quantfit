@@ -328,6 +328,19 @@ measurement validity verdict. Each entry carries its own publication disclaimer.
 
 ### Reference candidate assessment
 
+Validate and optionally pin a target declaration before assembling a replay bundle.
+
+```bash
+quantfit references target-verify --target target.json --sha256 SHA256 --json
+```
+
+The command uses the receiving assessment's schema validator. The JSON result
+contains the schema version, exact-byte SHA-256, byte size and whether the optional
+pin matches. Exit `0` means the declaration is valid and any supplied pin matches.
+Exit `3` means a valid declaration has a different digest. Exit `2` means the input
+or pin is invalid or the input cannot be read. This check establishes schema and
+byte identity. Publication criteria are evaluated separately by `references assess`.
+
 Quantfit 0.29.0 adds offline candidate-specific publication preconditions:
 
 ```bash
