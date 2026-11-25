@@ -1,5 +1,9 @@
 # CLI reference — every command, every flag
 
+Quantfit **0.67.0** combines the complete supplied-control triplet, one
+`--calibrations-dir`, and `--require-axis-conditional-resolution AXIS=PP` for
+`screen-summary`. See [selected axes with controls](saved-screen-control-evidence.md#selected-axes-with-one-calibration-directory-0670).
+
 Quantfit **0.66.0** adds optional `--junit PATH` only to
 `references assess`, projecting every original native criterion without changing
 JSON, policy or mathematical work. See [reference assessment JUnit](#reference-assessment-junit-0660).
@@ -27,10 +31,10 @@ Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --con
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.66.1.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.67.0.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.66.1, including pinned alternative probe corpora,
+This reference documents quantfit 0.67.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -211,9 +215,9 @@ Supply one or two unique canonical names, `refusal-robustness` / `over-refusal`,
 with exact finite numeric ceilings in `(0,100]` percentage points. The API keyword
 is `required_conditional_resolution_by_axis_pp: Mapping[str, float] | None`.
 Require either `--calibrations-dir` or declared `--calibration-variant NAME=DIR`
-choices. This option cannot be combined with the scalar
-`--require-conditional-resolution` or supplied-control report/capture/adjudication
-roles. Invalid, empty, duplicate or unknown options refuse exit 2 before input IO.
+choices. Choose the per-axis map or the scalar `--require-conditional-resolution`.
+Quantfit 0.67.0 also accepts the complete supplied-control triplet with the
+single calibration directory. Invalid, empty, duplicate or unknown options refuse exit 2 before input IO.
 
 Every original target and every named choice contributes to selected criteria;
 late missing evidence remains visible. Native adverse exits 3/4 retain priority,
