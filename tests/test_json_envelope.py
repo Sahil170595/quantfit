@@ -119,7 +119,7 @@ def test_the_leaf_set_is_what_we_think_it_is():
     expected = {
         "check", "list", "plan", "probe", "verify", "verify-safety", "inspect-run", "inspect-recover", "screen", "screen-summary", "screen-compare", "emit",
         "calibrate sheet", "calibrate ingest", "calibrate extract", "calibrate strata", "calibrate paired", "calibrate compare-judges", "calibrate observe-judge", "calibrate compare-observed-judge", "calibrate review prepare", "calibrate review apply", "calibrate chunks prepare", "calibrate chunks collect", "calibrate chunks validate", "calibrate chunks packets", "probes bundle", "calibrate reconcile", "gate", "t0", "reproduce", "audit", "quantize", "resolution",
-        "references list", "references verify", "references assess", "bundle create", "bundle verify",
+        "references list", "references verify", "references target-verify", "references assess", "bundle create", "bundle verify",
         "bundle pack", "bundle archive-verify", "bundle unpack",
         "bundle replay-create", "bundle replay-verify", "bundle screen-create", "bundle screen-verify",
         "cold-run", "repeatability", "evidence fetch", "evidence rerun", "adjudicate prepare", "adjudicate apply", "adjudicate verify", "adjudicate review-page", "adjudicate screen",
@@ -153,6 +153,11 @@ def test_json_is_not_a_flag_on_the_parent_of_a_subcommand():
 # Heavy commands are covered on their ERROR path where that path is reachable without a
 # backend — which is also the path a caller most needs to be able to parse.
 _CASES = [
+    (
+        "reference-target-verification-missing",
+        ["references", "target-verify", "--target", "no-reference-target-xyz.json"],
+        2,
+    ),
     (
         "calibrate-reconcile-missing",
         [
