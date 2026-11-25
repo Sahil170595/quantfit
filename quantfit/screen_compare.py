@@ -321,6 +321,7 @@ def compare_screen_bundles(
         result = _compare_held(reference, candidate, {"reference": verify_reference(), "candidate": verify_candidate()})
         if require_compatible_identity:
             requirement = _identity_requirement(result["rows"])
+            result["screen_comparison_schema_version"] = 2
             result["identity_requirement"] = requirement
             result["exit_code"] = _exit_code(result["rows"], identity_met=requirement["met"] is True)
         phase = "output_failure"

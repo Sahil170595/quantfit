@@ -187,12 +187,10 @@ def _screen_valid(screen: dict[str, Any]) -> None:
 
 
 def _validate(record: dict[str, Any]) -> None:
-    _require(
-        type(record) is dict
-        and type(record["screen_comparison_schema_version"]) is int
-        and record["screen_comparison_schema_version"] == 1
-        and record["kind"] == "quantfit.screen-comparison"
-    )
+    _require(type(record) is dict and record["kind"] == "quantfit.screen-comparison")
+    version = record["screen_comparison_schema_version"]
+    _require(type(version) is int and version in (1, 2))
+    _require(("identity_requirement" in record) is (version == 2))
     _require(type(record["exit_code"]) is int and record["exit_code"] in (0, 3, 4))
     for key in (
         "same_weights_established",

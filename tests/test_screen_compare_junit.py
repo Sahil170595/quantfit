@@ -108,7 +108,7 @@ def test_declared_identity_requirement_preserves_native_flags_and_transitions(
         mutate=change_digest if state == "different" else None,
     )
     default = compare(reference, candidate)
-    assert "identity_requirement" not in default
+    assert default["screen_comparison_schema_version"] == 1 and "identity_requirement" not in default
     junit = tmp_path / "comparison.xml"
     assert (
         main(
@@ -127,6 +127,7 @@ def test_declared_identity_requirement_preserves_native_flags_and_transitions(
         == code
     )
     result = json.loads(capsys.readouterr().out)["result"]
+    assert result["screen_comparison_schema_version"] == 2
     assert result["exit_code"] == code and not result["same_weights_established"]
     assert result["identity_requirement"] == {
         "met": state == "known",
@@ -139,6 +140,8 @@ def test_declared_identity_requirement_preserves_native_flags_and_transitions(
     assert (cases["declared_target_identity"].find("skipped") is not None) is (state != "known")
     assert (cases["overall"].find("failure") is not None) is flagged
     assert (cases["overall"].find("skipped") is not None) is (code == 4)
+    with pytest.raises(ScreenComparisonError):
+        render({**result, "screen_comparison_schema_version": 1})
     result["identity_requirement"]["met"] = not result["identity_requirement"]["met"]
     with pytest.raises(ScreenComparisonError):
         render(result)
