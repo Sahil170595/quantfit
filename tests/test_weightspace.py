@@ -95,3 +95,18 @@ def test_typed_invalid_codec_or_identity(tmp_path, mutate):
     with pytest.raises(WeightspaceError):
         decode(base, manifest, tmp_path / "new.safetensors")
     assert not (tmp_path / "new.safetensors").exists()
+
+
+def test_tensor_order_is_portable_but_duplicate_names_fail(tmp_path):
+    model = {"b": np.ones(1, "f4"), "a": np.ones(1, "i8")}
+    directory = tmp_path / "bundle"
+    encode(model, model, directory)
+    path = directory / "manifest.json"
+    doc = json.loads(path.read_bytes())
+    doc["tensors"].reverse()
+    path.write_text(json.dumps(doc))
+    assert decode(model, path, tmp_path / "out")["logical_sha256"] == doc["identities"]["target"]
+    doc["tensors"].append(doc["tensors"][0])
+    path.write_text(json.dumps(doc))
+    with pytest.raises(WeightspaceError, match="duplicate"):
+        decode(model, path, tmp_path / "second")

@@ -82,6 +82,15 @@ def records(tensors: dict[str, Tensor]) -> list[dict]:
     return [tensors[name].record(name) for name in sorted(tensors)]
 
 
+def ordered_records(rows: object) -> list[dict]:
+    require(
+        isinstance(rows, list) and all(isinstance(x, dict) and isinstance(x.get("name"), str) for x in rows),
+        "invalid declared logical tensor inventory",
+    )
+    require(len({row["name"] for row in rows}) == len(rows), "duplicate declared tensor name")
+    return sorted(rows, key=lambda row: row["name"])
+
+
 def identity(tensors: dict[str, Tensor]) -> str:
     return sha(canonical(records(tensors)))
 
