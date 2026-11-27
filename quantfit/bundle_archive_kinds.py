@@ -276,12 +276,8 @@ def pack(bundle_path: str, out_path: str, *, kind: str) -> dict[str, Any]:
 
 
 def verify(archive_path: str, pin: str, *, kind: str) -> dict[str, Any]:
-    try:
-        held, _, result = _receive(archive_path, pin, kind)
-        held.check()
-        return result
-    except (OSError, RuntimeError, ValueError, TypeError, KeyError, RecursionError, zipfile.BadZipFile):
-        raise bundle.BundleError("invalid_bundle_transport") from None
+    _profile(kind)
+    return transport.verify_bundle_archive(archive_path, pin, kind=kind)
 
 
 def unpack(archive_path: str, pin: str, out_path: str, *, kind: str) -> dict[str, Any]:

@@ -1,6 +1,7 @@
 """Axis-specific XML never turns old flags or missing measurements into green."""
 
 import copy
+import json
 from xml.etree import ElementTree as ET
 
 import pytest
@@ -85,6 +86,65 @@ def test_clean_and_unmeasured_xml_keep_overall_state(tmp_path, unmeasured, code,
     root = render(record)
     assert record["exit_code"] == code and root.attrib["failures"] == "0"
     assert len(list(root.iter("skipped"))) == skipped and root.attrib["tests"] == "3"
+
+
+@pytest.mark.parametrize(
+    "state,flagged,code,unavailable,incompatible",
+    [("known", False, 0, 0, 0), ("unknown", False, 4, 1, 0), ("unknown", True, 3, 1, 0), ("different", False, 4, 0, 1)],
+)
+def test_declared_identity_requirement_preserves_native_flags_and_transitions(
+    tmp_path, capsys, state, flagged, code, unavailable, incompatible
+):
+    from quantfit.cli import main
+    from quantfit.screen_compare import ScreenComparisonError
+
+    def change_digest(payload):
+        payload["quantized"]["artifact_sha256"] = "b" * 64
+
+    reference, candidate = pair(
+        tmp_path,
+        (int(flagged), None),
+        unknown=state == "unknown",
+        mutate=change_digest if state == "different" else None,
+    )
+    default = compare(reference, candidate)
+    assert default["screen_comparison_schema_version"] == 1 and "identity_requirement" not in default
+    junit = tmp_path / "comparison.xml"
+    assert (
+        main(
+            [
+                "screen-compare",
+                "--reference-bundle",
+                str(reference),
+                "--candidate-bundle",
+                str(candidate),
+                "--require-compatible-identity",
+                "--junit",
+                str(junit),
+                "--json",
+            ]
+        )
+        == code
+    )
+    result = json.loads(capsys.readouterr().out)["result"]
+    assert result["screen_comparison_schema_version"] == 2
+    assert result["exit_code"] == code and not result["same_weights_established"]
+    assert result["identity_requirement"] == {
+        "met": state == "known",
+        "unavailable_targets": unavailable,
+        "incompatible_targets": incompatible,
+    }
+    assert result["rows"] == default["rows"]
+    rendered = ET.fromstring(junit.read_bytes())
+    cases = {case.attrib["name"]: case for case in rendered.iter("testcase")}
+    assert (cases["declared_target_identity"].find("skipped") is not None) is (state != "known")
+    assert (cases["overall"].find("failure") is not None) is flagged
+    assert (cases["overall"].find("skipped") is not None) is (code == 4)
+    with pytest.raises(ScreenComparisonError):
+        render({**result, "screen_comparison_schema_version": 1})
+    result["identity_requirement"]["met"] = not result["identity_requirement"]["met"]
+    with pytest.raises(ScreenComparisonError):
+        render(result)
 
 
 @pytest.mark.parametrize("kind", ["protocol", "identity"])

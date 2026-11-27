@@ -477,6 +477,11 @@ def _build_parser() -> argparse.ArgumentParser:
         pcompare.add_argument(f"--{side}-sha256", metavar="HEX", help=f"required pin for the {side} archive")
     pcompare.add_argument("--out", default=None, metavar="PATH", help="separate receiving comparison JSON")
     pcompare.add_argument("--junit", default=None, metavar="PATH", help="two axes per target and overall XML case")
+    pcompare.add_argument(
+        "--require-compatible-identity",
+        action="store_true",
+        help="require complete matching revision, digest and precision declarations for both arms of every target",
+    )
     pe.add_argument("what", choices=("model-card",), help="what to emit")
     pe.add_argument("--report", required=True, metavar="PATH", help="a schema-v2 drift report written by --report")
     pe.add_argument(
@@ -760,10 +765,17 @@ def _build_parser() -> argparse.ArgumentParser:
         help="complete returned part and its original index",
     )
     chunk_validate.add_argument("--out", required=True, metavar="PATH", help="new aggregate inspection receipt")
-    chunk_validate.add_argument(
+    chunk_requirement = chunk_validate.add_mutually_exclusive_group()
+    chunk_requirement.add_argument(
         "--require-complete",
         action="store_true",
         help="require all original parts after native validation (valid missing coverage exits 4)",
+    )
+    chunk_requirement.add_argument(
+        "--require-part",
+        action="append",
+        metavar="INDEX",
+        help="require a selected original part; repeat for each part",
     )
     chunk_validate.add_argument(
         "--junit",
@@ -948,6 +960,9 @@ def _build_parser() -> argparse.ArgumentParser:
         )
     rverify.add_argument("--slug", required=True, help="registered reference slug")
     rverify.add_argument("--report", required=True, metavar="PATH", help="local artifact bytes to verify")
+    rtarget = rsub.add_parser("target-verify", help="verify a reference assessment target declaration before receiving")
+    rtarget.add_argument("--target", required=True, metavar="PATH", help="closed schema-1 target declaration JSON")
+    rtarget.add_argument("--sha256", metavar="HEX", help="expected lowercase SHA-256 of the exact target bytes")
     rassess = rsub.add_parser(
         "assess",
         help="offline receiving publication-review assessment (0 ready, 3 blocked, 4 unestablished, 2 malformed)",
@@ -997,6 +1012,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     bpack.add_argument("--out", required=True, metavar="PATH", help="new canonical stored archive")
     barchive = bsub.add_parser("archive-verify", help="offline expected-SHA256 container and native validation")
+    barchive.add_argument("--out", metavar="PATH", help="new JSON file for the native verification receipt")
     bunpack = bsub.add_parser("unpack", help="validate fully then restore to a fresh exclusive directory")
     for receiving in (barchive, bunpack):
         receiving.add_argument(
@@ -1198,11 +1214,21 @@ def _dispatch(args: argparse.Namespace) -> int:
             if path is not None:
                 archives[f"{side}_archive"] = (path, pin)
         result = compare_screen_bundles(
-            args.reference_bundle, args.candidate_bundle, out_path=args.out, junit_path=args.junit, **archives
+            args.reference_bundle,
+            args.candidate_bundle,
+            out_path=args.out,
+            junit_path=args.junit,
+            require_compatible_identity=args.require_compatible_identity,
+            **archives,
         )
 
         def human_screen_compare():
             print(f"Screen observation comparison exit: {result['exit_code']}")
+            if args.require_compatible_identity:
+                identity = result["identity_requirement"]
+                print(
+                    f"Declared identity coverage: {identity['unavailable_targets']} unavailable, {identity['incompatible_targets']} incompatible."
+                )
             print("Native flags remain unconfirmed; apparent clearance does not establish safety.")
             print(result["scope"])
 
@@ -1926,7 +1952,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             elif args.bundle_cmd == "unpack":
                 result = unpack_bundle(args.archive, args.sha256, args.out, kind=args.kind)
             else:
-                result = verify_bundle_archive(args.archive, args.sha256, kind=args.kind)
+                result = verify_bundle_archive(args.archive, args.sha256, kind=args.kind, out_path=args.out)
 
             def human_transport():
                 print(
@@ -2246,6 +2272,15 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.cmd == "references":
         from quantfit.reference_cli import list_references, verify_reference
 
+        if args.references_cmd == "target-verify":
+            from quantfit.reference_assessment import verify_target
+
+            result = verify_target(args.target, expected_sha256=args.sha256)
+            if result["matches_expected_sha256"] is False:
+                code, message = 3, "Target declaration SHA-256 differs from the expected digest."
+            else:
+                code, message = 0, f"Valid reference target declaration. SHA-256 {result['target_sha256']}"
+            return _emit(args, "references target-verify", code, result, lambda: print(message))
         if args.references_cmd == "assess":
             from quantfit.reference_assessment import ReferenceAssessmentError, assess_candidate
 

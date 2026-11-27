@@ -1,0 +1,55 @@
+{
+  "cases": {
+    "known": {
+      "exit_code": 0,
+      "identity_requirement": {
+        "incompatible_targets": 0,
+        "met": true,
+        "unavailable_targets": 0
+      },
+      "junit": {
+        "failures": 0,
+        "skipped": 0,
+        "tests": 4
+      },
+      "same_weights_established": false,
+      "scientific_go": false,
+      "screen_comparison_schema_version": 2
+    },
+    "unavailable": {
+      "exit_code": 4,
+      "identity_requirement": {
+        "incompatible_targets": 0,
+        "met": false,
+        "unavailable_targets": 1
+      },
+      "junit": {
+        "failures": 0,
+        "skipped": 2,
+        "tests": 4
+      },
+      "same_weights_established": false,
+      "scientific_go": false,
+      "screen_comparison_schema_version": 2
+    },
+    "unavailable_flagged": {
+      "exit_code": 3,
+      "identity_requirement": {
+        "incompatible_targets": 0,
+        "met": false,
+        "unavailable_targets": 1
+      },
+      "junit": {
+        "failures": 2,
+        "skipped": 1,
+        "tests": 4
+      },
+      "same_weights_established": false,
+      "scientific_go": false,
+      "screen_comparison_schema_version": 2
+    }
+  },
+  "platform": "Windows AMD64",
+  "python": "3.12.13",
+  "quantfit": "0.73.0"
+}

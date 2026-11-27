@@ -266,6 +266,15 @@ def collect_annotation_chunks(
         raise AnnotationChunksError("invalid_annotation_chunks") from None
 
 
+def _valid_required_parts(parts: tuple[int, ...] | None, limit: int) -> bool:
+    return parts is None or (
+        type(parts) is tuple
+        and 1 <= len(parts) <= limit
+        and all(type(index) is int and 1 <= index <= limit for index in parts)
+        and len(set(parts)) == len(parts)
+    )
+
+
 def validate_annotation_returns(
     sheet_path: str,
     key_path: str,
@@ -275,10 +284,12 @@ def validate_annotation_returns(
     out_path: str | None = None,
     require_complete: bool = False,
     junit_path: str | None = None,
+    required_parts: tuple[int, ...] | None = None,
 ) -> dict[str, Any]:
     """Inspect complete supplied parts; missing original parts remain explicit."""
     try:
-        require(type(require_complete) is bool)
+        require(type(require_complete) is bool and not (require_complete and required_parts is not None))
+        require(_valid_required_parts(required_parts, MAX_PARTS))
         indexed = _indexed_part_paths(indexed_parts)
         indices = list(indexed)
         paths = tuple(indexed.values())
@@ -298,6 +309,7 @@ def validate_annotation_returns(
         )
         require(_encode(expected) == _encode(manifest))
         require(all(index <= manifest["n_parts"] for index in indices))
+        require(_valid_required_parts(required_parts, manifest["n_parts"]))
         key, _ = _key(inputs[1].data)
         received = []
         for index, held in zip(indices, inputs[3:], strict=True):
@@ -345,6 +357,16 @@ def validate_annotation_returns(
                 "native_validation_exit_code": 0,
                 "exit_code": 4 if missing else 0,
             }
+        elif required_parts is not None:
+            missing_required = sorted(set(required_parts).intersection(missing))
+            result["annotation_returns_schema"] = 3
+            result["completeness_requirement"] = {
+                "requirement_schema": 2,
+                "required_part_indices": sorted(required_parts),
+                "missing_required_part_indices": missing_required,
+                "native_validation_exit_code": 0,
+                "exit_code": 4 if missing_required else 0,
+            }
         raw = _encode(result)
         require(len(raw) <= MAX_RECEIPT_BYTES)
         buffers = []
@@ -360,6 +382,7 @@ def validate_annotation_returns(
                 n_received,
                 require_complete,
                 _binding(inputs[2].data)["sha256"],
+                required_parts,
             )
             buffers.append((targets[-1], _to_junit(coverage)))
         if buffers:

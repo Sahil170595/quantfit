@@ -7,9 +7,10 @@ quantfit screen-compare --reference-bundle reference-screen --candidate-bundle c
 ```
 
 The Python API is `quantfit.screen_compare.compare_screen_bundles(reference_bundle,
-candidate_bundle, *, out_path=None, junit_path=None)`. It returns a schema-1
-`quantfit.screen-comparison` dictionary. `ScreenComparisonError` is a categorical
-operational refusal, mapped to CLI exit 2. JSON and JUnit outputs are optional.
+candidate_bundle, *, out_path=None, junit_path=None)`. It returns a
+`quantfit.screen-comparison` dictionary using schema 1 by default.
+`ScreenComparisonError` is a categorical operational refusal, mapped to CLI exit
+2. JSON and JUnit outputs are optional.
 
 ## Digest-pinned archive inputs (0.68.0)
 
@@ -53,6 +54,21 @@ contradiction on either arm prevents a matched transition. Empty/unknown precisi
 metadata remains unavailable and cannot mask a known contradiction elsewhere.
 Known precision strings are compared conservatively as declared, without invented
 alias equivalences.
+
+CI can require complete compatible declarations for every target.
+
+```bash
+quantfit screen-compare --reference-bundle reference-screen --candidate-bundle candidate-screen --require-compatible-identity --out comparison.json --junit comparison.xml --json
+```
+
+`--require-compatible-identity` produces a schema-2 record. Its
+`identity_requirement` reports the number of targets with unavailable or
+incompatible declarations and whether the requirement is met. Native flags still
+take priority and return `3`. Otherwise an
+unmet requirement returns `4`. JUnit adds a `declared_target_identity` case and
+reflects the same overall verdict. The SDK option is `require_compatible_identity=True`.
+This check covers recorded revisions, digests and precision. Evidence of actual
+weights and independent execution remains outside this check.
 
 When both reports and axes are measured and their known declarations are compatible,
 the transition is `newly_flagged`, `persisting_flag`, `apparent_clearance` or `no_flag`.

@@ -209,6 +209,19 @@ compute an epsilon or authenticate labels/rater identity. Existing 1–128 expli
 indexed roles, exact integer indices, native byte/CSV/work limits and assurance flags
 remain unchanged. Complete coverage describes a file census, not usable calibration.
 
+For staged returns, require only the original indices due in the current batch.
+
+```bash
+quantfit calibrate chunks validate --sheet blank.labels.csv --key private.labelkey.json --manifest annotation-parts/annotation.chunkmanifest.json --part 2=returned-part-2.labels.csv --require-part 2 --require-part 4 --junit inspection.xml --out inspection.json --json
+```
+
+Repeat `--require-part` for each distinct original index. This option is mutually
+exclusive with `--require-complete`. The SDK option is `required_parts=(2, 4)`.
+The schema-3 receipt adds the selected indices and missing required indices under
+`completeness_requirement`, while retaining the full census. Missing selected
+parts return `4` and become JUnit errors. Other missing parts are skipped in JUnit.
+An invalid index, malformed supplied part, or output failure returns `2`.
+
 Requested JUnit has one fixed overall case and every original part index in numeric
 order (maximum 129 cases). Supplied native-valid parts pass. Missing parts skip when
 coverage is optional, with overall exit 0; required missing parts error, including the

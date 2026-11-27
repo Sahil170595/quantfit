@@ -135,7 +135,7 @@ def test_actual_os_cli_full_receiving_roundtrip(tmp_path, kind):
         if kind == "replay"
         else screen(tmp_path / "source", code=4, summary=False)
     )
-    archive, restored = tmp_path / "cli.zip", tmp_path / "restored"
+    archive, restored, receipt = (tmp_path / name for name in ("cli.zip", "restored", "verification.json"))
 
     def invoke(action, options):
         process = subprocess.run(
@@ -152,10 +152,12 @@ def test_actual_os_cli_full_receiving_roundtrip(tmp_path, kind):
 
     packed = invoke("pack", ["--bundle", str(source), "--out", str(archive)])
     pin = hashlib.sha256(archive.read_bytes()).hexdigest()
-    for action, extra in (("archive-verify", []), ("unpack", ["--out", str(restored)])):
+    for action, extra in (("archive-verify", ["--out", str(receipt)]), ("unpack", ["--out", str(restored)])):
         result = invoke(action, ["--archive", str(archive), "--sha256", pin, *extra])
         assert result["archive"] == packed["archive"] and result["kind"] == kind
         assert result["scientific_claims_verified"] is False
+        if action == "archive-verify":
+            assert json.loads(receipt.read_bytes()) == result
     native_action = "replay-verify" if kind == "replay" else "screen-verify"
     process = subprocess.run(
         [sys.executable, "-B", "-m", "quantfit.cli", "bundle", native_action, "--bundle", str(restored), "--json"],
@@ -207,6 +209,30 @@ def test_explicit_aggregate_is_exact_default_bytes_and_result(tmp_path):
     assert transport.unpack_bundle(str(a), pin, str(tmp_path / "r0")) == transport.unpack_bundle(
         str(a), pin, str(tmp_path / "r1"), kind="aggregate"
     )
+
+
+def test_archive_verification_receipt_preserves_existing_files_and_requires_pin(tmp_path):
+    from test_bundle_transport import prepared
+
+    source, _ = prepared(tmp_path)
+    archive, receipt = tmp_path / "input.zip", tmp_path / "verification.json"
+    pin = transport.pack_bundle(str(source), str(archive))["archive"]["sha256"]
+    prior = archive.read_bytes()
+
+    with pytest.raises(BundleError, match="^invalid_bundle_transport$"):
+        transport.verify_bundle_archive(str(archive), "0" * 64, out_path=str(receipt))
+    assert not receipt.exists()
+    with pytest.raises(BundleError, match="^invalid_bundle_transport$"):
+        transport.verify_bundle_archive(str(archive), pin, out_path=str(archive))
+    assert archive.read_bytes() == prior
+
+    native = transport.verify_bundle_archive(str(archive), pin, out_path=str(receipt))
+    saved = receipt.read_bytes()
+    assert json.loads(saved) == transport.verify_bundle_archive(str(archive), pin) == native
+    with pytest.raises(BundleError, match="^invalid_bundle_transport$"):
+        transport.verify_bundle_archive(str(archive), pin, out_path=str(receipt))
+    assert receipt.read_bytes() == saved and archive.read_bytes() == prior
+    assert not list(tmp_path.glob(".quantfit-archive-*"))
 
 
 @pytest.mark.parametrize("invalid", [None, True, 1, "", "Replay", "screen ", [], object()])
