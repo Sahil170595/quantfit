@@ -31,10 +31,10 @@ Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --con
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.72.0.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.73.0.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.72.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.73.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -242,6 +242,9 @@ JUnit appends only selected requirement cases after its unchanged native prefix.
 Omitted and legacy scalar JSON, human stdout and JUnit retain their old behavior.
 There is no new analysis, reread, pooling, inference or source authentication.
 See [the complete per-axis contract](screen-resolution.md#per-axis-requirements-0620).
+
+Add `--require-compatible-identity` to `screen-compare` to require both arms' revision, digest and precision declarations for every target.
+Missing declarations can give an otherwise complete comparison exit 4. Native flagged outcomes retain precedence. See [screen comparison](screen-comparison.md).
 
 Quantfit 0.34.0 adds `screen-compare --reference-bundle DIR
 --candidate-bundle DIR --out comparison.json --junit comparison.xml --json`.
