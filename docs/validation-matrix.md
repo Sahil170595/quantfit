@@ -448,6 +448,7 @@ cross-release runs have been compared; the 0.5 screen has not run).
 | Flag | Command | Behavior | Evidence |
 |---|---|---|---|
 | `--codec` / `--scale` | weightspace encode, decode | Apply a checked floating-point task vector at a finite multiplier. | `validation/2026-11-27-weightspace-vectors/` |
+| `--bits` / `--group-size` | weightspace encode | Encode symmetric 4-bit or 8-bit deltas with explicit quantization groups. | `validation/2026-11-27-weightspace-lowbit/` |
 | `--base` | weightspace encode, decode | Supply the local SafeTensors base. Decoding checks its logical tensor identity against the manifest. | `tests/test_weightspace.py` |
 | `--target` | weightspace encode | Supply the checkpoint whose tensors the delta reconstructs. | `validation/2026-11-27-weightspace-lossless/` |
 | `--artifact` | weightspace decode | Read the manifest and verify the component sizes, digests and reconstructed tensor commitments. | `tests/test_weightspace.py` |
