@@ -1,0 +1,14 @@
+{
+  "version": "0.79.0",
+  "anchor_count": 6,
+  "fit_rank": 3,
+  "donor_parameters": 8,
+  "recipient_parameters": 6,
+  "cold_bytes": 1900,
+  "held_out_cases": 4,
+  "correct": 4,
+  "shuffled_correct": 4,
+  "shuffled_max_logit_error": 8.727272808551788,
+  "max_logit_error": 1.3322676295501878e-15,
+  "donor_file_present": false
+}

@@ -128,8 +128,10 @@ def encode(
     return receipt
 
 
-def _artifacts(doc: dict, root: Path, max_bytes: int) -> dict[str, bytes]:
-    require(isinstance(doc.get("files"), list) and len(doc["files"]) == 2, "expected one base and one payload")
+def _artifacts(doc: dict, root: Path, max_bytes: int, *, roles=("base", "payload"), phases=None) -> dict[str, bytes]:
+    if phases is None:
+        phases = ["decode"]
+    require(isinstance(doc.get("files"), list) and len(doc["files"]) == len(roles), "incorrect artifact role count")
     held: dict[str, bytes] = {}
     names: set[str] = set()
     for item in doc["files"]:
@@ -144,10 +146,8 @@ def _artifacts(doc: dict, root: Path, max_bytes: int) -> dict[str, bytes]:
                 and not any(ord(ch) < 32 or ch in '<>:"\\|?*' for ch in part),
                 "invalid relative artifact path",
             )
-        require(
-            name.casefold() not in names and role in ("base", "payload") and role not in held, "duplicate role or path"
-        )
-        require(item.get("phases") == ["decode"], "unsupported decode phases")
+        require(name.casefold() not in names and role in roles and role not in held, "duplicate role or path")
+        require(item.get("phases") == phases, "unsupported artifact phases")
         size = item.get("size_bytes")
         require(type(size) is int and 0 <= size <= max_bytes, "invalid artifact byte count")
         raw = _read(root / name, size)

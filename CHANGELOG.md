@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.79.0 — Unreleased
+
+- Fit a paired affine feature map, compose the donor classifier weights and bias, and export a narrower standalone recipient.
+- Verify the tokenizer, ordered labels and SafeTensors commitments before raw text prediction. See [wheel validation](validation/2026-11-27-weightspace-head/functional.json).
+
 ## 0.78.0 — Unreleased
 
 - Encode floating-point task updates with deterministic signed 4-bit or 8-bit group codes and stored scales.

@@ -1295,3 +1295,7 @@ Available in quantfit 0.51.0: both `verify-safety` and `inspect-run` accept all-
 The supplied population 1..4096 retains all actual prompt/zone/expected strings and order, including repeated/whitespace text. Per-prompt 64KiB and whole selected 8MiB UTF8 bounds are not SDK download/parser/heap limits. Source identities are recorded in reports/capture-only bindings, GGUF cache and Inspect logs/completed reports. Changed revision/split on the default ID is noncanonical. Default native math/0-3-4 priority and legacy Inspect judge/source-pin refusals stay; no implied corpus curation or accuracy transfer. Exact API, compatibility and evidence: [probe-corpus](probe-corpus.md).
 
 Create a quantized delta with `quantfit weightspace encode --codec grouped-int-v1 --bits 4 --group-size 64 --base base.safetensors --target target.safetensors --out delta`. Decode it with the same weightspace decode command used for a dense task vector.
+
+### Standalone classifier heads
+
+`quantfit weightspace compile-head --spec compiler.json --out recipient --json` takes a JSON object with recipient_anchors, donor_anchors, donor_weight, donor_bias, vocabulary, labels and optional lowercase. Arrays of anchors are row-paired, weights are class-major. `quantfit weightspace predict-head --artifact recipient/manifest.json --input-text "Alpha beta" --json` verifies the portable recipient and predicts from raw text. See [the compiler contract](weightspace.md).
