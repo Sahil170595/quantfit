@@ -13,6 +13,10 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.75.0 — 2026-11-27
+
+- Compare two replay handoffs directly from pinned canonical ZIPs or directories while retaining native T0, report bindings, and outcomes.
+
 ## 0.74.0 — 2026-11-27
 
 - Require selected original annotation parts in staged returns and distinguish them from other absent parts in JSON and JUnit.

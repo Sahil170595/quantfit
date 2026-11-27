@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 import pytest
 
@@ -365,6 +366,111 @@ def test_bundle_cli_preserves_envelope_and_native_exit(tmp_path, capsys):
 
 
 @pytest.mark.parametrize(
+    "mode,flips,disagreement,code", [("mixed", 1, False, 3), ("zips", 0, False, 0), ("zips", 0, True, 4)]
+)
+def test_pinned_replay_archives_preserve_native_decisions(tmp_path, capsys, mode, flips, disagreement, code):
+    from quantfit.bundle_transport import pack_bundle
+
+    reference, _, original = make_bundle(tmp_path, "reference", foreign=True)
+    candidate, _, _ = make_bundle(tmp_path, "candidate", flips=flips, disagreement=disagreement)
+    directory = compare_bundles(str(reference), str(candidate))
+    reference_zip, candidate_zip = tmp_path / "reference.zip", tmp_path / "candidate.zip"
+    ref_pin = pack_bundle(str(reference), str(reference_zip), kind="replay")["archive"]["sha256"]
+    cand_pin = pack_bundle(str(candidate), str(candidate_zip), kind="replay")["archive"]["sha256"]
+    reference.rename(tmp_path / "reference-offline")
+    args = ["reproduce", "--reference-archive", str(reference_zip), "--reference-sha256", ref_pin]
+    if mode == "zips":
+        candidate.rename(tmp_path / "candidate-offline")
+        args += ["--candidate-archive", str(candidate_zip), "--candidate-sha256", cand_pin]
+    else:
+        args += ["--candidate-bundle", str(candidate)]
+    out, junit = tmp_path / "comparison.json", tmp_path / "comparison.xml"
+    assert main([*args, "--out", str(out), "--junit", str(junit), "--json"]) == code
+    doc = json.loads(capsys.readouterr().out)
+    result = json.loads(out.read_bytes())
+    assert doc["result"] == {**result, "record_path": str(out)}
+    for key in (
+        "exit_code",
+        "outcome",
+        "checks",
+        "void_reasons",
+        "attribution",
+        "passed",
+        "failing_predicates",
+        "witnessed",
+    ):
+        assert result[key] == directory[key]
+    ref = result["bundle_evidence"]["reference"]
+    assert ref["original_t0"] == original
+    assert ref["archive"] == {"sha256": ref_pin, "size_bytes": reference_zip.stat().st_size}
+    assert ref["selected_report_sha256"] == directory["bundle_evidence"]["reference"]["selected_report_sha256"]
+    assert ref["report_bindings"][0]["receiving_path"] == f"{reference_zip}::report-1.json"
+    cases = list(ET.fromstring(junit.read_bytes()).iter("testcase"))
+    assert len(cases) == 10 and (cases[-1].find("failure") is not None) is (code != 0)
+    sdk = (
+        compare_bundles(None, str(candidate), reference_archive=(str(reference_zip), ref_pin))
+        if mode == "mixed"
+        else compare_bundles(
+            reference_archive=(str(reference_zip), ref_pin), candidate_archive=(str(candidate_zip), cand_pin)
+        )
+    )
+    assert sdk["outcome"] == result["outcome"]
+
+
+def test_reproduction_archive_refusals_preserve_inputs_and_outputs(tmp_path, capsys):
+    from quantfit.bundle_transport import pack_bundle
+
+    reference, _, _ = make_bundle(tmp_path, "reference")
+    candidate, _, _ = make_bundle(tmp_path, "candidate")
+    archive = tmp_path / "reference.zip"
+    pin = pack_bundle(str(reference), str(archive), kind="replay")["archive"]["sha256"]
+    original = archive.read_bytes()
+    out = tmp_path / "prior.json"
+    out.write_bytes(b"previous result")
+    with pytest.raises(ReproduceError, match="invalid reference replay archive"):
+        compare_bundles(None, str(candidate), str(out), reference_archive=(str(archive), "0" * 64))
+    same = compare_bundles(reference_archive=(str(archive), pin), candidate_archive=(str(archive), pin))
+    assert same["outcome"] == "void" and same["exit_code"] == 4
+
+    argv = [
+        "reproduce",
+        "--reference-archive",
+        str(archive),
+        "--reference-sha256",
+        pin,
+        "--candidate-bundle",
+        str(candidate),
+        "--json",
+    ]
+    assert main([*argv, "--out", str(archive), "--junit", str(tmp_path / "unsafe.xml")]) == 2
+    assert json.loads(capsys.readouterr().out)["exit_code"] == 2
+    assert archive.read_bytes() == original and out.read_bytes() == b"previous result"
+    assert not (tmp_path / "unsafe.xml").exists()
+
+
+def test_reproduction_archive_rechecked_after_output_staging(tmp_path, monkeypatch):
+    from quantfit import reproduce
+    from quantfit.bundle_transport import pack_bundle
+
+    reference, _, _ = make_bundle(tmp_path, "reference")
+    candidate, _, _ = make_bundle(tmp_path, "candidate")
+    archive, out = tmp_path / "reference.zip", tmp_path / "prior.json"
+    pin = pack_bundle(str(reference), str(archive), kind="replay")["archive"]["sha256"]
+    out.write_bytes(b"previous result")
+    stage_factory = reproduce.tempfile.NamedTemporaryFile
+
+    def change_archive_when_staging(*args, **kwargs):
+        with archive.open("ab") as stream:
+            stream.write(b"changed")
+        return stage_factory(*args, **kwargs)
+
+    monkeypatch.setattr(reproduce.tempfile, "NamedTemporaryFile", change_archive_when_staging)
+    with pytest.raises(ReproduceError, match="replay archive changed after verification"):
+        compare_bundles(None, str(candidate), str(out), reference_archive=(str(archive), pin))
+    assert out.read_bytes() == b"previous result" and not list(tmp_path.glob(".reproduce-*"))
+
+
+@pytest.mark.parametrize(
     "arguments",
     [
         ["--reference-bundle", "ref"],
@@ -374,12 +480,25 @@ def test_bundle_cli_preserves_envelope_and_native_exit(tmp_path, capsys):
         ["--reference-bundle", "ref", "--candidate-bundle", "cand", "--reference", "loose"],
         ["--reference-bundle", "ref", "--candidate-bundle", "cand", "--t0-reference", "t0"],
         ["--reference-bundle", "ref", "--candidate-bundle", "cand", "--t0-candidate", "t0"],
+        ["--reference-archive", "ref.zip", "--candidate-bundle", "cand"],
+        ["--reference-sha256", "0" * 64, "--reference-bundle", "ref", "--candidate-bundle", "cand"],
+        [
+            "--reference-archive",
+            "ref.zip",
+            "--reference-sha256",
+            "0" * 64,
+            "--reference-bundle",
+            "ref",
+            "--candidate-bundle",
+            "cand",
+        ],
+        ["--reference-archive", "ref.zip", "--reference-sha256", "0" * 64, "--candidate", "loose"],
     ],
 )
 def test_cli_incomplete_or_mixed_modes_fail_before_consumption(monkeypatch, arguments):
     import quantfit.reproduce as module
 
-    monkeypatch.setattr(module, "compare_bundles", lambda *args: pytest.fail("consumed invalid input mode"))
+    monkeypatch.setattr(module, "_compare_replay_sources", lambda *args: pytest.fail("consumed invalid input mode"))
     monkeypatch.setattr(module, "compare", lambda *args, **kwargs: pytest.fail("consumed invalid input mode"))
     assert main(["reproduce", *arguments, "--json"]) == 2
 

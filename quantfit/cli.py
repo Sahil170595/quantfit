@@ -929,6 +929,9 @@ def _build_parser() -> argparse.ArgumentParser:
     pr.add_argument("--candidate", metavar="PATH", help="the report claiming to reproduce it")
     pr.add_argument("--reference-bundle", metavar="DIR", help="verified reference schema-2 replay bundle")
     pr.add_argument("--candidate-bundle", metavar="DIR", help="verified candidate schema-2 replay bundle")
+    for side in ("reference", "candidate"):
+        pr.add_argument(f"--{side}-archive", metavar="ZIP", help=f"canonical {side} replay archive")
+        pr.add_argument(f"--{side}-sha256", metavar="HEX", help=f"required digest for the {side} replay archive")
     pr.add_argument("--out", default=None, metavar="PATH", help="write the comparison record JSON")
     pr.add_argument("--junit", metavar="PATH", help="write ten native reproduction JUnit cases")
     pr.add_argument(
@@ -2143,31 +2146,43 @@ def _dispatch(args: argparse.Namespace) -> int:
         from quantfit.reproduce import (
             T0_SCHEMA_VERSION,
             ReproduceError,
+            _compare_replay_sources,
             _prepare_reproduction_outputs,
             _publish_reproduction_outputs,
+            _replay_source,
             compare,
-            compare_bundles,
             within_hardware_identical,
         )
         from quantfit.reproduce_junit import _operational_error_to_junit, reproduction_to_junit
 
-        bundle_mode = args.reference_bundle is not None or args.candidate_bundle is not None
+        archives = {}
+        for side in ("reference", "candidate"):
+            path = getattr(args, f"{side}_archive")
+            pin = getattr(args, f"{side}_sha256")
+            if (path is None) != (pin is None):
+                raise ReproduceError("a replay archive requires its expected SHA-256")
+            if path is not None:
+                archives[side] = (path, pin)
+        bundle_mode = bool(archives) or args.reference_bundle is not None or args.candidate_bundle is not None
+        replay_sources: tuple[tuple[str, str | None], ...] = ()
         if bundle_mode:
-            if args.reference_bundle is None or args.candidate_bundle is None:
-                raise ReproduceError("supply both --reference-bundle and --candidate-bundle")
             if any(
                 value is not None for value in (args.reference, args.candidate, args.t0_reference, args.t0_candidate)
             ):
-                raise ReproduceError("bundle inputs cannot be mixed with loose reports or --t0-* inputs")
+                raise ReproduceError("replay inputs cannot be mixed with loose reports or --t0-* inputs")
+            replay_sources = (
+                _replay_source(args.reference_bundle, archives.get("reference")),
+                _replay_source(args.candidate_bundle, archives.get("candidate")),
+            )
         elif args.reference is None or args.candidate is None:
             raise ReproduceError("supply both --reference and --candidate, or both replay bundle inputs")
 
         sources = (
-            []
+            [path for path, pin in replay_sources if pin is not None]
             if bundle_mode
             else [args.reference, args.candidate, *(args.t0_reference or []), *(args.t0_candidate or [])]
         )
-        bundles = [args.reference_bundle, args.candidate_bundle] if bundle_mode else []
+        bundles = [path for path, pin in replay_sources if pin is None]
         output_paths = [path for path in (args.out, args.junit) if path is not None]
 
         def _t0_input(paths):
@@ -2202,11 +2217,12 @@ def _dispatch(args: argparse.Namespace) -> int:
             raise ReproduceError("one T0 input must be a standalone artifact; otherwise supply replicate report paths")
 
         plan = None
+        recheck = None
         try:
             if output_paths:
                 plan = _prepare_reproduction_outputs(sources, bundles, output_paths)
-            if bundle_mode:
-                decision = compare_bundles(args.reference_bundle, args.candidate_bundle)
+            if replay_sources:
+                decision, recheck = _compare_replay_sources(*replay_sources)
             else:
                 t0_ref = _t0_input(args.t0_reference)
                 t0_cand = _t0_input(args.t0_candidate)
@@ -2225,14 +2241,14 @@ def _dispatch(args: argparse.Namespace) -> int:
             if args.junit:
                 outputs.append((plan.targets[-1], reproduction_to_junit(decision).encode("utf-8")))
             if plan is not None:
-                _publish_reproduction_outputs(plan, outputs)
+                _publish_reproduction_outputs(plan, outputs, recheck=recheck)
         except (RuntimeError, OSError, ImportError):
             if args.junit and plan is not None:
                 try:
                     # All sources and BOTH outputs are rechecked. This is an
                     # error receipt, not an invented native comparison result.
                     _publish_reproduction_outputs(
-                        plan, [(plan.targets[-1], _operational_error_to_junit().encode("utf-8"))]
+                        plan, [(plan.targets[-1], _operational_error_to_junit().encode("utf-8"))], recheck=recheck
                     )
                 except (RuntimeError, OSError, ImportError):
                     pass  # Unsafe/unwritable XML cannot replace evidence; main still returns 2.

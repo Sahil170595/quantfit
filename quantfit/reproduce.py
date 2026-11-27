@@ -415,6 +415,7 @@ import tempfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from zipfile import BadZipFile
 
 from quantfit.safety.report import SCHEMA_VERSION as REPORT_SCHEMA_VERSION
 from quantfit.safety.report import ArmRun, DriftReport, ReportError
@@ -2456,37 +2457,55 @@ def _publish_reproduction_outputs(
                 stage.path.unlink(missing_ok=True)
 
 
-def _bundle_output_plan(bundle_paths: tuple[str, str], out_path: str) -> _ReproductionOutputs:
-    from quantfit.replay_bundle import ROLES
-
-    roots = tuple(Path(path) for path in bundle_paths)
-    return _ReproductionOutputs(
-        tuple(root / member for root in roots for member in (*ROLES.values(), "manifest.json")),
-        roots,
-        (Path(out_path),),
-    )
-
-
-def _bundle_output_path(bundle_paths: tuple[str, str], out_path: str) -> Path:
-    """Protect prepared canonical receiving paths without resolving or reading held sources."""
-    plan = _bundle_output_plan(bundle_paths, out_path)
-    _validate_reproduction_outputs(plan)
-    return plan.targets[0]
-
-
-def _publish_bundle_comparison(bundle_paths: tuple[str, str], out_path: str, artifact: dict) -> None:
-    """Stage a complete buffer and recheck both protected bundles before atomic publication."""
-    plan = _bundle_output_plan(bundle_paths, out_path)
-    raw = (json.dumps(artifact, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
-    _publish_reproduction_outputs(plan, [(plan.targets[0], raw)])
+def _replay_source(bundle_path: str | None, archive: tuple[str, str] | None) -> tuple[str, str | None]:
+    if (bundle_path is None) == (archive is None):
+        raise ReproduceError("supply one replay directory or digest-pinned archive per side")
+    if archive is None:
+        assert bundle_path is not None
+        return _canonical_receiving_path(bundle_path), None
+    if (
+        type(archive) is not tuple
+        or len(archive) != 2
+        or type(archive[0]) is not str
+        or type(archive[1]) is not str
+        or not re.fullmatch(r"[0-9a-f]{64}", archive[1])
+    ):
+        raise ReproduceError("invalid replay archive input")
+    try:
+        return _canonical_receiving_path(archive[0]), archive[1]
+    except (OSError, RuntimeError, ValueError):
+        raise ReproduceError("invalid replay archive input") from None
 
 
-def _bundle_comparison_side(bundle_path: str, side: str) -> tuple[_View, tuple[bool | None, dict], dict]:
-    """Derive report selection, native T0 and all bindings from verified held member bytes."""
-    from quantfit.replay_bundle import _verified_bundle
+def _bundle_comparison_side(
+    source: tuple[str, str | None], side: str
+) -> tuple[_View, tuple[bool | None, dict], dict, Callable[[], None] | None]:
+    """Derive report selection and T0 from one verified receiving input."""
+    from quantfit.replay_bundle import ROLES, SCOPE, _verified_bundle
 
-    verified, held = _verified_bundle(bundle_path)
-    return _bundle_comparison_held(verified, held, side)
+    path, pin = source
+    if pin is None:
+        verified, held = _verified_bundle(path)
+        return (*_bundle_comparison_held(verified, held, side), None)
+
+    from quantfit.bundle_archive_kinds import _receive
+
+    try:
+        archive_input, files, receipt = _receive(path, pin, "replay")
+        native = receipt["native_verification"]
+        verified = {
+            "bundle_path": path,
+            "bundle_schema": native["bundle_schema"],
+            "manifest": receipt["manifest"],
+            "integrity_verified": True,
+            "original_t0": native["original_t0"],
+            "scope": SCOPE,
+            "archive": receipt["archive"],
+        }
+        held = {role: files[member] for role, member in ROLES.items()}
+        return (*_bundle_comparison_held(verified, held, side), archive_input.check)
+    except (OSError, RuntimeError, RecursionError, TypeError, ValueError, KeyError, BadZipFile):
+        raise ReproduceError(f"invalid {side} replay archive") from None
 
 
 def _bundle_comparison_held(
@@ -2498,9 +2517,12 @@ def _bundle_comparison_held(
 
     if not verified["integrity_verified"]:
         raise ReproduceError(f"{side} replay bundle bytes differ from their manifest")
-    root = Path(verified["bundle_path"])
+    source = verified["bundle_path"]
+    archive = verified.get("archive")
+    members = [ROLES[f"replicate-{index}"] for index in range(1, 4)]
+    labels = [str(Path(source) / member) if archive is None else f"{source}::{member}" for member in members]
     views = [
-        _view_from_report(_report(held[role]), held[role], str(root / ROLES[role]), f"replicate[{i - 1}]")
+        _view_from_report(_report(held[role]), held[role], labels[i - 1], f"replicate[{i - 1}]")
         for i in range(1, 4)
         for role in (f"replicate-{i}",)
     ]
@@ -2555,11 +2577,47 @@ def _bundle_comparison_held(
         "scientific_claims_verified": False,
         "scope": verified["scope"],
     }
+    if archive is not None:
+        evidence["archive"] = archive
     return target, (receiving["pass"], block), evidence
 
 
-def compare_bundles(reference_bundle_path: str, candidate_bundle_path: str, out_path: str | None = None) -> dict:
-    """Compare fixed replicate-1 from two verified schema-2 replay bundles.
+def _compare_replay_sources(
+    reference: tuple[str, str | None], candidate: tuple[str, str | None]
+) -> tuple[dict, Callable[[], None] | None]:
+    try:
+        ref, t0_ref, ref_evidence, ref_check = _bundle_comparison_side(reference, "reference")
+        cand, t0_cand, cand_evidence, cand_check = _bundle_comparison_side(candidate, "candidate")
+        artifact = _compare_views(ref, cand, t0_ref=t0_ref, t0_cand=t0_cand, same_path=ref.path == cand.path)
+        artifact["bundle_evidence"] = {"reference": ref_evidence, "candidate": cand_evidence}
+        checks = tuple(check for check in (ref_check, cand_check) if check is not None)
+        if not checks:
+            return artifact, None
+
+        def recheck() -> None:
+            try:
+                for check in checks:
+                    check()
+            except (OSError, RuntimeError):
+                raise ReproduceError("replay archive changed after verification") from None
+
+        recheck()
+        return artifact, recheck
+    except (OSError, RuntimeError, RecursionError, TypeError, ValueError, KeyError) as exc:
+        if isinstance(exc, ReproduceError):
+            raise
+        raise ReproduceError(str(exc)) from exc
+
+
+def compare_bundles(
+    reference_bundle_path: str | None = None,
+    candidate_bundle_path: str | None = None,
+    out_path: str | None = None,
+    *,
+    reference_archive: tuple[str, str] | None = None,
+    candidate_archive: tuple[str, str] | None = None,
+) -> dict:
+    """Compare fixed replicate-1 from two verified replay directories or pinned archives.
 
     Both sides' native T0 and selected report bindings are derived from held member
     buffers. Original T0 bytes are preserved in the inputs and its producer paths
@@ -2569,20 +2627,21 @@ def compare_bundles(reference_bundle_path: str, candidate_bundle_path: str, out_
     is established. Unsafe/forged layouts and output failures raise ReproduceError.
     """
     try:
-        bundle_paths = (
-            _canonical_receiving_path(reference_bundle_path),
-            _canonical_receiving_path(candidate_bundle_path),
+        reference = _replay_source(reference_bundle_path, reference_archive)
+        candidate = _replay_source(candidate_bundle_path, candidate_archive)
+        plan = (
+            _prepare_reproduction_outputs(
+                [path for path, pin in (reference, candidate) if pin is not None],
+                [path for path, pin in (reference, candidate) if pin is None],
+                [out_path],
+            )
+            if out_path is not None
+            else None
         )
-        if out_path is not None:
-            out_path = _canonical_receiving_path(out_path)
-        if out_path is not None:
-            _bundle_output_path(bundle_paths, out_path)
-        ref, t0_ref, ref_evidence = _bundle_comparison_side(bundle_paths[0], "reference")
-        cand, t0_cand, cand_evidence = _bundle_comparison_side(bundle_paths[1], "candidate")
-        artifact = _compare_views(ref, cand, t0_ref=t0_ref, t0_cand=t0_cand, same_path=ref.path == cand.path)
-        artifact["bundle_evidence"] = {"reference": ref_evidence, "candidate": cand_evidence}
-        if out_path is not None:
-            _publish_bundle_comparison(bundle_paths, out_path, artifact)
+        artifact, recheck = _compare_replay_sources(reference, candidate)
+        if plan is not None:
+            raw = (json.dumps(artifact, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
+            _publish_reproduction_outputs(plan, [(plan.targets[0], raw)], recheck=recheck)
         return artifact
     except (OSError, RuntimeError, RecursionError, TypeError, ValueError, KeyError) as exc:
         if isinstance(exc, ReproduceError):

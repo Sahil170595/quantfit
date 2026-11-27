@@ -1,0 +1,91 @@
+{
+  "cases": {
+    "breach": {
+      "directory_decision_matches": true,
+      "exit_code": 3,
+      "junit": {
+        "failures": 2,
+        "skipped": 0,
+        "tests": 10
+      },
+      "outcome": "breach",
+      "sides": {
+        "candidate": {
+          "archive": {
+            "sha256": "5b7db1b79720de14ba6dfea96e756be3efcb48295582f056bae67f5f392addbf",
+            "size_bytes": 17734
+          },
+          "scientific_claims_verified": false,
+          "selected_report_sha256": "950321bf790f1a9b88d7788ca3f53945ce79cd9a9cc2eb4ef1807bd40c1bc5dd"
+        },
+        "reference": {
+          "archive": {
+            "sha256": "48df2c24c947c7c23e8a65001c1e54c6713aede263802c51aaccbfcfecff0b9b",
+            "size_bytes": 16993
+          },
+          "scientific_claims_verified": false,
+          "selected_report_sha256": "1bd20b6ebaee7ae3a047b51288fadd70d01dde4ed7d6bd88d4159e37600d548b"
+        }
+      }
+    },
+    "matching": {
+      "directory_decision_matches": true,
+      "exit_code": 0,
+      "junit": {
+        "failures": 0,
+        "skipped": 0,
+        "tests": 10
+      },
+      "outcome": "reproduced",
+      "sides": {
+        "candidate": {
+          "archive": {
+            "sha256": "3c59f39caa35ffe6891c7d93c50d93836973ef98896ea5034ea95dda228e8bb2",
+            "size_bytes": 17818
+          },
+          "scientific_claims_verified": false,
+          "selected_report_sha256": "a20fc79ee9c23bab4a1cfd5cbaee4951ae69240bcb5d362c2bb3858495c5d6dd"
+        },
+        "reference": {
+          "archive": {
+            "sha256": "f6d25d2c6ffbf8179b7abcb112a0c0bcef75999b17d274b5db1f1a8cde0c317e",
+            "size_bytes": 16993
+          },
+          "scientific_claims_verified": false,
+          "selected_report_sha256": "1bd20b6ebaee7ae3a047b51288fadd70d01dde4ed7d6bd88d4159e37600d548b"
+        }
+      }
+    },
+    "negative_t0": {
+      "directory_decision_matches": true,
+      "exit_code": 4,
+      "junit": {
+        "failures": 2,
+        "skipped": 0,
+        "tests": 10
+      },
+      "outcome": "void",
+      "sides": {
+        "candidate": {
+          "archive": {
+            "sha256": "0c6998ee427d046d2235cffafb0db04031143c3e30bfcfdd802089b5e3c49df7",
+            "size_bytes": 18225
+          },
+          "scientific_claims_verified": false,
+          "selected_report_sha256": "a20fc79ee9c23bab4a1cfd5cbaee4951ae69240bcb5d362c2bb3858495c5d6dd"
+        },
+        "reference": {
+          "archive": {
+            "sha256": "1e14456f3fab509bf9c268ddae45e1b720d9a8698ef95dbddbcf83c083f70c1e",
+            "size_bytes": 16993
+          },
+          "scientific_claims_verified": false,
+          "selected_report_sha256": "1bd20b6ebaee7ae3a047b51288fadd70d01dde4ed7d6bd88d4159e37600d548b"
+        }
+      }
+    }
+  },
+  "platform": "Windows AMD64",
+  "python": "3.12.13",
+  "quantfit": "0.75.0"
+}
