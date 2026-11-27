@@ -91,7 +91,8 @@ def restore(original, payload, doc, scale):
             and re.fullmatch("[a-f0-9]{64}", row["sha256"]),
             "invalid tensor digest",
         )
-        expected["sha256"] = row["sha256"]
+        if name in payload:
+            expected["sha256"] = row["sha256"]
         require(canonical(row) == canonical(expected), "target tensor layout mismatch")
     require(sha(canonical(source)) == doc["identities"].get("target"), "target inventory commitment mismatch")
     standard, scaled = dict(original), dict(original)

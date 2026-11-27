@@ -1,3 +1,4 @@
+import hashlib
 import json
 
 import numpy as np
@@ -36,3 +37,18 @@ def test_reject_wrong_base_dtype_and_degree(tmp_path):
             decode(base, tmp_path / "bundle" / "manifest.json", tmp_path / "out", scale=scale)
     with pytest.raises(WeightspaceError):
         encode({"x": np.array([1], "i4")}, {"x": np.array([2], "i4")}, tmp_path / "int", codec=CODEC)
+
+
+def test_unchanged_digest_checked_against_base(tmp_path):
+    a = {"x": np.array([1], "i4")}
+    folder = tmp_path / "bundle"
+    encode(a, a, folder, codec=CODEC)
+    path = folder / "manifest.json"
+    doc = json.loads(path.read_bytes())
+    doc["tensors"][0]["sha256"] = "0" * 64
+    doc["identities"]["target"] = hashlib.sha256(
+        json.dumps(doc["tensors"], sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(WeightspaceError, match="layout mismatch"):
+        decode(a, path, tmp_path / "out")
