@@ -1022,3 +1022,5 @@ Apache-2.0.
 Grouped 4-bit and 8-bit deltas are available with `quantfit weightspace encode --codec grouped-int-v1 --bits 4 --group-size 64`. See the [wire format and numerical rules](docs/weightspace.md).
 
 Compile a smaller classifier with `quantfit weightspace compile-head --spec compiler.json --out recipient`, then run `quantfit weightspace predict-head --artifact recipient/manifest.json --input-text "alpha beta"`. The [compiler contract](docs/weightspace.md) specifies the feature transform and label order.
+
+Use `quantfit weightspace benchmark-heads --spec benchmark.json --json` for a [paired offline comparison](docs/weightspace.md#matched-query-head-benchmark) at explicit target-query budgets.

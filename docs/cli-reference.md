@@ -1299,3 +1299,5 @@ Create a quantized delta with `quantfit weightspace encode --codec grouped-int-v
 ### Standalone classifier heads
 
 `quantfit weightspace compile-head --spec compiler.json --out recipient --json` takes a JSON object with recipient_anchors, donor_anchors, donor_weight, donor_bias, vocabulary, labels and optional lowercase. Arrays of anchors are row-paired, weights are class-major. `quantfit weightspace predict-head --artifact recipient/manifest.json --input-text "Alpha beta" --json` verifies the portable recipient and predicts from raw text. See [the compiler contract](weightspace.md).
+
+Run `quantfit weightspace benchmark-heads --spec benchmark.json --json` on disjoint local archive, query and evaluation partitions. The returned trials contain eight arms with per-budget usage, paired outcomes and accuracy. [Benchmark input contract](weightspace.md#matched-query-head-benchmark).

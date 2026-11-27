@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.80.0 — Unreleased
+
+- Compare compiled, randomized, shuffled, wrong-donor, labeled and output-only classifier heads on the same held-out cases.
+- Report per-arm archive, query and label use together with paired wins, ties and losses. See [wheel validation](validation/2026-11-27-weightspace-benchmark/functional.json).
+
 ## 0.79.0 — Unreleased
 
 - Fit a paired affine feature map, compose the donor classifier weights and bias, and export a narrower standalone recipient.

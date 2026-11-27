@@ -69,6 +69,15 @@ def contract(vocabulary, labels, lowercase):
     }
 
 
+def compose(rec, donor, w, b):
+    mapping, rank = affine(rec, donor)
+    with np.errstate(over="ignore", invalid="ignore"):
+        small_w = (w @ mapping[:-1].T).astype("<f4")
+        small_b = (b + w @ mapping[-1]).astype("<f4")
+    require(np.isfinite(small_w).all() and np.isfinite(small_b).all(), "compiled recipient exceeds finite float32")
+    return small_w, small_b, rank
+
+
 @_public_io
 def compile_head(
     recipient_anchors, donor_anchors, donor_weight, donor_bias, out, *, vocabulary, labels, lowercase=True
@@ -80,11 +89,7 @@ def compile_head(
     w, b = numeric(donor_weight, 2, "donor weight"), numeric(donor_bias, 1, "donor bias")
     require(w.shape == (len(labels), donor.shape[1]) and len(b) == len(labels), "donor head dimensions disagree")
     require(rec.shape[1] == len(vocabulary) < donor.shape[1], "recipient vocabulary must fit a strictly smaller head")
-    mapping, rank = affine(rec, donor)
-    with np.errstate(over="ignore", invalid="ignore"):
-        small_w = (w @ mapping[:-1].T).astype("<f4")
-        small_b = (b + w @ mapping[-1]).astype("<f4")
-    require(np.isfinite(small_w).all() and np.isfinite(small_b).all(), "compiled recipient exceeds finite float32")
+    small_w, small_b, rank = compose(rec, donor, w, b)
     raw, tensors = checkpoint({"weight": small_w, "bias": small_b}, MAX_FILE_BYTES)
     components = [
         ("weights.safetensors", "recipient", raw),

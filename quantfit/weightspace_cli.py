@@ -16,6 +16,8 @@ def add_parser(commands):
     comp = sub.add_parser("compile-head", help="Fit and export a standalone smaller classifier.")
     comp.add_argument("--spec", required=True, help="Local JSON compiler input.")
     comp.add_argument("--out", required=True, help="New recipient bundle directory.")
+    bench = sub.add_parser("benchmark-heads", help="Compare classifiers at matched offline query budgets.")
+    bench.add_argument("--spec", required=True, help="Local benchmark partitions, seeds and budgets in JSON.")
     pred = sub.add_parser("predict-head", help="Verify a standalone recipient and score raw text.")
     pred.add_argument("--artifact", required=True, help="Recipient manifest.json path.")
     pred.add_argument("--input-text", required=True, help="Raw text to classify.")
@@ -27,11 +29,20 @@ def add_parser(commands):
 
 
 def run(args, emit):
-    from quantfit.weightspace import compile_head, decode, encode, predict_head
+    from quantfit.weightspace import benchmark_heads, compile_head, decode, encode, predict_head
     from quantfit.weightspace.head import load_spec, require
 
     if args.weight_cmd == "encode":
         result = encode(args.base, args.target, args.out, codec=args.codec, bits=args.bits, group_size=args.group_size)
+    elif args.weight_cmd == "benchmark-heads":
+        result = benchmark_heads(load_spec(args.spec))
+        return emit(
+            args,
+            "weightspace/benchmark-heads",
+            0,
+            result,
+            lambda: print(f"{len(result['trials'])} trials, {result['held_out_cases']} held-out cases"),
+        )
     elif args.weight_cmd == "compile-head":
         spec = load_spec(args.spec)
         required = {"recipient_anchors", "donor_anchors", "donor_weight", "donor_bias", "vocabulary", "labels"}
