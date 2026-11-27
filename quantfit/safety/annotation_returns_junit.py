@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from xml.etree import ElementTree as ET
 
 from quantfit.junit import _render
-from quantfit.safety.annotation_chunks import MAX_PARTS, AnnotationChunksError
+from quantfit.safety.annotation_chunks import MAX_PARTS, AnnotationChunksError, _valid_required_parts
 from quantfit.safety.reconcile import MAX_IDS
 
 MAX_JUNIT_BYTES = 64 * 1024
@@ -22,6 +22,7 @@ class _Coverage:
     n_received_rows: int
     require_complete: bool
     manifest_sha256: str
+    required_parts: tuple[int, ...] | None = None
 
 
 def _require(condition: bool) -> None:
@@ -32,6 +33,8 @@ def _require(condition: bool) -> None:
 def _validate(coverage: _Coverage) -> None:
     _require(type(coverage) is _Coverage and type(coverage.require_complete) is bool)
     _require(type(coverage.expected_rows) is tuple and 1 <= len(coverage.expected_rows) <= MAX_PARTS)
+    _require(not (coverage.require_complete and coverage.required_parts is not None))
+    _require(_valid_required_parts(coverage.required_parts, len(coverage.expected_rows)))
     _require(type(coverage.n_rows) is int and 1 <= coverage.n_rows <= MAX_IDS)
     _require(all(type(count) is int and 1 <= count <= MAX_IDS for count in coverage.expected_rows))
     _require(sum(coverage.expected_rows) == coverage.n_rows)
@@ -60,12 +63,14 @@ def _to_junit(coverage: _Coverage) -> bytes:
     n_parts = len(coverage.expected_rows)
     received = set(coverage.received_part_indices)
     n_missing = n_parts - len(received)
-    unmet = coverage.require_complete and n_missing > 0
+    required = set(range(1, n_parts + 1)) if coverage.require_complete else set(coverage.required_parts or ())
+    missing_required = required - received
+    unmet = bool(missing_required)
     counts = {
         "tests": str(n_parts + 1),
         "failures": "0",
-        "errors": str(n_missing + 1 if unmet else 0),
-        "skipped": str(n_missing if not coverage.require_complete else 0),
+        "errors": str(len(missing_required) + int(unmet)),
+        "skipped": str(n_missing - len(missing_required)),
     }
     suites = ET.Element("testsuites", counts)
     suite = ET.SubElement(suites, "testsuite", {"name": CLASS_NAME, **counts})
@@ -94,9 +99,9 @@ def _to_junit(coverage: _Coverage) -> bytes:
         if index not in received:
             ET.SubElement(
                 case,
-                "error" if coverage.require_complete else "skipped",
+                "error" if index in missing_required else "skipped",
                 {"type": "MissingOriginalPart", "message": "original part not supplied"}
-                if coverage.require_complete
+                if index in missing_required
                 else {"message": "original part not supplied"},
             )
     raw = bytes(_render(suites), "utf-8")

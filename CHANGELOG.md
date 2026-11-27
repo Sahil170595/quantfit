@@ -13,6 +13,10 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.74.0 — 2026-11-27
+
+- Require selected original annotation parts in staged returns and distinguish them from other absent parts in JSON and JUnit.
+
 ## 0.73.0 — 2026-11-27
 
 - Require complete compatible declared identities for both arms of every target when a CI comparison needs that stricter condition.

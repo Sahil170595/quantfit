@@ -99,6 +99,52 @@ def test_actual_os_cli_publishes_valid_partial_receipt_and_xml_before_exit_four(
     assert document["result"] == json.loads(out.read_bytes()) and xml.exists()
 
 
+@pytest.mark.parametrize("required,code,missing", [((4, 2), 0, []), ((4, 1), 4, [1])])
+def test_selected_original_parts_gate_only_that_subset(tmp_path, required, code, missing):
+    source = prepare(tmp_path)
+    fill(source[3])
+    out, xml = tmp_path / "selected.json", tmp_path / "selected.xml"
+    opts = [option for index in required for option in ("--require-part", str(index))]
+    process = subprocess.run(
+        [*command(source, [4, 2], out), *opts, "--junit", str(xml), "--json"],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=False,
+        timeout=30,
+    )
+    assert process.returncode == code and not process.stderr
+    document = json.loads(process.stdout)
+    result = document["result"]
+    assert document["exit_code"] == code and result == json.loads(out.read_bytes())
+    assert result["annotation_returns_schema"] == 3 and not result["complete"]
+    assert result["missing_part_indices"] == [1, 3]
+    assert result["completeness_requirement"] == {
+        "requirement_schema": 2,
+        "required_part_indices": sorted(required),
+        "missing_required_part_indices": missing,
+        "native_validation_exit_code": 0,
+        "exit_code": code,
+    }
+    cases = {case.get("name"): case for case in ET.fromstring(xml.read_bytes()).iter("testcase")}
+    assert [name for name, case in cases.items() if case.find("error") is not None] == (
+        ["overall", "1"] if missing else []
+    )
+    assert [name for name, case in cases.items() if case.find("skipped") is not None] == (
+        ["3"] if missing else ["1", "3"]
+    )
+
+
+@pytest.mark.parametrize("required", [(True,), (), (1, 1), (0,), (5,)])
+def test_invalid_selected_part_requirements_refuse_before_writing(tmp_path, required):
+    source = prepare(tmp_path)
+    fill(source[3])
+    out, xml = tmp_path / "refused.json", tmp_path / "refused.xml"
+    with pytest.raises(chunks.AnnotationChunksError, match="^invalid_annotation_returns$"):
+        inspect(source, [2], required_parts=required, out_path=str(out), junit_path=str(xml))
+    assert not out.exists() and not xml.exists()
+
+
 def test_policy_exact_bool_admitted_before_any_private_io(monkeypatch):
     monkeypatch.setattr(chunks, "_held", lambda *a, **k: pytest.fail("invalid policy reached private IO"))
     with pytest.raises(chunks.AnnotationChunksError, match="^invalid_annotation_returns$"):

@@ -16,15 +16,19 @@ from quantfit.safety.annotation_chunks import (
 Emit = Callable[[argparse.Namespace, str, int, dict[str, Any], Callable[[], None]], int]
 
 
+def _part_index(raw: str, category: str) -> int:
+    if not (1 <= len(raw) <= 3 and raw.isascii() and raw.isdecimal() and str(int(raw)) == raw):
+        raise AnnotationChunksError(category)
+    return int(raw)
+
+
 def _parse_indexed_parts(entries: list[str], category: str) -> tuple[tuple[int, str], ...]:
     parts = []
     for entry in entries:
         index, separator, path = entry.partition("=")
-        if not (separator and path and index.isascii() and index.isdecimal() and 1 <= len(index) <= 3):
+        if not (separator and path):
             raise AnnotationChunksError(category)
-        if str(int(index)) != index:
-            raise AnnotationChunksError(category)
-        parts.append((int(index), path))
+        parts.append((_part_index(index, category), path))
     return tuple(parts)
 
 
@@ -55,6 +59,11 @@ def dispatch_chunks(args: argparse.Namespace, emit: Emit) -> int:
             receipt_path=args.receipt,
         )
     elif args.chunks_cmd == "validate":
+        required_parts = (
+            None
+            if args.require_part is None
+            else tuple(_part_index(index, "invalid_annotation_returns") for index in args.require_part)
+        )
         result = validate_annotation_returns(
             args.sheet,
             args.key,
@@ -63,6 +72,7 @@ def dispatch_chunks(args: argparse.Namespace, emit: Emit) -> int:
             out_path=args.out,
             require_complete=args.require_complete,
             junit_path=args.junit,
+            required_parts=required_parts,
         )
         code = result.get("completeness_requirement", {}).get("exit_code", 0)
     else:
@@ -76,6 +86,9 @@ def dispatch_chunks(args: argparse.Namespace, emit: Emit) -> int:
                 f"Validated {result['n_received_rows']} returned rows; missing parts: {len(result['missing_part_indices'])}."
             )
             print(f"Full part coverage: {str(result['complete']).lower()}; collection and ingestion are separate.")
+            if args.require_part is not None:
+                missing_required = result["completeness_requirement"]["missing_required_part_indices"]
+                print(f"Missing required parts: {len(missing_required)}.")
         else:
             print(f"Annotation {args.chunks_cmd}: {result['n_rows']} rows across {result['n_parts']} parts.")
         print("Private text stays local; no automatic labeling, sharing, ingestion or scientific GO.")

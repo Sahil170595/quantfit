@@ -41,6 +41,8 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+Quantfit **0.74.0** checks selected original annotation parts in a staged return with `calibrate chunks validate --require-part`. [Command reference](docs/annotation-chunks.md)
+
 Quantfit **0.73.0** checks complete model identity declarations with `screen-compare --require-compatible-identity`. [Command reference](docs/screen-comparison.md)
 
 Quantfit **0.72.0** saves verified archive receipts with `bundle archive-verify --out`. [Command reference](docs/cli-reference.md)
@@ -122,7 +124,7 @@ It does not establish authenticated curation, sensitivity or scientific GO.
 
 This README also covers the [retained-label workflow](docs/retained-labels.md), descriptive [calibration strata](docs/calibration-strata.md), [paired-label diagnostics](docs/calibration-paired.md), explicit [local label review](docs/label-review.md) and [conditional resolution requirements](docs/screen-resolution.md#explicit-requirement-0410).
 
-Install with `pip install "quantfit[inspect,gguf]==0.73.0"`.
+Install with `pip install "quantfit[inspect,gguf]==0.74.0"`.
 
 The observation runs the pinned judge over the original held completions.
 Use its receipt's raw SHA-256 for the offline comparison against one complete

@@ -765,10 +765,17 @@ def _build_parser() -> argparse.ArgumentParser:
         help="complete returned part and its original index",
     )
     chunk_validate.add_argument("--out", required=True, metavar="PATH", help="new aggregate inspection receipt")
-    chunk_validate.add_argument(
+    chunk_requirement = chunk_validate.add_mutually_exclusive_group()
+    chunk_requirement.add_argument(
         "--require-complete",
         action="store_true",
         help="require all original parts after native validation (valid missing coverage exits 4)",
+    )
+    chunk_requirement.add_argument(
+        "--require-part",
+        action="append",
+        metavar="INDEX",
+        help="require a selected original part; repeat for each part",
     )
     chunk_validate.add_argument(
         "--junit",
