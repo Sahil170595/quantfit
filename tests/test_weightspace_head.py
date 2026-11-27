@@ -1,6 +1,10 @@
 import json
+import subprocess
+import sys
 
+import numpy as np
 import pytest
+from safetensors.numpy import save_file
 
 from quantfit.weightspace import WeightspaceError, compile_head, predict_head
 from tools.ci_weightspace_head import check, fixture
@@ -39,3 +43,41 @@ def test_tie_order_and_corruption(tmp_path):
     manifest.write_text(json.dumps(doc), encoding="utf8")
     with pytest.raises(WeightspaceError, match="identity"):
         predict_head(manifest, "alpha")
+
+
+def test_float32_dot_then_bias_agrees_with_cli(tmp_path):
+    from quantfit.weightspace._tensors import identity, records, sha, unpack
+
+    root = tmp_path / "bundle"
+    compile_head(out=root, **fixture())
+    path = root / "weights.safetensors"
+    save_file({"weight": np.array([[2**24, 1], [0, 0]], "f4"), "bias": np.array([-(2**24), 0.5], "f4")}, path)
+    manifest = root / "manifest.json"
+    doc = json.loads(manifest.read_bytes())
+    raw = path.read_bytes()
+    ts = unpack(raw)
+    doc["tensors"] = records(ts)
+    doc["identities"].update(target=identity(ts), recipient=identity(ts))
+    doc["files"][0].update(size_bytes=len(raw), sha256=sha(raw))
+    manifest.write_text(json.dumps(doc), encoding="utf8")
+    result = predict_head(manifest, "alpha beta")
+    assert result["class_index"] == 1 and result["logits"] == [0.0, 0.5]
+    p = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "quantfit.cli",
+            "weightspace",
+            "predict-head",
+            "--artifact",
+            str(manifest),
+            "--input-text",
+            "alpha beta",
+            "--json",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    response = json.loads(p.stdout)
+    assert response["result"] == result

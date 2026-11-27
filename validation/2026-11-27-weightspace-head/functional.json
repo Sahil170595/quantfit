@@ -8,7 +8,7 @@
   "held_out_cases": 4,
   "correct": 4,
   "shuffled_correct": 4,
-  "shuffled_max_logit_error": 8.727272808551788,
-  "max_logit_error": 1.3322676295501878e-15,
+  "shuffled_max_logit_error": 8.727272987365723,
+  "max_logit_error": 0.0,
   "donor_file_present": false
 }

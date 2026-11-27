@@ -152,10 +152,10 @@ def predict_head(artifact, text):
         canonical(ordered_records(doc.get("tensors"))) == canonical(records(tensors)),
         "recipient tensor inventory mismatch",
     )
-    w, b = values(tensors["weight"]), values(tensors["bias"])
+    w, b = (values(tensors[key]).astype("<f4") for key in ("weight", "bias"))
     require(w.shape == (len(labels), len(vocab)) and b.shape == (len(labels),), "recipient dimensions mismatch")
     counts = Counter((text.lower() if lowercase else text).split())
-    logits = w @ np.asarray([counts[token] for token in vocab], dtype="f8") + b
+    logits = w @ np.asarray([counts[token] for token in vocab], dtype="<f4") + b
     require(np.isfinite(logits).all(), "nonfinite recipient logits")
     idx = int(np.argmax(logits))
     return {"class_index": idx, "label": labels[idx], "logits": logits.tolist(), "recipient_sha256": digest}
