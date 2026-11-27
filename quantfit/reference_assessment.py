@@ -61,6 +61,7 @@ SCOPE = (
 )
 _ERRORS = {
     "invalid_target",
+    "invalid_target_sha256",
     "invalid_reports",
     "invalid_bundle",
     "target_unreadable",
@@ -149,6 +150,28 @@ def _target(raw: bytes) -> dict[str, Any]:
         raise
     except (OSError, RuntimeError, RecursionError, TypeError, ValueError):
         raise ReferenceAssessmentError("invalid_target") from None
+
+
+def verify_target(path: str, *, expected_sha256: str | None = None) -> dict[str, object]:
+    """Validate the same target declaration used by assessment and describe its exact bytes."""
+    if expected_sha256 is not None:
+        _require(isinstance(expected_sha256, str) and bool(_DIGEST.fullmatch(expected_sha256)), "invalid_target_sha256")
+    try:
+        held = hold(path, MAX_TARGET_BYTES)
+    except (OSError, RuntimeError, ValueError):
+        raise ReferenceAssessmentError("target_unreadable") from None
+    declaration = _target(held.data)
+    digest = hashlib.sha256(held.data).hexdigest()
+    try:
+        held.check()
+    except (OSError, RuntimeError):
+        raise ReferenceAssessmentError("target_unreadable") from None
+    return {
+        "target_schema_version": declaration["target_schema_version"],
+        "target_sha256": digest,
+        "target_size_bytes": len(held.data),
+        "matches_expected_sha256": None if expected_sha256 is None else digest == expected_sha256,
+    }
 
 
 def assess_report_buffers(

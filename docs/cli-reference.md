@@ -31,10 +31,10 @@ Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --con
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.70.0.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.74.0.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.70.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.74.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -107,6 +107,16 @@ and `bundle unpack` for the existing schema-1 aggregate directory format.
 Receiving requires the expected full lowercase archive SHA256. Existing directory
 verification and native adverse outcomes are unchanged. See [closed transport
 format and failure behavior](portable-evidence-bundles.md#single-file-transport-0590).
+
+Save the native verification result as a CI artifact without extracting the ZIP.
+
+```bash
+quantfit bundle archive-verify --kind replay --archive replay.zip --sha256 FULL64 --out verification.json --json
+```
+
+`--out` accepts a new file in an existing directory for any supported archive kind.
+Its contents equal the CLI JSON `result`, including the native verdict and scope.
+Verification and writing both have to succeed for exit `0`. Refusals return `2`.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,
@@ -233,6 +243,9 @@ Omitted and legacy scalar JSON, human stdout and JUnit retain their old behavior
 There is no new analysis, reread, pooling, inference or source authentication.
 See [the complete per-axis contract](screen-resolution.md#per-axis-requirements-0620).
 
+Add `--require-compatible-identity` to `screen-compare` to require both arms' revision, digest and precision declarations for every target.
+Missing declarations can give an otherwise complete comparison exit 4. Native flagged outcomes retain precedence. See [screen comparison](screen-comparison.md).
+
 Quantfit 0.34.0 adds `screen-compare --reference-bundle DIR
 --candidate-bundle DIR --out comparison.json --junit comparison.xml --json`.
 Quantfit 0.68.0 adds a digest-pinned archive choice for each side, using
@@ -327,6 +340,19 @@ pin-present flag; list entries expose `declared_spec_validity` rather than a
 measurement validity verdict. Each entry carries its own publication disclaimer.
 
 ### Reference candidate assessment
+
+Validate and optionally pin a target declaration before assembling a replay bundle.
+
+```bash
+quantfit references target-verify --target target.json --sha256 SHA256 --json
+```
+
+The command uses the receiving assessment's schema validator. The JSON result
+contains the schema version, exact-byte SHA-256, byte size and whether the optional
+pin matches. Exit `0` means the declaration is valid and any supplied pin matches.
+Exit `3` means a valid declaration has a different digest. Exit `2` means the input
+or pin is invalid or the input cannot be read. This check establishes schema and
+byte identity. Publication criteria are evaluated separately by `references assess`.
 
 Quantfit 0.29.0 adds offline candidate-specific publication preconditions:
 
@@ -970,6 +996,8 @@ Quantfit 0.65.0 also accepts `--require-complete --junit inspection.xml`
 on that validate command. The requirement covers every original manifest part;
 missing parts are XML errors/exit 4 when required and skipped/default exit 0 otherwise.
 Neither option collects or ingests labels.
+
+Use repeatable `--require-part INDEX` on `calibrate chunks validate` to require a selected subset of original parts. A missing required part yields exit 4 after validation. The receipt retains the full original census. See [staged returns](annotation-chunks.md#complete-return-requirement-and-junit-0650).
 
 Explicitly fill every returned part, then collect them in manifest order:
 

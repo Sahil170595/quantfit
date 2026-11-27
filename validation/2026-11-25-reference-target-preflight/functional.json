@@ -1,0 +1,51 @@
+{
+  "cases": {
+    "matched": {
+      "command": "references target-verify",
+      "exit_code": 0,
+      "result": {
+        "matches_expected_sha256": true,
+        "target_schema_version": 1,
+        "target_sha256": "551be22e30cc753edeca070e6c2d67a2c4a51df39e62734ba4c59d7ba867eda1",
+        "target_size_bytes": 1613
+      },
+      "schema_version": 1,
+      "tool": {
+        "name": "quantfit",
+        "version": "0.71.0"
+      }
+    },
+    "mismatch": {
+      "command": "references target-verify",
+      "exit_code": 3,
+      "result": {
+        "matches_expected_sha256": false,
+        "target_schema_version": 1,
+        "target_sha256": "551be22e30cc753edeca070e6c2d67a2c4a51df39e62734ba4c59d7ba867eda1",
+        "target_size_bytes": 1613
+      },
+      "schema_version": 1,
+      "tool": {
+        "name": "quantfit",
+        "version": "0.71.0"
+      }
+    },
+    "unbound": {
+      "command": "references target-verify",
+      "exit_code": 0,
+      "result": {
+        "matches_expected_sha256": null,
+        "target_schema_version": 1,
+        "target_sha256": "551be22e30cc753edeca070e6c2d67a2c4a51df39e62734ba4c59d7ba867eda1",
+        "target_size_bytes": 1613
+      },
+      "schema_version": 1,
+      "tool": {
+        "name": "quantfit",
+        "version": "0.71.0"
+      }
+    }
+  },
+  "platform": "Windows AMD64",
+  "python": "3.12.13"
+}

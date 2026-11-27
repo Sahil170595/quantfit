@@ -152,11 +152,21 @@ def _identity(reference: bytes | None, candidate: bytes | None) -> dict[str, Any
     }
 
 
-def _exit_code(rows: list[dict[str, Any]]) -> int:
+def _identity_requirement(rows: list[dict[str, Any]]) -> dict[str, int | bool]:
+    unavailable = sum(row["identity"]["state"] == "unavailable" for row in rows)
+    incompatible = sum(row["identity"]["state"] == "incompatible" for row in rows)
+    return {
+        "met": unavailable == incompatible == 0,
+        "unavailable_targets": unavailable,
+        "incompatible_targets": incompatible,
+    }
+
+
+def _exit_code(rows: list[dict[str, Any]], *, identity_met: bool = True) -> int:
     axes = [axis for row in rows for axis in row["axes"].values()]
     if any(axis[side]["flagged"] is True for axis in axes for side in ("reference", "candidate")):
         return 3
-    return 4 if any(axis["status"] != "matched" for axis in axes) else 0
+    return 4 if not identity_met or any(axis["status"] != "matched" for axis in axes) else 0
 
 
 def _compare_held(
@@ -272,10 +282,12 @@ def compare_screen_bundles(
     candidate_archive: tuple[str, str] | None = None,
     out_path: str | None = None,
     junit_path: str | None = None,
+    require_compatible_identity: bool = False,
 ) -> dict[str, Any]:
     """Compare held directory or (screen ZIP path, SHA-256) inputs without extracting."""
     phase = "invalid_screen_comparison_input"
     try:
+        _require(type(require_compatible_identity) is bool, phase)
         ref_source = _source(reference_bundle, reference_archive)
         cand_source = _source(candidate_bundle, candidate_archive)
         outputs = tuple(Path(_canonical_receiving_path(path)) for path in (out_path, junit_path) if path is not None)
@@ -307,6 +319,11 @@ def compare_screen_bundles(
         phase = "invalid_screen_comparison_input"
         _require(reference.targets == candidate.targets, "target_manifest_mismatch")
         result = _compare_held(reference, candidate, {"reference": verify_reference(), "candidate": verify_candidate()})
+        if require_compatible_identity:
+            requirement = _identity_requirement(result["rows"])
+            result["screen_comparison_schema_version"] = 2
+            result["identity_requirement"] = requirement
+            result["exit_code"] = _exit_code(result["rows"], identity_met=requirement["met"] is True)
         phase = "output_failure"
         buffers = []
         if out_path is not None:
