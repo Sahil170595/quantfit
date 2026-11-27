@@ -31,10 +31,10 @@ Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --con
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.70.0.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.72.0.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.70.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.72.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -337,6 +337,19 @@ pin-present flag; list entries expose `declared_spec_validity` rather than a
 measurement validity verdict. Each entry carries its own publication disclaimer.
 
 ### Reference candidate assessment
+
+Validate and optionally pin a target declaration before assembling a replay bundle.
+
+```bash
+quantfit references target-verify --target target.json --sha256 SHA256 --json
+```
+
+The command uses the receiving assessment's schema validator. The JSON result
+contains the schema version, exact-byte SHA-256, byte size and whether the optional
+pin matches. Exit `0` means the declaration is valid and any supplied pin matches.
+Exit `3` means a valid declaration has a different digest. Exit `2` means the input
+or pin is invalid or the input cannot be read. This check establishes schema and
+byte identity. Publication criteria are evaluated separately by `references assess`.
 
 Quantfit 0.29.0 adds offline candidate-specific publication preconditions:
 
