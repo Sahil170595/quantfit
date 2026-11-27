@@ -1,0 +1,3 @@
+# Standalone recipient wheel validation
+
+Windows x64 CPU, Quantfit 0.79.0 installed wheel, NumPy 2.5.1, SafeTensors 0.8.0. Run `python -I tools/ci_weightspace_head.py` outside the checkout import path. Six paired feature anchors identify a known affine map from width two to width three. The source file is removed before prediction. The installed wheel checks the composed weight and bias, raw-text logits and class order on four disjoint feature vectors; a mismatched anchor pairing is scored separately. This analytic fixture measures standalone classifier correctness. It establishes no pretrained-model transfer or deployment throughput. The reversed anchor pairing retained all four winning classes despite changing logits; the record includes its maximum logit error.
