@@ -13,6 +13,7 @@ from quantfit.bundle import BundleError, _read
 from quantfit.bundle_transport import _publish_archive, _publish_flat_bundle
 from quantfit.safety.retention_io import RetainedLabelsError
 
+from . import _vectors
 from ._tensors import (
     MAX_FILE_BYTES,
     MAX_MANIFEST_BYTES,
@@ -72,32 +73,41 @@ def publish(out, manifest: dict, files: dict[str, bytes]) -> dict:
 @_public_io
 def encode(base, target, out, *, codec: str = XOR, max_bytes: int = MAX_FILE_BYTES) -> dict:
     """Publish a new local artifact. Inputs are SafeTensors paths or named NumPy arrays."""
-    require(codec == XOR, "unsupported weight-space codec")
+    require(codec in (XOR, _vectors.TASK), "unsupported weight-space codec")
     base_raw, original = checkpoint(base, max_bytes)
     _, wanted = checkpoint(target, max_bytes)
     require(bool(original) and original.keys() == wanted.keys(), "incompatible or empty tensor inventory")
-    unchanged, changes = [], {}
-    for name in sorted(original):
-        a, b = original[name], wanted[name]
-        require((a.dtype, a.shape) == (b.dtype, b.shape), f"incompatible layout for {name}")
-        if a.data == b.data:
-            unchanged.append(name)
-        else:
-            changes[name] = Tensor("U8", (len(a.data),), _xor(a.data, b.data))
+    ids = {"base": identity(original), "target": identity(wanted)}
+    if codec == _vectors.TASK:
+        changes, metadata, reconstructed = _vectors.extract(original, wanted)
+        ids["reconstructed"] = identity(reconstructed)
+    else:
+        unchanged, changes = [], {}
+        for name in sorted(original):
+            a, b = original[name], wanted[name]
+            require((a.dtype, a.shape) == (b.dtype, b.shape), f"incompatible layout for {name}")
+            if a.data == b.data:
+                unchanged.append(name)
+            else:
+                changes[name] = Tensor("U8", (len(a.data),), _xor(a.data, b.data))
+        metadata = {"unchanged": unchanged}
     delta = serialize(changes)
     require(len(delta) <= max_bytes, "delta exceeds byte budget")
     files = {"base.safetensors": base_raw, "delta.safetensors": delta}
     manifest = {
         "schema": SCHEMA,
-        "codec": {"id": codec, "exact": True, "parameters": {}},
-        "identities": {"base": identity(original), "target": identity(wanted)},
+        "codec": {"id": codec, "exact": codec == XOR, "parameters": {}},
+        "identities": ids,
         "files": [
             file_record(name, data, role, ["decode"]) for (name, data), role in zip(files.items(), ("base", "payload"))
         ],
         "tensors": records(wanted),
-        "metadata": {"unchanged": unchanged},
+        "metadata": metadata,
     }
-    return publish(out, manifest, files)
+    receipt = publish(out, manifest, files)
+    if codec == _vectors.TASK:
+        receipt.update(changed_tensors=len(changes), max_abs_error=metadata["max_abs_error"])
+    return receipt
 
 
 def _artifacts(doc: dict, root: Path, max_bytes: int) -> dict[str, bytes]:
@@ -130,15 +140,20 @@ def _artifacts(doc: dict, root: Path, max_bytes: int) -> dict[str, bytes]:
 
 
 @_public_io
-def decode(base, artifact, out, *, max_bytes: int = MAX_FILE_BYTES) -> dict:
+def decode(base, artifact, out, *, scale: float = 1.0, max_bytes: int = MAX_FILE_BYTES) -> dict:
     """Verify all commitments and write a new SafeTensors checkpoint without replacing an existing file."""
     path = Path(artifact)
     doc = read_json(_read(path, MAX_MANIFEST_BYTES))
     require(doc.get("schema") == SCHEMA, "unsupported weight-space manifest schema")
+    declaration = doc.get("codec")
+    require(isinstance(declaration, dict), "missing codec declaration")
+    codec = declaration.get("id")
     require(
-        canonical(doc.get("codec")) == canonical({"id": XOR, "exact": True, "parameters": {}}),
+        codec in (XOR, _vectors.TASK)
+        and canonical(declaration) == canonical({"id": codec, "exact": codec == XOR, "parameters": {}}),
         "unsupported codec declaration",
     )
+    require(type(scale) in (int, float) and (codec != XOR or scale == 1), "exact XOR cannot be scaled")
     _, original = checkpoint(base, max_bytes)
     files = _artifacts(doc, path.parent, max_bytes)
     ids = doc.get("identities")
@@ -150,29 +165,31 @@ def decode(base, artifact, out, *, max_bytes: int = MAX_FILE_BYTES) -> dict:
         isinstance(ids, dict) and ids.get("base") == identity(original) == identity(unpack(files["base"])),
         "wrong decode base",
     )
-    require(isinstance(doc.get("metadata"), dict), "missing codec metadata")
-    unchanged = doc["metadata"].get("unchanged")
-    require(
-        isinstance(unchanged, list)
-        and all(isinstance(n, str) for n in unchanged)
-        and len(set(unchanged)) == len(unchanged),
-        "invalid unchanged tensor list",
-    )
     delta = unpack(files["payload"])
-    require(
-        set(unchanged).isdisjoint(delta) and set(unchanged) | delta.keys() == original.keys(),
-        "payload coverage disagrees with base",
-    )
-    result = dict(original)
-    for name, tensor in delta.items():
-        a = original[name]
-        require(tensor.dtype == "U8" and tensor.shape == (len(a.data),), "invalid XOR tensor layout")
-        result[name] = Tensor(a.dtype, a.shape, _xor(a.data, tensor.data))
-    require(
-        canonical(ordered_records(doc.get("tensors"))) == canonical(records(result))
-        and identity(result) == ids.get("target"),
-        "decoded tensor commitment mismatch",
-    )
+    if codec == _vectors.TASK:
+        result = _vectors.restore(original, delta, doc, scale)
+    else:
+        require(isinstance(doc.get("metadata"), dict), "missing codec metadata")
+        unchanged = doc["metadata"].get("unchanged")
+        require(
+            isinstance(unchanged, list)
+            and all(isinstance(n, str) for n in unchanged)
+            and len(set(unchanged)) == len(unchanged),
+            "invalid unchanged tensor list",
+        )
+        require(
+            set(unchanged).isdisjoint(delta) and set(unchanged) | delta.keys() == original.keys(),
+            "payload coverage disagrees with base",
+        )
+        result = dict(original)
+        for name, tensor in delta.items():
+            a = original[name]
+            require(tensor.dtype == "U8" and tensor.shape == (len(a.data),), "invalid XOR tensor layout")
+            result[name] = Tensor(a.dtype, a.shape, _xor(a.data, tensor.data))
+        require(
+            canonical(ordered_records(doc.get("tensors"))) == canonical(records(result)) and identity(result) == ids.get("target"),
+            "decoded tensor commitment mismatch",
+        )
     output = serialize(result)
     require(len(output) <= max_bytes, "decoded checkpoint exceeds byte budget")
     _publish_archive(str(out), output, ())
@@ -181,5 +198,6 @@ def decode(base, artifact, out, *, max_bytes: int = MAX_FILE_BYTES) -> dict:
         "file_sha256": sha(output),
         "size_bytes": len(output),
         "tensor_count": len(result),
-        "codec": XOR,
+        "codec": codec,
+        **({"scale": scale} if codec == _vectors.TASK else {}),
     }

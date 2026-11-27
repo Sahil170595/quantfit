@@ -10,9 +10,11 @@ def add_parser(commands):
     enc.add_argument("--base", required=True, help="Base SafeTensors checkpoint.")
     enc.add_argument("--target", required=True, help="Target SafeTensors checkpoint.")
     enc.add_argument("--out", required=True, help="New bundle directory.")
+    enc.add_argument("--codec", choices=["xor-bytes-v1", "task-vector-v1"], default="xor-bytes-v1")
     dec = sub.add_parser("decode", help="Verify a delta and recover a new SafeTensors checkpoint.")
     dec.add_argument("--base", required=True, help="Base SafeTensors checkpoint.")
     dec.add_argument("--artifact", required=True, help="Bundle manifest.json path.")
+    dec.add_argument("--scale", type=float, default=1.0, help="Multiplier applied to a numerical update.")
     dec.add_argument("--out", required=True, help="New SafeTensors output file.")
 
 
@@ -20,9 +22,9 @@ def run(args, emit):
     from quantfit.weightspace import decode, encode
 
     if args.weight_cmd == "encode":
-        result = encode(args.base, args.target, args.out)
+        result = encode(args.base, args.target, args.out, codec=args.codec)
     else:
-        result = decode(args.base, args.artifact, args.out)
+        result = decode(args.base, args.artifact, args.out, scale=args.scale)
     return emit(
         args,
         f"weightspace/{args.weight_cmd}",
