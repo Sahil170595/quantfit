@@ -13,6 +13,16 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.77.0 — Unreleased
+
+- Export a floating-point task vector from compatible SafeTensors weights and apply positive, negative, fractional or zero scales.
+- Verify reconstruction commitments and report maximum absolute error against the supplied target. See [wheel validation](validation/2026-11-27-weightspace-vectors/functional.json).
+
+## 0.76.0 — Unreleased
+
+- Add Python encode/decode and matching weightspace CLI commands for byte-exact SafeTensors checkpoint deltas.
+- Verify local artifact digests, the selected base, and the logical target before creating the output.
+
 ## 0.75.0 — 2026-11-27
 
 - Compare two replay handoffs directly from pinned canonical ZIPs or directories while retaining native T0, report bindings, and outcomes.

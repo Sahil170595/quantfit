@@ -1,5 +1,9 @@
 # CLI reference — every command, every flag
 
+The 0.77.0 candidate adds `weightspace encode --codec task-vector-v1` and `weightspace decode --scale NUMBER`. [Arithmetic task vectors](weightspace.md#arithmetic-task-vectors)
+
+See [weight-space checkpoint operations](weightspace.md) for the 0.76.0 candidate, including `weightspace encode` and `weightspace decode`.
+
 Quantfit **0.67.0** combines the complete supplied-control triplet, one
 `--calibrations-dir`, and `--require-axis-conditional-resolution AXIS=PP` for
 `screen-summary`. See [selected axes with controls](saved-screen-control-evidence.md#selected-axes-with-one-calibration-directory-0670).

@@ -193,7 +193,10 @@ def _build_parser() -> argparse.ArgumentParser:
     # required — `quantfit --version` used to exit 2 with a usage dump, which made the
     # first thing any caller runs to confirm an install look like a broken install.
     p.add_argument("--version", "-V", action="version", version=f"quantfit {__version__}")
+    from quantfit.weightspace_cli import add_parser as add_weightspace
+
     sub = p.add_subparsers(dest="cmd", required=True)
+    add_weightspace(sub)
 
     # Shared --token for the commands that hit the Hub (gated / private models).
     tok = argparse.ArgumentParser(add_help=False)
@@ -1136,6 +1139,10 @@ def _add_json_flag(parser: argparse.ArgumentParser) -> None:
 
 
 def _dispatch(args: argparse.Namespace) -> int:
+    if args.cmd == "weightspace":
+        from quantfit.weightspace_cli import run
+
+        return run(args, _emit)
     if args.cmd == "probes":
         from quantfit.probe_bundle import prepare_probe_bundle
 

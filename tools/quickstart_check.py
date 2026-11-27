@@ -197,6 +197,8 @@ SUBCOMMAND_REQUIREMENTS: Mapping[str, tuple[str, ...]] = {
     "quantize": (REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),
     # Smoke-loads a LOCAL artifact through transformers (GGUF: magic bytes only).
     "verify": (REQ_ARTIFACT, REQ_GPU),
+    # CPU encode/decode read supplied checkpoint or bundle files (quantfit/weightspace_cli.py).
+    "weightspace": (REQ_ARTIFACT,),
     # Two arms + the judge. Refined to CPU for all-GGUF pairs (CHANGELOG 0.4.1).
     "verify-safety": (REQ_NETWORK, REQ_DOWNLOAD, REQ_GPU),
     # quantfit.inspect_hf: immutable snapshots, HF model and real pinned judge.

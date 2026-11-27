@@ -1,0 +1,12 @@
+{
+  "version": "0.76.0",
+  "example": "least-squares-two-class",
+  "fit_cases": 6,
+  "held_out_cases": 4,
+  "matching_argmax": 4,
+  "max_abs_logit_error": 0.0,
+  "exact_tensors": 2,
+  "logical_sha256": "f9c342c203e7198dc30d03722f01533c43845a49d747b3724ea4b5e83a158fbd",
+  "cold_bytes": 1502,
+  "incremental_bytes": 1350
+}
