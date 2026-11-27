@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.76.0 — Unreleased
+
+- Add Python encode/decode and matching weightspace CLI commands for byte-exact SafeTensors checkpoint deltas.
+- Verify local artifact digests, the selected base, and the logical target before creating the output.
+
 ## 0.75.0 — 2026-11-27
 
 - Compare two replay handoffs directly from pinned canonical ZIPs or directories while retaining native T0, report bindings, and outcomes.

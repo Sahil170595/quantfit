@@ -41,6 +41,8 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The 0.76.0 source candidate adds [lossless checkpoint encoding and reconstruction](docs/weightspace.md).
+
 Quantfit **0.75.0** compares digest-pinned replay ZIPs directly with `reproduce`. [Command reference](docs/cli-reference.md)
 
 Quantfit **0.74.0** checks selected original annotation parts in a staged return with `calibrate chunks validate --require-part`. [Command reference](docs/annotation-chunks.md)

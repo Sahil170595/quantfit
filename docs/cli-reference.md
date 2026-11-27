@@ -1,5 +1,7 @@
 # CLI reference — every command, every flag
 
+See [weight-space checkpoint operations](weightspace.md) for the 0.76.0 candidate, including `weightspace encode` and `weightspace decode`.
+
 Quantfit **0.67.0** combines the complete supplied-control triplet, one
 `--calibrations-dir`, and `--require-axis-conditional-resolution AXIS=PP` for
 `screen-summary`. See [selected axes with controls](saved-screen-control-evidence.md#selected-axes-with-one-calibration-directory-0670).
