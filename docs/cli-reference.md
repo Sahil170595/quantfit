@@ -31,10 +31,10 @@ Quantfit 0.61.0 adds the all-or-none `screen-summary --control-report PATH --con
 [supplied-control annotation](saved-screen-control-evidence.md) alongside native screen results.
 
 Quantfit 0.57.0 adds reference-action selected-axis forwarding through the native
-CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.71.0.
+CLI `--axis-threshold AXIS=PP` policy. Installation commands below use 0.72.0.
 See the [reference action](ci-integration.md#selected-axis-reference-action).
 
-This reference documents quantfit 0.71.0, including pinned alternative probe corpora,
+This reference documents quantfit 0.72.0, including pinned alternative probe corpora,
 private offline adjudication review,
 descriptive two-judge diagnostics,
 capture-backed receiving, whole-target saved adjudication screens and annotation chunks,
@@ -107,6 +107,16 @@ and `bundle unpack` for the existing schema-1 aggregate directory format.
 Receiving requires the expected full lowercase archive SHA256. Existing directory
 verification and native adverse outcomes are unchanged. See [closed transport
 format and failure behavior](portable-evidence-bundles.md#single-file-transport-0590).
+
+Save the native verification result as a CI artifact without extracting the ZIP.
+
+```bash
+quantfit bundle archive-verify --kind replay --archive replay.zip --sha256 FULL64 --out verification.json --json
+```
+
+`--out` accepts a new file in an existing directory for any supported archive kind.
+Its contents equal the CLI JSON `result`, including the native verdict and scope.
+Verification and writing both have to succeed for exit `0`. Refusals return `2`.
 
 `quantfit verify`, available since 0.26.0, validates a bounded GGUF structural profile and offers
 explicit Linux native CPU usability with `--runtime`. Its profile, typed API,

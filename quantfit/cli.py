@@ -997,6 +997,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     bpack.add_argument("--out", required=True, metavar="PATH", help="new canonical stored archive")
     barchive = bsub.add_parser("archive-verify", help="offline expected-SHA256 container and native validation")
+    barchive.add_argument("--out", metavar="PATH", help="new JSON file for the native verification receipt")
     bunpack = bsub.add_parser("unpack", help="validate fully then restore to a fresh exclusive directory")
     for receiving in (barchive, bunpack):
         receiving.add_argument(
@@ -1926,7 +1927,7 @@ def _dispatch(args: argparse.Namespace) -> int:
             elif args.bundle_cmd == "unpack":
                 result = unpack_bundle(args.archive, args.sha256, args.out, kind=args.kind)
             else:
-                result = verify_bundle_archive(args.archive, args.sha256, kind=args.kind)
+                result = verify_bundle_archive(args.archive, args.sha256, kind=args.kind, out_path=args.out)
 
             def human_transport():
                 print(

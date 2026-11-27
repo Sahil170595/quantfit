@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import json
 import os
 import re
 import stat
@@ -210,17 +211,27 @@ def pack_bundle(bundle_path: str, out_path: str, *, kind: str = "aggregate") -> 
         raise bundle.BundleError("invalid_bundle_transport") from None
 
 
-def verify_bundle_archive(archive_path: str, expected_sha256: str, *, kind: str = "aggregate") -> dict[str, Any]:
-    """Pin and validate the explicitly selected container offline, without restoration."""
+def verify_bundle_archive(
+    archive_path: str, expected_sha256: str, *, kind: str = "aggregate", out_path: str | None = None
+) -> dict[str, Any]:
+    """Pin and validate the selected container and optionally save its native receipt."""
     _require(type(kind) is str and kind in ("aggregate", "replay", "screen"))
-    if kind != "aggregate":
-        from quantfit.bundle_archive_kinds import verify
-
-        return verify(archive_path, expected_sha256, kind=kind)
     try:
-        held, _, result = _receive(archive_path, expected_sha256)
+        if kind == "aggregate":
+            held, _, result = _receive(archive_path, expected_sha256)
+        else:
+            from quantfit.bundle_archive_kinds import _receive as receive_kind
+
+            held, _, result = receive_kind(archive_path, expected_sha256, kind)
         held.check()
+        if out_path is not None:
+            raw = (json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
+            _publish_archive(out_path, raw, (held,))
         return result
+    except bundle.BundleError as exc:
+        if str(exc) == "archive_stage_preserved":
+            raise
+        raise bundle.BundleError("invalid_bundle_transport") from None
     except (OSError, RuntimeError, ValueError, TypeError, KeyError, RecursionError, zipfile.BadZipFile):
         raise bundle.BundleError("invalid_bundle_transport") from None
 
