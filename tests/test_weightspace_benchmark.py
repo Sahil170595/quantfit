@@ -48,3 +48,12 @@ def test_partition_leakage_and_invalid_controls():
     ]:
         with pytest.raises(WeightspaceError):
             benchmark_heads(fixture() | invalid)
+
+
+def test_zero_budget_without_a_query_pool():
+    spec = fixture() | {"queries": {"ids": [], "recipient": [], "donor": [], "labels": []}, "budgets": [0]}
+    result = benchmark_heads(spec)
+    assert result["target_logit_rows_materialized"] == 0
+    assert all(row["arms"]["output_only_matched"]["target_logit_queries"] == 0 for row in result["trials"])
+    with pytest.raises(WeightspaceError, match="budgets"):
+        benchmark_heads(spec | {"budgets": [1]})

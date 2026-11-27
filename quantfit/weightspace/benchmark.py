@@ -17,13 +17,24 @@ def integer_list(value, name, minimum, maximum):
     return value
 
 
-def partition(data, name, features, classes):
+def partition(data, name, features, classes, *, empty_widths=None):
     require(isinstance(data, dict) and data.keys() == {"ids", "recipient", *features}, f"incorrect {name} fields")
     ids = data["ids"]
     require(
         isinstance(ids, list) and all(isinstance(i, str) and i for i in ids) and len(set(ids)) == len(ids),
         f"invalid {name} IDs",
     )
+    if not ids and empty_widths is not None:
+        require(
+            all(isinstance(v, list) and not v for v in data.values()),
+            "empty query partition must contain only empty arrays",
+        )
+        return {
+            "ids": [],
+            "recipient": np.empty((0, empty_widths[0])),
+            "donor": np.empty((0, empty_widths[1])),
+            "labels": np.empty(0, dtype=np.intp),
+        }
     result = {"ids": ids, "recipient": numeric(data["recipient"], 2, f"{name} recipient")}
     require(len(result["recipient"]) == len(ids), f"{name} case count mismatch")
     if "donor" in features:
@@ -94,7 +105,13 @@ def benchmark_heads(spec, *, observe=None):
     )
     nc = len(labels)
     archive = partition(spec["archive"], "archive", {"donor"}, nc)
-    queries = partition(spec["queries"], "queries", {"donor", "labels"}, nc)
+    queries = partition(
+        spec["queries"],
+        "queries",
+        {"donor", "labels"},
+        nc,
+        empty_widths=(archive["recipient"].shape[1], archive["donor"].shape[1]),
+    )
     held = partition(spec["held_out"], "held-out", {"labels"}, nc)
     ids = archive["ids"] + queries["ids"] + held["ids"]
     require(len(set(ids)) == len(ids), "archive, query and evaluation IDs must be disjoint")
