@@ -13,6 +13,11 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.78.0 — Unreleased
+
+- Encode floating-point task updates with deterministic signed 4-bit or 8-bit group codes and stored scales.
+- Report serialized cold and shared-base costs and measured reconstruction error. See [wheel validation](validation/2026-11-27-weightspace-lowbit/functional.json).
+
 ## 0.77.0 — Unreleased
 
 - Export a floating-point task vector from compatible SafeTensors weights and apply positive, negative, fractional or zero scales.

@@ -13,7 +13,7 @@ from quantfit.bundle import BundleError, _read
 from quantfit.bundle_transport import _publish_archive, _publish_flat_bundle
 from quantfit.safety.retention_io import RetainedLabelsError
 
-from . import _vectors
+from . import _lowbit, _vectors
 from ._tensors import (
     MAX_FILE_BYTES,
     MAX_MANIFEST_BYTES,
@@ -71,15 +71,31 @@ def publish(out, manifest: dict, files: dict[str, bytes]) -> dict:
 
 
 @_public_io
-def encode(base, target, out, *, codec: str = XOR, max_bytes: int = MAX_FILE_BYTES) -> dict:
+def encode(
+    base,
+    target,
+    out,
+    *,
+    codec: str = XOR,
+    bits: int | None = None,
+    group_size: int | None = None,
+    max_bytes: int = MAX_FILE_BYTES,
+) -> dict:
     """Publish a new local artifact. Inputs are SafeTensors paths or named NumPy arrays."""
-    require(codec in (XOR, _vectors.TASK), "unsupported weight-space codec")
+    require(codec in (XOR, _vectors.TASK, _lowbit.LOWBIT), "unsupported weight-space codec")
+    params = {}
+    if codec == _lowbit.LOWBIT:
+        params = _lowbit.parameters(4 if bits is None else bits, 64 if group_size is None else group_size)
+    else:
+        require(bits is None and group_size is None, "bit and group settings require grouped-int-v1")
     base_raw, original = checkpoint(base, max_bytes)
     _, wanted = checkpoint(target, max_bytes)
     require(bool(original) and original.keys() == wanted.keys(), "incompatible or empty tensor inventory")
     ids = {"base": identity(original), "target": identity(wanted)}
-    if codec == _vectors.TASK:
+    if codec != XOR:
         changes, metadata, reconstructed = _vectors.extract(original, wanted)
+        if codec == _lowbit.LOWBIT:
+            changes, metadata, reconstructed = _lowbit.pack(original, wanted, changes, metadata, **params)
         ids["reconstructed"] = identity(reconstructed)
     else:
         unchanged, changes = [], {}
@@ -96,7 +112,7 @@ def encode(base, target, out, *, codec: str = XOR, max_bytes: int = MAX_FILE_BYT
     files = {"base.safetensors": base_raw, "delta.safetensors": delta}
     manifest = {
         "schema": SCHEMA,
-        "codec": {"id": codec, "exact": codec == XOR, "parameters": {}},
+        "codec": {"id": codec, "exact": codec == XOR, "parameters": params},
         "identities": ids,
         "files": [
             file_record(name, data, role, ["decode"]) for (name, data), role in zip(files.items(), ("base", "payload"))
@@ -105,8 +121,10 @@ def encode(base, target, out, *, codec: str = XOR, max_bytes: int = MAX_FILE_BYT
         "metadata": metadata,
     }
     receipt = publish(out, manifest, files)
-    if codec == _vectors.TASK:
-        receipt.update(changed_tensors=len(changes), max_abs_error=metadata["max_abs_error"])
+    if codec != XOR:
+        receipt.update(
+            changed_tensors=len(original) - len(metadata["unchanged"]), max_abs_error=metadata["max_abs_error"]
+        )
     return receipt
 
 
@@ -148,9 +166,14 @@ def decode(base, artifact, out, *, scale: float = 1.0, max_bytes: int = MAX_FILE
     declaration = doc.get("codec")
     require(isinstance(declaration, dict), "missing codec declaration")
     codec = declaration.get("id")
+    params = {}
+    if codec == _lowbit.LOWBIT:
+        supplied = declaration.get("parameters")
+        require(isinstance(supplied, dict), "missing group parameters")
+        params = _lowbit.parameters(supplied.get("bits"), supplied.get("group_size"))
     require(
-        codec in (XOR, _vectors.TASK)
-        and canonical(declaration) == canonical({"id": codec, "exact": codec == XOR, "parameters": {}}),
+        codec in (XOR, _vectors.TASK, _lowbit.LOWBIT)
+        and canonical(declaration) == canonical({"id": codec, "exact": codec == XOR, "parameters": params}),
         "unsupported codec declaration",
     )
     require(type(scale) in (int, float) and (codec != XOR or scale == 1), "exact XOR cannot be scaled")
@@ -166,7 +189,9 @@ def decode(base, artifact, out, *, scale: float = 1.0, max_bytes: int = MAX_FILE
         "wrong decode base",
     )
     delta = unpack(files["payload"])
-    if codec == _vectors.TASK:
+    if codec != XOR:
+        if codec == _lowbit.LOWBIT:
+            delta = _lowbit.unpack(original, delta, doc.get("metadata"), **params)
         result = _vectors.restore(original, delta, doc, scale)
     else:
         require(isinstance(doc.get("metadata"), dict), "missing codec metadata")
@@ -200,5 +225,5 @@ def decode(base, artifact, out, *, scale: float = 1.0, max_bytes: int = MAX_FILE
         "size_bytes": len(output),
         "tensor_count": len(result),
         "codec": codec,
-        **({"scale": scale} if codec == _vectors.TASK else {}),
+        **({"scale": scale} if codec != XOR else {}),
     }

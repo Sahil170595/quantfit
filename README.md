@@ -1018,3 +1018,5 @@ fresh unconfirmed flags. See the [target contract](docs/cli-reference.md#referen
 ## License
 
 Apache-2.0.
+
+Grouped 4-bit and 8-bit deltas are available with `quantfit weightspace encode --codec grouped-int-v1 --bits 4 --group-size 64`. See the [wire format and numerical rules](docs/weightspace.md).
