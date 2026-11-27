@@ -1,0 +1,9 @@
+{
+  "version": "0.77.0",
+  "scales_checked": 4,
+  "coefficients_per_scale": 4,
+  "changed_tensors": 1,
+  "max_abs_error_against_scalar": 0.0,
+  "source_target_digest": "c7f52d552fd8160ae1f47bb4a3b009d18be6157564bd38871fc456ff749cba9e",
+  "unit_scale_digest": "c7f52d552fd8160ae1f47bb4a3b009d18be6157564bd38871fc456ff749cba9e"
+}

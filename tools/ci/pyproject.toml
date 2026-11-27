@@ -5,6 +5,7 @@ requires-python = ">=3.11.5,<3.15"
 
 [dependency-groups]
 unit = [
+  "safetensors==0.8.0",
   "pytest==9.0.3", "hypothesis==6.152.5", "gguf==0.19.0", "inspect-ai==0.3.269", "agent-client-protocol==0.12.1",
   "huggingface-hub==1.31.0", "psutil==7.2.2", "tomli==2.4.0",
   "filelock==4.2.1", "datasets==5.0.1",

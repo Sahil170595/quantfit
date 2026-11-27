@@ -3,10 +3,10 @@ revision = 5
 requires-python = ">=3.11.5, <3.15"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'linux'",
-    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'linux'",
-    "python_full_version < '3.12' and sys_platform == 'linux'",
     "python_full_version >= '3.14' and sys_platform == 'win32'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'linux'",
     "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
+    "python_full_version < '3.12' and sys_platform == 'linux'",
     "python_full_version < '3.12' and sys_platform == 'win32'",
 ]
 supported-markers = [
@@ -1966,8 +1966,8 @@ version = "3.7"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'linux'",
-    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'linux'",
     "python_full_version >= '3.14' and sys_platform == 'win32'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'linux'",
     "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/dc/76/3af777226b63a5e64a6b36b1ec5855c14e2b94a37096d4760e595fc43511/networkx-3.7.tar.gz", hash = "sha256:fd77a511bd90f39f3d016351345b52cf5319b813bdca01de3f755d3cca62e96a", size = 1866482, upload-time = "2026-09-21T16:45:16.974Z" }
@@ -2593,8 +2593,8 @@ version = "14.0.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'linux'",
-    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'linux'",
     "python_full_version >= '3.14' and sys_platform == 'win32'",
+    "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'linux'",
     "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
 ]
 dependencies = [
@@ -2759,6 +2759,7 @@ numerical = [
     { name = "psutil" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "safetensors" },
     { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
     { name = "tomli" },
@@ -2798,6 +2799,7 @@ unit = [
     { name = "inspect-ai" },
     { name = "psutil" },
     { name = "pytest" },
+    { name = "safetensors" },
     { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
     { name = "tomli" },
@@ -2822,6 +2824,7 @@ numerical = [
     { name = "psutil", specifier = "==7.2.2" },
     { name = "pytest", specifier = "==9.0.3" },
     { name = "pytest-cov", specifier = "==7.1.0" },
+    { name = "safetensors", specifier = "==0.8.0" },
     { name = "scipy", marker = "python_full_version < '3.14'", specifier = "==1.15.3" },
     { name = "scipy", marker = "python_full_version >= '3.14'", specifier = "==1.17.1" },
     { name = "tomli", specifier = "==2.4.0" },
@@ -2861,6 +2864,7 @@ unit = [
     { name = "inspect-ai", specifier = "==0.3.269" },
     { name = "psutil", specifier = "==7.2.2" },
     { name = "pytest", specifier = "==9.0.3" },
+    { name = "safetensors", specifier = "==0.8.0" },
     { name = "scipy", marker = "python_full_version < '3.14'", specifier = "==1.15.3" },
     { name = "scipy", marker = "python_full_version >= '3.14'", specifier = "==1.17.1" },
     { name = "tomli", specifier = "==2.4.0" },
@@ -3175,8 +3179,8 @@ version = "1.15.3"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'linux'",
-    "python_full_version < '3.12' and sys_platform == 'linux'",
     "python_full_version >= '3.12' and python_full_version < '3.14' and sys_platform == 'win32'",
+    "python_full_version < '3.12' and sys_platform == 'linux'",
     "python_full_version < '3.12' and sys_platform == 'win32'",
 ]
 dependencies = [

@@ -1,0 +1,21 @@
+{
+  "version": "0.78.0",
+  "trials": [
+    {
+      "bits": 4,
+      "elements": 33,
+      "packed_code_bytes": 17,
+      "max_abs_error": 0.0,
+      "cold_bytes": 1551,
+      "incremental_bytes": 1347
+    },
+    {
+      "bits": 8,
+      "elements": 513,
+      "packed_code_bytes": 513,
+      "max_abs_error": 0.0039370059967041016,
+      "cold_bytes": 3988,
+      "incremental_bytes": 1864
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 # CLI reference — every command, every flag
 
+The 0.77.0 candidate adds `weightspace encode --codec task-vector-v1` and `weightspace decode --scale NUMBER`. [Arithmetic task vectors](weightspace.md#arithmetic-task-vectors)
+
+See [weight-space checkpoint operations](weightspace.md) for the 0.76.0 candidate, including `weightspace encode` and `weightspace decode`.
+
 Quantfit **0.67.0** combines the complete supplied-control triplet, one
 `--calibrations-dir`, and `--require-axis-conditional-resolution AXIS=PP` for
 `screen-summary`. See [selected axes with controls](saved-screen-control-evidence.md#selected-axes-with-one-calibration-directory-0670).
@@ -1289,3 +1293,5 @@ The required new private output must end exactly in `.adjudication.html`; existi
 Available in quantfit 0.51.0: both `verify-safety` and `inspect-run` accept all-or-none `--probe-dataset namespace/repo --probe-revision <40-lowercase-hex> --probe-split validation`. No URLs/local paths/buckets/packaged aliases, moving revisions, sliced/concatenated/all splits or demo combinations are accepted. Invalid source/options/whole population are operational 2 before observer/model/judge work.
 
 The supplied population 1..4096 retains all actual prompt/zone/expected strings and order, including repeated/whitespace text. Per-prompt 64KiB and whole selected 8MiB UTF8 bounds are not SDK download/parser/heap limits. Source identities are recorded in reports/capture-only bindings, GGUF cache and Inspect logs/completed reports. Changed revision/split on the default ID is noncanonical. Default native math/0-3-4 priority and legacy Inspect judge/source-pin refusals stay; no implied corpus curation or accuracy transfer. Exact API, compatibility and evidence: [probe-corpus](probe-corpus.md).
+
+Create a quantized delta with `quantfit weightspace encode --codec grouped-int-v1 --bits 4 --group-size 64 --base base.safetensors --target target.safetensors --out delta`. Decode it with the same weightspace decode command used for a dense task vector.

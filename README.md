@@ -41,6 +41,10 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The 0.77.0 source candidate adds [scaled arithmetic task vectors](docs/weightspace.md#arithmetic-task-vectors).
+
+The 0.76.0 source candidate adds [lossless checkpoint encoding and reconstruction](docs/weightspace.md).
+
 Quantfit **0.75.0** compares digest-pinned replay ZIPs directly with `reproduce`. [Command reference](docs/cli-reference.md)
 
 Quantfit **0.74.0** checks selected original annotation parts in a staged return with `calibrate chunks validate --require-part`. [Command reference](docs/annotation-chunks.md)
@@ -1014,3 +1018,5 @@ fresh unconfirmed flags. See the [target contract](docs/cli-reference.md#referen
 ## License
 
 Apache-2.0.
+
+Grouped 4-bit and 8-bit deltas are available with `quantfit weightspace encode --codec grouped-int-v1 --bits 4 --group-size 64`. See the [wire format and numerical rules](docs/weightspace.md).

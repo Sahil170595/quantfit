@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantfit"
-version = "0.75.0"
+version = "0.78.0"
 description = "Quantize an LLM and check it still refuses what it should — a GPU-aware quantization CLI that measures the safety drift of the quantization it just performed."
 readme = "README.md"
 requires-python = ">=3.11.5"
@@ -43,6 +43,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+weightspace = ["safetensors>=0.8,<0.9", "numpy>=1.26,<3"]
 # scipy: stats cross-check tests; gguf: crafts/reads tiny GGUFs in the arm tests.
 # ruff bounded: new minors add default rules (0.16 did, mid-cycle) — cap moves
 # only after a validated run on the new minor, same rule as llmcompressor.
