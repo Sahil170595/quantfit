@@ -443,6 +443,17 @@ cross-release runs have been compared; the 0.5 screen has not run).
 
 ## 3. Major flags
 
+### Weight-space checkpoint encoding (0.76.0 candidate)
+
+| Flag | Command | Behavior | Evidence |
+|---|---|---|---|
+| `--codec` / `--scale` | weightspace encode, decode | Apply a checked floating-point task vector at a finite multiplier. | `validation/2026-11-27-weightspace-vectors/` |
+| `--bits` / `--group-size` | weightspace encode | Encode symmetric 4-bit or 8-bit deltas with explicit quantization groups. | `validation/2026-11-27-weightspace-lowbit/` |
+| `--base` | weightspace encode, decode | Supply the local SafeTensors base. Decoding checks its logical tensor identity against the manifest. | `tests/test_weightspace.py` |
+| `--target` | weightspace encode | Supply the checkpoint whose tensors the delta reconstructs. | `validation/2026-11-27-weightspace-lossless/` |
+| `--artifact` | weightspace decode | Read the manifest and verify the component sizes, digests and reconstructed tensor commitments. | `tests/test_weightspace.py` |
+| `--out` | weightspace encode, decode | Create a new bundle directory or a new reconstructed checkpoint. Existing outputs are preserved. | `tests/test_weightspace.py` |
+
 ### Selected-axis effect gates (unreleased 0.52.0 source candidate, 2026-11-02)
 
 | Flag surface | Command | Bounded source behavior | Evidence and limits |
@@ -632,6 +643,7 @@ only required argument that command has.
 | `--no-check` | quantize | E3 only (`tests/test_dispatch.py`) | never exercised against a real too-big model |
 | `--token` | check, probe, verify-safety, screen, gate, quantize (**six** — `plan` no longer takes it) | **E0** — no gated/private model run is recorded | parser-level only (`tests/test_cli.py`). `plan` accepted this flag and its dispatch branch never read it: an **inert** flag, accepted by the parser and silently ignored, which is an error in the unsafe direction — a user supplying a token for a gated repo would have been told nothing. It was removed on this branch, and `quantfit/cli.py:42` records why (`plan` reads the local device and the frozen spec only). Removal is not validation: the six that remain are still E0 |
 | `--prefer` | plan | E3 (`tests/test_route.py`) | no recorded run of any value |
+| `--spec` / `--input-text` | weightspace compile-head, predict-head | Synthetic affine map, narrower recipient and raw-text prediction | `validation/2026-11-27-weightspace-head/` |
 | `--bits` | probe | **E1 at 4 and 8.** Run on 2026-09-25 and again on 2026-10-01; no other width has run. This row said E0, "parser-level only", for six days after the first recorded run | `validation/2026-09-25-check-and-probe/`, `validation/2026-10-01-probe-at-n64/` |
 | `--samples` | probe | **E1 at N = 64**, 2026-10-01: Qwen2.5-1.5B-Instruct `--bits 4 8 --samples 64`, exit 0, 37.2 s. The first eight samples' means equal the 2026-09-25 n = 8 means bit for bit at both widths, so a larger N extends the default rows as documented. Re-run with packed blocks (0.15.0) at N = 8 and 64: the n = 8 per-block KLs equal the first eight of n = 64 bit for bit (`validation/2026-10-01-probe-packed-blocks/`). Tests (`tests/test_cli.py`) cover the rest: the count reaches every bit-width, the default is `DEFAULT_PROBE_SAMPLES` (8), values below 1 are refused, and a short delivery prints `of N requested`. **NOT validated:** the short-delivery path on real data (64 asked, 64 delivered), and any N but 8 and 64 | `validation/2026-10-01-probe-at-n64/`; `tests/test_cli.py` (4 cases, E3); `docs/cli-reference.md` |
 | `--baseline` / `--fp16` | verify-safety, gate | E1 for the GGUF arm on L; the legacy `--fp16` alias is parser-tested only | `CHANGELOG.md` §0.4.0 (rename), §0.4.1 |

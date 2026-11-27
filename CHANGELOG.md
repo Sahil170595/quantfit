@@ -13,6 +13,31 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.80.0 — Unreleased
+
+- Compare compiled, randomized, shuffled, wrong-donor, labeled and output-only classifier heads on the same held-out cases.
+- Report per-arm archive, query and label use together with paired wins, ties and losses. See [wheel validation](validation/2026-11-27-weightspace-benchmark/functional.json).
+
+## 0.79.0 — Unreleased
+
+- Fit a paired affine feature map, compose the donor classifier weights and bias, and export a narrower standalone recipient.
+- Verify the tokenizer, ordered labels and SafeTensors commitments before raw text prediction. See [wheel validation](validation/2026-11-27-weightspace-head/functional.json).
+
+## 0.78.0 — Unreleased
+
+- Encode floating-point task updates with deterministic signed 4-bit or 8-bit group codes and stored scales.
+- Report serialized cold and shared-base costs and measured reconstruction error. See [wheel validation](validation/2026-11-27-weightspace-lowbit/functional.json).
+
+## 0.77.0 — Unreleased
+
+- Export a floating-point task vector from compatible SafeTensors weights and apply positive, negative, fractional or zero scales.
+- Verify reconstruction commitments and report maximum absolute error against the supplied target. See [wheel validation](validation/2026-11-27-weightspace-vectors/functional.json).
+
+## 0.76.0 — Unreleased
+
+- Add Python encode/decode and matching weightspace CLI commands for byte-exact SafeTensors checkpoint deltas.
+- Verify local artifact digests, the selected base, and the logical target before creating the output.
+
 ## 0.75.0 — 2026-11-27
 
 - Compare two replay handoffs directly from pinned canonical ZIPs or directories while retaining native T0, report bindings, and outcomes.

@@ -1,0 +1,3 @@
+# Matched-query offline benchmark
+
+Windows x64 CPU, installed Quantfit 0.80.0 wheel, NumPy 2.5.1 and SafeTensors 0.8.0. Run `python -I tools/ci_weightspace_benchmark.py` outside the checkout import path. The script generates disjoint synthetic anchor, calibration and evaluation rows, and recomputes every paired win, tie and loss from local case IDs. The JSON retains aggregates and ordered split commitments. Scores describe this planted linear classification task and the declared readout, archive and query access. They do not measure pretrained language-model transfer, generalization across tasks, API latency or real service costs.
