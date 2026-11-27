@@ -187,7 +187,8 @@ def decode(base, artifact, out, *, scale: float = 1.0, max_bytes: int = MAX_FILE
             require(tensor.dtype == "U8" and tensor.shape == (len(a.data),), "invalid XOR tensor layout")
             result[name] = Tensor(a.dtype, a.shape, _xor(a.data, tensor.data))
         require(
-            canonical(ordered_records(doc.get("tensors"))) == canonical(records(result)) and identity(result) == ids.get("target"),
+            canonical(ordered_records(doc.get("tensors"))) == canonical(records(result))
+            and identity(result) == ids.get("target"),
             "decoded tensor commitment mismatch",
         )
     output = serialize(result)

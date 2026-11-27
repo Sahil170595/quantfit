@@ -41,6 +41,8 @@ Exits 4 and 5 are not passes.
 
 ## Release and source scope
 
+The 0.77.0 source candidate adds [scaled arithmetic task vectors](docs/weightspace.md#arithmetic-task-vectors).
+
 The 0.76.0 source candidate adds [lossless checkpoint encoding and reconstruction](docs/weightspace.md).
 
 Quantfit **0.75.0** compares digest-pinned replay ZIPs directly with `reproduce`. [Command reference](docs/cli-reference.md)
