@@ -13,9 +13,17 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.73.0 — Unreleased
+## 0.73.0 — 2026-11-27
 
 - Require complete compatible declared identities for both arms of every target when a CI comparison needs that stricter condition.
+
+## 0.72.0 — 2026-11-27
+
+- Save the native integrity result of an exact pinned aggregate, replay, or screen ZIP to a new CI artifact without extraction.
+
+## 0.71.0 — 2026-11-27
+
+- Validate closed receiving declarations and optionally pin their exact bytes before assembling a reference bundle.
 
 ## 0.70.0 — 2026-11-25
 

@@ -1,0 +1,21 @@
+{
+  "archive": {
+    "sha256": "02d0d1d9561e423bc7b61d63051ed77c5c44f6340c80e3ad6411933ece1ae481",
+    "size_bytes": 17407
+  },
+  "exit_codes": {
+    "archive_alias": 2,
+    "prior_receipt": 2,
+    "verified": 0,
+    "wrong_pin": 2
+  },
+  "integrity_verified": true,
+  "kind": "replay",
+  "native_protocol_pass": false,
+  "platform": "Windows AMD64",
+  "python": "3.12.13",
+  "quantfit": "0.72.0",
+  "receipt_sha256": "9de42130092495165689b2e8fef7e5dd29a2a83a63254a182d8835b7debc7148",
+  "scientific_claims_verified": false,
+  "stdout_result_equals_saved_receipt": true
+}
