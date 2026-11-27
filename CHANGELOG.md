@@ -13,7 +13,7 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
-## 0.71.0 — Unreleased
+## 0.71.0 — 2026-11-27
 
 - Validate closed receiving declarations and optionally pin their exact bytes before assembling a reference bundle.
 
