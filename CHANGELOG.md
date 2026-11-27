@@ -13,6 +13,10 @@
 > patch release would misstate the surface change. `docs/validation-matrix.md` §1 is the
 > live answer to "is 0.10 met", and it still says NOT MET.
 
+## 0.71.0 — 2026-11-27
+
+- Validate closed receiving declarations and optionally pin their exact bytes before assembling a reference bundle.
+
 ## 0.70.0 — 2026-11-25
 
 - Assess a digest-pinned replay ZIP directly and preserve original receiving criteria and JUnit. See

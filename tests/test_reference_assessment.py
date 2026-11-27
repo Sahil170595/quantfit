@@ -43,6 +43,49 @@ def write_target(tmp_path, body=None):
     return target
 
 
+@pytest.mark.parametrize("pin_mode,code,match", [("none", 0, None), ("matching", 0, True), ("wrong", 3, False)])
+def test_verify_target_cli_receipt_binds_only_the_held_bytes(tmp_path, capsys, pin_mode, code, match):
+    body = target_declaration()
+    body["pair_slug"] = "private-local-declaration"
+    target = write_target(tmp_path, body)
+    raw = target.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    args = ["references", "target-verify", "--target", str(target), "--json"]
+    if pin_mode != "none":
+        args.extend(["--sha256", digest if pin_mode == "matching" else "0" * 64])
+
+    assert main(args) == code
+    captured = capsys.readouterr()
+    result = json.loads(captured.out)
+    assert result["command"] == "references target-verify" and result["exit_code"] == code
+    assert result["result"] == {
+        "target_schema_version": 1,
+        "target_sha256": digest,
+        "target_size_bytes": len(raw),
+        "matches_expected_sha256": match,
+    }
+    assert "private-local-declaration" not in captured.out and str(target) not in captured.out
+
+
+@pytest.mark.parametrize("defect", ["bad-pin", "missing-file", "extra-key", "duplicate-key"])
+def test_verify_target_rejects_malformed_or_unreadable_input(tmp_path, capsys, defect):
+    target = write_target(tmp_path)
+    pin = []
+    if defect == "bad-pin":
+        pin = ["--sha256", "private-bad-pin"]
+    elif defect == "missing-file":
+        target = tmp_path / "private-absent.json"
+    elif defect == "extra-key":
+        target = write_target(tmp_path, {**target_declaration(), "private-extra-key": "private-extra-value"})
+    else:
+        target.write_bytes(target.read_bytes().replace(b"{\n", b'{\n  "target_schema_version": 1,\n', 1))
+
+    assert main(["references", "target-verify", "--target", str(target), *pin, "--json"]) == 2
+    captured = capsys.readouterr()
+    assert json.loads(captured.out)["exit_code"] == 2
+    assert "private-" not in captured.out and "private-" not in captured.err
+
+
 @pytest.mark.parametrize("historical,code", [(False, 0), (True, 3)])
 def test_actual_phi4_and_synthetic_positive_remain_distinct(tmp_path, historical, code):
     bundle, _, original = make_bundle(tmp_path, "candidate", historical=historical)
